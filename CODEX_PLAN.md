@@ -29,7 +29,7 @@ Excluded from the first instrument entirely, in every stage below:
 
 ## Target
 
-The seven-step laboratory session of `UX_SPEC.md` §9, end to end, on one
+The “first laboratory workflow of `UX_SPEC.md` §9, end to end, on one
 coherent mathematical region of `Categorical_Rice_Shapiro`.
 
 The first slice should connect:
