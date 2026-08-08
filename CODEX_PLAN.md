@@ -29,11 +29,18 @@ Excluded from the first instrument entirely, in every stage below:
 
 ## Target
 
-The seven-step laboratory session of `UX_SPEC.md` §9, end to end, on one section
-of Appendix A:
+The seven-step laboratory session of `UX_SPEC.md` §9, end to end, on one
+coherent mathematical region of `Categorical_Rice_Shapiro`.
 
-one source hierarchy · one correspondence · one mathematical object · one
-understanding field · one formal artifact · one review cycle · one discrepancy.
+The first slice should connect:
+
+one source hierarchy · one mathematical region · its source occurrences ·
+its formal artifacts · its correspondences · its evolving understanding ·
+one review cycle · one discrepancy.
+
+The slice is not expected to begin with complete understanding. Unknown
+relationships, unresolved correspondences, and questions about the mathematics
+are part of the data to be preserved.
 
 ---
 
@@ -54,37 +61,62 @@ the ones later stages are checked against.
 
 ---
 
-## Stage 0 — The corpus slice
+## Stage 0 — The mathematical context reconstruction
 
-**Goal.** Author the data by hand for one section of Appendix A. No code.
+**Goal.** Reconstruct one coherent region of `Categorical_Rice_Shapiro` across
+its historical sources, manuscript, formal development, and current
+understanding. No code.
+
+The purpose is not to create study records before understanding the mathematics.
+The purpose is to determine whether a persistent context can support the process
+by which mathematical understanding is recovered, extended, and retained.
 
 **Deliverable.** Plain files — Markdown with YAML front matter, matching the
-note conventions already in use — holding: the source hierarchy for that
-section; the results it contains as mathematical objects; occurrences in the
-manuscript and in the Lean development; correspondences between them with their
-kinds; and at least one understanding field per object, including a conceptual
-role and a proof idea.
+note conventions already in use — holding:
 
-**Acceptance.** Every entity in `DOMAIN_MODEL.md` that the session needs has at
-least one instance, and every field carries a provenance. Where the model has
-no natural place for something the section requires, that is recorded as a model
-defect rather than worked around.
+- the relevant source hierarchy;
+- mathematical objects encountered in the region;
+- occurrences in historical notes, manuscript sources, and formal development
+  where known;
+- correspondences between occurrences, with their kinds where established;
+- formalization status where known;
+- current understanding fields;
+- unresolved questions and uncertainties.
 
-**Non-goals.** No schema, no database, no parser, no validation tooling. And no
-attempt at comprehensiveness: the slice is one section, not Appendix A. The goal
-is to discover whether the representation works, and documenting everything
-before knowing that is the expensive way to find out it does not.
+Understanding fields may initially record questions or incomplete understanding.
+A missing proof idea is not a defect; it is information about the current state
+of understanding.
 
-**Why first.** The domain model has never been populated. Authoring by hand is
-the cheapest test of whether it fits the mathematics, and the resulting files
-are the fixture every later stage runs against.
+**Acceptance.** The context supports an actual mathematical working session:
+
+- a mathematical idea can be traced to its source occurrences where known;
+- formal artifacts can be connected to manuscript occurrences where a
+  correspondence has been established;
+- discoveries made during formalization or AI-assisted exploration can be
+  attached to the relevant object with provenance;
+- unknowns are recorded rather than silently guessed.
+
+Where the model has no natural place for an important distinction, that is
+recorded as a model defect rather than worked around.
+
+**Non-goals.**
+
+- No attempt at comprehensive coverage of `Categorical_Rice_Shapiro`.
+- No requirement to write proof ideas before they are understood.
+- No schema, database, parser, exporter, or validation tooling.
+
+**Why first.** The first laboratory is not a database population exercise. It is
+a test of whether the proposed context representation helps reconstruct a
+mathematical project whose sources, formalization, and understanding have
+developed over time.
 
 ---
 
 ## Stage 1 — The descent
 
-**Goal.** Render the theorem view in the canonical order of `UX_SPEC.md` §3 and
-let a reader walk the hierarchy down to it.
+**Goal.** Render the context view and theorem view in the canonical order of
+`UX_SPEC.md` §3 and let a reader move from mathematical context down to formal
+details.
 
 **Deliverable.** A local Python application reading the Stage 0 files and
 presenting: subject hierarchy navigation; the theorem view with its sections in order,
@@ -186,11 +218,8 @@ it is the reason the first corpus was chosen.
 
 Deferred, and specified only so its boundary is fixed in advance.
 
-Machine assistance proposes: candidate correspondences, draft outlines, draft
-review items. Explanations obtained from external assistants are imported the
-same way, with the model recorded as author. Every proposal is adopted, edited,
-or rejected by a person. Adoption records the adopter and never changes the
-origin.
+Machine assistance proposes: candidate correspondences, draft context maps,
+draft outlines, and draft review items. Explanations obtained from external assistants are imported the same way, with the model recorded as author. Every proposal is adopted, edited, or rejected by a person. Adoption records the adopter and never changes the origin.
 
 **Acceptance.** Adopting or correcting a proposal costs less than authoring the
 thing from scratch. A feature failing that test is removed rather than improved,
