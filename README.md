@@ -2,27 +2,35 @@
 
 Theorem Terminal is a mathematical context system for learning, reconstructing, integrating, and retaining mathematics. It is intended both for entering and absorbing a large body of mathematics and for re-entering one’s own research, an inactive project, or a subject not studied or taught for years.
 
-It is an assistant's assistant. It supplies the persistent context in which work
-done with machine assistants, proof assistants, and computer algebra systems is
-organized, attributed, reviewed, and retained — what was learned, where each
-idea came from, which claims are checked, which explanations are human and
-which machine, and what needs review. No one assistant is the authority. The
-valuable artifact is not an assistant's answer but the corrected understanding
-that accumulates around it, which at present survives only in chat logs and in
-memory.
+It is an assistant's assistant. It preserves the mathematical work produced
+while consulting source literature and using machine assistants, proof
+assistants, and computer algebra systems: source locations, problems attempted,
+proof drafts, computations, examples, counterexamples, formal checks,
+corrections, and provenance. It can restore the state of an interrupted
+investigation and select later mathematical tasks that test reconstruction or
+application. No one assistant is the authority, and the system does not ask a
+mathematician to report an internal mental state.
 
 It is not a proof assistant, a Lean documentation browser, or a replacement for
 mathematical judgment.
 
 ## Motivation
 
-Mathematical context can decay. Results may remain available in papers, notes,
-and formal developments while the understanding that made them usable—their
-role, proof ideas, dependencies, and relation to surrounding mathematics—is
-lost. The same difficulty arises at different scales: entering a large corpus
-such as the Stacks Project [@stacksprojectauthorsStacksProject2021] or Kerodon,
-returning to one's own research or an inactive project, and teaching a subject
-after years away.
+Mathematical context can be lost even when papers, notes, books, or formal
+developments remain available. A mathematician may need to reconstruct the
+purpose of a definition, the idea of an argument, the dependence of one result
+on another, or the state of an unfinished proof. The same requirement arises at
+different scales: entering a large corpus such as the Stacks Project
+[@stacksprojectauthorsStacksProject2021] or Kerodon; studying a problem-centered
+text in which exercises develop the theory; returning to one's own research or
+an inactive project; and teaching a subject after years away.
+
+A source need not have a machine-checked counterpart, and a complete written
+proof need not be present. In a problem-centered source, problems may supply
+omitted proof steps, develop examples, establish computational familiarity, or
+introduce the next result. Theorem Terminal should therefore support selecting
+and solving problems, locating relevant definitions and prior results,
+preserving attempts and computations, and resuming unfinished work.
 
 AI adds two demands. It may increase the rate at which mathematical results,
 proofs, formalizations, and examples are produced, and it can produce
@@ -35,30 +43,39 @@ mathematical AI on canonical theories developed and organized by mathematicians
 [@taoMathematicsAgeAI2026].
 
 Theorem Terminal supports learning, reconstruction, integration, and retention
-across both human- and AI-generated mathematics. AI increases the need and
-supplies new forms of assistance; it did not create the underlying difficulty.
+across human- and AI-generated mathematics. AI increases the need and supplies
+new forms of assistance; it did not create the underlying difficulty.
 
-The design rests on three principles:
+The design rests on four principles:
 
-- Kallenberg's top-down approach to reading advanced mathematics — a general
-  overview first, then individual theorems, then proofs and their structure,
-  with proofs studied before exercises;
-- Curry's account of mathematical language as growing steadily more precise
-  without ever reaching absolute precision, so that formalization relocates
-  vagueness into the definitions rather than eliminating it;
-- formal verification as one aspect of mathematical knowledge. A kernel check
-  settles whether a proof is correct relative to stated definitions. It settles
-  nothing about why a result matters, what its proof's idea is, whether the
-  statement formalized is the statement intended, or whether anyone understands
-  it.
+- Kallenberg's top-down approach to reading advanced mathematics provides
+  orientation before detailed study. Depending on the source, the relevant
+  detail may be a theorem, proof, worked example, or problem.
+- A problem-centered source is studied through mathematical work. The system
+  should help select problems, recover prerequisites, provide optional
+  assistance, preserve attempts, and support later reconstruction without
+  requiring preliminary data entry.
+- Curry's account of mathematical language explains how mathematical discourse
+  becomes more precise without attaining absolute precision; formalization
+  relocates questions of interpretation into the definitions rather than
+  eliminating them [@curryFoundationsMathematicalLogic1977, §1].
+- Formal verification is optional and supplies one kind of evidence. A kernel
+  check settles whether a proof is correct relative to stated definitions. It
+  does not settle why a result matters, what its proof idea is, whether the
+  formal statement expresses the intended mathematics, or whether the argument
+  can be reconstructed and used.
 
 ## Status
 
 Design documents only. No implementation yet.
 
-The first implementation will be experimental. It will test which parts of
-mathematical understanding can be represented or retained with software
-assistance and which still require mathematical judgment.
+The first implementation will be an experiment conducted through actual
+mathematical work. It will test which source relations and work artifacts can be
+preserved or generated mechanically, whether they support later reconstruction
+and application, and which decisions still require mathematical judgment.
+Evidence will come from attempted proofs, solved problems, computations,
+reconstructions, and later use, not from forms asking what a mathematician
+believes is understood.
 
 ## Documents
 
@@ -71,17 +88,22 @@ assistance and which still require mathematical judgment.
 ## First corpus
 
 The first corpus is `flengyel/Categorical_Rice_Shapiro`, which is private and
-not publicly readable. It was chosen because it carries every aspect the project
-must connect: a mathematical manuscript, a Lean formal development, proofs with
-dependency and axiom information, and a hand-written document relating the
-informal mathematics to the formalization.
+not publicly readable. It was chosen because the repository contains four
+explicitly related kinds of material: a mathematical manuscript, a Lean formal
+development, mechanically available dependency and axiom information, and a
+hand-written document that relates parts of the manuscript to Lean
+declarations and records differences between them. These materials permit a
+direct test of source-to-formal correspondence. Their availability does not
+make a formal counterpart a prerequisite for other corpora.
 
-That last artifact is the reason for the choice. It records expert judgment that
-neither the manuscript nor the formal development contains — which hypotheses
-turned out unnecessary, which structures are derivable rather than postulated,
-where a term means different things in different parts of the development — and
-it decays as the formalization moves beneath it. The project asks which parts of
-such a bridge can be maintained mechanically and which require a mathematician.
+The hand-written document records expert judgments absent from both the
+manuscript and the Lean development: which hypotheses proved unnecessary,
+which structures are derivable rather than postulated, and where the same term
+has different meanings in different parts of the development. Its positional
+references become obsolete as either source changes. The experiment will test
+which locators, dependency lists, and checking facts can be regenerated
+mechanically; which proposed correspondences can be checked during mathematical
+work; and which assessments require mathematical judgment.
 
 The choice of this first corpus does not restrict which corpora may be studied
 later.

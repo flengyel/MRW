@@ -6,49 +6,52 @@ in `UX_SPEC.md`.
 
 ## Governing constraint
 
-The first implementation tests the complete working session described in
-`UX_SPEC.md` §9 on one coherent mathematical region. Each stage must enable or
-evaluate a mathematical activity on that region. Infrastructure is added only
-when a stage requires it.
+The first experimental implementation begins with a substantive mathematical
+task. It may not require schema population, a context questionnaire, a
+declaration inventory, or a written account of comprehension before an attempt
+begins.
 
-Repository scaffolding, a schema, an ORM, an exporter, and a GUI framework can
-all be built without establishing whether the proposed representation helps a
-mathematician learn, reconstruct, understand, or retain mathematics. The plan
-therefore begins with a hand-authored reconstruction of mathematical context,
-adds the ordered theorem view, and mechanizes tasks only after manual work has
-shown what must be represented.
+Two initial experiments test distinct functions:
+
+1. problem-centered study in a source with little or no formalization;
+2. mathematical re-entry and optional informal/formal correspondence in
+   `Categorical_Rice_Shapiro`.
+
+Infrastructure is added only when one of these sessions requires it. Evidence
+comes from the `WorkArtifact`s and `TaskEvidence` produced by the sessions, not
+from asserted states of comprehension.
 
 ## Global non-goals
 
 The first implementation does not attempt:
 
-- general corpus ingestion; the corpus is `Categorical_Rice_Shapiro`
-- Stacks, Kerodon, Mathlib at scale, or any second corpus
-- a GUI platform, component library, or framework commitment
-- automated theorem understanding
-- Mathlib-scale Lean analysis
-- system-generated mathematical proposals before Stage 5
-- multi-user operation, synchronization, accounts, or deployment
+- general corpus ingestion or complete ingestion of any large reference;
+- comprehensive coverage of either experimental source;
+- formalization of the problem-centered source;
+- a domain map authored before mathematical work begins;
+- questionnaires, confidence ratings, or comprehension forms;
+- automated correctness decisions for informal proofs;
+- a GUI platform, component library, or framework commitment;
+- Mathlib-scale Lean analysis;
+- multi-user operation, synchronization, accounts, or deployment.
 
-Mathematics or explanations generated outside Theorem Terminal are not
-excluded. They may be recorded in Stage 0 as study material with their
-provenance and verification status. General chat, prompt management,
-conversation archiving, and large-scale generation remain out of scope.
+AI-generated theorems, proofs, explanations, and examples may be studied with
+their provenance and verification status. Assistance generated during a session
+is permitted from the first problem-solving experiment because assistance is one
+of the claims being tested.
 
 ## Target
 
-Complete the first working session of `UX_SPEC.md` §9, end to end, on one
-coherent mathematical region of `Categorical_Rice_Shapiro`.
+Complete both experimental sessions in `UX_SPEC.md` §9:
 
-The selected region must connect:
+- solve, resume, and later reconstruct selected problems from an unformalized,
+  problem-centered source;
+- re-enter one region of `Categorical_Rice_Shapiro`, continue mathematical work,
+  and inspect formal correspondences only where they exist.
 
-one source hierarchy · one mathematical region · its source occurrences ·
-its formal artifacts · its correspondences · its evolving understanding ·
-one review cycle · one discrepancy.
-
-The selected region is not expected to begin with complete understanding.
-Unknown relationships, unresolved correspondences, and questions about the
-mathematics are part of the data to be preserved.
+The first target tests problem-centered learning and retention. The second tests
+reconstruction of prior work and maintenance of explicit informal/formal
+relations. Success in either does not establish success in the other.
 
 ---
 
@@ -69,224 +72,189 @@ stages will be evaluated.
 
 ---
 
-## Stage 0 — The mathematical context reconstruction
+## Stage 0 — Work the benchmark mathematics
 
-**Goal.** Reconstruct one coherent region of `Categorical_Rice_Shapiro` across
-its historical sources, manuscript, formal development, and current
-understanding. No code.
+**Goal.** Select a small coherent problem cluster from an algebraic number
+theory text and work on it before designing storage or navigation around it. No
+application code.
 
-The purpose is not to create study records before understanding the mathematics.
-The purpose is to determine whether a persistent context can support the process
-by which mathematical understanding is recovered, extended, and retained.
+**Deliverable.** The mathematical artifacts that ordinary work produces: TeX
+proofs or attempts, Sage calculations where useful, exact source locations, and
+the unresolved step at which work stopped. Also list the system operations that
+would have helped during the work, such as locating a prerequisite, restoring a
+prior attempt, checking an example, or requesting a bounded hint. This list
+describes operations, not an internal state.
 
-**Deliverable.** Plain files — Markdown with YAML front matter, matching the
-note conventions already in use — holding:
+**Acceptance.** At least one theoretical problem and one computational or
+example-driven problem have been attempted. The proposed first session can be
+specified from observed needs without requiring preliminary classification by
+the mathematician.
 
-- the relevant source hierarchy;
-- mathematical objects encountered in the region;
-- occurrences in historical notes, manuscript sources, and formal development
-  where known;
-- correspondences between occurrences, with their kinds where established;
-- formalization status where known;
-- current understanding fields;
-- any externally produced AI mathematics or explanations selected for study,
-  with their provenance and verification status recorded;
-- unresolved questions and uncertainties.
+**Non-goals.** No YAML front matter, object inventory, domain-map population,
+formalization, comprehensive chapter summary, schema, database, parser, or
+framework.
 
-Understanding fields may initially record questions or incomplete understanding.
-A missing proof idea is not a defect; it is information about the current state
-of understanding.
-
-**Acceptance.** The context supports an actual mathematical working session:
-
-- a mathematical idea can be traced to its source occurrences where known;
-- formal artifacts can be connected to manuscript occurrences where a
-  correspondence has been established;
-- a theorem, proof, argument, or explanation generated outside Theorem Terminal
-  can be recorded and studied with its AI provenance and verification status
-  kept distinct from later human judgments;
-- discoveries made during formalization or external AI-assisted exploration can
-  be attached to the relevant object with provenance;
-- unknowns are recorded rather than silently guessed.
-
-Where the model has no natural place for an important distinction, that is
-recorded as a model defect rather than worked around.
-
-**Non-goals.**
-
-- No attempt at comprehensive coverage of `Categorical_Rice_Shapiro`.
-- No requirement to write proof ideas before they are understood.
-- No schema, database, parser, exporter, or validation tooling.
-- No proposals generated by Theorem Terminal. Externally generated AI
-  mathematics may still be represented as study material.
-
-**Why first.** Stage 0 is not a database population exercise. It tests whether
-the proposed context representation helps reconstruct a mathematical project
-whose sources, formalization, and understanding have developed over time.
+**Checkpoint.** If the design cannot support these attempts without preparatory
+data entry unrelated to the mathematics, revise the workflow and domain model
+before implementation.
 
 ---
 
-## Stage 1 — The descent
+## Stage 1 — Minimal problem session
 
-**Goal.** Render the context view and theorem view in the canonical order of
-`UX_SPEC.md` §3 and let a reader move from mathematical context down to formal
-details.
+**Goal.** Support the problem-centered session of `UX_SPEC.md` §9.1 on the Stage
+0 cluster.
 
-**Deliverable.** A local Python application reading the Stage 0 files and
-presenting: subject hierarchy navigation; the theorem view with its sections in order,
-statement above the proof idea and dependencies below the skeleton; absent
-sections shown as absent; and provenance visible on every field.
+**Deliverable.** A local experimental application that can:
 
-**Acceptance.** A reader who has never seen the section can reach a result
-through the hierarchy, read why it matters before reading what it says, and
-descend to the formal declaration last. Entry by declaration name is not
-possible, deliberately, at this stage.
+- open a selected problem with a stable source locator;
+- show the relevant definitions, results, examples, and earlier problems;
+- open or attach the ordinary TeX or Sage file used for the attempt;
+- provide graduated assistance on request, with provenance;
+- preserve each attempt, revision, computation, consulted source, and hint used
+  as `WorkArtifact`s and `TaskEvidence`.
 
-**Non-goals.** No editing, no search, no graph rendering, no database, no
-framework — whatever renders text and links is sufficient, and the choice is not
-architectural.
+The source material and problem relations may be entered only as needed for the
+selected cluster. A complete subject model is not a prerequisite.
 
----
+**Acceptance.** A proof problem and a computational or example-driven problem
+can each be attempted end to end. Both sessions begin with the problem, work
+without any formal artifact, and require no comprehension form.
 
-## Stage 2 — Review
-
-**Goal.** One complete review cycle over the Stage 0 objects.
-
-**Deliverable.** Review items authored by hand at the levels available;
-per-level mastery separate from scheduler state, per `DOMAIN_MODEL.md`; a
-scheduler presenting the weakest due level; and recorded outcomes.
-
-**Acceptance.** A week of review runs without the item set being rewritten, and
-prompts at proof-idea level and above are graded by rubric or self-assessment
-rather than against a reference string.
-
-**Non-goals.** No generated items, no scheduling algorithm research — any
-interval scheme is adequate here, and replacing it later is cheap.
-
-**Checkpoint.** If proof-idea review items cannot be written in a form worth
-repeating, the proposed retention method has failed at that level. Record that
-failure and continue to evaluate orientation, reconstruction, theorem study, and
-formal comparison; this result does not by itself refute the other functions of
-Theorem Terminal.
+**Non-goals.** No general ingestion, comprehensive topic map, formal theorem
+analysis, graph rendering, or framework commitment.
 
 ---
 
-## Stage 3 — Formal facts
+## Stage 2 — Resumption and task-based retention
 
-**Goal.** Obtain declaration types, signatures, dependencies, axiom usage, and
-checking status mechanically for the declarations in the Stage 0 selected
-region.
+**Goal.** Resume interrupted work and test retention through later mathematical
+performance.
 
-**Task 3.0 — reconnaissance, and it comes first.** Run the existing tools
-against the branch and inspect what they emit: `lean4export`, `doc-gen4`,
-`ntp-toolkit`, LeanArchitect. Decide among consuming existing output, extending
-an existing tool, or writing a small exporter. The criterion is whether the
-output supplies the fields `DOMAIN_MODEL.md` calls formal facts, not novelty.
+**Deliverable.** Persistence of source location, current attempt, revisions,
+computations, unresolved step, and assistance used; `ReviewItem`s derived from
+the work; `ReviewState` generated from `TaskEvidence`.
 
-**Task 3.1 — the exporter, only if 3.0 says so.** Lean-side, inside Lake,
-emitting JSON. Environment data comes from the environment; nothing parses Lean
-source in Python.
+Review tasks include reconstructing a proof, completing a gap, solving a related
+problem, varying a hypothesis, producing an example or counterexample, and
+repeating a Lean or Sage task. They do not request a confidence rating or a
+written description of comprehension.
 
-**Acceptance.** Every formal fact presented by Theorem Terminal is generated,
-stamped with the environment revision from which it was obtained, and never
-hand-edited. Regeneration after a rebuild changes nothing else.
+**Acceptance.** After an interruption, the exact unfinished mathematical step
+can be resumed without recreating the surrounding context. After a later
+interval, at least one solution is reconstructed or one related problem is
+solved, and the resulting artifact updates `ReviewState` mechanically.
 
-**Non-goals.** No Mathlib-scale extraction, elaboration traces, proof states, or
-coverage of declarations outside the selected region.
+**Non-goals.** No scheduling-algorithm research, reference-string grading of
+proof ideas, or manually asserted proficiency score.
 
-**Checkpoint.** If existing tooling already supplies these formal facts and
-their required connections to mathematical context, use that tooling and omit
-the exporter. This result would remove or reduce Stage 3; it would not invalidate
-the work on orientation, reconstruction, retention, or understanding
-AI-generated mathematics.
+**Checkpoint.** If stored context does not reduce the work required to resume,
+remove or revise the records that failed to help. If a review task does not
+exercise mathematics worth retaining, remove that task kind without treating
+the result as evidence against the other functions.
 
 ---
 
-## Stage 4 — Discrepancy
+## Stage 3 — Mathematical re-entry
 
-**Goal.** Detect and resolve the one discrepancy of the session: a
-correspondence pointing at a declaration whose signature has changed, or that no
-longer exists.
+**Goal.** Re-enter one coherent region of `Categorical_Rice_Shapiro` and
+continue mathematical work after an interruption.
 
-**Deliverable.** A check comparing hand-authored claims against generated facts,
-producing `Discrepancy` records with kinds; surfacing on the object and in a
-session list; resolution recorded as understanding corrected, correspondence
-updated, mathematics changed, or false positive. Nothing auto-repaired.
+**Deliverable.** A session beginning from a mathematical question, manuscript
+result, unfinished proof, or earlier `WorkArtifact`. It makes available stable
+source occurrences, relevant prior artifacts, unresolved questions, and the
+source locations and relations needed to resume. Formal artifacts remain
+optional and are not the initial object of the session.
 
-**Acceptance.** Introducing a change on the branch — renaming a declaration,
-adding a hypothesis — produces the expected discrepancies and no spurious ones,
-each at the right object and with the right kind. One change may legitimately
-have several consequences: a signature altered, a correspondence invalidated, an
-understanding field downstream put in doubt. The criterion is precision, not
-cardinality.
+**Acceptance.** The session reconstructs enough specific context to continue a
+proof, calculation, exposition, or formalization task. The evidence is the
+continued work product and its source use, not a report about comprehension.
 
-**Non-goals.** No conflict-management workflow, no notifications, no repair
-suggestions.
-
-**Constraints, from `DOMAIN_MODEL.md`.** Absence from a formal dependency graph
-does not refute a claimed conceptual dependency. A note recorded against one
-declaration says nothing about another — comparisons are between claims and
-facts about the same subject.
-
-**Why this stage is included.** It tests whether changes in formal artifacts can
-be related precisely to stored mathematical judgments. That requirement is a
-reason for choosing the first corpus.
+**Non-goals.** No comprehensive reconstruction of the project, no requirement
+to inspect Lean, and no discrepancy machinery yet.
 
 ---
 
-## Stage 5 — System-generated assistance
+## Stage 4 — Optional formal correspondence and discrepancy
 
-Deferred until Stages 0–4 have been evaluated. This stage concerns proposals
-generated by Theorem Terminal. It does not determine whether externally produced
-AI mathematics may be studied.
+**Goal.** Where formal artifacts exist, connect them to the mathematical work
+and test whether changes can be detected precisely.
 
-Theorem Terminal may propose candidate correspondences, context maps, outlines,
-explanations, questions, and review items. Each proposal records the model as
-author and is adopted, edited, or rejected by a person. Adoption records the
-adopter and does not change the proposal's origin.
+**Task 4.0 — reconnaissance.** Run existing tools against the selected Lean
+region and inspect what they emit: `lean4export`, `doc-gen4`, `ntp-toolkit`, and
+LeanArchitect. Consume existing output unless a required formal fact is absent.
 
-Externally produced AI mathematics and explanations may already have been
-recorded in Stage 0 as study material, with provenance and verification status
-preserved. Importing and studying such material is not a Stage 5 generation
-feature.
+**Task 4.1 — minimal extraction, only if required.** Obtain declaration types,
+signatures, dependencies, axiom usage, verification status, and environment
+revision mechanically. Nothing parses Lean source in Python, and generated facts
+are never hand-edited.
 
-**Acceptance.** Adopting or correcting a proposal costs less than authoring the
-content from scratch. A feature failing that test is removed because it adds
-review load to authoring load.
+**Deliverable.** Explicit correspondences between source occurrences and formal
+artifacts, plus `Discrepancy` records for an identified mismatch. Formal views do
+not appear for objects without formal material.
 
-**Non-goals.** No generated understanding is presented without its origin. No
-chat client, prompt manager, or conversation archive: the import path takes
-finished mathematical content, not a dialogue. No system-generated proposals in
-Stages 0–4.
+**Acceptance.** A change such as renaming a declaration or adding a hypothesis
+invalidates only the exact affected correspondence or source-linked claim. A
+conceptual dependency is not rejected merely because it is absent from the
+formal dependency graph.
+
+**Non-goals.** No Mathlib-scale extraction, elaboration traces, proof-state
+archive, automatic repair, notifications, or formal coverage outside the
+selected region.
+
+**Checkpoint.** If existing tooling already supplies the required facts and
+connections, use it and omit extraction work. If discrepancy detection produces
+irrelevant conflicts, narrow or remove it.
+
+---
+
+## Stage 5 — Evaluate the experiment
+
+**Goal.** Decide which components helped actual mathematical work and which
+should be removed or revised before another corpus is attempted.
+
+**Deliverable.** An evaluation based on completed and abandoned
+`WorkArtifact`s, `TaskEvidence`, source-recovery operations, assistance requested
+and used, incorrect or premature assistance, successful resumptions, and later
+mathematical tasks. No questionnaire about comprehension is introduced.
+
+**Acceptance.** Each component receives a decision supported by session
+evidence: retain, revise, or remove. Expansion to a large reference work is
+considered only after the problem-centered and re-entry experiments have each
+been evaluated on their own terms.
+
+**Non-goals.** No scale-up, production deployment, or claim that one successful
+session establishes a general theory of mathematical understanding.
 
 ---
 
 ## Manuscript prerequisite
 
-Independent of the stages and required before Stage 4 is meaningful: add
-`\label`s to `rs_Appendix_A.tex` and reference labels rather than line numbers.
-`UX_SPEC.md` and `DOMAIN_MODEL.md` both require stable locators, and the current
-correspondence carries roughly fifty positional references into a manuscript
-that moves. This is an edit to the manuscript; no exporter substitutes for it.
+Before Stage 4, add `\label`s to `rs_Appendix_A.tex` and reference labels rather
+than line numbers. `UX_SPEC.md` and `DOMAIN_MODEL.md` require stable locators,
+and the current correspondence contains roughly fifty positional references to
+a manuscript that changes. This is a manuscript edit; no exporter substitutes
+for it.
 
 ---
 
 ## Not decided here
 
-- Storage. Files are adequate through Stage 4. A database is introduced when a
-  stage cannot proceed without one, and the reason is recorded.
-- GUI framework. Deferred until a session step is impossible without one.
-- The orientation view. `UX_SPEC.md` §11 leaves it open; Stage 1 navigation is
-  the hierarchy only, which is the minimum, and what orientation needs beyond
-  that is expected to become visible from use.
-- Whether relations among objects are authored only or proposed and adopted.
+- Which initial algebraic number theory problem cluster to use.
+- Storage beyond the files needed by the first sessions.
+- Whether the application edits TeX and Sage work directly or opens existing
+  tools and records their artifacts.
+- Which model or service supplies experimental assistance.
+- How the orientation view differs between a large problem-centered source and
+  a small research project.
+- Which relations are authored and which may be proposed from source structure
+  and prior attempts.
 
 ## Order and stopping
 
-Stages run −1, 0, 1, 2, 3, and 4. Stage 5 begins only if Stages 0–4 show that
-system-generated proposals would reduce the effort required to understand or
-record the selected mathematics.
+Stages run −1, 0, 1, 2, 3, 4, and 5. Each checkpoint evaluates a specific
+component. Failure revises or stops that component unless the evidence bears on
+the full thesis in `VISION.md`.
 
-Each checkpoint evaluates a specific claim or component. A failed checkpoint may
-stop or revise that component; it is evidence against the entire project only
-when it bears on the full thesis stated in `VISION.md`.
+The repository remains design-only until a separate decision authorizes Stage
+0. This plan does not authorize implementation.

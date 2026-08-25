@@ -6,18 +6,27 @@ invariants). Workflow and principles only; no screens, widgets, or framework.
 
 ## 1. Design principle
 
-The interface supports mathematical study, not document lookup.
+The interface supports doing and studying mathematics. It does not require a
+declaration name, a formal development, or a preliminary account of what the
+mathematician understands.
 
-The question a session begins from is *what do I need to understand next*, not
-*which declaration do I want to inspect*. Existing tools already support
-declaration lookup. Theorem Terminal begins from mathematical context rather
-than requiring a declaration name.
+A session begins from a mathematical objective: orient in a subject, solve a
+problem, study a theorem or proof, reconstruct earlier work, prepare to teach,
+or examine generated mathematics. The mathematician begins the mathematical
+work in the ordinary medium appropriate to it. Theorem Terminal supplies source
+context, prior work, computations, and assistance when relevant.
 
-Two constraints follow from `VISION.md` and hold everywhere below.
+Three constraints follow from `VISION.md` and apply throughout this
+specification.
 
-**The formal proof is available but does not determine the starting point.** It
-appears in every relevant view after the mathematical context, statement, proof
-idea, and proof skeleton.
+**Mathematical work comes first.** The interface must not require a subject map,
+questionnaire, or structured description of comprehension before a problem,
+proof, calculation, or exposition can begin.
+
+**Formal material is optional.** When formal material exists, it appears after
+the informal mathematical context and may be consulted when useful. Its absence
+never prevents orientation, theorem study, proof study, problem solving, or
+review.
 
 **Origin is always visible.** No view presents a machine proposal as a
 mathematician's judgment or as a mechanically derived fact, and no view presents
@@ -27,78 +36,80 @@ a derived fact as a claim someone made.
 
 ## 2. Session types
 
-Modes are not application tabs. They are what a mathematician is doing, and a
-session moves between them.
+Modes are not application tabs. They name mathematical activities, and a
+session may move among them.
 
 ### Orientation
 
-Enter or revisit a subject. Browse the source hierarchy, see which concepts
-organize it, see which results carry weight and how they relate. The output is a
-mental map, and the system's contribution is that the map persists between
-sessions and records what has decayed.
+Enter or revisit a subject. Locate its organizing concepts, central results,
+principal problem families, and the relations needed for the work at hand. The
+system preserves the source locations and relations consulted, together with
+prior work, so that a later session need not reconstruct them from nothing.
 
-Orientation is the mode with the least existing tooling and the most exposure:
-if it is done badly the system is a browser with extra steps.
+Orientation serves a mathematical task. It is not a preliminary exercise in
+describing the subject or completing a domain model.
+
+### Problem solving
+
+Work on a source problem, an omitted proof step, a calculation, an example, or
+a question arising from research. The session opens the problem and an ordinary
+working file immediately. It can then supply, on request, the exact source
+location, nearby definitions and results, related problems, prior attempts,
+computations, and graduated hints.
+
+The session records the resulting `WorkArtifact`s and the assistance used as
+`TaskEvidence`. It does not interrupt the work to ask for a report about the
+mathematician's internal state.
 
 ### Theorem study
 
-Understand one result. The canonical descent is in §3.
+Study one result: what it asserts, why it matters, how it is used, and why it is
+true. The default order is specified in §3.
 
 ### Proof study
 
-Learn how the mathematics is done: reconstruct the outline, identify the crucial
-reduction, inspect intermediate claims, compare a proof idea against the formal
-proof, and answer missing-step prompts. This is the mode Kallenberg's argument
-is really about — proofs are studied because that is where the doing of
-mathematics is learned.
+Reconstruct an outline, identify the crucial reduction, inspect intermediate
+claims, fill omitted steps, test examples, and compare methods. When a formal
+counterpart exists, comparison with it is available; proof study does not depend
+on such a counterpart.
 
 ### Formal exploration
 
-Read the declaration, its dependencies, its axiom usage, its verification
-status, and its proof states, with each formal step connected to whatever
-mathematical explanation exists for it. It is reachable from any study mode but
-is not the default entry point.
+This mode exists only for an object with formal material. It shows declarations,
+dependencies, axiom usage, verification status, and proof states, with links to
+the corresponding informal mathematics where those correspondences have been
+established.
 
-The mode is not passive, which is why it is not called inspection. Comparing a
-proof idea against the formal proof, discovering that a hypothesis is doing no
-work, and writing that discovery down as an understanding field without leaving
-the view are all part of it — see the formalization scope question below.
+A discovery made during formal exploration remains in the proof, code,
+calculation, or ordinary note produced during the work. The system may also
+record an explicit relation or discrepancy. No second account of comprehension
+is required.
 
 ### Review
 
-Retain what has been understood. The scheduler presents the weakest due level
-for an object rather than the object as a unit. Review targets and their prompts
-are in §7.
+Perform mathematics selected from earlier work: reconstruct an argument,
+complete a proof, solve a related problem, vary a hypothesis, produce an example
+or counterexample, or repeat a Lean or Sage task. `ReviewState` is generated from
+`TaskEvidence`; it is not a score asserted by the mathematician. See §7.
 
 ### Formalization
 
-**Scope question, not yet settled.** `VISION.md` records that formalization runs
-up the ladder and produces mathematics: a hypothesis turns out unnecessary, a
-symmetry turns out derivable, a clause resists formalization and two lemmas
-carry its content instead. Those discoveries are understanding fields that did
-not exist before the formal work.
+Formalization begins from a mathematical statement, problem, or proof step. It
+may reveal an unnecessary hypothesis, a derivable symmetry, a missing lemma, or
+a mismatch between prose and code. Such results are preserved as
+`WorkArtifact`s, relations, or discrepancies produced during the mathematical
+work.
 
-A session in this mode starts at a declaration and ends by writing prose, which
-inverts every other mode. Two options, and the choice shapes the rest of the
-specification:
-
-- *In scope.* The first implementation supports formalization work on the first
-  corpus, and understanding fields can be populated as a by-product of
-  formalizing rather than as a separate task. Cost: a second navigation model
-  and an editing surface next to the formal view.
-- *Out of scope for the first implementation.* Discoveries are recorded through
-  the ordinary authoring path of §5 after the fact. Cost: this separates
-  recording from the mathematical work, and `VISION.md` §9 identifies excessive
-  authoring cost as a failure condition.
-
-Recommendation: in scope, minimally — a way to attach an understanding field to
-an object while looking at its formal view, with no separate navigation.
+Formalization is neither required for a corpus nor required before study. The
+first problem-centered experiment therefore needs no formal development. A
+separate experiment may test informal/formal correspondence where a formal
+development already exists.
 
 ---
 
 ## 3. The theorem view
 
-One canonical order, used by theorem study and reachable from everywhere else.
+The default order for theorem study is:
 
 ```
 Title
@@ -110,176 +121,193 @@ Proof idea — the idea that makes the proof work
 Proof skeleton — the argument broken into its steps
 Dependencies — what it rests on, formal and conceptual
 Technical details
-Formalization
-Verification
+Formalization — when available
+Verification — when applicable
 ```
 
-Two corrections to the draft outline, which had the statement after the proof
-idea and after dependencies in §3 while placing it before both in §2.
+**The statement precedes the proof idea.** Everything above the statement
+answers *why am I reading this*; everything below answers *why is it true*.
 
-**The statement precedes the proof idea.** A proof idea is unintelligible
-without knowing what is being proved. Kallenberg's descent goes overview →
-individual theorems → proofs and their structure, and the theorem is the
-statement. Everything above the statement in the list answers *why am I reading
-this*; everything below answers *why is it true*.
+**Dependencies follow the skeleton.** Which results a proof uses becomes
+informative after the shape of the argument is visible. Formal dependencies and
+conceptual prerequisites remain distinct.
 
-**Dependencies follow the skeleton.** Which results a proof rests on is
-informative once the shape of the argument is known and is a list of names
-before that. Formal dependencies and conceptual prerequisites are shown as
-distinct sets, never merged.
-
-Each section links down to the next and up to its context. Any section may be
-empty, and an empty section is displayed as absent rather than as a gap to be filled —
-`VISION.md` fixes that an outline without a formalization is a legitimate final
-state, and so is a formal proof without an explanation, though the second is
-worth surfacing as an opportunity.
+Each section links to its source and to related work. Any section may be absent.
+An absent formalization is an ordinary state of the corpus, not a gap the
+mathematician must fill. A formal proof without an explanation is likewise
+displayed without treating verification as comprehension.
 
 ---
 
 ## 4. Subject navigation
 
-Movement runs subject → chapter → section → concept → result → proof → formal
-proof, over the source hierarchy and the relations among objects.
+Navigation may proceed from subject to chapter or section, then to concepts,
+results, problems, proofs, attempts, examples, and formal artifacts where they
+exist. No mandatory route ends in a formal proof.
 
 The navigation graph is not the formal dependency graph. Conceptual
-prerequisites, generalizations, analogies, and motivations are first-class
-edges, they are authored rather than extracted, and they may contradict the
-dependency graph without either being wrong.
+prerequisites, generalizations, analogies, motivations, and `ProblemRelation`s
+are distinct from extracted formal dependencies. Problem-relation kinds are
+`asks_to_prove`, `asks_to_prove_step_of`, `asks_to_apply`,
+`asks_to_compute_instance_of`, `asks_to_construct_example_of`,
+`asks_to_construct_counterexample_to`, and `prerequisite_for`.
 
-An object may occur in several sources. Navigation shows the occurrences and the
-correspondences between them with their kinds — formalizes, restates,
-strengthens, weakens, approximates — rather than silently presenting one
-occurrence as the object.
+An object may occur in several sources. Navigation shows those occurrences and
+the established correspondences between them, with kinds `same_claim`,
+`formalizes`, `restates`, `strengthens`, `weakens`, `implies`, and
+`is_implied_by`. It never silently identifies two occurrences.
 
 ---
 
-## 5. Authoring
+## 5. Work products and provenance
 
-Human-authored: conceptual role, why a result matters, proof idea, crucial
-reduction, hypothesis rationale, examples, counterexamples, relations among
-objects, and the judgment that two occurrences correspond.
+The primary human-produced records are `WorkArtifact`s created while doing
+mathematics: attempts, proofs, calculations, examples, counterexamples, code,
+exposition, and ordinary notes. The interface does not require these artifacts
+to be rewritten as structured reports.
 
-Machine-derived: types, signatures, imports, dependencies, axiom usage,
-verification status, source locations, and downstream references. These are
-never editable, and an attempt to correct one is a signal that either the
-generator or the mathematics is wrong.
+Source-derived records include stable locators and quotations. Machine-derived
+records include types, signatures, imports, dependencies, axiom usage,
+verification status, and downstream references. Machine-derived facts are not
+hand-edited; a suspected error is recorded as a discrepancy against the exact
+fact and source revision.
 
-Machine-proposed: candidate correspondences, candidate dependencies, draft
-outlines, draft review items. Every proposal is adopted, edited, or rejected by
-a person, and adoption records the adopter without changing the origin.
+Machine-proposed records include candidate correspondences, prerequisite
+relations, hints, proof outlines, and review tasks. Every proposal retains its
+origin whether it is accepted, edited, rejected, or merely used during an
+attempt.
 
-Two authoring paths that the draft outline omitted and that the domain model
-requires.
+**Correspondence authoring.** Linking two source occurrences is a mathematical
+judgment. The kind of relation is explicit because `formalizes`, `restates`, and
+`implies` assert different relationships.
 
-**Correspondence authoring.** Linking a manuscript occurrence to a declaration
-is a mathematical judgment with a kind attached, not a lookup. The interface
-must make the kind explicit at the moment of linking, because *formalizes* and
-*approximates* are different claims and the difference is exactly what decays
-when such a link is recorded as a bare pair of names.
-
-**Understanding capture in place.** Writing an understanding field must be
-possible from wherever the understanding occurred — including the formal view,
-per §2.
+**Recording during work.** The system records only what the work produces or
+what is needed to resume it: the source locator, relevant problem or object,
+artifact, revision, assistance used, and provenance. Optional notes remain
+ordinary mathematical notes. Recording may not become a gate before the next
+mathematical step.
 
 ---
 
 ## 6. Discrepancies
 
-The domain model makes a discrepancy a first-class object. The interface treats
-one as information rather than as an error to clear.
+A discrepancy records a conflict between an identified claim, relation, source
+occurrence, or generated fact and another identified record about the same
+subject. It records what conflicts, what detected the conflict, and how it was
+resolved: claim revised, correspondence updated, mathematics changed, generated
+fact regenerated, or false positive. Nothing is repaired automatically.
 
-A discrepancy surfaces on the object it concerns and in a session-level list. It
-records what conflicts with what, what detected it, and how it was resolved:
-understanding corrected, correspondence updated, mathematics changed, or false
-positive. Nothing is auto-repaired.
+The constraints specified in the domain model also apply here. Absence from a
+formal dependency graph does not refute a conceptual dependency. A record about
+one declaration says nothing about another declaration, however similar their
+names or roles.
 
-Two constraints carry over from the domain model. A conceptual dependency is not
-refuted by its absence from a formal dependency graph. And a note recorded
-against one declaration says nothing about another, however closely related — a
-detector that compares a claim about one subject with a fact about a different
-one generates false discrepancies and costs more attention than it saves.
-
-Repeated discrepancies at one object are a signal about where understanding is
-weak, and the review scheduler may use them.
+A discrepancy may influence later task selection only as evidence about a
+specific artifact or relation. It does not license an inference about the
+mathematician's internal state.
 
 ---
 
 ## 7. Review
 
-Levels: orientation, statement, dependencies, proof idea, technical details,
-formal proof. The scheduler presents the weakest due level.
+Review presents a mathematical task, not a request for a confidence rating or a
+description of comprehension. `ReviewItem` kinds include reconstruction, proof
+completion, hypothesis variation, example, counterexample, related problem,
+Lean exercise, and Sage task.
 
-`VISION.md` adopts Kallenberg's criterion that what can be looked up need not be
-retained, which raises an apparent conflict with a `statement` review level. The
-resolution is what the prompt asks for. A prompt asking to reproduce a signature
-or recite hypotheses tests lookup and is excluded. A prompt asking what a result
-asserts, in the reader's own terms, tests whether the content is held, and that
-is worth scheduling. Exact conditions are looked up; what a theorem says is
-known or not.
+Exact hypotheses, signatures, and source wording remain available for lookup.
+Review instead tests use: state the mathematical content needed for the task,
+reconstruct the argument, supply a missing step, apply the result, distinguish a
+nearby false statement, or solve a variation.
 
-Item kinds: reconstruction, explanation, proof completion, hypothesis analysis,
-example, counterexample, dependency recall, Lean exercise, Sage task.
+Proof-completion tasks may come from gaps left by an author, an earlier failed
+attempt, or a formal proof when one exists. Formal material is one possible
+source of tasks, not a prerequisite.
 
-Proof-completion items come from the gaps an argument leaves, which Kallenberg
-treats as the natural exercises. A formal development is unusually good at
-locating them.
-
-Grading is self-assessed or rubric-based above the statement level. Only items a
-machine can decide — a Lean exercise, a dependency recall checked against a
-derived fact — are machine-graded. No reference answer is presented as the
-correct one for a proof-idea prompt.
+`ReviewState` is generated from `TaskEvidence`: completion, checking result,
+hints used, later reconstruction, and performance on related problems. For work
+that no machine can decide, the artifact remains available for mathematical
+inspection; the system does not replace judgment with a score. No prompt asks
+the mathematician to declare a level of comprehension.
 
 ---
 
 ## 8. AI-generated mathematics and machine assistance
 
-AI-generated mathematics is material for theorem study and proof study. A
-theorem, proof, or mathematical argument produced outside Theorem Terminal may
-be recorded from the first implementation and studied through the same
-workflows as human-authored mathematics. Its AI origin, model when known,
-verification status, and subsequent human judgments remain distinct. Formal
-verification does not by itself make the mathematics understood.
+AI-generated mathematics is source material for the same activities as
+human-authored mathematics. Its origin, model when known, verification status,
+source revision, and later judgments remain distinct. Formal verification does
+not by itself establish that a human has understood the result.
 
-System-generated assistance is a later capability, deferred to Stage 5 of
-`CODEX_PLAN.md`. Theorem Terminal may then explain, summarize, propose
-questions, draft outlines, and suggest connections. These outputs remain
-proposals; they do not become authoritative explanations, formal facts, or
-mathematicians' judgments.
+During problem solving or proof study, Theorem Terminal may retrieve relevant
+source material, propose a hint or intermediate lemma, test examples, criticize
+an attempted step, draft an outline, or suggest a related problem. Assistance is
+given on request and may be revealed in stages so that it does not replace the
+attempt it is meant to support.
 
-An explanation obtained from an external assistant may be imported earlier as
-an `ai_proposal`, with the model recorded as author, compared against formal
-facts and existing understanding fields, and then adopted, edited, or rejected.
-Importing and studying external AI material is not the same as asking Theorem
-Terminal to generate it.
+Each generated output is a proposal with provenance. It may be compared with
+sources, formal facts when present, and existing `WorkArtifact`s. Use of a
+proposal is recorded in `TaskEvidence`; it does not convert the proposal into a
+human judgment.
 
 **Non-goal.** The import path records finished mathematical content and its
-provenance. It is not a chat client, prompt manager, or conversation archive.
-Nothing in the interface preserves a dialogue as such.
+provenance. It is not a general chat client, prompt manager, or conversation
+archive.
 
-Adoption is explicit and cheap. `VISION.md` §9 makes authoring cost a failure
-condition, so the test for any system-generated assistance is whether adopting
-or correcting a proposal costs less than writing it from scratch. A feature that
-fails that test is removed because it adds review load to authoring load.
+Assistance is useful only if it reduces the time or obstruction between the
+mathematician and substantive work. A feature that requires more correction or
+record keeping than the mathematical help it supplies is removed.
 
 ---
 
-## 9. First working session
+## 9. Initial experimental sessions
 
-On `Categorical_Rice_Shapiro`, a session that exercises the whole specification:
+The first implementation is evaluated through two distinct sessions. Neither
+session substitutes for the other.
 
-1. Open a manuscript section of Appendix A from the source hierarchy.
-2. See the results it contains and the declarations corresponding to them, with
-   the kind of each correspondence.
-3. Read the conceptual role of one result and why its hypotheses are what they
-   are.
-4. Descend to the proof idea and the skeleton.
-5. Inspect the formal proof, its dependencies, and its axiom usage.
-6. Notice a discrepancy — a correspondence pointing at a declaration whose
-   signature has changed — and resolve it.
-7. Schedule what was learned; return to it later at the weakest level.
+### 9.1 Problem-centered study without formalization
 
-Step 6 is the step no existing tool supports and the one the first corpus makes
-immediately testable.
+Use a coherent cluster from a problem-centered algebraic number theory text.
+
+1. Enter through a chapter objective or a selected problem family.
+2. See a concise orientation: relevant definitions and results, nearby examples,
+   and previously completed problems that may be useful.
+3. Open one problem and begin an attempt in an ordinary TeX or Sage work file,
+   without first completing a subject map or questionnaire.
+4. Request help only when useful: a source locator, definition reminder, related
+   result, strategic hint, intermediate lemma, computation, or comparison with a
+   solution when one is available.
+5. Preserve the attempt, revisions, calculations, exact sources consulted, and
+   assistance used.
+6. Resume later at the unfinished mathematical step.
+7. Test retention by reconstructing the solution or solving a related problem.
+
+**Acceptance.** The session is useful when no formal artifact exists. It begins
+with a substantive problem, preserves enough evidence to resume and test the
+work, and requires no declaration of comprehension.
+
+### 9.2 Mathematical re-entry and formal correspondence
+
+Use one coherent region of `Categorical_Rice_Shapiro`.
+
+1. Begin from a mathematical question, manuscript result, unfinished proof, or
+   earlier work product.
+2. Recover the relevant source occurrences, prior attempts, computations, and
+   unresolved questions.
+3. Reconstruct or continue the mathematical argument.
+4. When a formal counterpart exists and is useful, inspect its declaration,
+   dependencies, axiom usage, and verification status.
+5. Check explicit correspondences and resolve any discrepancy exposed by the
+   mathematical or formal work.
+6. Resume later from the preserved work product or perform a related task.
+
+**Acceptance.** The session restores enough specific context to continue work
+after an interruption. Its formal features are tested only on objects for which
+formal material exists.
+
+The first session tests problem-centered learning in an unformalized source. The
+second tests re-entry and optional informal/formal correspondence in an existing
+project.
 
 ---
 
@@ -287,28 +315,35 @@ immediately testable.
 
 The interface has failed if:
 
-- users enter through declarations because that is the fastest path;
-- explanations appear without their origins;
-- review measures recall of things that could have been looked up;
+- a subject map, inventory, or comprehension form must be completed before
+  mathematical work begins;
+- a formal proof is treated as available or required when none exists;
+- problem solving is secondary to browsing or record maintenance;
+- assistance reveals a solution before the mathematician requests that level of
+  help;
+- explanations or proposals appear without their origins;
+- review measures lookup or self-description instead of mathematical
+  performance;
 - verification status is read as comprehension;
-- navigation degenerates into a dependency-graph browser;
-- authoring understanding costs more attention than the understanding returns;
-- discrepancies accumulate unresolved, which means detection is noisier than it
-  is useful.
+- navigation degenerates into a formal dependency-graph browser;
+- preserving work costs more attention than resuming it saves;
+- discrepancy detection produces more irrelevant interruptions than useful
+  corrections.
 
 ---
 
 ## 11. Open questions
 
-- Whether formalization sessions are in scope for the first implementation (§2).
-- What the orientation view actually shows for a corpus with one manuscript and
-  one formal development, where the hierarchy is small enough to hold in mind.
-  Candidates, none settled: the source hierarchy, the concepts that organize it,
-  the results that carry weight, dependency clusters, unresolved discrepancies,
-  and mastery state. Not a rendering of the dependency graph, which is the thing
-  that is easy to produce and answers none of the orientation questions.
-- Whether relations among objects are authored only, or proposed from
-  co-occurrence and dependency data and then adopted.
-- How a curated subject map survives a revision of the source it was built over.
-- Whether review items are authored per object or generated per level from
-  existing understanding fields.
+- Which initial problem cluster best tests both theoretical proof and
+  computation without requiring broad ingestion?
+- Which levels of assistance should be available, and which should require an
+  explicit request?
+- How much prerequisite context can be recovered from sources and prior work
+  without manual classification?
+- What orientation view serves a large problem-centered source and what view
+  serves a small research project?
+- Which `ProblemRelation`s require human judgment and which may be proposed from
+  source structure and prior attempts?
+- How does a curated subject map survive revisions of its sources?
+- Which `ReviewItem`s can be generated from `TaskEvidence`, and which require
+  mathematical authorship?

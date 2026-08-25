@@ -6,18 +6,24 @@ implementation).
 
 ## Thesis
 
-* Learning a large body of mathematics requires orientation, understanding,
+* Learning a large body of mathematics requires orientation, mathematical work,
   integration, and retention.
 * Returning to mathematics after a lapse may require reconstructing context not
   explicit in the surviving sources.
+* Mathematical study may begin from exposition, a theorem, a proof, an example,
+  or a problem; no complete proof or formalization is assumed.
 * AI-generated mathematics may be correct or formally verified without being
   understood and must therefore be treated as material for study.
 * AI may increase the rate of mathematical production and the amount of work
-  requiring evaluation, understanding, and integration.
-* Kallenberg's top-down approach provides the learning model.
-* Curry's precision ladder provides the representation model.
-* Theorem Terminal explores tools for learning, reconstructing, integrating,
-  and retaining mathematics.
+  requiring evaluation, reconstruction, and integration.
+* Kallenberg's top-down approach determines the order in which available
+  mathematical material is presented.
+* Curry's account of increasing but never absolute precision explains why
+  informal and formal representations remain distinct.
+* Theorem Terminal explores tools for learning, solving problems,
+  reconstructing arguments, integrating results, and retaining mathematics.
+* Evidence comes from mathematical work and later performance, not from reports
+  about an internal mental state.
 
 Theorem Terminal is intended both for navigating and learning from a large
 corpus, such as the Stacks Project
@@ -28,25 +34,22 @@ create them. Tao observes that the growth of the literature, the increasing
 length and specialization of major proofs, and the strain on the refereeing
 system all predate modern AI [@taoMathematicsAgeAI2026].
 
-The first implementation will be experimental, not a completed system or a
-product specification. It will test whether recording sources,
-correspondences, explanations, formal facts, and review history helps a
-mathematician learn, reconstruct, integrate, and retain mathematics during
-actual work. It will also determine which records can be produced or
-maintained mechanically and which require mathematical judgment.
+The first implementation will be an experiment, not a completed system or a
+product specification. It will begin with mathematical work and test whether
+source locations, problem attempts, proof drafts, computations,
+correspondences, formal facts, corrections, and review results support later
+reconstruction and application. It will also determine which information can
+be obtained or updated mechanically and which decisions require mathematical
+judgment.
 
-Theorem Terminal is an assistant's assistant. It does not replace mathematical
-assistants, proof assistants, or formal systems, and it does not compete with
-them. It supplies the persistent context in which work done with those systems is
-organized, attributed, reviewed, and retained. A mathematician may use several
-machine assistants for exploration and critique, a proof assistant for
-verification, a computer algebra system for computation, and the literature for
-exposition; Theorem Terminal holds what was learned, where each idea came from,
-which claims are checked, which explanations are human and which machine, and
-what needs review — without making any one assistant the authority. The
-valuable artifact is not any assistant's answer. It is the corrected
-understanding that accumulates around it, which at present survives only in
-chat logs and in memory.
+Theorem Terminal is an assistant's assistant. A mathematician may consult
+several machine assistants for exploration and criticism, a proof assistant for
+verification when a formal development exists, a computer algebra system for
+computation, and the literature for definitions and exposition. Theorem
+Terminal preserves the resulting mathematical artifacts, their provenance,
+their relationships, their checking status, and the state at which work stopped.
+No one assistant becomes the authority. The system does not require a
+mathematician to complete a description of what is supposedly understood.
 
 ---
 
@@ -80,113 +83,109 @@ them distinct in its data model and interface.
 
 ## 2. Activities Theorem Terminal supports
 
-Four activities that are not completed merely by producing a proof.
+Five activities are not completed merely by possessing a theorem statement or a
+proof.
 
-**Orientation.** Before studying individual results, a mathematician needs to
-identify the subject's organizing concepts, principal results, dependencies,
-and sources. A table of contents or declaration index does not by itself
-provide this understanding.
+**Orientation.** Before detailed study, identify the subject's organizing
+concepts, principal results or problem families, dependencies, and sources. A
+table of contents or declaration index does not by itself establish these
+relationships.
 
-**Understanding.** Knowing that a theorem holds is not knowing why its proof
-works, which hypothesis is doing the work, what the argument reduces to, or what
-would break if a condition were dropped. A verified statement can be entirely
-opaque.
+**Problem solving.** Problems may test prior exposition, supply omitted proof
+steps, develop examples, or constitute the exposition itself. The system should
+present a selected problem with its source location and relevant prior material,
+accept ordinary mathematical work, and provide optional assistance without
+requiring preliminary classification or self-description.
 
-**Integration.** A result matters relative to a surrounding structure: what it
-generalizes, what depends on it, which earlier idea it makes precise, where it
-sits in a subject. Integration is the difference between a collection of true
-statements and a field one can work in.
+**Reconstruction.** A result becomes usable when its argument, governing idea,
+and dependence on hypotheses can be recovered. The relevant evidence is a
+reconstructed proof, a completed missing step, a successful application, an
+example, a counterexample, or a corrected computation. A declaration that the
+result is understood is not evidence.
 
-**Retention.** Understanding reached and then lost is a cost paid repeatedly.
-Among these activities, retention yields the most directly observable data:
-intervals, lapses, and whether a proof can be reconstructed can be recorded,
-whereas understanding and integration require judgment. That makes retention a
-practical place to test the design early—with the caveat that retention data
-measures retention of whatever the prompts happen to test, so a well-scheduled
-bad prompt set produces clean numbers and no understanding.
+**Integration.** A result is integrated when it can be related to earlier
+results and used in subsequent work: for example, to solve another problem,
+replace a stronger hypothesis, compare two methods, or explain a new case.
+These relations may be proposed mechanically, but accepting them is
+mathematical work.
 
-## 3. Kallenberg: the learning model
+**Retention.** Previously completed work should be recoverable after an
+interruption. The system can preserve dated attempts, assistance used,
+corrections, and later task results. These observations support review
+scheduling, but they do not justify a general claim about a person's knowledge.
+
+## 3. Kallenberg: the order of study
 
 Kallenberg prescribes a reading method for advanced mathematics and contrasts it
-with reading a novel front to back: gain a general overview first, work down
-gradually to individual theorems, and reach proofs and their logical structure
-last [@kallenbergFoundationsModernProbability2021, 1].
+with reading a novel from beginning to end: gain a general overview first,
+proceed gradually to individual theorems, and examine proofs and their logical
+structure after their place in the subject is known
+[@kallenbergFoundationsModernProbability2021, 1].
 
-Two further points from the same passage shape the design more than the
-top-down slogan does.
+His recommendation to study proofs before exercises is useful when completed
+proofs provide the exposition. It is not an assumption that every source
+contains such proofs, and it does not make a problem collection wait for a
+separate proof corpus. In a problem-centered text in which exercises develop
+the theory, selected problems may supply omitted arguments and establish command
+of examples. After an initial orientation, solving those problems is the study
+method.
 
-The first is why proofs come before exercises. Learning to prove theorems comes
-from studying proofs, in quantity; forgotten hypotheses in the statement of a
-theorem can simply be looked up. That is a direct claim about which
-mathematical content rewards retention effort and which does not, and the
-project adopts it: exact conditions are normally recoverable from the source, so
-review should not spend scarce time on rote recall of them.
+The top-down order used here is:
 
-The second is that the top-down method applies inside a proof as well as across
-a subject. The reader is to look for the ideas that make the proof work, then
-break the argument down into minor details and eventually calculations. The
-gaps an author leaves are, on this account, the natural exercises — identifying
-and filling them is the work.
+1. the purpose and organization of the subject or chapter;
+2. its central concepts, results, and problem families;
+3. the selected theorem, argument, example, or problem;
+4. the governing idea or proposed method;
+5. the detailed proof, calculation, or construction.
 
-This project uses that order as the organizing principle of the interface.
-Software organized around a formal development usually begins with a
-declaration name, its type, and its dependency edges. That supports declaration
-lookup. It does not by itself help someone determine what a subject is about,
-which results carry weight in it, or why they matter.
+This order applies only to material that exists. It neither assumes a
+machine-checked proof nor requires a complete informal proof before study can
+begin.
 
-Concretely, the order determines what a theorem view opens with. Not the
-statement, and certainly not the formal statement: why one is looking at this
-result at all, and what it accomplishes. The default entry point for learning is
-not the formal proof.
+A theorem view therefore opens with the result's role and mathematical effect.
+A problem view opens with the problem, its exact source location, the relevant
+definitions and prior results, and links to earlier related attempts.
+Assistance is optional and increasingly explicit: locate a definition or
+result; produce a small example; check a calculation; give a strategic hint;
+inspect a proposed step; suggest an intermediate lemma; or show a complete
+solution only when requested. The attempted proof or computation is the primary
+work artifact.
 
-That is a claim about study, not about discovery. In research, formalization
-often runs the other way and produces the mathematics: the Appendix A
-development records that two isomorphisms turn out to be provable rather than
-assumed, that an identity needs only the range axioms, that a restriction axiom
-requires neither the associator nor the symmetry, and that a result holds
-without a hypothesis the paper carried. None of that was visible before the
-formalization. A system organized around the learning order must therefore
-accommodate work that arrives from the bottom, which is why the rungs are a
-study trajectory and not a dependency chain.
+Research and formalization need not proceed in this order. Formal work may show
+that an asserted assumption is derivable, that an identity uses fewer axioms
+than expected, or that a manuscript hypothesis is unnecessary. The interface
+must accept these results and update the relationships among the affected
+artifacts. Top-down study determines presentation order, not discovery order or
+dependency.
 
 ## 4. Curry: the representation model
 
-Curry's subject is the U language — the unformalized language in which
-mathematics is actually discussed, carrying its technical terminology and
-notational conventions. Three features of it matter here
-[Curry, *Foundations of Mathematical Logic*, §1].
+Curry calls the unformalized language in which mathematics is discussed the U
+language. It includes mathematical terminology and notation whose use changes
+and becomes more precise as work proceeds
+[@curryFoundationsMathematicalLogic1977, §1].
 
-It grows. New terms and symbols are introduced, old terms are given new senses
-or abandoned, and the use of the language becomes more precise as work proceeds.
+New terms and symbols are introduced, old terms acquire new meanings or are
+abandoned, and usage becomes more precise. Curry nevertheless argues that
+absolute precision is unattainable. Formalization does not eliminate the
+interpretive decisions expressed in definitions; it makes a proof checkable
+relative to those definitions.
 
-It begins vague and can be sharpened without limit in practice. Curry's analogy
-is measurement: instruments made by human hands and brains nevertheless measure
-to millionths of an inch.
+The same mathematical subject may therefore have an overview, a theorem
+statement, a proof outline, a detailed informal proof, computations, a formal
+statement, and a machine-checked proof. These representations answer different
+questions. None is merely an incomplete version of another, and no fixed
+sequence of them must exist.
 
-And precision has no terminus. Curry is explicit that "absolute precision is not
-attainable" in measurement and that there is no reason to expect otherwise of
-the U language.
+An outline without a formalization is a legitimate final representation. A
+machine-checked proof without an account of its role or governing idea is also a
+legitimate but different representation. The system records explicit proposed
+relationships among representations rather than identifying them.
 
-The third point is the one this project must not lose. A precision ladder ending
-in a kernel check would suggest that formalization escapes the informal — that
-at the top rung the vagueness is gone. It is not gone; it has moved. A machine
-verifies a proof relative to definitions, and those definitions were written in
-the U language by someone deciding what the notions were. That is why §5 treats
-adequacy of formalization as an open question no kernel answers, and why the
-model records correspondences between manuscript and formalization as claims
-with a provenance rather than as identities.
-
-The working consequence is that a coarse representation is a first-class object
-and not a placeholder for a missing formal one. An outline with no formalization
-is a legitimate and often final state. So is a formal proof with no human
-explanation, which is a different kind of incompleteness and one the system
-should make visible. The rungs are a study trajectory, not a dependency chain:
-nothing requires a lower level to exist before a higher one is written.
-
-This is also where machine assistance is genuinely useful — moving between
-levels, proposing an outline for a formal proof or a formalization target for an
-informal argument — provided every product of that assistance stays labelled as
-what it is.
+Machine assistance can propose an outline of a formal proof, suggest a
+formalization target for an informal argument, compare definitions, or identify
+possible source correspondences. Each proposal retains its origin and checking
+status.
 
 ## 5. Formal verification is one aspect
 
@@ -197,9 +196,13 @@ having and is not the whole problem.
 What a kernel check does not settle: whether the statement formalized is the
 statement intended; why the result matters; what the proof's idea is; which
 hypotheses are essential; how the argument relates to the surrounding
-mathematics; and whether any human understands it. A formal development is
-therefore the best available substrate for the lower rungs and supplies nothing
-for the upper ones.
+mathematics; and whether the argument can be reconstructed and used.
+
+Where a formal development exists, it supplies mechanically checkable facts
+about types, dependencies, axioms, and verification status. Where none exists,
+Theorem Terminal still supports orientation, problem solving, proof attempts,
+computations, reconstruction, and review. An informal argument or problem
+attempt is not treated as awaiting formalization.
 
 Two rules follow. Formal facts — types, dependencies, axiom usage, checking
 status — are obtained mechanically, from one canonical generator, and never
@@ -207,27 +210,26 @@ maintained by hand. And verification is an attestation about a claim, not the
 origin of the claim: a proof written by a human, or proposed by a machine, and
 then checked, has one origin and one or more attestations.
 
-## 6. Why spaced repetition
+## 6. Retention and later reconstruction
 
-Retention is included because scheduling can address it directly, and because
-the alternative is rereading, which does not scale across large corpora or long
-projects.
+Review is included because rereading an entire corpus or project after every
+interruption does not scale. The system may schedule short mathematical tasks
+drawn from work already performed.
 
-The distinctive requirement is that review targets kinds of understanding rather
-than statements, and Kallenberg supplies the criterion: what can be looked up
-need not be retained. A prompt asking for a type signature or a list of
-hypotheses tests exactly the material he sets aside. Prompts worth scheduling
-ask for the role of a result, the idea that makes its proof work, the crucial
-reduction, why a hypothesis is needed, an example or counterexample.
+Useful tasks include reconstructing an argument, completing a previously omitted
+step, solving a related problem, applying a method under altered hypotheses,
+producing an example or counterexample, or checking a remembered proof against
+the source. Recalling a type signature or reproducing a list of hypotheses is
+normally unnecessary when the source can be consulted.
 
-Proof-completion items have the same source. Kallenberg treats the gaps an
-author leaves as the natural exercises, which makes a missing-step prompt the
-generated form of something a reader would otherwise construct by hand — and a
-formal development is unusually good at exposing where the gaps are.
+Problem-centered sources already supply many suitable tasks. Additional tasks
+may be derived from unfinished attempts, errors that were corrected, assistance
+that proved necessary, and later results that use the same method.
 
-Mastery is tracked per level, so the scheduler can present the weakest due level
-of an object rather than the object as a unit — orientation secure, statement
-secure, proof idea weak, formal proof unseen.
+Scheduling status is an operational estimate derived from dated task results,
+elapsed time, and assistance used. It is not a self-assigned level of knowledge.
+No review session requires completion of fields describing what the
+mathematician believes is understood.
 
 ## 7. What this is not
 
@@ -241,67 +243,65 @@ consistency checker. Each step was locally defensible and the composite lost the
 research question, because the infrastructure end of the problem is the part
 that is easiest to specify.
 
-The rule is not that infrastructure is forbidden. Infrastructure is justified
-when it serves the learning model: extracting formal dependencies because they
-explain proof structure is warranted, and building a dependency extractor
-because extraction is an interesting engineering problem is not. The test is
-whether a rung of the ladder becomes reachable that was not reachable before.
-Where existing tools
-supply what is needed, they are used rather than rebuilt.
+Infrastructure is justified only by a specified mathematical function. Extract
+formal dependencies when they help explain a proof or restore the state of an
+investigation. Do not build an extractor merely because extraction is an
+available engineering task. The test is whether the component enables a
+mathematician to orient, solve, reconstruct, integrate, or review work that
+could not otherwise be handled adequately. Existing tools should be used when
+they already provide the required function.
 
-## 8. The first corpus
+## 8. Corpora with different available evidence
 
-`flengyel/Categorical_Rice_Shapiro` is the first corpus because it carries every
-aspect the project must connect: a mathematical manuscript, a formal development,
-proofs, dependency and axiom information, and a hand-written document relating
-the manuscript to the formalization.
+`flengyel/Categorical_Rice_Shapiro` is the first corpus because it contains a
+mathematical manuscript, a Lean formal development, mechanically available
+dependency and axiom information, and a hand-written document relating
+manuscript passages to Lean declarations.
 
-That last artifact is the most useful thing about it. `Lean/docs/AppendixA.md`
-demonstrates both that expert correspondence between informal and formal
-mathematics is valuable and that it decays: it carries real mathematical
-judgment — conceptual roles, which hypotheses are absent, where formalization
-departs from the paper — alongside roughly fifty positional references into a
-manuscript that keeps moving, and it has fallen behind the formal corpus.
-Maintaining that bridge by hand does not scale past one development and one
-person. The project is an attempt to find out which parts of it can be
-maintained mechanically and which are irreducibly mathematical.
+`Lean/docs/AppendixA.md` records expert mathematical judgments absent from the
+two primary sources. It identifies hypotheses that formalization showed to be
+unnecessary, structures that proved derivable rather than postulated, terms
+used with different meanings, and manuscript claims with corresponding Lean
+results. Its positional references become obsolete as the manuscript and Lean
+development change. The first-corpus experiment asks which locators and formal
+facts can be regenerated, which proposed source-to-formal correspondences can
+be checked, and which assessments require mathematical judgment.
 
-Decay is the weaker half of the argument. The stronger half is that expert
-translation between informal and formal mathematics is itself valuable data and
-is almost never recorded. Knowing that a hypothesis in the paper turned out to
-be unnecessary, that a symmetry is derivable rather than postulated, that
-Heller's naturalizer clause has no formalization but that two lemmas carry its
-content in usable form, that "section" in one part of the development is not
-"section" in another — none of this is recoverable from the manuscript or the
-formal development separately, and no extraction produces it. The project
-preserves and extends that judgment; repairing decay is what makes preserving
-it possible.
+A problem-centered and mostly unformalized source requires a different
+workflow. For a problem-centered text in which exercises develop the theory,
+the principal artifacts are source locations, selected problems, relevant
+definitions and earlier results, proof attempts, computations, examples,
+corrections, and assistance used. A formal counterpart is included only when
+one already exists or is deliberately produced during the mathematical work.
 
-The system does not replace mathematical judgment. It records, organizes, and
-assists the processes by which judgment is formed, which is why every field it
-holds carries an origin and why an adopted machine proposal never becomes
-indistinguishable from a mathematician's own conclusion.
+The system must not require the same evidence from every corpus. Formal data is
+used when available and omitted when absent. In neither case is the
+mathematician asked to complete a form describing an internal mental state.
+Provenance attaches to source claims, machine proposals, computations, formal
+checks, and mathematical work artifacts.
 
 ## 9. Tests of the design
 
-The initial work tests several distinct claims:
+The design makes distinct, falsifiable claims:
 
-- If the mechanically derivable share of expert correspondence is negligible,
-  automatic maintenance of that correspondence is not viable; it must remain
-  authored mathematical judgment.
-- If review at the level of proof ideas cannot be constructed in a form worth
-  repeating, the proposed retention method for proof understanding fails. That
-  result would not by itself invalidate the orientation, reconstruction, or
-  integration functions.
-- If existing formal tooling already supplies adequate translation between
-  formal artifacts and mathematical understanding, Theorem Terminal should use
-  it rather than build a competing translation component.
-- If authoring understanding fields costs more than their later use returns,
-  manual capture is not viable. Assistance must make proposing, adopting, or
-  correcting those fields cheaper than writing them without support.
-- If maintaining the knowledge model costs more attention than it returns on
-  the first corpus, the proposed representation and workflow must be revised
-  before they are tested on larger corpora.
+- The `Categorical_Rice_Shapiro` trial tests whether mechanically obtained
+  source locations, dependencies, axiom information, and change detection
+  reduce the effort required to maintain source-to-formal correspondences.
+- A problem-centered trial tests whether mathematical work can begin from a
+  selected problem without prior formalization or manual population of a
+  knowledge model. It fails if preparation of the system requires more effort
+  than beginning the mathematics directly.
+- Assistance during a problem attempt is useful only if it locates relevant
+  material, checks a computation, identifies a specific gap, or supplies a
+  requested hint without displacing the mathematician's choice of method.
+- Retention support is useful only if later reconstruction, application, or
+  related problem solving improves. A self-rating is not evidence.
+- Existing formal tools should be used when they already provide the required
+  declaration, dependency, axiom, or checking information.
+- If maintaining the stored relationships costs more attention than their later
+  use saves, the representation and workflow must be revised.
 
-These outcomes test particular components rather than determining the value of
-the project as a whole. Each can be evaluated through use with the first corpus.
+The first and second trials test different functions. A corpus with an extensive
+formal development cannot establish that the problem-centered workflow works,
+and a mostly unformalized problem collection cannot test maintenance of
+source-to-formal correspondences.
