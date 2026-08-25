@@ -16,7 +16,7 @@ or examine generated mathematics. The mathematician begins the mathematical
 work in the ordinary medium appropriate to it. Theorem Terminal supplies source
 context, prior work, computations, and assistance when relevant.
 
-Three constraints follow from `VISION.md` and apply throughout this
+Four constraints follow from `VISION.md` and apply throughout this
 specification.
 
 **Mathematical work comes first.** The interface must not require a subject map,
@@ -31,6 +31,16 @@ review.
 **Origin is always visible.** No view presents a machine proposal as a
 mathematician's judgment or as a mechanically derived fact, and no view presents
 a derived fact as a claim someone made.
+
+**External transmission is explicit.** A model call is initiated from the
+current mathematical task. Before transmission, a compact disclosure identifies
+the configured provider and model, the exact versioned source passages and work
+artifacts selected, the request limits, and any provider retention that cannot
+be disabled. The system derives this disclosure from the active task; the
+mathematician writes the mathematical question and may remove context but
+completes no purpose or provenance form. All other workspace history and private
+notes are excluded by default. No source or work artifact is transmitted in the
+background.
 
 ---
 
@@ -177,6 +187,12 @@ relations, hints, proof outlines, and review tasks. Every proposal retains its
 origin whether it is accepted, edited, rejected, or merely used during an
 attempt.
 
+`ModelCall` records are generated automatically from bounded assistance
+requests. They preserve the selected context, exact application-supplied request
+content, provider, requested and resolved model identifiers, limits, non-secret
+settings, status, and any raw response. They are operational provenance, not
+mathematical work the mathematician must restate.
+
 **Correspondence authoring.** Linking two source occurrences is a mathematical
 judgment. The kind of relation is explicit because `formalizes`, `restates`, and
 `implies` assert different relationships.
@@ -239,20 +255,59 @@ human-authored mathematics. Its origin, model when known, verification status,
 source revision, and later judgments remain distinct. Formal verification does
 not by itself establish that a human has understood the result.
 
-During problem solving or proof study, Theorem Terminal may retrieve relevant
-source material, propose a hint or intermediate lemma, test examples, criticize
-an attempted step, draft an outline, or suggest a related problem. Assistance is
-given on request and may be revealed in stages so that it does not replace the
-attempt it is meant to support.
+Task-mediated assistance begins when the mathematician requests help with active
+work: for example, asking for an explanation of a definition or result, a
+possible source, criticism of an attempted step, an intermediate lemma, a
+computation to perform, a proof outline, or a related problem. Theorem Terminal
+constructs the request from the current problem or object, displayed source
+passages, and displayed `WorkArtifact`s. Before submission, the mathematician
+can inspect and reduce the exact outbound context. Nothing else is sent.
 
-Each generated output is a proposal with provenance. It may be compared with
-sources, formal facts when present, and existing `WorkArtifact`s. Use of a
-proposal is recorded in `TaskEvidence`; it does not convert the proposal into a
-human judgment.
+Each explicit user action creates at most one provider request. The request
+obeys configured input, output, and timeout limits, invokes no provider tools,
+and performs no automatic retry or recursive request. A retry or user-requested
+follow-up creates another `ModelCall` linked to the preceding call.
 
-**Non-goal.** The import path records finished mathematical content and its
-provenance. It is not a general chat client, prompt manager, or conversation
-archive.
+Each request produces a local `ModelCall`. The record contains every
+application-supplied instruction and message, the source and artifact versions
+used, provider, requested and resolved model identifiers, adapter version,
+limits, non-secret settings, times, status, response identifier when supplied,
+and raw response. This record permits inspection; it does not promise
+deterministic replay. Provider-side conversation state is not canonical.
+
+When the provider allows API response storage to be disabled, the first
+experiment requests that setting and records it. This does not assert that the
+provider performs no other processing or retention; the configured service's
+terms still govern its handling of the request.
+
+The raw response is preserved before extraction. Only a statement, hint,
+outline, calculation, source suggestion, criticism, or proposed solution that
+enters the mathematical work, or whose correction, rejection, or abandonment is
+recorded, becomes a `Representation` with
+`Provenance.origin = ai_proposal`, a link to its `ModelCall`, and its exact
+response span. Storage is not integration. A suggested source becomes a source
+occurrence only after it is independently retrieved and
+identified; a reported calculation or proof check becomes a verification only
+after the corresponding method or attestation is obtained separately.
+
+The raw response is treated as untrusted content. It cannot execute markup or
+commands, open a link, invoke a tool, or be submitted again without an explicit
+user action. Credentials are absent from model-call records, displayed context,
+logs, exports, and error text.
+
+Assistance is given only on request and may be revealed in stages so that it
+does not replace the attempt it is meant to support. Use, correction, rejection,
+or abandonment of a proposal is recorded in `TaskEvidence`; none converts the
+proposal into a human judgment.
+
+**Non-goal.** Importing external AI content and making model requests from
+active mathematical work do not make Theorem Terminal a general chat client,
+prompt manager, conversation archive, provider-orchestration layer, or
+autonomous agent system.
+
+Ordinary mathematical sessions never require a model call. The Stage 1
+evaluation deliberately includes one request at a genuine obstruction so that
+this function is tested.
 
 Assistance is useful only if it reduces the time or obstruction between the
 mathematician and substantive work. A feature that requires more correction or
@@ -275,16 +330,24 @@ Use a coherent cluster from a problem-centered algebraic number theory text.
 3. Open one problem and begin an attempt in an ordinary TeX or Sage work file,
    without first completing a subject map or questionnaire.
 4. Request help only when useful: a source locator, definition reminder, related
-   result, strategic hint, intermediate lemma, computation, or comparison with a
-   solution when one is available.
-5. Preserve the attempt, revisions, calculations, exact sources consulted, and
+   result, strategic hint, intermediate lemma, computation, criticism, or
+   comparison with a solution when one is available.
+5. At one genuine obstruction, make a bounded call to the configured model.
+   Inspect the selected outbound context, submit the request, and preserve the
+   `ModelCall` and raw response.
+6. Extract only proposals that enter the work or whose correction, rejection,
+   or abandonment is recorded, retaining their AI origin, exact response spans,
+   and links to the call.
+7. Preserve the attempt, revisions, calculations, exact sources consulted, and
    assistance used.
-6. Resume later at the unfinished mathematical step.
-7. Test retention by reconstructing the solution or solving a related problem.
+8. Resume later at the unfinished mathematical step.
+9. Test retention by reconstructing the solution or solving a related problem.
 
 **Acceptance.** The session is useful when no formal artifact exists. It begins
 with a substantive problem, preserves enough evidence to resume and test the
-work, and requires no declaration of comprehension.
+work, and requires no declaration of comprehension. At least one model call is
+traceable from exact outbound context through raw response to a proposal that is
+used, corrected, rejected, or abandoned during the mathematical attempt.
 
 ### 9.2 Mathematical re-entry and formal correspondence
 
@@ -321,6 +384,13 @@ The interface has failed if:
 - problem solving is secondary to browsing or record maintenance;
 - assistance reveals a solution before the mathematician requests that level of
   help;
+- source material or a work artifact is sent to an external model without an
+  explicit model call and inspectable outbound context;
+- a raw model response or extracted proposal appears as a source fact,
+  verification, or human judgment;
+- provider-side conversation state becomes the canonical project record;
+- model assistance expands into unsolicited follow-ups or a general chat
+  workflow;
 - explanations or proposals appear without their origins;
 - review measures lookup or self-description instead of mathematical
   performance;
@@ -338,6 +408,11 @@ The interface has failed if:
   computation without requiring broad ingestion?
 - Which levels of assistance should be available, and which should require an
   explicit request?
+- Which single model and service should be configured for the first experiment,
+  and what minimal response schema preserves the mathematical content without
+  forcing it into an inadequate schema?
+- How should outbound context be selected from sources and work artifacts
+  without manual classification or unnecessary disclosure?
 - How much prerequisite context can be recovered from sources and prior work
   without manual classification?
 - What orientation view serves a large problem-centered source and what view

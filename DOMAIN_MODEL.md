@@ -1,10 +1,15 @@
-# DOMAIN_MODEL.md — v3
+# DOMAIN_MODEL.md — v4
 
 Draft. Companion to `VISION.md` (why the system exists), `UX_SPEC.md` (what a
 mathematician does with it), and `CODEX_PLAN.md` (staged implementation).
 
 Fixes entities and invariants. Does not fix storage technology, schema syntax,
 or GUI framework.
+
+Changes from v3: bounded task-attached model calls made first-class; exact
+application-supplied request content and raw responses recorded; generated
+mathematical content
+remains proposed material with AI provenance.
 
 Changes from v2: problems and mathematical work made first-class; problem-to-
 result relations added for exercise-driven sources; manually asserted
@@ -18,6 +23,8 @@ For a body of mathematics under study, the model must represent:
 - the structure of the subject, as sources present it;
 - problems, statements, proofs, explanations, and examples, whether human- or
   AI-generated, and the sources in which they occur;
+- bounded model calls made from active mathematical work, including the exact
+  input sent, model identity, raw response, and extracted proposals;
 - proof attempts, calculations, examples, counterexamples, code, and other
   mathematical work produced during study;
 - formal statements, formal proofs, and mechanically generated facts when they
@@ -34,15 +41,19 @@ For a body of mathematics under study, the model must represent:
   formal development.
 - Not a questionnaire about a mathematician's internal state.
 - Not a manually maintained classification of competence.
+- Not a general chat client, prompt manager, multi-provider orchestration layer,
+  or autonomous-agent system.
 
 ## Orthogonal information classes
 
-Source content, mathematical work, provenance, verification, task evidence, and
-generated review state are distinct. The model must not infer one directly from
-another: provenance is not verification, verification is not retention, and a
-recorded task event is not a claim about an internal mental state.
+Source content, mathematical work, model-call records, provenance, verification,
+task evidence, and generated review state are distinct. The model must not infer
+one directly from another: a model response is neither source content nor
+verification, provenance is not verification, verification is not retention,
+and a recorded task event is not a claim about an internal mental state.
 
 ---
+
 ## Subject structure
 
 Subject structure supplies orientation before or alongside work on an individual
@@ -115,6 +126,7 @@ Stable locators on the manuscript side require adding `\label`s to
 `rs_Appendix_A.tex`; no formal exporter substitutes for that.
 
 ---
+
 ## Objects and relations
 
 ### MathematicalObject
@@ -205,11 +217,15 @@ TaskEvidence
     task              Problem | ReviewItem
     artifact          optional WorkArtifact
     event             started | resumed | artifact_saved | source_consulted
-                      | assistance_requested | check_requested | completed
-    assistance_kind   optional definition_lookup | result_lookup | source_lookup
-                      | strategic_hint | intermediate_lemma | worked_solution
-                      | computation
+                      | assistance_requested | proposal_used
+                      | proposal_corrected | proposal_rejected
+                      | proposal_abandoned | check_requested | completed
+    assistance_kind   optional definition_explanation | result_explanation
+                      | source_suggestion | strategic_hint
+                      | intermediate_lemma | proof_outline | critique
+                      | worked_solution | computation
     related           optional SourceOccurrence | Representation | Verification
+                      | ModelCall
     recorded_by       person | system | tool
     at
 ```
@@ -217,6 +233,7 @@ TaskEvidence
 `completed` records a workflow event, not correctness or competence. Task
 evidence is obtained from substantive activity; the interface must not require
 ratings or declarations of understanding.
+
 ### Correspondence
 
 Relates two occurrences across or within sources. A correspondence is a claim
@@ -250,6 +267,7 @@ prove projection-naturality statements under `IsTotal`; no correspondence to
 Heller's clause is recorded unless an implication or equivalence is established.
 The `Dom` sense of "section," a right inverse of `π_Z`, is not the
 `P`-categorical `IsSection`; a shared word does not establish a correspondence.
+
 ### MathematicalRelation
 
 Relations among objects, first-class and browsable. Conceptual relations are not
@@ -266,18 +284,18 @@ MathematicalRelation
 
 ---
 
-## Representations and traces
+## Representations and model calls
 
 ### Representation
 
-A statement, explanation, problem, hint, proof, calculation, or example associated
-with a mathematical object or problem. The kinds include stages on Curry's
-precision ladder [@curryFoundationsMathematicalLogic1977, §1], but no stage is
-required.
+A statement, explanation, problem, hint, proof, calculation, or example
+associated with a mathematical object, problem, work artifact, or review item.
+The kinds include stages in Curry's account of increasing precision
+[@curryFoundationsMathematicalLogic1977, §1], but no stage is required.
 
 ```
 Representation
-    subject     MathematicalObject | Problem
+    subject     MathematicalObject | Problem | WorkArtifact | ReviewItem
     kind        orientation | informal_explanation | statement
                 | problem_statement | proof_outline | proof_skeleton
                 | strategic_hint | proposed_solution | calculation
@@ -291,23 +309,105 @@ An AI-generated theorem, problem, proof, explanation, hint, solution, or worked
 example requires no additional entity or representation kind. When produced
 outside Theorem Terminal and imported for study, it is recorded as a
 `SourceOccurrence` in the appropriate source and represented with provenance
-whose origin is `ai_proposal` and whose author is the model. A proposal generated
-by Theorem Terminal is represented in the same way but need not have an external
+whose `Provenance.origin = ai_proposal` and whose author is the model. A
+proposal generated by Theorem Terminal is represented in the same way but need not have an external
 source occurrence. Verification and human adoption remain separate records.
 
 AI-generated mathematics may be imported, compared, verified, explained, and
 reviewed whether or not Theorem Terminal itself generates assistance.
 Generating a proposal is not a prerequisite for storing or studying one.
 
-**Invariant B — the sequence is a study trajectory, not a dependency.** Nothing
-requires one representation kind to exist before another. A problem with no
-formal statement, an outline with no formal proof, and a formal proof with no
-outline are all legitimate states. The absence of formal material never prevents
-study, problem solving, review, or reconstruction.
+**Invariant B — representation kinds are not prerequisites for one another.**
+Nothing requires one representation kind to exist before another. A problem
+with no formal statement, an outline with no formal proof, and a formal proof
+with no outline are all legitimate states. The absence of formal material never
+prevents study, problem solving, review, or reconstruction.
+
+### ModelCall
+
+A bounded request made by Theorem Terminal to a configured model from active
+mathematical work. The record describes an external action and is generated
+automatically; the mathematician does not populate it as a form.
+
+```
+ModelCall
+    id
+    initiated_by      person
+    target            Problem | ReviewItem | MathematicalObject | WorkArtifact
+    purpose           definition_explanation | result_explanation
+                      | source_suggestion | strategic_hint
+                      | intermediate_lemma | proof_outline | critique
+                      | worked_solution | computation
+    request_text      assistance requested in mathematical terms
+    context_refs      [VersionedSpan | SourceOccurrence | Representation
+                      | WorkArtifact]
+    effective_input   exact application-supplied request content, including all
+                      instructions, messages, template text, and selected
+                      mathematical context; excludes authentication credentials
+    provider
+    requested_model
+    resolved_model    optional provider-reported model or version
+    adapter_version
+    limits            input, output, and timeout
+    settings          non-secret parameters needed to interpret the call
+    in_reply_to       optional ModelCall
+    requested_at
+    completed_at
+    status            completed | failed | refused | incomplete
+    response_id       optional provider identifier
+    raw_response      optional exact returned content
+    extracted_representations [Representation]
+```
+
+`context_refs` identify the exact source revisions and artifact versions used to
+construct `effective_input`. The effective input includes every
+application-supplied instruction and message, not only the mathematician's
+question. The record permits inspection of what was sent; it does not promise
+deterministic replay.
+
+Each explicit user action creates at most one provider request and one
+`ModelCall`. The request includes only the displayed selected context, obeys its
+recorded limits, invokes no provider tools, and performs no automatic retry or
+recursive request. A retry or user-requested follow-up is another `ModelCall`
+linked through `in_reply_to`. The `purpose` is derived from the invoked
+assistance operation; the mathematician does not classify it separately.
+
+The raw response is preserved before extraction. Only response material that
+enters the mathematical work, or whose correction, rejection, or abandonment is
+recorded, is extracted as a `Representation`. Its provenance identifies the
+`ModelCall` and exact response span and has
+`Provenance.origin = ai_proposal`. Extraction
+does not establish correctness or a relation to any source.
+
+A suggested source does not become a `SourceOccurrence` until it is
+independently retrieved and identified. A reported computation or proof check
+does not become a `Verification` until the corresponding method is run or its
+attestation is obtained separately.
+
+Provider-side conversation state is never the canonical project record. When
+the service allows remote response storage to be disabled, the first experiment
+requests that setting and records it. The setting does not assert that the
+provider performs no other processing or retention.
+
+A narrow provider adapter translates between the canonical request record and
+one service in the first experiment. Provider-specific request and response
+types do not become domain entities. This boundary does not add service
+selection, multiple adapters, or routing.
+
+Credentials remain in the application's secret configuration and never appear
+in `effective_input`, raw responses, project records, diagnostic logs, exports,
+or error text. A raw response is untrusted content: it cannot execute markup or
+commands, open a link, invoke a tool, or be submitted again without an explicit
+user action.
+
+**Invariant I — a model response is proposed material.** Storing a raw response,
+extracting representations from it, or using one during work does not convert
+its mathematical claims into source facts, verifications, or human judgments.
+
 ### Trace
 
-An elaboration or execution record attached to a formal representation. Not a
-rung of the ladder.
+An elaboration or execution record attached to a formal representation. It is
+not one of the representation stages above.
 
 ```
 Trace
@@ -373,19 +473,22 @@ Origin only. Verification is recorded elsewhere.
 
 ```
 Provenance
-    origin      human_work | human_judgment | ai_proposal
-                | machine_extraction | source_quotation
-    author      person | model identifier | tool name and version
+    origin         human_work | human_judgment | ai_proposal
+                   | machine_extraction | source_quotation
+    author         person | model identifier | tool name and version
+    model_call     optional ModelCall
+    response_span  optional exact offsets in ModelCall.raw_response
     at
-    adopted_by  set when a human accepts an ai_proposal
+    adopted_by     set when a human accepts an ai_proposal
     adopted_at
 ```
 
-**Invariant D — adoption does not launder origin.** An adopted AI proposal
-remains `ai_proposal` with an adoption record. No view may present a generated
-claim as machine-extracted or as human judgment.
+**Invariant D — adoption does not change origin.** An adopted AI proposal
+retains `Provenance.origin = ai_proposal` with an adoption record. No view
+may present a generated claim as machine-extracted or as human judgment.
 
 ---
+
 ## Discrepancy
 
 A first-class object for any detected conflict between claims, sources,
@@ -416,6 +519,7 @@ declaration says nothing about another, however closely related. Detection must
 compare a claim with the fact about the same subject.
 
 ---
+
 ## Tasks and review
 
 ### ReviewItem
@@ -478,12 +582,16 @@ it has been checked. Any correctness claim is recorded separately as a
 - Any inference from verification status to retention or competence.
 - Any requirement that formal material exist before study or problem solving.
 - Any assumption that ingestion establishes identity across sources.
+- Provider-side conversation state as the canonical mathematical context.
+- Autonomous chains of model calls or a general conversation archive.
 
 ## Open questions
 
 - Granularity: whether a definition and its induced instances are one object.
 - Whether `Discrepancy` resolution may trigger regeneration or only annotation.
 - Which task events and thresholds a review-state generator should use.
+- Which parts of a raw model response, beyond representations used during the
+  work, should be extracted automatically in the first experiment.
 - How problem relations are proposed, checked, and revised.
 - How subject-level maps are produced — curated by hand, derived from
   `SourceNode` trees, proposed by AI, or some combination — and how a curated map

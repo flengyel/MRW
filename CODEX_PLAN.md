@@ -33,12 +33,20 @@ The first implementation does not attempt:
 - automated correctness decisions for informal proofs;
 - a GUI platform, component library, or framework commitment;
 - Mathlib-scale Lean analysis;
+- simultaneous support for multiple model services, autonomous follow-up calls,
+  or a general chat interface;
+- encoding a research-decision taxonomy or a predictive-framework schema;
 - multi-user operation, synchronization, accounts, or deployment.
 
 AI-generated theorems, proofs, explanations, and examples may be studied with
-their provenance and verification status. Assistance generated during a session
-is permitted from the first problem-solving experiment because assistance is one
-of the claims being tested.
+their provenance and verification status. Task-mediated model assistance is
+required in Stage 1 because the assistant's-assistant claim is one of the claims
+being tested. The first implementation makes one provider request per explicit user action
+to one configured model, preserves each `ModelCall` and any raw response, and
+records relevant extracted mathematical content as AI proposals. It defines
+only the narrow provider boundary needed to keep canonical records independent
+of provider-specific request types; it does not add another adapter, service
+selection, or routing.
 
 ## Target
 
@@ -49,9 +57,11 @@ Complete both experimental sessions in `UX_SPEC.md` §9:
 - re-enter one region of `Categorical_Rice_Shapiro`, continue mathematical work,
   and inspect formal correspondences only where they exist.
 
-The first target tests problem-centered learning and retention. The second tests
-reconstruction of prior work and maintenance of explicit informal/formal
-relations. Success in either does not establish success in the other.
+The first target tests problem-centered learning, task-mediated model assistance,
+and retention. It includes at least one bounded model call attached to an actual
+obstruction in the work. The second tests reconstruction of prior work and
+maintenance of explicit informal/formal relations. Success in either does not
+establish success in the other.
 
 ---
 
@@ -82,8 +92,10 @@ application code.
 proofs or attempts, Sage calculations where useful, exact source locations, and
 the unresolved step at which work stopped. Also list the system operations that
 would have helped during the work, such as locating a prerequisite, restoring a
-prior attempt, checking an example, or requesting a bounded hint. This list
-describes operations, not an internal state.
+prior attempt, checking an example, or requesting a bounded hint. For at least
+one actual obstruction, identify the mathematical request and the minimal source
+and work context that Stage 1 should send to a model. This list describes
+operations, not an internal state.
 
 **Acceptance.** At least one theoretical problem and one computational or
 example-driven problem have been attempted. The proposed first session can be
@@ -110,19 +122,54 @@ before implementation.
 - open a selected problem with a stable source locator;
 - show the relevant definitions, results, examples, and earlier problems;
 - open or attach the ordinary TeX or Sage file used for the attempt;
-- provide graduated assistance on request, with provenance;
-- preserve each attempt, revision, computation, consulted source, and hint used
-  as `WorkArtifact`s and `TaskEvidence`.
+- request graduated assistance from one configured model;
+- before transmission, show a compact disclosure of the provider, requested
+  model, exact versioned source passages and work artifacts selected, and input,
+  output, and timeout limits; derive the disclosure from the task, allow context
+  removal, and require no purpose or provenance form;
+- exclude other workspace history and private notes by default and transmit
+  nothing in the background;
+- create at most one provider request per explicit user action, with no provider
+  tools, automatic retry, or recursive request; record any user-requested retry
+  or follow-up as a new `ModelCall` linked to its predecessor;
+- preserve every application-supplied instruction and message, requested and
+  resolved model identifiers, adapter version, limits, non-secret settings,
+  status, response identifier when supplied, and raw response in the
+  `ModelCall`;
+- request disabled API response storage when the service supports it, record the
+  setting, display any provider retention that cannot be disabled before
+  submission, and avoid claiming that this controls every form of provider
+  processing or retention;
+- extract only proposals that enter the work or whose correction, rejection, or
+  abandonment is recorded, each with
+  `Provenance.origin = ai_proposal`, exact response span, and a link to its
+  `ModelCall`;
+- treat model output as untrusted content, with no executable markup, command
+  execution, link opening, tool invocation, or resubmission without a user
+  action;
+- keep credentials in secret configuration and exclude them from model inputs,
+  records, logs, exports, and error text;
+- preserve each attempt, revision, computation, consulted source, proposal
+  disposition, and check requested as `WorkArtifact`s and `TaskEvidence`.
 
 The source material and problem relations may be entered only as needed for the
-selected cluster. A complete subject model is not a prerequisite.
+selected cluster. A complete subject model is not a prerequisite. The raw
+mathematical response is preserved even if a small structured envelope is used
+for status, citations, or suggested checks.
 
 **Acceptance.** A proof problem and a computational or example-driven problem
 can each be attempted end to end. Both sessions begin with the problem, work
-without any formal artifact, and require no comprehension form.
+without any formal artifact, and require no comprehension form. At least one
+model call is traceable from selected context and exact input through raw
+response to a proposal that is used, corrected, rejected, or abandoned. No
+generated claim becomes a source fact, verification, or human judgment
+automatically. Ordinary mathematical sessions need not make a model call; the
+required call exists to evaluate Stage 1.
 
 **Non-goals.** No general ingestion, comprehensive topic map, formal theorem
-analysis, graph rendering, or framework commitment.
+analysis, graph rendering, support for a second model service or adapter,
+automatic model selection, provider tools, autonomous calls, conversation
+interface, prompt library, or framework commitment.
 
 ---
 
@@ -214,14 +261,17 @@ irrelevant conflicts, narrow or remove it.
 should be removed or revised before another corpus is attempted.
 
 **Deliverable.** An evaluation based on completed and abandoned
-`WorkArtifact`s, `TaskEvidence`, source-recovery operations, assistance requested
-and used, incorrect or premature assistance, successful resumptions, and later
-mathematical tasks. No questionnaire about comprehension is introduced.
+`WorkArtifact`s, `TaskEvidence`, source-recovery operations, `ModelCall`s,
+outbound context, raw responses, proposals used or rejected, incorrect or
+premature assistance, successful resumptions, and later mathematical tasks. No
+questionnaire about comprehension is introduced.
 
 **Acceptance.** Each component receives a decision supported by session
-evidence: retain, revise, or remove. Expansion to a large reference work is
-considered only after the problem-centered and re-entry experiments have each
-been evaluated on their own terms.
+evidence: retain, revise, or remove. Model assistance is retained only if at
+least one call improves subsequent mathematical work enough to justify its
+correction, provenance, disclosure, and record-keeping costs. Expansion to a
+large reference work is considered only after the problem-centered and re-entry
+experiments have each been evaluated on their own terms.
 
 **Non-goals.** No scale-up, production deployment, or claim that one successful
 session establishes a general theory of mathematical understanding.
@@ -244,7 +294,10 @@ for it.
 - Storage beyond the files needed by the first sessions.
 - Whether the application edits TeX and Sage work directly or opens existing
   tools and records their artifacts.
-- Which model or service supplies experimental assistance.
+- Which single model and service supplies Stage 1 assistance; the selection is
+  configuration and every call records the exact model used.
+- Whether later experiments should add tool-enabled calls, another model service,
+  or analysis by research-decision type. None is a Stage 1 requirement.
 - How the orientation view differs between a large problem-centered source and
   a small research project.
 - Which relations are authored and which may be proposed from source structure

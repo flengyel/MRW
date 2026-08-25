@@ -6,10 +6,17 @@ It is an assistant's assistant. It preserves the mathematical work produced
 while consulting source literature and using machine assistants, proof
 assistants, and computer algebra systems: source locations, problems attempted,
 proof drafts, computations, examples, counterexamples, formal checks,
-corrections, and provenance. It can restore the state of an interrupted
-investigation and select later mathematical tasks that test reconstruction or
-application. No one assistant is the authority, and the system does not ask a
-mathematician to report an internal mental state.
+corrections, and provenance. When requested during active work, it may send a
+bounded mathematical question and selected context to a configured model. The
+request, the exact context sent, and the raw response are preserved
+automatically. Material from the response is extracted only when it enters the
+mathematical work or is separately studied. Each extracted proposal remains
+linked to its exact response span and is recorded as an attributed AI proposal
+rather than a fact or human judgment. The system can
+restore the state of an interrupted investigation and select later mathematical
+tasks that test reconstruction or application. No one assistant is the
+authority, and the system does not ask a mathematician to report an internal
+mental state.
 
 It is not a proof assistant, a Lean documentation browser, or a replacement for
 mathematical judgment.
@@ -46,7 +53,7 @@ Theorem Terminal supports learning, reconstruction, integration, and retention
 across human- and AI-generated mathematics. AI increases the need and supplies
 new forms of assistance; it did not create the underlying difficulty.
 
-The design rests on four principles:
+The design rests on five principles:
 
 - Kallenberg's top-down approach to reading advanced mathematics provides
   orientation before detailed study. Depending on the source, the relevant
@@ -55,6 +62,10 @@ The design rests on four principles:
   should help select problems, recover prerequisites, provide optional
   assistance, preserve attempts, and support later reconstruction without
   requiring preliminary data entry.
+- Model assistance is requested from active mathematical work. The provider,
+  requested and resolved model identifiers, exact submitted request, selected
+  context, raw response, and every extracted proposal are recorded
+  automatically. A proposal is not a fact or human judgment.
 - Curry's account of mathematical language explains how mathematical discourse
   becomes more precise without attaining absolute precision; formalization
   relocates questions of interpretation into the definitions rather than
@@ -72,10 +83,11 @@ Design documents only. No implementation yet.
 The first implementation will be an experiment conducted through actual
 mathematical work. It will test which source relations and work artifacts can be
 preserved or generated mechanically, whether they support later reconstruction
-and application, and which decisions still require mathematical judgment.
-Evidence will come from attempted proofs, solved problems, computations,
-reconstructions, and later use, not from forms asking what a mathematician
-believes is understood.
+and application, and whether one bounded call to a configured model supplies
+useful assistance without displacing the mathematical attempt or creating more
+record keeping than it saves. Evidence will come from attempted proofs, solved
+problems, computations, reconstructions, and later use, not from forms asking
+what a mathematician believes is understood.
 
 ## Documents
 

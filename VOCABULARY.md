@@ -6,9 +6,9 @@ Terminology used throughout Theorem Terminal.
 
 The persistent mathematical environment maintained by Theorem Terminal.
 
-Context records sources, active problems, mathematical work, provenance,
-verification, previous task events, and proposed next work. It does not assert a
-mathematician's internal state.
+Context records sources, active problems, mathematical work, model calls,
+provenance, verification, previous task events, and proposed next work. It does
+not assert a mathematician's internal state.
 
 The term does not imply a hierarchy of mathematical knowledge. It names the
 surrounding information needed to resume work.
@@ -150,11 +150,34 @@ not change its origin.
 
 ## System-generated assistance
 
-An AI proposal produced by Theorem Terminal.
+An AI proposal produced through a model call made by Theorem Terminal.
 
 It is one source of AI-generated mathematical content, not a condition for
 studying such content. AI output produced elsewhere may be imported and studied
-before Theorem Terminal generates any assistance.
+before Theorem Terminal generates any assistance. The request and raw response
+remain distinct from any mathematical representations extracted from the
+response.
+
+## Model call
+
+A task-attached request made by Theorem Terminal to a configured model,
+together with its outcome and returned response, if any.
+
+In the first experiment, *bounded* has an operational meaning. Each explicit
+user action creates at most one provider request. The request includes only the
+displayed selected context, obeys configured input, output, and timeout limits,
+invokes no provider tools, and performs no automatic retry or recursive request.
+A retry or user-requested follow-up is a new model call linked to the preceding
+call.
+
+The record is generated automatically. It identifies the mathematical purpose,
+exact context sent, provider, requested and resolved model identifiers, limits,
+settings, status, request time, and any raw response. Mathematical content
+extracted
+from the response has `Provenance.origin = ai_proposal`.
+
+A model call is not a general chat conversation, a verification, source
+retrieval, or a source authority.
 
 ## Correspondence
 

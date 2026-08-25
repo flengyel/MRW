@@ -14,6 +14,9 @@ implementation).
   or a problem; no complete proof or formalization is assumed.
 * AI-generated mathematics may be correct or formally verified without being
   understood and must therefore be treated as material for study.
+* Theorem Terminal may request task-specific assistance from a configured model;
+  the request, selected context, raw response, and resulting proposals retain
+  their provenance.
 * AI may increase the rate of mathematical production and the amount of work
   requiring evaluation, reconstruction, and integration.
 * Kallenberg's top-down approach determines the order in which available
@@ -36,20 +39,22 @@ system all predate modern AI [@taoMathematicsAgeAI2026].
 
 The first implementation will be an experiment, not a completed system or a
 product specification. It will begin with mathematical work and test whether
-source locations, problem attempts, proof drafts, computations,
-correspondences, formal facts, corrections, and review results support later
-reconstruction and application. It will also determine which information can
-be obtained or updated mechanically and which decisions require mathematical
-judgment.
+source locations, problem attempts, proof drafts, computations, bounded model
+calls, generated proposals, correspondences, formal facts, corrections, and
+review results support later reconstruction and application. It will also
+determine which information can be obtained or updated mechanically and which
+decisions require mathematical judgment.
 
 Theorem Terminal is an assistant's assistant. A mathematician may consult
 several machine assistants for exploration and criticism, a proof assistant for
 verification when a formal development exists, a computer algebra system for
 computation, and the literature for definitions and exposition. Theorem
-Terminal preserves the resulting mathematical artifacts, their provenance,
-their relationships, their checking status, and the state at which work stopped.
-No one assistant becomes the authority. The system does not require a
-mathematician to complete a description of what is supposedly understood.
+Terminal may also make a bounded request to a configured model from active
+mathematical work. It preserves the selected context, request, any raw
+response, resulting mathematical representations and work artifacts,
+provenance, checking status, and the state at which work stopped. No one
+assistant becomes the authority. The system does not require a mathematician
+to complete a description of what is supposedly understood.
 
 ---
 
@@ -72,9 +77,11 @@ discusses both the prospect of verified proofs without human understanding and
 the dependence of mathematical AI on canonical theories developed and organized
 by mathematicians [@taoMathematicsAgeAI2026].
 
-Studying externally generated mathematics is part of the initial workflow.
-Generating proposals within Theorem Terminal is a separate capability and is
-deferred in `CODEX_PLAN.md`.
+Studying externally generated mathematics and requesting task-specific
+assistance from a configured model are both part of the initial workflow. A
+request is attached to active mathematical work. The exact outbound context and
+any raw response are preserved before a statement, hint, outline, calculation,
+or source suggestion is recorded as an AI proposal.
 
 A claim's epistemic status cannot be inferred from its availability. A result
 posted publicly, a result checked by a kernel, a result refereed, and a result
@@ -184,8 +191,9 @@ relationships among representations rather than identifying them.
 
 Machine assistance can propose an outline of a formal proof, suggest a
 formalization target for an informal argument, compare definitions, or identify
-possible source correspondences. Each proposal retains its origin and checking
-status.
+possible source correspondences. When Theorem Terminal requests such assistance,
+the model call and its raw response remain available alongside any extracted
+representations. Each proposal retains its origin and checking status.
 
 ## 5. Formal verification is one aspect
 
@@ -291,9 +299,12 @@ The design makes distinct, falsifiable claims:
   selected problem without prior formalization or manual population of a
   knowledge model. It fails if preparation of the system requires more effort
   than beginning the mathematics directly.
-- Assistance during a problem attempt is useful only if it locates relevant
-  material, checks a computation, identifies a specific gap, or supplies a
-  requested hint without displacing the mathematician's choice of method.
+- A model call during a problem attempt is useful only if its response helps
+  suggest relevant material to obtain or a computation to perform, identify a
+  specific gap, criticize an attempted step, or supply requested assistance
+  without
+  displacing the mathematician's choice of method. The response and its later
+  use, correction, or rejection must remain observable.
 - Retention support is useful only if later reconstruction, application, or
   related problem solving improves. A self-rating is not evidence.
 - Existing formal tools should be used when they already provide the required
