@@ -6,18 +6,34 @@ implementation).
 
 ## Thesis
 
-- AI changes the rate of mathematical production.
-- The human bottleneck becomes understanding, integration, and retention.
-- Kallenberg's top-down approach provides the learning model.
-- Curry's precision ladder provides the representation model.
-- Theorem Terminal explores tools for maintaining mathematical understanding.
+## Thesis
 
-Theorem Terminal supports mathematical re-entry: reconstructing and retaining the context of mathematics previously understood, whether returning to one’s own research, an inactive project, or a subject to be taught again. AI increases the pressure and supplies new forms of assistance, but did not create the problem. Tao similarly observes that the growth of the literature, the increasing length and specialization of major proofs, and the strain on the refereeing system all predate modern AI.<sup>&dagger;</sup>
+* Learning a large body of mathematics requires orientation, understanding,
+  integration, and retention.
+* Returning to mathematics after a lapse requires reconstructing context that
+  the surviving sources do not themselves preserve.
+* AI may increase the rate of mathematical production and the amount of work
+  requiring evaluation, understanding, and integration.
+* Kallenberg's top-down approach provides the learning model.
+* Curry's precision ladder provides the representation model.
+* Theorem Terminal explores tools for learning, reconstructing, integrating,
+  and retaining mathematics.
 
-The first implementation is a laboratory instrument, not a completed platform
-and not a product specification. Its purpose is to find out which parts of
-mathematical understanding can be supported, represented, and retained, and
-which cannot.
+Theorem Terminal is intended both for navigating and learning from a large
+corpus, such as the Stacks Project
+[@stacksprojectauthorsStacksProject2021], and for returning to one's own
+research, an inactive project, or a subject not studied or taught for years.
+AI increases these demands and supplies new forms of assistance, but did not
+create them. Tao observes that the growth of the literature, the increasing
+length and specialization of major proofs, and the strain on the refereeing
+system all predate modern AI [@taoMathematicsAgeAI2026].
+
+The first implementation will be experimental, not a completed system or a
+product specification. It will test whether recording sources,
+correspondences, explanations, formal facts, and review history helps a
+mathematician learn, reconstruct, integrate, and retain mathematics during
+actual work. It will also determine which records can be produced or
+maintained mechanically and which require mathematical judgment.
 
 Theorem Terminal is an assistant's assistant. It does not replace mathematical
 assistants, proof assistants, or formal systems, and it does not compete with
@@ -34,7 +50,7 @@ chat logs and in memory.
 
 ---
 
-## 1. The premise, stated as a conditional
+## 1. The additional pressure from AI
 
 The mathematical workflow now in use — read the literature, follow references,
 reconstruct arguments, remember what matters — was built for a world in which
@@ -61,8 +77,13 @@ at the level of its data model, not merely in the prose of its interface.
 
 ## 2. What the bottleneck actually consists of
 
-Three activities, none of which a proof-producing system performs on the
+Four activities, none of which a proof-producing system performs on the
 mathematician's behalf.
+
+**Orientation.** Before studying individual results, a mathematician needs to
+identify the subject's organizing concepts, principal results, dependencies,
+and sources. A table of contents or declaration index does not by itself
+provide this understanding.
 
 **Understanding.** Knowing that a theorem holds is not knowing why its proof
 works, which hypothesis is doing the work, what the argument reduces to, or what
@@ -227,7 +248,7 @@ whether a rung of the ladder becomes reachable that was not reachable before.
 Where existing tools
 supply what is needed, they are used rather than rebuilt.
 
-## 8. The first laboratory
+## 8. The first corpus
 
 `flengyel/Categorical_Rice_Shapiro` is the first corpus because it carries every
 aspect the project must connect: a mathematical manuscript, a formal development,
@@ -283,7 +304,3 @@ enthusiasm.
 
 None of these is decidable in advance. Each is answerable from use on the first
 laboratory.
-
-## References
-
-<sup>&dagger;</sup> Terence Tao, “Mathematics in the Age of AI,” [arXiv:2608.16753](https://arxiv.org/abs/2608.16753) [math.HO] (2026), §7, pp. 9–10.
