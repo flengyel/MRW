@@ -1,8 +1,6 @@
 # Theorem Terminal
 
-Theorem Terminal is a laboratory instrument for studying how a mathematician
-can maintain understanding, integration, and retention of mathematics in an
-AI-assisted environment.
+Theorem Terminal is a laboratory instrument for studying how software can help a mathematician reconstruct, integrate, and retain mathematical understanding across time. Its central use case is mathematical re-entry: returning to one’s own research, an inactive project, or a subject not studied or taught for years after the original context has faded.
 
 It is an assistant's assistant. It supplies the persistent context in which work
 done with machine assistants, proof assistants, and computer algebra systems is
@@ -18,11 +16,9 @@ mathematical judgment.
 
 ## Motivation
 
-AI may change the rate at which mathematical results, proofs, formalizations,
-and examples are produced. If mathematical production becomes less limited by
-human capacity, the bottleneck shifts toward understanding, integrating, and
-retaining mathematical knowledge. Theorem Terminal explores tools for that
-bottleneck.
+The problem predates AI. Mathematical results may remain available in papers, notes, and formal developments while the understanding that made them usable—their role, proof ideas, dependencies, and relation to surrounding mathematics—decays.
+
+AI may intensify this problem by changing the rate at which mathematical results, proofs, formalizations, and examples are produced. If mathematical production becomes less limited by human capacity, the bottleneck shifts further toward understanding, integrating, and retaining mathematical knowledge. Theorem Terminal explores tools for both the older problem of mathematical re-entry and the newer pressures created by AI-assisted work.
 
 The design rests on three principles:
 

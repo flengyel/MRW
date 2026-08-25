@@ -12,6 +12,8 @@ implementation).
 - Curry's precision ladder provides the representation model.
 - Theorem Terminal explores tools for maintaining mathematical understanding.
 
+Theorem Terminal supports mathematical re-entry: reconstructing and retaining the context of mathematics previously understood, whether returning to one’s own research, an inactive project, or a subject to be taught again. AI increases the pressure and supplies new forms of assistance, but did not create the problem. Tao similarly observes that the growth of the literature, the increasing length and specialization of major proofs, and the strain on the refereeing system all predate modern AI.<sup>&dagger;</sup>
+
 The first implementation is a laboratory instrument, not a completed platform
 and not a product specification. Its purpose is to find out which parts of
 mathematical understanding can be supported, represented, and retained, and
@@ -281,3 +283,7 @@ enthusiasm.
 
 None of these is decidable in advance. Each is answerable from use on the first
 laboratory.
+
+## References
+
+<sup>&dagger;</sup> Terence Tao, “Mathematics in the Age of AI,” [arXiv:2608.16753](https://arxiv.org/abs/2608.16753) [math.HO] (2026), §7, pp. 9–10.
