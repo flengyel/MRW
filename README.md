@@ -1,11 +1,14 @@
 # Theorem Terminal
 
-Theorem Terminal is a mathematical context system for learning, reconstructing, integrating, and retaining mathematics. It is intended both for entering and absorbing a large body of mathematics and for re-entering one’s own research, an inactive project, or a subject not studied or taught for years.
+Theorem Terminal is a mathematical context system for learning, reconstructing,
+integrating, and retaining mathematics. It is intended both for entering and
+absorbing a large body of mathematics and for re-entering one’s own research, an
+inactive project, or a subject not studied or taught for years.
 
 It is an assistant's assistant. It preserves the mathematical work produced
 while consulting source literature and using machine assistants, proof
 assistants, and computer algebra systems: source locations, problems attempted,
-proof drafts, computations, examples, counterexamples, formal checks,
+proof drafts, computations, diagrams, examples, counterexamples, formal checks,
 corrections, and provenance. When requested during active work, it may send a
 bounded mathematical question and selected context to a configured model. The
 request, the exact context sent, and the raw response are preserved
@@ -100,13 +103,13 @@ what a mathematician believes is understood.
 ## First corpus
 
 The first corpus is `flengyel/Categorical_Rice_Shapiro`, which is private and
-not publicly readable. It was chosen because the repository contains four
-explicitly related kinds of material: a mathematical manuscript, a Lean formal
-development, mechanically available dependency and axiom information, and a
-hand-written document that relates parts of the manuscript to Lean
-declarations and records differences between them. These materials permit a
-direct test of source-to-formal correspondence. Their availability does not
-make a formal counterpart a prerequisite for other corpora.
+not publicly readable. The named mathematical re-entry and
+informal/formal-correspondence test uses `rs_Appendix_A.tex`, the corresponding
+Lean declarations, and `Lean/docs/AppendixA.md`. Together they provide a
+mathematical manuscript, a formal development, mechanically available
+dependency and axiom information, and an existing record of expert
+correspondence judgments. A formal counterpart remains optional for every other
+corpus.
 
 The hand-written document records expert judgments absent from both the
 manuscript and the Lean development: which hypotheses proved unnecessary,
@@ -117,8 +120,13 @@ which locators, dependency lists, and checking facts can be regenerated
 mechanically; which proposed correspondences can be checked during mathematical
 work; and which assessments require mathematical judgment.
 
-The choice of this first corpus does not restrict which corpora may be studied
-later.
+The first implementation does not ingest a large reference. After its two
+initial experiments have been evaluated, a separately authorized experiment
+will ingest and study either the Stacks Project
+[@stacksprojectauthorsStacksProject2021] or Kerodon. It will import the published
+hierarchy, stable identifiers, cross-references, and revision information, then
+obtain and represent statements, proofs, examples, and surrounding context as
+active mathematical work requires them.
 
 ## License
 

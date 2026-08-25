@@ -1,8 +1,9 @@
 # CODEX_PLAN.md
 
-Plan for the first experimental implementation. It inherits the purposes in
-`VISION.md`, the entities and invariants in `DOMAIN_MODEL.md`, and the workflows
-in `UX_SPEC.md`.
+Plan for the first experimental implementation (Stages −1 through 5) and a
+separately authorized later large-corpus experiment (Stage 6). It inherits the
+purposes in `VISION.md`, the entities and invariants in `DOMAIN_MODEL.md`, and
+the workflows in `UX_SPEC.md`.
 
 ## Governing constraint
 
@@ -14,16 +15,17 @@ begins.
 Two initial experiments test distinct functions:
 
 1. problem-centered study in a source with little or no formalization;
-2. mathematical re-entry and optional informal/formal correspondence in
-   `Categorical_Rice_Shapiro`.
+2. mathematical re-entry and optional informal/formal correspondence using
+   `rs_Appendix_A.tex`, the corresponding Lean declarations, and
+   `Lean/docs/AppendixA.md`.
 
 Infrastructure is added only when one of these sessions requires it. Evidence
 comes from the `WorkArtifact`s and `TaskEvidence` produced by the sessions, not
 from asserted states of comprehension.
 
-## Global non-goals
+## Initial-implementation non-goals
 
-The first implementation does not attempt:
+Stages 0 through 5 do not attempt:
 
 - general corpus ingestion or complete ingestion of any large reference;
 - comprehensive coverage of either experimental source;
@@ -41,11 +43,11 @@ The first implementation does not attempt:
 AI-generated theorems, proofs, explanations, and examples may be studied with
 their provenance and verification status. Task-mediated model assistance is
 required in Stage 1 because the assistant's-assistant claim is one of the claims
-being tested. The first implementation makes one provider request per explicit user action
-to one configured model, preserves each `ModelCall` and any raw response, and
-records relevant extracted mathematical content as AI proposals. It defines
-only the narrow provider boundary needed to keep canonical records independent
-of provider-specific request types; it does not add another adapter, service
+being tested. The first implementation makes one provider request per explicit
+user action to one configured model, preserves each `ModelCall` and any raw
+response, and records relevant extracted mathematical content as AI proposals.
+It defines only the narrow provider boundary needed to keep canonical records
+independent of provider-specific request types; it does not add another adapter, service
 selection, or routing.
 
 ## Target
@@ -54,8 +56,9 @@ Complete both experimental sessions in `UX_SPEC.md` §9:
 
 - solve, resume, and later reconstruct selected problems from an unformalized,
   problem-centered source;
-- re-enter one region of `Categorical_Rice_Shapiro`, continue mathematical work,
-  and inspect formal correspondences only where they exist.
+- re-enter the mathematics in `rs_Appendix_A.tex`, continue mathematical work,
+  and inspect the corresponding Lean declarations and
+  `Lean/docs/AppendixA.md` only where they are relevant.
 
 The first target tests problem-centered learning, task-mediated model assistance,
 and retention. It includes at least one bounded model call attached to an actual
@@ -89,13 +92,13 @@ theory text and work on it before designing storage or navigation around it. No
 application code.
 
 **Deliverable.** The mathematical artifacts that ordinary work produces: TeX
-proofs or attempts, Sage calculations where useful, exact source locations, and
-the unresolved step at which work stopped. Also list the system operations that
-would have helped during the work, such as locating a prerequisite, restoring a
-prior attempt, checking an example, or requesting a bounded hint. For at least
-one actual obstruction, identify the mathematical request and the minimal source
-and work context that Stage 1 should send to a model. This list describes
-operations, not an internal state.
+proofs or attempts, Sage calculations and diagrams where useful, exact source
+locations, and the unresolved step at which work stopped. Also list the system
+operations that would have helped during the work, such as locating a
+prerequisite, restoring a prior attempt, checking an example, or requesting a
+bounded hint. For at least one actual obstruction, identify the mathematical
+request and the minimal source and work context that Stage 1 should send to a
+model. This list describes operations, not an internal state.
 
 **Acceptance.** At least one theoretical problem and one computational or
 example-driven problem have been attempted. The proposed first session can be
@@ -121,7 +124,8 @@ before implementation.
 
 - open a selected problem with a stable source locator;
 - show the relevant definitions, results, examples, and earlier problems;
-- open or attach the ordinary TeX or Sage file used for the attempt;
+- open or attach the ordinary work file used for the attempt, whether a TeX
+  file, Sage worksheet, or diagram;
 - request graduated assistance from one configured model;
 - before transmission, show a compact disclosure of the provider, requested
   model, exact versioned source passages and work artifacts selected, and input,
@@ -204,14 +208,16 @@ the result as evidence against the other functions.
 
 ## Stage 3 — Mathematical re-entry
 
-**Goal.** Re-enter one coherent region of `Categorical_Rice_Shapiro` and
-continue mathematical work after an interruption.
+**Goal.** Re-enter the mathematics of `rs_Appendix_A.tex` and continue
+mathematical work after an interruption.
 
 **Deliverable.** A session beginning from a mathematical question, manuscript
-result, unfinished proof, or earlier `WorkArtifact`. It makes available stable
-source occurrences, relevant prior artifacts, unresolved questions, and the
-source locations and relations needed to resume. Formal artifacts remain
-optional and are not the initial object of the session.
+result, unfinished proof, or earlier `WorkArtifact` in `rs_Appendix_A.tex`. It
+makes available stable manuscript occurrences, relevant prior artifacts,
+unresolved questions, and the source locations and relations needed to resume.
+The corresponding Lean declarations and `Lean/docs/AppendixA.md` are available
+only when relevant. Formal artifacts remain optional and are not the initial
+object of the session.
 
 **Acceptance.** The session reconstructs enough specific context to continue a
 proof, calculation, exposition, or formalization task. The evidence is the
@@ -224,12 +230,14 @@ to inspect Lean, and no discrepancy machinery yet.
 
 ## Stage 4 — Optional formal correspondence and discrepancy
 
-**Goal.** Where formal artifacts exist, connect them to the mathematical work
-and test whether changes can be detected precisely.
+**Goal.** Where corresponding Lean declarations exist, relate them to
+`rs_Appendix_A.tex` occurrences and the mathematical work, then test whether
+changes can be detected precisely.
 
-**Task 4.0 — reconnaissance.** Run existing tools against the selected Lean
-region and inspect what they emit: `lean4export`, `doc-gen4`, `ntp-toolkit`, and
-LeanArchitect. Consume existing output unless a required formal fact is absent.
+**Task 4.0 — reconnaissance.** Run existing tools against the Lean declarations
+corresponding to the selected manuscript material and inspect what they emit:
+`lean4export`, `doc-gen4`, `ntp-toolkit`, and LeanArchitect. Consume existing
+output unless a required formal fact is absent.
 
 **Task 4.1 — minimal extraction, only if required.** Obtain declaration types,
 signatures, dependencies, axiom usage, verification status, and environment
@@ -269,12 +277,42 @@ questionnaire about comprehension is introduced.
 **Acceptance.** Each component receives a decision supported by session
 evidence: retain, revise, or remove. Model assistance is retained only if at
 least one call improves subsequent mathematical work enough to justify its
-correction, provenance, disclosure, and record-keeping costs. Expansion to a
-large reference work is considered only after the problem-centered and re-entry
-experiments have each been evaluated on their own terms.
+correction, provenance, disclosure, and record-keeping costs. Stage 6 may begin
+only after the problem-centered and Appendix A experiments have each been
+evaluated on their own terms and the large-corpus experiment has been authorized
+separately.
 
 **Non-goals.** No scale-up, production deployment, or claim that one successful
 session establishes a general theory of mathematical understanding.
+
+---
+
+## Stage 6 — Large-corpus ingestion and study
+
+**Authorization boundary.** This stage is not part of the first experimental
+implementation. It may begin only after Stage 5 has been completed and the
+large-corpus experiment has been authorized separately.
+
+**Goal.** Test whether Theorem Terminal supports beginning and progressively
+studying one large structured mathematical corpus, initially either the Stacks
+Project [@stacksprojectauthorsStacksProject2021] or Kerodon.
+
+**Deliverable.** Import the selected corpus's published hierarchy, stable
+identifiers, cross-references, and revision information. Beginning from active
+mathematical work, obtain and represent the statements, proofs, examples, and
+surrounding context that the work requires. Preserve the ordered source
+locations consulted, work artifacts, model assistance, unresolved questions,
+and later reconstruction tasks.
+
+**Acceptance.** Beginning from a subject-level question, a mathematician can
+identify a coherent sequence of relevant source locations, study selected
+material, perform associated mathematical work, resume after interruption, and
+identify affected records after a source revision without manually classifying
+the corpus in advance.
+
+**Non-goals.** No semantic representation of the entire corpus, no preliminary
+hand-authored subject map, no simultaneous ingestion of both the Stacks Project
+and Kerodon, and no production-scale deployment.
 
 ---
 
@@ -291,6 +329,9 @@ for it.
 ## Not decided here
 
 - Which initial algebraic number theory problem cluster to use.
+- Whether the Stacks Project or Kerodon is selected for Stage 6 and which
+  published interfaces provide its hierarchy, stable identifiers,
+  cross-references, and revision information.
 - Storage beyond the files needed by the first sessions.
 - Whether the application edits TeX and Sage work directly or opens existing
   tools and records their artifacts.
@@ -305,9 +346,12 @@ for it.
 
 ## Order and stopping
 
-Stages run −1, 0, 1, 2, 3, 4, and 5. Each checkpoint evaluates a specific
-component. Failure revises or stops that component unless the evidence bears on
-the full thesis in `VISION.md`.
+The first implementation runs Stages −1, 0, 1, 2, 3, 4, and 5. Each checkpoint
+evaluates a specific component. Failure revises or stops that component unless
+the evidence bears on the full thesis in `VISION.md`.
+
+Stage 6 does not begin automatically after Stage 5. It requires a separate
+decision authorizing the large-corpus experiment.
 
 The repository remains design-only until a separate decision authorizes Stage
 0. This plan does not authorize implementation.

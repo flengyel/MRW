@@ -39,11 +39,11 @@ system all predate modern AI [@taoMathematicsAgeAI2026].
 
 The first implementation will be an experiment, not a completed system or a
 product specification. It will begin with mathematical work and test whether
-source locations, problem attempts, proof drafts, computations, bounded model
-calls, generated proposals, correspondences, formal facts, corrections, and
-review results support later reconstruction and application. It will also
-determine which information can be obtained or updated mechanically and which
-decisions require mathematical judgment.
+source locations, problem attempts, proof drafts, computations, diagrams,
+bounded model calls, generated proposals, correspondences, formal facts,
+corrections, and review results support later reconstruction and application.
+It will also determine which information can be obtained or updated mechanically
+and which decisions require mathematical judgment.
 
 Theorem Terminal is an assistant's assistant. A mathematician may consult
 several machine assistants for exploration and criticism, a proof assistant for
@@ -120,6 +120,13 @@ mathematical work.
 interruption. The system can preserve dated attempts, assistance used,
 corrections, and later task results. These observations support review
 scheduling, but they do not justify a general claim about a person's knowledge.
+
+These activities do not define a model of mathematical expertise. The system
+represents sources, mathematical objects and relations, work artifacts,
+requests for assistance, and task results. Proof attempts, informal deductions,
+examples, computations, diagrams, formal checks, and source use remain distinct
+records available as the current task requires them. No artifact must be
+translated into a single prescribed representation before work continues.
 
 ## 3. Kallenberg: the order of study
 
@@ -261,13 +268,14 @@ they already provide the required function.
 
 ## 8. Corpora with different available evidence
 
-`flengyel/Categorical_Rice_Shapiro` is the first corpus because it contains a
-mathematical manuscript, a Lean formal development, mechanically available
-dependency and axiom information, and a hand-written document relating
-manuscript passages to Lean declarations.
+`flengyel/Categorical_Rice_Shapiro` is the first corpus. Its named
+mathematical re-entry and informal/formal-correspondence test uses
+`rs_Appendix_A.tex`, the corresponding Lean declarations, and
+`Lean/docs/AppendixA.md`.
 
-`Lean/docs/AppendixA.md` records expert mathematical judgments absent from the
-two primary sources. It identifies hypotheses that formalization showed to be
+`Lean/docs/AppendixA.md` records expert mathematical judgments absent from
+`rs_Appendix_A.tex` and the corresponding Lean declarations. It identifies
+hypotheses that formalization showed to be
 unnecessary, structures that proved derivable rather than postulated, terms
 used with different meanings, and manuscript claims with corresponding Lean
 results. Its positional references become obsolete as the manuscript and Lean
@@ -278,9 +286,18 @@ be checked, and which assessments require mathematical judgment.
 A problem-centered and mostly unformalized source requires a different
 workflow. For a problem-centered text in which exercises develop the theory,
 the principal artifacts are source locations, selected problems, relevant
-definitions and earlier results, proof attempts, computations, examples,
-corrections, and assistance used. A formal counterpart is included only when
-one already exists or is deliberately produced during the mathematical work.
+definitions and earlier results, proof attempts, computations, diagrams,
+examples, corrections, and assistance used. A formal counterpart is included
+only when one already exists or is deliberately produced during the
+mathematical work.
+
+After the first two experiments are evaluated, a separately authorized
+large-corpus experiment will use either the Stacks Project
+[@stacksprojectauthorsStacksProject2021] or Kerodon. It will import the source's
+published hierarchy, stable identifiers, cross-references, and revision
+information. Statements, proofs, examples, and surrounding context will be
+obtained and represented as active mathematical work requires them. No
+corpus-wide semantic classification is required before study begins.
 
 The system must not require the same evidence from every corpus. Formal data is
 used when available and omitted when absent. In neither case is the
@@ -292,19 +309,25 @@ checks, and mathematical work artifacts.
 
 The design makes distinct, falsifiable claims:
 
-- The `Categorical_Rice_Shapiro` trial tests whether mechanically obtained
-  source locations, dependencies, axiom information, and change detection
-  reduce the effort required to maintain source-to-formal correspondences.
+- The Appendix A trial uses `rs_Appendix_A.tex`, the corresponding Lean
+  declarations, and `Lean/docs/AppendixA.md` to test whether mechanically
+  obtained source locations, dependencies, axiom information, and change
+  detection reduce the effort required to maintain source-to-formal
+  correspondences.
 - A problem-centered trial tests whether mathematical work can begin from a
   selected problem without prior formalization or manual population of a
   knowledge model. It fails if preparation of the system requires more effort
   than beginning the mathematics directly.
+- A later large-corpus trial tests whether, beginning from a subject-level
+  question, a mathematician can identify an ordered sequence of relevant source
+  locations, study selected material, preserve the resulting work, resume after
+  interruption, and identify records affected by a source revision without
+  classifying the corpus in advance.
 - A model call during a problem attempt is useful only if its response helps
   suggest relevant material to obtain or a computation to perform, identify a
   specific gap, criticize an attempted step, or supply requested assistance
-  without
-  displacing the mathematician's choice of method. The response and its later
-  use, correction, or rejection must remain observable.
+  without displacing the mathematician's choice of method. The response and its
+  later use, correction, or rejection must remain observable.
 - Retention support is useful only if later reconstruction, application, or
   related problem solving improves. A self-rating is not evidence.
 - Existing formal tools should be used when they already provide the required
@@ -312,7 +335,9 @@ The design makes distinct, falsifiable claims:
 - If maintaining the stored relationships costs more attention than their later
   use saves, the representation and workflow must be revised.
 
-The first and second trials test different functions. A corpus with an extensive
+The initial two trials test different functions. A corpus with an extensive
 formal development cannot establish that the problem-centered workflow works,
 and a mostly unformalized problem collection cannot test maintenance of
-source-to-formal correspondences.
+source-to-formal correspondences. The large-corpus trial begins only after both
+initial trials have been evaluated, requires separate authorization, and is not
+part of the first implementation.

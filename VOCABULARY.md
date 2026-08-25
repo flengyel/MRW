@@ -28,6 +28,16 @@ Examples:
 
 Aspects may interact but are not ordered as layers.
 
+## Ingestion
+
+Mechanical import of a source's published hierarchy, stable identifiers, source
+occurrences, explicit cross-references, and revision information.
+
+Ingestion does not establish mathematical identity across sources, conceptual
+dependency, relevance to a task, verification, or any claim about a
+mathematician. Mathematical objects and interpreted relations are added only as
+active work requires them.
+
 ## Mathematical object
 
 A theorem, definition, lemma, concept, example, or construction treated as one
@@ -37,8 +47,8 @@ Ingestion does not establish identity across sources.
 
 ## Representation
 
-A statement, explanation, problem, hint, proof, calculation, example, or formal
-artifact associated with a mathematical object or problem.
+A statement, explanation, problem, hint, proof, calculation, diagram, example,
+or formal artifact associated with a mathematical object or problem.
 
 Representations may include orientation, informal explanation, statement, proof
 outline, proof skeleton, formal statement, and formal proof. No representation
@@ -78,6 +88,7 @@ Examples:
 
 - proof attempt;
 - calculation;
+- diagram;
 - example;
 - counterexample;
 - SageMath code;

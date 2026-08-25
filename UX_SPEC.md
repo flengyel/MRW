@@ -172,9 +172,9 @@ the established correspondences between them, with kinds `same_claim`,
 ## 5. Work products and provenance
 
 The primary human-produced records are `WorkArtifact`s created while doing
-mathematics: attempts, proofs, calculations, examples, counterexamples, code,
-exposition, and ordinary notes. The interface does not require these artifacts
-to be rewritten as structured reports.
+mathematics: attempts, proofs, calculations, diagrams, examples,
+counterexamples, code, exposition, and ordinary notes. The interface does not
+require these artifacts to be rewritten as structured reports.
 
 Source-derived records include stable locators and quotations. Machine-derived
 records include types, signatures, imports, dependencies, axiom usage,
@@ -327,8 +327,9 @@ Use a coherent cluster from a problem-centered algebraic number theory text.
 1. Enter through a chapter objective or a selected problem family.
 2. See a concise orientation: relevant definitions and results, nearby examples,
    and previously completed problems that may be useful.
-3. Open one problem and begin an attempt in an ordinary TeX or Sage work file,
-   without first completing a subject map or questionnaire.
+3. Open one problem and begin an attempt in an ordinary work file, such as a TeX
+   file, Sage worksheet, or diagram, without first completing a subject map or
+   questionnaire.
 4. Request help only when useful: a source locator, definition reminder, related
    result, strategic hint, intermediate lemma, computation, criticism, or
    comparison with a solution when one is available.
@@ -351,7 +352,9 @@ used, corrected, rejected, or abandoned during the mathematical attempt.
 
 ### 9.2 Mathematical re-entry and formal correspondence
 
-Use one coherent region of `Categorical_Rice_Shapiro`.
+Use `rs_Appendix_A.tex` as the mathematical source, the corresponding Lean
+declarations when relevant, and `Lean/docs/AppendixA.md` as the existing
+correspondence record.
 
 1. Begin from a mathematical question, manuscript result, unfinished proof, or
    earlier work product.
@@ -374,12 +377,39 @@ project.
 
 ---
 
-## 10. Failure modes
+## 10. Later large-corpus experiment
+
+This experiment is outside the first implementation. It may begin only after
+the two initial sessions have been evaluated and it has been authorized
+separately. Use either the Stacks Project
+[@stacksprojectauthorsStacksProject2021] or Kerodon.
+
+1. Import the selected source's published hierarchy, stable identifiers,
+   cross-references, and revision information.
+2. Begin from a subject-level mathematical question.
+3. Obtain the statements, proofs, examples, and surrounding context required by
+   the current work.
+4. Preserve the ordered source locations consulted, work artifacts, model
+   assistance, unresolved questions, and later reconstruction tasks.
+5. Resume the work after an interruption.
+6. After a source revision, identify the stored records whose cited source
+   material changed.
+
+**Acceptance.** A mathematician can identify a coherent sequence of relevant
+source locations, study selected material, perform substantive mathematical
+work, and later resume it without a preliminary semantic classification of the
+corpus. A source revision identifies the stored records that require inspection.
+
+---
+
+## 11. Failure modes
 
 The interface has failed if:
 
 - a subject map, inventory, or comprehension form must be completed before
   mathematical work begins;
+- large-corpus study requires manual semantic classification before a
+  mathematical question can be pursued;
 - a formal proof is treated as available or required when none exists;
 - problem solving is secondary to browsing or record maintenance;
 - assistance reveals a solution before the mathematician requests that level of
@@ -402,10 +432,13 @@ The interface has failed if:
 
 ---
 
-## 11. Open questions
+## 12. Open questions
 
 - Which initial problem cluster best tests both theoretical proof and
   computation without requiring broad ingestion?
+- Which of the Stacks Project and Kerodon should be used for the later
+  large-corpus experiment, and which published interfaces provide its hierarchy,
+  identifiers, cross-references, and revision information?
 - Which levels of assistance should be available, and which should require an
   explicit request?
 - Which single model and service should be configured for the first experiment,
