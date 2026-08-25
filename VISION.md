@@ -6,8 +6,6 @@ implementation).
 
 ## Thesis
 
-## Thesis
-
 * Learning a large body of mathematics requires orientation, understanding,
   integration, and retention.
 * Returning to mathematics after a lapse requires reconstructing context that
