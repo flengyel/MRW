@@ -85,8 +85,13 @@ or source suggestion is recorded as an AI proposal.
 
 A claim's epistemic status cannot be inferred from its availability. A result
 posted publicly, a result checked by a kernel, a result refereed, and a result
-independently reproduced are four different things. Theorem Terminal must keep
-them distinct in its data model and interface.
+independently reproduced are four different things. Research-active
+mathematicians can disagree about whether an argument is a valid proof
+[@inglisMathematiciansDifferentStandards2013], and an argument's attributed
+source can affect how it is read and judged
+[@weberInfluenceSourcesReading2013]. Theorem Terminal must keep source,
+verification, epistemic status, and later judgments distinct in its data model
+and interface.
 
 ## 2. Activities Theorem Terminal supports
 
@@ -121,12 +126,24 @@ interruption. The system can preserve dated attempts, assistance used,
 corrections, and later task results. These observations support review
 scheduling, but they do not justify a general claim about a person's knowledge.
 
-These activities do not define a model of mathematical expertise. The system
-represents sources, mathematical objects and relations, work artifacts,
-requests for assistance, and task results. Proof attempts, informal deductions,
-examples, computations, diagrams, formal checks, and source use remain distinct
-records available as the current task requires them. No artifact must be
-translated into a single prescribed representation before work continues.
+Studies of mathematical work identify strategic knowledge in proof construction
+[@weberStudentDifficultyConstructing2001]; formal reconstruction, informal
+deduction, examples, and conceptual knowledge in proof validation
+[@weberHowMathematiciansDetermine2008]; line-by-line, modular, and
+authority-based proof reading [@weberWhyHowMathematicians2011]; local use of
+definitions, fragments, examples, and instantiated constructions while studying
+unfamiliar mathematics [@wilkerson-jerdeHowMathematiciansLearn2011]; more
+frequent movement between adjacent proof lines, interpreted as attention to
+implicit warrants [@inglisExpertNoviceApproaches2012]; and diagrams developed
+during problem solving [@stylianouInteractionVisualizationAnalysis2002].
+
+These studies concern particular tasks and do not establish a universal
+representation of mathematical expertise. Theorem Terminal represents sources,
+mathematical objects and relations, work artifacts, requests for assistance, and
+task results. Proof attempts, informal deductions, examples, computations,
+diagrams, formal checks, and source use remain distinct records available as the
+current task requires them. No artifact must be translated into a single
+prescribed representation before work continues.
 
 ## 3. Kallenberg: the order of study
 

@@ -37,7 +37,9 @@ Stages 0 through 5 do not attempt:
 - Mathlib-scale Lean analysis;
 - simultaneous support for multiple model services, autonomous follow-up calls,
   or a general chat interface;
-- encoding a research-decision taxonomy or a predictive-framework schema;
+- encoding the 29-decision taxonomy or predictive-framework schema developed
+  for science and engineering [@priceDetailedCharacterizationExpert2021;
+  @wiemanHowBecomeSuccessful2022];
 - multi-user operation, synchronization, accounts, or deployment.
 
 AI-generated theorems, proofs, explanations, and examples may be studied with
@@ -47,8 +49,8 @@ being tested. The first implementation makes one provider request per explicit
 user action to one configured model, preserves each `ModelCall` and any raw
 response, and records relevant extracted mathematical content as AI proposals.
 It defines only the narrow provider boundary needed to keep canonical records
-independent of provider-specific request types; it does not add another adapter, service
-selection, or routing.
+independent of provider-specific request types; it does not add another adapter,
+service selection, or routing.
 
 ## Target
 
