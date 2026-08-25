@@ -14,10 +14,18 @@ begins.
 
 Two initial experiments test distinct functions:
 
-1. problem-centered study in a source with little or no formalization;
-2. mathematical re-entry and optional informal/formal correspondence using
+1. mathematical re-entry and optional informal/formal correspondence using
    `rs_Appendix_A.tex`, the corresponding Lean declarations, and
-   `Lean/docs/AppendixA.md`.
+   `Lean/docs/AppendixA.md`;
+2. problem-centered study in a source with little or no formalization.
+
+Implementation was authorized on 2026-08-25 with Appendix A first. Its first
+executable operation is top-down orientation in `rs_Appendix_A.tex`, followed by
+selection and study of a result. No session record precedes orientation. The
+same Kallenberg order governs the later problem-centered experiment: book or
+chapter purpose and organization; central concepts, results, and problem
+families; selected problem; proposed method; detailed proof, calculation, or
+construction.
 
 Infrastructure is added only when one of these sessions requires it. Evidence
 comes from the `WorkArtifact`s and `TaskEvidence` produced by the sessions, not
@@ -56,17 +64,18 @@ service selection, or routing.
 
 Complete both experimental sessions in `UX_SPEC.md` §9:
 
-- solve, resume, and later reconstruct selected problems from an unformalized,
-  problem-centered source;
 - re-enter the mathematics in `rs_Appendix_A.tex`, continue mathematical work,
   and inspect the corresponding Lean declarations and
-  `Lean/docs/AppendixA.md` only where they are relevant.
+  `Lean/docs/AppendixA.md` only where they are relevant;
+- solve, resume, and later reconstruct selected problems from an unformalized,
+  problem-centered source.
 
-The first target tests problem-centered learning, task-mediated model assistance,
-and retention. It includes at least one bounded model call attached to an actual
-obstruction in the work. The second tests reconstruction of prior work and
-maintenance of explicit informal/formal relations. Success in either does not
-establish success in the other.
+The Appendix A target is executed first. It tests reconstruction of prior work
+and, only when useful, maintenance of explicit informal/formal relations. The
+problem-centered target tests learning, task-mediated model assistance, and
+retention. It includes at least one bounded model call attached to an actual
+obstruction in the work. Success in either does not establish success in the
+other.
 
 ---
 
@@ -74,24 +83,26 @@ establish success in the other.
 
 **Goal.** Establish the design baseline in one place.
 
-**Deliverable.** A repository containing `README.md`, `VISION.md`,
+**Completed baseline.** A repository containing `README.md`, `VISION.md`,
 `VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`, and `CODEX_PLAN.md`. The README
-states that the repository is design-only, identifies the role of each design
-document, and describes the first implementation as experimental.
+identified the role of each design document and described the planned first
+implementation as experimental. Implementation began only after a later,
+separate authorization.
 
-**Non-goals.** No package layout, dependency manifest, CI, application skeleton,
-or implementation of any kind.
+**Non-goals at completion.** No package layout, dependency manifest, CI,
+application skeleton, or implementation of any kind.
 
 **Why at all.** These six files form the design baseline against which later
 stages will be evaluated.
 
 ---
 
-## Stage 0 — Work the benchmark mathematics
+## Stage 0 — Orient in and work the benchmark mathematics
 
-**Goal.** Select a small coherent problem cluster from an algebraic number
-theory text and work on it before designing storage or navigation around it. No
-application code.
+**Goal.** Establish the book or chapter's purpose and organization and its
+central concepts, results, and problem families; then select a small coherent
+problem cluster from an algebraic number theory text and work on it before
+designing storage or navigation around it. No application code for this stage.
 
 **Deliverable.** The mathematical artifacts that ordinary work produces: TeX
 proofs or attempts, Sage calculations and diagrams where useful, exact source
@@ -102,10 +113,10 @@ bounded hint. For at least one actual obstruction, identify the mathematical
 request and the minimal source and work context that Stage 1 should send to a
 model. This list describes operations, not an internal state.
 
-**Acceptance.** At least one theoretical problem and one computational or
-example-driven problem have been attempted. The proposed first session can be
-specified from observed needs without requiring preliminary classification by
-the mathematician.
+**Acceptance.** The orientation precedes problem selection. At least one
+theoretical problem and one computational or example-driven problem have been
+attempted. The proposed first problem workflow can be specified from observed
+needs without requiring preliminary classification by the mathematician.
 
 **Non-goals.** No YAML front matter, object inventory, domain-map population,
 formalization, comprehensive chapter summary, schema, database, parser, or
@@ -213,13 +224,16 @@ the result as evidence against the other functions.
 **Goal.** Re-enter the mathematics of `rs_Appendix_A.tex` and continue
 mathematical work after an interruption.
 
-**Deliverable.** A session beginning from a mathematical question, manuscript
-result, unfinished proof, or earlier `WorkArtifact` in `rs_Appendix_A.tex`. It
-makes available stable manuscript occurrences, relevant prior artifacts,
-unresolved questions, and the source locations and relations needed to resume.
-The corresponding Lean declarations and `Lean/docs/AppendixA.md` are available
-only when relevant. Formal artifacts remain optional and are not the initial
-object of the session.
+**Deliverable.** The Appendix A path first presents the appendix's purpose and
+organization and its central concepts and results. It then selects a result and
+proceeds through its role, statement, governing idea, proof skeleton, and
+technical detail only as requested. Re-entry may begin from a mathematical
+question, manuscript result, unfinished proof, or earlier `WorkArtifact` in
+`rs_Appendix_A.tex`. Stable manuscript occurrences, relevant prior artifacts,
+unresolved questions, and the source locations and relations needed to resume
+are available. The corresponding Lean declarations and
+`Lean/docs/AppendixA.md` are available only when relevant. Formal artifacts
+remain optional and are not the initial object of the work.
 
 **Acceptance.** The session reconstructs enough specific context to continue a
 proof, calculation, exposition, or formalization task. The evidence is the
@@ -348,12 +362,18 @@ for it.
 
 ## Order and stopping
 
-The first implementation runs Stages −1, 0, 1, 2, 3, 4, and 5. Each checkpoint
-evaluates a specific component. Failure revises or stops that component unless
-the evidence bears on the full thesis in `VISION.md`.
+Implementation is authorized. The execution order is:
+
+1. Appendix A orientation and mathematical re-entry (Stage 3);
+2. resumption of actual Appendix A work (the relevant part of Stage 2);
+3. optional formal correspondence when useful to that work (Stage 4);
+4. top-down orientation and benchmark work in the problem-centered source
+   (Stage 0), followed by only the application support that work requires
+   (Stage 1);
+5. evaluation of both experiments on their own terms (Stage 5).
+
+Each checkpoint evaluates a specific component. Failure revises or stops that
+component unless the evidence bears on the full thesis in `VISION.md`.
 
 Stage 6 does not begin automatically after Stage 5. It requires a separate
 decision authorizing the large-corpus experiment.
-
-The repository remains design-only until a separate decision authorizes Stage
-0. This plan does not authorize implementation.

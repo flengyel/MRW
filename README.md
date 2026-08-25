@@ -81,7 +81,16 @@ The design rests on five principles:
 
 ## Status
 
-Design documents only. No implementation yet.
+Initial experimental implementation has begun. Its first executable path studies
+`rs_Appendix_A.tex` in Kallenberg's top-down order. `orient` presents the
+appendix's purpose and organization, central concepts and results, and a first
+selected result without displaying its statement, proof, or formal counterpart.
+`study` then reveals the selected result's role and statement; its governing
+idea, proof skeleton, and detailed source proof appear only when requested.
+
+The current code is read-only and uses no formal artifact, model service,
+session record, database, or network request. Interpretive guide text is marked
+as an AI proposal; exact statements and proofs are identified as source text.
 
 The first implementation will be an experiment conducted through actual
 mathematical work. It will test which source relations and work artifacts can be
@@ -92,6 +101,23 @@ record keeping than it saves. Evidence will come from attempted proofs, solved
 problems, computations, reconstructions, and later use, not from forms asking
 what a mathematician believes is understood.
 
+## Current commands
+
+Requires Python 3.11 or later.
+
+```text
+python -m pip install -e .
+theorem-terminal orient PATH/TO/rs_Appendix_A.tex
+theorem-terminal study PATH/TO/rs_Appendix_A.tex
+theorem-terminal study PATH/TO/rs_Appendix_A.tex --through idea
+theorem-terminal study PATH/TO/rs_Appendix_A.tex --through skeleton
+theorem-terminal study PATH/TO/rs_Appendix_A.tex --through details
+```
+
+The same order will govern a later experiment with Daniel A. Marcus's *Number
+Fields*: orient in the book or chapter and its central concepts, results, and
+problem families before selecting a problem.
+
 ## Documents
 
 - `VISION.md` — why the project exists.
@@ -99,6 +125,7 @@ what a mathematician believes is understood.
 - `DOMAIN_MODEL.md` — entities, information classes, and invariants.
 - `UX_SPEC.md` — the mathematical workflow the system supports.
 - `CODEX_PLAN.md` — staged implementation plan.
+- `AGENTS.md` — instructions for Codex and other coding agents.
 
 ## First corpus
 
