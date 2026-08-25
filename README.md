@@ -92,8 +92,8 @@ The current code is read-only and uses no formal artifact, model service,
 session record, database, or network request. Interpretive guide text is marked
 as an AI proposal; exact statements and proofs are identified as source text.
 
-The first implementation will be an experiment conducted through actual
-mathematical work. It will test which source relations and work artifacts can be
+The implementation is an experiment conducted through actual mathematical
+work. It tests which source relations and work artifacts can be
 preserved or generated mechanically, whether they support later reconstruction
 and application, and whether one bounded call to a configured model supplies
 useful assistance without displacing the mathematical attempt or creating more
@@ -101,17 +101,131 @@ record keeping than it saves. Evidence will come from attempted proofs, solved
 problems, computations, reconstructions, and later use, not from forms asking
 what a mathematician believes is understood.
 
-## Current commands
+## Install and run
 
-Requires Python 3.11 or later.
+The current implementation is a local command-line program requiring Python
+3.11 or later. Installation must run from the repository root, where
+`pyproject.toml` is located.
+
+### Install on Windows PowerShell
+
+```powershell
+git clone git@github.com:flengyel/theorem_terminal.git
+Set-Location theorem_terminal
+py -3 --version
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
+
+For an existing checkout, begin with `Set-Location` and then create or activate
+the virtual environment.
+
+### Install on macOS or Linux
+
+```bash
+git clone git@github.com:flengyel/theorem_terminal.git
+cd theorem_terminal
+python3 --version
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+```
+
+### Locate Appendix A
+
+The initial experiment reads `rs_Appendix_A.tex` from a separate checkout of
+the private `flengyel/Categorical_Rice_Shapiro` repository. The source file need
+not be copied into this repository. Assign its absolute path to a shell variable
+so spaces in directory names are handled correctly.
+
+If that repository is not already present, clone it in a chosen parent
+directory:
 
 ```text
-python -m pip install -e .
-theorem-terminal orient PATH/TO/rs_Appendix_A.tex
-theorem-terminal study PATH/TO/rs_Appendix_A.tex
-theorem-terminal study PATH/TO/rs_Appendix_A.tex --through idea
-theorem-terminal study PATH/TO/rs_Appendix_A.tex --through skeleton
-theorem-terminal study PATH/TO/rs_Appendix_A.tex --through details
+git clone git@github.com:flengyel/Categorical_Rice_Shapiro.git
+```
+
+Both repositories are private, so cloning requires GitHub authentication.
+
+PowerShell:
+
+```powershell
+$appendixA = 'C:\path with spaces\Categorical_Rice_Shapiro\rs_Appendix_A.tex'
+Test-Path -LiteralPath $appendixA
+```
+
+macOS or Linux:
+
+```bash
+appendix_a='/path with spaces/Categorical_Rice_Shapiro/rs_Appendix_A.tex'
+test -f "$appendix_a"
+```
+
+### Run the Appendix A experiment
+
+PowerShell:
+
+```powershell
+theorem-terminal orient "$appendixA"
+theorem-terminal study "$appendixA"
+theorem-terminal study "$appendixA" --through idea
+theorem-terminal study "$appendixA" --through skeleton
+theorem-terminal study "$appendixA" --through details
+```
+
+macOS or Linux:
+
+```bash
+theorem-terminal orient "$appendix_a"
+theorem-terminal study "$appendix_a"
+theorem-terminal study "$appendix_a" --through idea
+theorem-terminal study "$appendix_a" --through skeleton
+theorem-terminal study "$appendix_a" --through details
+```
+
+If the installed console command is unavailable, use
+`python -m theorem_terminal` in its place, for example:
+
+```text
+python -m theorem_terminal orient PATH/TO/rs_Appendix_A.tex
+```
+
+The commands reveal cumulative levels of detail:
+
+- `orient` displays the appendix's purpose and organization, its central
+  concepts and named results, and the first selected result. It omits theorem
+  statements, proofs, and formal counterparts.
+- `study` displays the selected result's proposed role and exact source
+  statement. The prepared result is
+  `lem:range-lifting-pullback-section`.
+- `--through idea` also displays the proposed governing idea.
+- `--through skeleton` also displays the proposed proof skeleton.
+- `--through details` also displays the exact proof from the source.
+
+No command currently writes to the manuscript, creates a session record,
+contacts a model service, or loads the Lean development.
+
+### Reviewed source revision
+
+The interpretive guide has been reviewed for the normalized SHA-256 revision
+
+```text
+51c3669da3b3a850b1cf8f61f10f873f297d6a598f01d3541678137f002b1945
+```
+
+Line-ending differences between Windows and Unix checkouts are normalized. Any
+other source change causes `orient` and `study` to exit with status 2 rather
+than present an unreviewed guide. Review the changed mathematics, revise the
+guide and its tests when necessary, and only then update the reviewed digest.
+
+### Verify the checkout
+
+From the repository root with the virtual environment active:
+
+```text
+python -m unittest discover -s tests -v
+python -m compileall -q src tests
 ```
 
 The same order will govern a later experiment with Daniel A. Marcus's *Number
