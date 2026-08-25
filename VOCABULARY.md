@@ -39,17 +39,44 @@ Examples:
 
 Representations form a study trajectory, not a dependency chain.
 
+## Understanding field
+
+An attributed record of what a mathematician understands, explicitly does not
+understand, or is still trying to determine about a mathematical object.
+
+Its epistemic state may be unknown, question, partial, or accepted. A correction
+creates a new field that supersedes the earlier one; it does not overwrite the
+earlier record.
+
 ## Provenance
 
 The origin and attribution of a claim or artifact.
 
 Examples:
+
 - human judgment;
 - AI proposal;
 - machine extraction;
 - source quotation.
 
 Adoption of an AI proposal does not change its origin.
+
+## AI-generated mathematical content
+
+A theorem, proof, explanation, example, or other mathematical representation
+produced by a model.
+
+Content produced outside Theorem Terminal may be imported through a source
+occurrence and studied like any other representation. Formal verification does
+not turn its origin into human judgment.
+
+## System-generated assistance
+
+An AI proposal produced by Theorem Terminal.
+
+It is one source of AI-generated mathematical content, not a condition for
+studying such content. AI output produced elsewhere may be imported and studied
+before Theorem Terminal generates any assistance.
 
 ## Mastery
 

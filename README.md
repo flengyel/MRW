@@ -16,9 +16,27 @@ mathematical judgment.
 
 ## Motivation
 
-The problem predates AI. Mathematical results may remain available in papers, notes, and formal developments while the understanding that made them usable—their role, proof ideas, dependencies, and relation to surrounding mathematics—decays.
+Mathematical context can decay. Results may remain available in papers, notes,
+and formal developments while the understanding that made them usable—their
+role, proof ideas, dependencies, and relation to surrounding mathematics—is
+lost. The same difficulty arises at different scales: entering a large corpus
+such as the Stacks Project [@stacksprojectauthorsStacksProject2021] or Kerodon,
+returning to one's own research or an inactive project, and teaching a subject
+after years away.
 
-AI may intensify this problem by changing the rate at which mathematical results, proofs, formalizations, and examples are produced. If mathematical production becomes less limited by human capacity, the bottleneck shifts further toward understanding, integrating, and retaining mathematical knowledge. Theorem Terminal explores tools for both the older problem of mathematical re-entry and the newer pressures created by AI-assisted work.
+AI adds two demands. It may increase the rate at which mathematical results,
+proofs, formalizations, and examples are produced, and it can produce
+mathematics that is correct or formally verified without being understood by
+the mathematician receiving it. Understanding such a result requires
+reconstructing the relevant human-developed mathematics from which current
+systems learn and which the result uses or extends. Tao discusses both the
+prospect of verified proofs without human understanding and the dependence of
+mathematical AI on canonical theories developed and organized by mathematicians
+[@taoMathematicsAgeAI2026].
+
+Theorem Terminal supports learning, reconstruction, integration, and retention
+across both human- and AI-generated mathematics. AI increases the need and
+supplies new forms of assistance; it did not create the underlying difficulty.
 
 The design rests on three principles:
 
@@ -38,17 +56,19 @@ The design rests on three principles:
 
 Design documents only. No implementation yet.
 
-The first implementation will be experimental. It will test which parts of mathematical understanding can be represented or retained with software assistance and which still require mathematical judgment.
-
+The first implementation will be experimental. It will test which parts of
+mathematical understanding can be represented or retained with software
+assistance and which still require mathematical judgment.
 
 ## Documents
 
 - `VISION.md` — why the project exists.
+- `VOCABULARY.md` — controlled terminology used across the design documents.
 - `DOMAIN_MODEL.md` — entities, information classes, and invariants.
 - `UX_SPEC.md` — the mathematical workflow the system supports.
 - `CODEX_PLAN.md` — staged implementation plan.
 
-## First laboratory
+## First corpus
 
 The first corpus is `flengyel/Categorical_Rice_Shapiro`, which is private and
 not publicly readable. It was chosen because it carries every aspect the project
@@ -63,7 +83,8 @@ where a term means different things in different parts of the development — an
 it decays as the formalization moves beneath it. The project asks which parts of
 such a bridge can be maintained mechanically and which require a mathematician.
 
-The first corpus is the first laboratory, not a restriction on future corpora.
+The choice of this first corpus does not restrict which corpora may be studied
+later.
 
 ## License
 

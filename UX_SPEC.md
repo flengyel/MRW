@@ -9,14 +9,15 @@ invariants). Workflow and principles only; no screens, widgets, or framework.
 The interface supports mathematical study, not document lookup.
 
 The question a session begins from is *what do I need to understand next*, not
-*which declaration do I want to inspect*. Lookup is already solved and is not
-the bottleneck; a system whose front door is a search box for declaration names
-has conceded the design before it starts.
+*which declaration do I want to inspect*. Existing tools already support
+declaration lookup. Theorem Terminal begins from mathematical context rather
+than requiring a declaration name.
 
 Two constraints follow from `VISION.md` and hold everywhere below.
 
-**The formal proof is available and is not the front door.** It appears in every
-relevant view, at the end of the descent rather than the beginning.
+**The formal proof is available but does not determine the starting point.** It
+appears in every relevant view after the mathematical context, statement, proof
+idea, and proof skeleton.
 
 **Origin is always visible.** No view presents a machine proposal as a
 mathematician's judgment or as a mechanically derived fact, and no view presents
@@ -55,8 +56,8 @@ mathematics is learned.
 
 Read the declaration, its dependencies, its axiom usage, its verification
 status, and its proof states, with each formal step connected to whatever
-mathematical explanation exists for it. Reachable from anywhere and never the
-default landing.
+mathematical explanation exists for it. It is reachable from any study mode but
+is not the default entry point.
 
 The mode is not passive, which is why it is not called inspection. Comparing a
 proof idea against the formal proof, discovering that a hypothesis is doing no
@@ -81,13 +82,14 @@ A session in this mode starts at a declaration and ends by writing prose, which
 inverts every other mode. Two options, and the choice shapes the rest of the
 specification:
 
-- *In scope.* The instrument supports the work actually being done on the first
-  corpus, and the understanding fields get populated as a by-product of
-  formalizing rather than as a separate chore. Cost: a second navigation model
+- *In scope.* The first implementation supports formalization work on the first
+  corpus, and understanding fields can be populated as a by-product of
+  formalizing rather than as a separate task. Cost: a second navigation model
   and an editing surface next to the formal view.
-- *Out of scope for the first instrument.* Discoveries are recorded through the
-  ordinary authoring path of §5 after the fact. Cost: the authoring is a chore,
-  and `VISION.md` §9 names authoring cost as a failure condition.
+- *Out of scope for the first implementation.* Discoveries are recorded through
+  the ordinary authoring path of §5 after the fact. Cost: this separates
+  recording from the mathematical work, and `VISION.md` §9 identifies excessive
+  authoring cost as a failure condition.
 
 Recommendation: in scope, minimally — a way to attach an understanding field to
 an object while looking at its formal view, with no separate navigation.
@@ -229,32 +231,39 @@ correct one for a proof-idea prompt.
 
 ---
 
-## 8. Machine assistance in the interface
+## 8. AI-generated mathematics and machine assistance
 
-Assistance explains, summarizes, proposes questions, drafts outlines, and
-suggests connections. It never becomes an authoritative explanation, a formal
-fact, or a mathematician's judgment.
+AI-generated mathematics is material for theorem study and proof study. A
+theorem, proof, or mathematical argument produced outside Theorem Terminal may
+be recorded from the first implementation and studied through the same
+workflows as human-authored mathematics. Its AI origin, model when known,
+verification status, and subsequent human judgments remain distinct. Formal
+verification does not by itself make the mathematics understood.
 
-Assistance is not confined to what the system generates. An explanation obtained
-from an external assistant is imported as an `ai_proposal` with the model
-recorded as its author, compared against the formal facts and against
-understanding fields already held, then adopted, edited, or rejected, and what
-survives is scheduled for review. The point is that a correction made in a chat
-window is currently lost, and the correction is the valuable part.
+System-generated assistance is a later capability, deferred to Stage 5 of
+`CODEX_PLAN.md`. Theorem Terminal may then explain, summarize, propose
+questions, draft outlines, and suggest connections. These outputs remain
+proposals; they do not become authoritative explanations, formal facts, or
+mathematicians' judgments.
 
-**Non-goal.** This is an import path with provenance attached, not a chat
-client, a prompt manager, or a conversation archive. Nothing in the interface
-holds a dialogue.
+An explanation obtained from an external assistant may be imported earlier as
+an `ai_proposal`, with the model recorded as author, compared against formal
+facts and existing understanding fields, and then adopted, edited, or rejected.
+Importing and studying external AI material is not the same as asking Theorem
+Terminal to generate it.
+
+**Non-goal.** The import path records finished mathematical content and its
+provenance. It is not a chat client, prompt manager, or conversation archive.
+Nothing in the interface preserves a dialogue as such.
 
 Adoption is explicit and cheap. `VISION.md` §9 makes authoring cost a failure
-condition, so the test for any assistance feature is whether adopting or
-correcting a proposal costs less than writing the thing from scratch. A feature
-that fails that test is worse than absent, because it adds review load to
-authoring load.
+condition, so the test for any system-generated assistance is whether adopting
+or correcting a proposal costs less than writing it from scratch. A feature that
+fails that test is removed because it adds review load to authoring load.
 
 ---
 
-## 9. First laboratory session
+## 9. First working session
 
 On `Categorical_Rice_Shapiro`, a session that exercises the whole specification:
 
@@ -291,7 +300,7 @@ The interface has failed if:
 
 ## 11. Open questions
 
-- Whether formalization sessions are in scope for the first instrument (§2).
+- Whether formalization sessions are in scope for the first implementation (§2).
 - What the orientation view actually shows for a corpus with one manuscript and
   one formal development, where the hierarchy is small enough to hold in mind.
   Candidates, none settled: the source hierarchy, the concepts that organize it,

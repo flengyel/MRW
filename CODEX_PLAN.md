@@ -1,63 +1,71 @@
 # CODEX_PLAN.md
 
-How to build the first instrument. Inherits `VISION.md` (why), `DOMAIN_MODEL.md`
-(what exists), and `UX_SPEC.md` (what a mathematician does), all frozen.
+Plan for the first experimental implementation. It inherits the purposes in
+`VISION.md`, the entities and invariants in `DOMAIN_MODEL.md`, and the workflows
+in `UX_SPEC.md`.
 
 ## Governing constraint
 
-The first implementation is a vertical slice, not a foundation. Every stage ends
-in a session step that a mathematician can actually perform on the first corpus.
-No stage exists to prepare for a later stage.
+The first implementation tests the complete working session described in
+`UX_SPEC.md` §9 on one coherent mathematical region. Each stage must enable or
+evaluate a mathematical activity on that region. Infrastructure is added only
+when a stage requires it.
 
-This inverts the usual order. Repository scaffolding, a schema, an ORM, an
-exporter, and a GUI framework are all things that can be built before anything
-works, which is why the project drifted into them once already. Here the data
-comes first, the descent second, and mechanization only where a step is
-demonstrably tedious.
+Repository scaffolding, a schema, an ORM, an exporter, and a GUI framework can
+all be built without establishing whether the proposed representation helps a
+mathematician learn, reconstruct, understand, or retain mathematics. The plan
+therefore begins with a hand-authored reconstruction of mathematical context,
+adds the ordered theorem view, and mechanizes tasks only after manual work has
+shown what must be represented.
 
 ## Global non-goals
 
-Excluded from the first instrument entirely, in every stage below:
+The first implementation does not attempt:
 
 - general corpus ingestion; the corpus is `Categorical_Rice_Shapiro`
-- Stacks, Kerodon, Mathlib at scale, or any second source
-- a GUI platform, a component library, or a framework commitment
+- Stacks, Kerodon, Mathlib at scale, or any second corpus
+- a GUI platform, component library, or framework commitment
 - automated theorem understanding
-- universal Lean analysis
-- large-scale AI features
-- multi-user anything, sync, accounts, deployment
+- Mathlib-scale Lean analysis
+- system-generated mathematical proposals before Stage 5
+- multi-user operation, synchronization, accounts, or deployment
+
+Mathematics or explanations generated outside Theorem Terminal are not
+excluded. They may be recorded in Stage 0 as study material with their
+provenance and verification status. General chat, prompt management,
+conversation archiving, and large-scale generation remain out of scope.
 
 ## Target
 
-The “first laboratory workflow of `UX_SPEC.md` §9, end to end, on one
+Complete the first working session of `UX_SPEC.md` §9, end to end, on one
 coherent mathematical region of `Categorical_Rice_Shapiro`.
 
-The first slice should connect:
+The selected region must connect:
 
 one source hierarchy · one mathematical region · its source occurrences ·
 its formal artifacts · its correspondences · its evolving understanding ·
 one review cycle · one discrepancy.
 
-The slice is not expected to begin with complete understanding. Unknown
-relationships, unresolved correspondences, and questions about the mathematics
-are part of the data to be preserved.
+The selected region is not expected to begin with complete understanding.
+Unknown relationships, unresolved correspondences, and questions about the
+mathematics are part of the data to be preserved.
 
 ---
 
 ## Stage −1 — Repository
 
-**Goal.** Establish the frozen design baseline in one place.
+**Goal.** Establish the design baseline in one place.
 
 **Deliverable.** A repository containing `README.md`, `VISION.md`,
-`DOMAIN_MODEL.md`, `UX_SPEC.md`, and this plan. The README states what the
-project is, which documents are frozen, and that the first implementation is a
-laboratory instrument.
+`VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`, and `CODEX_PLAN.md`. The README
+states that the repository is design-only, identifies the role of each design
+document, and describes the first implementation as experimental.
 
-**Non-goals.** No package layout, no dependency manifest, no CI, no application
-skeleton, no implementation of any kind.
+**Non-goals.** No package layout, dependency manifest, CI, application skeleton,
+or implementation of any kind.
 
-**Why at all.** The four documents are currently the only assets, and they are
-the ones later stages are checked against.
+**Why at all.** These six files form the design baseline against which later
+stages will be evaluated.
 
 ---
 
@@ -81,6 +89,8 @@ note conventions already in use — holding:
 - correspondences between occurrences, with their kinds where established;
 - formalization status where known;
 - current understanding fields;
+- any externally produced AI mathematics or explanations selected for study,
+  with their provenance and verification status recorded;
 - unresolved questions and uncertainties.
 
 Understanding fields may initially record questions or incomplete understanding.
@@ -92,8 +102,11 @@ of understanding.
 - a mathematical idea can be traced to its source occurrences where known;
 - formal artifacts can be connected to manuscript occurrences where a
   correspondence has been established;
-- discoveries made during formalization or AI-assisted exploration can be
-  attached to the relevant object with provenance;
+- a theorem, proof, argument, or explanation generated outside Theorem Terminal
+  can be recorded and studied with its AI provenance and verification status
+  kept distinct from later human judgments;
+- discoveries made during formalization or external AI-assisted exploration can
+  be attached to the relevant object with provenance;
 - unknowns are recorded rather than silently guessed.
 
 Where the model has no natural place for an important distinction, that is
@@ -104,11 +117,12 @@ recorded as a model defect rather than worked around.
 - No attempt at comprehensive coverage of `Categorical_Rice_Shapiro`.
 - No requirement to write proof ideas before they are understood.
 - No schema, database, parser, exporter, or validation tooling.
+- No proposals generated by Theorem Terminal. Externally generated AI
+  mathematics may still be represented as study material.
 
-**Why first.** The first laboratory is not a database population exercise. It is
-a test of whether the proposed context representation helps reconstruct a
-mathematical project whose sources, formalization, and understanding have
-developed over time.
+**Why first.** Stage 0 is not a database population exercise. It tests whether
+the proposed context representation helps reconstruct a mathematical project
+whose sources, formalization, and understanding have developed over time.
 
 ---
 
@@ -149,16 +163,19 @@ rather than against a reference string.
 **Non-goals.** No generated items, no scheduling algorithm research — any
 interval scheme is adequate here, and replacing it later is cheap.
 
-**Checkpoint.** `VISION.md` §9: if items at proof-idea level cannot be written
-in a form worth repeating, the retention leg fails and the rest of the plan is
-not worth executing.
+**Checkpoint.** If proof-idea review items cannot be written in a form worth
+repeating, the proposed retention method has failed at that level. Record that
+failure and continue to evaluate orientation, reconstruction, theorem study, and
+formal comparison; this result does not by itself refute the other functions of
+Theorem Terminal.
 
 ---
 
 ## Stage 3 — Formal facts
 
 **Goal.** Obtain declaration types, signatures, dependencies, axiom usage, and
-checking status mechanically, for the declarations in the Stage 0 slice.
+checking status mechanically for the declarations in the Stage 0 selected
+region.
 
 **Task 3.0 — reconnaissance, and it comes first.** Run the existing tools
 against the branch and inspect what they emit: `lean4export`, `doc-gen4`,
@@ -170,16 +187,18 @@ output supplies the fields `DOMAIN_MODEL.md` calls formal facts, not novelty.
 emitting JSON. Environment data comes from the environment; nothing parses Lean
 source in Python.
 
-**Acceptance.** Every formal fact in the instrument is generated, stamped with
-the environment revision it came from, and never hand-edited. Regeneration after
-a rebuild changes nothing else.
+**Acceptance.** Every formal fact presented by Theorem Terminal is generated,
+stamped with the environment revision from which it was obtained, and never
+hand-edited. Regeneration after a rebuild changes nothing else.
 
-**Non-goals.** No Mathlib-scale extraction, no elaboration traces, no proof
-states, no coverage of declarations outside the slice.
+**Non-goals.** No Mathlib-scale extraction, elaboration traces, proof states, or
+coverage of declarations outside the selected region.
 
-**Checkpoint.** If existing tooling already supplies the translation between
-formal artifacts and mathematical understanding, `VISION.md` §9 applies and the
-project has nothing in between to build.
+**Checkpoint.** If existing tooling already supplies these formal facts and
+their required connections to mathematical context, use that tooling and omit
+the exporter. This result would remove or reduce Stage 3; it would not invalidate
+the work on orientation, reconstruction, retention, or understanding
+AI-generated mathematics.
 
 ---
 
@@ -209,25 +228,36 @@ does not refute a claimed conceptual dependency. A note recorded against one
 declaration says nothing about another — comparisons are between claims and
 facts about the same subject.
 
-**Why this stage matters most.** It is the step no existing tool performs, and
-it is the reason the first corpus was chosen.
+**Why this stage is included.** It tests whether changes in formal artifacts can
+be related precisely to stored mathematical judgments. That requirement is a
+reason for choosing the first corpus.
 
 ---
 
-## Stage 5 — AI-assisted understanding
+## Stage 5 — System-generated assistance
 
-Deferred, and specified only so its boundary is fixed in advance.
+Deferred until Stages 0–4 have been evaluated. This stage concerns proposals
+generated by Theorem Terminal. It does not determine whether externally produced
+AI mathematics may be studied.
 
-Machine assistance proposes: candidate correspondences, draft context maps,
-draft outlines, and draft review items. Explanations obtained from external assistants are imported the same way, with the model recorded as author. Every proposal is adopted, edited, or rejected by a person. Adoption records the adopter and never changes the origin.
+Theorem Terminal may propose candidate correspondences, context maps, outlines,
+explanations, questions, and review items. Each proposal records the model as
+author and is adopted, edited, or rejected by a person. Adoption records the
+adopter and does not change the proposal's origin.
+
+Externally produced AI mathematics and explanations may already have been
+recorded in Stage 0 as study material, with provenance and verification status
+preserved. Importing and studying such material is not a Stage 5 generation
+feature.
 
 **Acceptance.** Adopting or correcting a proposal costs less than authoring the
-thing from scratch. A feature failing that test is removed rather than improved,
-because it adds review load to authoring load.
+content from scratch. A feature failing that test is removed because it adds
+review load to authoring load.
 
-**Non-goals.** No generated understanding presented without its origin. No chat
-client, prompt manager, or conversation archive — the import path takes a
-finished explanation, not a dialogue. No assistance in Stages 0–4.
+**Non-goals.** No generated understanding is presented without its origin. No
+chat client, prompt manager, or conversation archive: the import path takes
+finished mathematical content, not a dialogue. No system-generated proposals in
+Stages 0–4.
 
 ---
 
@@ -253,9 +283,10 @@ that moves. This is an edit to the manuscript; no exporter substitutes for it.
 
 ## Order and stopping
 
-Stages run −1, 0, 1, 2, 3, 4. Stage 5 follows only if Stages 0–4 produce
-something worth assisting.
+Stages run −1, 0, 1, 2, 3, and 4. Stage 5 begins only if Stages 0–4 show that
+system-generated proposals would reduce the effort required to understand or
+record the selected mathematics.
 
-Each checkpoint above is a stopping point, not a formality. `VISION.md` §9 names
-the conditions under which the thesis is wrong; the plan is arranged so that the
-cheapest of them are tested first.
+Each checkpoint evaluates a specific claim or component. A failed checkpoint may
+stop or revise that component; it is evidence against the entire project only
+when it bears on the full thesis stated in `VISION.md`.
