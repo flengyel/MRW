@@ -23,6 +23,7 @@ Examples:
 - mathematical work;
 - provenance;
 - verification;
+- explicit warrant;
 - task history;
 - generated review state.
 
@@ -136,6 +137,76 @@ the source revision.
 Formal facts may be absent. Their absence does not prevent study, problem
 solving, reconstruction, or review.
 
+## Claim atom version
+
+An immutable identifier for one opaque proposition used by the
+justification-logic layer.
+
+Its mathematical content remains in one or more exact representations, such as
+LaTeX source, a Lean proposition, or prose. Matching names or normalized text do
+not identify two atoms.
+
+## Justification profile
+
+The named justification calculus, syntax and rule versions, named constant
+specification required for \(J(CS)\) and absent for \(J_0\), and checker identity
+under which a derivation is checked.
+
+The initial profiles belong to the non-factive Artemov--Fitting \(J_0/J(CS)\)
+family. A constant specification \(CS\) is a downward-closed set of nested
+assertions \(c_n:\cdots:c_1:A\), where \(n\geq1\) and \(A\) is a logical axiom
+instance; every shorter suffix of a member is also a member. It is not a
+database of trusted sources or tools. Both profiles admit constants as terms;
+only \(J(CS)\) permits a proof step by membership in its named, versioned,
+decidable constant specification. An axiomatically appropriate \(CS\) supplies
+every axiom instance at every positive nesting depth and cannot be finite. A
+derivation's footprint is only the finite subset of \(CS\) members actually
+invoked as axioms. It is not thereby a constant specification; even if it is
+downward-closed and hence forms a finite constant specification, it is not
+axiomatically appropriate.
+
+## Justification term and formula
+
+Pure syntax for explicit reasons and the formulas they justify.
+
+The initial terms are variables, constants, application, and sum. Application
+composes reasons. Sum records alternative availability for the same formula; it
+does not record corroboration, probability, source independence, or weight.
+Provenance and external evidence bindings are not embedded in term identity.
+
+## Premise admission
+
+An immutable, scoped decision that a justification formula may be used in one
+justification context, together with the external basis, actor or policy,
+provenance, and revision on which that decision depends.
+
+A source occurrence, digest, model response, formal check, or correspondence
+does not create a premise admission automatically. A bridge such as
+\(F_L\to F_M\) is itself an admitted premise with a stated scope and basis.
+This application-level admission is not the acceptance predicate of an
+Artemov--Fitting Justification Awareness Model.
+
+## Justification context
+
+An immutable selection of active premise admissions for a derivation.
+
+Withdrawing an admission creates a new context that omits it. Qualifying one
+creates a new claim or formula and admission and then a new context that uses
+the replacement. An old derivation remains check-valid relative to its old
+context even when it is no longer an active warrant in the current context.
+
+## Justification derivation
+
+A checker-attested derivation of one formula relative to a justification
+profile and context, including its term, rule steps, dependencies, finite
+constant-specification footprint, checker result, and deterministic bundle
+identity.
+
+It establishes derivability relative to displayed admissions. It does not by
+itself establish truth, knowledge, understanding, provenance, verification, or
+human acceptance. A displayed derivation and its admitted bases form a
+*warrant path*.
+
 ## Provenance
 
 The origin and attribution of a claim or artifact.
@@ -149,6 +220,8 @@ Examples:
 - source quotation.
 
 Adoption of an AI proposal does not change its origin.
+
+Provenance does not admit a premise or establish a justification derivation.
 
 ## AI-generated mathematical content
 
@@ -215,11 +288,15 @@ Examples:
 - Lean kernel verification;
 - computer algebra;
 - external checker;
+- justification-derivation checker;
 - peer review;
 - independent reproduction;
 - source comparison.
 
-Verification does not establish provenance, retention, or competence.
+Verification does not establish provenance, premise admission, retention, or
+competence, and it does not create a formal--informal bridge. A
+justification-derivation check verifies only contextual derivability, not the
+truth of its conclusion.
 
 ## Discrepancy
 

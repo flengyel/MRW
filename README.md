@@ -24,6 +24,12 @@ mental state.
 It is not a proof assistant, a Lean documentation browser, or a replacement for
 mathematical judgment.
 
+The design also adopts an explicit warrant layer for tasks that require more
+than origin and checking status. A bounded Appendix A experiment uses
+non-factive Artemov--Fitting justification logic to record how explicitly
+admitted reasons compose. Source provenance, verification, admitted premises,
+checked derivability, and human use or rejection remain distinct.
+
 ## Motivation
 
 Mathematical context can be lost even when papers, notes, books, or formal
@@ -56,7 +62,7 @@ Theorem Terminal supports learning, reconstruction, integration, and retention
 across human- and AI-generated mathematics. AI increases the need and supplies
 new forms of assistance; it did not create the underlying difficulty.
 
-The design rests on five principles:
+The design rests on six principles:
 
 - Kallenberg's top-down approach to reading advanced mathematics provides
   orientation before detailed study. Depending on the source, the relevant
@@ -69,6 +75,10 @@ The design rests on five principles:
   requested and resolved model identifiers, exact submitted request, selected
   context, raw response, and every extracted proposal are recorded
   automatically. A proposal is not a fact or human judgment.
+- Justification logic makes the composition of admitted reasons inspectable
+  when an active task needs it. The initial non-factive `J0`/`J(CS)` layer does
+  not turn a source, model response, formal check, or correspondence into truth;
+  each transition requires a separate, versioned premise or bridge.
 - Curry's account of mathematical language explains how mathematical discourse
   becomes more precise without attaining absolute precision; formalization
   relocates questions of interpretation into the definitions rather than
@@ -91,6 +101,19 @@ idea, proof skeleton, and detailed source proof appear only when requested.
 The current code is read-only and uses no formal artifact, model service,
 session record, database, or network request. Interpretive guide text is marked
 as an AI proposal; exact statements and proofs are identified as source text.
+
+The next bounded increment is specified in
+`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. After Stage 4 mechanically obtains the
+relevant formal facts and the mathematician reviews the selected
+manuscript--Lean correspondence, it will check one explicit warrant route for
+`lem:range-lifting-pullback-section` in a separate Lean sidecar. The planned
+command is `theorem-terminal why PATH/TO/rs_Appendix_A.tex`. Because the first
+CLI is stateless, `why` will not assume an earlier command: it will cumulatively
+present the Appendix orientation, selected result's role and statement, idea,
+proof skeleton, available technical detail, and reviewed correspondence in
+Kallenberg order before the warrant. This experiment is specified but not yet
+implemented; the commands documented below are the complete current command
+set.
 
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
@@ -240,6 +263,8 @@ problem families before selecting a problem.
 - `UX_SPEC.md` — the mathematical workflow the system supports.
 - `CODEX_PLAN.md` — staged implementation plan.
 - `AGENTS.md` — instructions for Codex and other coding agents.
+- `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` — the bounded warrant-composition
+  experiment and its cut line.
 
 ## First corpus
 
@@ -260,6 +285,12 @@ references become obsolete as either source changes. The experiment will test
 which locators, dependency lists, and checking facts can be regenerated
 mechanically; which proposed correspondences can be checked during mathematical
 work; and which assessments require mathematical judgment.
+
+The justification-logic slice uses the same selected Appendix A result only
+after its mathematical role, statement, proof structure, and relevant formal
+counterpart have been inspected. It tests whether a checked reason term makes
+the formal-proof-policy and formal--manuscript bridges recoverable without
+placing formal logic before study.
 
 The first implementation does not ingest a large reference. After its two
 initial experiments have been evaluated, a separately authorized experiment

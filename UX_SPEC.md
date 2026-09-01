@@ -16,7 +16,7 @@ or examine generated mathematics. The mathematician begins the mathematical
 work in the ordinary medium appropriate to it. Theorem Terminal supplies source
 context, prior work, computations, and assistance when relevant.
 
-Four constraints follow from `VISION.md` and apply throughout this
+Five constraints follow from `VISION.md` and apply throughout this
 specification.
 
 **Mathematical work comes first.** The interface must not require a subject map,
@@ -41,6 +41,12 @@ mathematician writes the mathematical question and may remove context but
 completes no purpose or provenance form. All other workspace history and private
 notes are excluded by default. No source or work artifact is transmitted in the
 background.
+
+**Warrant is explicit, separate, and late.** A justification view may show a
+checked derivation relative to named admitted premises. It never presents
+contextual derivability as source identity, external verification, truth, or
+human acceptance, and it never precedes the mathematical study that made the
+warrant question relevant.
 
 ---
 
@@ -135,6 +141,17 @@ Formalization — when available
 Verification — when applicable
 ```
 
+`why` is a separate, explicitly requested post-correspondence view, not an
+earlier Kallenberg level. In the first stateless CLI it assumes no prior command
+or hidden session state. It cumulatively presents the source's purpose and
+organization, central concepts and results, the selected result's role and
+statement, governing idea, proof skeleton, available technical detail, and
+reviewed formal correspondence in that order before displaying the exact claim
+and context versions, admitted premises, term, derivation steps, checker result,
+and separately labeled provenance and verification records. Its conclusion is
+labeled “derivable relative to these admitted premises and policy,” never
+“true,” “known,” or “verified.”
+
 **The statement precedes the proof idea.** Everything above the statement
 answers *why am I reading this*; everything below answers *why is it true*.
 
@@ -192,6 +209,12 @@ requests. They preserve the selected context, exact application-supplied request
 content, provider, requested and resolved model identifiers, limits, non-secret
 settings, status, and any raw response. They are operational provenance, not
 mathematical work the mathematician must restate.
+
+`JustificationDerivation` records, when present, come from checked certificates
+and exact context snapshots. Their `PremiseAdmission`s expose the external basis
+and scope of every source, verification, correspondence, or model-derived reason
+used. No such record is required before ordinary mathematical work, and the
+Python interface renders rather than rechecks the justification calculus.
 
 **Correspondence authoring.** Linking two source occurrences is a mathematical
 judgment. The kind of relation is explicit because `formalizes`, `restates`, and
@@ -365,11 +388,24 @@ correspondence record.
    dependencies, axiom usage, and verification status.
 5. Check explicit correspondences and resolve any discrepancy exposed by the
    mathematical or formal work.
-6. Resume later from the preserved work product or perform a related task.
+6. For the bounded justification experiment, explicitly request `why` for
+   `lem:range-lifting-pullback-section` after the correspondence has been
+   reviewed.
+7. Inspect the immutable manuscript claim, exact proposition of
+   `Dom.exists_total_lift_iff_rangeLiftPullback_section`, pinned
+   kernel-attestation claim, separately admitted bridges, and checked
+   \(J_0\) certificate.
+8. Change a source, formal environment, or admission in a test fixture. Confirm
+   that a successor context deactivates only the dependent current route while
+   preserving the old certificate for its pinned snapshot.
+9. Resume later from the preserved work product or perform a related task.
 
 **Acceptance.** The session restores enough specific context to continue work
 after an interruption. Its formal features are tested only on objects for which
-formal material exists.
+formal material exists. The warrant slice succeeds when its displayed
+application term exposes the formal-proof-policy and formal--manuscript bridges,
+reports only contextual derivability, and supports later inspection without
+requiring logic entry before study.
 
 The first session tests problem-centered learning in an unformalized source. The
 second tests re-entry and optional informal/formal correspondence in an existing
@@ -411,6 +447,8 @@ The interface has failed if:
 - large-corpus study requires manual semantic classification before a
   mathematical question can be pursued;
 - a formal proof is treated as available or required when none exists;
+- formal-logic entry or premise maintenance is required before mathematical
+  study;
 - problem solving is secondary to browsing or record maintenance;
 - assistance reveals a solution before the mathematician requests that level of
   help;
@@ -425,6 +463,11 @@ The interface has failed if:
 - review measures lookup or self-description instead of mathematical
   performance;
 - verification status is read as comprehension;
+- contextual derivability is presented as truth, knowledge, or external
+  verification;
+- a `Correspondence` automatically creates a logical implication or premise;
+- justification sum is displayed as confidence, corroboration, independence,
+  or evidential weight;
 - navigation degenerates into a formal dependency-graph browser;
 - preserving work costs more attention than resuming it saves;
 - discrepancy detection produces more irrelevant interruptions than useful

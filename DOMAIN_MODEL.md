@@ -1,10 +1,15 @@
-# DOMAIN_MODEL.md — v5
+# DOMAIN_MODEL.md — v6
 
 Draft. Companion to `VISION.md` (why the system exists), `UX_SPEC.md` (what a
 mathematician does with it), and `CODEX_PLAN.md` (staged implementation).
 
 Fixes entities and invariants. Does not fix storage technology, schema syntax,
 or GUI framework.
+
+Changes from v5: non-factive justification terms, immutable premise admissions,
+versioned contexts, and checked derivations added as a separate warrant class;
+provenance, verification, correspondence, admission, and derivability kept
+orthogonal; the bounded Appendix A slice excludes JAM and factive profiles.
 
 Changes from v4: source-published cross-references and the boundary of
 large-corpus ingestion made explicit; diagrams made first-class work artifacts
@@ -33,27 +38,36 @@ For a body of mathematics under study, the model must represent:
 - formal statements, formal proofs, and mechanically generated facts when they
   are available;
 - what has been checked, by what method, and at what revision;
+- how explicitly admitted reasons compose in a checked non-factive
+  justification derivation when an active task requires that account;
 - observed task events and review state generated from those events.
 
 ## Non-goals
 
 - Not a Lean documentation browser. Formal artifacts are one optional
   representation class among several.
-- Not a proof assistant. Nothing here elaborates, checks, or rewrites proofs.
+- Not a proof assistant. Nothing here elaborates, checks, or rewrites
+  mathematical or Lean proofs. The optional sidecar checks only derivations in
+  the explicit justification object language.
 - Not a single-source system, and not a system whose objects originate in a
   formal development.
 - Not a questionnaire about a mathematician's internal state.
 - Not a manually maintained classification of competence.
 - Not a general chat client, prompt manager, multi-provider orchestration layer,
   or autonomous-agent system.
+- Not a requirement to encode all mathematical reasoning in logic, and not an
+  initial implementation of factive justification, introspection,
+  Justification Awareness Models, Fitting semantics, or epistemic scores.
 
 ## Orthogonal information classes
 
 Source content, mathematical work, model-call records, provenance, verification,
-task evidence, and generated review state are distinct. The model must not infer
-one directly from another: a model response is neither source content nor
-verification, provenance is not verification, verification is not retention,
-and a recorded task event is not a claim about an internal mental state.
+premise admission, justification derivability, task evidence, and generated
+review state are distinct. The model must not infer one directly from another:
+a model response is neither source content nor verification, provenance is not
+admission, verification is not a formal--informal bridge, a checked derivation
+does not verify the truth of its conclusion, verification is not retention, and
+a recorded task event is not a claim about an internal mental state.
 
 ---
 
@@ -146,8 +160,10 @@ targets, declaration names, problem numbers, and corpus tags. A correspondence
 keyed to line numbers is invalidated silently by every edit to its source, and
 `Lean/docs/AppendixA.md` illustrates the exposure — roughly fifty line
 references against fifty-seven mapping rows, with nothing to detect drift.
-Stable locators on the manuscript side require adding `\label`s to
-`rs_Appendix_A.tex`; no formal exporter substitutes for that.
+The selected result already has the stable locator
+`lem:range-lifting-pullback-section`. Remaining positional manuscript
+references require `\label`s before correspondence maintenance expands to
+them; no formal exporter substitutes for those locators.
 
 ---
 
@@ -308,6 +324,175 @@ MathematicalRelation
 
 ---
 
+## Claims and explicit justifications
+
+This information class represents how admitted reasons compose. It is used only
+when an active mathematical task needs an inspectable warrant path. The first
+profiles are the non-factive Artemov--Fitting systems \(J_0\) and \(J(CS)\).
+
+### ClaimAtomVersion
+
+An immutable opaque proposition in the justification language. Mathematical
+content remains in its exact representations rather than being reduced to the
+atom identifier.
+
+```
+ClaimAtomVersion
+    id
+    display_name
+    assertion       immutable canonical opaque proposition payload
+    representation_refs [SourceOccurrence | Representation | WorkArtifact
+                         | FormalFact]
+    content_hash
+    supersedes      optional ClaimAtomVersion
+```
+
+Matching names or normalized text never merge atom versions. A documentary
+claim about exact source bytes, a claim that a passage expresses a theorem, a
+formal judgment, a kernel-attestation claim, and the manuscript theorem are
+different atoms.
+
+### JustificationTerm and JustificationFormula
+
+Pure syntax. Terms contain no artifact binding, provenance, admission, or
+mutable status.
+
+```
+JustificationTerm
+    constructor     variable | constant | application | sum
+    name            for variable or constant
+    operands        ordered [JustificationTerm]
+    structural_hash
+
+JustificationFormula
+    constructor     atom | bottom | implication | reason_assertion
+    atom            optional ClaimAtomVersion
+    term            optional JustificationTerm
+    operands        ordered [JustificationFormula]
+    structural_hash
+```
+
+Application composes a reason for an implication with a reason for its
+antecedent. Sum records alternative reason availability for the same formula;
+it does not mean corroboration, independence, probability, consensus, or
+weight.
+
+### ConstantSpecification and JustificationProfile
+
+```
+ConstantSpecification
+    id
+    membership_scheme versioned decidable predicate over formulas
+    well_formedness   enforced by constructor | checked certificate
+    revision
+    structural_hash
+
+JustificationProfile
+    id
+    system          J0 | J(CS)
+    syntax_version
+    rule_version
+    constant_specification required for J(CS), absent for J0
+    checker
+    checker_version
+```
+
+A constant specification \(CS\) is a downward-closed set of nested assertions
+\(c_n:\cdots:c_1:A\), where \(n\geq1\) and \(A\) is a logical axiom instance:
+every shorter suffix of a member also belongs to \(CS\). It is never a trust
+list for sources, people, model providers, or theorem provers. Both \(J_0\) and
+\(J(CS)\) permit constants as terms; only \(J(CS)\) admits a proof step by
+membership in its named, versioned, decidable \(CS\). An axiomatically
+appropriate \(CS\) supplies every axiom instance at every positive nesting depth
+and cannot be finite. A derivation's footprint is only the finite subset of
+\(CS\) members actually invoked as axioms. It is not thereby a constant
+specification; even if it is downward-closed and hence forms a finite constant
+specification, it is not axiomatically appropriate.
+
+The constructor or certificate for a `ConstantSpecification` must establish
+that every member terminates in a logical axiom instance and that membership is
+closed under shorter suffixes. An arbitrary decidable predicate is not a
+constant specification.
+
+### PremiseAdmission and JustificationContext
+
+```
+PremiseAdmission
+    id
+    premise         JustificationFormula
+    basis_refs      [SourceOccurrence | Representation | WorkArtifact
+                    | FormalFact | Verification | Correspondence]
+    admitted_by     person | named policy
+    rationale       optional prose or WorkArtifact
+    scope
+    at
+    supersedes      optional PremiseAdmission, for a replacement
+
+JustificationContext
+    id
+    profile         JustificationProfile
+    admissions      ordered [PremiseAdmission]
+    predecessor     optional JustificationContext
+    created_at
+```
+
+An admission is a scoped decision to include an exact justification formula as
+a premise. A source, digest, model response, check, or correspondence supplies
+possible external basis and never creates an admission automatically.
+Withdrawal creates a successor context that omits the old admission.
+Qualification creates a new claim or formula and a new admission, then a
+successor context that uses it. Old admissions, contexts, and certificates are
+unchanged. `PremiseAdmission` is an application-level context record, not the
+acceptance predicate of an Artemov--Fitting Justification Awareness Model.
+
+### JustificationDerivation
+
+```
+JustificationDerivation
+    id
+    profile         JustificationProfile
+    context         JustificationContext
+    steps           ordered derivation DAG
+    conclusion      JustificationFormula
+    cs_footprint    exact CS members invoked as axioms
+    certificate
+    dependency_refs exact record revisions used
+    bundle_digest
+```
+
+A derivation presented as checked has one `Verification` whose subject is that
+derivation and whose method is `justification_checker`; the attestation is not a
+second copy of the derivation.
+
+**Invariant J — derivability is contextual.** A successful check establishes
+only that the conclusion is derivable under the recorded context and profile.
+It does not establish truth, knowledge, understanding, provenance, external
+verification of the conclusion, or unqualified human acceptance. The checker
+attestation verifies only that the certificate denotes the recorded contextual
+derivation. The first Appendix A output must say “derivable relative to these
+admitted premises and policy.”
+
+**Invariant K — every bridge is explicit.** Provenance, verification,
+correspondence, and model output never become premises automatically. A
+`formalizes`, `restates`, or `same_claim` correspondence does not create
+\(F_L\to F_M\); any implication used by application is a separately admitted
+formula with its own scope and basis.
+
+**Invariant L — syntax and history are immutable.** Artifact bindings belong to
+admissions, not terms. Only a derivation DAG must be acyclic; source, claim, and
+correspondence graphs may contain legitimate cycles. A derivation remains
+check-valid in its original context when a successor context omits an admission,
+although its route is no longer active in the successor.
+
+**Invariant M — the checker boundary is not duplicated.** A separate Lean deep
+embedding checks the calculus and emits a deterministic bundle. The Python
+application may validate the known schema, profile, dependencies, and a trusted
+expected digest and render the result; it does not reimplement the derivation
+checker. A bundle hash is useful only relative to an independently retained
+expected digest and is not a signature.
+
+---
+
 ## Representations and model calls
 
 ### Representation
@@ -336,8 +521,8 @@ outside Theorem Terminal and imported for study, it is recorded as a
 `SourceOccurrence` in the appropriate source and represented with provenance
 whose `Provenance.origin = ai_proposal` and whose author is the model. A
 proposal generated by Theorem Terminal is represented in the same way but need
-not have an external source occurrence. Verification and human adoption remain
-separate records.
+not have an external source occurrence. Verification, later human use or
+rejection, and admission as a justification premise remain separate records.
 
 AI-generated mathematics may be imported, compared, verified, explained, and
 reviewed whether or not Theorem Terminal itself generates assistance.
@@ -483,15 +668,21 @@ has one origin and one or more attestations.
 ```
 Verification
     subject         representation | object | problem | work_artifact
+                    | justification_derivation
     claim           what the method checked
     method          lean_kernel | computer_algebra | external_checker
                     | peer_review | independent_reproduction
-                    | source_comparison
+                    | source_comparison | justification_checker
     status          verified | failed | inconclusive | stale
     axioms          for kernel checks
     environment     revision
     at
 ```
+
+For `method = justification_checker`, the claim is limited to successful
+certificate checking under the exact recorded profile and context. It does not
+verify the mathematical truth of the derivation's conclusion or discharge any
+premise admission.
 
 ### Provenance
 
@@ -505,13 +696,13 @@ Provenance
     model_call     optional ModelCall
     response_span  optional exact offsets in ModelCall.raw_response
     at
-    adopted_by     set when a human accepts an ai_proposal
-    adopted_at
 ```
 
-**Invariant D — adoption does not change origin.** An adopted AI proposal
-retains `Provenance.origin = ai_proposal` with an adoption record. No view
-may present a generated claim as machine-extracted or as human judgment.
+**Invariant D — later treatment does not change origin.** An AI proposal
+retains `Provenance.origin = ai_proposal`. Use, correction, rejection, or
+abandonment is recorded by `TaskEvidence`; admission as a justification premise
+is recorded by `PremiseAdmission`. Neither changes origin. No view may present a
+generated claim as machine-extracted or as human judgment.
 
 ---
 
@@ -612,6 +803,10 @@ it has been checked. Any correctness claim is recorded separately as a
 - Any assumption that ingestion establishes identity across sources.
 - Provider-side conversation state as the canonical mathematical context.
 - Autonomous chains of model calls or a general conversation archive.
+- Global factivity, positive introspection, Fitting-world semantics, or a
+  Justification Awareness Model in the first warrant slice.
+- Any inference from checked contextual derivability to mathematical truth,
+  knowledge, understanding, or competence.
 
 ## Open questions
 
@@ -624,3 +819,5 @@ it has been checked. Any correctness claim is recorded separately as a
 - How subject-level maps are produced — curated by hand, derived from
   `SourceNode` trees, proposed by AI, or some combination — and how a curated map
   survives a source revision.
+- Which later mathematical tasks warrant another justification profile or claim
+  route after the first Appendix A certificate is evaluated.

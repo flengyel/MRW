@@ -1,6 +1,7 @@
 # CODEX_PLAN.md
 
-Plan for the first experimental implementation (Stages −1 through 5) and a
+Plan for the first experimental implementation (Stages −1 through 5), including
+one bounded justification-logic slice inside the Appendix A experiment, and a
 separately authorized later large-corpus experiment (Stage 6). It inherits the
 purposes in `VISION.md`, the entities and invariants in `DOMAIN_MODEL.md`, and
 the workflows in `UX_SPEC.md`.
@@ -48,6 +49,9 @@ Stages 0 through 5 do not attempt:
 - encoding the 29-decision taxonomy or predictive-framework schema developed
   for science and engineering [@priceDetailedCharacterizationExpert2021;
   @wiemanHowBecomeSuccessful2022];
+- a corpus-wide justification graph, factive justification profile,
+  Justification Awareness Model, Fitting semantics, introspection,
+  multi-agent epistemic model, or acceptance questionnaire;
 - multi-user operation, synchronization, accounts, or deployment.
 
 AI-generated theorems, proofs, explanations, and examples may be studied with
@@ -76,6 +80,10 @@ problem-centered target tests learning, task-mediated model assistance, and
 retention. It includes at least one bounded model call attached to an actual
 obstruction in the work. Success in either does not establish success in the
 other.
+
+The justification-logic work is a bounded vertical slice of the Appendix A
+target, not a third corpus experiment. It begins only after the active task has
+reached and reviewed the exact selected manuscript--Lean correspondence.
 
 ---
 
@@ -260,22 +268,121 @@ signatures, dependencies, axiom usage, verification status, and environment
 revision mechanically. Nothing parses Lean source in Python, and generated facts
 are never hand-edited.
 
+**Task 4.2 — bounded explicit-justification experiment.** Begin only after the
+selected manuscript and Lean statements and their directional correspondence
+have been reviewed. Implement a separate Lean deep embedding of pure
+Artemov--Fitting \(J_0/J(CS)\) term and formula syntax, immutable premise
+contexts, contextual Hilbert derivations, constant specifications, and a
+decidable certificate checker. Prove that every accepted certificate denotes a
+derivation in the represented profile. Do not modify the Lean kernel or identify
+Lean proof terms with justification terms.
+
+The sidecar is owned by this repository at `lean/` as a standalone Lake
+project. Before executable sidecar code or a checked bundle is committed, pin
+and test `lean/lean-toolchain`, `lean/lakefile.toml`, the source directory
+`lean/TheoremTerminal/Justification/`, the fixture
+`lean/TheoremTerminal/Justification/AppendixA.lean`, and the
+`justification_bundle` executable. The canonical commands are:
+
+```text
+cd lean
+lake build
+lake env lean TheoremTerminal/Justification/AppendixA.lean
+lake exe justification_bundle --output \
+  ../src/theorem_terminal/data/appendix_a_justification.json
+```
+
+Also record and reproduce the exact check command in the pinned Categorical
+Rice--Shapiro environment that supplies the external basis for \(K\). Stop Task
+4.2 before code if that environment, command, and output are unavailable; a
+source declaration or an entry in `Lean/check_axioms.lean` is reconnaissance,
+not a run attestation.
+
+Use these immutable opaque atoms:
+
+- \(F_M\): the statement at
+  `lem:range-lifting-pullback-section`, bound to the reviewed normalized
+  manuscript revision;
+- \(F_L\): the exact proposition of
+  `Dom.exists_total_lift_iff_rangeLiftPullback_section`, bound to a frozen
+  Categorical Rice--Shapiro repository and Lean environment; and
+- \(K\): a claim describing one exact kernel attestation, including declaration
+  type, repository revision, toolchain, imports, options, axiom report, and
+  checked artifact identity.
+
+Let \(k\), \(p\), and \(a\) be justification variables and record separate
+contextual admissions
+
+\[
+k:K,\qquad p:(K\to F_L),\qquad a:(F_L\to F_M),
+\]
+
+and check
+
+\[
+a\cdot(p\cdot k):F_M.
+\]
+
+The checking record supplies the external basis for \(k\), but does not create
+the formal-proof-policy bridge \(p\). The reviewed correspondence supplies
+relevant basis for considering \(a\), but does not create that directional
+implication automatically. The certificate is a \(J_0\) derivation because it
+uses only contextual premises and \(J_0\) rules. It is therefore valid in every
+\(J(CS)\) profile extending the same \(J_0\) syntax and rule version, with an
+empty constant-specification footprint. Both profiles permit constants as
+terms. Separate profile-boundary tests must reject a proof step tagged
+`constant specification` in \(J_0\), accept it in \(J(CS)\) exactly when its
+formula belongs to the named \(CS\), and permit the same formula as a contextual
+premise in \(J_0\). They also reject a purported \(CS\) member that does not
+terminate in an axiom instance and a membership representation that is not
+closed under suffixes.
+
+Emit one deterministic, versioned audit bundle only from a successfully checked
+derivation. Ship that frozen bundle with the Python package and pin its exact
+byte digest in code. Python validates the known bundle schema, profile, exact
+source and environment bindings, and independently retained expected digest,
+then renders `theorem-terminal why PATH/TO/rs_Appendix_A.tex`. This is a
+cumulative, explicitly requested post-correspondence view that assumes no prior
+command or hidden session state and restates the Kallenberg levels before the
+warrant. Python does not reproduce the derivation checker. No hand-authored
+placeholder may claim checked status. A clean wheel-install smoke test must
+confirm that the frozen bundle and expected digest are package data and that
+`why` works without a local Lean installation.
+
 **Deliverable.** Explicit correspondences between source occurrences and formal
-artifacts, plus `Discrepancy` records for an identified mismatch. Formal views do
-not appear for objects without formal material.
+artifacts, plus `Discrepancy` records for an identified mismatch. For Task 4.2,
+also the Lean checker and soundness boundary, one checked Appendix A
+certificate, its deterministic audit bundle, bundle-integrity and profile tests,
+standard-library Python validation and rendering, and an explicit `why` command.
+Formal and warrant views do not appear for objects without the corresponding
+material.
 
 **Acceptance.** A change such as renaming a declaration or adding a hypothesis
 invalidates only the exact affected correspondence or source-linked claim. A
 conceptual dependency is not rejected merely because it is absent from the
-formal dependency graph.
+formal dependency graph. The warrant slice displays the derivation above and
+labels it “derivable relative to these admitted premises and policy.” The Lean
+checker rejects malformed certificates and unauthorized
+constant-specification steps. Python bundle validation rejects schema, profile,
+dependency, and independently retained expected-digest mismatches without
+checking derivations. A successor context deactivates the dependent current
+route while preserving the old checked certificate for its pinned context.
+Existing `orient` and `study` behavior remains unchanged, and neither command
+requires Lean, a warrant record, or user-authored logic.
 
 **Non-goals.** No Mathlib-scale extraction, elaboration traces, proof-state
 archive, automatic repair, notifications, or formal coverage outside the
-selected region.
+selected region. No factivity, positive introspection, JAM, Fitting semantics,
+quantifiers, multi-agent logic, corpus-wide warrant graph, confidence score, or
+Python reimplementation of the checker.
 
 **Checkpoint.** If existing tooling already supplies the required facts and
 connections, use it and omit extraction work. If discrepancy detection produces
-irrelevant conflicts, narrow or remove it.
+irrelevant conflicts, narrow or remove it. Task 4.2 determines the certificate
+representation, serialization, interface, and appropriate scope for expansion.
+If a particular form interrupts the mathematics or fails later reconstruction,
+revise that form or halt expansion without collapsing provenance, verification,
+admission, and derivability into generic support edges.
 
 ---
 
@@ -287,8 +394,9 @@ should be removed or revised before another corpus is attempted.
 **Deliverable.** An evaluation based on completed and abandoned
 `WorkArtifact`s, `TaskEvidence`, source-recovery operations, `ModelCall`s,
 outbound context, raw responses, proposals used or rejected, incorrect or
-premature assistance, successful resumptions, and later mathematical tasks. No
-questionnaire about comprehension is introduced.
+premature assistance, checked warrant paths, bridge admissions, successful
+resumptions, and later mathematical tasks. No questionnaire about comprehension
+is introduced.
 
 **Acceptance.** Each component receives a decision supported by session
 evidence: retain, revise, or remove. Model assistance is retained only if at
@@ -297,6 +405,13 @@ correction, provenance, disclosure, and record-keeping costs. Stage 6 may begin
 only after the problem-centered and Appendix A experiments have each been
 evaluated on their own terms and the large-corpus experiment has been authorized
 separately.
+
+The separation of provenance, verification, premise admission, and contextual
+derivability, and the source-faithful non-factive \(J_0/J(CS)\) basis, are
+architectural commitments. Evaluation may revise or defer the certificate
+representation, serialization, `why` interface, and scope of expansion; it must
+not collapse the warrant layer into an untyped `supports` edge or another
+information class.
 
 **Non-goals.** No scale-up, production deployment, or claim that one successful
 session establishes a general theory of mathematical understanding.
@@ -334,10 +449,13 @@ and Kerodon, and no production-scale deployment.
 
 ## Manuscript prerequisite
 
-Before Stage 4, add `\label`s to `rs_Appendix_A.tex` and reference labels rather
-than line numbers. `UX_SPEC.md` and `DOMAIN_MODEL.md` require stable locators,
-and the current correspondence contains roughly fifty positional references to
-a manuscript that changes. This is a manuscript edit; no exporter substitutes
+The selected warrant experiment already has the stable manuscript locator
+`lem:range-lifting-pullback-section`; no new label is required for Task 4.2.
+Before correspondence maintenance expands to other positional entries in
+`Lean/docs/AppendixA.md`, add `\label`s to the corresponding statements or
+sections in `rs_Appendix_A.tex` and reference labels rather than line numbers.
+The current correspondence contains roughly fifty positional references to a
+manuscript that changes. This is a later manuscript edit; no exporter substitutes
 for it.
 
 ---
@@ -366,7 +484,9 @@ Implementation is authorized. The execution order is:
 
 1. Appendix A orientation and mathematical re-entry (Stage 3);
 2. resumption of actual Appendix A work (the relevant part of Stage 2);
-3. optional formal correspondence when useful to that work (Stage 4);
+3. optional formal correspondence and, when explicitly requested after that
+   correspondence is reviewed, the bounded Appendix A justification experiment
+   (Stage 4);
 4. top-down orientation and benchmark work in the problem-centered source
    (Stage 0), followed by only the application support that work requires
    (Stage 1);

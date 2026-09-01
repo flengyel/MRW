@@ -17,6 +17,9 @@ implementation).
 * Theorem Terminal may request task-specific assistance from a configured model;
   the request, selected context, raw response, and resulting proposals retain
   their provenance.
+* When a task needs an account of how reasons compose, a non-factive
+  justification-logic layer records checked derivability relative to explicit,
+  versioned premises and bridges.
 * AI may increase the rate of mathematical production and the amount of work
   requiring evaluation, reconstruction, and integration.
 * Kallenberg's top-down approach determines the order in which available
@@ -41,9 +44,10 @@ The first implementation will be an experiment, not a completed system or a
 product specification. It will begin with mathematical work and test whether
 source locations, problem attempts, proof drafts, computations, diagrams,
 bounded model calls, generated proposals, correspondences, formal facts,
-corrections, and review results support later reconstruction and application.
-It will also determine which information can be obtained or updated mechanically
-and which decisions require mathematical judgment.
+checked warrant paths, corrections, and review results support later
+reconstruction and application. It will also determine which information can be
+obtained or updated mechanically and which decisions require mathematical
+judgment.
 
 Theorem Terminal is an assistant's assistant. A mathematician may consult
 several machine assistants for exploration and criticism, a proof assistant for
@@ -90,8 +94,8 @@ mathematicians can disagree about whether an argument is a valid proof
 [@inglisMathematiciansDifferentStandards2013], and an argument's attributed
 source can affect how it is read and judged
 [@weberInfluenceSourcesReading2013]. Theorem Terminal must keep source,
-verification, epistemic status, and later judgments distinct in its data model
-and interface.
+verification, admitted warrant, checked derivability, epistemic status, and
+later judgments distinct in its data model and interface.
 
 ## 2. Activities Theorem Terminal supports
 
@@ -242,7 +246,52 @@ maintained by hand. And verification is an attestation about a claim, not the
 origin of the claim: a proof written by a human, or proposed by a machine, and
 then checked, has one origin and one or more attestations.
 
-## 6. Retention and later reconstruction
+## 6. Explicit warrants are a separate aspect
+
+Provenance answers where a claim or artifact came from. Verification records a
+scoped check. Neither records how one admitted reason combines with another.
+Theorem Terminal therefore adopts a bounded justification-logic layer for
+explicit warrant composition, based initially on the non-factive
+Artemov--Fitting systems \(J_0\) and \(J(CS)\)
+([Chapter 2](https://doi.org/10.1017/9781108348034.003)).
+
+Mathematical statements remain immutable opaque atoms in the first experiment.
+Justification application records composition: a reason for \(F\to G\) and a
+reason for \(F\) yield a reason for \(G\). Sum records alternative availability
+for the same formula; it is not a confidence score, independent corroboration,
+or evidential weight. The global system is non-factive: storing or deriving
+\(t:F\) does not add \(F\) as a theorem.
+
+Every source, formal check, correspondence, and AI proposal remains outside the
+calculus until an explicit, versioned premise or bridge admits its scoped use.
+A kernel check of \(F_L\) does not establish a manuscript claim \(F_M\), and a
+`formalizes` correspondence does not silently create \(F_L\to F_M\). The first
+Appendix A certificate therefore displays separately the checking-event reason,
+the formal-proof-policy bridge, and the reviewed directional
+formal--manuscript bridge.
+
+This layer is late and optional in the workflow. It follows the result's role,
+statement, governing idea, proof structure, and relevant formal correspondence;
+it never becomes preliminary logic entry. Lean checks a deep embedding and
+emits a versioned certificate bundle. The ordinary application renders that
+bundle without reimplementing the logic and continues to orient and study the
+source when Lean is absent. The exact first slice and cut line are fixed in
+`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`.
+
+The first command-line interface is stateless. Its explicitly requested `why`
+view therefore assumes no earlier command or hidden session state. It is a
+cumulative post-correspondence view: it presents purpose and organization,
+central concepts and results, the selected result's role and statement,
+governing idea, proof skeleton, available technical detail, and reviewed formal
+correspondence in that order before the warrant.
+
+Factivity, positive introspection, Justification Awareness Models, Fitting
+semantics, quantifiers, and corpus-wide warrant graphs are not part of the first
+slice. Its evaluation determines how the adopted warrant layer should be
+represented and where it is useful, not whether provenance and verification
+should be collapsed back into a single status.
+
+## 7. Retention and later reconstruction
 
 Review is included because rereading an entire corpus or project after every
 interruption does not scale. The system may schedule short mathematical tasks
@@ -263,7 +312,7 @@ elapsed time, and assistance used. It is not a self-assigned level of knowledge.
 No review session requires completion of fields describing what the
 mathematician believes is understood.
 
-## 7. What this is not
+## 8. What this is not
 
 Not a Lean documentation browser. Not a theorem database. Not a proof assistant,
 a search engine, or a formalization tool.
@@ -283,7 +332,7 @@ mathematician to orient, solve, reconstruct, integrate, or review work that
 could not otherwise be handled adequately. Existing tools should be used when
 they already provide the required function.
 
-## 8. Corpora with different available evidence
+## 9. Corpora with different available evidence
 
 `flengyel/Categorical_Rice_Shapiro` is the first corpus. Its named
 mathematical re-entry and informal/formal-correspondence test uses
@@ -322,7 +371,7 @@ mathematician asked to complete a form describing an internal mental state.
 Provenance attaches to source claims, machine proposals, computations, formal
 checks, and mathematical work artifacts.
 
-## 9. Tests of the design
+## 10. Tests of the design
 
 The design makes distinct, falsifiable claims:
 
@@ -331,6 +380,11 @@ The design makes distinct, falsifiable claims:
   obtained source locations, dependencies, axiom information, and change
   detection reduce the effort required to maintain source-to-formal
   correspondences.
+- The bounded justification-logic slice tests whether one checked, explicit
+  reason term makes the formal-proof-policy and formal--manuscript bridges for
+  `lem:range-lifting-pullback-section` easier to inspect and reconstruct. It
+  fails operationally if it requires logic entry before mathematical work,
+  hides an admission, or conflates derivability with truth or verification.
 - A problem-centered trial tests whether mathematical work can begin from a
   selected problem without prior formalization or manual population of a
   knowledge model. It fails if preparation of the system requires more effort
