@@ -12,8 +12,9 @@ projects into the existing generic claim, admission, context, and derivation
 records rather than a bespoke trust or support schema.
 
 Changes from v5: non-factive justification terms, immutable premise admissions,
-versioned contexts, and checked derivations added as a separate warrant class;
-provenance, verification, correspondence, admission, and derivability kept
+versioned contexts, and checked derivations added as a distinct, integral
+warrant class; provenance, verification, correspondence, admission, and
+derivability kept
 orthogonal; the bounded Appendix A slice excludes JAM and factive profiles.
 
 Changes from v4: source-published cross-references and the boundary of
@@ -52,8 +53,9 @@ For a body of mathematics under study, the model must represent:
 - Not a Lean documentation browser. Formal artifacts are one optional
   representation class among several.
 - Not a proof assistant. Nothing here elaborates, checks, or rewrites
-  mathematical or Lean proofs. The optional sidecar checks only derivations in
-  the explicit justification object language.
+  mathematical or Lean proofs. The integral justification-logic subsystem is
+  implemented in Lean and checks only derivations in its explicit object
+  language; invoking that checker is task-dependent.
 - Not a single-source system, and not a system whose objects originate in a
   formal development.
 - Not a questionnaire about a mathematician's internal state.
@@ -511,20 +513,20 @@ correspondence graphs may contain legitimate cycles. A derivation remains
 check-valid in its original context when a successor context omits an admission,
 although its route is no longer active in the successor.
 
-**Invariant M — the checker boundary is not duplicated.** A separate Lean deep
-embedding checks the calculus and emits a deterministic bundle. The Python
-application may validate the known schema, profile, dependencies, and a trusted
-expected digest and render the result; it does not reimplement the derivation
-checker. The emitted bundle contains no digest of itself. For a frozen fixture
-shipped with the application, the expected SHA-256 of the complete bundle bytes
-is pinned in Python package or code metadata. For a bundle generated at runtime,
-the application computes SHA-256 over the complete bytes received at the
-trusted sidecar handoff and atomically retains it in the immutable
-`Verification`, with the artifact identity, checker and environment revision,
-profile, and context. Subsequent validation compares the bytes with that
-separate retained value. A bundle hash detects later substitution relative to
-its independently retained expected digest; it is not a signature and does not
-authenticate the producer.
+**Invariant M — the checker boundary is not duplicated.** The integral warrant
+subsystem is implemented as a Lean deep embedding that checks the calculus and
+emits a deterministic bundle. The Python application may validate the known
+schema, profile, dependencies, and a trusted expected digest and render the
+result; it does not reimplement the derivation checker. The emitted bundle
+contains no digest of itself. For a frozen fixture shipped with the application,
+the expected SHA-256 of the complete bundle bytes is pinned in Python package or
+code metadata. For a bundle generated at runtime, the application computes
+SHA-256 over the complete bytes received at the trusted Lean-checker handoff and
+atomically retains it in the immutable `Verification`, with the artifact
+identity, checker and environment revision, profile, and context. Subsequent
+validation compares the bytes with that separate retained value. A bundle hash
+detects later substitution relative to its independently retained expected
+digest; it is not a signature and does not authenticate the producer.
 
 ---
 

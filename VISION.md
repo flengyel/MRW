@@ -253,7 +253,7 @@ maintained by hand. And verification is an attestation about a claim, not the
 origin of the claim: a proof written by a human, or proposed by a machine, and
 then checked, has one origin and one or more attestations.
 
-## 6. Explicit warrants are a separate aspect
+## 6. Explicit warrants are an integral, distinct aspect
 
 Provenance answers where a claim or artifact came from. Verification records a
 scoped check. Neither records how one admitted reason combines with another.
@@ -261,6 +261,9 @@ Theorem Terminal therefore adopts a bounded justification-logic layer for
 explicit warrant composition, based initially on the non-factive
 Artemov--Fitting systems \(J_0\) and \(J(CS)\)
 ([Chapter 2](https://doi.org/10.1017/9781108348034.003)).
+This is an integral warrant subsystem, not an external add-on. Its separation
+from provenance and verification is a semantic boundary: those records answer
+different questions and must not be collapsed into one status.
 
 Mathematical statements remain immutable opaque atoms in the first experiment.
 Justification application records composition: a reason for \(F\to G\) and a
@@ -290,13 +293,15 @@ computation, or formal checking directly supplies a reason \(v:F\); then the
 honest mathematical warrant is \(v:F\), while the model call remains causal
 assistance recorded by provenance and task evidence.
 
-This layer is late and optional in the workflow. It follows the result's role,
-statement, governing idea, proof structure, and relevant formal correspondence;
-it never becomes preliminary logic entry. Lean checks a deep embedding and
-emits a versioned certificate bundle. The ordinary application renders that
-bundle without reimplementing the logic and continues to orient and study the
-source when Lean is absent. The exact first slice and cut line are fixed in
-`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`.
+Use of this integral subsystem is late and task-dependent in the workflow. It
+follows the result's role, statement, governing idea, proof structure, and
+relevant formal correspondence; it never becomes preliminary logic entry. The
+term and formula syntax, axiom profiles, contextual derivations, constant
+specifications, certificate checker, and certificate-soundness theorem are
+implemented in Lean. The ordinary Python application validates and renders the
+Lean-generated versioned bundle without reimplementing the logic and continues
+to orient and study the source when Lean is absent. The exact first slice and
+cut line are fixed in `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`.
 
 The first command-line interface is stateless. Its explicitly requested `why`
 view therefore assumes no earlier command or hidden session state. It is a

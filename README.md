@@ -109,17 +109,23 @@ proposal; exact statements and proofs are identified as source text. `orient`
 and `study` require no formal artifact and do not load one.
 
 The bounded justification-logic increment in
-`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` is now executable. A standalone Lean
-sidecar checks one explicit warrant route for
-`lem:range-lifting-pullback-section` and generates a deterministic audit bundle.
-The Python package retains the bundle's expected SHA-256 outside that bundle,
+`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` is now executable. Justification logic
+is an integral warrant subsystem of Theorem Terminal. Its syntax, selected
+axiom profiles, contextual derivations, constant specifications, certificate
+checker, and certificate-soundness theorem are implemented in the
+repository-owned `lean/` Lake project. That Lean implementation checks one
+explicit warrant route for `lem:range-lifting-pullback-section` and generates a
+deterministic audit bundle. The Python package does not reimplement the
+calculus: it retains the bundle's expected SHA-256 outside that bundle,
 validates its schema and exact bindings without rechecking the derivation, and
 renders it with
 `theorem-terminal why PATH/TO/rs_Appendix_A.tex`. `why` is stateless: it
 cumulatively presents the Appendix orientation, selected result's role and
 statement, idea, proof skeleton, available technical detail, and reviewed
 correspondence in Kallenberg order before the admitted premises and checked
-warrant. Running `why` from an installed package does not require Lean.
+warrant. Checker invocation is task-dependent. Running `why` from an installed
+package does not require Lean because it consumes the packaged, already checked
+bundle.
 
 The specification also fixes the next AI-integration boundary. One selected,
 lossless response span may be projected into the existing generic warrant layer

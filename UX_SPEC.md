@@ -42,7 +42,9 @@ completes no purpose or provenance form. All other workspace history and private
 notes are excluded by default. No source or work artifact is transmitted in the
 background.
 
-**Warrant is explicit, separate, and late.** A justification view may show a
+**Warrant is explicit, distinct, and task-triggered.** The justification-logic
+warrant subsystem is integral to the architecture, but its view is presented
+only when an active task makes the warrant question relevant. It may show a
 checked derivation relative to named admitted premises. It never presents
 contextual derivability as source identity, external verification, truth, or
 human acceptance, and it never precedes the mathematical study that made the

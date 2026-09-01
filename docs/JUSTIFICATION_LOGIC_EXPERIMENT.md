@@ -145,7 +145,7 @@ self-contained replacement bundle. The emitted bundle contains no digest of
 itself. For the frozen Appendix A fixture, Python package or code metadata stores
 the expected SHA-256 computed over the complete emitted bytes. For a bundle
 created at runtime, the application computes that digest over the final bytes
-received at the trusted sidecar handoff and atomically stores it outside the
+received at the trusted Lean-checker handoff and atomically stores it outside the
 bundle in the immutable checker `Verification`, together with the artifact
 identity, checker and environment revision, profile, and context.
 
@@ -226,9 +226,12 @@ or qualification.
 
 ## Implementation prerequisite
 
-The sidecar belongs to this repository under a standalone `lean/` Lake project.
-Before executable sidecar code or a checked bundle is committed, the repository
-must contain and test:
+The justification-logic warrant subsystem is integral to Theorem Terminal and
+is implemented in Lean under the repository-owned, standalone `lean/` Lake
+project. `Standalone` identifies a build and dependency boundary; it does not
+make the subsystem an external or optional add-on. Before executable Lean
+checker code or a checked bundle is committed, the repository must contain and
+test:
 
 - `lean/lean-toolchain`, pinning the exact Lean toolchain;
 - `lean/lakefile.toml`, pinning the Lake environment and dependencies;
@@ -258,9 +261,10 @@ list is not a substitute for the run.
    Lean statements.
 2. Freeze the atom identities, source revision, formal environment, and bridge
    admissions for one route.
-3. Implement a separate Lean deep embedding of the syntax and selected
-   \(J_0/J(CS)\) derivability fragment, a decidable certificate checker, and a
-   theorem that accepted certificates denote derivations.
+3. Implement the warrant calculus and checker in Lean as a deep embedding of the
+   syntax and selected \(J_0/J(CS)\) derivability fragment, with a decidable
+   certificate checker and a theorem that accepted certificates denote
+   derivations.
 4. Check the one Appendix A certificate and emit a deterministic versioned
    audit bundle.
 5. Let the standard-library Python application validate the bundle schema,
@@ -275,8 +279,8 @@ list is not a substitute for the run.
    semantics.
 
 Lean proof terms and justification terms remain different objects. The Lean
-sidecar does not modify the kernel. Existing `orient` and `study` commands
-remain read-only and work without Lean installed.
+implementation does not modify the kernel. Existing `orient` and `study`
+commands remain read-only and work without Lean installed.
 
 ## Reuse by the AI-interaction experiment
 
@@ -284,14 +288,14 @@ After this slice has produced a compiled generic checker and pinned profile,
 Stage 1 reuses them for one selected response span at a genuine mathematical
 obstruction. It does not create an AI-specific logic or epistemic data model.
 After the call is finalized and the selected representation and admissions are
-frozen, the Lean sidecar is invoked explicitly in its pinned build environment
-and emits a separate deterministic AI-warrant bundle. Model-response handling
+frozen, the Lean justification checker is invoked explicitly in its pinned build
+environment and emits a deterministic AI-warrant bundle. Model-response handling
 does not invoke Lean implicitly; Python later validates and renders the frozen
 bundle. Because this bundle is produced after a runtime call, its expected
-digest cannot be package-pinned in advance. At the trusted sidecar handoff, the
-application computes SHA-256 over the exact final bundle bytes and atomically
-retains it in the generic immutable checker `Verification`, with the bundle
-identity, checker and environment revision, profile, and context. Later reads
+digest cannot be package-pinned in advance. At the trusted Lean-checker
+handoff, the application computes SHA-256 over the exact final bundle bytes and
+atomically retains it in the generic immutable checker `Verification`, with the
+bundle identity, checker and environment revision, profile, and context. Later reads
 compare the bytes with that retained digest; the bundle never asserts its own
 expected digest.
 

@@ -207,16 +207,16 @@ epistemic schema. If that checker has not been compiled and tested, Stage 1 may
 preserve calls and proposals but may not describe an AI warrant as checked.
 
 For the designated evaluation fixture, finalize the call, freeze the selected
-response representation and admissions, and invoke the Lean sidecar explicitly
-in its pinned build environment. The sidecar emits a separate deterministic
-AI-warrant bundle. At the trusted handoff, Python computes SHA-256 over the
-exact final bytes and atomically retains it in the generic immutable checker
-`Verification`, with the bundle identity, checker and environment revision,
-profile, and context. Later validation compares the bundle with that external
-digest; a runtime bundle cannot be package-pinned in advance and never contains
-its own expected digest. Python renders the bundle later; handling a model
-response never invokes Lean implicitly, and ordinary problem work requires
-neither Lean nor logic entry.
+response representation and admissions, and invoke the Lean justification
+checker explicitly in its pinned build environment. The checker emits a
+deterministic AI-warrant bundle. At the trusted handoff, Python computes
+SHA-256 over the exact final bytes and atomically retains it in the generic
+immutable checker `Verification`, with the bundle identity, checker and
+environment revision, profile, and context. Later validation compares the
+bundle with that external digest; a runtime bundle cannot be package-pinned in
+advance and never contains its own expected digest. Python renders the bundle
+later; handling a model response never invokes Lean implicitly, and ordinary
+problem work requires neither Lean nor logic entry.
 
 **Acceptance.** A proof problem and a computational or example-driven problem
 can each be attempted end to end. Both sessions begin with the problem, work
@@ -315,16 +315,18 @@ are never hand-edited.
 
 **Task 4.2 — bounded explicit-justification experiment.** Begin only after the
 selected manuscript and Lean statements and their directional correspondence
-have been reviewed. Implement a separate Lean deep embedding of pure
-Artemov--Fitting \(J_0/J(CS)\) term and formula syntax, immutable premise
-contexts, contextual Hilbert derivations, constant specifications, and a
-decidable certificate checker. Prove that every accepted certificate denotes a
-derivation in the represented profile. Do not modify the Lean kernel or identify
-Lean proof terms with justification terms.
+have been reviewed. Implement the integral warrant subsystem in Lean as a deep
+embedding of pure Artemov--Fitting \(J_0/J(CS)\) term and formula syntax,
+immutable premise contexts, contextual Hilbert derivations, constant
+specifications, and a decidable certificate checker. Prove that every accepted
+certificate denotes a derivation in the represented profile. Do not modify the
+Lean kernel or identify Lean proof terms with justification terms.
 
-The sidecar is owned by this repository at `lean/` as a standalone Lake
-project. Before executable sidecar code or a checked bundle is committed, pin
-and test `lean/lean-toolchain`, `lean/lakefile.toml`, the source directory
+The Lean implementation is owned by this repository at `lean/` as a standalone
+Lake project. Here `standalone` names its build and dependency boundary, not its
+architectural status: the warrant subsystem is integral to Theorem Terminal.
+Before executable checker code or a checked bundle is committed, pin and test
+`lean/lean-toolchain`, `lean/lakefile.toml`, the source directory
 `lean/TheoremTerminal/Justification/`, the fixture
 `lean/TheoremTerminal/Justification/AppendixA.lean`, and the
 `justification_bundle` executable. The canonical commands are:

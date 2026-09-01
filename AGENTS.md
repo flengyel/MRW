@@ -32,8 +32,14 @@ score, subject inventory, or formal declaration before mathematical work.
 Ordinary TeX, Sage, code, diagram, and note files remain the primary work
 artifacts.
 
-The Python application uses only the standard library. The optional Lean
-justification sidecar is a separate checked component. Run the Python checks:
+The justification-logic warrant subsystem is architecturally integral to
+Theorem Terminal. Its object language, profiles, derivations, constant
+specifications, certificate checker, and certificate-soundness theorem are
+implemented in the repository-owned `lean/` Lake project. The Python
+application uses only the standard library: it validates and renders
+Lean-generated checked bundles and never reimplements the calculus. Building or
+invoking the Lean checker is task-dependent, and ordinary orientation, study,
+and problem work remain usable without Lean. Run the Python checks:
 
 ```text
 PYTHONPATH=src python -m unittest discover -s tests -v
@@ -45,13 +51,13 @@ an active mathematical task supplies an observed requirement. The first formal
 increment is the bounded \(J_0/J(CS)\) checker and Appendix A fixture in
 `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. After that checker and profile exist,
 Stage 1 is authorized to reuse them for the single AI-interaction fixture
-specified there; it must not add a second logic or checker. Both uses remain
-optional in ordinary mathematical sessions and do not alter or gate `orient`,
-`study`, or problem work. The Appendix and AI fixtures are nevertheless required
-acceptance tests once their respective authorized evaluation stages are
-executed. Do not commit a checked bundle or executable sidecar until the pinned
-Lean command has actually compiled and checked it; never hand-author a
-placeholder that claims checked status.
+specified there; it must not add a second logic or checker. Checker invocation
+for either fixture remains task-dependent in ordinary mathematical sessions and
+does not alter or gate `orient`, `study`, or problem work. The Appendix and AI
+fixtures are nevertheless required acceptance tests once their respective
+authorized evaluation stages are executed. Do not commit a checked bundle or
+executable Lean checker until the pinned Lean command has actually compiled and
+checked it; never hand-author a placeholder that claims checked status.
 
 For the warrant layer:
 
@@ -66,10 +72,10 @@ For the warrant layer:
 - sum is alternative reason availability, not corroboration, confidence,
   independence, or weight;
 - Python validates and renders the trusted Lean-generated bundle and never
-  reimplements the derivation checker; and
+  reimplements the derivation checker;
 - pin the frozen Appendix fixture's expected bundle digest in package metadata,
   but retain a runtime AI fixture's exact-byte digest outside its bundle in the
-  generic immutable checker `Verification` created at the trusted sidecar
+  generic immutable checker `Verification` created at the trusted Lean-checker
   handoff; and
 - do not add factivity, introspection, JAM, Fitting semantics, or a corpus-wide
   justification graph in this slice.
