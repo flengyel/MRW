@@ -103,22 +103,23 @@ selected result without displaying its statement, proof, or formal counterpart.
 `study` then reveals the selected result's role and statement; its governing
 idea, proof skeleton, and detailed source proof appear only when requested.
 
-The current code is read-only and uses no formal artifact, model service,
-session record, database, or network request. Interpretive guide text is marked
-as an AI proposal; exact statements and proofs are identified as source text.
+The current code is read-only and uses no model service, session record,
+database, or network request. Interpretive guide text is marked as an AI
+proposal; exact statements and proofs are identified as source text. `orient`
+and `study` require no formal artifact and do not load one.
 
-The next bounded increment is specified in
-`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. After Stage 4 mechanically obtains the
-relevant formal facts and the mathematician reviews the selected
-manuscript--Lean correspondence, it will check one explicit warrant route for
-`lem:range-lifting-pullback-section` in a separate Lean sidecar. The planned
-command is `theorem-terminal why PATH/TO/rs_Appendix_A.tex`. Because the first
-CLI is stateless, `why` will not assume an earlier command: it will cumulatively
-present the Appendix orientation, selected result's role and statement, idea,
-proof skeleton, available technical detail, and reviewed correspondence in
-Kallenberg order before the warrant. This experiment is specified but not yet
-implemented; the commands documented below are the complete current command
-set.
+The bounded justification-logic increment in
+`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` is now executable. A standalone Lean
+sidecar checks one explicit warrant route for
+`lem:range-lifting-pullback-section` and generates a deterministic audit bundle.
+The Python package retains the bundle's expected SHA-256 outside that bundle,
+validates its schema and exact bindings without rechecking the derivation, and
+renders it with
+`theorem-terminal why PATH/TO/rs_Appendix_A.tex`. `why` is stateless: it
+cumulatively presents the Appendix orientation, selected result's role and
+statement, idea, proof skeleton, available technical detail, and reviewed
+correspondence in Kallenberg order before the admitted premises and checked
+warrant. Running `why` from an installed package does not require Lean.
 
 The specification also fixes the next AI-integration boundary. One selected,
 lossless response span may be projected into the existing generic warrant layer
@@ -207,6 +208,7 @@ theorem-terminal study "$appendixA"
 theorem-terminal study "$appendixA" --through idea
 theorem-terminal study "$appendixA" --through skeleton
 theorem-terminal study "$appendixA" --through details
+theorem-terminal why "$appendixA"
 ```
 
 macOS or Linux:
@@ -217,6 +219,7 @@ theorem-terminal study "$appendix_a"
 theorem-terminal study "$appendix_a" --through idea
 theorem-terminal study "$appendix_a" --through skeleton
 theorem-terminal study "$appendix_a" --through details
+theorem-terminal why "$appendix_a"
 ```
 
 If the installed console command is unavailable, use
@@ -237,9 +240,16 @@ The commands reveal cumulative levels of detail:
 - `--through idea` also displays the proposed governing idea.
 - `--through skeleton` also displays the proposed proof skeleton.
 - `--through details` also displays the exact proof from the source.
+- `why` first displays all of those mathematical levels and the reviewed
+  informal--formal correspondence. It then displays exact claim versions,
+  premise admissions and bases, the checked derivation, the pinned external
+  Lean attestation, related source bindings, and the separate justification
+  verification. Its conclusion is “derivable relative to these admitted
+  premises and policy,” not a claim of truth, knowledge, or understanding.
 
-No command currently writes to the manuscript, creates a session record,
-contacts a model service, or loads the Lean development.
+No command writes to the manuscript, creates a session record, contacts a model
+service, or invokes Lean. Only `why` reads the packaged, Lean-generated audit
+bundle; `orient` and `study` remain independent of it.
 
 ### Reviewed source revision
 
@@ -250,9 +260,10 @@ The interpretive guide has been reviewed for the normalized SHA-256 revision
 ```
 
 Line-ending differences between Windows and Unix checkouts are normalized. Any
-other source change causes `orient` and `study` to exit with status 2 rather
-than present an unreviewed guide. Review the changed mathematics, revise the
-guide and its tests when necessary, and only then update the reviewed digest.
+other source change causes `orient`, `study`, and `why` to exit with status 2
+rather than present an unreviewed guide. Review the changed mathematics, revise
+the guide and its tests when necessary, and only then update the reviewed
+digest and any affected warrant bindings.
 
 ### Verify the checkout
 
@@ -262,6 +273,42 @@ From the repository root with the virtual environment active:
 python -m unittest discover -s tests -v
 python -m compileall -q src tests
 ```
+
+The packaged audit bundle is
+`src/theorem_terminal/data/appendix_a_justification.json`. Its complete final
+bytes have expected SHA-256
+
+```text
+3ca6794e8e9f2ec6f7d6bd08662ac19df2a4496287e8559aec556b3febdd81ed
+```
+
+The bundle contains no digest of itself. The expected value and the selected
+profile, context, checker, environment, attestation, and source bindings are
+retained separately in Python code. A digest match detects replacement relative
+to that retained value; it is not a signature.
+
+Maintainers with the pinned Lean toolchain can reproduce the checker and bundle
+from the repository root:
+
+```text
+cd lean
+lake build
+lake test
+lake env lean TheoremTerminal/Justification/AppendixA.lean
+bundle_check_dir="$(mktemp -d)"
+lake exe justification_bundle --output "$bundle_check_dir/first.json"
+lake exe justification_bundle --output "$bundle_check_dir/second.json"
+cmp "$bundle_check_dir/first.json" "$bundle_check_dir/second.json"
+sha256sum "$bundle_check_dir/first.json"
+cmp "$bundle_check_dir/first.json" \
+  ../src/theorem_terminal/data/appendix_a_justification.json
+```
+
+On macOS, use `shasum -a 256` in place of `sha256sum`.
+
+The generated file and its external expected digest must be updated only after
+the full build, fixture check, deterministic double export, and identity audit
+succeed. Ordinary installation and use of `why` require none of these commands.
 
 The same order will govern a later experiment with Daniel A. Marcus's *Number
 Fields*: orient in the book or chapter and its central concepts, results, and

@@ -137,7 +137,11 @@ def validate_source(source: SourceDocument) -> None:
         )
 
 
-def render_orientation(source: SourceDocument) -> str:
+def _orientation_lines(
+    source: SourceDocument,
+    *,
+    include_stop: bool,
+) -> list[str]:
     validate_source(source)
     lines = [
         "Appendix A — top-down orientation",
@@ -161,20 +165,31 @@ def render_orientation(source: SourceDocument) -> str:
             "   lifting as a pullback-section condition",
             "   Label: lem:range-lifting-pullback-section",
             "   This is the result prepared for guided study in this increment.",
-            "   This orientation stops before the statement and proof.",
-            "",
-            "Next action:",
-            "   Select lem:range-lifting-pullback-section with the study command.",
         ]
     )
-    return "\n".join(lines)
+    if include_stop:
+        lines.extend(
+            [
+                "   This orientation stops before the statement and proof.",
+                "",
+                "Next action:",
+                "   Select lem:range-lifting-pullback-section with the study command.",
+            ]
+        )
+    return lines
 
 
-def render_study(
+def render_orientation(source: SourceDocument) -> str:
+    return "\n".join(_orientation_lines(source, include_stop=True))
+
+
+def _study_lines(
     source: SourceDocument,
     label: str,
-    through: StudyLevel = StudyLevel.STATEMENT,
-) -> str:
+    *,
+    through: StudyLevel,
+    include_header: bool,
+) -> list[str]:
     validate_source(source)
     guide = _GUIDES.get(label)
     if guide is None:
@@ -184,19 +199,27 @@ def render_study(
         )
     occurrence = extract_labeled_statement(source.text, label)
     title = occurrence.title or label
-    lines = [
-        f"Appendix A — {title}",
-        f"Source: {source.path}",
-        f"Source revision (SHA-256): {source.revision}",
-        f"Stable locator: {label}",
-        "Guide origin: AI proposal. Statement and detailed proof are source text.",
-        "",
-        "Role in Appendix A",
-        guide.role,
-        "",
-        "Statement",
-        occurrence.statement_tex,
-    ]
+    lines = []
+    if include_header:
+        lines.extend(
+            [
+                f"Appendix A — {title}",
+                f"Source: {source.path}",
+                f"Source revision (SHA-256): {source.revision}",
+                f"Stable locator: {label}",
+                "Guide origin: AI proposal. Statement and detailed proof are source text.",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "Role in Appendix A",
+            guide.role,
+            "",
+            "Statement",
+            occurrence.statement_tex,
+        ]
+    )
     if through >= StudyLevel.IDEA:
         lines.extend(["", "Governing idea", guide.idea])
     if through >= StudyLevel.SKELETON:
@@ -211,4 +234,33 @@ def render_study(
             if occurrence.proof_tex is not None
             else "No proof immediately follows this statement in the source."
         )
+    return lines
+
+
+def render_study(
+    source: SourceDocument,
+    label: str,
+    through: StudyLevel = StudyLevel.STATEMENT,
+) -> str:
+    return "\n".join(
+        _study_lines(source, label, through=through, include_header=True)
+    )
+
+
+def render_complete_study(
+    source: SourceDocument,
+    label: str = "lem:range-lifting-pullback-section",
+) -> str:
+    """Render every mathematical level before a later warrant view."""
+
+    lines = _orientation_lines(source, include_stop=False)
+    lines.extend(["", "4. Selected result in detail"])
+    lines.extend(
+        _study_lines(
+            source,
+            label,
+            through=StudyLevel.DETAILS,
+            include_header=False,
+        )
+    )
     return "\n".join(lines)
