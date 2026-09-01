@@ -1,7 +1,8 @@
 # Justification-logic experiment
 
-Status: accepted bounded augmentation to the Appendix A experiment. This
-document specifies the first slice; it does not claim that every mathematical
+Status: the Appendix A warrant slice and the offline documentary AI-response
+bridge are executable. The provider-backed Stage 1 mathematical-assistance
+trial remains pending. This document does not claim that every mathematical
 reason should be encoded in justification logic.
 
 ## Purpose
@@ -245,6 +246,7 @@ The canonical compile, fixture-check, and export commands are:
 ```text
 cd lean
 lake build
+lake test
 lake env lean TheoremTerminal/Justification/AppendixA.lean
 lake exe justification_bundle --output \
   ../src/theorem_terminal/data/appendix_a_justification.json
@@ -282,14 +284,68 @@ Lean proof terms and justification terms remain different objects. The Lean
 implementation does not modify the kernel. Existing `orient` and `study`
 commands remain read-only and work without Lean installed.
 
+## Executable offline documentary bridge
+
+The generic checker supports the first executable AI-response integration
+boundary without making a provider request. The sequence is deliberately
+split:
+
+1. `project-response` validates a finalized `ModelCall`, its exact raw-response
+   UTF-8 digest, and a lossless half-open byte span. It freezes the corresponding
+   `Representation` and constructs the canonical documentary atom (D). It
+   creates no premise.
+2. `admit-documentary` is the explicit action that creates the admission
+   (m:D). Its basis names the exact call, digest, span, and representation; its
+   operational request has `checked_at: null`.
+3. `check-documentary` repeats Python's strict digest, span, assertion-hash, and
+   cross-link validation, rejects a pre-stamped request, stamps canonical UTC
+   from the application clock, and enforces ModelCall finalization ≤ admission
+   ≤ check. It verifies the pinned Linux x86-64/WSL source, compiled module,
+   and executable identities, then runs the repository-owned Lean executable.
+   Its internal transport command is
+   `justification_bundle --documentary-warrant REQUEST --stdout`. Lean treats
+   atom hashes as opaque identities and constructs and checks a one-node
+   contextual-premise certificate whose conclusion is \(m:D\); the raw transport
+   executable is not an independent provenance-hash validator.
+4. Python captures that single emitted byte stream, retains it as the runtime
+   bundle, and creates the generic immutable checker `Verification` from those
+   same bytes. The external `Verification` records the actual checker-handoff
+   time separately from the earlier admission and context time. The bundle
+   contains no expected digest of itself.
+
+The complete public command sequence is documented in `README.md`. The
+unstamped output of `admit-documentary` is intentionally not direct Lean input.
+Direct maintainer inspection of the internal Lean transport uses the stamped
+`package/request.json` retained by a successful public check:
+
+```text
+cd lean
+lake exe justification_bundle \
+  --documentary-warrant PATH/TO/package/request.json \
+  --stdout
+```
+
+The projection and checker-request files are operational serializations of the
+existing `ModelCall`, `Representation`, `ClaimAtomVersion`,
+`PremiseAdmission`, `JustificationContext`, and `JustificationDerivation`
+records. They are not new domain entities or an AI-specific trust structure.
+
+This milestone emits no substantive atom (F), no admission (r:(D\to F)),
+and no derivation (r\cdot m:F). The non-derivability regression confirms that
+documentary (m:D) alone does not yield a distinct substantive (F). The
+static multibyte fixture tests mechanics only and is not recorded as an actual
+assistance event.
+
 ## Reuse by the AI-interaction experiment
 
-After this slice has produced a compiled generic checker and pinned profile,
-Stage 1 reuses them for one selected response span at a genuine mathematical
-obstruction. It does not create an AI-specific logic or epistemic data model.
+Stage 1 will reuse this executable boundary for one selected response span at a
+genuine mathematical obstruction. That later trial adds an actual provider
+request, mathematical use or disposition of the proposal, and either an
+explicitly based substantive route or an honest no-bridge outcome. It does not
+create an AI-specific logic or epistemic data model.
 After the call is finalized and the selected representation and admissions are
 frozen, the Lean justification checker is invoked explicitly in its pinned build
-environment and emits a deterministic AI-warrant bundle. Model-response handling
+environment and emits a deterministic documentary-warrant bundle. Model-response handling
 does not invoke Lean implicitly; Python later validates and renders the frozen
 bundle. Because this bundle is produced after a runtime call, its expected
 digest cannot be package-pinned in advance. At the trusted Lean-checker
@@ -353,7 +409,7 @@ If acceptance or knowledge-production semantics are later required, they need a
 separately specified justification-logic extension; they are not fields added
 to `ModelCall` or `Representation`.
 
-The Stage 1 reuse is accepted only when:
+The later Stage 1 trial is accepted only when:
 
 - the call, raw-response digest, span, and lossless representation identify one
   immutable documentary atom;
@@ -397,5 +453,7 @@ verification, and warrant back into one status.
 
 No JAM, general `why` database, corpus-wide justification graph, model-call
 requirement inside the Appendix A slice, Stacks/Kerodon change, or
-nonmathematical application belongs to this slice. The subsequent Stage 1 reuse
-above is a separate fixture over the same generic checker.
+nonmathematical application belongs to this slice. The executable offline
+documentary bridge is a mechanics fixture over the same generic checker. It is
+not the subsequent Stage 1 trial and supplies no evidence that model assistance
+improved mathematics.

@@ -40,7 +40,7 @@ create them. Tao observes that the growth of the literature, the increasing
 length and specialization of major proofs, and the strain on the refereeing
 system all predate modern AI [@taoMathematicsAgeAI2026].
 
-The first implementation will be an experiment, not a completed system or a
+The first implementation is an experiment, not a completed system or a
 product specification. It will begin with mathematical work and test whether
 source locations, problem attempts, proof drafts, computations, diagrams,
 bounded model calls, generated proposals, correspondences, formal facts,
@@ -410,10 +410,11 @@ The design makes distinct, falsifiable claims:
   `lem:range-lifting-pullback-section` easier to inspect and reconstruct. It
   fails operationally if it requires logic entry before mathematical work,
   hides an admission, or conflates derivability with truth or verification.
-- A problem-centered trial tests whether mathematical work can begin from a
-  selected problem without prior formalization or manual population of a
-  knowledge model. It fails if preparation of the system requires more effort
-  than beginning the mathematics directly.
+- A problem-centered trial tests whether, after top-down orientation, detailed
+  mathematical work can begin from a selected problem without prior
+  formalization or manual population of a knowledge model. It fails if
+  preparation of the system requires more effort than beginning the mathematics
+  directly.
 - A later large-corpus trial tests whether, beginning from a subject-level
   question, a mathematician can identify an ordered sequence of relevant source
   locations, study selected material, preserve the resulting work, resume after
@@ -429,6 +430,11 @@ The design makes distinct, falsifiable claims:
   work supplies the mathematical warrant. An incorrect or irrelevant proposal
   may instead end with no bridge and no warrant for its substantive claim; its
   rejection or abandonment remains task evidence.
+  An offline fixture may establish exact response binding, explicit
+  documentary admission, Lean-checker reuse, and runtime-bundle integrity. It
+  is not evidence that model assistance was useful, because it contains no
+  genuine obstruction, provider request, proposal use, or subsequent
+  mathematical work.
 - Retention support is useful only if later reconstruction, application, or
   related problem solving improves. A self-rating is not evidence.
 - Existing formal tools should be used when they already provide the required

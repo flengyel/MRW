@@ -6,3 +6,5 @@ import TheoremTerminal.Justification.Certificate
 import TheoremTerminal.Justification.Semantics
 import TheoremTerminal.Justification.Bundle
 import TheoremTerminal.Justification.AppendixA
+import TheoremTerminal.Justification.AIInteraction
+import TheoremTerminal.Justification.AIInteractionBundle

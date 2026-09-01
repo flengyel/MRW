@@ -103,10 +103,10 @@ selected result without displaying its statement, proof, or formal counterpart.
 `study` then reveals the selected result's role and statement; its governing
 idea, proof skeleton, and detailed source proof appear only when requested.
 
-The current code is read-only and uses no model service, session record,
-database, or network request. Interpretive guide text is marked as an AI
-proposal; exact statements and proofs are identified as source text. `orient`
-and `study` require no formal artifact and do not load one.
+The Appendix A study path is read-only and uses no model service, session
+record, database, or network request. Interpretive guide text is marked as an
+AI proposal; exact statements and proofs are identified as source text.
+`orient` and `study` require no formal artifact and do not load one.
 
 The bounded justification-logic increment in
 `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` is now executable. Justification logic
@@ -127,12 +127,32 @@ warrant. Checker invocation is task-dependent. Running `why` from an installed
 package does not require Lean because it consumes the packaged, already checked
 bundle.
 
-The specification also fixes the next AI-integration boundary. One selected,
-lossless response span may be projected into the existing generic warrant layer
-only through explicit claim atoms and premise admissions. The model call remains
-provenance, and independent reconstruction may warrant the mathematics without
-placing the call in the derivation. This AI-to-warrant integration is specified
-but is not current executable behavior.
+The first AI-integration bridge mechanics are now executable offline.
+`project-response` validates a finalized `ModelCall`, including the SHA-256
+digest of its exact raw-response UTF-8 bytes, and selects a lossless half-open
+byte span whose endpoints must be UTF-8 boundaries. It writes an immutable
+`Representation` projection and the canonical documentary atom
+\(D=\operatorname{ModelProduced}(C,h,s,R)\). This operation creates no premise
+admission.
+
+`admit-documentary` is a separate, explicit action that creates a request
+containing the documentary admission \(m:D\). It creates no substantive
+mathematical atom \(F\), no bridge \(D\to F\), and no mathematical warrant
+beyond the documentary claim.
+
+`check-documentary` explicitly invokes the repository-owned Lean justification
+checker in its pinned environment. Lean checks a one-node \(J_0\) certificate
+whose conclusion is \(m:D\) relative to the displayed admission and emits a
+deterministic runtime bundle. Python does not reimplement the calculus: it
+captures the exact emitted bytes, computes their SHA-256 digest, and records the
+artifact identity, checker and environment revisions, profile, context, and
+digest in a generic immutable `Verification` outside the bundle.
+
+This offline path establishes response binding, explicit admission, checker
+reuse, and trusted runtime handoff. It makes no provider request and does not
+satisfy the Stage 1 requirement for assistance at a genuine mathematical
+obstruction. It supplies no evidence that model assistance improved
+mathematical work.
 
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
@@ -173,6 +193,42 @@ python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -e .
 ```
+
+### WSL2 and Codex
+
+For the authorized WSL2 checkout, update `main`, enter the repository, and start
+Codex there so it discovers the root `AGENTS.md`:
+
+```bash
+cd /home/flengyel/src/theorem_terminal
+git pull --ff-only origin main
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+codex
+```
+
+The Lean and Lake installation already used by `/home/flengyel/src/PCats` can
+supply Elan's toolchain and download cache. Theorem Terminal does not import or
+execute the PCats Lake project for this bridge. Its own `lean/lean-toolchain`,
+`lean/lakefile.toml`, and `lean/lake-manifest.json` pin the checker build:
+
+```bash
+cd /home/flengyel/src/theorem_terminal/lean
+lake build
+lake test
+cd ..
+PYTHONPATH=src python -m unittest discover -s tests -v
+python -m compileall -q src tests
+```
+
+The current documentary-checker executable identity is pinned for Linux
+x86-64, including WSL2. Do not substitute a binary from PCats or another Lake
+project. A changed source, compiled module, or executable is rejected until the
+repository's identity bindings are deliberately reviewed and updated.
+Native Windows and macOS installations may still use `orient`, `study`, and the
+packaged `why` view; this increment's runtime `check-documentary` identity is
+Linux x86-64/WSL2 only.
 
 ### Locate Appendix A
 
@@ -253,9 +309,98 @@ The commands reveal cumulative levels of detail:
   verification. Its conclusion is “derivable relative to these admitted
   premises and policy,” not a claim of truth, knowledge, or understanding.
 
-No command writes to the manuscript, creates a session record, contacts a model
-service, or invokes Lean. Only `why` reads the packaged, Lean-generated audit
-bundle; `orient` and `study` remain independent of it.
+`orient`, `study`, and `why` do not write to the manuscript, create a session
+record, contact a model service, or invoke Lean. Only `why` reads the packaged,
+Lean-generated Appendix audit bundle; `orient` and `study` remain independent
+of it. The explicitly named bridge commands below write only their requested
+artifacts. None contacts a model service; only `check-documentary` invokes Lean.
+
+### Run the offline documentary bridge
+
+This synthetic regression exercises the integration mechanics; it makes no
+provider request, is not an actual assistance event, and supplies no evidence
+of mathematical usefulness. Build the pinned Linux
+x86-64/WSL checker first, then run from the repository root with the virtual
+environment active:
+
+```bash
+cd lean
+lake build
+lake test
+cd ..
+
+bridge_demo="$(mktemp -d)"
+
+theorem-terminal project-response \
+  tests/fixtures/mechanical_model_call.json \
+  --start-byte 17 \
+  --end-byte 26 \
+  --representation-id representation-mechanical-span-v1 \
+  --representation-version 1 \
+  --kind strategic_hint \
+  --claim-id claim-model-produced-mechanical-fixture-v1 \
+  --output "$bridge_demo/projection.json"
+
+theorem-terminal admit-documentary \
+  "$bridge_demo/projection.json" \
+  --fixture-id ai-documentary-mechanical-fixture-v1 \
+  --context-id ai-documentary-mechanical-context-v1 \
+  --admission-id admission-ai-documentary-mechanical-v1 \
+  --admitted-by-kind named_policy \
+  --admitted-by-id ai-documentary-mechanical-policy-v1 \
+  --at 2026-09-01T00:00:00Z \
+  --reason-variable m \
+  --rationale \
+    'Admit only that this synthetic finalized-call fixture contains the exact span.' \
+  --scope \
+    'Mechanical regression only; no substantive mathematical claim is admitted.' \
+  --derivation-id derivation-ai-documentary-mechanical-v1 \
+  --output "$bridge_demo/request.json"
+
+cmp "$bridge_demo/request.json" tests/fixtures/mechanical_admission.json
+
+theorem-terminal check-documentary \
+  "$bridge_demo/projection.json" \
+  "$bridge_demo/request.json" \
+  "$bridge_demo/package" \
+  --lean-root lean
+
+theorem-terminal show-documentary "$bridge_demo/package"
+```
+
+`project-response` requires a completed and finalized `ModelCall`, verifies the
+SHA-256 of its exact raw-response UTF-8 bytes, and accepts a half-open byte span
+whose endpoints must be UTF-8 boundaries. It creates a lossless
+`Representation` and documentary atom \(D\), but no premise. The fixture's
+span `[17, 26)` is the nine-byte text `α → β`.
+
+`admit-documentary` is the separate action that creates the explicit scoped
+premise \(m:D\). It does not invoke Lean and creates no substantive \(F\),
+\(D\to F\) bridge, or mathematical acceptance. Projection and request files
+are created with no-overwrite semantics.
+
+The admission request records `checked_at: null`. `check-documentary` first
+repeats Python's strict response, span, assertion
+hash, and cross-link checks. It then verifies every pinned checker source,
+compiled module, and executable digest before invoking the repository-owned Lean
+checker. Lean checks the one-node contextual-premise certificate and emits the
+bundle once on standard output. The command atomically retains
+`projection.json`, `request.json`, the exact `bundle.json` bytes, and a separate
+generic `verification.json` in the destination directory. Immediately before
+invoking Lean, the application—not the caller—stamps canonical UTC
+`checked_at`; the retained request, Lean's embedded check record, and the
+external `Verification` agree on that handoff time, separately from the earlier
+admission time. The external record also binds the exact retained projection
+and stamped request bytes. Existing destinations are refused.
+
+`show-documentary` reloads and revalidates those four files without invoking
+Lean and deliberately does not display the model's prose. The raw Lean
+`--documentary-warrant` interface is an internal transport boundary: Lean
+treats claim hashes as opaque atom identities, while the public Python path
+establishes the response and assertion hashes before Lean checks derivability.
+The retained digest detects changes relative to the immutable external
+`Verification`; it is not a digital signature and does not authenticate a
+maliciously replaced persistence store.
 
 ### Reviewed source revision
 

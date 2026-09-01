@@ -1,0 +1,42 @@
+{
+  "adapter_version": "mechanical-fixture-adapter-v1",
+  "completed_at": "2026-09-01T00:00:00Z",
+  "context_refs": [],
+  "effective_input": {
+    "messages": [
+      {
+        "content": "Return a non-evaluative multibyte fixture.",
+        "role": "user"
+      }
+    ]
+  },
+  "finalized_at": "2026-09-01T00:00:00Z",
+  "id": "model-call-mechanical-fixture-v1",
+  "in_reply_to": null,
+  "initiated_by": "person-mechanical-fixture",
+  "limits": {
+    "input_tokens": 100,
+    "output_tokens": 20,
+    "timeout_seconds": 30
+  },
+  "provider": "synthetic-fixture-provider",
+  "purpose": "strategic_hint",
+  "raw_response": "Fixture only — α → β.\n",
+  "raw_response_digest": "3edc5ac184de675fa0407c410569597f8a1bf4073d46fc3e65348c2c5dab2bd8",
+  "request_text": "Return the fixed mechanical fixture.",
+  "requested_at": "2026-09-01T00:00:00Z",
+  "requested_model": "synthetic-fixture-model",
+  "resolved_model": "synthetic-fixture-model-v1",
+  "response_id": "synthetic-fixture-response-v1",
+  "schema": "theorem-terminal.model-call",
+  "schema_version": 1,
+  "settings": {
+    "store": false,
+    "temperature": 0
+  },
+  "status": "completed",
+  "target": {
+    "id": "work-artifact-mechanical-fixture-v1",
+    "kind": "WorkArtifact"
+  }
+}

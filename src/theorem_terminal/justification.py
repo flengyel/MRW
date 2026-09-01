@@ -164,6 +164,34 @@ _REFERENCE_KEYS = frozenset({"kind", "id"})
 _REVISED_REFERENCE_KEYS = frozenset({"kind", "id", "revision"})
 _ACTOR_KEYS = frozenset({"kind", "id"})
 _CS_MEMBER_KEYS = frozenset({"id", "formula"})
+_RUNTIME_CHECKER_VERIFICATION_KEYS = frozenset(
+    {
+        "id",
+        "subject",
+        "claim",
+        "method",
+        "status",
+        "checker_revision",
+        "environment",
+        "profile",
+        "context",
+        "artifact_identity",
+        "artifact_digest",
+        "at",
+    }
+)
+_RUNTIME_ARTIFACT_IDENTITY_KEYS = frozenset(
+    {"schema", "schema_version", "fixture_id"}
+)
+_RUNTIME_ENVIRONMENT_WRAPPER_KEYS = frozenset(
+    {
+        "reported_checker_environment",
+        "reported_verification",
+        "runtime_checker",
+        "input_artifacts",
+    }
+)
+MAX_BUNDLE_BYTES = 2 * 1024 * 1024
 
 _SOURCE_BINDING_KEYS = {
     "source_occurrence": frozenset(
@@ -228,12 +256,41 @@ class JustificationBundleError(ValueError):
     """Raised when a checked-bundle artifact cannot be trusted or rendered."""
 
 
+def _freeze_json(value: Any) -> Any:
+    """Return an immutable, detached copy of a JSON-compatible value."""
+
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {key: _freeze_json(item) for key, item in value.items()}
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_json(item) for item in value)
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    raise TypeError("retained values must be JSON-compatible")
+
+
 @dataclass(frozen=True)
 class ExactBinding:
     """One independently retained exact value at a JSON path."""
 
     path: tuple[str | int, ...]
     value: object
+
+    def __post_init__(self) -> None:
+        detached_path = tuple(self.path)
+        if not detached_path or any(
+            isinstance(component, bool)
+            or not isinstance(component, (str, int))
+            or (isinstance(component, str) and not component)
+            or (isinstance(component, int) and component < 0)
+            for component in detached_path
+        ):
+            raise ValueError(
+                "exact-binding paths must contain strings or nonnegative integers"
+            )
+        object.__setattr__(self, "path", detached_path)
+        object.__setattr__(self, "value", _freeze_json(self.value))
 
 
 @dataclass(frozen=True)
@@ -249,6 +306,12 @@ class BundleExpectation:
     schema_version: int
     fixture_id: str
     exact_bindings: Sequence[ExactBinding] = ()
+
+    def __post_init__(self) -> None:
+        bindings = tuple(self.exact_bindings)
+        if any(not isinstance(binding, ExactBinding) for binding in bindings):
+            raise TypeError("exact_bindings must contain ExactBinding records")
+        object.__setattr__(self, "exact_bindings", bindings)
 
 
 @dataclass(frozen=True)
@@ -315,7 +378,13 @@ def _require_exact_keys(
         raise JustificationBundleError(f"{path} has wrong fields: {'; '.join(details)}")
 
 
-def _require_string(value: object, path: str, *, allow_empty: bool = False) -> str:
+def _require_string(
+    value: object,
+    path: str,
+    *,
+    allow_empty: bool = False,
+    allow_multiline: bool = False,
+) -> str:
     if not isinstance(value, str) or (not allow_empty and not value):
         qualifier = "a string" if allow_empty else "a non-empty string"
         raise JustificationBundleError(f"{path} must be {qualifier}")
@@ -323,8 +392,14 @@ def _require_string(value: object, path: str, *, allow_empty: bool = False) -> s
         (
             character
             for character in value
-            if (ord(character) < 0x20 and character not in "\n\t")
+            if (
+                ord(character) < 0x20
+                and not (allow_multiline and character in "\n\t")
+            )
             or 0x7F <= ord(character) <= 0x9F
+            or ord(character) in (0x061C, 0x200E, 0x200F)
+            or 0x202A <= ord(character) <= 0x202E
+            or 0x2066 <= ord(character) <= 0x2069
         ),
         None,
     )
@@ -639,8 +714,18 @@ def _validate_external_verifications(value: object) -> list[dict[str, object]]:
             "at",
         ):
             _require_string(verification[key], _path(path, key))
-        _require_string(verification["stdout"], _path(path, "stdout"), allow_empty=True)
-        _require_string(verification["stderr"], _path(path, "stderr"), allow_empty=True)
+        _require_string(
+            verification["stdout"],
+            _path(path, "stdout"),
+            allow_empty=True,
+            allow_multiline=True,
+        )
+        _require_string(
+            verification["stderr"],
+            _path(path, "stderr"),
+            allow_empty=True,
+            allow_multiline=True,
+        )
         _require_string_array(verification["command_argv"], _path(path, "command_argv"))
         _require_string_array(verification["axiom_report"], _path(path, "axiom_report"))
         for key in ("exit_code", "stdout_byte_length", "stderr_byte_length"):
@@ -745,14 +830,6 @@ def _validate_source_bindings(value: object) -> list[dict[str, object]]:
     return result
 
 
-def _freeze_json(value: Any) -> Any:
-    if isinstance(value, dict):
-        return MappingProxyType({key: _freeze_json(item) for key, item in value.items()})
-    if isinstance(value, list):
-        return tuple(_freeze_json(item) for item in value)
-    return value
-
-
 def _lookup_path(document: object, path: tuple[str | int, ...]) -> object:
     current = document
     rendered = "bundle"
@@ -781,11 +858,201 @@ def _normalize_json(value: object) -> object:
     return value
 
 
+def _validate_unicode_tree(value: object, path: str = "bundle", depth: int = 0) -> None:
+    if depth > 100:
+        raise JustificationBundleError("bundle JSON nesting exceeds 100 levels")
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8", errors="strict")
+        except UnicodeEncodeError as exc:
+            raise JustificationBundleError(f"{path} is not strict Unicode") from exc
+    elif isinstance(value, Mapping):
+        for key, item in value.items():
+            _validate_unicode_tree(key, f"{path}.<key>", depth + 1)
+            _validate_unicode_tree(item, _path(path, key), depth + 1)
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            _validate_unicode_tree(item, _path(path, index), depth + 1)
+
+
+def bundle_expectation_from_verification(
+    verification: Mapping[str, object],
+    *,
+    exact_bindings: Sequence[ExactBinding] = (),
+) -> BundleExpectation:
+    """Derive a runtime bundle expectation from an immutable checker record.
+
+    The caller is responsible for creating this generic ``Verification`` at
+    the trusted checker handoff from the same captured byte stream that was
+    persisted.  This function performs no I/O and never invokes the checker.
+    It accepts only a successful justification-checker verification and pins
+    the exact profile, context, checker attestation, and environment found in
+    that record.
+    """
+
+    record = _require_object(_normalize_json(verification), "verification")
+    _require_exact_keys(
+        record,
+        _RUNTIME_CHECKER_VERIFICATION_KEYS,
+        "verification",
+    )
+    for key in ("id", "subject", "claim", "checker_revision", "at"):
+        _require_string(record[key], _path("verification", key))
+    method = _require_string(record["method"], "verification.method")
+    status = _require_string(record["status"], "verification.status")
+    if method != "justification_checker":
+        raise JustificationBundleError(
+            "verification.method must be justification_checker"
+        )
+    if status != "verified":
+        raise JustificationBundleError("verification.status must be verified")
+
+    identity = _require_object(
+        record["artifact_identity"],
+        "verification.artifact_identity",
+    )
+    _require_exact_keys(
+        identity,
+        _RUNTIME_ARTIFACT_IDENTITY_KEYS,
+        "verification.artifact_identity",
+    )
+    schema = _require_string(
+        identity["schema"],
+        "verification.artifact_identity.schema",
+    )
+    schema_version = _require_integer(
+        identity["schema_version"],
+        "verification.artifact_identity.schema_version",
+    )
+    fixture_id = _require_string(
+        identity["fixture_id"],
+        "verification.artifact_identity.fixture_id",
+    )
+    artifact_digest = _validate_digest(
+        record["artifact_digest"],
+        "verification.artifact_digest",
+    )
+    if artifact_digest["algorithm"] != "sha256":
+        raise JustificationBundleError(
+            "verification.artifact_digest must use sha256"
+        )
+
+    profile = _require_object(record["profile"], "verification.profile")
+    context = _require_object(record["context"], "verification.context")
+    environment = _require_object(record["environment"], "verification.environment")
+    profile_id = _require_string(profile.get("id"), "verification.profile.id")
+    checker = _require_string(profile.get("checker"), "verification.profile.checker")
+    profile_checker_revision = _require_string(
+        profile.get("checker_version"),
+        "verification.profile.checker_version",
+    )
+    context_id = _require_string(context.get("id"), "verification.context.id")
+    context_profile = _require_string(
+        context.get("profile"),
+        "verification.context.profile",
+    )
+    if context_profile != profile_id:
+        raise JustificationBundleError(
+            "verification profile and context references are inconsistent"
+        )
+    if profile_checker_revision != record["checker_revision"]:
+        raise JustificationBundleError(
+            "verification checker revision and profile are inconsistent"
+        )
+    if not environment:
+        raise JustificationBundleError("verification.environment must not be empty")
+
+    if frozenset(environment) == _RUNTIME_ENVIRONMENT_WRAPPER_KEYS:
+        reported_environment = _require_object(
+            environment["reported_checker_environment"],
+            "verification.environment.reported_checker_environment",
+        )
+        embedded_verification = _require_object(
+            environment["reported_verification"],
+            "verification.environment.reported_verification",
+        )
+        runtime_checker = _require_object(
+            environment["runtime_checker"],
+            "verification.environment.runtime_checker",
+        )
+        input_artifacts = _require_array(
+            environment["input_artifacts"],
+            "verification.environment.input_artifacts",
+        )
+        if not reported_environment or not runtime_checker or not input_artifacts:
+            raise JustificationBundleError(
+                "verification runtime environment must not be empty"
+            )
+        _require_exact_keys(
+            embedded_verification,
+            _JUSTIFICATION_VERIFICATION_KEYS,
+            "verification.environment.reported_verification",
+        )
+        consistency = {
+            "subject": record["subject"],
+            "claim_checked": record["claim"],
+            "method": method,
+            "result": "passed",
+            "checker": checker,
+            "checker_revision": record["checker_revision"],
+            "environment": reported_environment,
+            "profile": profile_id,
+            "context": context_id,
+        }
+        for key, expected in consistency.items():
+            if embedded_verification.get(key) != expected:
+                raise JustificationBundleError(
+                    "reported checker verification is inconsistent with its external Verification"
+                )
+        _require_string(
+            embedded_verification.get("id"),
+            "verification.environment.reported_verification.id",
+        )
+        _require_string(
+            embedded_verification.get("at"),
+            "verification.environment.reported_verification.at",
+        )
+    else:
+        embedded_verification = {
+            "id": record["id"],
+            "subject": record["subject"],
+            "claim_checked": record["claim"],
+            "method": method,
+            "result": "passed",
+            "checker": checker,
+            "checker_revision": record["checker_revision"],
+            "environment": environment,
+            "profile": profile_id,
+            "context": context_id,
+            "at": record["at"],
+        }
+    retained = (
+        ExactBinding(("profile",), profile),
+        ExactBinding(("context",), context),
+        ExactBinding(("derivation", "id"), record["subject"]),
+        ExactBinding(("justification_verification",), embedded_verification),
+        *tuple(exact_bindings),
+    )
+    digest_value = artifact_digest["value"]
+    assert isinstance(digest_value, str)
+    return BundleExpectation(
+        digest=digest_value,
+        schema=schema,
+        schema_version=schema_version,
+        fixture_id=fixture_id,
+        exact_bindings=retained,
+    )
+
+
 def validate_bundle(raw: bytes, expectation: BundleExpectation) -> ValidatedBundle:
     """Validate a Lean-emitted audit bundle without checking its derivation."""
 
     if not isinstance(raw, bytes):
         raise TypeError("raw bundle must be bytes")
+    if len(raw) > MAX_BUNDLE_BYTES:
+        raise JustificationBundleError(
+            f"bundle exceeds the {MAX_BUNDLE_BYTES}-byte limit"
+        )
     if len(expectation.digest) != 64 or any(
         character not in "0123456789abcdef" for character in expectation.digest
     ):
@@ -814,8 +1081,11 @@ def validate_bundle(raw: bytes, expectation: BundleExpectation) -> ValidatedBund
         ) from exc
     except json.JSONDecodeError as exc:
         raise JustificationBundleError(f"bundle is not valid JSON: {exc.msg}") from exc
+    except RecursionError as exc:
+        raise JustificationBundleError("bundle JSON nesting is excessive") from exc
 
     document = _require_object(parsed, "bundle")
+    _validate_unicode_tree(document)
     _require_exact_keys(document, _TOP_LEVEL_KEYS, "bundle")
     _require_string(document["schema"], "schema")
     schema_version = _require_integer(document["schema_version"], "schema_version")

@@ -46,15 +46,61 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 python -m compileall -q src tests
 ```
 
-Do not add model calls, general corpus ingestion, or general Lean analysis until
-an active mathematical task supplies an observed requirement. The first formal
-increment is the bounded \(J_0/J(CS)\) checker and Appendix A fixture in
+For the authorized WSL2 checkout, start Codex in the repository root and use
+the repository-owned Lake project:
+
+```text
+cd /home/flengyel/src/theorem_terminal
+codex
+```
+
+Codex then runs the build and tests from that checkout:
+
+```text
+cd lean
+lake build
+lake test
+cd ..
+PYTHONPATH=src python -m unittest discover -s tests -v
+python -m compileall -q src tests
+```
+
+The Lean and Lake installation already used by `/home/flengyel/src/PCats` may
+supply the pinned toolchain and download cache. `PCats` is not the checker for
+this repository: do not point the documentary bridge at a PCats executable or
+copy its build artifacts. `lean/lean-toolchain`, `lean/lakefile.toml`, and
+`lean/lake-manifest.json` govern this build. The current executable identity is
+pinned for Linux x86-64/WSL and is checked before every documentary run.
+
+The executable offline bridge has three mandatory boundaries:
+
+1. `project-response` validates a finalized call and exact UTF-8 span and
+   creates only the lossless `Representation` and documentary atom \(D\); it
+   neither admits a premise nor invokes Lean.
+2. `admit-documentary` explicitly serializes one scoped premise \(m:D\); it
+   still does not invoke Lean and creates no substantive \(F\) or bridge. Its
+   operational request has `checked_at: null`.
+3. `check-documentary` is the only bridge command that invokes the pinned Lean
+   checker. It rejects a pre-stamped request, stamps canonical UTC from the
+   application clock, and enforces ModelCall finalization ≤ admission ≤
+   check. The public path must first perform Python's strict response-digest,
+   span, assertion-hash, and cross-link validation; Lean then checks the
+   contextual derivation. Do not treat the raw Lean transport executable as an
+   independent provenance-hash validator.
+
+The committed multibyte `ModelCall` is synthetic regression data. Its success
+tests mechanics only and never counts as a provider request, mathematical use,
+or Stage 1 usefulness evidence.
+
+Do not add provider model calls, general corpus ingestion, or general Lean
+analysis until an active mathematical task supplies an observed requirement.
+The first formal increment is the bounded \(J_0/J(CS)\) checker and Appendix A fixture in
 `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. After that checker and profile exist,
-Stage 1 is authorized to reuse them for the single AI-interaction fixture
+Stage 1 is authorized to reuse them for the single model-response trial
 specified there; it must not add a second logic or checker. Checker invocation
 for either fixture remains task-dependent in ordinary mathematical sessions and
-does not alter or gate `orient`, `study`, or problem work. The Appendix and AI
-fixtures are nevertheless required acceptance tests once their respective
+does not alter or gate `orient`, `study`, or problem work. The Appendix fixture
+and model-response trial are nevertheless required acceptance tests once their respective
 authorized evaluation stages are executed. Do not commit a checked bundle or
 executable Lean checker until the pinned Lean command has actually compiled and
 checked it; never hand-author a placeholder that claims checked status.
@@ -74,7 +120,7 @@ For the warrant layer:
 - Python validates and renders the trusted Lean-generated bundle and never
   reimplements the derivation checker;
 - pin the frozen Appendix fixture's expected bundle digest in package metadata,
-  but retain a runtime AI fixture's exact-byte digest outside its bundle in the
+  but retain a runtime documentary bundle's exact-byte digest outside it in the
   generic immutable checker `Verification` created at the trusted Lean-checker
   handoff; and
 - do not add factivity, introspection, JAM, Fitting semantics, or a corpus-wide

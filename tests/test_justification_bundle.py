@@ -3,12 +3,14 @@ from __future__ import annotations
 from copy import deepcopy
 from hashlib import sha256
 import json
+from types import MappingProxyType
 import unittest
 
 from theorem_terminal.justification import (
     BundleExpectation,
     ExactBinding,
     JustificationBundleError,
+    bundle_expectation_from_verification,
     render_warrant,
     validate_bundle,
 )
@@ -279,6 +281,34 @@ def expectation_for(
     )
 
 
+def runtime_verification_for(
+    raw: bytes,
+    document: dict[str, object],
+) -> dict[str, object]:
+    embedded = document["justification_verification"]
+    return {
+        "id": embedded["id"],
+        "subject": document["derivation"]["id"],
+        "claim": embedded["claim_checked"],
+        "method": "justification_checker",
+        "status": "verified",
+        "checker_revision": embedded["checker_revision"],
+        "environment": deepcopy(embedded["environment"]),
+        "profile": deepcopy(document["profile"]),
+        "context": deepcopy(document["context"]),
+        "artifact_identity": {
+            "schema": document["schema"],
+            "schema_version": document["schema_version"],
+            "fixture_id": document["fixture_id"],
+        },
+        "artifact_digest": {
+            "algorithm": "sha256",
+            "value": sha256(raw).hexdigest(),
+        },
+        "at": embedded["at"],
+    }
+
+
 class JustificationBundleTests(unittest.TestCase):
     def setUp(self) -> None:
         self.document = sample_document()
@@ -359,15 +389,21 @@ class JustificationBundleTests(unittest.TestCase):
                     validate_bundle(raw, expectation)
 
     def test_terminal_control_characters_are_rejected_before_rendering(self) -> None:
-        changed = deepcopy(self.document)
-        changed["claims"][0]["display_name"] = "unsafe\x1b[31m"
-        raw = encode(changed)
-        expectation = expectation_for(raw, changed)
-        with self.assertRaisesRegex(
-            JustificationBundleError,
-            "unsafe terminal control U\\+001B",
+        for value, codepoint in (
+            ("unsafe\x1b[31m", "001B"),
+            ("safe\nFORGED: verified", "000A"),
+            ("safe\u202eFORGED", "202E"),
         ):
-            validate_bundle(raw, expectation)
+            with self.subTest(codepoint=codepoint):
+                changed = deepcopy(self.document)
+                changed["claims"][0]["display_name"] = value
+                raw = encode(changed)
+                expectation = expectation_for(raw, changed)
+                with self.assertRaisesRegex(
+                    JustificationBundleError,
+                    f"unsafe terminal control U\\+{codepoint}",
+                ):
+                    validate_bundle(raw, expectation)
 
     def test_self_digest_field_is_rejected(self) -> None:
         changed = deepcopy(self.document)
@@ -448,6 +484,87 @@ class JustificationBundleTests(unittest.TestCase):
         expectation = expectation_for(raw, changed)
         with self.assertRaisesRegex(JustificationBundleError, "subject is inconsistent"):
             validate_bundle(raw, expectation)
+
+    def test_runtime_expectation_comes_from_generic_checker_verification(self) -> None:
+        verification = runtime_verification_for(self.raw, self.document)
+        expectation = bundle_expectation_from_verification(
+            MappingProxyType(verification)
+        )
+
+        bundle = validate_bundle(self.raw, expectation)
+
+        self.assertEqual(bundle.digest, sha256(self.raw).hexdigest())
+        self.assertEqual(expectation.fixture_id, self.document["fixture_id"])
+        self.assertEqual(expectation.schema, self.document["schema"])
+        self.assertEqual(expectation.schema_version, self.document["schema_version"])
+
+    def test_runtime_verification_must_describe_a_successful_justification_check(self) -> None:
+        mutations = (
+            ("method", "lean_kernel", "method must be justification_checker"),
+            ("status", "failed", "status must be verified"),
+            ("environment", {}, "environment must not be empty"),
+        )
+        for key, value, message in mutations:
+            with self.subTest(key=key):
+                verification = runtime_verification_for(self.raw, self.document)
+                verification[key] = value
+                with self.assertRaisesRegex(JustificationBundleError, message):
+                    bundle_expectation_from_verification(verification)
+
+        missing_identity = runtime_verification_for(self.raw, self.document)
+        del missing_identity["artifact_identity"]
+        with self.assertRaisesRegex(JustificationBundleError, "missing artifact_identity"):
+            bundle_expectation_from_verification(missing_identity)
+
+    def test_runtime_verification_requires_consistent_profile_context_and_checker(self) -> None:
+        mutations = (
+            (("profile", "checker_version"), "other", "checker revision"),
+            (("context", "profile"), "other", "profile and context"),
+        )
+        for path, value, message in mutations:
+            with self.subTest(path=path):
+                verification = runtime_verification_for(self.raw, self.document)
+                target = verification
+                for component in path[:-1]:
+                    target = target[component]
+                target[path[-1]] = value
+                with self.assertRaisesRegex(JustificationBundleError, message):
+                    bundle_expectation_from_verification(verification)
+
+        verification = runtime_verification_for(self.raw, self.document)
+        verification["artifact_digest"] = {
+            "algorithm": "git-sha1",
+            "value": "0" * 40,
+        }
+        with self.assertRaisesRegex(JustificationBundleError, "must use sha256"):
+            bundle_expectation_from_verification(verification)
+
+    def test_runtime_expectation_defensively_freezes_retained_values(self) -> None:
+        verification = runtime_verification_for(self.raw, self.document)
+        extra_value = {"basis": ["exact-v1"]}
+        supplied_bindings = [ExactBinding(("claims", 0, "description"), self.document["claims"][0]["description"])]
+        detached = ExactBinding(("claims", 0, "representation_refs"), extra_value)
+        self.assertEqual(detached.value["basis"], ("exact-v1",))
+        extra_value["basis"].append("changed")
+        self.assertEqual(detached.value["basis"], ("exact-v1",))
+
+        expectation = bundle_expectation_from_verification(
+            verification,
+            exact_bindings=supplied_bindings,
+        )
+        verification["profile"]["rule_version"] = "changed-after-construction"
+        verification["environment"]["lean_commit"] = "f" * 40
+        supplied_bindings.clear()
+
+        bundle = validate_bundle(self.raw, expectation)
+        self.assertEqual(bundle.document["profile"]["rule_version"], "j0-rules-v1")
+
+    def test_runtime_digest_detects_changed_artifact_bytes(self) -> None:
+        verification = runtime_verification_for(self.raw, self.document)
+        expectation = bundle_expectation_from_verification(verification)
+
+        with self.assertRaisesRegex(JustificationBundleError, "SHA-256"):
+            validate_bundle(self.raw + b" ", expectation)
 
 
 if __name__ == "__main__":

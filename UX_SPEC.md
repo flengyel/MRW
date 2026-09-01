@@ -358,6 +358,23 @@ Assistance is useful only if it reduces the time or obstruction between the
 mathematician and substantive work. A feature that requires more correction or
 record keeping than the mathematical help it supplies is removed.
 
+The executable offline documentary bridge covers only the mechanics behind
+exact-span projection and checker handoff. Its explicit sequence is projection,
+documentary admission, and Lean checking of (m:D). It does not make a model
+request, create a substantive (F), admit (D\to F), or show that assistance
+helped. It therefore cannot replace the genuine-obstruction request below or
+satisfy the acceptance criteria of §9.1.
+
+The public check repeats strict response, span, assertion-hash, and cross-link
+validation before invoking Lean and rejects a source, compiled module, or
+executable that does not match the pinned Linux x86-64/WSL checker identity.
+The application stamps the checker-handoff time in canonical UTC; the resulting
+external `Verification` and Lean check record use it separately from the earlier
+admission and context time. The external record also binds the exact retained
+projection and stamped request bytes. Lean checks
+derivability over opaque atom identities; it is not used as the response-hash
+validator.
+
 ---
 
 ## 9. Initial experimental sessions
@@ -397,8 +414,9 @@ Use a coherent cluster from a problem-centered algebraic number theory text.
 10. Test retention by reconstructing the solution or solving a related problem.
 
 **Acceptance.** The session is useful when no formal artifact exists. It begins
-with a substantive problem, preserves enough evidence to resume and test the
-work, and requires no declaration of comprehension. At least one model call is
+with top-down orientation and proceeds directly to substantive problem work,
+preserves enough evidence to resume and test the work, and requires no
+declaration of comprehension. At least one model call is
 traceable from exact outbound context through raw response to a proposal that is
 used, corrected, rejected, or abandoned during the mathematical attempt. One
 exact response span is also traceable through its documentary atom and explicit
@@ -413,26 +431,28 @@ Use `rs_Appendix_A.tex` as the mathematical source, the corresponding Lean
 declarations when relevant, and `Lean/docs/AppendixA.md` as the existing
 correspondence record.
 
-1. Begin from a mathematical question, manuscript result, unfinished proof, or
+1. Orient in the appendix's purpose and organization, central concepts, and
+   named results before selecting detailed material.
+2. Begin from a mathematical question, manuscript result, unfinished proof, or
    earlier work product.
-2. Recover the relevant source occurrences, prior attempts, computations, and
+3. Recover the relevant source occurrences, prior attempts, computations, and
    unresolved questions.
-3. Reconstruct or continue the mathematical argument.
-4. When a formal counterpart exists and is useful, inspect its declaration,
+4. Reconstruct or continue the mathematical argument.
+5. When a formal counterpart exists and is useful, inspect its declaration,
    dependencies, axiom usage, and verification status.
-5. Check explicit correspondences and resolve any discrepancy exposed by the
+6. Check explicit correspondences and resolve any discrepancy exposed by the
    mathematical or formal work.
-6. For the bounded justification experiment, explicitly request `why` for
+7. For the bounded justification experiment, explicitly request `why` for
    `lem:range-lifting-pullback-section` after the correspondence has been
    reviewed.
-7. Inspect the immutable manuscript claim, exact proposition of
+8. Inspect the immutable manuscript claim, exact proposition of
    `Dom.exists_total_lift_iff_rangeLiftPullback_section`, pinned
    kernel-attestation claim, separately admitted bridges, and checked
    \(J_0\) certificate.
-8. Change a source, formal environment, or admission in a test fixture. Confirm
+9. Change a source, formal environment, or admission in a test fixture. Confirm
    that a successor context deactivates only the dependent current route while
    preserving the old certificate for its pinned snapshot.
-9. Resume later from the preserved work product or perform a related task.
+10. Resume later from the preserved work product or perform a related task.
 
 **Acceptance.** The session restores enough specific context to continue work
 after an interruption. Its formal features are tested only on objects for which
@@ -497,6 +517,9 @@ The interface has failed if:
 - provider-side conversation state becomes the canonical project record;
 - model assistance expands into unsolicited follow-ups or a general chat
   workflow;
+- an offline, synthetic, or replayed integration fixture is counted as the
+  required model call at a genuine mathematical obstruction or as evidence
+  that assistance improved subsequent work;
 - explanations or proposals appear without their origins;
 - review measures lookup or self-description instead of mathematical
   performance;

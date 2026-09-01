@@ -132,67 +132,6 @@ def repeatedCSCertificate : Certificate := {
   conclusion := cMemberFormula
 }
 
-def documentaryAtom : Formula := atom "D-model-produced"
-def substantiveAtom : Formula := atom "F-substantive"
-def m : Term := .variable "m"
-def bridgeReason : Term := .variable "r"
-def documentaryPremise : Formula := .reason m documentaryAtom
-def bridgePremise : Formula :=
-  .reason bridgeReason (.implication documentaryAtom substantiveAtom)
-
-def aiMetadata : ProfileMetadata := testMetadata "test-ai-j0-v1"
-def aiProfile : Profile := .j0 aiMetadata
-
-def aiRawContext : RawContext := {
-  id := "test-ai-documentary-only-context-v1"
-  profileId := aiMetadata.id
-  admissions := [{ id := "admit-m-documentary", formula := documentaryPremise }]
-}
-
-theorem aiRawContext_valid : aiRawContext.isValid = true := by decide
-def aiContext : CheckedContext := ⟨aiRawContext, aiRawContext_valid⟩
-
-theorem aiContext_countermodelValid : ContextCountermodelValid aiContext := by
-  intro admissionId formula permitted
-  simp [CheckedContext.provides, RawContext.provides, aiContext, aiRawContext] at permitted
-  rcases permitted with ⟨_, permitted⟩
-  subst formula
-  rfl
-
-theorem documentary_alone_not_substantive :
-    ¬ Derives aiProfile aiContext substantiveAtom :=
-  not_derivable_of_counterEvaluation_false aiContext_countermodelValid (by rfl)
-
-def aiBridgeRawContext : RawContext := {
-  id := "test-ai-explicit-bridge-context-v1"
-  profileId := aiMetadata.id
-  admissions := [
-    { id := "admit-m-documentary", formula := documentaryPremise },
-    { id := "admit-r-bridge", formula := bridgePremise }
-  ]
-}
-
-theorem aiBridgeRawContext_valid : aiBridgeRawContext.isValid = true := by decide
-def aiBridgeContext : CheckedContext :=
-  ⟨aiBridgeRawContext, aiBridgeRawContext_valid⟩
-
-def aiBridgeConclusion : Formula :=
-  .reason (.application bridgeReason m) substantiveAtom
-
-def aiBridgeCertificate : Certificate := {
-  nodes := [
-    { formula := documentaryPremise, rule := .premise "admit-m-documentary" },
-    { formula := bridgePremise, rule := .premise "admit-r-bridge" },
-    { formula := .implication bridgePremise
-        (.implication documentaryPremise aiBridgeConclusion),
-      rule := .axiom .application },
-    { formula := .implication documentaryPremise aiBridgeConclusion,
-      rule := .modusPonens 2 1 },
-    { formula := aiBridgeConclusion, rule := .modusPonens 3 0 }
-  ]
-  conclusion := aiBridgeConclusion
-}
-
 def wrongCSMemberCertificate : Certificate := {
   nodes := [{
     formula := cMemberFormula
@@ -482,16 +421,45 @@ private def runTests : IO Unit := do
     (AppendixA.checkedCertificate.constantSpecificationFootprint == [])
   expect "exact attestation stdout byte length"
     (AppendixA.attestationStdout.toUTF8.size == 551)
+  expect "mechanical documentary one-node fixture"
+    (accepted AIInteraction.profile AIInteraction.mechanicalContext
+      (AIInteraction.certificate AIInteraction.mechanicalRequest))
+  expect "mechanical documentary node count"
+    ((AIInteraction.certificate AIInteraction.mechanicalRequest).nodes.length == 1)
   expect "documentary premise does not warrant substantive atom"
-    (counterEvaluation documentaryPremise && !counterEvaluation substantiveAtom)
-  expect "explicit AI bridge route"
-    (accepted aiProfile aiBridgeContext aiBridgeCertificate)
+    (counterEvaluation
+        (AIInteraction.conclusion AIInteraction.mechanicalRequest) &&
+      !counterEvaluation AIInteraction.mechanicalSubstantiveFormula)
+  expect "multibyte fixture response byte length"
+    (AIInteraction.mechanicalRawResponse.toUTF8.size == 28)
+  expect "multibyte fixture span byte length"
+    (AIInteraction.mechanicalRepresentation.toUTF8.size == 9)
+  let mechanicalRequestText ← IO.FS.readFile "mechanical_request.json"
+  let firstDocumentaryBundle ←
+    match AIInteractionBundle.bundleBytesFromText mechanicalRequestText with
+    | .ok bytes => pure bytes
+    | .error message =>
+        throw (IO.userError ("failed: parsed documentary fixture: " ++ message))
+  let secondDocumentaryBundle ←
+    match AIInteractionBundle.bundleBytesFromText mechanicalRequestText with
+    | .ok bytes => pure bytes
+    | .error message =>
+        throw (IO.userError ("failed: reparsed documentary fixture: " ++ message))
+  expect "parsed fixture matches checked documentary value"
+    (firstDocumentaryBundle == AIInteractionBundle.mechanicalBundleBytes)
+  expect "independent documentary exports are deterministic"
+    (firstDocumentaryBundle == secondDocumentaryBundle)
+  expect "noncanonical documentary request rejected"
+    (match AIInteraction.parseRequest mechanicalRequestText.trimAscii.toString with
+      | .error _ => true
+      | .ok _ => false)
   expect "deterministic bundle value"
     (appendixBundleBytes == appendixBundleBytes)
 
 #print axioms checkCertificate_sound
 #print axioms AppendixA.conclusion_derivable
-#print axioms documentary_alone_not_substantive
+#print axioms AIInteraction.mechanical_documentary_derivable
+#print axioms AIInteraction.documentary_only_not_substantive
 
 end TheoremTerminal.Justification.Tests
 

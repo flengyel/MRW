@@ -139,7 +139,7 @@ before implementation.
 
 ---
 
-## Stage 1 — Minimal problem session
+## Stage 1 — Minimal support for oriented problem work
 
 **Goal.** Support the problem-centered session of `UX_SPEC.md` §9.1 on the Stage
 0 cluster.
@@ -204,12 +204,40 @@ for status, citations, or suggested checks.
 Stage 1 reuses the generic Task 4.2 justification checker after its pinned
 profile and executable exist. It does not add a Python checker or an AI-specific
 epistemic schema. If that checker has not been compiled and tested, Stage 1 may
-preserve calls and proposals but may not describe an AI warrant as checked.
+preserve calls and proposals but may not describe a model-response documentary
+derivation as checked.
+
+**Implemented bridge-mechanics precursor.** Before the provider-backed Stage 1
+trial, an executable offline path exercises the generic response-to-warrant
+boundary. It validates a finalized call record and exact UTF-8 response span,
+freezes the lossless `Representation`, constructs the canonical documentary
+atom (D), and requires a separate explicit action to admit (m:D). The
+existing Lean checker then checks a one-node contextual-premise certificate for
+(m:D), emits a deterministic runtime bundle, and supplies the exact bytes
+from which the generic external checker `Verification` is created. The path
+creates no substantive (F), no (D\to F) bridge, and no (r\cdot m:F)
+route.
+
+The public check path first repeats the strict Python digest, exact-span,
+assertion-hash, and cross-link checks, then verifies the pinned Linux
+x86-64/WSL identities of the Lean sources, compiled modules, and executable.
+The application stamps the actual checker-handoff time in canonical UTC; the
+external `Verification` and Lean check record use it separately from the earlier
+admission and context time. The external record also binds the exact retained
+projection and stamped request bytes. Lean treats atom hashes as opaque
+identities and remains solely responsible for checking derivability; its raw
+transport executable is not presented as an independent provenance-hash
+validator.
+
+Its regression fixture is declared synthetic test data. Passing it establishes
+serialization, integrity, and checker integration only. It is not the required
+provider request at a genuine obstruction, a proposal disposition, evidence of
+subsequent mathematical progress, or Stage 1 acceptance.
 
 For the designated evaluation fixture, finalize the call, freeze the selected
 response representation and admissions, and invoke the Lean justification
 checker explicitly in its pinned build environment. The checker emits a
-deterministic AI-warrant bundle. At the trusted handoff, Python computes
+deterministic documentary-warrant bundle. At the trusted handoff, Python computes
 SHA-256 over the exact final bytes and atomically retains it in the generic
 immutable checker `Verification`, with the bundle identity, checker and
 environment revision, profile, and context. Later validation compares the
@@ -219,8 +247,9 @@ later; handling a model response never invokes Lean implicitly, and ordinary
 problem work requires neither Lean nor logic entry.
 
 **Acceptance.** A proof problem and a computational or example-driven problem
-can each be attempted end to end. Both sessions begin with the problem, work
-without any formal artifact, and require no comprehension form. At least one
+can each be attempted end to end. Both sessions begin with the Stage 0
+top-down orientation; detailed attempts then begin with a selected problem,
+work without any formal artifact, and require no comprehension form. At least one
 model call is traceable from selected context and exact input through raw
 response to a proposal that is used, corrected, rejected, or abandoned. No
 generated claim becomes a source fact, verification, or human judgment
@@ -460,6 +489,9 @@ correction, provenance, disclosure, and record-keeping costs. Stage 6 may begin
 only after the problem-centered and Appendix A experiments have each been
 evaluated on their own terms and the large-corpus experiment has been authorized
 separately.
+
+The offline documentary fixture cannot be counted as the required model call
+or as evidence that assistance improved mathematical work.
 
 The AI-to-warrant projection is retained only if the exact-span documentary
 atom and explicit bridge make later inspection or reconstruction clearer than

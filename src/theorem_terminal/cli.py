@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import stat
 import sys
 from typing import Sequence
 
@@ -51,31 +52,231 @@ def _parser() -> argparse.ArgumentParser:
         help="show the cumulative mathematics and its checked warrant",
     )
     why.add_argument("source", type=Path, help="path to rs_Appendix_A.tex")
+
+    project = commands.add_parser(
+        "project-response",
+        help="project one exact finalized-response span as documentary material",
+    )
+    project.add_argument("model_call", type=Path, help="finalized ModelCall JSON")
+    project.add_argument("--start-byte", type=int, required=True)
+    project.add_argument("--end-byte", type=int, required=True)
+    project.add_argument("--representation-id", required=True)
+    project.add_argument("--representation-version", default="1")
+    project.add_argument("--kind", required=True)
+    project.add_argument("--claim-id", required=True)
+    project.add_argument("--output", type=Path, required=True)
+
+    admit = commands.add_parser(
+        "admit-documentary",
+        help="create one explicit m:D premise-admission request",
+    )
+    admit.add_argument("projection", type=Path)
+    admit.add_argument("--fixture-id", required=True)
+    admit.add_argument("--context-id", required=True)
+    admit.add_argument("--admission-id", required=True)
+    admit.add_argument(
+        "--admitted-by-kind",
+        choices=("person", "named_policy"),
+        required=True,
+    )
+    admit.add_argument("--admitted-by-id", required=True)
+    admit.add_argument("--at", required=True, help="premise-admission time")
+    admit.add_argument("--reason-variable", default="m")
+    admit.add_argument("--rationale", required=True)
+    admit.add_argument("--scope", required=True)
+    admit.add_argument("--derivation-id", required=True)
+    admit.add_argument("--output", type=Path, required=True)
+
+    check = commands.add_parser(
+        "check-documentary",
+        help="invoke the pinned Lean checker and retain one runtime package",
+    )
+    check.add_argument("projection", type=Path)
+    check.add_argument("request", type=Path)
+    check.add_argument("destination", type=Path)
+    check.add_argument(
+        "--lean-root",
+        type=Path,
+        default=Path("lean"),
+        help="pinned repository-owned Lake project (default: lean)",
+    )
+
+    show = commands.add_parser(
+        "show-documentary",
+        help="reload, validate, and display a retained documentary warrant",
+    )
+    show.add_argument("package", type=Path)
     return parser
+
+
+def _write_new(path: Path, raw: bytes) -> None:
+    """Write a small artifact once; remove a partial file after an I/O error."""
+
+    created = False
+    try:
+        with path.open("xb") as stream:
+            created = True
+            stream.write(raw)
+            stream.flush()
+    except BaseException:
+        if created:
+            try:
+                path.unlink()
+            except OSError:
+                pass
+        raise
+
+
+def _read_bounded(path: Path, limit: int, description: str) -> bytes:
+    metadata = path.lstat()
+    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+        raise ValueError(f"{description} must be a regular non-symlink file")
+    if metadata.st_size > limit:
+        raise ValueError(f"{description} exceeds the {limit}-byte limit")
+    with path.open("rb") as stream:
+        raw = stream.read(limit + 1)
+    if len(raw) > limit:
+        raise ValueError(f"{description} exceeds the {limit}-byte limit")
+    return raw
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
-        source = SourceDocument.read(args.source)
+        if args.command in ("orient", "study", "why"):
+            source = SourceDocument.read(args.source)
         if args.command == "orient":
             output = render_orientation(source)
         elif args.command == "study":
             level = StudyLevel[args.through.upper()]
             output = render_study(source, args.label, through=level)
-        else:
+        elif args.command == "why":
             from theorem_terminal.appendix_a_warrant import render_why
 
             output = render_why(source)
+        elif args.command == "project-response":
+            from theorem_terminal.documentary_warrant import (
+                DocumentaryProjection,
+                encode_documentary_projection,
+            )
+            from theorem_terminal.model_projection import (
+                MAX_MODEL_CALL_BYTES,
+                extract_lossless_representation,
+                make_model_produced_claim,
+                parse_finalized_model_call,
+            )
+
+            call = parse_finalized_model_call(
+                _read_bounded(
+                    args.model_call,
+                    MAX_MODEL_CALL_BYTES,
+                    "ModelCall input",
+                )
+            )
+            subject = call.document["target"]
+            representation = extract_lossless_representation(
+                call,
+                representation_id=args.representation_id,
+                version=args.representation_version,
+                subject=subject,
+                kind=args.kind,
+                start_byte=args.start_byte,
+                end_byte=args.end_byte,
+            )
+            claim = make_model_produced_claim(
+                call,
+                representation,
+                claim_id=args.claim_id,
+                display_name="Model produced selected response span",
+                description=(
+                    "Documentary attribution of exact model-response UTF-8 bytes only."
+                ),
+            )
+            raw = encode_documentary_projection(
+                DocumentaryProjection(call, representation, claim)
+            )
+            _write_new(args.output, raw)
+            output = f"Created documentary projection: {args.output}"
+        elif args.command == "admit-documentary":
+            from theorem_terminal.documentary_warrant import (
+                MAX_PROJECTION_BYTES,
+                build_lean_request,
+                parse_documentary_projection,
+            )
+
+            projection = parse_documentary_projection(
+                _read_bounded(
+                    args.projection,
+                    MAX_PROJECTION_BYTES,
+                    "documentary projection",
+                )
+            )
+            raw = build_lean_request(
+                projection,
+                fixture_id=args.fixture_id,
+                context_id=args.context_id,
+                admission_id=args.admission_id,
+                admitted_by={
+                    "kind": args.admitted_by_kind,
+                    "id": args.admitted_by_id,
+                },
+                at=args.at,
+                reason_variable=args.reason_variable,
+                rationale=args.rationale,
+                scope=args.scope,
+                derivation_id=args.derivation_id,
+            )
+            _write_new(args.output, raw)
+            output = f"Created explicit documentary admission request: {args.output}"
+        elif args.command == "check-documentary":
+            from theorem_terminal.documentary_warrant import (
+                MAX_PROJECTION_BYTES,
+                MAX_REQUEST_BYTES,
+                create_documentary_warrant_package,
+                render_documentary_warrant,
+            )
+
+            package = create_documentary_warrant_package(
+                args.destination,
+                _read_bounded(
+                    args.projection,
+                    MAX_PROJECTION_BYTES,
+                    "documentary projection",
+                ),
+                _read_bounded(
+                    args.request,
+                    MAX_REQUEST_BYTES,
+                    "documentary admission request",
+                ),
+                lean_root=args.lean_root,
+            )
+            output = (
+                f"Created checked documentary package: {package.path}\n\n"
+                + render_documentary_warrant(package)
+            )
+        else:
+            from theorem_terminal.documentary_warrant import (
+                load_documentary_warrant_package,
+                render_documentary_warrant,
+            )
+
+            output = render_documentary_warrant(
+                load_documentary_warrant_package(args.package)
+            )
     except (
         SourceError,
         AppendixASourceError,
         LatexSourceError,
         JustificationBundleError,
+        OSError,
     ) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        # Bridge validation errors are ValueError subclasses; keep CLI failures
+        # concise without importing the bridge on ordinary study commands.
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
     print(output)
     return 0
-
