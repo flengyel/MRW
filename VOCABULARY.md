@@ -54,6 +54,8 @@ or formal artifact associated with a mathematical object or problem.
 Representations may include orientation, informal explanation, statement, proof
 outline, proof skeleton, formal statement, and formal proof. No representation
 kind is a prerequisite for another, and formal representations may be absent.
+A representation is immutable and content-hashed. Editing, paraphrasing, or
+normalizing it creates a new derived or successor representation.
 
 ## Problem
 
@@ -178,7 +180,9 @@ Provenance and external evidence bindings are not embedded in term identity.
 
 An immutable, scoped decision that a justification formula may be used in one
 justification context, together with the external basis, actor or policy,
-provenance, and revision on which that decision depends.
+scope, time, and optional replacement link on which that decision depends. Its
+exact basis records retain their own provenance and revisions; the admission
+does not duplicate them in a second provenance record.
 
 A source occurrence, digest, model response, formal check, or correspondence
 does not create a premise admission automatically. A bridge such as
@@ -194,13 +198,19 @@ Withdrawing an admission creates a new context that omits it. Qualifying one
 creates a new claim or formula and admission and then a new context that uses
 the replacement. An old derivation remains check-valid relative to its old
 context even when it is no longer an active warrant in the current context.
+Every successor context records its predecessor, additions, removals, actor or
+policy, rationale, and time; history is not inferred from a set difference.
 
 ## Justification derivation
 
-A checker-attested derivation of one formula relative to a justification
-profile and context, including its term, rule steps, dependencies, finite
-constant-specification footprint, checker result, and deterministic bundle
-identity.
+A derivation of one formula relative to a justification profile and context,
+including its term, rule steps, dependencies, finite constant-specification
+footprint, and certificate. A separate `Verification` with method
+`justification_checker` records the checker result. An emitted bundle never
+contains its own expected digest. A frozen bundle shipped as a fixture has its
+expected digest in external package or code metadata. A bundle generated at
+runtime has the digest of its exact final bytes retained in the immutable
+`Verification` created at the trusted checker handoff, outside the bundle.
 
 It establishes derivability relative to displayed admissions. It does not by
 itself establish truth, knowledge, understanding, provenance, verification, or
@@ -256,12 +266,52 @@ call.
 
 The record is generated automatically. It identifies the mathematical purpose,
 exact context sent, provider, requested and resolved model identifiers, limits,
-settings, status, request time, and any raw response. Mathematical content
-extracted
-from the response has `Provenance.origin = ai_proposal`.
+settings, status, request time, raw response, and digest of that response.
+For the first adapter, the raw response is the exact Unicode mathematical text
+after transport decoding and before trimming, normalization, parsing, or
+extraction.
+
+Request fields are frozen at transmission; response and terminal fields are
+appended during the call. Finalization makes the complete record immutable, and
+only a finalized call with a fixed response digest may enter a documentary atom.
+
+Mathematical content extracted from the response has
+`Provenance.origin = ai_proposal` and a lossless half-open UTF-8 byte span
+anchored to that digest. A paraphrase, normalization, or edit is a separate
+derived representation.
 
 A model call is not a general chat conversation, a verification, source
-retrieval, or a source authority.
+retrieval, source authority, or warrant. It is an operational and provenance
+envelope and has no trust, support, correctness, confidence, acceptance, or
+authority status.
+
+## AI-to-warrant projection
+
+The use of existing generic justification records when a selected AI proposal
+participates in an inspectable warrant. It is not a new domain entity.
+
+For an exact model call \(C\), response digest \(h\), response span \(s\), and
+lossless extracted representation \(R\), the opaque documentary atom
+
+\[
+D=\operatorname{ModelProduced}(C,h,s,R)
+\]
+
+says only that this exact call produced this exact proposal. It is distinct
+from any substantive mathematical atom \(F\). An admission \(m:D\) records the
+documentary basis. Direct reliance additionally requires a separately scoped
+and based admission \(r:(D\to F)\), after which application may derive
+\(r\cdot m:F\). Extraction creates neither admission.
+
+`ModelProduced` is a display convention for an ordinary opaque atom. It adds no
+predicate language or AI-specific domain type.
+
+If independent reconstruction, source retrieval, computation, or formal
+checking instead warrants \(F\) directly, the resulting reason \(v:F\) omits
+the model call from the mathematical derivation. Causal assistance remains
+visible through provenance and task evidence without being converted into
+epistemic authority. No `AITrust`, `AIWarrant`, `ModelAuthority`, generic
+support edge, or provider-wide trust rule belongs to this projection.
 
 ## Correspondence
 

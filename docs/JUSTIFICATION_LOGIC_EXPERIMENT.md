@@ -111,6 +111,9 @@ that the formal statement expresses the manuscript statement. A
 silently create a logical implication. A model response supplies attributed
 material; it does not supply truth or an admitted premise.
 
+The same separation later governs the Stage 1 model-assistance trial. The
+Appendix A slice itself still requires no model call.
+
 ## Versioned experiment records
 
 The first slice needs only these records:
@@ -123,20 +126,28 @@ The first slice needs only these records:
 - `JustificationTerm` and `JustificationFormula`: pure syntax, with no embedded
   provenance or mutable bindings;
 - `PremiseAdmission`: an immutable, scoped admission of a justification
-  formula, with its external basis, actor or policy, provenance, and revision;
+  formula, with its exact external bases, actor or policy, scope, time, and
+  optional replacement link;
 - `JustificationContext`: an immutable selection of active admissions;
 - `JustificationDerivation`: a checked conclusion, derivation DAG, profile,
-  context, constant-specification footprint, checker result, dependencies, and
-  deterministic bundle digest.
+  context, constant-specification footprint, certificate, and dependencies,
+  with the checker result recorded by a separate `Verification`.
 
 Withdrawal creates a new context without the admission. It does not make the
-old derivation invalid in its old context. Only the derivation DAG must be
-acyclic; mathematical claim and correspondence graphs may contain legitimate
-cycles.
+old derivation invalid in its old context. The successor records its
+predecessor, additions, removals, actor or policy, rationale, and time. Only the
+derivation DAG must be acyclic; mathematical claim and correspondence graphs
+may contain legitimate cycles.
 
 A bundle hash detects substitution only when compared with an independently
 trusted expected digest. It is not a signature and does not authenticate a
-self-contained replacement bundle.
+self-contained replacement bundle. The emitted bundle contains no digest of
+itself. For the frozen Appendix A fixture, Python package or code metadata stores
+the expected SHA-256 computed over the complete emitted bytes. For a bundle
+created at runtime, the application computes that digest over the final bytes
+received at the trusted sidecar handoff and atomically stores it outside the
+bundle in the immutable checker `Verification`, together with the artifact
+identity, checker and environment revision, profile, and context.
 
 ## Appendix A slice
 
@@ -267,6 +278,94 @@ Lean proof terms and justification terms remain different objects. The Lean
 sidecar does not modify the kernel. Existing `orient` and `study` commands
 remain read-only and work without Lean installed.
 
+## Reuse by the AI-interaction experiment
+
+After this slice has produced a compiled generic checker and pinned profile,
+Stage 1 reuses them for one selected response span at a genuine mathematical
+obstruction. It does not create an AI-specific logic or epistemic data model.
+After the call is finalized and the selected representation and admissions are
+frozen, the Lean sidecar is invoked explicitly in its pinned build environment
+and emits a separate deterministic AI-warrant bundle. Model-response handling
+does not invoke Lean implicitly; Python later validates and renders the frozen
+bundle. Because this bundle is produced after a runtime call, its expected
+digest cannot be package-pinned in advance. At the trusted sidecar handoff, the
+application computes SHA-256 over the exact final bundle bytes and atomically
+retains it in the generic immutable checker `Verification`, with the bundle
+identity, checker and environment revision, profile, and context. Later reads
+compare the bytes with that retained digest; the bundle never asserts its own
+expected digest.
+
+Let \(C\) be the immutable `ModelCall`, \(h\) the SHA-256 digest of its exact
+raw-response UTF-8 bytes, \(s\) a half-open UTF-8 byte span, and \(R\) the
+lossless `Representation` extracted from that span. The ordinary opaque atom
+
+\[
+D=\operatorname{ModelProduced}(C,h,s,R)
+\]
+
+records only the documentary claim that the finalized call returned that exact
+proposal. `ModelProduced` is a display convention for an application atom, not
+a new predicate language or domain entity. The substantive mathematical atom
+\(F\) remains distinct.
+
+If the model's production of the proposal itself participates in the warrant,
+the context separately admits
+
+\[
+m:D,\qquad r:(D\to F),
+\]
+
+where \(m\) and \(r\) are justification variables. The basis for \(m\) names
+the call, digest, span, and lossless representation. The bridge \(r\) names the
+exact review or policy under which this particular proposal is used. The checker
+may then derive
+
+\[
+r\cdot m:F.
+\]
+
+No provider-wide version of \(r\) is permitted. Provider and model identifiers
+do not enter the constant specification, which remains reserved for logical
+axioms.
+
+The model call need not occur in the mathematical derivation. If the proposal
+causes the mathematician to reconstruct a proof, retrieve a source, run a
+computation, or obtain a formal check that directly warrants \(F\), the context
+admits the independently based reason \(v:F\). The honest warrant is then
+\(v:F\); the call remains attributed causal assistance in provenance and
+`TaskEvidence`. The experiment must not manufacture \(D\to F\) merely to credit
+the model.
+
+Extraction creates no admission. Reported citations, computations, or proof
+checks remain proposals until independently retrieved or run. Withdrawal of
+\(m\) or \(r\) creates a successor context without rewriting the call,
+representation, atoms, old context, or certificate. A paraphrase,
+normalization, or edit is a separate representation derived from the lossless
+span.
+
+This reuse adds no `AITrust`, `AIWarrant`, `ModelAuthority`, generic support
+edge, confidence score, acceptance flag, or other bespoke epistemic shortcut.
+If acceptance or knowledge-production semantics are later required, they need a
+separately specified justification-logic extension; they are not fields added
+to `ModelCall` or `Representation`.
+
+The Stage 1 reuse is accepted only when:
+
+- the call, raw-response digest, span, and lossless representation identify one
+  immutable documentary atom;
+- \(m:D\) alone cannot derive \(F\);
+- the displayed outcome is either an explicitly admitted and checked
+  \(r\cdot m:F\) route or a no-bridge decision with the independently based
+  \(v:F\) route actually used, or rejection or abandonment with no bridge and
+  no warrant for \(F\);
+- rejected or unused spans remain attributed proposals outside the active
+  justification context;
+- changing the call, digest, span, representation, bridge, or admission
+  deactivates exactly the dependent current route without rewriting history;
+  and
+- ordinary orientation, study, and problem work require neither a model call
+  nor logic entry.
+
 ## Acceptance and cut line
 
 The slice is accepted when:
@@ -293,5 +392,6 @@ revision or a halt to expansion; it does not collapse provenance,
 verification, and warrant back into one status.
 
 No JAM, general `why` database, corpus-wide justification graph, model-call
-requirement, Stacks/Kerodon change, or nonmathematical application belongs to
-this slice.
+requirement inside the Appendix A slice, Stacks/Kerodon change, or
+nonmathematical application belongs to this slice. The subsequent Stage 1 reuse
+above is a separate fixture over the same generic checker.

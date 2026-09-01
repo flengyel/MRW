@@ -41,13 +41,17 @@ python -m compileall -q src tests
 ```
 
 Do not add model calls, general corpus ingestion, or general Lean analysis until
-an active mathematical task supplies an observed requirement. The only newly
-authorized formal increment is the bounded \(J_0/J(CS)\) checker and Appendix A
-fixture in `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. It remains optional, does
-not alter `orient` or `study`, and does not require Lean for ordinary use. Do not
-commit a checked bundle or the executable sidecar until the pinned Lean command
-has actually compiled and checked it; never hand-author a placeholder that
-claims checked status.
+an active mathematical task supplies an observed requirement. The first formal
+increment is the bounded \(J_0/J(CS)\) checker and Appendix A fixture in
+`docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. After that checker and profile exist,
+Stage 1 is authorized to reuse them for the single AI-interaction fixture
+specified there; it must not add a second logic or checker. Both uses remain
+optional in ordinary mathematical sessions and do not alter or gate `orient`,
+`study`, or problem work. The Appendix and AI fixtures are nevertheless required
+acceptance tests once their respective authorized evaluation stages are
+executed. Do not commit a checked bundle or executable sidecar until the pinned
+Lean command has actually compiled and checked it; never hand-author a
+placeholder that claims checked status.
 
 For the warrant layer:
 
@@ -63,8 +67,32 @@ For the warrant layer:
   independence, or weight;
 - Python validates and renders the trusted Lean-generated bundle and never
   reimplements the derivation checker; and
+- pin the frozen Appendix fixture's expected bundle digest in package metadata,
+  but retain a runtime AI fixture's exact-byte digest outside its bundle in the
+  generic immutable checker `Verification` created at the trusted sidecar
+  handoff; and
 - do not add factivity, introspection, JAM, Fitting semantics, or a corpus-wide
   justification graph in this slice.
+
+For model assistance, `ModelCall` is an immutable operational and provenance
+envelope, never an epistemic status record. Preserve the exact raw-response
+digest and lossless digest-anchored span before creating a representation. A
+paraphrase, normalization, or edit is a separate derived representation.
+
+Project selected AI output into warrants only with the existing generic records:
+opaque `ClaimAtomVersion`s, pure formulas, explicit `PremiseAdmission`s,
+immutable contexts, and checked `JustificationDerivation`s. Keep the documentary
+atom \(D=\operatorname{ModelProduced}(C,h,s,R)\) distinct from the substantive
+claim \(F\). Admission of \(m:D\) does not admit \(F\); direct reliance requires
+a separately scoped \(r:(D\to F)\). If independent work warrants \(F\), record
+that reason directly and leave the model call out of the derivation.
+
+Do not add `AITrust`, `AIWarrant`, `ModelAuthority`, a generic support edge, a
+provider-wide production-to-truth bridge, or trust, reliability, confidence,
+acceptance, correctness, authority, weight, integration, or adoption fields to
+model-call or proposal records. Provider and model identifiers never belong in
+a constant specification. Extraction, structured output, fluency, citation,
+use, or proposal disposition never creates a premise automatically.
 
 Bind the fixture to the exact manuscript revision, Categorical Rice--Shapiro
 commit, Lean environment, declaration type, axiom report, admissions, logic

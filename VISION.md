@@ -87,6 +87,13 @@ request is attached to active mathematical work. The exact outbound context and
 any raw response are preserved before a statement, hint, outline, calculation,
 or source suggestion is recorded as an AI proposal.
 
+`ModelCall` is the operational and provenance envelope for this interaction,
+not an epistemic model. It records what was sent and returned; it has no field
+for trust, support, correctness, confidence, acceptance, or authority. If a
+selected proposal participates in a warrant, it crosses into the generic
+justification layer through explicit claim atoms and premise admissions. No
+AI-specific support edge or provider-wide reliance rule is introduced.
+
 A claim's epistemic status cannot be inferred from its availability. A result
 posted publicly, a result checked by a kernel, a result refereed, and a result
 independently reproduced are four different things. Research-active
@@ -270,6 +277,19 @@ Appendix A certificate therefore displays separately the checking-event reason,
 the formal-proof-policy bridge, and the reviewed directional
 formal--manuscript bridge.
 
+The same boundary governs model assistance. Let \(C\) be an exact `ModelCall`,
+\(h\) its response digest, \(s\) an exact response span, and \(R\) the lossless
+proposal extracted from that span. The documentary atom
+\(D=\operatorname{ModelProduced}(C,h,s,R)\) says only that the call produced the
+proposal. It is distinct from the substantive mathematical atom \(F\). If the
+origin itself is used in a warrant, separate admissions of \(m:D\) and
+\(r:(D\to F)\) permit the checked application \(r\cdot m:F\). Neither admission
+is automatic, and \(r\) must be scoped to that exact output with an inspectable
+basis. More commonly, independent reconstruction, source retrieval,
+computation, or formal checking directly supplies a reason \(v:F\); then the
+honest mathematical warrant is \(v:F\), while the model call remains causal
+assistance recorded by provenance and task evidence.
+
 This layer is late and optional in the workflow. It follows the result's role,
 statement, governing idea, proof structure, and relevant formal correspondence;
 it never becomes preliminary logic entry. Lean checks a deep embedding and
@@ -398,7 +418,12 @@ The design makes distinct, falsifiable claims:
   suggest relevant material to obtain or a computation to perform, identify a
   specific gap, criticize an attempted step, or supply requested assistance
   without displacing the mathematician's choice of method. The response and its
-  later use, correction, or rejection must remain observable.
+  later use, correction, or rejection must remain observable. For one selected
+  exact response span, the trial must also expose either an explicit checked
+  AI-to-claim bridge or the deliberate absence of that bridge when independent
+  work supplies the mathematical warrant. An incorrect or irrelevant proposal
+  may instead end with no bridge and no warrant for its substantive claim; its
+  rejection or abandonment remains task evidence.
 - Retention support is useful only if later reconstruction, application, or
   related problem solving improves. A self-rating is not evidence.
 - Existing formal tools should be used when they already provide the required

@@ -1,10 +1,15 @@
-# DOMAIN_MODEL.md — v6
+# DOMAIN_MODEL.md — v7
 
 Draft. Companion to `VISION.md` (why the system exists), `UX_SPEC.md` (what a
 mathematician does with it), and `CODEX_PLAN.md` (staged implementation).
 
 Fixes entities and invariants. Does not fix storage technology, schema syntax,
 or GUI framework.
+
+Changes from v6: model calls fixed as operational provenance envelopes; exact
+response spans anchored to immutable response digests; selected AI output
+projects into the existing generic claim, admission, context, and derivation
+records rather than a bespoke trust or support schema.
 
 Changes from v5: non-factive justification terms, immutable premise admissions,
 versioned contexts, and checked derivations added as a separate warrant class;
@@ -259,13 +264,16 @@ TaskEvidence
     event             started | resumed | artifact_saved | source_consulted
                       | assistance_requested | proposal_used
                       | proposal_corrected | proposal_rejected
-                      | proposal_abandoned | check_requested | completed
+                      | proposal_abandoned | premise_admitted
+                      | premise_withdrawn | premise_replaced
+                      | warrant_inspected | check_requested | completed
     assistance_kind   optional definition_explanation | result_explanation
                       | source_suggestion | strategic_hint
                       | intermediate_lemma | proof_outline | critique
                       | worked_solution | computation
     related           optional SourceOccurrence | Representation | Verification
-                      | ModelCall
+                      | ModelCall | PremiseAdmission | JustificationContext
+                      | JustificationDerivation
     recorded_by       person | system | tool
     at
 ```
@@ -352,6 +360,10 @@ claim about exact source bytes, a claim that a passage expresses a theorem, a
 formal judgment, a kernel-attestation claim, and the manuscript theorem are
 different atoms.
 
+A substantive claim atom may list an AI-proposal `Representation` for display.
+That reference records neither evidence nor admission and does not identify the
+substantive atom with the documentary claim that a model returned the proposal.
+
 ### JustificationTerm and JustificationFormula
 
 Pure syntax. Terms contain no artifact binding, provenance, admission, or
@@ -421,7 +433,7 @@ PremiseAdmission
     id
     premise         JustificationFormula
     basis_refs      [SourceOccurrence | Representation | WorkArtifact
-                    | FormalFact | Verification | Correspondence]
+                    | ModelCall | FormalFact | Verification | Correspondence]
     admitted_by     person | named policy
     rationale       optional prose or WorkArtifact
     scope
@@ -433,17 +445,33 @@ JustificationContext
     profile         JustificationProfile
     admissions      ordered [PremiseAdmission]
     predecessor     optional JustificationContext
+    change_kind     initial | add | remove | replace
+    added           [PremiseAdmission]
+    removed         [PremiseAdmission]
+    created_by      person | named policy | system
+    rationale       optional prose or WorkArtifact
     created_at
 ```
 
 An admission is a scoped decision to include an exact justification formula as
 a premise. A source, digest, model response, check, or correspondence supplies
 possible external basis and never creates an admission automatically.
+`id`, the exact formula and basis revisions, `admitted_by`, `scope`, `at`, and
+optional `supersedes` link supply its immutable identity and history; it does
+not duplicate those bases in a separate `Provenance` record.
 Withdrawal creates a successor context that omits the old admission.
 Qualification creates a new claim or formula and a new admission, then a
 successor context that uses it. Old admissions, contexts, and certificates are
 unchanged. `PremiseAdmission` is an application-level context record, not the
 acceptance predicate of an Artemov--Fitting Justification Awareness Model.
+For an initial context, `predecessor` is absent, `change_kind = initial`,
+`added = admissions`, and `removed` is empty.
+Every successor identifies its additions and removals, actor or policy,
+rationale, and predecessor; these fields are the immutable withdrawal and
+replacement history displayed by `why`.
+For `add`, the successor admissions are the predecessor admissions plus
+`added`; for `remove`, they are the predecessor admissions minus `removed`; for
+`replace`, both lists are nonempty and the successor applies both operations.
 
 ### JustificationDerivation
 
@@ -457,7 +485,6 @@ JustificationDerivation
     cs_footprint    exact CS members invoked as axioms
     certificate
     dependency_refs exact record revisions used
-    bundle_digest
 ```
 
 A derivation presented as checked has one `Verification` whose subject is that
@@ -488,8 +515,16 @@ although its route is no longer active in the successor.
 embedding checks the calculus and emits a deterministic bundle. The Python
 application may validate the known schema, profile, dependencies, and a trusted
 expected digest and render the result; it does not reimplement the derivation
-checker. A bundle hash is useful only relative to an independently retained
-expected digest and is not a signature.
+checker. The emitted bundle contains no digest of itself. For a frozen fixture
+shipped with the application, the expected SHA-256 of the complete bundle bytes
+is pinned in Python package or code metadata. For a bundle generated at runtime,
+the application computes SHA-256 over the complete bytes received at the
+trusted sidecar handoff and atomically retains it in the immutable
+`Verification`, with the artifact identity, checker and environment revision,
+profile, and context. Subsequent validation compares the bytes with that
+separate retained value. A bundle hash detects later substitution relative to
+its independently retained expected digest; it is not a signature and does not
+authenticate the producer.
 
 ---
 
@@ -505,14 +540,19 @@ The kinds include stages in Curry's account of increasing precision
 
 ```
 Representation
+    id
+    version
     subject     MathematicalObject | Problem | WorkArtifact | ReviewItem
     kind        orientation | informal_explanation | statement
                 | problem_statement | proof_outline | proof_skeleton
                 | strategic_hint | proposed_solution | calculation | diagram
                 | formal_statement | formal_proof | worked_example
     content
+    content_hash SHA-256 of the immutable content
     provenance
     occurrence  optional SourceOccurrence
+    derived_from optional [Representation]
+    supersedes  optional Representation
 ```
 
 An AI-generated theorem, problem, proof, explanation, hint, solution, or worked
@@ -528,6 +568,10 @@ AI-generated mathematics may be imported, compared, verified, explained, and
 reviewed whether or not Theorem Terminal itself generates assistance.
 Generating a proposal is not a prerequisite for storing or studying one.
 
+A `Representation` is immutable. Editing, paraphrasing, or normalizing its
+content creates a new version linked through `derived_from` or `supersedes`; it
+never changes the content or hash of the earlier representation.
+
 **Invariant B — representation kinds are not prerequisites for one another.**
 Nothing requires one representation kind to exist before another. A problem
 with no formal statement, an outline with no formal proof, and a formal proof
@@ -537,7 +581,8 @@ prevents study, problem solving, review, or reconstruction.
 ### ModelCall
 
 A bounded request made by Theorem Terminal to a configured model from active
-mathematical work. The record describes an external action and is generated
+mathematical work. Its terminal snapshot is immutable. The record is an
+operational and provenance envelope for an external action and is generated
 automatically; the mathematician does not populate it as a form.
 
 ```
@@ -564,10 +609,11 @@ ModelCall
     in_reply_to       optional ModelCall
     requested_at
     completed_at
+    finalized_at       when the terminal snapshot became immutable
     status            completed | failed | refused | incomplete
     response_id       optional provider identifier
     raw_response      optional exact returned content
-    extracted_representations [Representation]
+    raw_response_digest optional SHA-256 of raw_response UTF-8 bytes
 ```
 
 `context_refs` identify the exact source revisions and artifact versions used to
@@ -576,6 +622,12 @@ application-supplied instruction and message, not only the mathematician's
 question. The record permits inspection of what was sent; it does not promise
 deterministic replay.
 
+Request fields are frozen when transmission begins. Response and terminal
+fields are appended as events arrive; once `finalized_at` is set, the complete
+`ModelCall` is immutable. A correction or retry creates another linked call.
+Only a finalized call with a fixed response digest may participate in a
+documentary claim atom.
+
 Each explicit user action creates at most one provider request and one
 `ModelCall`. The request includes only the displayed selected context, obeys its
 recorded limits, invokes no provider tools, and performs no automatic retry or
@@ -583,12 +635,26 @@ recursive request. A retry or user-requested follow-up is another `ModelCall`
 linked through `in_reply_to`. The `purpose` is derived from the invoked
 assistance operation; the mathematician does not classify it separately.
 
-The raw response is preserved before extraction. Only response material that
-enters the mathematical work, or whose correction, rejection, or abandonment is
-recorded, is extracted as a `Representation`. Its provenance identifies the
-`ModelCall` and exact response span and has
-`Provenance.origin = ai_proposal`. Extraction
-does not establish correctness or a relation to any source.
+For the first adapter, `raw_response` is the exact Unicode mathematical-response
+text delivered by the adapter after transport decoding and before trimming,
+normalization, parsing, or extraction. The first experiment accepts one such
+text payload; unsupported multipart or non-text output is recorded as an
+incomplete call and is not projected into a warrant.
+
+The raw response and its digest are preserved before extraction. Only response
+material that enters the mathematical work, or whose correction, rejection, or
+abandonment is recorded, is extracted as a `Representation`. In the first
+experiment this extraction is lossless: its content is the exact half-open
+UTF-8 byte span `[start, end)` of `raw_response` identified by
+`raw_response_digest`. Its provenance identifies the `ModelCall` and span and
+has `Provenance.origin = ai_proposal`. A paraphrase, normalization, or edit is a
+separate `Representation` linked through `derived_from`; it is never described
+as the exact returned span. Extraction establishes attribution only, not
+correctness or a relation to any source.
+
+`raw_response_digest` is required whenever `raw_response` is present. A failed,
+refused, or incomplete call with no returned content has neither a response
+digest nor a response span.
 
 A suggested source does not become a `SourceOccurrence` until it is
 independently retrieved and identified. A reported computation or proof check
@@ -611,9 +677,72 @@ or error text. A raw response is untrusted content: it cannot execute markup or
 commands, open a link, invoke a tool, or be submitted again without an explicit
 user action.
 
+Representations extracted from a call are obtained by reverse lookup through
+their provenance. They are not a mutable list stored on the immutable
+`ModelCall`.
+
 **Invariant I — a model response is proposed material.** Storing a raw response,
 extracting representations from it, or using one during work does not convert
-its mathematical claims into source facts, verifications, or human judgments.
+its mathematical claims into source facts, verifications, premise admissions,
+justification derivations, or human judgments.
+
+### AI-to-warrant projection
+
+This projection uses the existing generic warrant records; it introduces no
+AI-specific domain entity. Let:
+
+- \(C\) be an immutable `ModelCall`;
+- \(h\) be its `raw_response_digest`;
+- \(s\) be the exact response span of a lossless `Representation` \(R\);
+- \(D=\operatorname{ModelProduced}(C,h,s,R)\) be an opaque documentary
+  `ClaimAtomVersion`; and
+- \(F\) be a distinct opaque substantive mathematical claim.
+
+`ModelProduced` is only the display convention for this application atom, not
+an added predicate language or domain type. If the documentary fact participates
+in a warrant, a `PremiseAdmission` may admit \(m:D\), with \(m\) a justification
+variable and with \(C\), \(R\), and the exact span as external basis. This says
+only that the finalized call returned that proposal.
+
+The canonical assertion payload for \(D\) is the compact UTF-8 JSON array
+
+```text
+["model-produced-v1", call_id, response_digest, start_byte, end_byte,
+ representation_id, representation_content_hash]
+```
+
+with JSON string escaping, base-ten integer offsets, and no insignificant
+whitespace. `ClaimAtomVersion.content_hash` is the SHA-256 of those exact bytes.
+All identifiers are stable immutable identifiers; \(C\) must be finalized and
+\(R\) immutable before the atom is created.
+
+Direct reliance on the proposal additionally requires a separate, scoped
+admission \(r:(D\to F)\), with an independently inspectable review or policy
+basis. The checker may then derive \(r\cdot m:F\). No extraction, structured
+response, provider identity, fluency, citation, or use during work creates
+either admission. No provider-wide bridge from model production to truth is
+permitted.
+
+When independent reconstruction, source retrieval, computation, or formal
+checking directly warrants \(F\), the context instead admits a separately based
+reason \(v:F\). The model call then remains causally relevant through provenance
+and `TaskEvidence` but is correctly absent from the mathematical derivation.
+Reported citations, computations, and checks remain proposals until retrieved
+or run independently.
+
+**Invariant N — AI interaction has no bespoke epistemic shortcut.** `ModelCall`,
+`Representation`, `Provenance`, and `ClaimAtomVersion` acquire no field for
+trust, reliability, support, confidence, acceptance, correctness, verification,
+authority, weight, integration, or adoption. There is no `AITrust`, `AIWarrant`,
+`ModelAuthority`, generic support edge, or provider entry in a constant
+specification. If a later experiment needs acceptance or knowledge-production
+semantics, it must adopt a separately specified justification-logic extension
+rather than add application-specific status fields.
+
+For selected AI output, `PremiseAdmission` is the only ingress from external
+records into a justification context, and a checked `JustificationDerivation`
+is the only record of compositional warrant. Proposal use or disposition in
+`TaskEvidence` is not a substitute for either.
 
 ### Trace
 
@@ -675,14 +804,24 @@ Verification
                     | source_comparison | justification_checker
     status          verified | failed | inconclusive | stale
     axioms          for kernel checks
+    checker_revision optional exact checker implementation revision
     environment     revision
+    profile         optional exact JustificationProfile
+    context         optional exact JustificationContext
+    artifact_identity optional stable identity of exact emitted artifact
+    artifact_digest optional SHA-256 of exact emitted artifact bytes
     at
 ```
 
 For `method = justification_checker`, the claim is limited to successful
-certificate checking under the exact recorded profile and context. It does not
-verify the mathematical truth of the derivation's conclusion or discharge any
-premise admission.
+certificate checking under the exact recorded profile and context; the
+`checker_revision`, `environment`, `profile`, and `context` are required and
+must agree with the subject derivation. When a runtime check emits a bundle,
+`artifact_identity` and `artifact_digest` are created atomically at the trusted
+checker handoff and become the expected identity and digest for later
+validation. These fields are generic checker-output integrity records, not
+AI-specific epistemic status. Verification does not establish the mathematical
+truth of the derivation's conclusion or discharge any premise admission.
 
 ### Provenance
 
@@ -693,8 +832,9 @@ Provenance
     origin         human_work | human_judgment | ai_proposal
                    | machine_extraction | source_quotation
     author         person | model identifier | tool name and version
-    model_call     optional ModelCall
-    response_span  optional exact offsets in ModelCall.raw_response
+    model_call     required for a system-generated AI proposal
+    response_span  required digest-anchored half-open UTF-8 byte offsets for a
+                   lossless system-generated AI proposal
     at
 ```
 
@@ -703,6 +843,10 @@ retains `Provenance.origin = ai_proposal`. Use, correction, rejection, or
 abandonment is recorded by `TaskEvidence`; admission as a justification premise
 is recorded by `PremiseAdmission`. Neither changes origin. No view may present a
 generated claim as machine-extracted or as human judgment.
+
+Imported AI material may lack a `ModelCall` and instead has an exact
+`SourceOccurrence`. A representation extracted from a local `ModelCall` must
+have that call, its response digest, and its exact span jointly available.
 
 ---
 

@@ -148,9 +148,10 @@ organization, central concepts and results, the selected result's role and
 statement, governing idea, proof skeleton, available technical detail, and
 reviewed formal correspondence in that order before displaying the exact claim
 and context versions, admitted premises, term, derivation steps, checker result,
-and separately labeled provenance and verification records. Its conclusion is
-labeled “derivable relative to these admitted premises and policy,” never
-“true,” “known,” or “verified.”
+and separately labeled provenance and verification records. The checker result
+is the linked `Verification` with method `justification_checker`, not a duplicate
+field on the derivation. Its conclusion is labeled “derivable relative to these
+admitted premises and policy,” never “true,” “known,” or “verified.”
 
 **The statement precedes the proof idea.** Everything above the statement
 answers *why am I reading this*; everything below answers *why is it true*.
@@ -208,7 +209,8 @@ attempt.
 requests. They preserve the selected context, exact application-supplied request
 content, provider, requested and resolved model identifiers, limits, non-secret
 settings, status, and any raw response. They are operational provenance, not
-mathematical work the mathematician must restate.
+mathematical work the mathematician must restate and not a trust, support,
+correctness, confidence, or acceptance record.
 
 `JustificationDerivation` records, when present, come from checked certificates
 and exact context snapshots. Their `PremiseAdmission`s expose the external basis
@@ -308,10 +310,28 @@ outline, calculation, source suggestion, criticism, or proposed solution that
 enters the mathematical work, or whose correction, rejection, or abandonment is
 recorded, becomes a `Representation` with
 `Provenance.origin = ai_proposal`, a link to its `ModelCall`, and its exact
-response span. Storage is not integration. A suggested source becomes a source
-occurrence only after it is independently retrieved and
+response span anchored to the response digest. The first extraction is
+lossless; any paraphrase, normalization, or edit is a separate representation
+linked to it. Storage and extraction are not integration. A suggested source
+becomes a source occurrence only after it is independently retrieved and
 identified; a reported calculation or proof check becomes a verification only
 after the corresponding method or attestation is obtained separately.
+
+When a selected proposal participates in an inspectable warrant, the interface
+uses the ordinary justification records rather than an AI-specific status. It
+keeps the documentary atom
+\(D=\operatorname{ModelProduced}(C,h,s,R)\) distinct from the substantive atom
+\(F\). Admitting \(m:D\) records only that the exact call returned the exact
+proposal. A separate, scoped admission \(r:(D\to F)\) is required before a
+checker may derive \(r\cdot m:F\). The view shows the call, response digest and
+span, both admissions and their bases, the derivation, and any later withdrawal.
+
+The interface does not force the model call into the mathematical warrant. If
+the proposal prompts an independent proof, source retrieval, computation, or
+formal check that supplies \(v:F\), it displays that direct warrant and retains
+the model call only as attributed causal assistance and task evidence. Neither
+using a proposal during work nor marking it corrected or rejected creates a
+premise admission.
 
 The raw response is treated as untrusted content. It cannot execute markup or
 commands, open a link, invoke a tool, or be submitted again without an explicit
@@ -360,18 +380,30 @@ Use a coherent cluster from a problem-centered algebraic number theory text.
    Inspect the selected outbound context, submit the request, and preserve the
    `ModelCall` and raw response.
 6. Extract only proposals that enter the work or whose correction, rejection,
-   or abandonment is recorded, retaining their AI origin, exact response spans,
-   and links to the call.
-7. Preserve the attempt, revisions, calculations, exact sources consulted, and
+   or abandonment is recorded, retaining their AI origin, lossless exact
+   response spans, response digest, and links to the call.
+7. For one selected substantive claim, inspect the generic warrant projection.
+   Either review separate admissions \(m:D\) and \(r:(D\to F)\) and the checked
+   route \(r\cdot m:F\), or retain an explicit no-bridge outcome and display the
+   independent reason \(v:F\) that actually warrants the mathematics. If the
+   proposal is wrong or irrelevant, retain \(D\) without an active bridge or
+   admission and record rejection or abandonment; no warrant for \(F\) is
+   required.
+8. Preserve the attempt, revisions, calculations, exact sources consulted, and
    assistance used.
-8. Resume later at the unfinished mathematical step.
-9. Test retention by reconstructing the solution or solving a related problem.
+9. Resume later at the unfinished mathematical step.
+10. Test retention by reconstructing the solution or solving a related problem.
 
 **Acceptance.** The session is useful when no formal artifact exists. It begins
 with a substantive problem, preserves enough evidence to resume and test the
 work, and requires no declaration of comprehension. At least one model call is
 traceable from exact outbound context through raw response to a proposal that is
-used, corrected, rejected, or abandoned during the mathematical attempt.
+used, corrected, rejected, or abandoned during the mathematical attempt. One
+exact response span is also traceable through its documentary atom and explicit
+admissions to a checked derivation, or to a recorded no-bridge decision and the
+independent warrant used instead, or to rejection or abandonment with no
+warrant for \(F\). Proposal disposition alone is task evidence, not a
+mathematical warrant, and \(m:D\) alone cannot derive \(F\).
 
 ### 9.2 Mathematical re-entry and formal correspondence
 
@@ -456,6 +488,10 @@ The interface has failed if:
   explicit model call and inspectable outbound context;
 - a raw model response or extracted proposal appears as a source fact,
   verification, or human judgment;
+- a model call or proposal receives a bespoke trust, support, confidence,
+  correctness, acceptance, authority, or integration status;
+- extracting structured model output automatically creates a premise or a
+  provider-wide bridge from model production to mathematical truth;
 - provider-side conversation state becomes the canonical project record;
 - model assistance expands into unsolicited follow-ups or a general chat
   workflow;

@@ -60,9 +60,12 @@ required in Stage 1 because the assistant's-assistant claim is one of the claims
 being tested. The first implementation makes one provider request per explicit
 user action to one configured model, preserves each `ModelCall` and any raw
 response, and records relevant extracted mathematical content as AI proposals.
-It defines only the narrow provider boundary needed to keep canonical records
+When selected output participates in a warrant, it uses the existing generic
+claim atoms, premise admissions, contexts, and checked justification
+derivations; extraction and proposal disposition never create a premise. It
+defines only the narrow provider boundary needed to keep canonical records
 independent of provider-specific request types; it does not add another adapter,
-service selection, or routing.
+service selection, routing, or AI-specific trust structure.
 
 ## Target
 
@@ -160,15 +163,31 @@ before implementation.
 - preserve every application-supplied instruction and message, requested and
   resolved model identifiers, adapter version, limits, non-secret settings,
   status, response identifier when supplied, and raw response in the
-  `ModelCall`;
+  `ModelCall`, together with the SHA-256 digest of the exact raw-response UTF-8
+  bytes;
+- define `raw_response` for the first adapter as the exact Unicode mathematical
+  response text after transport decoding and before trimming, normalization,
+  parsing, or extraction; accept one text payload and do not project unsupported
+  multipart or non-text output into a warrant;
 - request disabled API response storage when the service supports it, record the
   setting, display any provider retention that cannot be disabled before
   submission, and avoid claiming that this controls every form of provider
   processing or retention;
 - extract only proposals that enter the work or whose correction, rejection, or
   abandonment is recorded, each with
-  `Provenance.origin = ai_proposal`, exact response span, and a link to its
-  `ModelCall`;
+  `Provenance.origin = ai_proposal`, a lossless half-open UTF-8 byte span
+  anchored to the response digest, and a link to its `ModelCall`; record any
+  paraphrase, normalization, or edit as a separate derived representation;
+- for one selected response span, create the documentary opaque atom
+  \(D=\operatorname{ModelProduced}(C,h,s,R)\), distinct from the substantive
+  mathematical atom \(F\), using the generic `ClaimAtomVersion` record;
+- admit \(m:D\) only when its exact call, digest, span, and representation are
+  displayed as external basis; if the proposal itself is relied upon, admit the
+  separately scoped bridge \(r:(D\to F)\) and check \(r\cdot m:F\) with the
+  Task 4.2 \(J_0/J(CS)\) checker;
+- when independent reconstruction, retrieval, computation, or formal checking
+  instead supplies \(v:F\), preserve that direct warrant and leave the model
+  call outside the mathematical derivation;
 - treat model output as untrusted content, with no executable markup, command
   execution, link opening, tool invocation, or resubmission without a user
   action;
@@ -182,19 +201,45 @@ selected cluster. A complete subject model is not a prerequisite. The raw
 mathematical response is preserved even if a small structured envelope is used
 for status, citations, or suggested checks.
 
+Stage 1 reuses the generic Task 4.2 justification checker after its pinned
+profile and executable exist. It does not add a Python checker or an AI-specific
+epistemic schema. If that checker has not been compiled and tested, Stage 1 may
+preserve calls and proposals but may not describe an AI warrant as checked.
+
+For the designated evaluation fixture, finalize the call, freeze the selected
+response representation and admissions, and invoke the Lean sidecar explicitly
+in its pinned build environment. The sidecar emits a separate deterministic
+AI-warrant bundle. At the trusted handoff, Python computes SHA-256 over the
+exact final bytes and atomically retains it in the generic immutable checker
+`Verification`, with the bundle identity, checker and environment revision,
+profile, and context. Later validation compares the bundle with that external
+digest; a runtime bundle cannot be package-pinned in advance and never contains
+its own expected digest. Python renders the bundle later; handling a model
+response never invokes Lean implicitly, and ordinary problem work requires
+neither Lean nor logic entry.
+
 **Acceptance.** A proof problem and a computational or example-driven problem
 can each be attempted end to end. Both sessions begin with the problem, work
 without any formal artifact, and require no comprehension form. At least one
 model call is traceable from selected context and exact input through raw
 response to a proposal that is used, corrected, rejected, or abandoned. No
 generated claim becomes a source fact, verification, or human judgment
-automatically. Ordinary mathematical sessions need not make a model call; the
-required call exists to evaluate Stage 1.
+automatically. For one exact span, the system also records the documentary atom
+and either checks an explicitly admitted \(r\cdot m:F\) route or records that no
+AI-to-claim bridge was admitted and displays the independently based \(v:F\)
+route used instead, or records rejection or abandonment with no warrant for
+\(F\). Tests show that \(m:D\) alone cannot derive \(F\). Withdrawing an
+admission deactivates only the dependent current route and preserves the call,
+proposal, old context, and certificate. Ordinary mathematical sessions need not
+make a model call; the required call exists to evaluate Stage 1.
 
 **Non-goals.** No general ingestion, comprehensive topic map, formal theorem
 analysis, graph rendering, support for a second model service or adapter,
 automatic model selection, provider tools, autonomous calls, conversation
-interface, prompt library, or framework commitment.
+interface, prompt library, or framework commitment. No `AITrust`, `AIWarrant`,
+`ModelAuthority`, provider-wide truth bridge, generic support edge, or trust,
+reliability, confidence, acceptance, correctness, authority, weight,
+integration, or adoption field on model records.
 
 ---
 
@@ -349,6 +394,14 @@ placeholder may claim checked status. A clean wheel-install smoke test must
 confirm that the frozen bundle and expected digest are package data and that
 `why` works without a local Lean installation.
 
+The emitted bundle does not serialize a digest of itself. Compute SHA-256 over
+the complete final bundle bytes after emission and store the expected value in
+separate Python package or code metadata. Validation compares those bytes with
+that external value; neither the derivation nor the bundle owns its own digest.
+This package-pinned rule applies to the frozen Appendix A fixture. A runtime
+bundle in Stage 1 instead retains its handoff digest in the generic immutable
+checker `Verification` as specified there.
+
 **Deliverable.** Explicit correspondences between source occurrences and formal
 artifacts, plus `Discrepancy` records for an identified mismatch. For Task 4.2,
 also the Lean checker and soundness boundary, one checked Appendix A
@@ -405,6 +458,12 @@ correction, provenance, disclosure, and record-keeping costs. Stage 6 may begin
 only after the problem-centered and Appendix A experiments have each been
 evaluated on their own terms and the large-corpus experiment has been authorized
 separately.
+
+The AI-to-warrant projection is retained only if the exact-span documentary
+atom and explicit bridge make later inspection or reconstruction clearer than
+the pre-existing `ModelCall`, proposal provenance, and `TaskEvidence` alone. An
+honest no-bridge outcome is not a failure when independent work warrants the
+mathematics; manufacturing a model-authority bridge would be a failure.
 
 The separation of provenance, verification, premise admission, and contextual
 derivability, and the source-faithful non-factive \(J_0/J(CS)\) basis, are

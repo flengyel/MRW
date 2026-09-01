@@ -15,11 +15,15 @@ request, the exact context sent, and the raw response are preserved
 automatically. Material from the response is extracted only when it enters the
 mathematical work or is separately studied. Each extracted proposal remains
 linked to its exact response span and is recorded as an attributed AI proposal
-rather than a fact or human judgment. The system can
-restore the state of an interrupted investigation and select later mathematical
-tasks that test reconstruction or application. No one assistant is the
-authority, and the system does not ask a mathematician to report an internal
-mental state.
+rather than a fact or human judgment. `ModelCall` remains an operational
+provenance record; it acquires no trust, support, correctness, confidence, or
+acceptance field. If selected output later participates in a mathematical
+warrant, Theorem Terminal uses the same generic justification-logic claim
+atoms, premise admissions, contexts, and checked derivations used for every
+other reason. The system can restore the state of an interrupted investigation
+and select later mathematical tasks that test reconstruction or application. No
+one assistant is the authority, and the system does not ask a mathematician to
+report an internal mental state.
 
 It is not a proof assistant, a Lean documentation browser, or a replacement for
 mathematical judgment.
@@ -74,7 +78,8 @@ The design rests on six principles:
 - Model assistance is requested from active mathematical work. The provider,
   requested and resolved model identifiers, exact submitted request, selected
   context, raw response, and every extracted proposal are recorded
-  automatically. A proposal is not a fact or human judgment.
+  automatically. A proposal is not a fact or human judgment. No provider-wide
+  trust rule or bespoke AI-support status converts it into a premise.
 - Justification logic makes the composition of admitted reasons inspectable
   when an active task needs it. The initial non-factive `J0`/`J(CS)` layer does
   not turn a source, model response, formal check, or correspondence into truth;
@@ -114,6 +119,13 @@ proof skeleton, available technical detail, and reviewed correspondence in
 Kallenberg order before the warrant. This experiment is specified but not yet
 implemented; the commands documented below are the complete current command
 set.
+
+The specification also fixes the next AI-integration boundary. One selected,
+lossless response span may be projected into the existing generic warrant layer
+only through explicit claim atoms and premise admissions. The model call remains
+provenance, and independent reconstruction may warrant the mathematics without
+placing the call in the derivation. This AI-to-warrant integration is specified
+but is not current executable behavior.
 
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
