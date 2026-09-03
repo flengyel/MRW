@@ -119,6 +119,9 @@ possible. It never automatically projects a response, admits a premise,
 invokes Lean, or creates a mathematical warrant. Ordinary orientation, study,
 and problem work remain independent of model assistance and justification-
 logic entry.
+Its current transient JSON is a low-level developer integration envelope, not
+a form for mathematicians and not the task-facing live workflow; that later
+workflow must derive request metadata and limits from active mathematical work.
 
 For the warrant layer:
 

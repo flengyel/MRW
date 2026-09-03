@@ -6,6 +6,7 @@ from hashlib import sha256
 import os
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
@@ -269,6 +270,10 @@ class OpenAIResponseTests(unittest.TestCase):
                 )
 
     def test_redirect_is_terminal_and_provider_read_is_bounded(self) -> None:
+        handler = openai_response_module._RejectRedirect()
+        self.assertIsNone(
+            handler.redirect_request(None, None, 302, "redirect", {}, "https://example.test")
+        )
         class RedirectingOpener:
             def __init__(self):
                 self.calls = 0
@@ -313,8 +318,6 @@ class OpenAIResponseTests(unittest.TestCase):
             headers = {"Content-Length": "3"}
             def read(self, amount):
                 return b"{}"
-        with patch("theorem_terminal.openai_response.build_opener", return_value=LargeOpener()):
-            pass
         truncated = TruncatedResponse()
         class TruncatedOpener:
             def open(self, request, timeout):
@@ -367,24 +370,146 @@ class OpenAIResponseTests(unittest.TestCase):
                 )
 
     def test_provider_lone_surrogate_retains_failed_record(self) -> None:
-        for field in ("id", "model", "text"):
+        for field in ("id", "model", "text", "nested-key"):
             with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
                 response = json.loads(provider_response())
                 if field == "text":
                     response["output"][0]["content"][0]["text"] = "\\ud800"
+                elif field == "nested-key":
+                    response["metadata"] = {"\\ud800": "value"}
                 else:
                     response[field] = "\\ud800"
                 raw_response = json.dumps(response).replace("\\\\ud800", "\\ud800").encode()
                 destination = Path(temporary) / "call.json"
                 times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
+                calls = []
                 with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
                     request_assistance(
                         self.spec, "model", destination, "secret",
                         confirmation=lambda _: "SEND", preview=lambda _: None,
-                        transport=lambda *_: TransportResult(200, raw_response),
+                        transport=lambda *args: (calls.append(args) or TransportResult(200, raw_response)),
                         clock=lambda: next(times), id_generator=lambda: "surrogate-failure",
                     )
                 self.assertEqual(json.loads(destination.read_bytes())["status"], "failed")
+                self.assertEqual(len(calls), 1)
+
+    def test_clock_failure_after_transport_retains_ordered_failed_call(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "call.json"
+            calls = []
+            clock_calls = 0
+            def clock():
+                nonlocal clock_calls
+                clock_calls += 1
+                if clock_calls == 1:
+                    return "2026-09-03T12:00:00Z"
+                raise RuntimeError("clock failed")
+            with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
+                request_assistance(
+                    self.spec, "model", destination, "secret",
+                    confirmation=lambda _: "SEND", preview=lambda _: None,
+                    transport=lambda *args: (calls.append(args) or TransportResult(200, provider_response())),
+                    clock=clock, id_generator=lambda: "clock-failed-call",
+                )
+            record = json.loads(destination.read_bytes())
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(clock_calls, 2)
+            self.assertEqual(record["status"], "failed")
+            self.assertEqual(
+                (record["requested_at"], record["completed_at"], record["finalized_at"]),
+                ("2026-09-03T12:00:00Z",) * 3,
+            )
+
+    def test_output_reservation_allows_only_one_concurrent_transport(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            destination = parent / "call.json"
+            entered = threading.Event()
+            release = threading.Event()
+            calls = []
+            errors = []
+            def transport(*args):
+                calls.append(args)
+                entered.set()
+                release.wait(5)
+                return TransportResult(200, provider_response())
+            def first():
+                times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
+                try:
+                    request_assistance(
+                        self.spec, "model", destination, "secret",
+                        confirmation=lambda _: "SEND", preview=lambda _: None,
+                        transport=transport, clock=lambda: next(times),
+                        id_generator=lambda: "winning-call",
+                    )
+                except BaseException as exc:
+                    errors.append(exc)
+            thread = threading.Thread(target=first)
+            thread.start()
+            self.assertTrue(entered.wait(5))
+            with self.assertRaisesRegex(OpenAIResponseError, "reserved"):
+                request_assistance(
+                    self.spec, "model", destination, "secret",
+                    confirmation=lambda _: "SEND", preview=lambda _: None,
+                    transport=transport,
+                )
+            release.set()
+            thread.join(5)
+            self.assertFalse(thread.is_alive())
+            self.assertEqual(errors, [])
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(json.loads(destination.read_bytes())["id"], "winning-call")
+            self.assertEqual(list(parent.glob("*.request-assistance.reserve")), [])
+
+    def test_preview_confirmation_transport_order_and_strict_send(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "call.json"
+            operation = prepare_operation(self.spec, "model", destination)
+            expected_preview = render_preview(operation)
+            events = []
+            times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
+            def confirm(value):
+                events.append(("confirm", value))
+                return "SEND"
+            request_assistance(
+                self.spec, "model", destination, "secret",
+                preview=lambda value: events.append(("preview", value)),
+                confirmation=confirm,
+                transport=lambda *args: (events.append(("transport", args[2])) or TransportResult(200, provider_response())),
+                clock=lambda: next(times), id_generator=lambda: "ordered-operation",
+            )
+            self.assertEqual([event[0] for event in events], ["preview", "confirm", "transport"])
+            self.assertEqual(events[0][1], expected_preview)
+            self.assertEqual(events[1][1], expected_preview)
+            self.assertEqual(events[2][1], operation.body)
+
+        for answer in (" SEND", "SEND ", "send", "Send", "SEND\n", ""):
+            with self.subTest(answer=repr(answer)), tempfile.TemporaryDirectory() as temporary:
+                calls = []
+                result = request_assistance(
+                    self.spec, "model", Path(temporary) / "call.json", "secret",
+                    preview=lambda _: None, confirmation=lambda _: answer,
+                    transport=lambda *args: calls.append(args),
+                )
+                self.assertIsNone(result)
+                self.assertEqual(calls, [])
+
+    def test_injected_oversized_response_is_rejected_before_parsing(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            spec = request_spec()
+            spec["limits"]["max_provider_response_bytes"] = 10
+            destination = Path(temporary) / "call.json"
+            with patch("theorem_terminal.openai_response.classify_response") as classify:
+                with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
+                    request_assistance(
+                        spec, "model", destination, "secret",
+                        preview=lambda _: None, confirmation=lambda _: "SEND",
+                        transport=lambda *_: TransportResult(200, b"x" * 11),
+                        clock=lambda: "2026-09-03T12:00:00Z",
+                        id_generator=lambda: "oversized-call",
+                    )
+                classify.assert_not_called()
+            self.assertEqual(json.loads(destination.read_bytes())["status"], "failed")
 
     def test_post_transmission_failures_are_retained_without_retry_or_secret(self) -> None:
         for name, response in (
@@ -436,6 +561,87 @@ class OpenAIResponseTests(unittest.TestCase):
                 self.assertEqual(json.loads(destination.read_bytes())["status"], expected)
                 self.assertEqual(len(calls), 1)
 
+    def test_complete_terminal_records_for_every_status(self) -> None:
+        completed = json.loads(provider_response("Exact result.\n"))
+        refused = json.loads(provider_response())
+        refused["output"][0]["content"] = [{"type": "refusal", "refusal": "No."}]
+        incomplete = json.loads(provider_response())
+        incomplete["status"] = "queued"
+        failed = json.loads(provider_response())
+        failed["status"] = "failed"
+        failed["output"][0]["content"] = [{"type": "refusal", "refusal": "ignored"}]
+        cancelled = json.loads(provider_response())
+        cancelled["status"] = "cancelled"
+        cases = (
+            ("completed", TransportResult(200, json.dumps(completed).encode()), "completed", "Exact result.\n", False),
+            ("refused", TransportResult(200, json.dumps(refused).encode()), "refused", "No.", False),
+            ("incomplete", TransportResult(200, json.dumps(incomplete).encode()), "incomplete", None, False),
+            ("provider-failed", TransportResult(200, json.dumps(failed).encode()), "failed", None, False),
+            ("provider-cancelled", TransportResult(200, json.dumps(cancelled).encode()), "failed", None, False),
+            ("local-failure", OpenAIResponseError("local failure"), "failed", None, True),
+        )
+        for name, outcome, status, text, raises in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                destination = Path(temporary) / "call.json"
+                calls = []
+                def transport(*args):
+                    calls.append(args)
+                    if isinstance(outcome, Exception):
+                        raise outcome
+                    return outcome
+                timestamps = iter((
+                    "2026-09-03T12:00:00Z",
+                    "2026-09-03T12:00:01Z",
+                    "2026-09-03T12:00:02Z",
+                ))
+                kwargs = dict(
+                    confirmation=lambda _: "SEND", preview=lambda _: None,
+                    transport=transport, clock=lambda: next(timestamps),
+                    id_generator=lambda: f"{name}-call",
+                )
+                if raises:
+                    with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
+                        request_assistance(self.spec, "configured-model", destination, "secret", **kwargs)
+                else:
+                    request_assistance(self.spec, "configured-model", destination, "secret", **kwargs)
+                self.assertEqual(len(calls), 1)
+                operation = prepare_operation(self.spec, "configured-model", destination)
+                expected = {
+                    "schema": "theorem-terminal.model-call",
+                    "schema_version": 1,
+                    "id": f"{name}-call",
+                    "initiated_by": "person-test",
+                    "target": {"kind": "WorkArtifact", "id": "attempt-test-v1"},
+                    "purpose": "strategic_hint",
+                    "request_text": "Suggest one next step; do not solve the problem.",
+                    "context_refs": [{"kind": "WorkArtifact", "id": "attempt-test-v1", "revision": "abc"}],
+                    "effective_input": {
+                        "instructions": "Return one strategic hint only.",
+                        "input": [{"role": "user", "content": [{"type": "input_text", "text": "Exact α-context.\n"}]}],
+                    },
+                    "provider": "openai",
+                    "requested_model": "configured-model",
+                    "resolved_model": None if raises else "configured-model-2026-01-01",
+                    "adapter_version": "openai-responses-v1",
+                    "limits": {
+                        "max_request_body_bytes": 4096,
+                        "max_provider_response_bytes": 4096,
+                        "max_output_tokens": 200,
+                        "timeout_seconds": 30,
+                        "request_body_utf8_bytes": len(operation.body),
+                    },
+                    "settings": {"store": False},
+                    "in_reply_to": None,
+                    "requested_at": "2026-09-03T12:00:00Z",
+                    "completed_at": "2026-09-03T12:00:00Z" if raises else "2026-09-03T12:00:01Z",
+                    "finalized_at": "2026-09-03T12:00:00Z" if raises else "2026-09-03T12:00:02Z",
+                    "status": status,
+                    "response_id": None if raises else "resp_test",
+                    "raw_response": text,
+                    "raw_response_digest": sha256(text.encode()).hexdigest() if text is not None else None,
+                }
+                self.assertEqual(json.loads(destination.read_bytes()), expected)
+
     def test_maximum_metadata_and_large_response_fit_projection_ceiling(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             spec = request_spec()
@@ -477,6 +683,69 @@ class OpenAIResponseTests(unittest.TestCase):
         parsed = parse_prepared_request(json.dumps(changed).encode())
         with self.assertRaisesRegex(OpenAIResponseError, "request body"):
             prepare_operation(parsed, "model", Path("call.json"))
+
+    def test_all_byte_and_numeric_limits_accept_maximum_and_reject_one_over(self) -> None:
+        spec = request_spec()
+        spec["limits"] = {
+            "max_request_body_bytes": openai_response_module.HARD_MAX_REQUEST_BODY_BYTES,
+            "max_provider_response_bytes": openai_response_module.HARD_MAX_PROVIDER_RESPONSE_BYTES,
+            "max_output_tokens": openai_response_module.HARD_MAX_OUTPUT_TOKENS,
+            "timeout_seconds": openai_response_module.HARD_MAX_TIMEOUT_SECONDS,
+        }
+        base = json.dumps(spec).encode()
+        padded = base + b" " * (openai_response_module.MAX_PREPARED_REQUEST_BYTES - len(base))
+        self.assertEqual(len(padded), openai_response_module.MAX_PREPARED_REQUEST_BYTES)
+        parse_prepared_request(padded)
+        with self.assertRaisesRegex(OpenAIResponseError, "prepared request exceeds"):
+            parse_prepared_request(padded + b" ")
+        for key, maximum in (
+            ("max_request_body_bytes", openai_response_module.HARD_MAX_REQUEST_BODY_BYTES),
+            ("max_provider_response_bytes", openai_response_module.HARD_MAX_PROVIDER_RESPONSE_BYTES),
+            ("max_output_tokens", openai_response_module.HARD_MAX_OUTPUT_TOKENS),
+            ("timeout_seconds", openai_response_module.HARD_MAX_TIMEOUT_SECONDS),
+        ):
+            changed = json.loads(json.dumps(spec))
+            changed["limits"][key] = maximum + 1
+            with self.subTest(key=key), self.assertRaisesRegex(OpenAIResponseError, "1 through"):
+                parse_prepared_request(json.dumps(changed).encode())
+
+        spec["effective_input"] = {"input": "x"}
+        probe = prepare_operation(spec, "model", Path("call.json"))
+        overhead = len(probe.body) - 1
+        spec["effective_input"] = {"input": "x" * (openai_response_module.HARD_MAX_REQUEST_BODY_BYTES - overhead)}
+        exact = prepare_operation(spec, "model", Path("call.json"))
+        self.assertEqual(len(exact.body), openai_response_module.HARD_MAX_REQUEST_BODY_BYTES)
+        spec["effective_input"]["input"] += "x"
+        with self.assertRaisesRegex(OpenAIResponseError, "request body"):
+            prepare_operation(spec, "model", Path("call.json"))
+
+        spec = request_spec()
+        spec["limits"]["max_provider_response_bytes"] = openai_response_module.HARD_MAX_PROVIDER_RESPONSE_BYTES
+        base_response = provider_response()
+        maximum_response = base_response + b" " * (
+            openai_response_module.HARD_MAX_PROVIDER_RESPONSE_BYTES - len(base_response)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            first = Path(temporary) / "maximum.json"
+            request_assistance(
+                spec, "model", first, "secret", preview=lambda _: None,
+                confirmation=lambda _: "SEND",
+                transport=lambda *_: TransportResult(200, maximum_response),
+                clock=lambda: "2026-09-03T12:00:00Z",
+                id_generator=lambda: "maximum-response-call",
+            )
+            self.assertEqual(json.loads(first.read_bytes())["status"], "completed")
+            second = Path(temporary) / "over.json"
+            with patch("theorem_terminal.openai_response.classify_response") as classify:
+                with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
+                    request_assistance(
+                        spec, "model", second, "secret", preview=lambda _: None,
+                        confirmation=lambda _: "SEND",
+                        transport=lambda *_: TransportResult(200, maximum_response + b" "),
+                        clock=lambda: "2026-09-03T12:00:00Z",
+                        id_generator=lambda: "over-response-call",
+                    )
+                classify.assert_not_called()
 
     def test_timestamps_remain_ordered_if_wall_clock_moves_backward(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -548,6 +817,24 @@ class OpenAIResponseTests(unittest.TestCase):
                     install_atomic_no_overwrite(destination, b"complete")
             self.assertFalse(destination.exists())
             self.assertEqual(list(parent.glob(".call.json.*.tmp")), [])
+
+    def test_rollback_does_not_delete_concurrently_substituted_destination(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "call.json"
+            real_fsync = os.fsync
+            calls = 0
+            def fsync(descriptor):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    destination.unlink()
+                    destination.write_bytes(b"concurrent replacement")
+                    raise OSError("directory sync failed")
+                return real_fsync(descriptor)
+            with patch("theorem_terminal.openai_response.os.fsync", side_effect=fsync):
+                with self.assertRaisesRegex(OSError, "directory sync"):
+                    install_atomic_no_overwrite(destination, b"our record")
+            self.assertEqual(destination.read_bytes(), b"concurrent replacement")
 
         for name, patches in (
             ("file sync", {"fsync": OSError("sync failed")}),

@@ -6,6 +6,7 @@ output, admit a premise, invoke Lean, or submit a follow-up request.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from hashlib import sha256
@@ -351,6 +352,8 @@ def classify_response(raw: bytes) -> ResponseClassification:
     model = provider_string(response.get("model"), "response.model")
     if response.get("status") in ("failed", "cancelled"):
         return ResponseClassification("failed", response_id, model, None)
+    if response.get("status") != "completed":
+        return ResponseClassification("incomplete", response_id, model, None)
     output = response.get("output")
     if not isinstance(output, list):
         return ResponseClassification("incomplete", response_id, model, None)
@@ -396,8 +399,6 @@ def classify_response(raw: bytes) -> ResponseClassification:
     unambiguous = (texts + refusals)[0] if len(texts) + len(refusals) == 1 else None
     if refusals:
         return ResponseClassification("refused", response_id, model, unambiguous)
-    if response.get("status") != "completed":
-        return ResponseClassification("incomplete", response_id, model, unambiguous)
     if (
         response.get("object") != "response"
         or response_id is None
@@ -419,13 +420,30 @@ def _decode_provider_json(raw: bytes) -> object:
     except UnicodeDecodeError as exc:
         raise OpenAIResponseError("OpenAI provider response is not valid UTF-8") from exc
     try:
-        return json.loads(
+        value = json.loads(
             text,
             object_pairs_hook=_unique_object,
             parse_constant=_standard_number,
         )
     except (json.JSONDecodeError, RecursionError) as exc:
         raise OpenAIResponseError("OpenAI provider response is not valid JSON") from exc
+    _validate_provider_unicode(value, "response")
+    return value
+
+
+def _validate_provider_unicode(value: object, path: str) -> None:
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8", errors="strict")
+        except UnicodeEncodeError as exc:
+            raise OpenAIResponseError(f"{path} contains non-strict Unicode") from exc
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _validate_provider_unicode(key, f"{path}.<key>")
+            _validate_provider_unicode(item, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            _validate_provider_unicode(item, f"{path}[{index}]")
 
 
 def render_preview(operation: PreparedOperation) -> str:
@@ -515,6 +533,7 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
     )
     temporary = Path(name)
     installed = False
+    installed_identity: tuple[int, int] | None = None
     try:
         with os.fdopen(descriptor, "wb") as stream:
             descriptor = -1
@@ -523,6 +542,8 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
             os.fsync(stream.fileno())
         os.link(temporary, destination)
         installed = True
+        temporary_metadata = temporary.stat()
+        installed_identity = (temporary_metadata.st_dev, temporary_metadata.st_ino)
         directory_descriptor = os.open(parent, os.O_RDONLY)
         try:
             os.fsync(directory_descriptor)
@@ -531,9 +552,14 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
     except FileExistsError as exc:
         raise OpenAIResponseError(f"output already exists: {destination}") from exc
     except BaseException:
-        if installed:
+        if installed and installed_identity is not None:
             try:
-                destination.unlink()
+                destination_metadata = destination.lstat()
+                if (
+                    destination_metadata.st_dev,
+                    destination_metadata.st_ino,
+                ) == installed_identity:
+                    destination.unlink()
             except OSError:
                 pass
         raise
@@ -542,6 +568,38 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
             os.close(descriptor)
         try:
             temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+@contextmanager
+def reserve_output(destination: Path):
+    """Exclusively reserve one output name without exposing a ModelCall."""
+
+    reservation = destination.parent / f".{destination.name}.request-assistance.reserve"
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(reservation, flags, 0o600)
+    except FileExistsError as exc:
+        raise OpenAIResponseError(f"output is reserved: {destination}") from exc
+    metadata = os.fstat(descriptor)
+    identity = (metadata.st_dev, metadata.st_ino)
+    try:
+        try:
+            os.lstat(destination)
+        except FileNotFoundError:
+            pass
+        else:
+            raise OpenAIResponseError(f"output already exists: {destination}")
+        yield
+    finally:
+        os.close(descriptor)
+        try:
+            current = reservation.lstat()
+            if (current.st_dev, current.st_ino) == identity:
+                reservation.unlink()
         except FileNotFoundError:
             pass
 
@@ -559,6 +617,8 @@ def execute_confirmed(
 
     call_id = _string(id_generator(), "generated ModelCall id")
     requested_at = _next_timestamp(clock)
+    completed_at = requested_at
+    finalized_at = requested_at
     try:
         result = transport(
             "POST",
@@ -571,12 +631,15 @@ def execute_confirmed(
             operation.timeout_seconds,
             operation.max_provider_response_bytes,
         )
+        if len(result.body) > operation.max_provider_response_bytes:
+            raise OpenAIResponseError("OpenAI provider response exceeds its byte limit")
         if result.status != 200:
             raise OpenAIResponseError(
                 f"OpenAI Responses API returned HTTP {result.status}"
             )
         classification = classify_response(result.body)
         completed_at = _next_timestamp(clock, requested_at)
+        finalized_at = completed_at
         finalized_at = _next_timestamp(clock, completed_at)
         raw = _serialize_terminal(_terminal_record(
             operation, call_id, requested_at, completed_at, finalized_at,
@@ -586,8 +649,6 @@ def execute_confirmed(
             raise OpenAIResponseError("terminal ModelCall exceeds its byte limit")
     except (Exception, KeyboardInterrupt) as exc:
         classification = ResponseClassification("failed", None, None, None)
-        completed_at = _next_timestamp(clock, requested_at)
-        finalized_at = _next_timestamp(clock, completed_at)
         raw = _serialize_terminal(
             _terminal_record(
                 operation,
@@ -650,11 +711,12 @@ def request_assistance(
         return None
     if answer != "SEND":
         return None
-    return execute_confirmed(
-        operation,
-        api_key,
-        transport=http_transport if transport is None else transport,
-        clock=clock,
-        id_generator=id_generator,
-        installer=installer,
-    )
+    with reserve_output(destination):
+        return execute_confirmed(
+            operation,
+            api_key,
+            transport=http_transport if transport is None else transport,
+            clock=clock,
+            id_generator=id_generator,
+            installer=installer,
+        )

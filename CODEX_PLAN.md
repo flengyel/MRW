@@ -234,6 +234,15 @@ serialization, integrity, and checker integration only. It is not the required
 provider request at a genuine obstruction, a proposal disposition, evidence of
 subsequent mathematical progress, or Stage 1 acceptance.
 
+**Authorized provider-infrastructure precursor.** One bounded OpenAI Responses
+adapter is implemented as a low-level developer integration surface. It
+previews and freezes one exact request, requires explicit `SEND`, makes at most
+one non-retried request with `store: false`, and retains a terminal `ModelCall`
+without automatically projecting, admitting, or invoking Lean. Its transient
+JSON envelope is intended to be generated later from active mathematical work,
+not authored by the mathematician. This infrastructure does not execute or
+complete the genuine-obstruction Stage 1 trial, which remains pending.
+
 For the designated evaluation fixture, finalize the call, freeze the selected
 response representation and admissions, and invoke the Lean justification
 checker explicitly in its pinned build environment. The checker emits a

@@ -411,12 +411,13 @@ maliciously replaced persistence store.
 
 ### Create one finalized OpenAI ModelCall
 
-The current integration surface consumes an internal, transient,
-task-generated adapter envelope containing only existing request-side
-`ModelCall` information. It is not a form for a mathematician to prepare. A
-later task-facing operation must derive the initiator, target, purpose, context
-references, and limits from the active mathematical work. The envelope has
-exactly these fields:
+The current integration surface consumes a low-level developer integration
+envelope containing only existing request-side `ModelCall` information. This
+transient JSON is intended eventually to be generated from the active task;
+mathematicians should not author it, and it is not yet the task-facing live
+workflow. A later task-facing operation must derive the initiator, target,
+purpose, context references, and limits from the active mathematical work. The
+envelope has exactly these fields:
 
 ```json
 {
