@@ -9,6 +9,9 @@ from theorem_terminal.model_projection import FinalizedModelCall
 
 INDEX_PAGE_SIZE = 20
 PREVIEW_SCALARS = 120
+METADATA_PREVIEW_SCALARS = 120
+DIAGNOSTIC_PREVIEW_SCALARS = 240
+MAX_INDEX_OUTPUT_CHARACTERS = 32 * 1024
 PURPOSE_TO_KIND = {
     "definition_explanation": "informal_explanation",
     "result_explanation": "informal_explanation",
@@ -55,56 +58,100 @@ def safe_terminal_text(value: str) -> str:
     return "".join(rendered)
 
 
-def passages(response: str) -> tuple[Passage, ...]:
-    """Apply the exact LF/CRLF and ASCII-blank passage grammar."""
+def bounded_safe_field(
+    label: str, value: str, limit: int = METADATA_PREVIEW_SCALARS
+) -> str:
+    """Put trusted size/framing before a bounded safely rendered value."""
 
-    found: list[Passage] = []
-    character_start = 0
-    byte_start = 0
+    shown = min(len(value), limit)
+    truncated = "yes" if len(value) > limit else "no"
+    return (
+        f"{label} [scalars={len(value)}, shown={shown}, truncated={truncated}]: "
+        f"{safe_terminal_text(value[:limit])}"
+    )
+
+
+def bounded_safe_diagnostic(value: str) -> str:
+    return bounded_safe_field("diagnostic", value, DIAGNOSTIC_PREVIEW_SCALARS)
+
+
+def _iter_passages(raw: bytes):
+    """Yield passages in one scan without retaining earlier passage records."""
+
+    position = 0
+    number = 0
     passage_start: int | None = None
     passage_end = 0
-    while character_start < len(response):
-        newline = response.find("\n", character_start)
-        character_end = len(response) if newline < 0 else newline + 1
-        logical = response[character_start:character_end]
-        content = logical
+    while position < len(raw):
+        newline = raw.find(b"\n", position)
+        line_end = len(raw) if newline < 0 else newline + 1
+        content_end = line_end
         if newline >= 0:
-            content = logical[:-2] if logical.endswith("\r\n") else logical[:-1]
-        line_bytes = logical.encode("utf-8")
-        line_end_byte = byte_start + len(line_bytes)
-        blank = all(character in " \t" for character in content)
+            content_end = (
+                newline - 1
+                if newline > position and raw[newline - 1] == 0x0D
+                else newline
+            )
+        content = raw[position:content_end]
+        blank = all(byte in (0x20, 0x09) for byte in content)
         if blank:
             if passage_start is not None:
-                found.append(Passage(len(found) + 1, passage_start, passage_end))
+                number += 1
+                yield Passage(number, passage_start, passage_end)
                 passage_start = None
         else:
             if passage_start is None:
-                passage_start = byte_start
-            passage_end = line_end_byte
-        character_start = character_end
-        byte_start = line_end_byte
+                passage_start = position
+            passage_end = line_end
+        position = line_end
     if passage_start is not None:
-        found.append(Passage(len(found) + 1, passage_start, passage_end))
-    return tuple(found)
+        yield Passage(number + 1, passage_start, passage_end)
+
+
+def passages(response: str) -> tuple[Passage, ...]:
+    """Compatibility helper returning all exact passages for programmatic callers."""
+
+    return tuple(_iter_passages(response.encode("utf-8")))
+
+
+def _scan(
+    response: str,
+    *,
+    page_start: int | None = None,
+    selected_number: int | None = None,
+) -> tuple[bytes, int, tuple[Passage, ...], Passage | None]:
+    """Scan once, retaining at most one selected passage or one bounded page."""
+
+    raw = response.encode("utf-8")
+    page: list[Passage] = []
+    selected = None
+    count = 0
+    for passage in _iter_passages(raw):
+        count = passage.number
+        if selected_number == passage.number:
+            selected = passage
+        if (
+            page_start is not None
+            and passage.number >= page_start
+            and len(page) < INDEX_PAGE_SIZE
+        ):
+            page.append(passage)
+    return raw, count, tuple(page), selected
 
 
 def select_passage(response: str, number: int) -> Passage:
     if isinstance(number, bool) or number <= 0:
         raise ResponseReviewError("passage number must be positive")
-    indexed = passages(response)
-    if number > len(indexed):
+    _, _, _, selected = _scan(response, selected_number=number)
+    if selected is None:
         raise ResponseReviewError(f"passage {number} is out of range")
-    return indexed[number - 1]
+    return selected
 
 
 def purpose_kind(call: FinalizedModelCall) -> str:
     purpose = call.document["purpose"]
     assert isinstance(purpose, str)
     return PURPOSE_TO_KIND[purpose]
-
-
-def _material(response: str, passage: Passage) -> str:
-    return response.encode("utf-8")[passage.start_byte:passage.end_byte].decode("utf-8")
 
 
 def _header(call: FinalizedModelCall) -> list[str]:
@@ -120,7 +167,7 @@ def _header(call: FinalizedModelCall) -> list[str]:
         ("Request", document["request_text"]),
     )
     return ["Response review"] + [
-        f"{label}: {safe_terminal_text(str(value))}" for label, value in fields
+        bounded_safe_field(label, str(value)) for label, value in fields
     ]
 
 
@@ -131,33 +178,60 @@ def render_response_review(
     passage_number: int | None = None,
     full: bool = False,
 ) -> str:
-    indexed = passages(call.raw_response)
+    if sum((index_start is not None, passage_number is not None, bool(full))) > 1:
+        raise ResponseReviewError(
+            "index, passage, and full-response selectors are mutually exclusive"
+        )
+    if passage_number is not None and (
+        isinstance(passage_number, bool) or passage_number <= 0
+    ):
+        raise ResponseReviewError("passage number must be positive")
+    start = 1 if index_start is None else index_start
+    if isinstance(start, bool) or start <= 0:
+        raise ResponseReviewError("index start must be positive")
+
+    if full:
+        raw, count, page, selected = _scan(call.raw_response)
+    elif passage_number is not None:
+        raw, count, page, selected = _scan(
+            call.raw_response, selected_number=passage_number
+        )
+    else:
+        raw, count, page, selected = _scan(call.raw_response, page_start=start)
+
     lines = _header(call)
-    lines.append(f"Passages: {len(indexed)}")
+    lines.append(f"Passages: {count}")
     if full:
         lines.extend(("Full response:", safe_terminal_text(call.raw_response)))
     elif passage_number is not None:
-        passage = select_passage(call.raw_response, passage_number)
-        lines.extend((
-            f"Passage {passage.number} ({passage.end_byte - passage.start_byte} UTF-8 bytes):",
-            safe_terminal_text(_material(call.raw_response, passage)),
-        ))
-    else:
-        start = 1 if index_start is None else index_start
-        if isinstance(start, bool) or start <= 0:
-            raise ResponseReviewError("index start must be positive")
-        if not indexed:
-            if start != 1:
-                raise ResponseReviewError(f"index start {start} is out of range")
-        elif start > len(indexed):
-            raise ResponseReviewError(f"index start {start} is out of range")
-        lines.append(f"Passage index starting at {start} (at most {INDEX_PAGE_SIZE} rows):")
-        for passage in indexed[start - 1:start - 1 + INDEX_PAGE_SIZE]:
-            material = _material(call.raw_response, passage)
-            preview = material[:PREVIEW_SCALARS]
-            marker = " [preview truncated]" if len(material) > PREVIEW_SCALARS else ""
-            lines.append(
-                f"Passage {passage.number} | {passage.end_byte - passage.start_byte} UTF-8 bytes | "
-                f"{safe_terminal_text(preview)}{marker}"
+        if selected is None:
+            raise ResponseReviewError(f"passage {passage_number} is out of range")
+        lines.extend(
+            (
+                f"Passage {selected.number} "
+                f"({selected.end_byte - selected.start_byte} UTF-8 bytes):",
+                safe_terminal_text(
+                    raw[selected.start_byte:selected.end_byte].decode("utf-8")
+                ),
             )
-    return "\n".join(lines)
+        )
+    else:
+        if (count == 0 and start != 1) or (count and start > count):
+            raise ResponseReviewError(f"index start {start} is out of range")
+        lines.append(
+            f"Passage index starting at {start} (at most {INDEX_PAGE_SIZE} rows):"
+        )
+        for passage in page:
+            material = raw[passage.start_byte:passage.end_byte].decode("utf-8")
+            shown = min(len(material), PREVIEW_SCALARS)
+            truncated = "yes" if len(material) > PREVIEW_SCALARS else "no"
+            lines.append(
+                f"Passage {passage.number} "
+                f"[bytes={passage.end_byte - passage.start_byte}, "
+                f"preview-scalars={shown}, truncated={truncated}]: "
+                f"{safe_terminal_text(material[:PREVIEW_SCALARS])}"
+            )
+    rendered = "\n".join(lines)
+    if not full and passage_number is None and len(rendered) > MAX_INDEX_OUTPUT_CHARACTERS:
+        raise ResponseReviewError("bounded response index exceeded its display limit")
+    return rendered

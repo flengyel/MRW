@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import tracemalloc
 import unittest
 from unittest.mock import patch
 
@@ -19,9 +20,12 @@ from theorem_terminal.private_persistence import (
     PrivatePersistenceError,
     persist_private_new,
 )
+from theorem_terminal import private_persistence as persistence_module
 from theorem_terminal.response_review import (
     INDEX_PAGE_SIZE,
     PREVIEW_SCALARS,
+    METADATA_PREVIEW_SCALARS,
+    MAX_INDEX_OUTPUT_CHARACTERS,
     passages,
     render_response_review,
     safe_terminal_text,
@@ -107,10 +111,10 @@ class SafeReviewTests(unittest.TestCase):
 
     def test_every_record_metadata_and_response_string_is_safely_rendered(self) -> None:
         rendered = render_response_review(self.call("body\n\u001b]8;;https://bad\a"), full=True)
-        self.assertIn("Call: call\\\\id\\u{001B}", rendered)
-        self.assertIn("Provider: provider\\u{0085}", rendered)
-        self.assertIn("Model: resolved\\u{202E}", rendered)
-        self.assertIn("Request: request\\u{000A}text\\\\value", rendered)
+        self.assertIn("Call [scalars=8, shown=8, truncated=no]: call\\\\id\\u{001B}", rendered)
+        self.assertIn("Provider [scalars=9, shown=9, truncated=no]: provider\\u{0085}", rendered)
+        self.assertIn("Model [scalars=9, shown=9, truncated=no]: resolved\\u{202E}", rendered)
+        self.assertIn("Request [scalars=18, shown=18, truncated=no]: request\\u{000A}text\\\\value", rendered)
         self.assertIn("body\\u{000A}\\u{001B}]8;;https://bad\\u{0007}", rendered)
         self.assertNotIn("\x1b", rendered)
 
@@ -122,12 +126,57 @@ class SafeReviewTests(unittest.TestCase):
         call = self.call(response)
         first = render_response_review(call)
         self.assertEqual(first, render_response_review(call))
-        self.assertEqual(first.count(" UTF-8 bytes | "), INDEX_PAGE_SIZE)
-        self.assertIn("[preview truncated]", first)
-        self.assertNotIn("Passage 21 |", first)
+        self.assertEqual(first.count("[bytes="), INDEX_PAGE_SIZE)
+        self.assertIn("truncated=yes", first)
+        self.assertNotIn("Passage 21 [", first)
         second = render_response_review(call, index_start=21)
-        self.assertEqual(second.count(" UTF-8 bytes | "), 5)
-        self.assertIn("Passage 25 |", second)
+        self.assertEqual(second.count("[bytes="), 5)
+        self.assertIn("Passage 25 [", second)
+
+    def test_bounded_metadata_and_unambiguous_trusted_prefix(self) -> None:
+        first = "x|[preview truncated]" + ("\x1b" * 121)
+        response = "\n\n".join([first] + [("\x1b" * 121)] * 19) + "\n"
+        document = call_document(response)
+        document["id"] = "I" * 500_000
+        document["provider"] = "P" * 500_000
+        document["resolved_model"] = "M" * 500_000
+        document["request_text"] = "R" * 500_000
+        raw = (json.dumps(document, separators=(",", ":")) + "\n").encode()
+        rendered = render_response_review(parse_finalized_model_call(raw))
+        self.assertLessEqual(len(rendered), MAX_INDEX_OUTPUT_CHARACTERS)
+        self.assertIn(
+            f"Call [scalars=500000, shown={METADATA_PREVIEW_SCALARS}, truncated=yes]:",
+            rendered,
+        )
+        row = next(line for line in rendered.splitlines() if line.startswith("Passage 1 "))
+        self.assertTrue(
+            row.startswith("Passage 1 [bytes=143, preview-scalars=120, truncated=yes]: ")
+        )
+        self.assertIn("x|[preview truncated]", row)
+
+    def test_fragmented_near_boundary_response_has_bounded_retained_state(self) -> None:
+        response = "x\n\n" * 300_000
+        call = self.call(response)
+        tracemalloc.start()
+        try:
+            rendered = render_response_review(call)
+            _, peak = tracemalloc.get_traced_memory()
+        finally:
+            tracemalloc.stop()
+        self.assertEqual(rendered.count("[bytes="), INDEX_PAGE_SIZE)
+        self.assertLess(peak, 8 * 1024 * 1024)
+
+    def test_programmatic_selector_exclusivity(self) -> None:
+        call = self.call("one")
+        for keywords in (
+            {"index_start": 1, "passage_number": 1},
+            {"index_start": 1, "full": True},
+            {"passage_number": 1, "full": True},
+        ):
+            with self.subTest(keywords=keywords), self.assertRaisesRegex(
+                ValueError, "mutually exclusive"
+            ):
+                render_response_review(call, **keywords)
 
     def test_empty_blank_and_selector_ranges(self) -> None:
         empty = self.call("")
@@ -200,6 +249,45 @@ class ReviewCliTests(unittest.TestCase):
                     self.assertTrue(error.startswith("error: "))
                     self.assertEqual(set(parent.iterdir()), before)
 
+    def test_rejected_records_cannot_emit_unbounded_terminal_controls(self) -> None:
+        malicious = "\\u001b]8;;bad\\u0007\\r\\n\\u0085\\u007f\\\\\\u202e"
+        huge = malicious + ("K" * 2_000_000)
+        records = (
+            b'{"' + huge.encode() + b'":0,"' + huge.encode() + b'":1}',
+            (json.dumps({**call_document("one"), huge: "value"}) + "\n").encode(),
+            (
+                json.dumps(
+                    {
+                        **call_document("one"),
+                        "target": {"kind": "WorkArtifact", "id": "a", huge: "value"},
+                    }
+                )
+                + "\n"
+            ).encode(),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            for index, raw in enumerate(records):
+                source = parent / f"bad-{index}.json"
+                source.write_bytes(raw)
+                for command in ("review-response", "project-response"):
+                    arguments = [command, str(source)]
+                    if command == "project-response":
+                        arguments += [
+                            "--passage", "1", "--representation-id", "r",
+                            "--claim-id", "c", "--output", str(parent / "out.json"),
+                        ]
+                    code, output, error = self.run_main(arguments)
+                    self.assertEqual(code, 2)
+                    self.assertEqual(output, "")
+                    self.assertLess(len(error), 2200)
+                    self.assertNotIn("\x1b", error)
+                    self.assertNotIn("\r", error)
+                    self.assertNotIn("\x85", error)
+                    self.assertNotIn("\x7f", error)
+                    self.assertNotIn("\u202e", error)
+                    self.assertFalse((parent / "out.json").exists())
+
     def test_passage_projection_equals_byte_mode_and_maps_every_purpose(self) -> None:
         mapping = {
             "definition_explanation": "informal_explanation",
@@ -269,9 +357,16 @@ class PrivatePersistenceTests(unittest.TestCase):
 
             raced = parent / "raced.json"
             real_link = os.link
-            def link(source, target):
-                Path(target).write_bytes(b"concurrent")
-                return real_link(source, target)
+            def link(source, target, **kwargs):
+                descriptor = os.open(
+                    target,
+                    os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+                    0o600,
+                    dir_fd=kwargs["dst_dir_fd"],
+                )
+                os.write(descriptor, b"concurrent")
+                os.close(descriptor)
+                return real_link(source, target, **kwargs)
             with patch("theorem_terminal.private_persistence.os.link", side_effect=link):
                 with self.assertRaisesRegex(PrivatePersistenceError, "File exists"):
                     persist_private_new(raced, b"ours")
@@ -281,7 +376,7 @@ class PrivatePersistenceTests(unittest.TestCase):
     def test_prelink_failures_cleanup_and_postlink_sync_retains_destination(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary)
-            for operation in ("fchmod", "fdopen", "fsync", "link"):
+            for operation in ("fchmod", "write", "fsync", "link"):
                 destination = parent / f"{operation}.json"
                 target = f"theorem_terminal.private_persistence.os.{operation}"
                 with self.subTest(operation=operation), patch(target, side_effect=OSError("failed")):
@@ -297,6 +392,89 @@ class PrivatePersistenceTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(PrivatePersistenceError, "published.*durability"):
                     persist_private_new(destination, b"complete")
+            self.assertEqual(destination.read_bytes(), b"complete")
+            self.assertEqual(list(parent.glob(".*.tmp")), [])
+
+    def test_source_substitution_and_parent_identity_change_are_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            destination = parent / "record.json"
+            real_stat = os.stat
+            substituted = False
+
+            def replacing_stat(path, *args, **kwargs):
+                nonlocal substituted
+                if (
+                    isinstance(path, str)
+                    and path.endswith(".tmp")
+                    and kwargs.get("dir_fd") is not None
+                    and not substituted
+                ):
+                    substituted = True
+                    os.unlink(path, dir_fd=kwargs["dir_fd"])
+                    descriptor = os.open(
+                        path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600,
+                        dir_fd=kwargs["dir_fd"],
+                    )
+                    os.write(descriptor, b"substituted")
+                    os.close(descriptor)
+                return real_stat(path, *args, **kwargs)
+
+            with patch(
+                "theorem_terminal.private_persistence.os.stat",
+                side_effect=replacing_stat,
+            ):
+                with self.assertRaisesRegex(PrivatePersistenceError, "identity"):
+                    persist_private_new(destination, b"complete")
+            self.assertFalse(destination.exists())
+            self.assertEqual(list(parent.glob(".*.tmp")), [])
+
+            with patch.object(
+                persistence_module, "_parent_matches", side_effect=(True, False)
+            ):
+                with self.assertRaisesRegex(PrivatePersistenceError, "parent.*identity"):
+                    persist_private_new(destination, b"complete")
+            self.assertFalse(destination.exists())
+            self.assertEqual(list(parent.glob(".*.tmp")), [])
+
+    def test_cleanup_faults_do_not_skip_remaining_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            destination = parent / "record.json"
+            real_unlink = os.unlink
+            calls = 0
+
+            def transient_unlink(*args, **kwargs):
+                nonlocal calls
+                calls += 1
+                if calls == 1:
+                    raise OSError("transient unlink failure")
+                return real_unlink(*args, **kwargs)
+
+            with patch(
+                "theorem_terminal.private_persistence.os.unlink",
+                side_effect=transient_unlink,
+            ):
+                persist_private_new(destination, b"complete")
+            self.assertEqual(destination.read_bytes(), b"complete")
+            self.assertEqual(list(parent.glob(".*.tmp")), [])
+
+            destination.unlink()
+            real_close = os.close
+            calls = 0
+
+            def transient_close(descriptor):
+                nonlocal calls
+                calls += 1
+                if calls == 1:
+                    raise OSError("descriptor close failure")
+                return real_close(descriptor)
+
+            with patch(
+                "theorem_terminal.private_persistence.os.close",
+                side_effect=transient_close,
+            ):
+                persist_private_new(destination, b"complete")
             self.assertEqual(destination.read_bytes(), b"complete")
             self.assertEqual(list(parent.glob(".*.tmp")), [])
 

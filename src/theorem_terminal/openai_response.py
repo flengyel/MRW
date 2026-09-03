@@ -537,13 +537,16 @@ def reserve_output(destination: Path):
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
+    descriptor = -1
+    identity = None
+    primary = None
     try:
         descriptor = os.open(reservation, flags, 0o600)
     except FileExistsError as exc:
         raise OpenAIResponseError(f"output is reserved: {destination}") from exc
-    metadata = os.fstat(descriptor)
-    identity = (metadata.st_dev, metadata.st_ino)
     try:
+        metadata = os.fstat(descriptor)
+        identity = (metadata.st_dev, metadata.st_ino)
         try:
             os.lstat(destination)
         except FileNotFoundError:
@@ -551,14 +554,33 @@ def reserve_output(destination: Path):
         else:
             raise OpenAIResponseError(f"output already exists: {destination}")
         yield
+    except BaseException as exc:
+        primary = exc
+        raise
     finally:
-        os.close(descriptor)
-        try:
-            current = reservation.lstat()
-            if (current.st_dev, current.st_ino) == identity:
-                reservation.unlink()
-        except FileNotFoundError:
-            pass
+        cleanup_failures = []
+        for attempt in range(2):
+            try:
+                current = reservation.lstat()
+                if identity is None or (current.st_dev, current.st_ino) == identity:
+                    reservation.unlink()
+                break
+            except FileNotFoundError:
+                break
+            except OSError as exc:
+                if attempt:
+                    cleanup_failures.append(f"reservation cleanup failed: {exc}")
+        if descriptor >= 0:
+            try:
+                os.close(descriptor)
+            except OSError as exc:
+                cleanup_failures.append(f"reservation descriptor close failed: {exc}")
+        if cleanup_failures:
+            detail = "; ".join(cleanup_failures)
+            if primary is not None and hasattr(primary, "add_note"):
+                primary.add_note(detail)
+            elif primary is None:
+                raise OpenAIResponseError(detail)
 
 
 def execute_confirmed(

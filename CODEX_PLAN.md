@@ -283,10 +283,13 @@ is mutually exclusive with its existing `--start-byte` and `--end-byte`
 developer pair; otherwise both byte arguments remain required.
 
 The default index shows at most 20 passages from a requested starting passage.
-Each row contains trusted framing, the passage number, its UTF-8 byte length,
-and a one-line preview of at most the first 120 Unicode scalar values before safe
-rendering, with a trusted truncation marker when needed. Further rows require an
-explicit page request. Explicit passage and full-response views may be longer.
+Each row puts trusted passage number, UTF-8 byte length, preview scalar count,
+and truncation status before a one-line preview of at most the first 120 Unicode
+scalar values. Variable-width attribution and request metadata use the same
+120-scalar bound and trusted length/truncation-first framing; `--full` expands
+only the raw response. One linear scan counts passages while retaining at most
+the requested page or selected passage. Further rows require an explicit page
+request. Explicit passage and full-response views may be longer.
 
 Every record-derived string, including identifiers, provider and model names,
 purpose, request text, and response text, is passed through one renderer. It
@@ -305,7 +308,10 @@ The mathematician may select a displayed passage number; the application, not
 the mathematician, computes the existing `project-response` span. Merely
 viewing or cancelling creates no artifact. This increment also factors the provider-
 independent private persistence needed by response-bearing records: mode
-`0600`, synchronization, atomic no-overwrite publication, and failure cleanup.
+`0600`, synchronization, descriptor-relative inode-bound atomic no-overwrite
+publication in a stable parent directory, and failure cleanup. This local
+filesystem boundary handles accidental and ordinary concurrent replacement,
+not arbitrary compromise of the same Unix account.
 A successful hard link remains the publication commit point. Every pre-link
 failure leaves no destination; after link success, even a directory-sync failure
 retains the complete destination, reports a durability error, and removes only

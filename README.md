@@ -403,9 +403,14 @@ theorem-terminal review-response MODEL_CALL --passage 1
 theorem-terminal review-response MODEL_CALL --full
 ```
 
-The three selectors are mutually exclusive. Index pages contain at most 20
-rows, and each row previews at most 120 Unicode scalar values before safe
-rendering. Record-derived backslashes, terminal controls, and bidi controls are
+The three selectors are mutually exclusive in both the CLI and underlying
+renderer. Index pages contain at most 20 rows, and each row puts its byte
+length, displayed scalar count, and truncation status in trusted framing before
+a preview of at most 120 Unicode scalar values. Variable-width attribution and
+request metadata are likewise bounded to 120 scalars, with trusted length and
+truncation framing first; `--full` expands only the raw response. Passage
+counting is a single linear scan that retains at most the requested page or one
+selected passage. Record-derived backslashes, terminal controls, and bidi controls are
 reversibly escaped as visible ASCII; the command emits no terminal hyperlinks,
 invokes no pager or renderer, and does not interpret returned markup, commands,
 TeX, or URLs. A terminal emulator may still auto-link plain URL text. Review is
@@ -533,6 +538,11 @@ overwriting an existing or concurrently created destination; temporary files
 are removed on success and failure. The atomic link is the publication commit
 point. If the subsequent directory durability sync fails, the command reports
 that failure while retaining the complete, file-synchronized destination.
+Publication uses descriptor-relative operations and verifies the temporary
+file's inode, mode, and stable parent-directory identity before linking. This
+protects the local workflow against accidental and ordinary concurrent pathname
+replacement; it is not a security boundary against arbitrary compromise of the
+same Unix account or host.
 
 The resulting completed file is directly consumable by `project-response`. Nothing in
 `request-assistance` automatically projects output, admits a premise, invokes Lean,

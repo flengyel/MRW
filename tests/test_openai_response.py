@@ -783,9 +783,14 @@ class OpenAIResponseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             destination = Path(temporary) / "call.json"
             real_link = os.link
-            def racing_link(source, target):
-                Path(target).write_bytes(b"concurrent")
-                return real_link(source, target)
+            def racing_link(source, target, **kwargs):
+                descriptor = os.open(
+                    target, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600,
+                    dir_fd=kwargs["dst_dir_fd"],
+                )
+                os.write(descriptor, b"concurrent")
+                os.close(descriptor)
+                return real_link(source, target, **kwargs)
             with patch("theorem_terminal.openai_response.os.link", racing_link):
                 with self.assertRaisesRegex(OpenAIResponseError, "already exists"):
                     install_atomic_no_overwrite(destination, b"ours")
@@ -810,8 +815,8 @@ class OpenAIResponseTests(unittest.TestCase):
             parent = Path(temporary)
             destination = parent / "call.json"
             with patch(
-                "theorem_terminal.openai_response.os.fdopen",
-                side_effect=lambda descriptor, _mode: BrokenWriter(descriptor),
+                "theorem_terminal.private_persistence.os.write",
+                side_effect=OSError("write failed"),
             ):
                 with self.assertRaises(OSError):
                     install_atomic_no_overwrite(destination, b"complete")
@@ -877,6 +882,27 @@ class OpenAIResponseTests(unittest.TestCase):
                 self.assertEqual(
                     list(parent.glob(".*.request-assistance.reserve")), []
                 )
+
+    def test_reservation_fstat_failure_still_cleans_and_skips_transport(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            destination = parent / "call.json"
+            calls = []
+            with patch(
+                "theorem_terminal.openai_response.os.fstat",
+                side_effect=OSError("reservation fstat failed"),
+            ):
+                with self.assertRaisesRegex(OSError, "reservation fstat failed"):
+                    request_assistance(
+                        self.spec, "model", destination, "secret",
+                        preview=lambda _: None, confirmation=lambda _: "SEND",
+                        transport=lambda *args: calls.append(args),
+                    )
+            self.assertEqual(calls, [])
+            self.assertFalse(destination.exists())
+            self.assertEqual(
+                list(parent.glob(".*.request-assistance.reserve")), []
+            )
 
     def test_project_response_accepts_success_without_changing_call(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

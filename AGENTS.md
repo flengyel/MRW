@@ -127,8 +127,9 @@ over completed, finalized `ModelCall` records. It:
   passage, and full-response selectors specified in `CODEX_PLAN.md`, and extend
   `project-response` with its mutually exclusive `--passage N` selector;
 - show the bounded, pageable deterministic passage index specified in
-  `CODEX_PLAN.md` and keep the complete exact response available by explicit
-  action;
+  `CODEX_PLAN.md`, bound every variable-width metadata preview, put trusted
+  lengths and truncation state before untrusted text, and keep the complete
+  exact response available by explicit action;
 - define passages, numbering, previews, and zero-passage behavior exactly as
   `CODEX_PLAN.md` does and map a selected visible passage number to the existing
   half-open UTF-8 span internally;
@@ -140,12 +141,16 @@ over completed, finalized `ModelCall` records. It:
   cancelled;
 - use the existing parser, digest validation, and projection construction rather
   than duplicating them;
-- factor a provider-independent, mode-`0600`, synchronized, atomic
+- use a single linear passage scan retaining only the requested page or selected
+  passage; factor a provider-independent, mode-`0600`, synchronized, atomic
   no-overwrite persistence helper and apply it to response-bearing projection
   and admission artifacts as well as the model-call path, preserving the current
   model-call publication commit point, including retention of the complete destination and
   cleanup of only temporary or reservation artifacts after any post-link
   directory-sync failure;
+- bind publication to the synchronized temporary inode and a held stable parent
+  directory; this protects against ordinary concurrent pathname replacement,
+  not arbitrary compromise of the same Unix account;
 - preserve response selection as an ordinary lossless `Representation`; map
   call purposes to existing generic representation kinds rather than adding an
   AI-response hierarchy; and

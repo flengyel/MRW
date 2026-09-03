@@ -156,6 +156,14 @@ def _read_bounded(path: Path, limit: int, description: str) -> bytes:
     return raw
 
 
+def _cli_error(command: str, exc: BaseException) -> str:
+    if command in ("review-response", "project-response"):
+        from theorem_terminal.response_review import bounded_safe_diagnostic
+
+        return bounded_safe_diagnostic(str(exc))
+    return str(exc)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
@@ -351,12 +359,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         JustificationBundleError,
         OSError,
     ) as exc:
-        print(f"error: {exc}", file=sys.stderr)
+        print(f"error: {_cli_error(args.command, exc)}", file=sys.stderr)
         return 2
     except ValueError as exc:
         # Bridge validation errors are ValueError subclasses; keep CLI failures
         # concise without importing the bridge on ordinary study commands.
-        print(f"error: {exc}", file=sys.stderr)
+        print(f"error: {_cli_error(args.command, exc)}", file=sys.stderr)
         return 2
 
     print(output)
