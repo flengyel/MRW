@@ -818,23 +818,31 @@ class OpenAIResponseTests(unittest.TestCase):
             self.assertFalse(destination.exists())
             self.assertEqual(list(parent.glob(".call.json.*.tmp")), [])
 
-    def test_rollback_does_not_delete_concurrently_substituted_destination(self) -> None:
+    def test_directory_sync_failure_retains_published_complete_destination(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
             destination = Path(temporary) / "call.json"
             real_fsync = os.fsync
+            real_unlink = os.unlink
             calls = 0
+            unlink_attempts = []
             def fsync(descriptor):
                 nonlocal calls
                 calls += 1
                 if calls == 2:
-                    destination.unlink()
-                    destination.write_bytes(b"concurrent replacement")
                     raise OSError("directory sync failed")
                 return real_fsync(descriptor)
-            with patch("theorem_terminal.openai_response.os.fsync", side_effect=fsync):
-                with self.assertRaisesRegex(OSError, "directory sync"):
-                    install_atomic_no_overwrite(destination, b"our record")
-            self.assertEqual(destination.read_bytes(), b"concurrent replacement")
+            def unlink(path, *args, **kwargs):
+                unlink_attempts.append(Path(path))
+                return real_unlink(path, *args, **kwargs)
+            complete = b'{"complete":"ModelCall"}\n'
+            with patch("theorem_terminal.openai_response.os.fsync", side_effect=fsync), \
+                 patch("os.unlink", side_effect=unlink):
+                with self.assertRaisesRegex(OpenAIResponseError, "published.*durability"):
+                    install_atomic_no_overwrite(destination, complete)
+            self.assertEqual(destination.read_bytes(), complete)
+            self.assertNotIn(destination, unlink_attempts)
+            self.assertEqual(list(parent.glob(".call.json.*.tmp")), [])
 
         for name, patches in (
             ("file sync", {"fsync": OSError("sync failed")}),
@@ -850,17 +858,25 @@ class OpenAIResponseTests(unittest.TestCase):
                 self.assertFalse(destination.exists())
                 self.assertEqual(list(parent.glob(".call.json.*.tmp")), [])
 
-        with tempfile.TemporaryDirectory() as temporary:
-            parent = Path(temporary)
-            destination = parent / "call.json"
-            with patch(
-                "theorem_terminal.openai_response.os.fsync",
-                side_effect=(None, OSError("directory sync failed")),
-            ):
-                with self.assertRaises(OSError):
-                    install_atomic_no_overwrite(destination, b"complete")
-            self.assertFalse(destination.exists())
-            self.assertEqual(list(parent.glob(".call.json.*.tmp")), [])
+    def test_reservations_are_cleaned_after_transport_failure_and_interrupt(self) -> None:
+        for failure in (OpenAIResponseError("transport failed"), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__), tempfile.TemporaryDirectory() as temporary:
+                parent = Path(temporary)
+                destination = parent / "call.json"
+                def transport(*_args):
+                    raise failure
+                with self.assertRaises(type(failure)):
+                    request_assistance(
+                        self.spec, "model", destination, "secret",
+                        preview=lambda _: None, confirmation=lambda _: "SEND",
+                        transport=transport,
+                        clock=lambda: "2026-09-03T12:00:00Z",
+                        id_generator=lambda: "failed-call",
+                    )
+                self.assertEqual(json.loads(destination.read_bytes())["status"], "failed")
+                self.assertEqual(
+                    list(parent.glob(".*.request-assistance.reserve")), []
+                )
 
     def test_project_response_accepts_success_without_changing_call(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

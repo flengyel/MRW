@@ -484,7 +484,9 @@ malformed-response failures produce terminal `failed` records after
 transmission when the record can be retained. No error response body is printed.
 Every terminal file is flushed, synchronized, and installed atomically without
 overwriting an existing or concurrently created destination; temporary files
-are removed on success and failure.
+are removed on success and failure. The atomic link is the publication commit
+point. If the subsequent directory durability sync fails, the command reports
+that failure while retaining the complete, file-synchronized destination.
 
 The resulting completed file is directly consumable by `project-response`. Nothing in
 `request-assistance` automatically projects output, admits a premise, invokes Lean,

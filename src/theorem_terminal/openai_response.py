@@ -532,8 +532,6 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
         prefix=f".{destination.name}.", suffix=".tmp", dir=parent
     )
     temporary = Path(name)
-    installed = False
-    installed_identity: tuple[int, int] | None = None
     try:
         with os.fdopen(descriptor, "wb") as stream:
             descriptor = -1
@@ -541,28 +539,19 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         os.link(temporary, destination)
-        installed = True
-        temporary_metadata = temporary.stat()
-        installed_identity = (temporary_metadata.st_dev, temporary_metadata.st_ino)
-        directory_descriptor = os.open(parent, os.O_RDONLY)
         try:
-            os.fsync(directory_descriptor)
-        finally:
-            os.close(directory_descriptor)
+            directory_descriptor = os.open(parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_descriptor)
+            finally:
+                os.close(directory_descriptor)
+        except OSError as exc:
+            raise OpenAIResponseError(
+                "ModelCall was published, but directory durability sync failed; "
+                "the complete destination was retained"
+            ) from exc
     except FileExistsError as exc:
         raise OpenAIResponseError(f"output already exists: {destination}") from exc
-    except BaseException:
-        if installed and installed_identity is not None:
-            try:
-                destination_metadata = destination.lstat()
-                if (
-                    destination_metadata.st_dev,
-                    destination_metadata.st_ino,
-                ) == installed_identity:
-                    destination.unlink()
-            except OSError:
-                pass
-        raise
     finally:
         if descriptor >= 0:
             os.close(descriptor)
