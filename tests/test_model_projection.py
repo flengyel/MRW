@@ -133,6 +133,16 @@ class ModelProjectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ModelProjectionError, "timestamps must satisfy"):
             parse_finalized_model_call(encode(changed))
 
+    def test_model_call_reference_kinds_are_enforced(self) -> None:
+        changed = model_call_document()
+        changed["target"]["kind"] = "Session"
+        with self.assertRaisesRegex(ModelProjectionError, "target.kind"):
+            parse_finalized_model_call(encode(changed))
+        changed = model_call_document()
+        changed["context_refs"][0]["kind"] = "ModelCall"
+        with self.assertRaisesRegex(ModelProjectionError, "context_refs.*kind"):
+            parse_finalized_model_call(encode(changed))
+
     def test_wrong_fields_duplicate_keys_and_nonstandard_numbers_are_rejected(self) -> None:
         changed = model_call_document()
         changed["trust"] = "high"

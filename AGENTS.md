@@ -92,8 +92,10 @@ The committed multibyte `ModelCall` is synthetic regression data. Its success
 tests mechanics only and never counts as a provider request, mathematical use,
 or Stage 1 usefulness evidence.
 
-Do not add provider model calls, general corpus ingestion, or general Lean
-analysis until an active mathematical task supplies an observed requirement.
+Do not make a live provider call, add another provider adapter, add general
+corpus ingestion, or add general Lean analysis until an active mathematical
+task supplies an observed requirement. Implementation and offline testing of
+the single bounded OpenAI Responses adapter described below are authorized.
 The first formal increment is the bounded \(J_0/J(CS)\) checker and Appendix A fixture in
 `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md`. After that checker and profile exist,
 Stage 1 is authorized to reuse them for the single model-response trial

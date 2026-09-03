@@ -48,6 +48,12 @@ _MODEL_CALL_KEYS = frozenset(
 )
 _REFERENCE_KEYS = frozenset({"kind", "id"})
 _REVISED_REFERENCE_KEYS = frozenset({"kind", "id", "revision"})
+_MODEL_CALL_TARGET_KINDS = frozenset(
+    {"Problem", "ReviewItem", "MathematicalObject", "WorkArtifact"}
+)
+_MODEL_CALL_CONTEXT_KINDS = frozenset(
+    {"VersionedSpan", "SourceOccurrence", "Representation", "WorkArtifact"}
+)
 _PURPOSES = frozenset(
     {
         "definition_explanation",
@@ -183,12 +189,19 @@ def _require_timestamp(value: object, path: str) -> datetime:
     return parsed
 
 
-def _require_reference(value: object, path: str) -> dict[str, object]:
+def _require_reference(
+    value: object,
+    path: str,
+    *,
+    allowed_kinds: frozenset[str] | None = None,
+) -> dict[str, object]:
     reference = _require_object(value, path)
     if frozenset(reference) not in (_REFERENCE_KEYS, _REVISED_REFERENCE_KEYS):
         _require_exact_keys(reference, _REFERENCE_KEYS, path)
     for key in reference:
         _require_string(reference[key], f"{path}.{key}")
+    if allowed_kinds is not None and reference["kind"] not in allowed_kinds:
+        raise ModelProjectionError(f"{path}.kind is not recognized")
     return reference
 
 
@@ -313,12 +326,18 @@ def parse_finalized_model_call(raw: bytes) -> FinalizedModelCall:
     purpose = _require_string(record["purpose"], "model_call.purpose")
     if purpose not in _PURPOSES:
         raise ModelProjectionError("model_call.purpose is not recognized")
-    _require_reference(record["target"], "model_call.target")
+    _require_reference(
+        record["target"], "model_call.target", allowed_kinds=_MODEL_CALL_TARGET_KINDS
+    )
     context_refs = record["context_refs"]
     if not isinstance(context_refs, list):
         raise ModelProjectionError("model_call.context_refs must be a JSON array")
     for index, reference in enumerate(context_refs):
-        _require_reference(reference, f"model_call.context_refs[{index}]")
+        _require_reference(
+            reference,
+            f"model_call.context_refs[{index}]",
+            allowed_kinds=_MODEL_CALL_CONTEXT_KINDS,
+        )
     for key in ("limits", "settings"):
         _require_object(record[key], f"model_call.{key}")
     _require_nullable_string(record["resolved_model"], "model_call.resolved_model")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import io
 from hashlib import sha256
 import os
 from pathlib import Path
@@ -11,6 +12,11 @@ from urllib.error import HTTPError
 
 from theorem_terminal.cli import main
 from theorem_terminal.model_projection import parse_finalized_model_call
+from theorem_terminal.documentary_warrant import encode_documentary_projection
+from theorem_terminal.model_projection import (
+    extract_lossless_representation,
+    make_model_produced_claim,
+)
 from theorem_terminal.openai_response import (
     OpenAIResponseError,
     RESPONSES_URL,
@@ -23,6 +29,7 @@ from theorem_terminal.openai_response import (
     render_preview,
     request_assistance,
 )
+import theorem_terminal.openai_response as openai_response_module
 
 
 def request_spec() -> dict[str, object]:
@@ -140,8 +147,92 @@ class OpenAIResponseTests(unittest.TestCase):
                 call.document["resolved_model"], "configured-model-2026-01-01"
             )
             self.assertEqual(call.document["requested_at"], "2026-09-03T12:00:00Z")
+            self.assertEqual(call.document["completed_at"], "2026-09-03T12:00:01Z")
+            self.assertEqual(call.document["finalized_at"], "2026-09-03T12:00:02Z")
+            self.assertEqual(call.document["provider"], "openai")
+            self.assertEqual(call.document["adapter_version"], "openai-responses-v1")
+            self.assertEqual(call.document["initiated_by"], "person-test")
+            self.assertEqual(call.document["target"], self.spec["target"])
+            self.assertEqual(call.document["purpose"], "strategic_hint")
+            self.assertEqual(call.document["request_text"], self.spec["request_text"])
+            self.assertEqual(call.document["context_refs"], tuple(self.spec["context_refs"]))
+            self.assertEqual(call.document["settings"], {"store": False})
+            self.assertEqual(call.document["limits"]["max_output_tokens"], 200)
+            self.assertEqual(call.document["limits"]["timeout_seconds"], 30)
+            self.assertEqual(call.document["response_id"], "resp_test")
             self.assertNotIn("secret-test-key", previews[0])
             self.assertNotIn("secret-test-key", raw.decode())
+
+    def test_literal_outbound_bytes_and_preview_are_independent_oracles(self) -> None:
+        cases = (
+            (
+                "plain",
+                {"input": "Exact string input."},
+                b'{"input":"Exact string input.","max_output_tokens":200,"model":"configured-model","store":false}\n',
+            ),
+            (
+                "messages",
+                self.spec["effective_input"],
+                b'{"input":[{"content":[{"text":"Exact \xce\xb1-context.\\n","type":"input_text"}],"role":"user"}],"instructions":"Return one strategic hint only.","max_output_tokens":200,"model":"configured-model","store":false}\n',
+            ),
+        )
+        for name, effective, expected in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                spec = request_spec()
+                spec["effective_input"] = effective
+                operation = prepare_operation(
+                    parse_prepared_request(json.dumps(spec, ensure_ascii=False).encode()),
+                    "configured-model",
+                    Path(temporary) / "call.json",
+                )
+                self.assertEqual(operation.body, expected)
+                expected_preview = "\n".join((
+                    "OpenAI Responses API request preview", "Method: POST",
+                    f"Endpoint: {RESPONSES_URL}", "Requested model: configured-model",
+                    "Non-secret headers:", "  Content-Type: application/json",
+                    "Complete UTF-8 JSON request body:", expected.decode().removesuffix("\n"),
+                    "Selected context references:",
+                    json.dumps(spec["context_refs"], ensure_ascii=False, sort_keys=True),
+                    "Transmitted instructions and input:",
+                    json.dumps(effective, ensure_ascii=False, sort_keys=True),
+                    "Enforced limits:",
+                    json.dumps(spec["limits"], ensure_ascii=False, sort_keys=True),
+                    f"Output destination: {operation.output}",
+                    "OpenAI data handling remains governed by its policies; store:false does not claim to disable every form of processing or retention.",
+                    "Type SEND to transmit exactly the displayed request-body bytes: ",
+                ))
+                self.assertEqual(render_preview(operation), expected_preview)
+
+    def test_caller_mutation_after_preview_cannot_change_operation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            original = request_spec()
+            calls = []
+            def confirmation(_rendered):
+                original["initiated_by"] = "mutated"
+                original["limits"]["timeout_seconds"] = 299
+                original["effective_input"]["input"][0]["content"][0]["text"] = "mutated"
+                return "SEND"
+            times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
+            raw = request_assistance(
+                original, "configured-model", Path(temporary) / "call.json", "secret",
+                confirmation=confirmation, preview=lambda _: None,
+                transport=lambda *args: (calls.append(args) or TransportResult(200, provider_response())),
+                clock=lambda: next(times), id_generator=lambda: "immutable-call",
+            )
+            record = json.loads(raw)
+            self.assertEqual(calls[0][4], 30)
+            self.assertEqual(record["initiated_by"], "person-test")
+            self.assertEqual(record["effective_input"]["input"][0]["content"][0]["text"], "Exact α-context.\n")
+
+    def test_invalid_target_and_context_kinds_are_rejected(self) -> None:
+        for location in ("target", "context"):
+            changed = request_spec()
+            if location == "target":
+                changed["target"]["kind"] = "Session"
+            else:
+                changed["context_refs"][0]["kind"] = "ModelCall"
+            with self.subTest(location=location), self.assertRaisesRegex(OpenAIResponseError, "kind"):
+                parse_prepared_request(json.dumps(changed).encode())
 
     def test_reasoning_is_allowed_but_not_extracted(self) -> None:
         response = json.loads(provider_response())
@@ -187,12 +278,13 @@ class OpenAIResponseTests(unittest.TestCase):
                 raise HTTPError(request.full_url, 302, "redirect", {}, None)
 
         opener = RedirectingOpener()
-        with patch("theorem_terminal.openai_response.build_opener", return_value=opener):
+        with patch("theorem_terminal.openai_response.build_opener", return_value=opener) as builder:
             with self.assertRaisesRegex(OpenAIResponseError, "HTTP 302"):
                 http_transport(
                     "POST", RESPONSES_URL, b"{}", {"Authorization": "Bearer secret"},
                     30, 100,
                 )
+        self.assertIsInstance(builder.call_args.args[0], openai_response_module._RejectRedirect)
         self.assertEqual(opener.calls, 1)
 
         class LargeResponse:
@@ -217,6 +309,20 @@ class OpenAIResponseTests(unittest.TestCase):
                 http_transport("POST", RESPONSES_URL, b"{}", {}, 30, 100)
         self.assertEqual(response.amount, 101)
 
+        class TruncatedResponse(LargeResponse):
+            headers = {"Content-Length": "3"}
+            def read(self, amount):
+                return b"{}"
+        with patch("theorem_terminal.openai_response.build_opener", return_value=LargeOpener()):
+            pass
+        truncated = TruncatedResponse()
+        class TruncatedOpener:
+            def open(self, request, timeout):
+                return truncated
+        with patch("theorem_terminal.openai_response.build_opener", return_value=TruncatedOpener()):
+            with self.assertRaisesRegex(OpenAIResponseError, "truncated"):
+                http_transport("POST", RESPONSES_URL, b"{}", {}, 30, 100)
+
     def test_decline_eof_missing_key_existing_output_make_zero_requests(self) -> None:
         for answer in ("NO", "", EOFError(), KeyboardInterrupt()):
             with self.subTest(answer=repr(answer)), tempfile.TemporaryDirectory() as temporary:
@@ -233,6 +339,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 )
                 self.assertIsNone(result)
                 self.assertEqual(calls, [])
+
         with tempfile.TemporaryDirectory() as temporary:
             destination = Path(temporary) / "call.json"
             with self.assertRaisesRegex(OpenAIResponseError, "OPENAI_API_KEY"):
@@ -248,6 +355,36 @@ class OpenAIResponseTests(unittest.TestCase):
                     confirmation=lambda _: "SEND", preview=lambda _: None,
                     transport=lambda *_: self.fail("transport called"),
                 )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "dangling.json"
+            destination.symlink_to(Path(temporary) / "absent")
+            with self.assertRaisesRegex(OpenAIResponseError, "already exists"):
+                request_assistance(
+                    self.spec, "model", destination, "secret",
+                    confirmation=lambda _: "SEND", preview=lambda _: None,
+                    transport=lambda *_: self.fail("transport called"),
+                )
+
+    def test_provider_lone_surrogate_retains_failed_record(self) -> None:
+        for field in ("id", "model", "text"):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
+                response = json.loads(provider_response())
+                if field == "text":
+                    response["output"][0]["content"][0]["text"] = "\\ud800"
+                else:
+                    response[field] = "\\ud800"
+                raw_response = json.dumps(response).replace("\\\\ud800", "\\ud800").encode()
+                destination = Path(temporary) / "call.json"
+                times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
+                with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
+                    request_assistance(
+                        self.spec, "model", destination, "secret",
+                        confirmation=lambda _: "SEND", preview=lambda _: None,
+                        transport=lambda *_: TransportResult(200, raw_response),
+                        clock=lambda: next(times), id_generator=lambda: "surrogate-failure",
+                    )
+                self.assertEqual(json.loads(destination.read_bytes())["status"], "failed")
 
     def test_post_transmission_failures_are_retained_without_retry_or_secret(self) -> None:
         for name, response in (
@@ -287,15 +424,48 @@ class OpenAIResponseTests(unittest.TestCase):
             else:
                 response["status"] = "incomplete"
             with self.subTest(expected=expected), tempfile.TemporaryDirectory() as temporary:
+                calls = []
                 destination = Path(temporary) / "call.json"
                 times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
                 request_assistance(
                     self.spec, "model", destination, "secret",
                     confirmation=lambda _: "SEND", preview=lambda _: None,
-                    transport=lambda *_: TransportResult(200, json.dumps(response).encode()),
+                    transport=lambda *args: (calls.append(args) or TransportResult(200, json.dumps(response).encode())),
                     clock=lambda: next(times), id_generator=lambda: "terminal-call",
                 )
                 self.assertEqual(json.loads(destination.read_bytes())["status"], expected)
+                self.assertEqual(len(calls), 1)
+
+    def test_maximum_metadata_and_large_response_fit_projection_ceiling(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            spec = request_spec()
+            spec["request_text"] = "q" * 700_000
+            spec["limits"]["max_provider_response_bytes"] = 1_048_576
+            response_text = "r" * 900_000
+            response = provider_response(response_text)
+            self.assertLessEqual(len(response), 1_048_576)
+            destination = Path(temporary) / "call.json"
+            times = iter(("2026-09-03T12:00:00Z", "2026-09-03T12:00:01Z", "2026-09-03T12:00:02Z"))
+            raw = request_assistance(
+                spec, "model", destination, "secret",
+                confirmation=lambda _: "SEND", preview=lambda _: None,
+                transport=lambda *_: TransportResult(200, response),
+                clock=lambda: next(times), id_generator=lambda: "bounded-call",
+            )
+            self.assertLessEqual(len(raw), 4 * 1024 * 1024)
+            call = parse_finalized_model_call(raw)
+            representation = extract_lossless_representation(
+                call, representation_id="large-representation", version="1",
+                subject={"kind": "WorkArtifact", "id": "attempt-test-v1"},
+                kind="strategic_hint", start_byte=0, end_byte=len(response_text),
+            )
+            claim = make_model_produced_claim(
+                call, representation, claim_id="large-claim",
+                display_name="Large bounded projection", description="Boundary regression.",
+            )
+            from theorem_terminal.documentary_warrant import DocumentaryProjection
+            projection = DocumentaryProjection(call, representation, claim)
+            self.assertLessEqual(len(encode_documentary_projection(projection)), 4 * 1024 * 1024)
 
     def test_request_and_response_limits(self) -> None:
         changed = request_spec()
@@ -422,6 +592,56 @@ class OpenAIResponseTests(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertTrue(projection.is_file())
             self.assertEqual(sha256(call_path.read_bytes()).hexdigest(), before)
+
+    def test_cli_success_decline_missing_key_and_terminal_outcomes(self) -> None:
+        refused = json.loads(provider_response())
+        refused["output"][0]["content"] = [{"type": "refusal", "refusal": "No."}]
+        incomplete = json.loads(provider_response())
+        incomplete["status"] = "incomplete"
+        cases = (
+            ("success", "SEND\n", "key", TransportResult(200, provider_response()), 0, "completed"),
+            ("refused", "SEND\n", "key", TransportResult(200, json.dumps(refused).encode()), 0, "refused"),
+            ("incomplete", "SEND\n", "key", TransportResult(200, json.dumps(incomplete).encode()), 0, "incomplete"),
+            ("decline", "send\n", "key", None, 0, None),
+            ("missing-key", "SEND\n", None, None, 2, None),
+            ("failed", "SEND\n", "key", TransportResult(503, b"secret body"), 2, "failed"),
+        )
+        for name, entered, key, result, expected_code, expected_status in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                parent = Path(temporary)
+                request_path = parent / "request.json"
+                request_path.write_bytes(encoded_spec())
+                destination = parent / "call.json"
+                calls = []
+                def transport(*args):
+                    calls.append(args)
+                    if result is None:
+                        self.fail("transport called")
+                    return result
+                environment = {} if key is None else {"OPENAI_API_KEY": key}
+                stdout, stderr = io.StringIO(), io.StringIO()
+                with patch.dict(os.environ, environment, clear=True), \
+                     patch("sys.stdin", io.StringIO(entered)), \
+                     patch("sys.stdout", stdout), patch("sys.stderr", stderr), \
+                     patch("theorem_terminal.openai_response.http_transport", transport):
+                    code = main([
+                        "request-assistance", str(request_path), "--model", "configured-model",
+                        "--output", str(destination),
+                    ])
+                self.assertEqual(code, expected_code)
+                self.assertNotIn("key", stdout.getvalue() + stderr.getvalue())
+                if expected_status is None:
+                    self.assertFalse(destination.exists())
+                    self.assertEqual(calls, [])
+                else:
+                    self.assertEqual(json.loads(destination.read_bytes())["status"], expected_status)
+                    self.assertEqual(len(calls), 1)
+                if name == "success":
+                    self.assertIn("OpenAI Responses API request preview", stdout.getvalue())
+                    self.assertIn("Created terminal ModelCall", stdout.getvalue())
+                    self.assertEqual(stderr.getvalue(), "")
+                elif expected_code == 2:
+                    self.assertTrue(stderr.getvalue().startswith("error: "))
 
 
 if __name__ == "__main__":

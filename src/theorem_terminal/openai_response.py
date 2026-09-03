@@ -14,20 +14,24 @@ import os
 from pathlib import Path
 import socket
 import tempfile
+from types import MappingProxyType
 from typing import Callable, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import uuid4
 
-from theorem_terminal.model_projection import parse_finalized_model_call
+from theorem_terminal.model_projection import (
+    MAX_MODEL_CALL_BYTES,
+    parse_finalized_model_call,
+)
 
 
 ADAPTER_VERSION = "openai-responses-v1"
 PROVIDER = "openai"
 RESPONSES_URL = "https://api.openai.com/v1/responses"
 MAX_PREPARED_REQUEST_BYTES = 1024 * 1024
-HARD_MAX_REQUEST_BODY_BYTES = 1024 * 1024
-HARD_MAX_PROVIDER_RESPONSE_BYTES = 4 * 1024 * 1024
+HARD_MAX_REQUEST_BODY_BYTES = 256 * 1024
+HARD_MAX_PROVIDER_RESPONSE_BYTES = 1024 * 1024
 HARD_MAX_OUTPUT_TOKENS = 16384
 HARD_MAX_TIMEOUT_SECONDS = 300
 _PURPOSES = {
@@ -42,6 +46,10 @@ _SPEC_KEYS = {
 _LIMIT_KEYS = {
     "max_request_body_bytes", "max_provider_response_bytes",
     "max_output_tokens", "timeout_seconds",
+}
+_TARGET_KINDS = {"Problem", "ReviewItem", "MathematicalObject", "WorkArtifact"}
+_CONTEXT_KINDS = {
+    "VersionedSpan", "SourceOccurrence", "Representation", "WorkArtifact",
 }
 
 
@@ -60,6 +68,10 @@ class PreparedOperation:
     requested_model: str
     body: bytes
     output: Path
+    timeout_seconds: int
+    max_request_body_bytes: int
+    max_provider_response_bytes: int
+    max_output_tokens: int
 
 
 @dataclass(frozen=True)
@@ -110,6 +122,22 @@ def _object(value: object, path: str) -> dict[str, object]:
     return value
 
 
+def _freeze_json(value: object) -> object:
+    if isinstance(value, dict):
+        return MappingProxyType({key: _freeze_json(item) for key, item in value.items()})
+    if isinstance(value, list):
+        return tuple(_freeze_json(item) for item in value)
+    return value
+
+
+def _plain_json(value: object) -> object:
+    if isinstance(value, Mapping):
+        return {key: _plain_json(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_plain_json(item) for item in value]
+    return value
+
+
 def _string(value: object, path: str) -> str:
     if not isinstance(value, str) or not value:
         raise OpenAIResponseError(f"{path} must be a non-empty string")
@@ -120,11 +148,18 @@ def _string(value: object, path: str) -> str:
     return value
 
 
-def _reference(value: object, path: str) -> dict[str, str]:
+def _reference(
+    value: object, path: str, *, allowed_kinds: set[str] | None = None
+) -> dict[str, str]:
     result = _object(value, path)
     if set(result) not in ({"kind", "id"}, {"kind", "id", "revision"}):
         raise OpenAIResponseError(f"{path} has wrong fields")
-    return {key: _string(item, f"{path}.{key}") for key, item in result.items()}
+    reference = {
+        key: _string(item, f"{path}.{key}") for key, item in result.items()
+    }
+    if allowed_kinds is not None and reference["kind"] not in allowed_kinds:
+        raise OpenAIResponseError(f"{path}.kind is not recognized")
+    return reference
 
 
 def _positive_int(value: object, path: str, maximum: int) -> int:
@@ -185,14 +220,20 @@ def parse_prepared_request(raw: bytes) -> dict[str, object]:
         _string(spec[key], f"prepared_request.{key}")
     if spec["purpose"] not in _PURPOSES:
         raise OpenAIResponseError("prepared_request.purpose is not recognized")
-    _reference(spec["target"], "prepared_request.target")
+    _reference(
+        spec["target"], "prepared_request.target", allowed_kinds=_TARGET_KINDS
+    )
     if spec["in_reply_to"] is not None:
         _string(spec["in_reply_to"], "prepared_request.in_reply_to")
     context_refs = spec["context_refs"]
     if not isinstance(context_refs, list):
         raise OpenAIResponseError("prepared_request.context_refs must be an array")
     for index, reference in enumerate(context_refs):
-        _reference(reference, f"prepared_request.context_refs[{index}]")
+        _reference(
+            reference,
+            f"prepared_request.context_refs[{index}]",
+            allowed_kinds=_CONTEXT_KINDS,
+        )
     effective = _object(spec["effective_input"], "prepared_request.effective_input")
     if not set(effective).issubset({"instructions", "input"}) or "input" not in effective:
         raise OpenAIResponseError("prepared_request.effective_input has wrong fields")
@@ -213,8 +254,9 @@ def prepare_operation(
     spec: Mapping[str, object], model: str, output: Path
 ) -> PreparedOperation:
     requested_model = _string(model, "requested model")
-    effective = spec["effective_input"]
-    limits = spec["limits"]
+    snapshot = parse_prepared_request(encode_canonical(spec))
+    effective = snapshot["effective_input"]
+    limits = snapshot["limits"]
     assert isinstance(effective, dict) and isinstance(limits, dict)
     body = {
         "model": requested_model,
@@ -227,7 +269,15 @@ def prepare_operation(
     body_bytes = encode_canonical(body)
     if len(body_bytes) > limits["max_request_body_bytes"]:
         raise OpenAIResponseError("request body exceeds its configured byte limit")
-    return PreparedOperation(spec, requested_model, body_bytes, Path(output))
+    snapshot_limits = snapshot["limits"]
+    assert isinstance(snapshot_limits, dict)
+    return PreparedOperation(
+        _freeze_json(snapshot), requested_model, body_bytes, Path(output),
+        int(snapshot_limits["timeout_seconds"]),
+        int(snapshot_limits["max_request_body_bytes"]),
+        int(snapshot_limits["max_provider_response_bytes"]),
+        int(snapshot_limits["max_output_tokens"]),
+    )
 
 
 def encode_canonical(value: object) -> bytes:
@@ -264,12 +314,23 @@ def http_transport(
         with opener.open(request, timeout=timeout) as response:
             raw = response.read(max_response_bytes + 1)
             status = response.status
+            response_headers = getattr(response, "headers", {})
+            declared = response_headers.get("Content-Length")
     except HTTPError as exc:
         raise OpenAIResponseError(f"OpenAI Responses API returned HTTP {exc.code}") from None
     except (URLError, socket.timeout, TimeoutError) as exc:
         raise OpenAIResponseError(f"OpenAI Responses API transport failed: {type(exc).__name__}") from None
     if len(raw) > max_response_bytes:
         raise OpenAIResponseError("OpenAI provider response exceeds its byte limit")
+    if declared is not None:
+        try:
+            declared_length = int(declared)
+        except ValueError:
+            raise OpenAIResponseError("OpenAI provider returned invalid Content-Length") from None
+        if declared_length > max_response_bytes:
+            raise OpenAIResponseError("OpenAI provider response exceeds its byte limit")
+        if declared_length != len(raw):
+            raise OpenAIResponseError("OpenAI provider response body was truncated")
     return TransportResult(status, raw)
 
 
@@ -281,10 +342,15 @@ def classify_response(raw: bytes) -> ResponseClassification:
         )
     except OpenAIResponseError:
         raise
-    response_id = response.get("id")
-    model = response.get("model")
-    response_id = response_id if isinstance(response_id, str) and response_id else None
-    model = model if isinstance(model, str) and model else None
+    def provider_string(value: object, path: str) -> str | None:
+        if not isinstance(value, str) or value == "":
+            return None
+        return _string(value, path)
+
+    response_id = provider_string(response.get("id"), "response.id")
+    model = provider_string(response.get("model"), "response.model")
+    if response.get("status") in ("failed", "cancelled"):
+        return ResponseClassification("failed", response_id, model, None)
     output = response.get("output")
     if not isinstance(output, list):
         return ResponseClassification("incomplete", response_id, model, None)
@@ -311,20 +377,25 @@ def classify_response(raw: bytes) -> ResponseClassification:
             if not isinstance(part, dict):
                 unsupported = True
             elif part.get("type") == "output_text" and isinstance(part.get("text"), str):
-                texts.append(part["text"])
+                text = part["text"]
+                try:
+                    text.encode("utf-8", errors="strict")
+                except UnicodeEncodeError as exc:
+                    raise OpenAIResponseError(
+                        "response.output[].content[].text is not strict Unicode"
+                    ) from exc
+                texts.append(text)
             elif (
                 part.get("type") == "refusal"
                 and isinstance(part.get("refusal"), str)
                 and part["refusal"]
             ):
-                refusals.append(part["refusal"])
+                refusals.append(_string(part["refusal"], "response.output[].content[].refusal"))
             else:
                 unsupported = True
     unambiguous = (texts + refusals)[0] if len(texts) + len(refusals) == 1 else None
     if refusals:
         return ResponseClassification("refused", response_id, model, unambiguous)
-    if response.get("status") in ("failed", "cancelled"):
-        return ResponseClassification("failed", response_id, model, unambiguous)
     if response.get("status") != "completed":
         return ResponseClassification("incomplete", response_id, model, unambiguous)
     if (
@@ -370,11 +441,11 @@ def render_preview(operation: PreparedOperation) -> str:
             "Complete UTF-8 JSON request body:",
             operation.body.decode("utf-8").removesuffix("\n"),
             "Selected context references:",
-            json.dumps(request["context_refs"], ensure_ascii=False, sort_keys=True),
+            json.dumps(_plain_json(request["context_refs"]), ensure_ascii=False, sort_keys=True),
             "Transmitted instructions and input:",
-            json.dumps(request["effective_input"], ensure_ascii=False, sort_keys=True),
+            json.dumps(_plain_json(request["effective_input"]), ensure_ascii=False, sort_keys=True),
             "Enforced limits:",
-            json.dumps(request["limits"], ensure_ascii=False, sort_keys=True),
+            json.dumps(_plain_json(request["limits"]), ensure_ascii=False, sort_keys=True),
             f"Output destination: {operation.output}",
             "OpenAI data handling remains governed by its policies; store:false does not claim to disable every form of processing or retention.",
             "Type SEND to transmit exactly the displayed request-body bytes: ",
@@ -393,23 +464,23 @@ def _terminal_record(
     request = operation.request
     text = classification.raw_response
     limits = request["limits"]
-    assert isinstance(limits, dict)
+    assert isinstance(limits, Mapping)
     return {
         "schema": "theorem-terminal.model-call",
         "schema_version": 1,
         "id": call_id,
         "initiated_by": request["initiated_by"],
-        "target": request["target"],
+        "target": _plain_json(request["target"]),
         "purpose": request["purpose"],
         "request_text": request["request_text"],
-        "context_refs": request["context_refs"],
-        "effective_input": request["effective_input"],
+        "context_refs": _plain_json(request["context_refs"]),
+        "effective_input": _plain_json(request["effective_input"]),
         "provider": PROVIDER,
         "requested_model": operation.requested_model,
         "resolved_model": classification.resolved_model,
         "adapter_version": ADAPTER_VERSION,
         "limits": {
-            **limits,
+            **_plain_json(limits),
             "request_body_utf8_bytes": len(operation.body),
         },
         "settings": {"store": False},
@@ -427,16 +498,7 @@ def _terminal_record(
 
 
 def _serialize_terminal(record: Mapping[str, object]) -> bytes:
-    raw = (
-        json.dumps(
-            record,
-            ensure_ascii=False,
-            allow_nan=False,
-            sort_keys=True,
-            indent=2,
-        )
-        + "\n"
-    ).encode("utf-8")
+    raw = encode_canonical(record)
     if record["status"] == "completed":
         parse_finalized_model_call(raw)
     elif record["status"] not in ("failed", "refused", "incomplete"):
@@ -498,8 +560,6 @@ def execute_confirmed(
     call_id = _string(id_generator(), "generated ModelCall id")
     requested_at = _next_timestamp(clock)
     try:
-        limits = operation.request["limits"]
-        assert isinstance(limits, dict)
         result = transport(
             "POST",
             RESPONSES_URL,
@@ -508,14 +568,22 @@ def execute_confirmed(
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}",
             },
-            limits["timeout_seconds"],
-            limits["max_provider_response_bytes"],
+            operation.timeout_seconds,
+            operation.max_provider_response_bytes,
         )
         if result.status != 200:
             raise OpenAIResponseError(
                 f"OpenAI Responses API returned HTTP {result.status}"
             )
         classification = classify_response(result.body)
+        completed_at = _next_timestamp(clock, requested_at)
+        finalized_at = _next_timestamp(clock, completed_at)
+        raw = _serialize_terminal(_terminal_record(
+            operation, call_id, requested_at, completed_at, finalized_at,
+            classification,
+        ))
+        if len(raw) > MAX_MODEL_CALL_BYTES:
+            raise OpenAIResponseError("terminal ModelCall exceeds its byte limit")
     except (Exception, KeyboardInterrupt) as exc:
         classification = ResponseClassification("failed", None, None, None)
         completed_at = _next_timestamp(clock, requested_at)
@@ -536,18 +604,6 @@ def execute_confirmed(
         raise OpenAIResponseError(
             "provider request failed; finalized failed ModelCall retained"
         ) from None
-    completed_at = _next_timestamp(clock, requested_at)
-    finalized_at = _next_timestamp(clock, completed_at)
-    raw = _serialize_terminal(
-        _terminal_record(
-            operation,
-            call_id,
-            requested_at,
-            completed_at,
-            finalized_at,
-            classification,
-        )
-    )
     installer(operation.output, raw)
     return raw
 
@@ -560,22 +616,32 @@ def request_assistance(
     *,
     confirmation: Callable[[str], str],
     preview: Callable[[str], None],
-    transport: Transport = http_transport,
+    transport: Transport | None = None,
     clock: Callable[[], str] = _utc_now,
     id_generator: Callable[[], str] = lambda: f"model-call-{uuid4()}",
     installer: Callable[[Path, bytes], None] = install_atomic_no_overwrite,
 ) -> bytes | None:
     """Complete every preflight before preview, confirmation, and transport."""
 
+    try:
+        snapshot = parse_prepared_request(encode_canonical(request))
+    except (TypeError, ValueError, UnicodeEncodeError) as exc:
+        if isinstance(exc, OpenAIResponseError):
+            raise
+        raise OpenAIResponseError("prepared request is not valid JSON data") from exc
     _string(model, "requested model")
     if not api_key:
         raise OpenAIResponseError("OPENAI_API_KEY is not configured")
     destination = Path(output)
-    if destination.exists():
+    try:
+        os.lstat(destination)
+    except FileNotFoundError:
+        pass
+    else:
         raise OpenAIResponseError(f"output already exists: {destination}")
     if not destination.parent.is_dir():
         raise OpenAIResponseError("output parent directory does not exist")
-    operation = prepare_operation(request, model, destination)
+    operation = prepare_operation(snapshot, model, destination)
     rendered = render_preview(operation)
     preview(rendered)
     try:
@@ -587,7 +653,7 @@ def request_assistance(
     return execute_confirmed(
         operation,
         api_key,
-        transport=transport,
+        transport=http_transport if transport is None else transport,
         clock=clock,
         id_generator=id_generator,
         installer=installer,

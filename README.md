@@ -411,8 +411,12 @@ maliciously replaced persistence store.
 
 ### Create one finalized OpenAI ModelCall
 
-Prepare a transient JSON object containing only existing request-side
-`ModelCall` information. It has exactly these fields:
+The current integration surface consumes an internal, transient,
+task-generated adapter envelope containing only existing request-side
+`ModelCall` information. It is not a form for a mathematician to prepare. A
+later task-facing operation must derive the initiator, target, purpose, context
+references, and limits from the active mathematical work. The envelope has
+exactly these fields:
 
 ```json
 {
@@ -481,7 +485,7 @@ Every terminal file is flushed, synchronized, and installed atomically without
 overwriting an existing or concurrently created destination; temporary files
 are removed on success and failure.
 
-The resulting file is directly consumable by `project-response`. Nothing in
+The resulting completed file is directly consumable by `project-response`. Nothing in
 `request-assistance` automatically projects output, admits a premise, invokes Lean,
 or treats the returned text as mathematics. OpenAI's handling of API data is
 governed by its current policies; `store: false` disables response retrieval
@@ -492,6 +496,8 @@ Automated tests inject confirmation, IDs, clocks, persistence, and byte-level
 HTTP transport. They make no live OpenAI request. A successful completed file
 may then be passed explicitly through the unchanged sequence
 `project-response` → `admit-documentary` → `check-documentary`.
+This adapter infrastructure does not complete Stage 1; the genuine-obstruction
+mathematical trial and its live request remain pending.
 
 ### Reviewed source revision
 
