@@ -51,8 +51,11 @@ Ingestion does not establish identity across sources.
 A statement, explanation, problem, hint, proof, calculation, diagram, example,
 or formal artifact associated with a mathematical object or problem.
 
-Representations may include orientation, informal explanation, statement, proof
-outline, proof skeleton, formal statement, and formal proof. No representation
+Representations may include orientation, informal explanation, statement,
+strategic hint, proposed solution, calculation, proof outline, proof skeleton,
+formal statement, and formal proof. An AI response's purpose is retained on its
+model call and task evidence; it does not require a parallel family of
+AI-specific representation types. No representation
 kind is a prerequisite for another, and formal representations may be absent.
 A representation is immutable and content-hashed. Editing, paraphrasing, or
 normalizing it creates a new derived or successor representation.
@@ -102,7 +105,8 @@ separately.
 
 ## Task evidence
 
-An observed event arising from work on a problem or review item.
+An observed event arising from work on a problem, review item, or mathematical
+object.
 
 Examples:
 
@@ -284,6 +288,28 @@ A model call is not a general chat conversation, a verification, source
 retrieval, source authority, or warrant. It is an operational and provenance
 envelope and has no trust, support, correctness, confidence, acceptance, or
 authority status.
+
+## Response digestion
+
+A human-led workflow over an immutable completed model call and the ordinary
+records already defined here. It supports reconstruction, independent checking,
+and synthesis; it is not a new entity or an automatic summary.
+
+Its first executable step is a deterministic local response-review view. The
+view keeps attribution and the response digest visible, indexes returned
+passages, and lets the mathematician select visible exact text while the
+application computes the digest-anchored UTF-8 span. Viewing creates no
+representation, task disposition, premise admission, or check. A candidate-route view is derived only from routes actually returned or
+recorded in ordinary work artifacts; it is not a new stored entity. The current adapter sends no reasoning-summary parameter
+and ignores auxiliary reasoning items. Theorem Terminal does not label returned
+explanations as raw chain of thought or claim access to hidden model reasoning
+or search history.
+
+A lossless selected passage may become an AI-proposal representation. A human
+paraphrase or synthesis is a separate derived representation; a model-produced
+synthesis requires a separate explicit model call. Source retrieval,
+mathematical verification, premise admission, and justification checking remain
+separate operations.
 
 ## AI-to-warrant projection
 

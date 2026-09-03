@@ -173,11 +173,27 @@ before implementation.
   setting, display any provider retention that cannot be disabled before
   submission, and avoid claiming that this controls every form of provider
   processing or retention;
+- provide a deterministic local response-review and selection view that keeps
+  attribution
+  visible, initially indexes passages rather than flooding the terminal, and
+  lets the mathematician select visible exact text without entering byte
+  offsets; compute and validate digest-anchored UTF-8 spans internally;
+- render every record-derived string through an exact safe terminal renderer;
+  emit no terminal hyperlink escapes and never interpret or dispatch returned
+  markup, commands, or URLs, while preserving the recorded response unchanged;
 - extract only proposals that enter the work or whose correction, rejection, or
   abandonment is recorded, each with
   `Provenance.origin = ai_proposal`, a lossless half-open UTF-8 byte span
-  anchored to the response digest, and a link to its `ModelCall`; record any
-  paraphrase, normalization, or edit as a separate derived representation;
+  anchored to the response digest, and a link to its `ModelCall`;
+- preserve only candidate routes explicitly returned by the provider or
+  recorded by the mathematician in `WorkArtifact`s; never claim to retain hidden reasoning,
+  chain of thought, internal search, or unreturned alternatives;
+- retain any paraphrase or synthesis as a separate derived representation
+  linked to its lossless selected sources; a model-produced synthesis requires
+  another explicit linked `ModelCall`;
+- keep source suggestions proposed until the cited material is independently
+  retrieved and identified, and keep reported calculations or checks proposed
+  until separately performed or attested;
 - for one selected response span, create the documentary opaque atom
   \(D=\operatorname{ModelProduced}(C,h,s,R)\), distinct from the substantive
   mathematical atom \(F\), using the generic `ClaimAtomVersion` record;
@@ -234,7 +250,7 @@ serialization, integrity, and checker integration only. It is not the required
 provider request at a genuine obstruction, a proposal disposition, evidence of
 subsequent mathematical progress, or Stage 1 acceptance.
 
-**Authorized provider-infrastructure precursor.** One bounded OpenAI Responses
+**Implemented provider-infrastructure precursor.** One bounded OpenAI Responses
 adapter is implemented as a low-level developer integration surface. It
 previews and freezes one exact request, requires explicit `SEND`, makes at most
 one non-retried request with `store: false`, and retains a terminal `ModelCall`
@@ -242,6 +258,65 @@ without automatically projecting, admitting, or invoking Lean. Its transient
 JSON envelope is intended to be generated later from active mathematical work,
 not authored by the mathematician. This infrastructure does not execute or
 complete the genuine-obstruction Stage 1 trial, which remains pending.
+
+**Authorized response-review and selection precursor.** The next executable bridge
+increment operates only on completed, finalized local `ModelCall` records. It
+makes no provider, network, tool, or Lean call. It validates the response digest
+and shows attribution plus a deterministic numbered passage index.
+
+For this increment, logical lines are separated only by LF (`U+000A`); an
+immediately preceding CR (`U+000D`) belongs to the line terminator, while a
+lone CR remains line content. After removing its LF or CRLF terminator, a line is
+blank exactly when its content contains only ASCII space (`U+0020`) or
+horizontal tab (`U+0009`). A passage is a maximal sequence of nonblank logical
+lines. Its span begins at the first line's first code point and includes the
+last nonblank line's terminator when present. Surrounding blank lines and their
+terminators are excluded. Passages are numbered from 1 in source order. A
+response with at least one nonblank logical line and no separating blank line is
+one passage; an empty response or a response containing only blank lines has
+zero passages and cannot be projected by passage number.
+
+The CLI surface is `review-response MODEL_CALL`. With no selector it shows the
+first index page. `--index-start N`, `--passage N`, and `--full` are mutually
+exclusive. `project-response --passage N` selects the same computed span and
+is mutually exclusive with its existing `--start-byte` and `--end-byte`
+developer pair; otherwise both byte arguments remain required.
+
+The default index shows at most 20 passages from a requested starting passage.
+Each row contains trusted framing, the passage number, its UTF-8 byte length,
+and a one-line preview of at most the first 120 Unicode scalar values before safe
+rendering, with a trusted truncation marker when needed. Further rows require an
+explicit page request. Explicit passage and full-response views may be longer.
+
+Every record-derived string, including identifiers, provider and model names,
+purpose, request text, and response text, is passed through one renderer. It
+maps backslash (`U+005C`) to two ASCII backslashes. It maps each C0 control
+(`U+0000`--`U+001F`), DEL (`U+007F`), C1 control
+(`U+0080`--`U+009F`), and bidi control (`U+061C`, `U+200E`,
+`U+200F`, `U+202A`--`U+202E`, and `U+2066`--`U+2069`) to
+the ASCII form `\u{XXXX}`, using four uppercase hexadecimal digits. All other
+Unicode scalars are emitted unchanged. Only application-constant framing
+supplies control characters. The application emits no OSC-8 or other terminal
+hyperlink escape, does not invoke a pager or Markdown renderer, and never
+interprets, opens, or dispatches returned links, markup, or commands. A terminal
+may still auto-link plain URL text.
+
+The mathematician may select a displayed passage number; the application, not
+the mathematician, computes the existing `project-response` span. Merely
+viewing or cancelling creates no artifact. This increment also factors the provider-
+independent private persistence needed by response-bearing records: mode
+`0600`, synchronization, atomic no-overwrite publication, and failure cleanup.
+A successful hard link remains the publication commit point. Every pre-link
+failure leaves no destination; after link success, even a directory-sync failure
+retains the complete destination, reports a durability error, and removes only
+temporary, reservation, or other pre-publication artifacts.
+
+Synthetic fixtures establish mechanics only. This increment does not select
+the Stage 1 obstruction, create the active-task request envelope, make a live
+request, infer a semantic classification, generate a summary, retrieve a
+source, record a proposal disposition, admit a premise, invoke Lean, or satisfy
+the genuine-obstruction trial. It is the local selection boundary through which
+material may later enter the integral justification layer.
 
 For the designated evaluation fixture, finalize the call, freeze the selected
 response representation and admissions, and invoke the Lean justification
@@ -274,10 +349,12 @@ make a model call; the required call exists to evaluate Stage 1.
 **Non-goals.** No general ingestion, comprehensive topic map, formal theorem
 analysis, graph rendering, support for a second model service or adapter,
 automatic model selection, provider tools, autonomous calls, conversation
-interface, prompt library, or framework commitment. No `AITrust`, `AIWarrant`,
-`ModelAuthority`, provider-wide truth bridge, generic support edge, or trust,
-reliability, confidence, acceptance, correctness, authority, weight,
-integration, or adoption field on model records.
+interface, prompt library, or framework commitment. No capture or reconstruction
+of provider-internal reasoning, hidden chain of thought, internal search, or
+unreturned alternatives. No `AITrust`, `AIWarrant`, `ModelAuthority`,
+provider-wide truth bridge, generic support edge, or trust, reliability,
+confidence, acceptance, correctness, authority, weight, integration, or
+adoption field on model records.
 
 ---
 

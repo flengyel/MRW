@@ -307,17 +307,46 @@ experiment requests that setting and records it. This does not assert that the
 provider performs no other processing or retention; the configured service's
 terms still govern its handling of the request.
 
-The raw response is preserved before extraction. Only a statement, hint,
-outline, calculation, source suggestion, criticism, or proposed solution that
-enters the mathematical work, or whose correction, rejection, or abandonment is
-recorded, becomes a `Representation` with
-`Provenance.origin = ai_proposal`, a link to its `ModelCall`, and its exact
-response span anchored to the response digest. The first extraction is
-lossless; any paraphrase, normalization, or edit is a separate representation
-linked to it. Storage and extraction are not integration. A suggested source
-becomes a source occurrence only after it is independently retrieved and
-identified; a reported calculation or proof check becomes a verification only
-after the corresponding method or attestation is obtained separately.
+The raw response is preserved before extraction. Response digestion is the
+human-led work of reconstructing, checking, and synthesizing returned material.
+Its first executable step is a deterministic local response-review view that
+keeps provider, model, purpose, and response digest
+visible and initially shows a numbered passage index rather than flooding the
+terminal. The complete exact response remains available. Viewing writes
+nothing, makes no provider request, invokes no tool or Lean process, and creates
+no representation or task event.
+
+The mathematician selects a visible passage; the application resolves that
+selection and computes and validates the digest-anchored half-open UTF-8 byte
+span internally. The interface never requires the mathematician to calculate
+byte offsets. Every displayed record-derived string passes through the safe
+terminal renderer. The application emits no terminal hyperlink escapes and
+never interprets or dispatches returned markup, commands, or URLs; a terminal
+may nevertheless auto-link plain URL text. The recorded response remains
+unchanged.
+
+Only a statement, hint, outline, calculation, source suggestion, criticism,
+intermediate lemma, or proposed solution that enters the mathematical work, or
+whose correction, rejection, or abandonment is recorded, becomes a lossless
+`Representation` with `Provenance.origin = ai_proposal`, a link to its
+`ModelCall`, and its exact response span anchored to the response digest. The
+call purpose maps to an existing generic representation kind; no parallel
+AI-response hierarchy is introduced.
+
+A candidate-route view is derived only from routes explicitly present in
+returned response spans and routes recorded in `WorkArtifact`s; it is
+not a new stored entity. It does not claim access to hidden model reasoning,
+chain of thought, internal search, or alternatives that were never returned.
+Use, correction, rejection, and abandonment are recorded as `TaskEvidence`, not as properties of the call.
+
+A paraphrase or synthesis is a separate representation linked through
+`derived_from`; it does not replace its exact sources or acquire their
+verification, admission, or disposition. A model-produced synthesis requires a
+new, explicit, linked `ModelCall`. Storage, viewing, extraction, and synthesis
+are not mathematical integration. A suggested source becomes a source
+occurrence only after it is independently retrieved and identified; a reported
+calculation or proof check becomes a verification only after the corresponding
+method or attestation is obtained separately.
 
 When a selected proposal participates in an inspectable warrant, the interface
 uses the ordinary justification records rather than an AI-specific status. It
@@ -398,30 +427,40 @@ Use a coherent cluster from a problem-centered algebraic number theory text.
 5. At one genuine obstruction, make a bounded call to the configured model.
    Inspect the selected outbound context, submit the request, and preserve the
    `ModelCall` and raw response.
-6. Extract only proposals that enter the work or whose correction, rejection,
-   or abandonment is recorded, retaining their AI origin, lossless exact
-   response spans, response digest, and links to the call.
-7. For one selected substantive claim, inspect the generic warrant projection.
+6. Inspect the response progressively. Select visible passages without entering
+   byte offsets; retain only exact spans that enter the work or whose correction,
+   rejection, or abandonment is recorded. Record only candidate routes that the
+   response actually states or the mathematician records in a work artifact.
+7. If a selected passage suggests a source or reports a calculation or check,
+   retrieve, identify, calculate, or check it independently. Until then it
+   remains a proposal.
+8. If a paraphrase or synthesis helps continued work, preserve it as a separate
+   derived representation linked to its exact selected sources.
+9. For one selected substantive claim, inspect the generic warrant projection.
    Either review separate admissions \(m:D\) and \(r:(D\to F)\) and the checked
    route \(r\cdot m:F\), or retain an explicit no-bridge outcome and display the
    independent reason \(v:F\) that actually warrants the mathematics. If the
    proposal is wrong or irrelevant, retain \(D\) without an active bridge or
    admission and record rejection or abandonment; no warrant for \(F\) is
    required.
-8. Preserve the attempt, revisions, calculations, exact sources consulted, and
-   assistance used.
-9. Resume later at the unfinished mathematical step.
-10. Test retention by reconstructing the solution or solving a related problem.
+10. Preserve the attempt, revisions, calculations, exact sources consulted, and
+    assistance used.
+11. Resume later at the unfinished mathematical step.
+12. Test retention by reconstructing the solution or solving a related problem.
 
 **Acceptance.** The session is useful when no formal artifact exists. It begins
 with top-down orientation and proceeds directly to substantive problem work,
 preserves enough evidence to resume and test the work, and requires no
 declaration of comprehension. At least one model call is
 traceable from exact outbound context through raw response to a proposal that is
-used, corrected, rejected, or abandoned during the mathematical attempt. One
-exact response span is also traceable through its documentary atom and explicit
-admissions to a checked derivation, or to a recorded no-bridge decision and the
-independent warrant used instead, or to rejection or abandonment with no
+used, corrected, rejected, or abandoned during the mathematical attempt. The
+selected material is recoverable from visible text without user-supplied byte
+arithmetic; every paraphrase or synthesis remains linked to its lossless
+sources. The derived candidate-route view contains no inferred provider-internal search,
+and a source suggestion is either independently retrieved and identified or
+remains visibly unverified. One exact response span is also traceable through
+its documentary atom and explicit admissions to a checked derivation, or to a
+recorded no-bridge decision and the independent warrant used instead, or to rejection or abandonment with no
 warrant for \(F\). Proposal disposition alone is task evidence, not a
 mathematical warrant, and \(m:D\) alone cannot derive \(F\).
 

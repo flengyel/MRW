@@ -161,6 +161,18 @@ OpenAI Responses API JSON and selected context, requires the user to type
 terminal `ModelCall`. Projection, admission, and Lean checking remain separate
 explicit commands.
 
+The next authorized executable increment is a local response-review and
+selection view
+over a completed `ModelCall`. It will keep attribution visible, index returned
+passages deterministically, let the mathematician select visible exact text
+without calculating byte offsets, and pass that selection through the existing
+lossless projection boundary. It will not make another model call, retrieve a
+source, summarize automatically, admit a premise, or invoke Lean. Justification
+logic remains the integral warrant layer available after selected material
+enters mathematical work; it is not required merely to view or discard a
+response. This paragraph describes the authorized next increment, not a command
+that is already implemented.
+
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
 preserved or generated mechanically, whether they support later reconstruction
@@ -379,7 +391,10 @@ theorem-terminal show-documentary "$bridge_demo/package"
 SHA-256 of its exact raw-response UTF-8 bytes, and accepts a half-open byte span
 whose endpoints must be UTF-8 boundaries. It creates a lossless
 `Representation` and documentary atom \(D\), but no premise. The fixture's
-span `[17, 26)` is the nine-byte text `α → β`.
+span `[17, 26)` is the nine-byte text `α → β`. Those offsets expose the exact
+persistence boundary for testing; they are not intended to be calculated by a
+mathematician. The response-review operation will compute them from a visible
+passage selection.
 
 `admit-documentary` is the separate action that creates the explicit scoped
 premise \(m:D\). It does not invoke Lean and creates no substantive \(F\),
@@ -491,9 +506,22 @@ that failure while retaining the complete, file-synchronized destination.
 The resulting completed file is directly consumable by `project-response`. Nothing in
 `request-assistance` automatically projects output, admits a premise, invokes Lean,
 or treats the returned text as mathematics. OpenAI's handling of API data is
-governed by its current policies; `store: false` disables response retrieval
-storage but is not presented as control over every kind of processing or
-retention.
+governed by its current
+[data controls](https://developers.openai.com/api/docs/guides/your-data);
+`store: false`, as documented for the
+[Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses),
+disables response retrieval storage but is not presented as control over every
+kind of processing or retention.
+
+The system records only the API-visible text accepted by its explicit response
+contract. OpenAI documents that raw reasoning tokens are not exposed through
+the API and that optional reasoning summaries are summaries rather than raw
+chain of thought
+([reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)).
+This adapter sends no reasoning-summary parameter and ignores auxiliary
+reasoning items. Theorem Terminal never labels a returned explanation or
+summary as raw chain of thought, reconstructs hidden reasoning, or claims access
+to provider-internal search.
 
 Automated tests inject confirmation, IDs, clocks, persistence, and byte-level
 HTTP transport. They make no live OpenAI request. A successful completed file

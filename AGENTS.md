@@ -107,21 +107,74 @@ authorized evaluation stages are executed. Do not commit a checked bundle or
 executable Lean checker until the pinned Lean command has actually compiled and
 checked it; never hand-author a placeholder that claims checked status.
 
-Implementation of the single OpenAI Responses API provider adapter is now
-authorized as infrastructure for the later Stage 1 trial. This authorization
-does not authorize a live request, selection of the genuine mathematical
-obstruction, or a claim that Stage 1 is complete. The adapter uses the fixed
-OpenAI endpoint, obtains its credential only from `OPENAI_API_KEY`, rejects
-redirects, performs no retries, and transmits only the exact frozen UTF-8 body
-shown in its preview after the user enters `SEND`. Once transmission begins it
-atomically retains a completed, failed, refused, or incomplete `ModelCall` when
-possible. It never automatically projects a response, admits a premise,
-invokes Lean, or creates a mathematical warrant. Ordinary orientation, study,
-and problem work remain independent of model assistance and justification-
-logic entry.
-Its current transient JSON is a low-level developer integration envelope, not
-a form for mathematicians and not the task-facing live workflow; that later
-workflow must derive request metadata and limits from active mathematical work.
+The single bounded OpenAI Responses API provider adapter is implemented as
+infrastructure for the later Stage 1 trial. It uses the fixed endpoint, obtains
+its credential only from `OPENAI_API_KEY`, rejects redirects, performs no
+retries, and transmits only the exact frozen UTF-8 body shown in its preview
+after the user enters `SEND`. Once transmission begins it atomically retains a
+completed, failed, refused, or incomplete `ModelCall` when possible. Do not
+change its transport or publication boundary unless a demonstrated defect
+requires it. It never automatically projects a response, admits a premise,
+invokes Lean, or creates a mathematical warrant.
+
+The next authorized executable increment is deterministic local response review
+and selection over completed, finalized `ModelCall` records. It must:
+
+- make no network, provider, tool, or Lean call;
+- validate the call and response digest before display;
+- show attribution and response identity before mathematical content;
+- implement `review-response MODEL_CALL` with the mutually exclusive index,
+  passage, and full-response selectors specified in `CODEX_PLAN.md`, and extend
+  `project-response` with its mutually exclusive `--passage N` selector;
+- show the bounded, pageable deterministic passage index specified in
+  `CODEX_PLAN.md` and keep the complete exact response available by explicit
+  action;
+- define passages, numbering, previews, and zero-passage behavior exactly as
+  `CODEX_PLAN.md` does and map a selected visible passage number to the existing
+  half-open UTF-8 span internally;
+- apply the exact reversible safe-rendering rule in `CODEX_PLAN.md` to every
+  record-derived string, use trusted application framing, emit no terminal
+  hyperlink escapes, and invoke no pager, Markdown renderer, shell, or link
+  handler;
+- create no artifact when the response is only viewed or the action is
+  cancelled;
+- use the existing parser, digest validation, and projection construction rather
+  than duplicating them;
+- factor a provider-independent, mode-`0600`, synchronized, atomic
+  no-overwrite persistence helper and apply it to response-bearing projection
+  and admission artifacts as well as the model-call path, preserving the current
+  model-call publication commit point, including retention of the complete destination and
+  cleanup of only temporary or reservation artifacts after any post-link
+  directory-sync failure;
+- preserve response selection as an ordinary lossless `Representation`; map
+  call purposes to existing generic representation kinds rather than adding an
+  AI-response hierarchy; and
+- add tests for exact passage boundaries, multibyte Unicode, CRLF, repeated
+  passages, a response with no blank separator, empty and blank-only responses,
+  the current 4 MiB `ModelCall` input boundary, a response at the adapter's
+  1 MiB ceiling, terminal controls, cancellation, digest mismatch,
+  non-completed calls, mode `0600`,
+  no overwrite, concurrent destinations, and failure cleanup.
+
+This increment must not automatically summarize, semantically classify, retrieve
+a source, record a disposition, make a second model call, admit a premise, or
+invoke Lean. It records only routes present in the returned text. The task-facing
+generator must not solicit hidden chain of thought; the current adapter sends no
+reasoning-summary parameter and ignores auxiliary reasoning items. Never label a
+returned explanation or summary as raw chain of thought, reconstruct hidden
+reasoning, or claim access to provider-internal search or unreturned
+alternatives. A human synthesis is a separate
+derived representation. A model-produced synthesis requires another explicit
+linked `ModelCall`. Source retrieval, verification, premise admission, and
+justification checking remain separate explicit actions.
+
+Ordinary orientation, study, and problem work remain independent of model
+assistance and justification-logic entry. The current transient request JSON is
+a low-level developer integration envelope, not a form for mathematicians and
+not the task-facing live workflow; deriving its request metadata and limits
+still waits for active mathematical work and a genuine Stage 1 obstruction.
+The response-review precursor authorizes no live request and does not
+establish Stage 1 usefulness.
 
 For the warrant layer:
 

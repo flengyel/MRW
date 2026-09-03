@@ -1,10 +1,16 @@
-# DOMAIN_MODEL.md — v7
+# DOMAIN_MODEL.md — v8
 
 Draft. Companion to `VISION.md` (why the system exists), `UX_SPEC.md` (what a
 mathematician does with it), and `CODEX_PLAN.md` (staged implementation).
 
 Fixes entities and invariants. Does not fix storage technology, schema syntax,
 or GUI framework.
+
+Changes from v7: response digestion made explicit as a human-led workflow over existing
+records, not a new AI-specific schema; task evidence extended to mathematical-
+object study; visible passage selection separated from retained digest-anchored
+byte spans; returned and pursued routes distinguished from hidden model
+reasoning; derived syntheses retain their exact sources.
 
 Changes from v6: model calls fixed as operational provenance envelopes; exact
 response spans anchored to immutable response digests; selected AI output
@@ -257,11 +263,12 @@ separate verification question.
 
 ### TaskEvidence
 
-An observed event arising from work on a problem or review item.
+An observed event arising from work on a problem, review item, or mathematical
+object.
 
 ```
 TaskEvidence
-    task              Problem | ReviewItem
+    task              Problem | ReviewItem | MathematicalObject
     artifact          optional WorkArtifact
     event             started | resumed | artifact_saved | source_consulted
                       | assistance_requested | proposal_used
@@ -570,9 +577,23 @@ AI-generated mathematics may be imported, compared, verified, explained, and
 reviewed whether or not Theorem Terminal itself generates assistance.
 Generating a proposal is not a prerequisite for storing or studying one.
 
+Task-mediated assistance uses the existing representation kinds. A definition
+or result explanation and a criticism ordinarily become an
+`informal_explanation`; an intermediate lemma becomes a `statement`; a source
+suggestion becomes an `informal_explanation` containing the exact suggestion;
+a computation becomes a `calculation`; and a worked solution remains a
+`proposed_solution` until later human work is represented separately. The
+purpose of the call remains available on `ModelCall` and `TaskEvidence`;
+duplicating it as a specialized AI-response type is unnecessary.
+
 A `Representation` is immutable. Editing, paraphrasing, or normalizing its
 content creates a new version linked through `derived_from` or `supersedes`; it
-never changes the content or hash of the earlier representation.
+never changes the content or hash of the earlier representation. A paraphrase
+or synthesis of selected response material is a separate representation whose
+`derived_from` field identifies its lossless selected sources. It neither
+replaces them nor inherits their verification, premise admission, or
+disposition. A synthesis produced by another model requires its own
+`ModelCall` and exact response provenance.
 
 **Invariant B — representation kinds are not prerequisites for one another.**
 Nothing requires one representation kind to exist before another. A problem
@@ -643,16 +664,26 @@ normalization, parsing, or extraction. The first experiment accepts one such
 text payload; unsupported multipart or non-text output is recorded as an
 incomplete call and is not projected into a warrant.
 
-The raw response and its digest are preserved before extraction. Only response
-material that enters the mathematical work, or whose correction, rejection, or
-abandonment is recorded, is extracted as a `Representation`. In the first
-experiment this extraction is lossless: its content is the exact half-open
-UTF-8 byte span `[start, end)` of `raw_response` identified by
+The raw response and its digest are preserved before extraction. The first
+executable step is a deterministic response-review view that may display a
+numbered passage index and exact returned
+text without creating a record. A mathematician selects a visible passage; the
+application computes and validates the half-open UTF-8 byte span internally.
+Passage numbers are transient presentation aids, not persistent identities.
+
+Only response material that enters the mathematical work, or whose correction,
+rejection, or abandonment is recorded, is extracted as a `Representation`. In
+the first experiment this extraction is lossless: its content is the exact
+half-open UTF-8 byte span `[start, end)` of `raw_response` identified by
 `raw_response_digest`. Its provenance identifies the `ModelCall` and span and
-has `Provenance.origin = ai_proposal`. A paraphrase, normalization, or edit is a
-separate `Representation` linked through `derived_from`; it is never described
-as the exact returned span. Extraction establishes attribution only, not
-correctness or a relation to any source.
+has `Provenance.origin = ai_proposal`. Extraction establishes attribution only,
+not correctness or a relation to any source.
+
+A candidate-route view is derived only from routes stated in returned response
+spans and routes actually preserved in `WorkArtifact`s, together with their
+`TaskEvidence` dispositions; it is not a new stored entity. No record purports
+to expose or reconstruct a provider's hidden reasoning, chain of thought,
+internal search, or alternatives that were never returned.
 
 `raw_response_digest` is required whenever `raw_response` is present. A failed,
 refused, or incomplete call with no returned content has neither a response

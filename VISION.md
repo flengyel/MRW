@@ -81,6 +81,27 @@ discusses both the prospect of verified proofs without human understanding and
 the dependence of mathematical AI on canonical theories developed and organized
 by mathematicians [@taoMathematicsAgeAI2026].
 
+In his ICM public lecture, Tao distinguishes proof generation, verification,
+exposition, digestion and acceptance, and canonicalization; under an explicitly
+stated working hypothesis, he argues that increased generation may create
+bottlenecks among those later activities
+([preprint](https://doi.org/10.48550/arXiv.2608.16753),
+[slides](https://teorth.github.io/tao-web/slides/age-of-ai-icm-2026.pdf),
+[Simons Foundation recording](https://www.youtube.com/watch?v=M0--ZH1lOzg)). A
+separate first-person account reports cross-field source discovery, rapid
+testing of ideas and wrong avenues, and substantial human effort spent
+reconstructing poorly anchored model prose
+([garvy, “No Country for Mediocre Mathematicians”][garvy-essay]).
+That account is anecdotal workflow evidence, not a controlled productivity
+study or a labor-market forecast. Together these sources motivate an explicit
+response-digestion bridge: preserve exact output and origin, expose the routes
+actually returned, retrieve and check suggested sources independently, and
+support reconstruction and durable synthesis. Canonicalization remains the
+mathematical community's longer process of absorbing work into dependable
+theory and exposition; it is not an automatic application action.
+
+[garvy-essay]: https://garvvee.substack.com/p/no-country-for-mediocre-mathematicians
+
 Studying externally generated mathematics and requesting task-specific
 assistance from a configured model are both part of the initial workflow. A
 request is attached to active mathematical work. The exact outbound context and

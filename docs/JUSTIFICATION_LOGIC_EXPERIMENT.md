@@ -9,14 +9,29 @@ reason should be encoded in justification logic.
 
 The current model records where a claim came from and what checks were run, but
 it does not express how admitted reasons compose. The experiment adds an
-explicit warrant layer for that purpose. Its first question is concrete: can a
-later reader reconstruct why the selected Appendix A claim was admitted, which
-bridges were required, and which revisions those bridges depended on?
+explicit warrant layer for that purpose. Justification logic is therefore an
+integral warrant subsystem, not a sidecar attached to AI output. Its invocation
+is nevertheless task-dependent: not every mathematical object, response, or
+work artifact needs an explicit derivation. Its first question is concrete: can
+a later reader reconstruct why the selected Appendix A claim was admitted,
+which bridges were required, and which revisions those bridges depended on?
 
-This layer follows mathematical study. It does not precede `orient`, the
-theorem landscape, the statement, the proof idea, the proof skeleton, or the
-relevant technical detail. It is reached only when an active Appendix A task
-uses the manuscript--Lean correspondence.
+Response digestion is the human-led bridge from an immutable `ModelCall` to
+reconstructed, checked, and synthesized mathematical material. Its first
+executable step is deterministic response review and selection. Merely viewing
+or losslessly selecting returned text creates no admission. When a selected
+claim enters an inspectable warrant, the ordinary claim, admission, context, derivation, and verification records
+below apply; no AI-specific trust or warrant type intervenes. Only returned text
+and routes recorded in ordinary work artifacts are recordable. The current adapter sends no
+reasoning-summary parameter and ignores auxiliary reasoning items. The system
+does not label returned explanations as raw chain of thought, reconstruct hidden
+model reasoning, or claim access to internal search.
+
+The explicit warrant layer follows mathematical study. It does not precede
+`orient`, the theorem landscape, the statement, the proof idea, the proof
+skeleton, or the relevant technical detail. It is reached when an active task
+needs an inspectable warrant. Appendix A is its first mathematical fixture, not
+its only application.
 
 ## Logical basis
 
