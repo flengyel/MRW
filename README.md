@@ -154,6 +154,13 @@ satisfy the Stage 1 requirement for assistance at a genuine mathematical
 obstruction. It supplies no evidence that model assistance improved
 mathematical work.
 
+One provider-backed operation is also implemented, but no live request is made
+by installation or testing. `request-assistance` displays the exact bounded
+OpenAI Responses API JSON and selected context, requires the user to type
+`SEND`, makes at most one request with `store: false`, and atomically creates a
+terminal `ModelCall`. Projection, admission, and Lean checking remain separate
+explicit commands.
+
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
 preserved or generated mechanically, whether they support later reconstruction
@@ -401,6 +408,90 @@ establishes the response and assertion hashes before Lean checks derivability.
 The retained digest detects changes relative to the immutable external
 `Verification`; it is not a digital signature and does not authenticate a
 maliciously replaced persistence store.
+
+### Create one finalized OpenAI ModelCall
+
+Prepare a transient JSON object containing only existing request-side
+`ModelCall` information. It has exactly these fields:
+
+```json
+{
+  "initiated_by": "person-id",
+  "target": {"kind": "WorkArtifact", "id": "attempt-id"},
+  "purpose": "strategic_hint",
+  "request_text": "The mathematical assistance requested.",
+  "context_refs": [
+    {"kind": "WorkArtifact", "id": "attempt-id", "revision": "revision-id"}
+  ],
+  "effective_input": {
+    "instructions": "Optional exact application instruction.",
+    "input": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "input_text", "text": "Exact transmitted mathematical context."}
+        ]
+      }
+    ]
+  },
+  "limits": {
+    "max_request_body_bytes": 262144,
+    "max_provider_response_bytes": 1048576,
+    "max_output_tokens": 800,
+    "timeout_seconds": 60
+  },
+  "in_reply_to": null
+}
+```
+
+This is operational input, not a persistent domain schema. `instructions` may
+be omitted, and `input` may instead be one nonempty string. The adapter accepts
+only text input. Configure the requested model on the command line:
+
+```bash
+export OPENAI_API_KEY='...'
+theorem-terminal request-assistance prepared-request.json \
+  --model MODEL \
+  --output model-call.json
+```
+
+Before any network operation, the command checks the prepared input, model,
+limits, credential presence, and output destination, then freezes and displays
+the exact UTF-8 body. The preview includes the fixed endpoint, requested model,
+non-secret `Content-Type` header, complete body, context references,
+instructions and input, all limits, and destination. Only the exact token
+`SEND` authorizes transmission; any other input or interruption creates no file
+and sends nothing.
+
+The adapter makes one `POST` to `https://api.openai.com/v1/responses`. The body
+allowlist is `model`, optional `instructions`, `input`, `max_output_tokens`, and
+`store` fixed to `false`. The authorization header is constructed from
+`OPENAI_API_KEY`; the credential is excluded from previews, records, and error
+text. Tools, streaming, background mode, remote prompts, previous-response and
+conversation state are absent by construction. Redirects and retries are
+disabled.
+
+A completed call requires exactly one assistant message with exactly one
+nonempty `output_text` block. Auxiliary reasoning items are ignored. Refusals,
+incomplete responses, and unsupported output shapes produce terminal
+`refused` or `incomplete` records; HTTP, transport, timeout, decoding, and
+malformed-response failures produce terminal `failed` records after
+transmission when the record can be retained. No error response body is printed.
+Every terminal file is flushed, synchronized, and installed atomically without
+overwriting an existing or concurrently created destination; temporary files
+are removed on success and failure.
+
+The resulting file is directly consumable by `project-response`. Nothing in
+`request-assistance` automatically projects output, admits a premise, invokes Lean,
+or treats the returned text as mathematics. OpenAI's handling of API data is
+governed by its current policies; `store: false` disables response retrieval
+storage but is not presented as control over every kind of processing or
+retention.
+
+Automated tests inject confirmation, IDs, clocks, persistence, and byte-level
+HTTP transport. They make no live OpenAI request. A successful completed file
+may then be passed explicitly through the unchanged sequence
+`project-response` → `admit-documentary` → `check-documentary`.
 
 ### Reviewed source revision
 

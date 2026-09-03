@@ -105,6 +105,19 @@ authorized evaluation stages are executed. Do not commit a checked bundle or
 executable Lean checker until the pinned Lean command has actually compiled and
 checked it; never hand-author a placeholder that claims checked status.
 
+Implementation of the single OpenAI Responses API provider adapter is now
+authorized as infrastructure for the later Stage 1 trial. This authorization
+does not authorize a live request, selection of the genuine mathematical
+obstruction, or a claim that Stage 1 is complete. The adapter uses the fixed
+OpenAI endpoint, obtains its credential only from `OPENAI_API_KEY`, rejects
+redirects, performs no retries, and transmits only the exact frozen UTF-8 body
+shown in its preview after the user enters `SEND`. Once transmission begins it
+atomically retains a completed, failed, refused, or incomplete `ModelCall` when
+possible. It never automatically projects a response, admits a premise,
+invokes Lean, or creates a mathematical warrant. Ordinary orientation, study,
+and problem work remain independent of model assistance and justification-
+logic entry.
+
 For the warrant layer:
 
 - terms and formulas are pure syntax and mathematical claims are immutable

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 import stat
 import sys
@@ -52,6 +53,20 @@ def _parser() -> argparse.ArgumentParser:
         help="show the cumulative mathematics and its checked warrant",
     )
     why.add_argument("source", type=Path, help="path to rs_Appendix_A.tex")
+
+    request = commands.add_parser(
+        "request-assistance",
+        help="explicitly send one displayed bounded OpenAI Responses API request",
+    )
+    request.add_argument(
+        "request", type=Path, help="bounded request specification JSON"
+    )
+    request.add_argument(
+        "--model", required=True, help="requested OpenAI model identifier"
+    )
+    request.add_argument(
+        "--output", type=Path, required=True, help="new terminal ModelCall JSON"
+    )
 
     project = commands.add_parser(
         "project-response",
@@ -154,6 +169,33 @@ def main(argv: Sequence[str] | None = None) -> int:
             from theorem_terminal.appendix_a_warrant import render_why
 
             output = render_why(source)
+        elif args.command == "request-assistance":
+            from theorem_terminal.openai_response import (
+                MAX_PREPARED_REQUEST_BYTES,
+                parse_prepared_request,
+                request_assistance,
+            )
+
+            prepared = parse_prepared_request(
+                _read_bounded(
+                    args.request,
+                    MAX_PREPARED_REQUEST_BYTES,
+                    "prepared request",
+                )
+            )
+            raw = request_assistance(
+                prepared,
+                args.model,
+                args.output,
+                os.environ.get("OPENAI_API_KEY", ""),
+                preview=lambda rendered: print(rendered, end="", flush=True),
+                confirmation=lambda _rendered: sys.stdin.readline().rstrip("\r\n"),
+            )
+            output = (
+                f"Created terminal ModelCall: {args.output}"
+                if raw is not None
+                else "Request not sent; no ModelCall created."
+            )
         elif args.command == "project-response":
             from theorem_terminal.documentary_warrant import (
                 DocumentaryProjection,
