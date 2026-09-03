@@ -117,8 +117,8 @@ change its transport or publication boundary unless a demonstrated defect
 requires it. It never automatically projects a response, admits a premise,
 invokes Lean, or creates a mathematical warrant.
 
-The next authorized executable increment is deterministic local response review
-and selection over completed, finalized `ModelCall` records. It must:
+The deterministic local response-review and selection precursor is implemented
+over completed, finalized `ModelCall` records. It:
 
 - make no network, provider, tool, or Lean call;
 - validate the call and response digest before display;
@@ -156,7 +156,7 @@ and selection over completed, finalized `ModelCall` records. It must:
   non-completed calls, mode `0600`,
   no overwrite, concurrent destinations, and failure cleanup.
 
-This increment must not automatically summarize, semantically classify, retrieve
+This implemented precursor must not automatically summarize, semantically classify, retrieve
 a source, record a disposition, make a second model call, admit a premise, or
 invoke Lean. It records only routes present in the returned text. The task-facing
 generator must not solicit hidden chain of thought; the current adapter sends no

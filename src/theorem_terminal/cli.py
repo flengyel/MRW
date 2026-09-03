@@ -68,16 +68,27 @@ def _parser() -> argparse.ArgumentParser:
         "--output", type=Path, required=True, help="new terminal ModelCall JSON"
     )
 
+    review = commands.add_parser(
+        "review-response",
+        help="locally review a finalized response by deterministic passages",
+    )
+    review.add_argument("model_call", type=Path, help="finalized ModelCall JSON")
+    review_selectors = review.add_mutually_exclusive_group()
+    review_selectors.add_argument("--index-start", type=int)
+    review_selectors.add_argument("--passage", type=int)
+    review_selectors.add_argument("--full", action="store_true")
+
     project = commands.add_parser(
         "project-response",
         help="project one exact finalized-response span as documentary material",
     )
     project.add_argument("model_call", type=Path, help="finalized ModelCall JSON")
-    project.add_argument("--start-byte", type=int, required=True)
-    project.add_argument("--end-byte", type=int, required=True)
+    project.add_argument("--start-byte", type=int)
+    project.add_argument("--end-byte", type=int)
+    project.add_argument("--passage", type=int)
     project.add_argument("--representation-id", required=True)
     project.add_argument("--representation-version", default="1")
-    project.add_argument("--kind", required=True)
+    project.add_argument("--kind")
     project.add_argument("--claim-id", required=True)
     project.add_argument("--output", type=Path, required=True)
 
@@ -125,21 +136,11 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _write_new(path: Path, raw: bytes) -> None:
-    """Write a small artifact once; remove a partial file after an I/O error."""
+    """Persist a private record atomically without overwriting."""
 
-    created = False
-    try:
-        with path.open("xb") as stream:
-            created = True
-            stream.write(raw)
-            stream.flush()
-    except BaseException:
-        if created:
-            try:
-                path.unlink()
-            except OSError:
-                pass
-        raise
+    from theorem_terminal.private_persistence import persist_private_new
+
+    persist_private_new(path, raw)
 
 
 def _read_bounded(path: Path, limit: int, description: str) -> bytes:
@@ -196,6 +197,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if raw is not None
                 else "Request not sent; no ModelCall created."
             )
+        elif args.command == "review-response":
+            from theorem_terminal.model_projection import (
+                MAX_MODEL_CALL_BYTES,
+                parse_finalized_model_call,
+            )
+            from theorem_terminal.response_review import render_response_review
+
+            call = parse_finalized_model_call(
+                _read_bounded(args.model_call, MAX_MODEL_CALL_BYTES, "ModelCall input")
+            )
+            output = render_response_review(
+                call,
+                index_start=args.index_start,
+                passage_number=args.passage,
+                full=args.full,
+            )
         elif args.command == "project-response":
             from theorem_terminal.documentary_warrant import (
                 DocumentaryProjection,
@@ -207,6 +224,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 make_model_produced_claim,
                 parse_finalized_model_call,
             )
+            from theorem_terminal.response_review import purpose_kind, select_passage
 
             call = parse_finalized_model_call(
                 _read_bounded(
@@ -215,15 +233,36 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "ModelCall input",
                 )
             )
+            if args.passage is not None:
+                if args.start_byte is not None or args.end_byte is not None:
+                    raise ValueError(
+                        "--passage is mutually exclusive with --start-byte and --end-byte"
+                    )
+                if args.kind is not None:
+                    raise ValueError("--kind is not accepted with --passage")
+                selected = select_passage(call.raw_response, args.passage)
+                start_byte = selected.start_byte
+                end_byte = selected.end_byte
+                kind = purpose_kind(call)
+            else:
+                if args.start_byte is None or args.end_byte is None:
+                    raise ValueError(
+                        "byte mode requires both --start-byte and --end-byte"
+                    )
+                if args.kind is None:
+                    raise ValueError("byte mode requires --kind")
+                start_byte = args.start_byte
+                end_byte = args.end_byte
+                kind = args.kind
             subject = call.document["target"]
             representation = extract_lossless_representation(
                 call,
                 representation_id=args.representation_id,
                 version=args.representation_version,
                 subject=subject,
-                kind=args.kind,
-                start_byte=args.start_byte,
-                end_byte=args.end_byte,
+                kind=kind,
+                start_byte=start_byte,
+                end_byte=end_byte,
             )
             claim = make_model_produced_claim(
                 call,

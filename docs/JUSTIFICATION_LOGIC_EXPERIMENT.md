@@ -18,7 +18,8 @@ which bridges were required, and which revisions those bridges depended on?
 
 Response digestion is the human-led bridge from an immutable `ModelCall` to
 reconstructed, checked, and synthesized mathematical material. Its first
-executable step is deterministic response review and selection. Merely viewing
+executable step, deterministic local `review-response` and lossless
+`project-response --passage`, is implemented. Merely viewing
 or losslessly selecting returned text creates no admission. When a selected
 claim enters an inspectable warrant, the ordinary claim, admission, context, derivation, and verification records
 below apply; no AI-specific trust or warrant type intervenes. Only returned text

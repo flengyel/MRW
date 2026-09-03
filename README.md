@@ -161,17 +161,14 @@ OpenAI Responses API JSON and selected context, requires the user to type
 terminal `ModelCall`. Projection, admission, and Lean checking remain separate
 explicit commands.
 
-The next authorized executable increment is a local response-review and
-selection view
-over a completed `ModelCall`. It will keep attribution visible, index returned
-passages deterministically, let the mathematician select visible exact text
-without calculating byte offsets, and pass that selection through the existing
-lossless projection boundary. It will not make another model call, retrieve a
-source, summarize automatically, admit a premise, or invoke Lean. Justification
-logic remains the integral warrant layer available after selected material
-enters mathematical work; it is not required merely to view or discard a
-response. This paragraph describes the authorized next increment, not a command
-that is already implemented.
+The local response-review and selection precursor is executable over completed
+`ModelCall` records. It keeps attribution visible, indexes returned passages
+deterministically, and lets the mathematician select visible exact text without
+calculating byte offsets. It makes no model call, retrieves no source, performs
+no automatic summary, admits no premise, and invokes no Lean process.
+Justification logic remains the integral downstream warrant layer; it is not
+required merely to view or discard a response. This precursor does not complete
+Stage 1 or select its genuine mathematical obstruction.
 
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
@@ -393,8 +390,42 @@ whose endpoints must be UTF-8 boundaries. It creates a lossless
 `Representation` and documentary atom \(D\), but no premise. The fixture's
 span `[17, 26)` is the nine-byte text `α → β`. Those offsets expose the exact
 persistence boundary for testing; they are not intended to be calculated by a
-mathematician. The response-review operation will compute them from a visible
+mathematician. The response-review operation computes them from a visible
 passage selection.
+
+Review a completed call locally with a bounded first index page, another page,
+one complete passage, or the complete response:
+
+```bash
+theorem-terminal review-response MODEL_CALL
+theorem-terminal review-response MODEL_CALL --index-start 21
+theorem-terminal review-response MODEL_CALL --passage 1
+theorem-terminal review-response MODEL_CALL --full
+```
+
+The three selectors are mutually exclusive. Index pages contain at most 20
+rows, and each row previews at most 120 Unicode scalar values before safe
+rendering. Record-derived backslashes, terminal controls, and bidi controls are
+reversibly escaped as visible ASCII; the command emits no terminal hyperlinks,
+invokes no pager or renderer, and does not interpret returned markup, commands,
+TeX, or URLs. A terminal emulator may still auto-link plain URL text. Review is
+read-only and needs neither `OPENAI_API_KEY`, network access, nor Lean.
+
+Select the same exact passage through the existing documentary projection:
+
+```bash
+theorem-terminal project-response MODEL_CALL \
+  --passage 1 \
+  --representation-id REPRESENTATION_ID \
+  --claim-id CLAIM_ID \
+  --output projection.json
+```
+
+Passage mode derives the existing generic representation kind from the call's
+purpose and rejects `--kind` or byte offsets. The developer byte interface
+continues to require both offsets and `--kind`. Passage selection creates only
+the existing lossless `Representation` and documentary atom; admission and Lean
+checking remain separate explicit commands.
 
 `admit-documentary` is the separate action that creates the explicit scoped
 premise \(m:D\). It does not invoke Lean and creates no substantive \(F\),

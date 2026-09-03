@@ -259,7 +259,7 @@ JSON envelope is intended to be generated later from active mathematical work,
 not authored by the mathematician. This infrastructure does not execute or
 complete the genuine-obstruction Stage 1 trial, which remains pending.
 
-**Authorized response-review and selection precursor.** The next executable bridge
+**Implemented response-review and selection precursor.** This executable bridge
 increment operates only on completed, finalized local `ModelCall` records. It
 makes no provider, network, tool, or Lean call. It validates the response digest
 and shows attribution plus a deterministic numbered passage index.

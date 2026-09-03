@@ -14,7 +14,6 @@ import json
 import os
 from pathlib import Path
 import socket
-import tempfile
 from types import MappingProxyType
 from typing import Callable, Mapping
 from urllib.error import HTTPError, URLError
@@ -25,6 +24,7 @@ from theorem_terminal.model_projection import (
     MAX_MODEL_CALL_BYTES,
     parse_finalized_model_call,
 )
+from theorem_terminal.private_persistence import persist_private_new
 
 
 ADAPTER_VERSION = "openai-responses-v1"
@@ -526,39 +526,7 @@ def _serialize_terminal(record: Mapping[str, object]) -> bytes:
 
 def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
     """Publish complete bytes with fsync and an atomic no-replace hard link."""
-
-    parent = destination.parent
-    descriptor, name = tempfile.mkstemp(
-        prefix=f".{destination.name}.", suffix=".tmp", dir=parent
-    )
-    temporary = Path(name)
-    try:
-        with os.fdopen(descriptor, "wb") as stream:
-            descriptor = -1
-            stream.write(raw)
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.link(temporary, destination)
-        try:
-            directory_descriptor = os.open(parent, os.O_RDONLY)
-            try:
-                os.fsync(directory_descriptor)
-            finally:
-                os.close(directory_descriptor)
-        except OSError as exc:
-            raise OpenAIResponseError(
-                "ModelCall was published, but directory durability sync failed; "
-                "the complete destination was retained"
-            ) from exc
-    except FileExistsError as exc:
-        raise OpenAIResponseError(f"output already exists: {destination}") from exc
-    finally:
-        if descriptor >= 0:
-            os.close(descriptor)
-        try:
-            temporary.unlink()
-        except FileNotFoundError:
-            pass
+    persist_private_new(destination, raw, error_type=OpenAIResponseError)
 
 
 @contextmanager
