@@ -148,8 +148,10 @@ over completed, finalized `ModelCall` records. It:
   model-call publication commit point, including retention of the complete destination and
   cleanup of only temporary or reservation artifacts after any post-link
   directory-sync failure;
-- bind publication to the synchronized temporary inode and a held stable parent
-  directory; this protects against ordinary concurrent pathname replacement,
+- hold the synchronized temporary descriptor and stable parent directory,
+  verify the installed link names that inode before accepting publication, and
+  remove an identity-mismatched new link only after verifying it is the link
+  created by the operation; this protects against ordinary concurrent pathname replacement,
   not arbitrary compromise of the same Unix account;
 - preserve response selection as an ordinary lossless `Representation`; map
   call purposes to existing generic representation kinds rather than adding an

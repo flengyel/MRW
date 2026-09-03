@@ -50,6 +50,7 @@ def safe_terminal_text(value: str) -> str:
         elif (
             codepoint <= 0x1F
             or 0x7F <= codepoint <= 0x9F
+            or 0xD800 <= codepoint <= 0xDFFF
             or codepoint in _BIDI_CONTROLS
         ):
             rendered.append(f"\\u{{{codepoint:04X}}}")

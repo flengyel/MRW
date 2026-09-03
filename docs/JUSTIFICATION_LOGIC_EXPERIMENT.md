@@ -20,8 +20,8 @@ Response digestion is the human-led bridge from an immutable `ModelCall` to
 reconstructed, checked, and synthesized mathematical material. Its first
 executable step, deterministic local `review-response` and lossless
 `project-response --passage`, is implemented with bounded safely rendered
-metadata, a linear bounded-state passage scan, and inode-bound private
-publication. Merely viewing
+metadata, a linear bounded-state passage scan, and descriptor-held private
+publication with installed-link identity verification. Merely viewing
 or losslessly selecting returned text creates no admission. When a selected
 claim enters an inspectable warrant, the ordinary claim, admission, context, derivation, and verification records
 below apply; no AI-specific trust or warrant type intervenes. Only returned text

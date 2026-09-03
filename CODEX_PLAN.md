@@ -308,8 +308,10 @@ The mathematician may select a displayed passage number; the application, not
 the mathematician, computes the existing `project-response` span. Merely
 viewing or cancelling creates no artifact. This increment also factors the provider-
 independent private persistence needed by response-bearing records: mode
-`0600`, synchronization, descriptor-relative inode-bound atomic no-overwrite
-publication in a stable parent directory, and failure cleanup. This local
+`0600`, synchronization, a held synchronized descriptor, descriptor-relative
+atomic no-overwrite publication in a stable parent directory, verification that
+the installed link names that inode, and failure cleanup. A mismatched new link
+is removed only after its identity is verified. This local
 filesystem boundary handles accidental and ordinary concurrent replacement,
 not arbitrary compromise of the same Unix account.
 A successful hard link remains the publication commit point. Every pre-link

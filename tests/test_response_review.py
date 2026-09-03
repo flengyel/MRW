@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import stat
 import tempfile
 import tracemalloc
 import unittest
@@ -102,8 +103,8 @@ class SafeReviewTests(unittest.TestCase):
         return parse_finalized_model_call(encoded_call(response))
 
     def test_exact_safe_renderer(self) -> None:
-        source = "\\\0\t\n\r\x1b\x1f\x7f\x80\x9f\u061c\u200e\u200f\u202a\u202e\u2066\u2069α"
-        expected = "\\\\\\u{0000}\\u{0009}\\u{000A}\\u{000D}\\u{001B}\\u{001F}\\u{007F}\\u{0080}\\u{009F}\\u{061C}\\u{200E}\\u{200F}\\u{202A}\\u{202E}\\u{2066}\\u{2069}α"
+        source = "\\\0\t\n\r\x1b\x1f\x7f\x80\x9f\ud800\udfff\u061c\u200e\u200f\u202a\u202e\u2066\u2069α"
+        expected = "\\\\\\u{0000}\\u{0009}\\u{000A}\\u{000D}\\u{001B}\\u{001F}\\u{007F}\\u{0080}\\u{009F}\\u{D800}\\u{DFFF}\\u{061C}\\u{200E}\\u{200F}\\u{202A}\\u{202E}\\u{2066}\\u{2069}α"
         rendered = safe_terminal_text(source)
         self.assertEqual(rendered, expected)
         self.assertNotIn("\x1b", rendered)
@@ -288,6 +289,36 @@ class ReviewCliTests(unittest.TestCase):
                     self.assertNotIn("\u202e", error)
                     self.assertFalse((parent / "out.json").exists())
 
+    def test_surrogate_json_keys_are_safe_on_strict_utf8_streams(self) -> None:
+        duplicate = b'{"\\ud800":0,"\\ud800":1}'
+        document = call_document("one")
+        document["\ud800"] = "unexpected"
+        unexpected = (json.dumps(document, ensure_ascii=True) + "\n").encode("ascii")
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            for record_name, raw in (("duplicate", duplicate), ("unexpected", unexpected)):
+                source = parent / f"{record_name}.json"
+                source.write_bytes(raw)
+                for command in ("review-response", "project-response"):
+                    stdout_bytes = io.BytesIO()
+                    stderr_bytes = io.BytesIO()
+                    stdout = io.TextIOWrapper(stdout_bytes, encoding="utf-8", errors="strict")
+                    stderr = io.TextIOWrapper(stderr_bytes, encoding="utf-8", errors="strict")
+                    arguments = [command, str(source)]
+                    if command == "project-response":
+                        arguments += [
+                            "--passage", "1", "--representation-id", "r",
+                            "--claim-id", "c", "--output", str(parent / "out.json"),
+                        ]
+                    with patch("sys.stdout", stdout), patch("sys.stderr", stderr):
+                        code = main(arguments)
+                    stdout.flush()
+                    stderr.flush()
+                    self.assertEqual(code, 2)
+                    self.assertEqual(stdout_bytes.getvalue(), b"")
+                    self.assertIn(b"\\u{D800}", stderr_bytes.getvalue())
+                    self.assertFalse((parent / "out.json").exists())
+
     def test_passage_projection_equals_byte_mode_and_maps_every_purpose(self) -> None:
         mapping = {
             "definition_explanation": "informal_explanation",
@@ -429,6 +460,32 @@ class PrivatePersistenceTests(unittest.TestCase):
             self.assertFalse(destination.exists())
             self.assertEqual(list(parent.glob(".*.tmp")), [])
 
+    def test_substitution_inside_link_hook_never_publishes_substitute(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary)
+            destination = parent / "record.json"
+            real_link = os.link
+
+            def substitute_then_link(source, target, **kwargs):
+                source_fd = kwargs["src_dir_fd"]
+                os.unlink(source, dir_fd=source_fd)
+                descriptor = os.open(
+                    source, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600,
+                    dir_fd=source_fd,
+                )
+                os.write(descriptor, b"substituted")
+                os.close(descriptor)
+                return real_link(source, target, **kwargs)
+
+            with patch(
+                "theorem_terminal.private_persistence.os.link",
+                side_effect=substitute_then_link,
+            ):
+                with self.assertRaisesRegex(PrivatePersistenceError, "identity"):
+                    persist_private_new(destination, b"original")
+            self.assertFalse(destination.exists())
+            self.assertEqual(list(parent.glob(".*.tmp")), [])
+
             with patch.object(
                 persistence_module, "_parent_matches", side_effect=(True, False)
             ):
@@ -461,22 +518,32 @@ class PrivatePersistenceTests(unittest.TestCase):
 
             destination.unlink()
             real_close = os.close
-            calls = 0
+            close_attempts = {}
+            reused_descriptor = None
 
-            def transient_close(descriptor):
-                nonlocal calls
-                calls += 1
-                if calls == 1:
-                    raise OSError("descriptor close failure")
+            def close_then_report(descriptor):
+                nonlocal reused_descriptor
+                close_attempts[descriptor] = close_attempts.get(descriptor, 0) + 1
+                metadata = os.fstat(descriptor)
+                if stat.S_ISREG(metadata.st_mode):
+                    real_close(descriptor)
+                    reused_descriptor = os.open("/dev/null", os.O_RDONLY)
+                    self.assertEqual(reused_descriptor, descriptor)
+                    raise OSError("descriptor close reported failure")
                 return real_close(descriptor)
 
             with patch(
                 "theorem_terminal.private_persistence.os.close",
-                side_effect=transient_close,
+                side_effect=close_then_report,
             ):
-                persist_private_new(destination, b"complete")
+                with self.assertRaisesRegex(PrivatePersistenceError, "cleanup failed"):
+                    persist_private_new(destination, b"complete")
             self.assertEqual(destination.read_bytes(), b"complete")
             self.assertEqual(list(parent.glob(".*.tmp")), [])
+            assert reused_descriptor is not None
+            self.assertEqual(close_attempts[reused_descriptor], 1)
+            os.fstat(reused_descriptor)
+            os.close(reused_descriptor)
 
 
 if __name__ == "__main__":

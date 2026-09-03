@@ -120,6 +120,11 @@ def persist_private_new(
             destination.name, dir_fd=parent_fd, follow_symlinks=False
         )
         if _identity(installed) != temporary_identity:
+            source_after_link = os.stat(
+                temporary_name, dir_fd=parent_fd, follow_symlinks=False
+            )
+            if _identity(installed) == _identity(source_after_link):
+                os.unlink(destination.name, dir_fd=parent_fd)
             raise error_type("published record identity changed unexpectedly")
         try:
             os.fsync(parent_fd)
@@ -134,15 +139,10 @@ def persist_private_new(
     finally:
         cleanup_failures: list[str] = []
         if temporary_fd >= 0:
-            for attempt in range(2):
-                try:
-                    os.close(temporary_fd)
-                    break
-                except OSError as exc:
-                    if attempt:
-                        cleanup_failures.append(
-                            f"temporary descriptor close failed: {exc}"
-                        )
+            try:
+                os.close(temporary_fd)
+            except OSError as exc:
+                cleanup_failures.append(f"temporary descriptor close failed: {exc}")
         if temporary_name is not None and parent_fd >= 0:
             for attempt in range(2):
                 try:

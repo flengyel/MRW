@@ -538,8 +538,11 @@ overwriting an existing or concurrently created destination; temporary files
 are removed on success and failure. The atomic link is the publication commit
 point. If the subsequent directory durability sync fails, the command reports
 that failure while retaining the complete, file-synchronized destination.
-Publication uses descriptor-relative operations and verifies the temporary
-file's inode, mode, and stable parent-directory identity before linking. This
+Publication holds the synchronized temporary descriptor, uses descriptor-relative
+operations, and verifies the temporary file's inode, mode, stable parent-directory
+identity, and installed link before accepting publication. If the staging name
+was substituted during linking, only the verified link created by this operation
+is removed and publication fails. This
 protects the local workflow against accidental and ordinary concurrent pathname
 replacement; it is not a security boundary against arbitrary compromise of the
 same Unix account or host.
