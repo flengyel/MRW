@@ -34,10 +34,11 @@ durability boundaries. Explicit Save
 and Save As alone write ordinary editor files, with revision-conflict detection
 and atomic replacement. A failed checkpoint must block close and quit unless an
 informed user explicitly discards the session. Use the separate cross-platform
-mutable-file service; preserve immutable-record publication unchanged. Different
-projects may be open in different workstation processes, but only one active
-workstation process per project is supported in this increment. There is no
-lifetime lock; do not implement one in this correction.
+mutable-file service; preserve immutable-record publication unchanged.
+Different projects may be open in different workstation processes. Concurrent
+workstation processes for the same project are unsupported because no
+interprocess lifetime lock exists. Add such a lock only in a separately
+authorized concurrency change.
 
 Startup, opening, restoration and viewing invoke no compiler, checker, external
 editor, notebook kernel, model or network. LaTeX build, external-editor and
@@ -50,8 +51,8 @@ conventional input operations, not a complete read boundary. In particular,
 `\immediate\pdfobj stream file` can embed an absolute external file in the PDF;
 arbitrary external reads are not confined. Build only trusted project TeX.
 Preserve openin_any=p, openout_any=p, no shell escape, and the accepted
-pdfTeX/latexmk engine boundary. LuaLaTeX remains
-disabled without a separately verified OS sandbox; do not add one in this pass.
+pdfTeX/latexmk engine boundary. LuaLaTeX is unsupported. Enabling it requires a
+separately verified OS sandbox and a separately authorized change.
 Generated build files remain outside the project and are quota-monitored.
 Builds are unavailable on native Windows/macOS until equivalent process-tree
 termination and resource controls exist. Qt/runtime and TeX prerequisites are
@@ -75,9 +76,10 @@ Exercise toolkit-independent controllers and actual Qt widgets with
 Use an ordinary temporary project with TeX, Lean, Sage, Python, Markdown and text
 files; no test-only controller subclass may stand in for the GUI. Check real
 LaTeX rendering, diagnostics, Vim/Neovim handoff, source integrity, checkpoint recovery
-and re-entry visually at 1280×820 and 960×680 when changing widgets. Open the real
-integration manuscript through the same project and file actions only when
-authorized; this repair pass leaves that external repository untouched.
+and re-entry visually at 1280×820 and 960×680 when changing widgets. Open a real
+integration corpus through ordinary project and file actions only when the current
+task explicitly authorizes access. A visual check must not modify the external
+project.
 
 The current GUI directly provides ordinary-file editing, external-editor and
 Jupyter handoff, staged LaTeX building, PDF rendering, recovery and retained-record
@@ -137,15 +139,8 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 python -m compileall -q src tests
 ```
 
-For the authorized WSL2 checkout, start Codex in the repository root and use
-the repository-owned Lake project:
-
-```text
-cd /home/flengyel/src/theorem_terminal
-codex
-```
-
-Codex then runs the build and tests from that checkout:
+When the task requires Lean verification, run the repository-owned Lake project
+from the repository root:
 
 ```text
 cd lean

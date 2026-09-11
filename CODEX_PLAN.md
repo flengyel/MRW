@@ -111,7 +111,7 @@ files. The legacy CLI and frozen source bindings remain unchanged. Current limit
 and installation commands belong in README; the workflow specification belongs
 in UX_SPEC.
 
-The 2026-09-11 repair pass preserves this increment without adding product
+The 2026-09-11 repair preserved this increment without adding product
 features. Worker completions now enter explicitly queued main-thread QObject
 slots; background observations return detached data. Editing changes memory
 without serializing or syncing recovery on each keystroke. A 250 ms debounce
@@ -120,15 +120,15 @@ means the latest successfully completed checkpoint. Recent-project settings
 merge under a kernel lock across processes; genuine tool-setting collisions
 remain explicit. Different projects may be open in different workstation
 processes, but only one active workstation process per project is supported in
-this increment. No lifetime-lock subsystem is implemented or added here.
+this increment. No lifetime-lock subsystem was implemented or added.
 
 Out-of-tree staged builds execute trusted TeX with trusted installed tools.
-Staging is not a sandbox. This pass accepts latexmk with a fixed pdfLaTeX
+Staging is not a sandbox. The repair accepted latexmk with a fixed pdfLaTeX
 executable path, or direct pdfLaTeX, with openin_any=p, restricted writes via
 openout_any=p and no shell escape. openin_any=p is defense in depth for
 conventional input operations, not a complete read boundary. pdfTeX can still
 embed an absolute external file through `\immediate\pdfobj stream file`.
-The correction removes the contrary comment and narrows the existing test
+The correction removed the contrary comment and narrowed the existing test
 names to conventional `\input`/`\openout` and `\pdffiledump`/`\pdffilesize`
 restrictions. A real pdfTeX regression requires the external stream to appear
 in a successful PDF, its path to remain in `outside_inputs`, partial coverage,
@@ -141,27 +141,9 @@ partial or unknown because external toolchain/package revisions are not tracked;
 outside observations are retained. An unrelated .bib no longer suppresses a
 supplied .bbl. Qt/runtime and TeX prerequisites remain platform-dependent.
 
-The correction leaves the index empty. At a later explicitly authorized staging
-step, record the eleven new Python/test files as Git index mode `100644` with:
-
-```bash
-git add --chmod=-x -- \
-  src/theorem_terminal/gui.py \
-  src/theorem_terminal/latex_build.py \
-  src/theorem_terminal/local_files.py \
-  src/theorem_terminal/mutable_files.py \
-  src/theorem_terminal/record_views.py \
-  src/theorem_terminal/tool_settings.py \
-  src/theorem_terminal/workspace.py \
-  src/theorem_terminal/workstation.py \
-  tests/test_gui.py \
-  tests/test_latex_build.py \
-  tests/test_workstation.py
-```
-
-Verify the resulting index modes at that staging step. DrvFS may continue to
-report `0777`; it does not determine the intended recorded Git mode. Do not
-change mount configuration or `core.filemode`. No staging occurs in this pass.
+Commit `d82685f7b28e26f9502827e5f3bcd6f5f9d9a4ee` recorded the seven modified
+and eleven added GUI/LaTeX paths on `main`. All committed paths have Git mode
+`100644`; DrvFS working-tree modes do not determine Git index modes.
 
 The GUI directly provides ordinary-file editing, external-editor and Jupyter
 handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
