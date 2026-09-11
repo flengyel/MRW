@@ -26,11 +26,19 @@ class SourceDocument:
 
         try:
             raw = source_path.read_bytes()
+        except OSError as exc:
+            raise SourceError(f"cannot read source {source_path}: {exc}") from exc
+
+        return cls.from_bytes(source_path, raw)
+
+    @classmethod
+    def from_bytes(cls, path: str | Path, raw: bytes) -> "SourceDocument":
+        """Identify one captured read, also usable after a bounded record read."""
+        source_path = Path(path).expanduser()
+        try:
             text = raw.decode("utf-8")
         except UnicodeDecodeError as exc:
             raise SourceError(f"source is not UTF-8: {source_path}") from exc
-        except OSError as exc:
-            raise SourceError(f"cannot read source {source_path}: {exc}") from exc
 
         return cls(
             path=source_path.resolve(),

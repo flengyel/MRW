@@ -3,27 +3,24 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
-import stat
 import sys
 from typing import Sequence
 
-from theorem_terminal.appendix_a import (
-    AppendixASourceError,
-    StudyLevel,
-    render_orientation,
-    render_study,
-)
 from theorem_terminal.justification import JustificationBundleError
 from theorem_terminal.latex import LatexSourceError
+from theorem_terminal.local_files import read_bounded as _read_bounded
 from theorem_terminal.source import SourceDocument, SourceError
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="theorem-terminal",
-        description="Study a mathematical source in top-down order.",
+        description="Mathematical Research Workstation and legacy mathematical study commands.",
     )
     commands = parser.add_subparsers(dest="command", required=True)
+
+    gui = commands.add_parser("gui", help="open Mathematical Research Workstation")
+    gui.add_argument("project", type=Path, nargs="?", help="project directory to open or resume")
 
     orient = commands.add_parser(
         "orient",
@@ -143,19 +140,6 @@ def _write_new(path: Path, raw: bytes) -> None:
     persist_private_new(path, raw)
 
 
-def _read_bounded(path: Path, limit: int, description: str) -> bytes:
-    metadata = path.lstat()
-    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
-        raise ValueError(f"{description} must be a regular non-symlink file")
-    if metadata.st_size > limit:
-        raise ValueError(f"{description} exceeds the {limit}-byte limit")
-    with path.open("rb") as stream:
-        raw = stream.read(limit + 1)
-    if len(raw) > limit:
-        raise ValueError(f"{description} exceeds the {limit}-byte limit")
-    return raw
-
-
 def _cli_error(command: str, exc: BaseException) -> str:
     if command in ("review-response", "project-response"):
         from theorem_terminal.response_review import bounded_safe_diagnostic
@@ -167,7 +151,15 @@ def _cli_error(command: str, exc: BaseException) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
+        if args.command == "gui":
+            try:
+                from theorem_terminal.gui import launch
+            except ImportError as exc:
+                raise ValueError("The GUI requires PySide6 with QtPdf and the platform desktop libraries. Install the package and see README desktop prerequisites.") from exc
+            return launch(args.project)
         if args.command in ("orient", "study", "why"):
+            from theorem_terminal.appendix_a import StudyLevel, render_orientation, render_study
+
             source = SourceDocument.read(args.source)
         if args.command == "orient":
             output = render_orientation(source)
@@ -354,7 +346,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
     except (
         SourceError,
-        AppendixASourceError,
         LatexSourceError,
         JustificationBundleError,
         OSError,

@@ -2,7 +2,14 @@
 
 The mathematician's workflow the interface must support. Companion to
 `VISION.md` (why the system exists) and `DOMAIN_MODEL.md` (entities and
-invariants). Workflow and principles only; no screens, widgets, or framework.
+invariants). Present implementation and limitations are documented in README.
+The current GUI provides ordinary-file editing, external-editor and Jupyter
+handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
+inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+literature-service, live-model and Kallenberg-guidance GUI workflows below remain
+unimplemented. Kallenberg ordering will govern requested mathematical guidance,
+not startup or mandatory forms. Qt/runtime and TeX prerequisites remain
+platform-dependent; they are not permanent workflow invariants.
 
 ## 1. Design principle
 
@@ -10,7 +17,8 @@ The interface supports doing and studying mathematics. It does not require a
 declaration name, a formal development, or a preliminary account of what the
 mathematician understands.
 
-A session begins from a mathematical objective: orient in a subject, solve a
+A mathematical objective describes the work, not a required data-entry field.
+A session can begin by opening an ordinary file to orient in a subject, solve a
 problem, study a theorem or proof, reconstruct earlier work, prepare to teach,
 or examine generated mathematics. The mathematician begins the mathematical
 work in the ordinary medium appropriate to it. Theorem Terminal supplies source
@@ -50,12 +58,55 @@ contextual derivability as source identity, external verification, truth, or
 human acceptance, and it never precedes the mathematical study that made the
 warrant question relevant.
 
+### Ordinary files, rendered mathematics and re-entry
+
+Begin with an existing project directory and an ordinary mathematical file.
+Editing, viewing a source and comparing two documents require no preliminary
+metadata. Mathematical hypotheses belong in the text or formal declarations.
+The navigator and contextual information should leave room for the current work.
+All operations must be available through visible menus without required key chords.
+Different projects may be open in different workstation processes. This increment
+supports only one active workstation process per project, without a lifetime lock.
+
+For LaTeX, select an existing file as the root, save the intended source revisions
+and explicitly request a build. TeX source is trusted executable input;
+out-of-tree staging is not a sandbox. openin_any=p is defense in depth for
+conventional input operations, not a complete read boundary: pdfTeX can embed
+an absolute external file through `\immediate\pdfobj stream file`. Arbitrary
+external reads are not confined; build only trusted project TeX. Keep the rendered
+PDF beside its source. A reported file-and-line error should return directly to
+the relevant text. Preserve
+the last successful output after a failed build and make changed-input staleness
+visible. Distinguish complete, partial and unknown dependency coverage. With
+untracked external dependencies, describe only the recorded project inputs as
+unchanged. Derivation/build provenance comes from the action; successful typesetting
+is separate from mathematical Verification and from justification or judgment.
+
+A deliberate external-editor action opens the saved file at the current passage.
+On return, compare changed disk content with any unsaved work before refreshing.
+Notebook execution likewise requires a deliberate tool action; merely opening a
+notebook must not execute it or expose editable raw JSON by default.
+
+Re-entry restores the open work, selected passage and rendering position. An
+optional unresolved-work marker anchors a file selection without demanding a
+written description. Private recovery retains the exact latest successfully
+completed checkpoint across an interrupted process, not uncheckpointed characters; it is mutable application state, never mathematical provenance. A failed
+final checkpoint must leave the work available until the user explicitly decides
+whether to discard it.
+
+When retained model or warrant material becomes relevant, inspect it alongside
+the work. Model attribution and response identity precede returned mathematical
+text; retaining a passage preserves its exact digest-anchored span. Provenance,
+Verification, premise admission, contextual derivability and human judgment must
+remain distinct. Viewing or cancelling creates no record. Opening a project,
+restoring work or viewing any document makes no automatic tool or network call.
+
 ---
 
 ## 2. Session types
 
-Modes are not application tabs. They name mathematical activities, and a
-session may move among them.
+These are mathematical activities, not mutually exclusive application modes or
+mandatory tabs. A session may move among them.
 
 ### Orientation
 
@@ -93,7 +144,7 @@ on such a counterpart.
 
 ### Formal exploration
 
-This mode exists only for an object with formal material. It shows declarations,
+This activity applies when the current object has formal material. It shows declarations,
 dependencies, axiom usage, verification status, and proof states, with links to
 the corresponding informal mathematics where those correspondences have been
 established.
@@ -465,6 +516,10 @@ warrant for \(F\). Proposal disposition alone is task evidence, not a
 mathematical warrant, and \(m:D\) alone cannot derive \(F\).
 
 ### 9.2 Mathematical re-entry and formal correspondence
+
+The completed Appendix A editor/build/render/re-entry smoke test used ordinary
+corpus-neutral project actions. It did **not** complete this mathematical re-entry
+and warrant session.
 
 Use `rs_Appendix_A.tex` as the mathematical source, the corresponding Lean
 declarations when relevant, and `Lean/docs/AppendixA.md` as the existing

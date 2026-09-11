@@ -1,14 +1,105 @@
 # Codex instructions
 
+Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
+
+The editor-centered GUI is the principal user-facing interface; launch it with
+`theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
+identities unchanged. Open Project Directory is the principal entry: show the
+actual directory tree lazily and open ordinary mathematical files as buffers.
+External references are read-only. No attachment step, preliminary form or
+mathematical metadata questionnaire is required. Mathematical content belongs in
+ordinary files.
+
+All projects, navigation, files and persistence are corpus-independent.
+`rs_Appendix_A.tex` opens like any other file. Add no Appendix-specific production
+imports, navigation, corpus selector, study-guide option, adapter registry, saved
+capability identifier or integration machinery. Preserve the legacy
+Appendix-specific CLI and its source checks. Corpus-neutral format and tool
+integrations are permitted when invoked by direct user action.
+
+The current GUI uses PySide6 Qt Widgets and QtPdf. Keep widgets separate from the
+controller, record validation and persistence services. Neither toolkit, schema
+version nor pane arrangement is a permanent domain invariant. Format-aware
+behavior must preserve source integrity and the distinction between editable
+text, rendered output and retained records.
+
+Opening or viewing a project must not write inside it or read executable
+configuration from it. Mutable session state, trusted tool settings, private
+unsaved-text recovery and build storage belong in OS user-local application
+storage keyed by canonical project identity. Provide a test-only state-root
+override. Keep edits in memory and coalesce recovery writes outside the
+per-keystroke path. Recovery preserves the latest successfully completed
+checkpoint, not characters that were never checkpointed. Flush synchronously at
+durability boundaries. Explicit Save
+and Save As alone write ordinary editor files, with revision-conflict detection
+and atomic replacement. A failed checkpoint must block close and quit unless an
+informed user explicitly discards the session. Use the separate cross-platform
+mutable-file service; preserve immutable-record publication unchanged. Different
+projects may be open in different workstation processes, but only one active
+workstation process per project is supported in this increment. There is no
+lifetime lock; do not implement one in this correction.
+
+Startup, opening, restoration and viewing invoke no compiler, checker, external
+editor, notebook kernel, model or network. LaTeX build, external-editor and
+Jupyter handoffs require explicit actions and argument vectors without a shell.
+Editor templates supply the saved file and current line/column; compare disk
+revisions on return without replacing dirty text. TeX root selection is an action
+on an existing file. Out-of-tree staged builds execute trusted project TeX with
+trusted tools; staging is not a sandbox. openin_any=p is defense in depth for
+conventional input operations, not a complete read boundary. In particular,
+`\immediate\pdfobj stream file` can embed an absolute external file in the PDF;
+arbitrary external reads are not confined. Build only trusted project TeX.
+Preserve openin_any=p, openout_any=p, no shell escape, and the accepted
+pdfTeX/latexmk engine boundary. LuaLaTeX remains
+disabled without a separately verified OS sandbox; do not add one in this pass.
+Generated build files remain outside the project and are quota-monitored.
+Builds are unavailable on native Windows/macOS until equivalent process-tree
+termination and resource controls exist. Qt/runtime and TeX prerequisites are
+platform-dependent. Capture
+build provenance from the invocation, preserve the last successful PDF after
+failure, and mark it stale when recorded input revisions change. Retain observed
+outside inputs and explicit dependency coverage (complete, partial or unknown).
+When toolchain/package revisions are untracked, say only “recorded project
+inputs unchanged.” Typesetting
+success creates no mathematical Verification, admission, derivation or judgment.
+
+Justification logic is integral and task-triggered. The contextual inspector
+faithfully exposes existing ClaimAtomVersion, PremiseAdmission,
+JustificationContext, JustificationDerivation, associated Verification and
+provenance separately. Inspection creates no admission and infers no human
+decision. Ordinary work requires neither Lean nor existing warrant records.
+Do not redesign the calculus, add JAM semantics or invoke Lean automatically.
+
+Exercise toolkit-independent controllers and actual Qt widgets with
+`THEOREM_TERMINAL_GUI_TESTS=1` (an offscreen Qt platform can run widget tests).
+Use an ordinary temporary project with TeX, Lean, Sage, Python, Markdown and text
+files; no test-only controller subclass may stand in for the GUI. Check real
+LaTeX rendering, diagnostics, Vim/Neovim handoff, source integrity, checkpoint recovery
+and re-entry visually at 1280×820 and 960×680 when changing widgets. Open the real
+integration manuscript through the same project and file actions only when
+authorized; this repair pass leaves that external repository untouched.
+
+The current GUI directly provides ordinary-file editing, external-editor and
+Jupyter handoff, staged LaTeX building, PDF rendering, recovery and retained-record
+inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+literature-service, live-model and Kallenberg-guidance GUI workflows remain
+unimplemented. Appendix A supplied a corpus-neutral editor/build/render/re-entry
+smoke test, not the mathematical re-entry and warrant session in UX_SPEC.md §9.2.
+Keep Qt worker results detached; only explicitly queued main-thread QObject
+slots may apply completion results to controllers or widgets.
+
 Read `README.md`, `VISION.md`, `VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`,
 `CODEX_PLAN.md`, and `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` before changing
 behavior.
 
-Implementation is authorized. The first corpus is `rs_Appendix_A.tex` from
-`flengyel/Categorical_Rice_Shapiro`. Begin with top-down mathematical
-orientation; do not begin with session bookkeeping.
+Implementation is authorized. The legacy CLI experiment uses `rs_Appendix_A.tex`
+from `flengyel/Categorical_Rice_Shapiro` as its first corpus. Its ordered
+mathematical guidance begins with top-down orientation. This does not impose a
+corpus or a preliminary activity on the general editor.
 
-For every source, including a problem-centered text, preserve this order:
+When mathematical guidance is requested, Kallenberg ordering will govern it.
+It is not a startup requirement or a mandatory form. For that guidance, including
+a problem-centered text, preserve this order:
 
 1. purpose and organization of the subject or chapter;
 2. central concepts, results, and problem families;
@@ -35,9 +126,9 @@ artifacts.
 The justification-logic warrant subsystem is architecturally integral to
 Theorem Terminal. Its object language, profiles, derivations, constant
 specifications, certificate checker, and certificate-soundness theorem are
-implemented in the repository-owned `lean/` Lake project. The Python
-application uses only the standard library: it validates and renders
-Lean-generated checked bundles and never reimplements the calculus. Building or
+implemented in the repository-owned `lean/` Lake project. The toolkit-independent Python
+record and checker services use the standard library: they validate and render
+Lean-generated checked bundles and never reimplement the calculus. Building or
 invoking the Lean checker is task-dependent, and ordinary orientation, study,
 and problem work remain usable without Lean. Run the Python checks:
 

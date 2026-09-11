@@ -28,9 +28,154 @@ chapter purpose and organization; central concepts, results, and problem
 families; selected problem; proposed method; detailed proof, calculation, or
 construction.
 
-Infrastructure is added only when one of these sessions requires it. Evidence
+Apart from the later explicitly authorized general GUI tranche below,
+infrastructure is added only when one of these sessions requires it. Evidence
 comes from the `WorkArtifact`s and `TaskEvidence` produced by the sessions, not
 from asserted states of comprehension.
+
+## Later authorization: general graphical workstation
+
+On 2026-09-09 the user explicitly authorized a working GUI, superseding the prior
+framework deferral. Subsequent corrections removed proposed objective,
+hypothesis, relationship and unfinished-step forms. The plain-text Tk editor was
+not an accepted Mathematical Research Workstation. The later LaTeX increment
+explicitly superseded its toolkit, project-local version 2 state and screen
+layout: LaTeX source → explicit build → rendered PDF → navigable diagnostics and
+resumable state. These implementation choices are not domain invariants.
+
+Mathematical Research Workstation is the user-facing system being developed from
+the Theorem Terminal experimental prototype. Its principal interface is
+`theorem-terminal gui [PROJECT_DIRECTORY]`; the CLI remains available for testing,
+automation, reproducibility, low-level records and legacy study commands.
+
+Implemented with PySide6 Qt Widgets and QtPdf: ordinary project-directory
+navigation, editable mathematical files, read-only external references, two
+source/record buffers, a source/PDF view, menu-accessible editing and a trusted
+user-local editor argument template. Root selection acts on an existing TeX file.
+Builds and editor/notebook handoffs run only after direct actions, without a
+shell. No project file supplies executable configuration. Opening and viewing
+invoke no tool and do not write into the project.
+
+Session state, recovery checkpoints, tool settings and build output now reside
+in OS user-local storage. Atomic mutable saves use kernel-released locks,
+revision checks and explicit checkpoint failure handling. Existing immutable
+record publication is unchanged. Deferred bounded document reads, notebook
+recognition, companion-aware retained records, current-line editor handoff and
+safe external-change comparison correct the earlier editor foundations. Source
+cursor/selection, split, root, PDF page/zoom and optional exact-passage marker
+support re-entry without descriptive forms.
+
+Explicit build observations retain tool/version, exact arguments, times, streams,
+exit code, log/PDF digests and observed project-local input revisions. Diagnostics
+can return to a file and line. Failed builds preserve the previous successful PDF;
+changed inputs make it visibly stale. None of this is mathematical Verification,
+premise admission, contextual derivability or human judgment.
+
+The 2026-09-10 graphical sessions exercised both requested window sizes, a real
+LaTeX proof/calculation project, an intentionally failed build and diagnostic,
+actual terminal Vim editing, a process restart and recovery of checkpointed unsaved text.
+The ordinary installed application also opened the real Categorical Rice–Shapiro
+project, built its 76-page manuscript, restored a file/PDF position at the selected
+`lem:range-lifting-pullback-section` passage in `rs_Appendix_A.tex` (page 60), and
+opened the relevant Lean source and existing expert-authored correspondence
+document through the same navigator. This was a corpus-neutral
+editor/build/render/re-entry smoke test. It did not complete the mathematical
+re-entry and warrant session in UX_SPEC.md §9.2, establish Stage 1 model
+usefulness, or supply mathematical verification.
+
+The initial real build exposed latexmk/BibTeX writing into the source directory
+despite an output-directory flag. The corrected build stages bounded ordinary
+inputs outside the project, with an automated bibliography regression test. A
+repeat real build preserved all 688 inventoried project files byte-for-byte. The
+earlier `rs_main.bbl` newline change was subsequently restored to its captured
+original exact-byte digest. The earlier regenerated `rs_main.blg` remains; its
+original bytes were not available. This remains unresolved, not an acceptable
+permanent state. The repair-pass audit classifies rs_main.blg as ignored by
+.gitignore:48 (*.blg), with no tracked HEAD version and SHA-256
+bcbad377f6e78db3b46da6bfef76f1155b4b52f0bf5afd5e189d00a80b4134ba.
+The external repository remains untouched pending explicit user direction. No manuscript text or pre-existing Lean edits
+were replaced. Final logs and screenshots are review artifacts outside the
+repository.
+
+Finalized ModelCall review and exact passage projection reuse the existing
+parser, digest checks, bounded index and lossless UTF-8 span construction.
+Justification logic remains a settled integral subsystem. Compatible retained
+records expose ClaimAtomVersion, PremiseAdmission, JustificationContext,
+JustificationDerivation, Verification and provenance separately. No human
+decision is inferred. No calculus, Lean source, fixture or checked bundle changed;
+no Lean or model provider was invoked for this increment.
+
+No corpus-specific production import, navigation, registry or persistence field
+exists. Appendix A supplied the first real integration smoke test, selected as ordinary
+files. The legacy CLI and frozen source bindings remain unchanged. Current limits
+and installation commands belong in README; the workflow specification belongs
+in UX_SPEC.
+
+The 2026-09-11 repair pass preserves this increment without adding product
+features. Worker completions now enter explicitly queued main-thread QObject
+slots; background observations return detached data. Editing changes memory
+without serializing or syncing recovery on each keystroke. A 250 ms debounce
+coalesces checkpoints, with synchronous durability boundaries. “Exact recovery”
+means the latest successfully completed checkpoint. Recent-project settings
+merge under a kernel lock across processes; genuine tool-setting collisions
+remain explicit. Different projects may be open in different workstation
+processes, but only one active workstation process per project is supported in
+this increment. No lifetime-lock subsystem is implemented or added here.
+
+Out-of-tree staged builds execute trusted TeX with trusted installed tools.
+Staging is not a sandbox. This pass accepts latexmk with a fixed pdfLaTeX
+executable path, or direct pdfLaTeX, with openin_any=p, restricted writes via
+openout_any=p and no shell escape. openin_any=p is defense in depth for
+conventional input operations, not a complete read boundary. pdfTeX can still
+embed an absolute external file through `\immediate\pdfobj stream file`.
+The correction removes the contrary comment and narrows the existing test
+names to conventional `\input`/`\openout` and `\pdffiledump`/`\pdffilesize`
+restrictions. A real pdfTeX regression requires the external stream to appear
+in a successful PDF, its path to remain in `outside_inputs`, partial coverage,
+unchanged sentinel bytes, and no mathematical Verification or warrant. These
+settings do not confine arbitrary external reads. LuaLaTeX is
+rejected; no general sandbox was added. Linux/WSL2 supervision bounds generated
+files and reaps descendants, even after their parent exits. Native Windows/macOS
+TeX builds are unavailable pending equivalent controls. Recorder coverage is
+partial or unknown because external toolchain/package revisions are not tracked;
+outside observations are retained. An unrelated .bib no longer suppresses a
+supplied .bbl. Qt/runtime and TeX prerequisites remain platform-dependent.
+
+The correction leaves the index empty. At a later explicitly authorized staging
+step, record the eleven new Python/test files as Git index mode `100644` with:
+
+```bash
+git add --chmod=-x -- \
+  src/theorem_terminal/gui.py \
+  src/theorem_terminal/latex_build.py \
+  src/theorem_terminal/local_files.py \
+  src/theorem_terminal/mutable_files.py \
+  src/theorem_terminal/record_views.py \
+  src/theorem_terminal/tool_settings.py \
+  src/theorem_terminal/workspace.py \
+  src/theorem_terminal/workstation.py \
+  tests/test_gui.py \
+  tests/test_latex_build.py \
+  tests/test_workstation.py
+```
+
+Verify the resulting index modes at that staging step. DrvFS may continue to
+report `0777`; it does not determine the intended recorded Git mode. Do not
+change mount configuration or `core.filemode`. No staging occurs in this pass.
+
+The GUI directly provides ordinary-file editing, external-editor and Jupyter
+handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
+inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+literature-service, live-model and Kallenberg-guidance GUI workflows remain
+unimplemented. Kallenberg ordering will govern mathematical guidance when
+requested, not startup or mandatory forms.
+
+Later notebook support must preserve cells, outputs, execution order, kernel
+identity and explicit execution provenance. The current handoff executes no
+notebook in the workstation. Later MathML support means validated source beside
+rendered mathematics with external resources and active content disabled. A
+restricted local QWebEngineView may support such later work; this increment adds
+no unused web framework or notebook-execution machinery.
 
 ## Initial-implementation non-goals
 
@@ -42,7 +187,7 @@ Stages 0 through 5 do not attempt:
 - a domain map authored before mathematical work begins;
 - questionnaires, confidence ratings, or comprehension forms;
 - automated correctness decisions for informal proofs;
-- a GUI platform, component library, or framework commitment;
+- GUI scope beyond the explicitly authorized desktop increment above;
 - Mathlib-scale Lean analysis;
 - simultaneous support for multiple model services, autonomous follow-up calls,
   or a general chat interface;
@@ -357,7 +502,8 @@ make a model call; the required call exists to evaluate Stage 1.
 **Non-goals.** No general ingestion, comprehensive topic map, formal theorem
 analysis, graph rendering, support for a second model service or adapter,
 automatic model selection, provider tools, autonomous calls, conversation
-interface, prompt library, or framework commitment. No capture or reconstruction
+interface, prompt library, or framework beyond the authorized desktop increment.
+No capture or reconstruction
 of provider-internal reasoning, hidden chain of thought, internal search, or
 unreturned alternatives. No `AITrust`, `AIWarrant`, `ModelAuthority`,
 provider-wide truth bridge, generic support edge, or trust, reliability,

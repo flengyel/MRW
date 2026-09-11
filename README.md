@@ -1,6 +1,13 @@
-# Theorem Terminal
+# Mathematical Research Workstation
 
-Theorem Terminal is a mathematical context system for learning, reconstructing,
+Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
+
+The GUI is the principal user-facing interface. The `theorem-terminal` CLI
+remains available for testing, automation, reproducibility, and low-level
+operations. Repository, executable, Python package, Lean namespaces, and
+serialized record identities retain their existing technical names.
+
+The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an
 inactive project, or a subject not studied or taught for years.
@@ -9,7 +16,7 @@ It is an assistant's assistant. It preserves the mathematical work produced
 while consulting source literature and using machine assistants, proof
 assistants, and computer algebra systems: source locations, problems attempted,
 proof drafts, computations, diagrams, examples, counterexamples, formal checks,
-corrections, and provenance. When requested during active work, it may send a
+corrections, and provenance. In the intended model-assisted workflow, it may send a
 bounded mathematical question and selected context to a configured model. The
 request, the exact context sent, and the raw response are preserved
 automatically. Material from the response is extracted only when it enters the
@@ -18,10 +25,10 @@ linked to its exact response span and is recorded as an attributed AI proposal
 rather than a fact or human judgment. `ModelCall` remains an operational
 provenance record; it acquires no trust, support, correctness, confidence, or
 acceptance field. If selected output later participates in a mathematical
-warrant, Theorem Terminal uses the same generic justification-logic claim
+warrant, the workstation uses the same generic justification-logic claim
 atoms, premise admissions, contexts, and checked derivations used for every
-other reason. The system can restore the state of an interrupted investigation
-and select later mathematical tasks that test reconstruction or application. No
+other reason. The design calls for restoring an interrupted investigation
+and selecting later mathematical tasks that test reconstruction or application. No
 one assistant is the authority, and the system does not ask a mathematician to
 report an internal mental state.
 
@@ -96,7 +103,46 @@ The design rests on six principles:
 
 ## Status
 
-Initial experimental implementation has begun. Its first executable path studies
+The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
+Directory** displays the actual directory tree lazily. Ordinary mathematical
+files open in editable buffers; external references are read-only. The working
+vertical slice is LaTeX source, explicit root selection and build, a rendered PDF
+beside the source, navigable file-and-line diagnostics, and resumption at a marked
+passage. It has been exercised with an unrelated mathematical project and the
+real Categorical Rice–Shapiro manuscript. No mathematical questionnaire precedes
+work, and typesetting success supplies no mathematical verification.
+
+Mutable session state and recovery of the latest completed checkpoint live outside the project
+in user-local application storage. Opening, viewing and closing a project do not
+write into it. Explicit Save and Save As alone write ordinary editor files;
+revision conflicts preserve in-memory work. Two source buffers can be compared,
+and a configured external editor can open a saved file at its current line.
+
+The GUI reviews existing finalized `ModelCall`s through the existing validation,
+bounded passage index, safe rendering and exact projection services. Retaining a
+selected passage creates a lossless projection, not a premise. Compatible
+Verification/bundle pairs and documentary warrant packages expose
+`ClaimAtomVersion`, `PremiseAdmission`, `JustificationContext`,
+`JustificationDerivation`, and associated `Verification` records separately.
+Justification logic is integral and task-dependent. Ordinary work needs neither
+Lean nor a warrant. Inspection validates retained data without rerunning a
+checker, issuing a new Verification or inferring a human decision.
+
+Projects, navigation and persistence are corpus-independent. Startup, restoration
+and viewing run no external program and make no network or provider call. Build,
+external-editor and notebook handoff actions require direct user action. This GUI
+directly provides ordinary-file editing, external-editor and Jupyter handoff,
+out-of-tree staged LaTeX builds, PDF rendering, checkpoint recovery and retained-record
+inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+literature-service, live-model and Kallenberg-guidance GUI workflows remain
+unimplemented. Kallenberg ordering will govern mathematical guidance when
+requested; it is not a startup activity or a set of mandatory forms.
+
+Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.
+It did not complete the mathematical re-entry and warrant session specified in
+UX_SPEC.md §9.2.
+
+The prototype's original CLI path studies
 `rs_Appendix_A.tex` in Kallenberg's top-down order. `orient` presents the
 appendix's purpose and organization, central concepts and results, and a first
 selected result without displaying its statement, proof, or formal counterpart.
@@ -110,7 +156,7 @@ AI proposal; exact statements and proofs are identified as source text.
 
 The bounded justification-logic increment in
 `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` is now executable. Justification logic
-is an integral warrant subsystem of Theorem Terminal. Its syntax, selected
+is an integral warrant subsystem of Mathematical Research Workstation. Its syntax, selected
 axiom profiles, contextual derivations, constant specifications, certificate
 checker, and certificate-soundness theorem are implemented in the
 repository-owned `lean/` Lake project. That Lean implementation checks one
@@ -181,33 +227,194 @@ what a mathematician believes is understood.
 
 ## Install and run
 
-The current implementation is a local command-line program requiring Python
-3.11 or later. Installation must run from the repository root, where
-`pyproject.toml` is located.
+Python 3.11 or later is required. PySide6 supplies Qt Widgets and QtPdf through
+the package dependency; it provides native desktop controls and local PDF
+rendering without a web server. The controller and record-validation services
+remain independent of the widget toolkit.
 
-### Install on Windows PowerShell
+### Desktop installation and launch
 
-```powershell
-git clone git@github.com:flengyel/theorem_terminal.git
-Set-Location theorem_terminal
-py -3 --version
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e .
-```
-
-For an existing checkout, begin with `Set-Location` and then create or activate
-the virtual environment.
-
-### Install on macOS or Linux
+From the repository root on Linux, WSL2 or macOS:
 
 ```bash
-git clone git@github.com:flengyel/theorem_terminal.git
-cd theorem_terminal
-python3 --version
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -e .
+python -m pip install .
+theorem-terminal gui
+```
+
+After closing its previous workstation process, resume a project with:
+
+```bash
+theorem-terminal gui /absolute/path/to/project
+```
+
+Windows PowerShell, from the repository root:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install .
+theorem-terminal gui
+```
+
+Linux needs a desktop display; WSL2 can use WSLg or a forwarded X display. On
+Debian/Ubuntu, the Python environment and Qt X11 prerequisites used here are:
+
+```bash
+sudo apt install python3-venv libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-keysyms1
+```
+
+Opening and editing files requires no TeX installation. **Build LaTeX** uses an
+installed `latexmk` and pdfTeX on Linux/WSL2, falling back to `pdflatex` if latexmk is
+absent. An existing distribution can be used directly. A typical Debian/Ubuntu
+installation is:
+
+```bash
+sudo apt install latexmk texlive-latex-recommended texlive-latex-extra texlive-pictures texlive-fonts-recommended
+```
+
+Individual manuscripts may require further packages. The real manuscript tested
+here also needs Euler-VM, supplied by Debian's large `texlive-fonts-extra` package.
+These are document dependencies, never corpus-specific application requirements.
+
+### Ordinary files and re-entry
+
+Choose **Open Project Directory**, expand directories and double-click a file,
+or use **File → Open**. **New file** creates an untitled buffer. **Save** checks
+the original disk revision before replacing a project file; **Save As** creates a
+new project file and refuses an existing destination. External references remain
+read-only, with Save As available for an explicit new project copy. Refresh and
+comparison preserve dirty text until the user explicitly saves or discards it.
+
+Open, Save, Save As, Refresh from disk, Find, Go to line, Split and Close buffer
+are available through menus. Each pane has a buffer selector and visible saved,
+modified, read-only, external-change or conflict state. **View → Split** allows
+two source or record buffers. The navigator and contextual facets can be hidden;
+ordinary file editing does not require a wide identity inspector. Hashes are in
+expandable technical details.
+
+Session state retains the project root, open buffers, active buffer, cursor,
+selection, scroll, split, recent files and PDF view. Select a mathematical passage
+and use **Work → Mark current selection**; **Return to marked selection**
+checks the saved revision before returning there. No descriptive form is needed.
+
+State, trusted tool settings, build outputs and private recovery are stored under:
+
+- Linux: `$XDG_STATE_HOME/theorem-terminal`, or `~/.local/state/theorem-terminal`;
+- Windows: `%LOCALAPPDATA%\theorem-terminal`;
+- macOS: `~/Library/Application Support/theorem-terminal`.
+
+Project sessions are keyed by canonical directory identity. Different projects
+may be open in different workstation processes, but this increment supports only
+one active workstation process per project. No lifetime lock enforces this limit.
+Project files cannot configure executables or nominate restoration paths. No `.theorem-terminal`
+directory or `.gitignore` entry is created in the project. Dirty text is
+checkpointed privately after 250 ms of quiet editing and flushed synchronously
+at Save, close, quit and other durability boundaries. Recovery restores the exact
+text of the latest successfully completed checkpoint; characters not yet
+checkpointed can be lost after abnormal termination. A
+successful save or explicit discard removes its recovery snapshot. Closing can
+keep private recovery. A failed final checkpoint blocks closing or quitting
+unless the user explicitly chooses to discard the session. State uses a separate
+atomic mutable-file service; immutable record publication retains its existing
+service and semantics.
+
+### External tools and LaTeX
+
+**Tools → Configure editor…** sets a trusted user-local argument template.
+Use `{file}`, `{line}` and optionally `{column}`; quoted arguments are parsed
+without shell expansion. **Open in configured editor**, also on the toolbar,
+uses this template, then `VISUAL`, then `EDITOR`. Use a foreground/waiting editor
+command so its exit can trigger a disk-revision comparison. A terminal Vim
+example, where `xterm` and `vim` are installed, is:
+
+```text
+xterm -e vim +{line} -c "normal! {column}|" {file}
+```
+
+The real handoff test used a terminal with `/usr/bin/vim.tiny`. After the editor
+exits, choose Refresh, Compare or Keep buffer. Dirty text is never silently
+replaced. A notebook (`.ipynb`) opens as a read-only notebook summary; configure
+and invoke its Jupyter/JupyterLab handoff deliberately. No kernel runs inside
+this GUI.
+
+Open the root `.tex` file and choose **LaTeX → Set as TeX root**, then **Build
+LaTeX**. Building executes **trusted project TeX only**, using trusted installed
+tools. An out-of-tree staged build is **not a security sandbox**. This tranche
+accepts latexmk with a fixed pdfLaTeX executable path, or direct pdfLaTeX. LuaLaTeX,
+XeLaTeX and engine-switching aliases are not supported. Tool selection belongs
+to trusted user-local settings. Arguments use shell=False, disable shell escape
+and first-line engine selection, ignore latexmk rc files, and set both
+openin_any=p and openout_any=p. The input setting is defense in depth for
+conventional input operations, not a complete read boundary. In particular,
+pdfTeX can use `\immediate\pdfobj stream file` to embed an absolute external
+file in the generated PDF despite openin_any=p. Arbitrary external reads are
+not confined by these settings; build only trusted project TeX. An explicit build
+snapshots bounded ordinary project inputs into user-local storage and runs there,
+keeping generated auxiliary and bibliography files outside the project. Opening or viewing a source never copies
+it or initiates a build.
+
+The source/PDF view provides previous/next page, a page number, fit width, fit
+page, zoom and reload. A failed build retains the last successful PDF. A changed
+recorded input revision, dirty input buffer or different root marks that output
+stale. Root, source position, PDF page, zoom and source/PDF visibility survive
+restart. Build diagnostics occupy a separate view; activating a file-and-line
+entry opens that project file at the reported line.
+
+Build provenance is captured from the action: executable and version, exact
+arguments, working directory, times, stdout, stderr, exit code, log and output
+digests, and observed project input revisions from recorder output when available.
+Dependency coverage is reported as complete, partial or unknown. Current builds
+have partial coverage when recorder data exists and unknown coverage otherwise:
+external package/toolchain revisions are not tracked. Observed outside input
+paths are retained. “Recorded project inputs unchanged” does not claim the whole
+environment is current or reproducible.
+A successful build establishes only that this tool invocation produced these
+output bytes. It creates no `Verification`, premise admission, justification
+derivation, correctness claim or human decision.
+
+### Retained records and current limits
+
+Use **Records** to open a completed model response, exact projection, documentary
+warrant package, or Verification with its exact checked bundle. Review shows
+attribution first, a bounded index, visible passage-number selection and explicit
+full-response viewing. **Retain displayed exact passage** uses the existing UTF-8 projection
+service. Viewing or cancelling creates no record. Context facets keep provenance,
+admission, contextual derivability and mathematical verification separate.
+
+The current increment has been exercised on Linux/WSL, including a disposable
+project on `/mnt/c`, real TeX and Vim, actual Qt widgets, and desktop sizes
+1280×820 and 960×680. Qt/runtime and TeX installation prerequisites depend on
+the platform and distribution. Native Windows and macOS GUI operation has not
+been exercised; **TeX building is unavailable there in this tranche**. Build
+supervision uses Linux/WSL2 subreaping and /proc to terminate and reap descendants,
+including children whose parent has exited. Mutable
+storage includes Windows and POSIX paths/locking; existing immutable publication
+still uses its Unix descriptor boundary. Project relocation and migration from
+old experimental project-local state are not automatic.
+
+Ordinary UTF-8 text and notebooks are limited to 2 MiB, with up to 128 open buffer
+references. Reads of visible documents are deferred and bounded. Standard relative
+TeX inputs are staged with a 4096-file/256 MiB inventory limit; individual build
+inputs and PDFs are limited to 64 MiB. Each tool invocation is monitored for
+1024 generated entries and 128 MiB of generated data, including non-stdio
+auxiliaries and replaced staged inputs. An inherited per-file limit supplements
+20 ms total-storage polling; transient overshoot is possible between samples.
+A quota failure stops descendants, removes that invocation's staged/generated
+files and retains at most 64 KiB of each diagnostic stream plus its bounded
+report. Missing, oversized and unsupported files
+produce visible errors. Custom build recipes, staging external/symlink dependencies,
+SyncTeX, complete TeX-log interpretation, automatic build-history cleanup,
+language servers, notebook execution and GUI checker invocation are outside this
+increment. Installed TeX packages are not a frozen reproducible environment.
+
+For the full suite, including actual Qt widgets without a desktop display:
+
+```bash
+THEOREM_TERMINAL_GUI_TESTS=1 QT_QPA_PLATFORM=offscreen PYTHONPATH=src python -m unittest discover -s tests -v
+python -m compileall -q src tests
+git diff --check
 ```
 
 ### WSL2 and Codex
@@ -277,6 +484,9 @@ test -f "$appendix_a"
 ```
 
 ### Run the Appendix A experiment
+
+The general GUI opens `rs_Appendix_A.tex` as an ordinary user-selected file. The
+following commands belong to the preserved Appendix-specific CLI experiment:
 
 PowerShell:
 
@@ -659,7 +869,7 @@ dependency and axiom information, and an existing record of expert
 correspondence judgments. A formal counterpart remains optional for every other
 corpus.
 
-The hand-written document records expert judgments absent from both the
+The existing expert-authored correspondence document records judgments absent from both the
 manuscript and the Lean development: which hypotheses proved unnecessary,
 which structures are derivable rather than postulated, and where the same term
 has different meanings in different parts of the development. Its positional
