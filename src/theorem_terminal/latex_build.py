@@ -36,6 +36,7 @@ MAX_GENERATED_BYTES = 128 * 1024 * 1024
 MAX_GENERATED_FILES = 1024
 FAILURE_LOG_BYTES = 64 * 1024
 MONITOR_INTERVAL = 0.02
+STAGED_MONITOR_INTERVAL = 1.0
 INPUT_SUFFIXES = {'.tex', '.sty', '.cls', '.bib', '.bst', '.bbl', '.cfg', '.def',
                   '.png', '.jpg', '.jpeg', '.pdf', '.eps', '.svg', '.csv', '.dat', '.txt'}
 SKIP_DIRECTORIES = {'.git', '.lake', '.venv', 'venv', 'node_modules', '__pycache__', '.theorem-terminal'}
@@ -111,9 +112,11 @@ def build_arguments(engine: str, tex_root: Path, output: Path, *, pdf_engine=Non
     raise WorkspaceError('Only latexmk with pdfLaTeX, or pdfLaTeX, is supported; LuaLaTeX is disabled')
 
 
-def storage_snapshot(directory):
-    """Inventory signatures; an overwritten staged input also consumes quota."""
+def storage_snapshot(directory, *, prune=None):
+    """Inventory signatures, optionally counting a directory but not its descendants."""
     result = {}
+    if directory.is_symlink():
+        return result
     for root, dirs, files in os.walk(directory, followlinks=False):
         for name in dirs + files:
             path = Path(root) / name
@@ -123,14 +126,36 @@ def storage_snapshot(directory):
                 continue
             result[str(path)] = (0 if stat.S_ISDIR(item.st_mode) else item.st_size,
                                  item.st_mtime_ns, item.st_ino)
+        if prune is not None:
+            dirs[:] = [name for name in dirs if Path(root) / name != prune]
     return result
 
 
-def generated_usage(directory, baseline):
-    current = storage_snapshot(directory)
+def generated_usage(directory, baseline, *, prune=None):
+    current = storage_snapshot(directory, prune=prune)
     changed = [entry for name, entry in current.items()
                if name not in baseline or entry[0] and entry != baseline[name]]
     return len(changed), sum(entry[0] for entry in changed)
+
+
+class StorageMonitor:
+    """Combine disjoint output and staged-descendant observations between full scans."""
+
+    def __init__(self, directory, baseline, now):
+        self.directory = directory
+        self.staged = directory / 'inputs'
+        self.baseline = baseline
+        self.staged_usage = (0, 0)
+        self.next_staged_scan = now + STAGED_MONITOR_INTERVAL
+
+    def poll(self, now):
+        count, size = generated_usage(self.directory, self.baseline, prune=self.staged)
+        if now >= self.next_staged_scan:
+            # The staged root itself belongs to the frequent scan, so summing
+            # these disjoint inventories counts added/replaced entries once.
+            self.staged_usage = generated_usage(self.staged, self.baseline)
+            self.next_staged_scan = now + STAGED_MONITOR_INTERVAL
+        return count + self.staged_usage[0], size + self.staged_usage[1]
 
 
 def _children(pid):
@@ -188,11 +213,12 @@ def _supervise(request_path):
         os.fchmod(out.fileno(), 0o600)
         os.fchmod(err.fileno(), 0o600)
         baseline = storage_snapshot(directory)
+        monitor = StorageMonitor(directory, baseline, time.monotonic())
         process = subprocess.Popen(request['arguments'], cwd=request['cwd'], shell=False,
             env=env, stdin=subprocess.DEVNULL, stdout=out, stderr=err, start_new_session=True)
         try:
             while True:
-                count, size = generated_usage(directory, baseline)
+                count, size = monitor.poll(time.monotonic())
                 if count > request['max_files'] or size >= request['max_bytes']:
                     problem = 'Generated-file count or byte quota exceeded'
                 if out_path.stat().st_size > MAX_LOG_BYTES or err_path.stat().st_size > MAX_LOG_BYTES:
@@ -328,10 +354,15 @@ def bibliography_inputs(directory, source_directory, project, *, root_directory)
             match = re.match(r'Database file #\d+: (.+)$', line)
             if match:
                 path = (log.parent / match[1]).resolve()
-                if not path.is_file() and not Path(match[1]).is_absolute():
-                    # BibTeX searches from the selected staged TeX root,
-                    # which may be nested below the input-tree root.
-                    path = (root_directory / match[1]).resolve()
+                if not Path(match[1]).is_absolute():
+                    # A same-named file beside the log does not establish which
+                    # file BibTeX used. Retain an existing selected-root staged
+                    # candidate conservatively, even if build output now shadows it.
+                    candidate = (root_directory / match[1]).resolve()
+                    if candidate.is_relative_to(source_directory) and candidate.is_file():
+                        paths.add(project / candidate.relative_to(source_directory))
+                    if not path.is_file():
+                        path = candidate
                 if path.is_relative_to(source_directory):
                     paths.add(project / path.relative_to(source_directory))
                 elif not path.is_relative_to(directory):

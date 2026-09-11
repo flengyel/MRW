@@ -13,7 +13,8 @@ import unittest
 from unittest.mock import patch
 
 from theorem_terminal.latex_build import (build_arguments, build_log, load_build, parse_diagnostics,
-    pdf_bytes, recorder_inputs, recorder_observations, run_capture, run_latex, stale_inputs, input_snapshot, FAILURE_LOG_BYTES)
+    pdf_bytes, recorder_inputs, recorder_observations, run_capture, run_latex, stale_inputs, input_snapshot, FAILURE_LOG_BYTES,
+    StorageMonitor, STAGED_MONITOR_INTERVAL, bibliography_inputs, generated_usage, storage_snapshot)
 from theorem_terminal.workstation import Workstation
 from theorem_terminal.workspace import WorkspaceError
 
@@ -261,6 +262,103 @@ class BuildTests(unittest.TestCase):
         self.assertFalse(sentinel.exists())
         self.assertIn('pdfTeX', report['stdout'])
 
+    def test_frequent_storage_scan_prunes_staged_descendants_and_counts_output(self):
+        output = self.home / 'monitored'
+        staged = output / 'inputs'
+        nested = staged / 'sub'
+        nested.mkdir(parents=True)
+        for number in range(4):
+            (nested / f'{number}.tex').write_bytes(b'unchanged input')
+        generated = output / 'generated'
+        generated.mkdir()
+        baseline = storage_snapshot(output)
+        (generated / 'main.aux').write_bytes(b'generated output')
+        monitor = StorageMonitor(output, baseline, 0)
+        visited = []
+        walk = os.walk
+        def observed_walk(*args, **kwargs):
+            for root, dirs, files in walk(*args, **kwargs):
+                visited.append(Path(root))
+                yield root, dirs, files
+        with patch('theorem_terminal.latex_build.os.walk', observed_walk):
+            self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL / 2),
+                             (1, len(b'generated output')))
+        self.assertEqual(set(visited), {output, generated})
+        self.assertFalse(any(path.is_relative_to(staged) for path in visited))
+
+    def test_slower_storage_scan_counts_replaced_and_added_staged_files_once(self):
+        output = self.home / 'monitored'
+        staged = output / 'inputs'
+        staged.mkdir(parents=True)
+        source = staged / 'main.tex'
+        source.write_bytes(b'old')
+        baseline = storage_snapshot(output)
+        monitor = StorageMonitor(output, baseline, 0)
+        replacement = self.home / 'replacement'
+        replacement.write_bytes(b'new')
+        replacement.replace(source)  # Same size, different inode; no clock dependency.
+        added = staged / 'added'
+        added.mkdir()
+        (added / 'extra.tex').write_bytes(b'extra')
+        auxiliary = output / 'main.aux'
+        auxiliary.write_bytes(b'output')
+        self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL / 2), (1, 6))
+        with patch('theorem_terminal.latex_build.storage_snapshot', wraps=storage_snapshot) as scan:
+            self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL), (4, 14))
+            self.assertEqual([call.args[0] for call in scan.call_args_list], [output, staged])
+            scan.reset_mock()
+            auxiliary.write_bytes(b'new output')
+            self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL * 1.5), (4, 18))
+            self.assertEqual([call.args[0] for call in scan.call_args_list], [output])
+            source.write_bytes(b'newer input')
+            scan.reset_mock()
+            self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL * 2), (4, 26))
+            self.assertEqual([call.args[0] for call in scan.call_args_list], [output, staged])
+        self.assertEqual(generated_usage(output, baseline), (4, 26))
+
+    def test_final_scan_catches_staged_quota_before_any_periodic_staged_scan(self):
+        for kind in ('bytes', 'count'):
+            with self.subTest(kind=kind):
+                output = self.home / ('final-staged-quota-' + kind)
+                staged = output / 'inputs'
+                staged.mkdir(parents=True)
+                (staged / 'existing.tex').write_bytes(b'old')
+                engine = "from pathlib import Path; Path('inputs/existing.tex').write_bytes(b'r'*768); Path('inputs/new.tex').write_bytes(b'n'*768)"
+                request = output / 'request.json'
+                request.write_text(json.dumps(dict(arguments=[sys.executable, '-c', engine],
+                    cwd=str(output), directory=str(output), label='build', timeout=5,
+                    max_bytes=1024 if kind == 'bytes' else 1024*1024,
+                    max_files=10 if kind == 'bytes' else 1)))
+                # Freeze only the supervisor's clock: the real child exits before
+                # a periodic staged scan is due, independently of scheduling speed.
+                runner = """
+import json,sys
+from unittest.mock import patch
+from theorem_terminal import latex_build as build
+observations = []
+usage = build.generated_usage
+def observed_usage(directory, baseline, **kwargs):
+    prune = kwargs.get('prune')
+    observations.append([str(directory), str(prune) if prune else None])
+    return usage(directory, baseline, **kwargs)
+with patch.object(build.time, 'monotonic', return_value=0), patch.object(build, 'generated_usage', observed_usage):
+    build._supervise(sys.argv[1])
+print(json.dumps(observations))
+"""
+                completed = subprocess.run([sys.executable, '-c', runner, str(request)],
+                    capture_output=True, text=True, check=True, timeout=15)
+                observations = json.loads(completed.stdout)
+                self.assertGreaterEqual(len(observations), 2)
+                self.assertTrue(all(item == [str(output), str(staged)] for item in observations[:-1]))
+                self.assertEqual(observations[-1], [str(output), None])
+                result = json.loads((output / 'build.result.json').read_bytes())
+                self.assertEqual(result['code'], 0)  # No kill or per-file-limit failure.
+                self.assertIn('quota', result['problem'])
+                files = list(output.rglob('*'))
+                self.assertEqual({p.name for p in files},
+                                 {'build.stdout', 'build.stderr', 'build.result.json'})
+                self.assertLessEqual(sum(p.stat().st_size for p in files), FAILURE_LOG_BYTES * 2 + 1024)
+
     def test_output_quotas_bound_auxiliary_files_and_retained_diagnostics(self):
         for kind in ('bytes', 'count'):
             for repeat in range(2):
@@ -389,6 +487,31 @@ print(json.dumps([c.current().pdf_page,c.current().pdf_zoom,c.current().pdf_scal
         self.assertEqual(self.c.build_report(), report)
         self.assertEqual(before, {str(p.relative_to(self.project)): p.read_bytes()
                                  for p in self.project.rglob('*') if p.is_file()})
+
+    def test_relative_bibliography_retains_staged_candidate_despite_build_local_namesake(self):
+        nested = self.project / 'sub'
+        nested.mkdir()
+        database = nested / 'refs.bib'
+        database.write_text('@misc{sample, title={Project database}}')
+        output = self.home / 'bibliography-build'
+        staged = output / 'inputs'
+        input_snapshot(self.project, staged)
+        root_directory = staged / 'sub'
+        generated = output / 'refs.bib'
+        generated.write_text('@misc{other, title={Build-generated database}}')
+        outside = self.home / 'outside.bib'
+        outside.write_text('@misc{external, title={External database}}')
+        log = output / 'main.blg'
+        for entry, paths, external in (
+            ('refs.bib', {database}, set()),
+            (str(root_directory / 'refs.bib'), {database}, set()),
+            (str(generated), set(), set()),
+            (str(outside), set(), {str(outside)}),
+        ):
+            with self.subTest(entry=entry):
+                log.write_text('Database file #1: ' + entry + '\n')
+                self.assertEqual(bibliography_inputs(output, staged, self.project,
+                    root_directory=root_directory), (paths, external))
 
     def test_combined_dependency_limit_includes_every_observation_before_publication(self):
         database = self.project / 'refs.bib'

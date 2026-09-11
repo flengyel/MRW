@@ -399,8 +399,13 @@ references. Reads of visible documents are deferred and bounded. Standard relati
 TeX inputs are staged with a 4096-file/256 MiB inventory limit; individual build
 inputs and PDFs are limited to 64 MiB. Each tool invocation is monitored for
 1024 generated entries and 128 MiB of generated data, including non-stdio
-auxiliaries and replaced staged inputs. An inherited per-file limit supplements
-20 ms total-storage polling; transient overshoot is possible between samples.
+auxiliaries and replaced staged inputs. Output scans run on the 20 ms polling
+loop and prune staged-input descendants, which are scanned on a slower one-second
+cadence. Their disjoint counts and byte totals are combined; a final complete scan
+after process termination and descendant reaping also checks short-lived builds.
+An inherited per-file limit supplements these scans; transient overshoot is
+possible between samples. These limits provide resource control for trusted TeX
+and tools, not confinement.
 A quota failure stops descendants, removes that invocation's staged/generated
 files and retains at most 64 KiB of each diagnostic stream plus its bounded
 report. Missing, oversized and unsupported files
