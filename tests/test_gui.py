@@ -67,6 +67,37 @@ class GraphicalEditorTests(unittest.TestCase):
         self.wait_idle()
         return self.window.active_pane()
 
+    def select_passage(self, pane, start, end):
+        from PySide6.QtGui import QTextCursor
+        from theorem_terminal.gui import qt_position
+        cursor = pane.text.textCursor()
+        cursor.setPosition(qt_position(pane.text, start))
+        cursor.setPosition(qt_position(pane.text, end), QTextCursor.MoveMode.KeepAnchor)
+        pane.text.setTextCursor(cursor)
+
+    def pane_position(self, pane):
+        cursor = pane.text.textCursor()
+        return (pane.shown, pane.text.toPlainText(), cursor.position(), cursor.anchor(),
+                pane.text.verticalScrollBar().value(), pane.text.horizontalScrollBar().value())
+
+    def restart_window(self):
+        from theorem_terminal.gui import WorkstationWindow
+        from theorem_terminal.workstation import Workstation
+        self.window.flush()
+        self.controller.close_project(keep_recovery=True)
+        self.assertTrue(self.window.close())
+        self.app.processEvents()
+        self.error_patch.stop()
+        self.controller = Workstation(state_root=self.home / 'state')
+        self.window = WorkstationWindow(self.controller)
+        self.error_patch = patch.object(self.window, 'show_error', side_effect=self.errors.append)
+        self.error_patch.start()
+        self.window.show()
+        self.window.disk_timer.stop()
+        self.app.processEvents()
+        self.window.open_project(self.root)
+        self.wait_idle()
+
     def test_completion_success_has_main_thread_affinity(self):
         from PySide6.QtCore import QThread
         worker, completed = [], []
@@ -347,6 +378,163 @@ class GraphicalEditorTests(unittest.TestCase):
             self.assertTrue(any(label.startswith(prefix) for label in labels), labels)
         self.assertTrue(self.window.context_dock.isVisible())
         self.assertFalse(self.errors)
+
+    def test_working_context_widgets_restart_unicode_crlf_and_independent_marker(self):
+        from copy import deepcopy
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        from theorem_terminal.gui import EditorPane
+        tex = self.files['notes/differences.tex']
+        tex.write_bytes('% α😀 base\r\nProof line β\r\n'.encode('utf-8'))
+        external = self.home / 'external-reference.txt'
+        external.write_text('External α reference\n', encoding='utf-8')
+        original = {p: p.read_bytes() for p in [*self.files.values(), external]}
+        with ExitStack() as stack:
+            for name in ('socket.socket', 'subprocess.Popen', 'os.system', 'urllib.request.urlopen',
+                         'theorem_terminal.documentary_warrant.run_lean_documentary_checker',
+                         'theorem_terminal.latex_build.run_latex',
+                         'theorem_terminal.gui.QInputDialog.getText', 'theorem_terminal.gui.QInputDialog.getInt'):
+                stack.enter_context(patch(name, side_effect=AssertionError('unexpected tool, network or form')))
+            self.open_project()
+            self.window.disk_timer.stop()
+            self.assertFalse(self.window.selection_dock.isVisible())
+            paths = [tex, tex, self.files['formal/Basic.lean'], external, self.files['proof.md']]
+            spans = [('1.2', '2.5'), ('1.2', '1.4'), ('1.0', '1.7'), ('1.0', '1.8'), ('1.0', '1.5')]
+            for index, (path, span) in enumerate(zip(paths, spans)):
+                pane = self.open_file(path)
+                if path == self.files['proof.md']:
+                    pane.text.appendPlainText('Unsaved working observation α')
+                pane.text.setFocus()
+                self.select_passage(pane, *span)
+                focus = self.app.focusWidget()
+                before = self.pane_position(pane)[:4]
+                self.assertTrue(self.window.actions['context_add'].isEnabled())
+                self.window.actions['context_add'].trigger()
+                self.assertEqual(self.window.selection_list.count(), index + 1)
+                self.assertEqual(self.window.selection_list.currentRow(), index)
+                self.assertEqual(self.pane_position(pane)[:4], before)
+                self.assertIs(self.app.focusWidget(), focus)
+                self.assertTrue(self.window.selection_dock.isVisible())
+                label = str(path.relative_to(self.root)) if path.is_relative_to(self.root) else str(path)
+                self.assertEqual(self.window.selection_list.item(index).text(), f'{label} · {span[0]}–{span[1]}')
+                self.assertIn(str(path), self.window.selection_list.item(index).toolTip())
+                self.assertIn(self.controller.current().selection_shelf[index].revision,
+                              self.window.selection_list.item(index).toolTip())
+            self.window.actions['context_add'].trigger()
+            self.assertEqual(self.window.selection_list.count(), 5)
+            self.select_passage(pane, '3.0', '3.7')
+            self.window.actions['mark'].trigger()
+            marker = deepcopy(self.controller.current().marker)
+            self.assertEqual(self.window.actions['mark'].text(), 'Mark unfinished work here')
+            self.assertEqual(self.window.actions['return'].text(), 'Return to unfinished work')
+            self.assertEqual(self.window.actions['clear_marker'].text(), 'Clear unfinished marker')
+            self.app.processEvents()
+            before = self.pane_position(pane)
+            item = self.window.selection_list.item(0)
+            row_point = self.window.selection_list.visualItemRect(item).center()
+            QTest.mouseClick(self.window.selection_list.viewport(), Qt.MouseButton.LeftButton, pos=row_point)
+            self.assertEqual(self.pane_position(pane), before)
+            QTest.mouseDClick(self.window.selection_list.viewport(), Qt.MouseButton.LeftButton, pos=row_point)
+            self.wait_idle()
+            left = self.window.panes[0]
+            self.assertEqual(left.text.textCursor().selectedText(), 'α😀 base\u2029Proof')
+            self.window.selection_list.setCurrentRow(1)
+            before = self.pane_position(left)
+            self.window.context_buttons['context_other'].click()
+            self.wait_idle()
+            self.assertTrue(self.controller.current().split)
+            self.assertEqual(self.pane_position(left), before)
+            self.assertEqual(self.window.panes[1].text.textCursor().selectedText(), 'α😀')
+            self.window.selection_list.setCurrentRow(2)
+            before = self.pane_position(self.window.panes[1])
+            self.window.actions['context_other'].trigger()
+            self.wait_idle()
+            self.assertEqual(self.pane_position(self.window.panes[1]), before)
+            self.window.selection_list.setCurrentRow(4)
+            self.window.context_buttons['context_open'].click()
+            self.wait_idle()
+            work = self.window.active_pane()
+            self.select_passage(work, '3.0', '3.7')
+            expected_work = self.pane_position(work)
+            rows = [self.window.selection_list.item(i).text() for i in range(5)]
+            self.restart_window()
+            self.assertTrue(self.window.selection_dock.isVisible())
+            self.assertEqual([self.window.selection_list.item(i).text() for i in range(5)], rows)
+            self.assertEqual(self.pane_position(self.window.active_pane()), expected_work)
+            self.assertTrue(self.controller.buffer().recovery_warning)
+            self.assertEqual(self.controller.current().marker, marker)
+            self.assertTrue(self.controller.current().split)
+            self.window.selection_list.setCurrentRow(0)
+            before = self.pane_position(self.window.active_pane())
+            self.window.actions['context_other'].trigger()
+            self.wait_idle()
+            self.assertEqual(self.pane_position(self.window.panes[0]), before)
+            self.assertEqual(self.window.panes[1].text.textCursor().selectedText(), 'α😀 base\u2029Proof')
+            self.assertEqual(self.controller.buffer().content.encode('utf-8'), original[tex])
+            self.window.context_buttons['context_remove'].click()
+            self.assertEqual(self.window.selection_list.count(), 4)
+            self.assertEqual(self.controller.current().marker, marker)
+            self.assertEqual(len(self.window.panes), 2)
+            self.assertEqual(len(self.window.findChildren(EditorPane)), 2)
+        self.assertEqual({p: p.read_bytes() for p in original}, original)
+        self.assertFalse(self.errors)
+
+    def test_working_context_display_is_lazy_and_add_requires_a_current_file_selection(self):
+        self.open_project()
+        self.window.disk_timer.stop()
+        pane = self.open_file(self.files['proof.md'])
+        self.assertFalse(self.window.actions['context_add'].isEnabled())
+        self.select_passage(pane, '3.0', '3.7')
+        self.window.actions['context_add'].trigger()
+        self.window.actions['close'].trigger()
+        self.assertEqual(self.window.selection_list.count(), 1)
+        self.assertFalse(self.controller.buffers)
+        self.assertTrue(self.window.close_project())
+        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('shelf read source content')):
+            self.window.open_project(self.root)
+            self.wait_idle()
+            self.window.render()
+            self.window.selection_dock.toggleViewAction().trigger()
+            self.window.selection_dock.toggleViewAction().trigger()
+            self.assertTrue(self.window.selection_dock.isVisible())
+            self.assertEqual(self.window.selection_list.count(), 1)
+        self.window.actions['context_open'].trigger()
+        self.wait_idle()
+        self.assertEqual(self.window.active_pane().text.textCursor().selectedText(), 'Expand ')
+        self.window.actions['new'].trigger()
+        pane = self.window.active_pane()
+        pane.text.insertPlainText('Untitled text')
+        self.select_passage(pane, '1.0', '1.5')
+        self.assertFalse(self.window.actions['context_add'].isEnabled())
+        self.assertFalse(self.errors)
+
+    def test_working_context_failed_open_retains_rows_editors_and_unsplit_layout(self):
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.files['proof.md']
+        pane = self.open_file(path)
+        self.select_passage(pane, '3.0', '3.7')
+        self.window.actions['context_add'].trigger()
+        self.window.actions['mark'].trigger()
+        self.open_file(self.files['notes/differences.tex'])
+        from copy import deepcopy
+        marker = deepcopy(self.controller.current().marker)
+        original = path.read_bytes()
+        for missing in (False, True):
+            if missing:
+                path.unlink()
+            else:
+                path.write_bytes(b'Changed revision\n' + original)
+            before = [self.pane_position(pane) for pane in self.window.panes]
+            self.window.actions['context_other'].trigger()
+            self.wait_idle()
+            self.assertEqual([self.pane_position(pane) for pane in self.window.panes], before)
+            self.assertFalse(self.controller.current().split)
+            self.assertEqual(self.window.selection_list.count(), 1)
+            self.assertEqual(self.controller.current().marker, marker)
+            self.assertTrue(self.errors)
+            self.errors.clear()
+            path.write_bytes(original)
 
     @unittest.skipUnless(shutil.which('pdflatex'), 'No real TeX tool available')
     def test_actual_qtpdf_build_diagnostic_navigation_sizes_and_resumption(self):

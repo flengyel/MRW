@@ -16,11 +16,12 @@ from .local_files import read_bounded
 from .mutable_files import private_directory, save_mutable
 
 SCHEMA = 'theorem-terminal.workspace'
-VERSION = 3
+VERSION = 4
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_TEXT_BYTES = 2 * 1024 * 1024
 MAX_RECOVERY_BYTES = 6 * MAX_TEXT_BYTES + 4096
 MAX_BUFFERS = 128
+MAX_CONTEXT_SELECTIONS = 32
 FORMATS = {'text', 'notebook', 'model_call', 'projection', 'documentary_package', 'verification'}
 
 
@@ -69,6 +70,7 @@ class Workspace:
     split: bool = False
     recent: list[str] = field(default_factory=list)
     marker: WorkMarker | None = None
+    selection_shelf: list[WorkMarker] = field(default_factory=list)
     tex_root: str | None = None
     last_build: str | None = None
     successful_build: str | None = None
@@ -127,12 +129,25 @@ def _position(value):
         raise WorkspaceError('Invalid editor position')
 
 
+def selection_span(start, end):
+    """Validate a forward, nonempty pair of scalar line/column positions."""
+    _position(start)
+    _position(end)
+    first, last = (tuple(map(int, position.split('.'))) for position in (start, end))
+    if first >= last:
+        raise WorkspaceError('Select a nonempty forward passage')
+    return first, last
+
+
 def decode_workspace(raw: bytes) -> Workspace:
     if len(raw) > MAX_MANIFEST_BYTES:
         raise WorkspaceError('Editor state exceeds 1 MiB')
     data = strict_json(raw)
-    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] != VERSION:
+    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, VERSION):
         raise WorkspaceError('Unsupported editor-state version')
+    if data['schema_version'] == 3:
+        _keys(data, {'schema', 'schema_version', *Workspace.__dataclass_fields__} - {'selection_shelf'}, 'version-3 editor state')
+        data = {**data, 'schema_version': VERSION, 'selection_shelf': []}
     _keys(data, {'schema', 'schema_version', *Workspace.__dataclass_fields__}, 'editor state')
     _path(data['root'])
     root = Path(data['root'])
@@ -205,6 +220,19 @@ def decode_workspace(raw: bytes) -> Workspace:
         _position(marker['start'])
         _position(marker['end'])
         marker = WorkMarker(**marker)
+    shelf = data['selection_shelf']
+    if not isinstance(shelf, list) or len(shelf) > MAX_CONTEXT_SELECTIONS:
+        raise WorkspaceError('Working context is limited to 32 selections')
+    selections = []
+    for item in shelf:
+        _keys(item, WorkMarker.__dataclass_fields__, 'context selection')
+        _path(item['path'])
+        _revision(item['revision'])
+        selection_span(item['start'], item['end'])
+        entry = WorkMarker(**item)
+        if entry in selections:
+            raise WorkspaceError('Duplicate context selection')
+        selections.append(entry)
     if data['tex_root'] is not None:
         _path(data['tex_root'])
         if not Path(data['tex_root']).is_relative_to(root) or Path(data['tex_root']).suffix.lower() != '.tex':
@@ -220,7 +248,7 @@ def decode_workspace(raw: bytes) -> Workspace:
     if not isinstance(size, list) or len(size) != 2 or any(type(n) is not int or not 480 <= n <= 16384 for n in size):
         raise WorkspaceError('Invalid window size')
     values = {key: data[key] for key in Workspace.__dataclass_fields__}
-    values.update(buffers=buffers, marker=marker)
+    values.update(buffers=buffers, marker=marker, selection_shelf=selections)
     return Workspace(**values)
 
 

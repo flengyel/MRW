@@ -1,6 +1,8 @@
 """Corpus-neutral controller/recovery tests; fixture checks are structural only."""
 
 from contextlib import ExitStack
+from copy import deepcopy
+from dataclasses import asdict
 from hashlib import sha256
 import json
 import os
@@ -18,7 +20,8 @@ from theorem_terminal.documentary_warrant import parse_documentary_projection
 from theorem_terminal.model_projection import parse_finalized_model_call
 from theorem_terminal.response_review import passages, render_response_review
 from theorem_terminal.mutable_files import MutableFileError, file_lock, save_mutable
-from theorem_terminal.workspace import MAX_TEXT_BYTES, VERSION, WorkspaceError, decode_workspace
+from theorem_terminal.workspace import (MAX_TEXT_BYTES, VERSION, WorkspaceError, WorkspaceStore,
+                                        decode_workspace, encode_workspace)
 from theorem_terminal.workstation import Workstation
 
 def mathematical_project(root):
@@ -529,7 +532,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_invalid_versions_malformed_records_and_digest_mismatch_are_non_destructive(self):
         original = self.manifest.read_bytes()
-        for version in (0, 1, 2, 4, True, '3', None):
+        for version in (0, 1, 2, 5, 99, True, False, 3.0, 4.0, '3', '4', None):
             data = json.loads(original)
             data['schema_version'] = version
             with self.assertRaisesRegex(WorkspaceError, 'Unsupported'):
@@ -549,6 +552,283 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             with self.assertRaises(ValueError):
                 self.controller.open_record(path, 'model_call')
             self.assertEqual(path.read_bytes(), raw)
+
+    def add_selection(self, buffer, start='1.0', end='1.5'):
+        self.controller.set_position(buffer.state.id, cursor=end, selection=[start, end], yscroll=.2, xscroll=0)
+        return self.controller.add_context_selection(buffer.state.id, start, end)
+
+    def test_version_three_migration_preserves_complete_session_and_recovery(self):
+        c = self.controller
+        left = c.open_file(self.files['notes/differences.tex'])
+        c.set_split(True)
+        right = c.open_file(self.files['proof.md'], pane=1)
+        c.edit(right.state.id, right.content + 'Unsaved α\r\n')
+        c.set_position(right.state.id, cursor='3.7', selection=['3.0', '3.7'], yscroll=.7, xscroll=.1)
+        c.mark(right.state.id, '3.0', '3.4')
+        c.set_tex_root(left.state.id)
+        c.set_pdf_view(page=7, zoom='custom', scale=1.4)
+        expected = asdict(c.current())
+        recovery = c.store.recovery_path(right.state.id)
+        c.close_project(keep_recovery=True)
+        recovery_bytes = recovery.read_bytes()
+        old = json.loads(self.manifest.read_bytes())
+        old['schema_version'] = 3
+        del old['selection_shelf']
+        raw = encode(old)
+        self.manifest.write_bytes(raw)
+        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('eager source read')):
+            store, migrated = WorkspaceStore.for_project(self.root, self.state_root)
+            self.assertEqual(asdict(migrated), expected)
+            self.assertEqual(self.manifest.read_bytes(), raw)
+            restored = self.restored()
+        self.assertEqual(VERSION, 4)
+        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 4)
+        self.assertEqual(asdict(restored.current()), expected)
+        self.assertEqual(recovery.read_bytes(), recovery_bytes)
+        self.assertTrue(restored.view().recovery_warning)
+        self.assertEqual(restored.buffer().content, right.content)
+
+    def test_migration_and_shelf_schema_reject_malformed_manifests(self):
+        original_raw = self.manifest.read_bytes()
+        original = json.loads(original_raw)
+        for version in (3, 4):
+            valid = deepcopy(original)
+            valid['schema_version'] = version
+            if version == 3:
+                del valid['selection_shelf']
+            for mutation in ({'split': 1}, {'marker': {}}, {'buffers': [{}]}, {'extra': None}):
+                with self.subTest(version=version, mutation=mutation), self.assertRaises(WorkspaceError):
+                    decode_workspace(encode({**valid, **mutation}))
+            for field in tuple(valid):
+                broken = {k: v for k, v in valid.items() if k != field}
+                with self.subTest(version=version, missing=field), self.assertRaises(WorkspaceError):
+                    decode_workspace(encode(broken))
+        with self.assertRaises(WorkspaceError):
+            decode_workspace(encode({**original, 'schema_version': 3}))
+        entry = dict(path=str(self.files['proof.md']), revision='a' * 64, start='1.0', end='1.5')
+        invalid = [None, {}, '', True, [entry] * 2,
+                   [{**entry, 'end': f'{n + 2}.0'} for n in range(33)]]
+        for mutation in ({'path': 'relative'}, {'path': False}, {'revision': 'x'}, {'revision': True},
+                         {'start': '0.0'}, {'start': ''}, {'start': '1.-1'}, {'start': True},
+                         {'end': '1.0'}, {'start': '2.0'}, {'end': '1.1000000000'},
+                         {'title': 'forbidden'}, {'text': 'not retained'}):
+            invalid.append([{**entry, **mutation}])
+        invalid.extend([{k: v for k, v in entry.items() if k != field}] for field in entry)
+        for shelf in invalid:
+            with self.subTest(shelf=shelf), self.assertRaises(WorkspaceError):
+                decode_workspace(encode({**original, 'selection_shelf': shelf}))
+        self.assertEqual(self.manifest.read_bytes(), original_raw)
+
+    def test_context_selections_survive_process_restart_in_order_without_external_actions(self):
+        external = self.home / 'external-reference.txt'
+        external.write_text('Reference passage α\nAnother exact passage.\n', encoding='utf-8')
+        before, external_before = self.snapshot(), external.read_bytes()
+        c = self.controller
+        buffers = [c.open_file(self.files[name]) for name in ('proof.md', 'notes/differences.tex', 'formal/Basic.lean')]
+        buffers.append(c.open_file(external, reference=True))
+        c.mark(buffers[0].state.id, '3.0', '3.7')
+        marker = deepcopy(c.current().marker)
+        for index, buffer in enumerate(buffers):
+            self.assertEqual(self.add_selection(buffer), index)
+        self.assertEqual(self.add_selection(buffers[0], '3.0', '3.7'), 4)
+        self.assertEqual(self.add_selection(buffers[0]), 0)
+        self.assertEqual(len(c.current().selection_shelf), 5)
+        expected = asdict(c.current())['selection_shelf']
+        c.close_buffer(buffers[1].state.id)
+        self.assertEqual(asdict(c.current())['selection_shelf'], expected)
+        c.close_project()
+        script = '''
+import json, sys
+from pathlib import Path
+from contextlib import ExitStack
+from unittest.mock import patch
+from dataclasses import asdict
+from theorem_terminal.workstation import Workstation
+with ExitStack() as stack:
+ for name in ('socket.socket', 'subprocess.Popen', 'os.system', 'urllib.request.urlopen',
+              'theorem_terminal.documentary_warrant.run_lean_documentary_checker',
+              'theorem_terminal.latex_build.run_latex'):
+  stack.enter_context(patch(name, side_effect=AssertionError('unexpected external action')))
+ c = Workstation(state_root=Path(sys.argv[2]))
+ with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('eager shelf read')):
+  c.open_project(Path(sys.argv[1]))
+ assert not any(b.loaded for b in c.buffers.values())
+ before = asdict(c.current())
+ for index in range(len(c.current().selection_shelf)):
+  b = c.open_context_selection(index)
+  entry = c.current().selection_shelf[index]
+  assert b.state.selection == [entry.start, entry.end]
+  if b.state.external: assert b.state.readonly
+ assert asdict(c.current())['marker'] == before['marker']
+ c.close_project()
+ print(json.dumps(before))
+'''
+        result = subprocess.run([sys.executable, '-c', script, str(self.root), str(self.state_root)],
+                                check=True, capture_output=True, text=True)
+        state = json.loads(result.stdout)
+        self.assertEqual(state['selection_shelf'], expected)
+        self.assertEqual(state['marker'], asdict(marker))
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(external.read_bytes(), external_before)
+
+    def test_context_selection_requires_supported_current_bounded_span(self):
+        c = self.controller
+        path = self.root / 'long.txt'
+        path.write_text('x' * 100 + '\n')
+        b = c.open_file(path)
+        with self.assertRaisesRegex(WorkspaceError, 'current'):
+            c.add_context_selection(b.state.id, '1.0', '1.3')
+        for start, end in (('1.0', '1.0'), ('1.5', '1.2'), ('1.0', '1.101'), ('1.0', '3.0'),
+                           ('0.0', '1.1'), ('1.-1', '1.1'), ('1.x', '1.2'), (True, '1.1'),
+                           ('1.0', '1.1000000000')):
+            with self.subTest(start=start, end=end), self.assertRaises(WorkspaceError):
+                self.add_selection(b, start, end)
+        self.assertFalse(c.current().selection_shelf)
+        for number in range(1, 33):
+            self.assertEqual(self.add_selection(b, '1.0', f'1.{number}'), number - 1)
+        self.assertEqual(self.add_selection(b, '1.0', '1.1'), 0)
+        with self.assertRaisesRegex(WorkspaceError, '32'):
+            self.add_selection(b, '1.0', '1.33')
+        for index in (-1, 32, True, '0', None):
+            for operation in (c.open_context_selection, c.remove_context_selection):
+                with self.subTest(index=index), self.assertRaises(WorkspaceError):
+                    operation(index)
+        b.loaded = False
+        self.assertFalse(c.context_selection_supported(b.state.id))
+        with self.assertRaises(WorkspaceError):
+            c.add_context_selection(b.state.id, '1.0', '1.1')
+        b.loaded = True
+        for unsupported in (c.new_buffer(), self.call()):
+            with self.assertRaises(WorkspaceError):
+                self.add_selection(unsupported)
+        self.assertEqual(len(c.current().selection_shelf), 32)
+
+    def test_context_selection_resolves_checkpointed_unsaved_unicode_crlf(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        original = self.files['proof.md'].read_bytes()
+        c.mark(b.state.id, '3.0', '3.7')
+        marker = deepcopy(c.current().marker)
+        text = 'First α\r\nSecond β 😀\r\n'
+        c.edit(b.state.id, text)
+        self.add_selection(b, '1.6', '2.10')
+        entry = c.current().selection_shelf[0]
+        self.assertEqual(entry.revision, sha256(text.encode('utf-8')).hexdigest())
+        self.assertNotEqual(entry.revision, b.state.revision)
+        self.assertEqual(c.store.read_recovery(b.state)['text'], text)
+        c.close_project(keep_recovery=True)
+        restored = self.restored()
+        b = restored.open_context_selection(0)
+        self.assertEqual(b.content, text)
+        self.assertTrue(b.recovery_warning)
+        self.assertEqual(b.state.selection, ['1.6', '2.10'])
+        self.assertEqual(b.state.cursor, '2.10')
+        restored.remove_context_selection(0)
+        self.assertEqual(restored.current().marker, marker)
+        self.assertEqual(self.files['proof.md'].read_bytes(), original)
+
+    def test_context_shelf_add_remove_roll_back_on_checkpoint_failures(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.mark(b.state.id, '3.0', '3.7')
+        marker = deepcopy(c.current().marker)
+        self.add_selection(b)
+        c.edit(b.state.id, b.content + 'Unsaved work.\n')
+        for service, method in ((c.store, 'write_recovery'), (c.store, 'save'), (c.settings_store, 'save')):
+            with patch.object(service, method, side_effect=OSError('checkpoint denied')):
+                for operation in (lambda: self.add_selection(b, '3.0', '3.7'), lambda: c.remove_context_selection(0)):
+                    with self.assertRaisesRegex(WorkspaceError, 'checkpoint failed'):
+                        operation()
+                    self.assertEqual(len(c.current().selection_shelf), 1)
+                    self.assertEqual(len(json.loads(self.manifest.read_bytes())['selection_shelf']), 1)
+        self.assertTrue(c.checkpoint())
+        save = c.store.save
+        def fail_candidate(state):
+            if len(state.selection_shelf) != 1:
+                raise OSError('shelf publication denied')
+            return save(state)
+        with patch.object(c.store, 'save', side_effect=fail_candidate):
+            for operation in (lambda: self.add_selection(b, '3.0', '3.7'), lambda: c.remove_context_selection(0)):
+                with self.assertRaisesRegex(WorkspaceError, 'publication denied'):
+                    operation()
+                self.assertEqual(len(c.current().selection_shelf), 1)
+                self.assertEqual(len(json.loads(self.manifest.read_bytes())['selection_shelf']), 1)
+        # Exercise a real replacement followed by a failed directory sync.
+        from theorem_terminal.mutable_files import sync_directory
+        failed = []
+        def fail_after_replace(directory):
+            if directory == c.store.directory and not failed and len(json.loads(self.manifest.read_bytes())['selection_shelf']) == 2:
+                failed.append(True)
+                raise OSError('post-replace sync denied')
+            return sync_directory(directory)
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_after_replace):
+            with self.assertRaisesRegex(WorkspaceError, 'post-replace'):
+                self.add_selection(b, '3.0', '3.7')
+        self.assertTrue(failed)
+        self.assertEqual(len(c.current().selection_shelf), 1)
+        self.assertEqual(len(json.loads(self.manifest.read_bytes())['selection_shelf']), 1)
+        self.assertTrue(c.checkpoint())
+        c.remove_context_selection(0)
+        self.assertFalse(c.current().selection_shelf)
+        self.assertEqual(c.current().marker, marker)
+
+    def test_context_open_validates_before_moving_either_pane(self):
+        c = self.controller
+        left = c.open_file(self.files['proof.md'])
+        right = c.open_file(self.files['notes/differences.tex'])
+        target = c.open_file(self.files['formal/Basic.lean'])
+        self.add_selection(target)
+        c.mark(left.state.id, '3.0', '3.7')
+        c.set_split(True)
+        c.activate(left.state.id, 0)
+        c.activate(right.state.id, 1)
+        for pane, other in ((0, right), (1, left)):
+            c.activate(left.state.id, 0)
+            c.activate(right.state.id, 1)
+            other_before = deepcopy(other.state)
+            c.open_context_selection(0, pane)
+            self.assertEqual(c.current().visible[1 - pane], other.state.id)
+            self.assertEqual(other.state, other_before)
+            self.assertEqual(c.current().visible[pane], target.state.id)
+        for loaded in (True, False):
+            for failure in ('changed', 'missing', 'redirected', 'unavailable', 'digest'):
+                with self.subTest(loaded=loaded, failure=failure):
+                    path = Path(target.state.path)
+                    raw = path.read_bytes()
+                    c.activate(left.state.id, 0)
+                    c.activate(right.state.id, 1)
+                    target.loaded = loaded
+                    if failure == 'changed':
+                        path.write_bytes(b'Changed source\n' + raw)
+                    elif failure == 'missing':
+                        path.unlink()
+                    elif failure == 'redirected':
+                        path.unlink()
+                        path.symlink_to(self.files['proof.md'])
+                    elif failure == 'unavailable' and loaded:
+                        target.problem = 'read failed'
+                    elif failure == 'digest':
+                        c.current().selection_shelf[0].revision = 'f' * 64
+                    else:
+                        path.write_bytes(b'\0')
+                    before = asdict(c.current())
+                    try:
+                        with self.assertRaises((WorkspaceError, OSError)):
+                            c.open_context_selection(0, 0)
+                        self.assertEqual(asdict(c.current()), before)
+                    finally:
+                        if path.is_symlink():
+                            path.unlink()
+                        path.write_bytes(raw)
+                        target.loaded, target.problem = True, ''
+                        c.current().selection_shelf[0].revision = sha256(raw).hexdigest()
+        before = asdict(c.current())
+        prepared = c.prepare_context_selection(0)
+        c.edit(target.state.id, target.content + 'New in-memory work')
+        with self.assertRaisesRegex(WorkspaceError, 'mismatch'):
+            c.accept_context_selection(0, prepared, 0)
+        self.assertEqual(c.current().visible, before['visible'])
+        self.assertEqual(asdict(c.current())['marker'], before['marker'])
 
     def test_no_process_network_provider_lean_or_content_import_on_local_workflow(self):
         self.call()

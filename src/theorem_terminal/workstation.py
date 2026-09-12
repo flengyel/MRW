@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from hashlib import sha256
 import os
 from pathlib import Path
 import stat
@@ -18,8 +19,9 @@ from .record_views import inspect_record, read_call_snapshot
 from .response_review import purpose_kind, render_response_review, select_passage
 from .source import SourceDocument
 from .tool_settings import SettingsStore, expand_arguments, launch_tool
-from .workspace import (BufferState, MAX_BUFFERS, MAX_TEXT_BYTES, WorkMarker, Workspace,
-                        WorkspaceError, WorkspaceStore, strict_json)
+from .workspace import (BufferState, MAX_BUFFERS, MAX_CONTEXT_SELECTIONS, MAX_MANIFEST_BYTES,
+                        MAX_TEXT_BYTES, WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
+                        encode_workspace, selection_span, strict_json)
 
 
 @dataclass
@@ -498,6 +500,124 @@ class Workstation:
             self.workspace.buffers = [self.buffers[s.id].state for s in previous.buffers]
             raise WorkspaceError('Final buffer checkpoint failed; buffer remains open')
         del self.buffers[buffer.state.id]
+
+    def context_selection_supported(self, identifier):
+        buffer = self.buffers.get(identifier)
+        return bool(buffer and buffer.loaded and buffer.state.path and buffer.state.format == 'text'
+                    and not buffer.problem and not self._internal(Path(buffer.state.path))
+                    and (Path(buffer.state.path).is_relative_to(Path(self.current().root))
+                         or (buffer.state.external and buffer.state.readonly))
+                    and not record_kind(buffer.content))
+
+    @staticmethod
+    def _context_span(text, start, end):
+        positions = selection_span(start, end)
+        lines = text.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+        if any(line > len(lines) or column > len(lines[line - 1]) for line, column in positions):
+            raise WorkspaceError('Selection is outside the current document')
+
+    def _context_selection(self, index):
+        shelf = self.current().selection_shelf
+        if type(index) is not int or not 0 <= index < len(shelf):
+            raise WorkspaceError('Select a working-context passage first')
+        return shelf[index]
+
+    def _checkpoint_selection_shelf(self, selections):
+        # Finish recovery, cleanup and settings before publishing an anchor to
+        # unsaved text. The shelf itself is the final atomic manifest write.
+        if not self.checkpoint():
+            raise WorkspaceError('Working context checkpoint failed: ' + self.persistence_error)
+        previous = self.store.previous
+        candidate = replace(self.current(), selection_shelf=selections)
+        raw = encode_workspace(candidate)
+        try:
+            self.store.save(candidate)
+        except (OSError, ValueError) as exc:
+            self.persistence_error = str(exc)
+            # A directory-sync error can follow atomic replacement. Restore
+            # only our exact candidate, never a concurrent writer's manifest.
+            try:
+                if read_bounded(self.store.path, MAX_MANIFEST_BYTES, 'editor state') == raw:
+                    save_mutable(self.store.path, previous, previous=raw, lock_root=self.store.lock_root)
+                    self.store.previous = previous
+            except (OSError, ValueError) as rollback:
+                self.persistence_error += '; could not restore the previous shelf: ' + str(rollback)
+            raise WorkspaceError('Working context checkpoint failed: ' + self.persistence_error) from exc
+        self.current().selection_shelf = selections
+
+    def add_context_selection(self, identifier, start, end) -> int:
+        if not self.context_selection_supported(identifier):
+            raise WorkspaceError('Select a passage in a loaded ordinary text file')
+        buffer = self.buffer(identifier)
+        self._context_span(buffer.content, start, end)
+        if buffer.state.selection != [start, end]:
+            raise WorkspaceError('Use the current nonempty editor selection')
+        entry = WorkMarker(buffer.state.path, sha256(buffer.content.encode('utf-8')).hexdigest(), start, end)
+        shelf = self.current().selection_shelf
+        if entry in shelf:
+            return shelf.index(entry)
+        if len(shelf) >= MAX_CONTEXT_SELECTIONS:
+            raise WorkspaceError('Working context is limited to 32 selections; remove a passage first')
+        self._checkpoint_selection_shelf([*shelf, entry])
+        return len(shelf)
+
+    def remove_context_selection(self, index):
+        self._context_selection(index)
+        shelf = self.current().selection_shelf
+        self._checkpoint_selection_shelf(shelf[:index] + shelf[index + 1:])
+
+    def prepare_context_selection(self, index):
+        """Explicit bounded read; return detached data without any navigation."""
+        entry = deepcopy(self._context_selection(index))
+        path = Path(entry.path)
+        if path.resolve(strict=True) != path:
+            raise WorkspaceError('Working-context path was redirected; the anchor was retained')
+        existing = next((b for b in self.buffers.values() if b.state.path == entry.path), None)
+        if existing is None:
+            buffer = self.prepare_file(path, reference=not path.is_relative_to(Path(self.current().root)))
+        elif not existing.loaded:
+            buffer = self.load_snapshot(existing.state.id)
+        else:
+            buffer = deepcopy(existing)
+            self._match(buffer.state.revision, text_snapshot(path).revision)
+        self._validate_context_content(entry, buffer)
+        return entry, buffer
+
+    def _validate_context_content(self, entry, buffer):
+        if (not buffer.loaded or buffer.state.path != entry.path or buffer.state.format != 'text'
+                or buffer.problem or record_kind(buffer.content)):
+            raise WorkspaceError('Working-context document is unavailable; the anchor was retained')
+        self._match(entry.revision, sha256(buffer.content.encode('utf-8')).hexdigest())
+        self._context_span(buffer.content, entry.start, entry.end)
+
+    def accept_context_selection(self, index, prepared, pane=None):
+        """Apply a checked read on the controller's owning (GUI) thread only."""
+        entry, snapshot = prepared
+        if entry != self._context_selection(index):
+            raise WorkspaceError('Working context changed during the read; select the passage again')
+        state = self.current()
+        pane = state.active_pane if pane is None else pane
+        if type(pane) is not int or pane not in (0, 1):
+            raise WorkspaceError('Select one of the two editor panes')
+        existing = next((b for b in self.buffers.values() if b.state.path == entry.path), None)
+        buffer = existing if existing and existing.loaded else snapshot
+        self._validate_context_content(entry, buffer)
+        if existing is None:
+            if len(state.buffers) >= MAX_BUFFERS:
+                raise WorkspaceError('Close a buffer before opening more than 128 documents')
+            state.buffers.append(buffer.state)
+            self.buffers[buffer.state.id] = buffer
+        elif not existing.loaded:
+            buffer = self.accept_snapshot(snapshot)
+        buffer.state.cursor = entry.end
+        buffer.state.selection = [entry.start, entry.end]
+        if pane == 1:
+            state.split = True
+        self.activate(buffer.state.id, pane)
+        return buffer
+
+    def open_context_selection(self, index, pane=None):
+        return self.accept_context_selection(index, self.prepare_context_selection(index), pane)
 
     def mark(self, identifier, start, end):
         buffer = self.buffer(identifier)

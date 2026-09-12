@@ -295,9 +295,26 @@ ordinary file editing does not require a wide identity inspector. Hashes are in
 expandable technical details.
 
 Session state retains the project root, open buffers, active buffer, cursor,
-selection, scroll, split, recent files and PDF view. Select a mathematical passage
-and use **Work → Mark current selection**; **Return to marked selection**
-checks the saved revision before returning there. No descriptive form is needed.
+selection, scroll, split, recent files and PDF view. **Work → Add current selection
+to working context** retains up to 32 ordered, revision-pinned passages from
+ordinary project text or explicitly opened external read-only text. The bottom
+**Working context** shelf shows paths and selection endpoints; tooltips show the
+full path and SHA-256 revision. Open a selected passage in the active or other
+editor pane, or remove it, through the Work menu or dock buttons. Double-clicking
+opens a passage; single-clicking only selects its row. Different passages in one
+file coexist; adding the same exact selection again selects its existing row.
+The shelf survives closing buffers and restarting the project. Showing it reads
+no source content. An explicit open checks the path and exact current or recovered
+UTF-8 content before navigating; missing, redirected or changed sources leave the
+anchor and both editors in place. No similar-text search or relocation occurs.
+
+**Work → Mark unfinished work here**, **Return to unfinished work**, and **Clear
+unfinished marker** maintain the independent single unfinished-work location.
+Neither aid requires a descriptive form. Shelf entries are private local
+navigation anchors only, not provenance, citations, warrant records or
+mathematical-object identities, and nothing is automatically sent to a model.
+Version-3 sessions migrate to version 4 with an empty shelf at the next atomic
+checkpoint; existing recovery, unfinished marker and view state are preserved.
 
 State, trusted tool settings, build outputs and private recovery are stored under:
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from html import escape
 import os
 from pathlib import Path
 import shlex
@@ -198,6 +199,7 @@ class EditorPane(QWidget):
         self.text.textChanged.connect(self.edited)
         self.text.cursorPositionChanged.connect(self.capture_position)
         self.text.selectionChanged.connect(self.capture_position)
+        self.text.selectionChanged.connect(window.update_context_actions)
         self.text.verticalScrollBar().valueChanged.connect(self.capture_position)
         self.text.horizontalScrollBar().valueChanged.connect(self.capture_position)
         self.text.focused.connect(self.focused)
@@ -533,6 +535,31 @@ class WorkstationWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.diagnostics_dock)
         self.diagnostics_dock.hide()
         self.view_menu.addAction(self.diagnostics_dock.toggleViewAction())
+        self.selection_dock = QDockWidget('Working context', self)
+        self.selection_dock.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
+        shelf = QWidget()
+        shelf_layout = QVBoxLayout(shelf)
+        shelf_layout.setContentsMargins(5, 3, 5, 3)
+        self.selection_list = QListWidget()
+        self.selection_list.setAccessibleName('Working-context passages')
+        self.selection_list.setMinimumHeight(56)
+        self.selection_list.currentRowChanged.connect(self.update_context_actions)
+        self.selection_list.itemDoubleClicked.connect(lambda *_: self.perform(self.open_context_selection))
+        shelf_layout.addWidget(self.selection_list)
+        buttons = QHBoxLayout()
+        self.context_buttons = {}
+        for key, label in (('context_open', 'Open'), ('context_other', 'Other pane'), ('context_remove', 'Remove')):
+            button = QPushButton(label)
+            button.clicked.connect(lambda _checked=False, key=key: self.actions[key].trigger())
+            self.context_buttons[key] = button
+            buttons.addWidget(button)
+        buttons.addStretch()
+        shelf_layout.addLayout(buttons)
+        self.selection_dock.setWidget(shelf)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.selection_dock)
+        self.selection_dock.hide()
+        self.view_menu.addAction(self.selection_dock.toggleViewAction())
+        self._selection_rows = None
         self.persistence = QLabel('')
         self.persistence.setTextFormat(Qt.TextFormat.PlainText)
         self.persistence.setStyleSheet('color: #a42e20;')
@@ -540,6 +567,7 @@ class WorkstationWindow(QMainWindow):
         self.resizeDocks([self.navigator_dock], [210], Qt.Orientation.Horizontal)
         self.resizeDocks([self.context_dock], [300], Qt.Orientation.Horizontal)
         self.resizeDocks([self.diagnostics_dock], [170], Qt.Orientation.Vertical)
+        self.resizeDocks([self.selection_dock], [150], Qt.Orientation.Vertical)
         self.setStyleSheet('QToolButton, QPushButton, QComboBox, QSpinBox { min-height: 26px; } QTreeView::item, QListView::item { min-height: 26px; } QScrollBar:vertical { width: 16px; } QScrollBar:horizontal { height: 16px; } QMenu::item { padding: 7px 24px; }')
         self.render()
 
@@ -575,9 +603,14 @@ class WorkstationWindow(QMainWindow):
         self.actions['wrap'].setChecked(True)
         self.add_action(self.view_menu, 'pdf', 'Source / PDF', self.toggle_pdf, checkable=True)
         work = self.menuBar().addMenu('Work')
-        self.add_action(work, 'mark', 'Mark current selection', self.mark_selection)
-        self.add_action(work, 'return', 'Return to marked selection', self.return_to_marker)
-        self.add_action(work, 'clear_marker', 'Clear marker', lambda: self.controller.clear_marker())
+        self.add_action(work, 'mark', 'Mark unfinished work here', self.mark_selection)
+        self.add_action(work, 'return', 'Return to unfinished work', self.return_to_marker)
+        self.add_action(work, 'clear_marker', 'Clear unfinished marker', lambda: self.controller.clear_marker())
+        work.addSeparator()
+        self.add_action(work, 'context_add', 'Add current selection to working context', self.add_context_selection)
+        self.add_action(work, 'context_open', 'Open selected context passage', self.open_context_selection)
+        self.add_action(work, 'context_other', 'Open selected context passage in other pane', lambda: self.open_context_selection(other=True))
+        self.add_action(work, 'context_remove', 'Remove selected context passage', self.remove_context_selection)
         latex = self.menuBar().addMenu('LaTeX')
         self.add_action(latex, 'tex_root', 'Set as TeX root', lambda: self.controller.set_tex_root())
         self.add_action(latex, 'build', 'Build LaTeX', self.build_latex)
@@ -693,9 +726,44 @@ class WorkstationWindow(QMainWindow):
         self.recent_files.clear()
         for path in state.recent if state else []:
             self.recent_files.addAction(path, lambda path=path: self.perform(lambda: self.open_file(Path(path))))
+        self.update_context_actions()
+
+    def update_context_actions(self, *_):
+        if not hasattr(self, 'selection_list'):
+            return
+        state = self.controller.workspace
+        ready = state is not None and not self.jobs
+        pane = self.active_pane() if state else None
+        self.actions['context_add'].setEnabled(bool(ready and pane.text.textCursor().hasSelection()
+            and self.controller.context_selection_supported(pane.shown)))
+        selected = bool(ready and 0 <= self.selection_list.currentRow() < len(state.selection_shelf))
+        for key, button in self.context_buttons.items():
+            self.actions[key].setEnabled(selected)
+            button.setEnabled(selected)
+
+    def refresh_selection_shelf(self):
+        state = self.controller.workspace
+        rows = tuple((s.path, s.revision, s.start, s.end) for s in state.selection_shelf) if state else ()
+        if rows != self._selection_rows:
+            selected = self.selection_list.currentRow()
+            with QSignalBlocker(self.selection_list):
+                self.selection_list.clear()
+                for path, revision, start, end in rows:
+                    local = Path(path)
+                    label = str(local.relative_to(Path(state.root))) if local.is_relative_to(Path(state.root)) else path
+                    item = QListWidgetItem(f'{label} · {start}–{end}')
+                    item.setToolTip('<qt>' + escape(path) + '<br>SHA-256: ' + revision + '</qt>')
+                    self.selection_list.addItem(item)
+                if rows:
+                    self.selection_list.setCurrentRow(min(max(0, selected), len(rows) - 1))
+            self._selection_rows = rows
+        if state is None:
+            self.selection_dock.hide()
+        self.update_context_actions()
 
     def render(self):
         state = self.controller.workspace
+        self.refresh_selection_shelf()
         self.panes[1].setVisible(bool(state and state.split))
         self.pdf.setVisible(bool(state and state.pdf_visible))
         for index, pane in enumerate(self.panes):
@@ -741,6 +809,7 @@ class WorkstationWindow(QMainWindow):
         self.navigator.setRootIndex(self.file_filter.mapFromSource(self.filesystem.index(root)))
         self.navigator_dock.setWindowTitle('Project · ' + Path(root).name)
         self.resize(*self.controller.current().window_size)
+        self.selection_dock.setVisible(bool(self.controller.current().selection_shelf))
         self.render()
         if self.controller.current().last_build:
             self.submit(self.controller.build_report, self.show_build_result)
@@ -977,6 +1046,39 @@ class WorkstationWindow(QMainWindow):
             edit.setTextCursor(cursor)
             edit.centerCursor()
             edit.setFocus()
+
+    def add_context_selection(self):
+        pane = self.active_pane()
+        pane.capture_position()
+        cursor = pane.text.textCursor()
+        index = self.controller.add_context_selection(pane.shown,
+            cursor_index(pane.text, cursor.selectionStart()), cursor_index(pane.text, cursor.selectionEnd()))
+        self.refresh_selection_shelf()
+        self.selection_list.setCurrentRow(index)
+        self.selection_dock.show()
+
+    def open_context_selection(self, *, other=False):
+        if self.jobs:
+            raise WorkspaceError('Wait for the current read to finish')
+        index = self.selection_list.currentRow()
+        pane = self.controller.current().active_pane
+        if other:
+            pane = 1 - pane
+        def accepted(prepared):
+            buffer = self.controller.accept_context_selection(index, prepared, pane)
+            self.panes[1].setVisible(self.controller.current().split)
+            target = self.panes[pane]
+            target.center_on_next_show = True
+            # Only the requested editor navigates, even if the same file is
+            # also visible at another passage in the other editor.
+            target.show_buffer(buffer.state.id, force=True)
+            target.text.setFocus()
+            self.update_context()
+        self.submit(lambda: self.controller.prepare_context_selection(index), accepted)
+
+    def remove_context_selection(self):
+        self.controller.remove_context_selection(self.selection_list.currentRow())
+        self.refresh_selection_shelf()
 
     def mark_selection(self):
         pane = self.active_pane()

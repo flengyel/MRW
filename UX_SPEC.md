@@ -89,7 +89,18 @@ notebook must not execute it or expose editable raw JSON by default.
 
 Re-entry restores the open work, selected passage and rendering position. An
 optional unresolved-work marker anchors a file selection without demanding a
-written description. Private recovery retains the exact latest successfully
+written description. The implemented **Working context** shelf independently
+retains up to 32 ordered, exact revision-pinned selections across ordinary text
+files, including explicitly opened external read-only references. Its menu and
+dock actions open a passage in either of the two editors or remove an anchor.
+Restoring or displaying the shelf reads no source content; opening is explicit
+and fails without moving the editors if a path is missing or redirected or its
+current/recovered content does not match. Entries contain only the path, content
+revision and selection endpoints. They are private local navigation anchors,
+not provenance, citations, warrant records, mathematical-object identities or
+material automatically sent to a model. **Mark unfinished work here**, **Return
+to unfinished work** and **Clear unfinished marker** retain their independent
+single-location purpose. Private recovery retains the exact latest successfully
 completed checkpoint across an interrupted process, not uncheckpointed characters; it is mutable application state, never mathematical provenance. A failed
 final checkpoint must leave the work available until the user explicitly decides
 whether to discard it.
@@ -519,7 +530,9 @@ mathematical warrant, and \(m:D\) alone cannot derive \(F\).
 
 The completed Appendix A editor/build/render/re-entry smoke test used ordinary
 corpus-neutral project actions. It did **not** complete this mathematical re-entry
-and warrant session.
+and warrant session. The working-context shelf now supplies a bounded navigation
+aid; the complete mathematical re-entry and warrant workflow below remains
+unfinished.
 
 Use `rs_Appendix_A.tex` as the mathematical source, the corresponding Lean
 declarations when relevant, and `Lean/docs/AppendixA.md` as the existing
