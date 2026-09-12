@@ -171,6 +171,83 @@ class GraphicalEditorTests(unittest.TestCase):
                 self.wait_idle()
         self.assertFalse(self.errors)
 
+    def test_loading_placeholder_preserves_recovered_cursor_selection_and_scroll(self):
+        import threading
+        from theorem_terminal.gui import WorkstationWindow, cursor_index
+        from theorem_terminal.workstation import Workstation
+
+        self.open_project()
+        path = self.root / 'work-note.md'
+        original = ''.join(f'Working observation {line}: a polynomial calculation.\n' for line in range(1, 221))
+        path.write_text(original, encoding='utf-8')
+        pane = self.open_file(path)
+        pane.text.appendPlainText('Unsaved refinement: the leading coefficient is nonzero. α')
+        recovered_text = pane.text.toPlainText()
+        identifier = pane.shown
+        expected = dict(cursor='155.12', selection=['150.0', '155.12'], yscroll=0.70, xscroll=0.0)
+        self.controller.set_position(identifier, **expected)
+        self.assertTrue(self.controller.checkpoint())
+        self.controller.close_project(keep_recovery=True)
+        self.assertTrue(self.window.close())
+        self.app.processEvents()
+        self.error_patch.stop()
+
+        self.controller = Workstation(state_root=self.home / 'state')
+        self.window = WorkstationWindow(self.controller)
+        self.error_patch = patch.object(self.window, 'show_error', side_effect=self.errors.append)
+        self.error_patch.start()
+        self.window.show()
+        self.window.disk_timer.stop()
+        self.app.processEvents()
+        ready, release = threading.Event(), threading.Event()
+        load_snapshot = self.controller.load_snapshot
+
+        def delayed_snapshot(buffer_id):
+            snapshot = load_snapshot(buffer_id)
+            ready.set()
+            if not release.wait(30):
+                raise TimeoutError('Test did not release the recovered snapshot')
+            return snapshot
+
+        with patch.object(self.controller, 'load_snapshot', side_effect=delayed_snapshot):
+            try:
+                self.window.open_project(self.root)
+                self.assertTrue(ready.wait(5), 'snapshot worker did not start')
+                pane = self.window.active_pane()
+                self.assertEqual(pane.shown, identifier)
+                self.assertFalse(pane.loading)
+                self.assertFalse(self.controller.buffer(identifier).loaded)
+                self.assertEqual(pane.text.toPlainText(), 'Loading this document…')
+                self.assertTrue(self.window.jobs)
+                state = self.controller.buffer(identifier).state
+                self.assertEqual({key: getattr(state, key) for key in expected}, expected)
+                # Exercise delayed placeholder signals while completion is held;
+                # neither Qt event timing nor the synchronous loading guard can mask it.
+                pane.capture_position()
+                self.assertEqual({key: getattr(state, key) for key in expected}, expected)
+            finally:
+                release.set()
+                self.wait_idle()
+
+        buffer = self.controller.buffer(identifier)
+        self.assertTrue(buffer.loaded)
+        self.assertTrue(buffer.dirty)
+        self.assertEqual(buffer.content, recovered_text)
+        self.assertEqual(pane.text.toPlainText(), recovered_text)
+        self.assertIn('latest completed local checkpoint', buffer.recovery_warning)
+        self.assertIn('recovered', pane.notice.text())
+        cursor = pane.text.textCursor()
+        self.assertEqual(cursor_index(pane.text, cursor.position()), expected['cursor'])
+        self.assertEqual([cursor_index(pane.text, cursor.selectionStart()),
+                          cursor_index(pane.text, cursor.selectionEnd())], expected['selection'])
+        self.assertEqual(buffer.state.cursor, expected['cursor'])
+        self.assertEqual(buffer.state.selection, expected['selection'])
+        vertical = pane.text.verticalScrollBar()
+        self.assertGreater(vertical.value(), 0)
+        self.assertAlmostEqual(vertical.value() / vertical.maximum(), expected['yscroll'], delta=0.03)
+        self.assertEqual(path.read_text(encoding='utf-8'), original)
+        self.assertFalse(self.errors)
+
     def test_failed_checkpoint_blocks_quit_and_keeps_visible_text(self):
         from PySide6.QtWidgets import QMessageBox
         self.open_project()

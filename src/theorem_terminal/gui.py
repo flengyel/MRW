@@ -225,6 +225,9 @@ class EditorPane(QWidget):
     def capture_position(self, *_):
         if self.loading or self.shown not in self.window.controller.buffers:
             return
+        buffer = self.window.controller.buffer(self.shown)
+        if not buffer.loaded:
+            return
         if self.window.controller.current().visible[self.number] != self.shown:
             return
         cursor = self.text.textCursor()
