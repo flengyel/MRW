@@ -83,6 +83,7 @@ class GraphicalEditorTests(unittest.TestCase):
     def restart_window(self):
         from theorem_terminal.gui import WorkstationWindow
         from theorem_terminal.workstation import Workstation
+        wrap = self.window.actions['wrap'].isChecked()
         self.window.flush()
         self.controller.close_project(keep_recovery=True)
         self.assertTrue(self.window.close())
@@ -94,9 +95,238 @@ class GraphicalEditorTests(unittest.TestCase):
         self.error_patch.start()
         self.window.show()
         self.window.disk_timer.stop()
+        self.window.actions['wrap'].setChecked(wrap)
+        self.window.toggle_wrap(wrap)
         self.app.processEvents()
         self.window.open_project(self.root)
         self.wait_idle()
+
+    def test_same_file_pane_views_survive_render_edit_split_and_restart(self):
+        from PySide6.QtGui import QTextCursor
+        from theorem_terminal.gui import qt_position
+        self.open_project()
+        self.window.disk_timer.stop()
+        self.window.resize(1280, 820)
+        self.window.actions['wrap'].trigger()
+        path = self.root / 'shared-work.txt'
+        original = ''.join(f'{line:03d} ' + 'x' * 200 + '\n' for line in range(1, 261))
+        path.write_text(original, encoding='utf-8')
+        left = self.open_file(path)
+        identifier = left.shown
+        self.window.actions['split'].trigger()
+        self.window.select(identifier, 1)
+        self.app.processEvents()
+        right = self.window.panes[1]
+        for pane, start, end, y, x in ((left, '30.4', '35.12', 20, 40),
+                                       (right, '180.9', '185.20', 170, 140)):
+            pane.text.setFocus()
+            self.select_passage(pane, start, end)
+            pane.text.verticalScrollBar().setValue(y)
+            pane.text.horizontalScrollBar().setValue(x)
+            pane.capture_position()
+        expected = [self.pane_position(p)[2:] for p in (left, right)]
+        def geometry():
+            return [(p.text.width(), p.text.height(), p.text.verticalScrollBar().maximum(),
+                     p.text.horizontalScrollBar().maximum()) for p in self.window.panes]
+        expected_geometry = geometry()
+        self.assertNotEqual(expected[0], expected[1])
+        self.assertEqual(self.controller.current().visible, [identifier, identifier])
+        self.assertEqual(len(self.controller.buffers), 1)
+
+        def assert_views(stage):
+            self.assertEqual([self.pane_position(p)[2:] for p in self.window.panes], expected,
+                f'{stage}; geometry {geometry()} vs {expected_geometry}; {self.controller.buffer(identifier).state}')
+
+        self.window.render()
+        assert_views('forced render must retain both same-file views')
+        for pane in (left, right, left, right):
+            pane.text.setFocus()
+            pane.capture_position()
+            self.window.render()
+            assert_views('focus and capture must address only their own pane')
+        # Edit after both selected passages without moving either widget cursor.
+        edit = QTextCursor(left.text.document())
+        edit.setPosition(qt_position(left.text, '250.4'))
+        edit.setPosition(qt_position(left.text, '250.5'), QTextCursor.MoveMode.KeepAnchor)
+        edit.insertText('α')
+        self.app.processEvents()
+        recovered = original.replace('250 x', '250 α', 1)
+        self.assertEqual(self.controller.buffer(identifier).content, recovered)
+        self.assertEqual(left.text.toPlainText(), right.text.toPlainText())
+        assert_views('shared-content refresh must preserve the other view')
+        self.window.actions['split'].trigger()
+        self.window.actions['split'].trigger()
+        self.app.processEvents()
+        assert_views('hiding the split must retain pane views')
+        self.restart_window()
+        assert_views('a fresh controller and widgets must restore independent views')
+        self.assertEqual(self.controller.current().visible, [identifier, identifier])
+        self.assertEqual(len(self.controller.buffers), 1)
+        buffer = self.controller.buffer(identifier)
+        self.assertEqual(buffer.content, recovered)
+        self.assertTrue(buffer.recovery_warning)
+        for pane in self.window.panes:
+            self.assertEqual(pane.text.toPlainText(), recovered)
+        self.assertEqual(len(list((self.controller.store.directory / 'recovery').glob('*.json'))), 1)
+        self.assertEqual(path.read_text(encoding='utf-8'), original)
+        self.assertFalse(self.errors)
+
+        # Also verify actual Qt widgets in a separate process, after the parent
+        # controller has closed the project (never concurrent same-project use).
+        import json, subprocess, sys
+        self.window.flush()
+        self.controller.close_project(keep_recovery=True)
+        self.window.close()
+        self.app.processEvents()
+        script = '''
+import json, sys, time
+from pathlib import Path
+from PySide6.QtWidgets import QApplication
+from theorem_terminal.gui import WorkstationWindow
+from theorem_terminal.workstation import Workstation
+expected = json.load(sys.stdin)
+app = QApplication([])
+c = Workstation(state_root=Path(sys.argv[2]))
+w = WorkstationWindow(c)
+errors = []
+w.show_error = errors.append
+w.show()
+w.toggle_wrap(False)
+app.processEvents()
+w.open_project(Path(sys.argv[1]))
+w.disk_timer.stop()
+deadline = time.monotonic() + 30
+while w.jobs and time.monotonic() < deadline:
+ app.processEvents()
+ time.sleep(.01)
+app.processEvents()
+assert not w.jobs and not errors, errors
+assert len(c.buffers) == 1
+assert c.current().visible == [expected['identifier']] * 2
+for pane, position in zip(w.panes, expected['positions']):
+ cursor = pane.text.textCursor()
+ actual = [cursor.position(), cursor.anchor(), pane.text.verticalScrollBar().value(), pane.text.horizontalScrollBar().value()]
+ assert actual == position, (actual, position)
+ assert pane.text.toPlainText() == expected['text']
+assert c.buffer().content == expected['text'] and c.buffer().recovery_warning
+assert len(list((c.store.directory / 'recovery').glob('*.json'))) == 1
+c.close_project(keep_recovery=True)
+w.close()
+'''
+        result = subprocess.run([sys.executable, '-c', script, str(self.root), str(self.home / 'state')],
+            input=json.dumps(dict(identifier=identifier, positions=expected, text=recovered)),
+            text=True, capture_output=True, timeout=40)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_shared_lazy_load_is_deduplicated_and_placeholder_captures_no_views(self):
+        import threading
+        from copy import deepcopy
+        from theorem_terminal.gui import WorkstationWindow
+        from theorem_terminal.workstation import Workstation
+        self.open_project()
+        self.window.disk_timer.stop()
+        self.window.actions['wrap'].trigger()
+        path = self.root / 'lazy-shared.txt'
+        original = ''.join(f'{n:03d} exact work α\n' for n in range(1, 241))
+        path.write_text(original, encoding='utf-8')
+        left = self.open_file(path)
+        identifier = left.shown
+        self.window.actions['split'].trigger()
+        self.window.select(identifier, 1)
+        self.app.processEvents()
+        self.controller.edit(identifier, original + 'Checkpointed unsaved work\n')
+        self.window.render()
+        for pane, start, end, scroll in ((left, '30.0', '35.7', 20),
+                                        (self.window.panes[1], '180.0', '185.7', 170)):
+            self.select_passage(pane, start, end)
+            pane.text.verticalScrollBar().setValue(scroll)
+            pane.capture_position()
+        expected = deepcopy(self.controller.buffer(identifier).state.pane_views)
+        widgets = [self.pane_position(p) for p in self.window.panes]
+        self.window.flush()
+        self.controller.close_project(keep_recovery=True)
+        self.window.close()
+        self.app.processEvents()
+        self.error_patch.stop()
+        self.controller = Workstation(state_root=self.home / 'state')
+        self.window = WorkstationWindow(self.controller)
+        self.error_patch = patch.object(self.window, 'show_error', side_effect=self.errors.append)
+        self.error_patch.start()
+        self.window.show()
+        self.window.actions['wrap'].trigger()
+        self.window.disk_timer.stop()
+        self.app.processEvents()
+        ready, release = threading.Event(), threading.Event()
+        load = self.controller.load_snapshot
+        def delayed(buffer_id):
+            snapshot = load(buffer_id)
+            ready.set()
+            if not release.wait(30):
+                raise TimeoutError('shared load was not released')
+            return snapshot
+        with patch.object(self.controller, 'load_snapshot', side_effect=delayed) as read:
+            try:
+                self.window.open_project(self.root)
+                self.assertTrue(ready.wait(5))
+                for pane in self.window.panes:
+                    self.assertEqual(pane.text.toPlainText(), 'Loading this document…')
+                    self.assertFalse(pane.loading)
+                    pane.capture_position()
+                self.window.flush()
+                self.assertEqual(self.controller.buffer(identifier).state.pane_views, expected)
+                self.assertEqual(read.call_count, 1)
+                self.assertEqual(self.window.loading_buffers, {identifier})
+            finally:
+                release.set()
+                self.wait_idle()
+            self.assertEqual(read.call_count, 1)
+        self.assertEqual([self.pane_position(p) for p in self.window.panes], widgets)
+        self.assertEqual(len(self.controller.buffers), 1)
+        self.assertTrue(self.controller.buffer(identifier).recovery_warning)
+        self.assertEqual(path.read_text(encoding='utf-8'), original)
+        self.assertFalse(self.errors)
+
+    def test_duplicate_context_add_reports_recovery_failure_without_adding_a_row(self):
+        self.open_project()
+        pane = self.open_file(self.files['proof.md'])
+        identifier = pane.shown
+        pane.text.appendPlainText('Unsaved A')
+        text = pane.text.toPlainText()
+        self.select_passage(pane, '1.0', '1.5')
+        self.window.actions['context_add'].trigger()
+        self.controller.discard(identifier)
+        self.window.render()
+        pane.text.appendPlainText('Unsaved A')
+        self.assertEqual(pane.text.toPlainText(), text)
+        self.select_passage(pane, '1.0', '1.5')
+        with patch.object(self.controller.store, 'write_recovery', side_effect=OSError('duplicate checkpoint denied')):
+            self.window.actions['context_add'].trigger()
+        self.assertTrue(any('duplicate checkpoint denied' in error for error in self.errors))
+        self.assertEqual(self.window.selection_list.count(), 1)
+        self.assertFalse(self.controller.store.recovery_path(identifier).exists())
+        self.errors.clear()
+        self.window.actions['context_add'].trigger()
+        self.assertEqual(self.window.selection_list.count(), 1)
+        self.assertEqual(self.controller.store.read_recovery(self.controller.buffer(identifier).state)['text'], text)
+        self.assertFalse(self.errors)
+
+    def test_shared_response_review_refreshes_both_widgets_at_reset_views(self):
+        self.open_project()
+        path = self.root / 'response.json'
+        path.write_bytes(encode(model_call_document(response='First α\n\nSecond β\n')))
+        left = self.open_file(path)
+        self.window.actions['split'].trigger()
+        self.window.select(left.shown, 1)
+        right = self.window.panes[1]
+        self.select_passage(left, '1.0', '1.3')
+        self.select_passage(right, '2.0', '2.3')
+        left.passage.setValue(2)
+        left.review('passage')
+        self.assertEqual(left.text.toPlainText(), right.text.toPlainText())
+        for pane in (left, right):
+            self.assertEqual(pane.text.textCursor().position(), 0)
+            self.assertFalse(pane.text.textCursor().hasSelection())
+        self.assertFalse(self.errors)
 
     def test_completion_success_has_main_thread_affinity(self):
         from PySide6.QtCore import QThread
@@ -250,7 +480,7 @@ class GraphicalEditorTests(unittest.TestCase):
                 self.assertFalse(self.controller.buffer(identifier).loaded)
                 self.assertEqual(pane.text.toPlainText(), 'Loading this document…')
                 self.assertTrue(self.window.jobs)
-                state = self.controller.buffer(identifier).state
+                state = self.controller.buffer(identifier).state.pane_views[pane.number]
                 self.assertEqual({key: getattr(state, key) for key in expected}, expected)
                 # Exercise delayed placeholder signals while completion is held;
                 # neither Qt event timing nor the synchronous loading guard can mask it.
@@ -271,8 +501,8 @@ class GraphicalEditorTests(unittest.TestCase):
         self.assertEqual(cursor_index(pane.text, cursor.position()), expected['cursor'])
         self.assertEqual([cursor_index(pane.text, cursor.selectionStart()),
                           cursor_index(pane.text, cursor.selectionEnd())], expected['selection'])
-        self.assertEqual(buffer.state.cursor, expected['cursor'])
-        self.assertEqual(buffer.state.selection, expected['selection'])
+        self.assertEqual(buffer.state.pane_views[pane.number].cursor, expected['cursor'])
+        self.assertEqual(buffer.state.pane_views[pane.number].selection, expected['selection'])
         vertical = pane.text.verticalScrollBar()
         self.assertGreater(vertical.value(), 0)
         self.assertAlmostEqual(vertical.value() / vertical.maximum(), expected['yscroll'], delta=0.03)
@@ -343,7 +573,7 @@ class GraphicalEditorTests(unittest.TestCase):
             edit = self.window.active_pane().text
             self.assertEqual(edit.textCursor().blockNumber(), line - 1)
             self.assertTrue(edit.viewport().rect().contains(edit.cursorRect().center()))
-            self.assertGreater(self.controller.buffer().state.yscroll, 0)
+            self.assertGreater(self.controller.buffer().state.pane_views[self.controller.current().active_pane].yscroll, 0)
         self.assertFalse(self.errors)
 
     def test_model_response_projection_and_integral_record_facets(self):

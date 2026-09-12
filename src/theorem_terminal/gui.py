@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import ExitStack
 import json
 from html import escape
 import os
@@ -225,17 +226,18 @@ class EditorPane(QWidget):
             self.window.update_actions()
 
     def capture_position(self, *_):
-        if self.loading or self.shown not in self.window.controller.buffers:
+        if self.loading or not self.isVisible() or self.shown not in self.window.controller.buffers:
             return
         buffer = self.window.controller.buffer(self.shown)
         if not buffer.loaded:
             return
-        if self.window.controller.current().visible[self.number] != self.shown:
+        state = self.window.controller.current()
+        if state.visible[self.number] != self.shown or (self.number == 1 and not state.split):
             return
         cursor = self.text.textCursor()
         selection = [cursor_index(self.text, cursor.selectionStart()), cursor_index(self.text, cursor.selectionEnd())] if cursor.hasSelection() else None
         vertical, horizontal = self.text.verticalScrollBar(), self.text.horizontalScrollBar()
-        self.window.controller.set_position(self.shown, cursor=cursor_index(self.text, cursor.position()), selection=selection,
+        self.window.controller.set_position(self.shown, pane=self.number, cursor=cursor_index(self.text, cursor.position()), selection=selection,
             yscroll=vertical.value() / max(1, vertical.maximum()), xscroll=horizontal.value() / max(1, horizontal.maximum()))
         self.window.schedule_checkpoint()
 
@@ -255,7 +257,7 @@ class EditorPane(QWidget):
             self.window.show_error(str(exc))
         self.capture_position()
         for pane in self.window.panes:
-            if pane is not self and pane.shown == self.shown:
+            if pane is not self and pane.isVisible() and pane.shown == self.shown:
                 pane.show_buffer(self.shown, force=True)
         self.window.update_actions()
         self.window.mark_pdf_dirty()
@@ -287,22 +289,30 @@ class EditorPane(QWidget):
                 normalized = text.replace('\r\n', '\n').replace('\r', '\n')
                 if not same_buffer or self.text.toPlainText() != normalized:
                     self.text.setPlainText(normalized)
+                # blockCountChanged is suppressed while installing text. Set
+                # the final gutter width before restoring either scrollbar.
+                self.text.layout_gutter()
                 self.text.document().setModified(bool(buffer and buffer.dirty))
                 if buffer and buffer.loaded and not buffer.problem:
+                    view = buffer.state.pane_views[self.number]
                     cursor = self.text.textCursor()
-                    if buffer.state.selection:
-                        cursor.setPosition(qt_position(self.text, buffer.state.selection[0]))
-                        cursor.setPosition(qt_position(self.text, buffer.state.selection[1]), QTextCursor.MoveMode.KeepAnchor)
+                    if view.selection:
+                        start, end = view.selection
+                        # Qt keeps the active end at the cursor, including a
+                        # backwards selection whose active end is its start.
+                        anchor = end if view.cursor == start else start
+                        cursor.setPosition(qt_position(self.text, anchor))
+                        cursor.setPosition(qt_position(self.text, view.cursor), QTextCursor.MoveMode.KeepAnchor)
                     else:
-                        cursor.setPosition(qt_position(self.text, buffer.state.cursor))
+                        cursor.setPosition(qt_position(self.text, view.cursor))
                     self.text.setTextCursor(cursor)
                     if self.center_on_next_show:
                         self.text.centerCursor()
                         self.center_on_next_show = False
                         centered = True
                     else:
-                        self.text.verticalScrollBar().setValue(round(buffer.state.yscroll * self.text.verticalScrollBar().maximum()))
-                        self.text.horizontalScrollBar().setValue(round(buffer.state.xscroll * self.text.horizontalScrollBar().maximum()))
+                        self.text.verticalScrollBar().setValue(round(view.yscroll * self.text.verticalScrollBar().maximum()))
+                        self.text.horizontalScrollBar().setValue(round(view.xscroll * self.text.horizontalScrollBar().maximum()))
                 if response:
                     self.passage.setValue(buffer.state.review_number)
                     self.retain.setEnabled(buffer.state.review_mode == 'passage' and not buffer.problem)
@@ -315,7 +325,9 @@ class EditorPane(QWidget):
 
     def review(self, mode):
         self.window.perform(lambda: self.window.controller.review_response(self.shown, mode, self.passage.value()))
-        self.show_buffer(self.shown, force=True)
+        for pane in self.window.panes:
+            if pane.isVisible() and pane.shown == self.shown:
+                pane.show_buffer(self.shown, force=True)
         self.window.update_context()
 
 
@@ -667,10 +679,15 @@ class WorkstationWindow(QMainWindow):
         self.checkpoint_timer.start(250)
 
     def flush(self):
-        self.checkpoint_timer.stop()
         if self.controller.workspace:
+            for pane in self.panes:
+                if pane.isVisible():
+                    pane.capture_position()
+            self.checkpoint_timer.stop()
             self.controller.current().window_size = [self.width(), self.height()]
             self.controller.checkpoint()
+        else:
+            self.checkpoint_timer.stop()
         self.update_actions()
 
     def update_actions(self):
@@ -761,14 +778,22 @@ class WorkstationWindow(QMainWindow):
             self.selection_dock.hide()
         self.update_context_actions()
 
-    def render(self):
+    def render(self, *, balance_editors=False):
         state = self.controller.workspace
         self.refresh_selection_shelf()
-        self.panes[1].setVisible(bool(state and state.split))
-        self.pdf.setVisible(bool(state and state.pdf_visible))
-        for index, pane in enumerate(self.panes):
-            if index == 0 or state and state.split:
-                pane.show_buffer(state.visible[index] if state else None, force=True)
+        # Split layout changes can emit position signals before document views
+        # are restored. These signals describe geometry, not user navigation.
+        with ExitStack() as signals:
+            for pane in self.panes:
+                for widget in (pane.text, pane.text.verticalScrollBar(), pane.text.horizontalScrollBar()):
+                    signals.enter_context(QSignalBlocker(widget))
+            self.panes[1].setVisible(bool(state and state.split))
+            self.pdf.setVisible(bool(state and state.pdf_visible))
+            if balance_editors:
+                self.editors.setSizes([500, 500])
+            for index, pane in enumerate(self.panes):
+                if index == 0 or state and state.split:
+                    pane.show_buffer(state.visible[index] if state else None, force=True)
         self.update_context()
         self.update_actions()
 
@@ -831,15 +856,16 @@ class WorkstationWindow(QMainWindow):
         def install(buffer):
             installed = self.controller._install(buffer, pane)
             if line:
-                installed.state.cursor = f'{line}.0'
-                installed.state.selection = None
+                installed.state.pane_views[pane].cursor = f'{line}.0'
+                installed.state.pane_views[pane].selection = None
                 self.panes[pane].center_on_next_show = True
             self.render()
             self.panes[pane].text.setFocus()
         for buffer in self.controller.buffers.values():
             if buffer.state.path == str(path.resolve()):
                 if line:
-                    buffer.state.cursor, buffer.state.selection = f'{line}.0', None
+                    view = buffer.state.pane_views[pane]
+                    view.cursor, view.selection = f'{line}.0', None
                     self.panes[pane].center_on_next_show = True
                 self.controller.activate(buffer.state.id, pane)
                 self.render()
@@ -1004,9 +1030,11 @@ class WorkstationWindow(QMainWindow):
             event.ignore()
 
     def toggle_split(self, enabled):
+        for pane in self.panes:
+            if pane.isVisible():
+                pane.capture_position()
         self.controller.set_split(enabled)
-        self.render()
-        self.editors.setSizes([500, 500])
+        self.render(balance_editors=True)
 
     def toggle_wrap(self, enabled):
         for pane in self.panes:
@@ -1052,7 +1080,7 @@ class WorkstationWindow(QMainWindow):
         pane.capture_position()
         cursor = pane.text.textCursor()
         index = self.controller.add_context_selection(pane.shown,
-            cursor_index(pane.text, cursor.selectionStart()), cursor_index(pane.text, cursor.selectionEnd()))
+            cursor_index(pane.text, cursor.selectionStart()), cursor_index(pane.text, cursor.selectionEnd()), pane=pane.number)
         self.refresh_selection_shelf()
         self.selection_list.setCurrentRow(index)
         self.selection_dock.show()

@@ -87,7 +87,9 @@ On return, compare changed disk content with any unsaved work before refreshing.
 Notebook execution likewise requires a deliberate tool action; merely opening a
 notebook must not execute it or expose editable raw JSON by default.
 
-Re-entry restores the open work, selected passage and rendering position. An
+Re-entry restores the open work, selected passage and rendering position. Two
+panes comparing the same file retain independent cursor, selection and scroll
+positions while sharing file content and one buffer/recovery identity. An
 optional unresolved-work marker anchors a file selection without demanding a
 written description. The implemented **Working context** shelf independently
 retains up to 32 ordered, exact revision-pinned selections across ordinary text

@@ -2,7 +2,7 @@
 
 from contextlib import ExitStack
 from copy import deepcopy
-from dataclasses import asdict
+from dataclasses import asdict, field
 from hashlib import sha256
 import json
 import os
@@ -20,7 +20,8 @@ from theorem_terminal.documentary_warrant import parse_documentary_projection
 from theorem_terminal.model_projection import parse_finalized_model_call
 from theorem_terminal.response_review import passages, render_response_review
 from theorem_terminal.mutable_files import MutableFileError, file_lock, save_mutable
-from theorem_terminal.workspace import (MAX_TEXT_BYTES, VERSION, WorkspaceError, WorkspaceStore,
+from theorem_terminal.workspace import (BufferState, MAX_TEXT_BYTES, PaneViewState, VERSION,
+                                        WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
                                         decode_workspace, encode_workspace)
 from theorem_terminal.workstation import Workstation
 
@@ -40,6 +41,24 @@ def mathematical_project(root):
         path.write_bytes(content.encode("utf-8"))
         result[name] = path
     return result
+
+
+def historical_workspace(root, version):
+    """Literal v3/v4 wire data; never generated from the current dataclasses."""
+    path = str(root / 'proof.md')
+    identifier = '11111111-1111-1111-1111-111111111111'
+    marker = dict(path=path, revision='a' * 64, start='3.00', end='3.07')
+    data = dict(schema='theorem-terminal.workspace', schema_version=version, root=str(root),
+        buffers=[dict(id=identifier, path=path, format='text', revision='a' * 64,
+            readonly=False, external=False, companion=None, companion_revision=None,
+            cursor='3.07', selection=['3.00', '3.07'], yscroll=.7, xscroll=.2,
+            was_dirty=True, review_mode='index', review_number=1)],
+        active=identifier, visible=[identifier, identifier], active_pane=1, split=True,
+        recent=[path], marker=marker, tex_root=None, last_build=None, successful_build=None,
+        pdf_page=7, pdf_zoom='custom', pdf_scale=1.4, pdf_visible=True, window_size=[960, 680])
+    if version == 4:
+        data['selection_shelf'] = [dict(path=path, revision='b' * 64, start='1.00', end='1.05'), marker.copy()]
+    return data
 
 
 def verification_fixture():
@@ -260,7 +279,7 @@ print(encode_workspace(c.current()).decode())
         self.assertTrue(state['pdf_visible'])
         self.assertEqual(state['recent'][0], str(self.files['proof.md']))
         current = next(b for b in state['buffers'] if b['id'] == right.state.id)
-        self.assertEqual(current['selection'], ['3.0', '3.7'])
+        self.assertEqual(current['pane_views'][1]['selection'], ['3.0', '3.7'])
         for excluded in ('objective', 'hypotheses', 'relationships', 'editor_command', 'adapter'):
             self.assertNotIn(excluded, state)
 
@@ -457,7 +476,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         vim = shutil.which('vim.tiny') or shutil.which('nvim')
         path = self.files['proof.md']
         b = self.controller.open_file(path)
-        b.state.cursor = '3.4'
+        b.state.pane_views[0].cursor = '3.4'
         arguments = [vim, '-u', 'NONE', '-i', 'NONE', '-n', '-N', '-es', '+{line}', '-c', 's/.*/Written by actual Vim/', '-c', 'wq', '{file}']
         import shlex
         self.controller.configure_editor(shlex.join(arguments))
@@ -532,7 +551,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_invalid_versions_malformed_records_and_digest_mismatch_are_non_destructive(self):
         original = self.manifest.read_bytes()
-        for version in (0, 1, 2, 5, 99, True, False, 3.0, 4.0, '3', '4', None):
+        for version in (0, 1, 2, 6, 99, True, False, 3.0, 4.0, 5.0, '3', '4', '5', None):
             data = json.loads(original)
             data['schema_version'] = version
             with self.assertRaisesRegex(WorkspaceError, 'Unsupported'):
@@ -554,6 +573,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertEqual(path.read_bytes(), raw)
 
     def add_selection(self, buffer, start='1.0', end='1.5'):
+        if self.controller.current().active != buffer.state.id:
+            self.controller.activate(buffer.state.id)
         self.controller.set_position(buffer.state.id, cursor=end, selection=[start, end], yscroll=.2, xscroll=0)
         return self.controller.add_context_selection(buffer.state.id, start, end)
 
@@ -574,6 +595,10 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         old = json.loads(self.manifest.read_bytes())
         old['schema_version'] = 3
         del old['selection_shelf']
+        for item, wanted in zip(old['buffers'], expected['buffers']):
+            position = item.pop('pane_views')[1 if item['id'] == right.state.id else 0]
+            item.update(position)
+            wanted['pane_views'] = [deepcopy(position), deepcopy(position)]
         raw = encode(old)
         self.manifest.write_bytes(raw)
         with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('eager source read')):
@@ -581,8 +606,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertEqual(asdict(migrated), expected)
             self.assertEqual(self.manifest.read_bytes(), raw)
             restored = self.restored()
-        self.assertEqual(VERSION, 4)
-        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 4)
+        self.assertEqual(VERSION, 5)
+        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 5)
         self.assertEqual(asdict(restored.current()), expected)
         self.assertEqual(recovery.read_bytes(), recovery_bytes)
         self.assertTrue(restored.view().recovery_warning)
@@ -591,7 +616,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
     def test_migration_and_shelf_schema_reject_malformed_manifests(self):
         original_raw = self.manifest.read_bytes()
         original = json.loads(original_raw)
-        for version in (3, 4):
+        for version in (3, 4, 5):
             valid = deepcopy(original)
             valid['schema_version'] = version
             if version == 3:
@@ -618,6 +643,308 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             with self.subTest(shelf=shelf), self.assertRaises(WorkspaceError):
                 decode_workspace(encode({**original, 'selection_shelf': shelf}))
         self.assertEqual(self.manifest.read_bytes(), original_raw)
+
+    def test_literal_historical_migrations_normalize_and_keep_independent_views(self):
+        for version in (3, 4):
+            with self.subTest(version=version):
+                document = historical_workspace(self.root, version)
+                raw = encode(document)
+                with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read a file')):
+                    state = decode_workspace(raw)
+                self.assertEqual(document, json.loads(raw))
+                self.assertEqual(state.visible, [state.buffers[0].id] * 2)
+                left, right = state.buffers[0].pane_views
+                expected = dict(cursor='3.7', selection=['3.0', '3.7'], yscroll=.7, xscroll=.2)
+                self.assertEqual(asdict(left), expected)
+                self.assertEqual(asdict(right), expected)
+                self.assertIsNot(left, right)
+                self.assertIsNot(left.selection, right.selection)
+                left.selection[0] = '2.0'
+                self.assertEqual(right.selection, ['3.0', '3.7'])
+                self.assertEqual((state.marker.start, state.marker.end), ('3.0', '3.7'))
+                self.assertEqual((state.pdf_page, state.pdf_zoom, state.pdf_scale, state.window_size),
+                                 (7, 'custom', 1.4, [960, 680]))
+                self.assertEqual([(s.revision, s.start, s.end) for s in state.selection_shelf],
+                                 [] if version == 3 else [('b' * 64, '1.0', '1.5'), ('a' * 64, '3.0', '3.7')])
+                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], 5)
+                for key, value in (('cursor', '0.1'), ('yscroll', True), ('selection', ['1.0']), ('pane_views', [])):
+                    malformed = deepcopy(document)
+                    malformed['buffers'][0][key] = value
+                    with self.assertRaises(WorkspaceError):
+                        decode_workspace(encode(malformed))
+        duplicate = historical_workspace(self.root, 4)
+        duplicate['selection_shelf'][1] = {**duplicate['selection_shelf'][0], 'start': '1.0', 'end': '1.5'}
+        with self.assertRaisesRegex(WorkspaceError, 'Duplicate'):
+            decode_workspace(encode(duplicate))
+
+    def test_historical_wire_shapes_do_not_follow_current_dataclass_fields(self):
+        for version in (3, 4):
+            document = historical_workspace(self.root, version)
+            with ExitStack() as stack:
+                for cls in (Workspace, BufferState, WorkMarker, PaneViewState):
+                    stack.enter_context(patch.dict(cls.__dataclass_fields__, {'future_field': field(default=None)}))
+                state = decode_workspace(encode(document))
+                self.assertEqual(state.buffers[0].pane_views[0].cursor, '3.7')
+                for target in ('workspace', 'buffer', 'marker'):
+                    broken = deepcopy(document)
+                    destination = broken if target == 'workspace' else (broken['buffers'][0] if target == 'buffer' else broken['marker'])
+                    destination['future_field'] = None
+                    with self.assertRaises(WorkspaceError):
+                        decode_workspace(encode(broken))
+
+    def test_version_five_rejects_malformed_pane_views_and_legacy_fields(self):
+        valid = json.loads(encode_workspace(decode_workspace(encode(historical_workspace(self.root, 4)))))
+        view = valid['buffers'][0]['pane_views'][0]
+        invalid = [None, True, '', {}, [], [view], [view] * 3, [None, view], [[], view], [True, view]]
+        mutations = [dict(cursor=value) for value in ('1.00', '01.0', '0.0', '1.-1', '1.1000000000', '', None, True, 1)]
+        mutations += [dict(selection=value) for value in ([], ['1.0'], ['1.0'] * 3, '1.0', True, [None, '1.0'], ['1.00', '2.0'])]
+        mutations += [{key: value} for key in ('yscroll', 'xscroll') for value in (True, False, None, '0', -1, 1.01, float('inf'), float('-inf'), float('nan'))]
+        mutations += [{'extra': 0}]
+        invalid.extend([{**view, **mutation}, view] for mutation in mutations)
+        invalid.extend([{k: v for k, v in view.items() if k != key}, view] for key in view)
+        for views in invalid:
+            broken = deepcopy(valid)
+            broken['buffers'][0]['pane_views'] = views
+            with self.subTest(views=views), self.assertRaises(WorkspaceError):
+                decode_workspace(json.dumps(broken).encode())
+        for key in ('cursor', 'selection', 'yscroll', 'xscroll'):
+            broken = deepcopy(valid)
+            broken['buffers'][0][key] = view[key]
+            with self.assertRaises(WorkspaceError):
+                decode_workspace(encode(broken))
+        broken = deepcopy(valid)
+        del broken['buffers'][0]['pane_views']
+        with self.assertRaises(WorkspaceError):
+            decode_workspace(encode(broken))
+        for value in (0, 1, .25):
+            valid['buffers'][0]['pane_views'][0]['yscroll'] = value
+            decode_workspace(encode(valid))
+
+    def test_pane_controller_keeps_shared_content_and_independent_navigation(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.set_split(True)
+        c.activate(b.state.id, 1)
+        left = dict(cursor='1.5', selection=['1.0', '1.5'], yscroll=.2, xscroll=.1)
+        right = dict(cursor='3.7', selection=['3.0', '3.7'], yscroll=.8, xscroll=.6)
+        c.set_position(b.state.id, pane=0, **left)
+        c.set_position(b.state.id, **right)
+        for pane in (True, -1, 2, '0'):
+            with self.assertRaises(WorkspaceError):
+                c.set_position(b.state.id, pane=pane, **left)
+        self.assertIsNot(b.state.pane_views[0].selection, left['selection'])
+        c.add_context_selection(b.state.id, '1.0', '1.5', pane=0)
+        c.add_context_selection(b.state.id, '3.0', '3.7', pane=1)
+        c.mark(b.state.id, '1.1', '1.4')
+        marker = deepcopy(c.current().marker)
+        for pane, index in ((0, 1), (1, 0)):
+            other = deepcopy(b.state.pane_views[1 - pane])
+            c.open_context_selection(index, pane)
+            self.assertEqual(b.state.pane_views[1 - pane], other)
+            self.assertEqual(c.current().visible, [b.state.id] * 2)
+        untouched = deepcopy(b.state.pane_views[0])
+        c.return_to_marker()
+        self.assertEqual(b.state.pane_views[0], untouched)
+        self.assertEqual(b.state.pane_views[1].selection, ['1.1', '1.4'])
+        c.set_position(b.state.id, pane=0, **left)
+        c.set_position(b.state.id, pane=1, **right)
+        with patch('theorem_terminal.tool_settings.resolve_executable', side_effect=lambda x: x):
+            c.configure_editor('editor {line} {column} {file}')
+            for pane, expected in ((0, ['1', '6']), (1, ['3', '8'])):
+                c.activate(b.state.id, pane)
+                self.assertEqual(c.external_editor_arguments()[1:3], expected)
+        stale = c.load_snapshot(b.state.id)
+        c.set_position(b.state.id, pane=0, **right)
+        c.set_position(b.state.id, pane=1, **left)
+        wanted = deepcopy(b.state.pane_views)
+        b = c.accept_snapshot(stale)
+        self.assertEqual(b.state.pane_views, wanted)
+        self.assertIsNot(b.state.pane_views[0], wanted[0])
+        c.set_split(False)
+        with self.assertRaises(WorkspaceError):
+            c.set_position(b.state.id, pane=1, **right)
+        c.set_split(True)
+        self.assertEqual(b.state.pane_views, wanted)
+        other = c.open_file(self.files['questions.txt'], pane=0)
+        with self.assertRaises(WorkspaceError):
+            c.set_position(b.state.id, pane=0, **left)
+        c.activate(b.state.id, 0)
+        c.close_buffer(b.state.id)
+        self.assertEqual(c.current().visible, [None, None])
+        self.assertNotIn(b.state.id, c.buffers)
+        self.assertEqual(c.current().marker, marker)
+        self.assertEqual(len(c.current().selection_shelf), 2)
+
+    def test_response_review_resets_both_shared_pane_views(self):
+        c = self.controller
+        b = self.call()
+        c.set_split(True)
+        c.activate(b.state.id, 1)
+        for pane in (0, 1):
+            c.set_position(b.state.id, pane=pane, cursor='3.7', selection=['3.0', '3.7'], yscroll=.5, xscroll=.2)
+        c.review_response(b.state.id, 'passage', 2)
+        self.assertEqual(b.state.pane_views, [PaneViewState(), PaneViewState()])
+        self.assertIsNot(b.state.pane_views[0], b.state.pane_views[1])
+        self.assertEqual(c.current().visible, [b.state.id] * 2)
+
+    def test_duplicate_add_checkpoints_recovered_text_before_abrupt_restart(self):
+        original = self.files['proof.md'].read_bytes()
+        self.controller.close_project()
+        script = '''
+import os, sys
+from pathlib import Path
+from unittest.mock import patch
+from theorem_terminal.workstation import Workstation
+from theorem_terminal.workspace import WorkspaceError
+c = Workstation(state_root=Path(sys.argv[2]))
+c.open_project(Path(sys.argv[1]))
+b = c.open_file(Path(sys.argv[1]) / 'proof.md')
+a = b.content + 'Unsaved A α\\n'
+def select():
+ c.set_position(b.state.id, cursor='1.5', selection=['1.0','1.5'], yscroll=.2, xscroll=0)
+c.edit(b.state.id, a)
+select()
+assert c.add_context_selection(b.state.id, '1.0', '1.5') == 0
+c.discard(b.state.id)
+assert not c.store.recovery_path(b.state.id).exists()
+c.edit(b.state.id, a)
+select()
+with patch.object(c.store, 'write_recovery', side_effect=OSError('duplicate recovery denied')):
+ try: c.add_context_selection(b.state.id, '1.0', '1.5')
+ except WorkspaceError as error: assert 'duplicate recovery denied' in str(error)
+ else: raise AssertionError('duplicate addition reported false success')
+assert len(c.current().selection_shelf) == 1
+assert not c.store.recovery_path(b.state.id).exists()
+assert c.add_context_selection(b.state.id, '1.0', '1.5') == 0
+assert len(c.current().selection_shelf) == 1
+assert c.store.read_recovery(b.state)['text'] == a
+os._exit(0)
+'''
+        subprocess.run([sys.executable, '-c', script, str(self.root), str(self.state_root)],
+                       check=True, capture_output=True, timeout=30)
+        c = self.restored()
+        b = c.open_context_selection(0)
+        self.assertEqual(b.content, original.decode() + 'Unsaved A α\n')
+        self.assertTrue(b.recovery_warning)
+        self.assertEqual(len(c.current().selection_shelf), 1)
+        self.assertEqual(self.files['proof.md'].read_bytes(), original)
+
+    def test_context_accept_rechecks_filesystem_before_any_navigation(self):
+        c = self.controller
+        target = c.open_file(self.files['proof.md'])
+        self.add_selection(target)
+        c.mark(target.state.id, '3.0', '3.7')
+        left = c.open_file(self.files['questions.txt'])
+        c.set_split(True)
+        right = c.open_file(self.files['notes/differences.tex'], pane=1)
+        path = Path(target.state.path)
+        raw = path.read_bytes()
+        for state in ('loaded', 'recovered', 'unloaded', 'closed'):
+            if state == 'recovered':
+                c.activate(target.state.id, 0)
+                c.edit(target.state.id, target.content + 'Unsaved α\n')
+                self.add_selection(target)
+                c.current().selection_shelf[0] = c.current().selection_shelf.pop()
+            elif state == 'unloaded':
+                target.loaded = False
+            elif state == 'closed':
+                target = c.view(target.state.id)
+                c.discard(target.state.id)
+                c.current().selection_shelf[0].revision = sha256(raw).hexdigest()
+                c.close_buffer(target.state.id)
+            for mutation in ('replacement', 'deletion', 'symlink'):
+                for pane in (0, 1):
+                    c.set_split(True)
+                    c.activate(left.state.id, 0)
+                    c.activate(right.state.id, 1)
+                    if pane == 1:
+                        c.set_split(False)
+                    prepared = c.prepare_context_selection(0)
+                    before, buffers = deepcopy(c.current()), deepcopy(c.buffers)
+                    try:
+                        if mutation == 'replacement':
+                            replacement = self.root / 'replacement.txt'
+                            replacement.write_bytes(b'Replaced byte content\n')
+                            os.replace(replacement, path)
+                        else:
+                            path.unlink()
+                            if mutation == 'symlink':
+                                path.symlink_to(self.files['questions.txt'])
+                        with self.assertRaises((WorkspaceError, OSError)):
+                            c.accept_context_selection(0, prepared, pane)
+                        self.assertEqual(c.current(), before)
+                        self.assertEqual(c.buffers, buffers)
+                    finally:
+                        if path.is_symlink():
+                            path.unlink()
+                        path.write_bytes(raw)
+
+    def test_failed_shelf_rollback_reconciles_cache_and_checkpoint_repairs_disk(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        self.add_selection(b)
+        c.set_position(b.state.id, cursor='3.7', selection=['3.0', '3.7'], yscroll=.3, xscroll=.1)
+        self.assertTrue(c.checkpoint())
+        previous = self.manifest.read_bytes()
+        old_shelf = deepcopy(c.current().selection_shelf)
+        from theorem_terminal.mutable_files import sync_directory
+        def fail_candidate_sync(directory):
+            if directory == c.store.directory and len(json.loads(self.manifest.read_bytes())['selection_shelf']) == 2:
+                raise OSError('candidate directory sync denied')
+            return sync_directory(directory)
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_candidate_sync), \
+             patch('theorem_terminal.workstation.save_mutable', side_effect=OSError('rollback replacement denied')):
+            with self.assertRaisesRegex(WorkspaceError, 'rollback replacement denied'):
+                c.add_context_selection(b.state.id, '3.0', '3.7')
+        candidate = self.manifest.read_bytes()
+        self.assertNotEqual(candidate, previous)
+        self.assertEqual(len(json.loads(candidate)['selection_shelf']), 2)
+        self.assertEqual(c.current().selection_shelf, old_shelf)
+        self.assertEqual(c.store.previous, candidate)
+        self.assertTrue(c.persistence_error)
+        with patch('theorem_terminal.workspace.save_mutable', wraps=save_mutable) as replace_manifest:
+            self.assertTrue(c.checkpoint())
+            self.assertEqual(replace_manifest.call_args.kwargs['previous'], candidate)
+        self.assertEqual(self.manifest.read_bytes(), previous)
+        self.assertEqual(c.store.previous, previous)
+
+    def test_unreconcilable_shelf_manifest_blocks_later_checkpoints(self):
+        from theorem_terminal.mutable_files import sync_directory
+        for failure in ('missing', 'unrelated', 'unreadable'):
+            with self.subTest(failure=failure):
+                root = self.home / failure
+                root.mkdir()
+                path = root / 'work.txt'
+                path.write_text('First line\nSecond line\n')
+                c = Workstation(state_root=self.home / (failure + '-state'))
+                c.open_project(root)
+                b = c.open_file(path)
+                c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
+                manifest = c.store.path
+                def fail_sync(directory):
+                    if directory == c.store.directory and json.loads(manifest.read_bytes())['selection_shelf']:
+                        raise OSError('candidate sync denied')
+                    return sync_directory(directory)
+                def fail_rollback(*args, **kwargs):
+                    if failure == 'missing':
+                        manifest.unlink()
+                    elif failure == 'unrelated':
+                        manifest.write_bytes(b'unrelated writer')
+                    raise OSError('rollback denied')
+                with ExitStack() as stack:
+                    stack.enter_context(patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_sync))
+                    stack.enter_context(patch('theorem_terminal.workstation.save_mutable', side_effect=fail_rollback))
+                    if failure == 'unreadable':
+                        stack.enter_context(patch('theorem_terminal.workspace.read_bounded', side_effect=OSError('read denied')))
+                    with self.assertRaises(WorkspaceError):
+                        c.add_context_selection(b.state.id, '1.0', '1.5')
+                actual = manifest.read_bytes() if manifest.exists() else None
+                self.assertIsNotNone(c.store.previous)
+                self.assertNotIsInstance(c.store.previous, bytes)
+                self.assertFalse(c.current().selection_shelf)
+                self.assertFalse(c.checkpoint())
+                self.assertIn('reconciled', c.persistence_error)
+                self.assertEqual(manifest.read_bytes() if manifest.exists() else None, actual)
 
     def test_context_selections_survive_process_restart_in_order_without_external_actions(self):
         external = self.home / 'external-reference.txt'
@@ -657,7 +984,7 @@ with ExitStack() as stack:
  for index in range(len(c.current().selection_shelf)):
   b = c.open_context_selection(index)
   entry = c.current().selection_shelf[index]
-  assert b.state.selection == [entry.start, entry.end]
+  assert b.state.pane_views[c.current().active_pane].selection == [entry.start, entry.end]
   if b.state.external: assert b.state.readonly
  assert asdict(c.current())['marker'] == before['marker']
  c.close_project()
@@ -721,8 +1048,8 @@ with ExitStack() as stack:
         b = restored.open_context_selection(0)
         self.assertEqual(b.content, text)
         self.assertTrue(b.recovery_warning)
-        self.assertEqual(b.state.selection, ['1.6', '2.10'])
-        self.assertEqual(b.state.cursor, '2.10')
+        self.assertEqual(b.state.pane_views[0].selection, ['1.6', '2.10'])
+        self.assertEqual(b.state.pane_views[0].cursor, '2.10')
         restored.remove_context_selection(0)
         self.assertEqual(restored.current().marker, marker)
         self.assertEqual(self.files['proof.md'].read_bytes(), original)

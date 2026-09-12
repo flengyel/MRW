@@ -20,8 +20,8 @@ from .response_review import purpose_kind, render_response_review, select_passag
 from .source import SourceDocument
 from .tool_settings import SettingsStore, expand_arguments, launch_tool
 from .workspace import (BufferState, MAX_BUFFERS, MAX_CONTEXT_SELECTIONS, MAX_MANIFEST_BYTES,
-                        MAX_TEXT_BYTES, WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
-                        encode_workspace, selection_span, strict_json)
+                        MAX_TEXT_BYTES, PaneViewState, WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
+                        decode_pane_view, encode_workspace, selection_span, strict_json)
 
 
 @dataclass
@@ -270,8 +270,7 @@ class Workstation:
         identifier = snapshot.state.id
         current = self.buffer(identifier)
         # Positions may have changed while a worker read the disk.
-        for key in ('cursor', 'selection', 'yscroll', 'xscroll'):
-            setattr(snapshot.state, key, getattr(current.state, key))
+        snapshot.state.pane_views = deepcopy(current.state.pane_views)
         index = next(i for i, s in enumerate(self.current().buffers) if s.id == identifier)
         self.current().buffers[index] = snapshot.state
         self.buffers[identifier] = snapshot
@@ -343,7 +342,7 @@ class Workstation:
     def activate(self, identifier, pane=None):
         workspace = self.current()
         pane = workspace.active_pane if pane is None else pane
-        if pane not in (0, 1) or (pane == 1 and not workspace.split):
+        if type(pane) is not int or pane not in (0, 1) or (pane == 1 and not workspace.split):
             raise WorkspaceError('The selected editor pane is not open')
         if identifier is not None:
             buffer = self.buffer(identifier)
@@ -390,10 +389,18 @@ class Workstation:
             buffer.recovery_warning = ''
             self.pending_recovery_cleanup.add(identifier)
 
-    def set_position(self, identifier, *, cursor, selection, yscroll, xscroll):
-        state = self.buffer(identifier).state
-        state.cursor, state.selection = cursor, selection
-        state.yscroll, state.xscroll = yscroll, xscroll
+    def _displayed_pane(self, identifier, pane=None):
+        state = self.current()
+        pane = state.active_pane if pane is None else pane
+        if (type(pane) is not int or pane not in (0, 1) or (pane == 1 and not state.split)
+                or state.visible[pane] != identifier):
+            raise WorkspaceError('The selected pane must display this buffer')
+        return pane
+
+    def set_position(self, identifier, *, cursor, selection, yscroll, xscroll, pane=None):
+        pane = self._displayed_pane(identifier, pane)
+        view = decode_pane_view(dict(cursor=cursor, selection=selection, yscroll=yscroll, xscroll=xscroll))
+        self.buffer(identifier).state.pane_views[pane] = view
 
     def _destination(self, path, *, current=None):
         path = path.expanduser().absolute()
@@ -542,19 +549,22 @@ class Workstation:
                     self.store.previous = previous
             except (OSError, ValueError) as rollback:
                 self.persistence_error += '; could not restore the previous shelf: ' + str(rollback)
+            self.store.reconcile_failed_save(previous, raw)
             raise WorkspaceError('Working context checkpoint failed: ' + self.persistence_error) from exc
         self.current().selection_shelf = selections
 
-    def add_context_selection(self, identifier, start, end) -> int:
+    def add_context_selection(self, identifier, start, end, *, pane=None) -> int:
         if not self.context_selection_supported(identifier):
             raise WorkspaceError('Select a passage in a loaded ordinary text file')
         buffer = self.buffer(identifier)
         self._context_span(buffer.content, start, end)
-        if buffer.state.selection != [start, end]:
+        pane = self._displayed_pane(identifier, pane)
+        if buffer.state.pane_views[pane].selection != [start, end]:
             raise WorkspaceError('Use the current nonempty editor selection')
         entry = WorkMarker(buffer.state.path, sha256(buffer.content.encode('utf-8')).hexdigest(), start, end)
         shelf = self.current().selection_shelf
         if entry in shelf:
+            self._checkpoint_selection_shelf(shelf)
             return shelf.index(entry)
         if len(shelf) >= MAX_CONTEXT_SELECTIONS:
             raise WorkspaceError('Working context is limited to 32 selections; remove a passage first')
@@ -579,9 +589,15 @@ class Workstation:
             buffer = self.load_snapshot(existing.state.id)
         else:
             buffer = deepcopy(existing)
-            self._match(buffer.state.revision, text_snapshot(path).revision)
         self._validate_context_content(entry, buffer)
+        self._validate_context_file(entry, buffer)
         return entry, buffer
+
+    def _validate_context_file(self, entry, buffer):
+        path = Path(entry.path)
+        if path.resolve(strict=True) != path:
+            raise WorkspaceError('Working-context path was redirected; the anchor was retained')
+        self._match(buffer.state.revision, text_snapshot(path).revision)
 
     def _validate_context_content(self, entry, buffer):
         if (not buffer.loaded or buffer.state.path != entry.path or buffer.state.format != 'text'
@@ -602,6 +618,9 @@ class Workstation:
         existing = next((b for b in self.buffers.values() if b.state.path == entry.path), None)
         buffer = existing if existing and existing.loaded else snapshot
         self._validate_context_content(entry, buffer)
+        # The disk may have changed since the worker prepared this passage.
+        # Compare against its base revision, independently of recovered text.
+        self._validate_context_file(entry, snapshot)
         if existing is None:
             if len(state.buffers) >= MAX_BUFFERS:
                 raise WorkspaceError('Close a buffer before opening more than 128 documents')
@@ -609,8 +628,9 @@ class Workstation:
             self.buffers[buffer.state.id] = buffer
         elif not existing.loaded:
             buffer = self.accept_snapshot(snapshot)
-        buffer.state.cursor = entry.end
-        buffer.state.selection = [entry.start, entry.end]
+        view = buffer.state.pane_views[pane]
+        view.cursor = entry.end
+        view.selection = [entry.start, entry.end]
         if pane == 1:
             state.split = True
         self.activate(buffer.state.id, pane)
@@ -635,8 +655,9 @@ class Workstation:
         if buffer.problem:
             raise WorkspaceError(buffer.problem)
         self._match(marker.revision, SourceDocument.from_bytes(marker.path, buffer.content.encode('utf-8')).revision)
-        buffer.state.cursor = marker.start
-        buffer.state.selection = [marker.start, marker.end] if marker.start != marker.end else None
+        view = buffer.state.pane_views[self.current().active_pane]
+        view.cursor = marker.start
+        view.selection = [marker.start, marker.end] if marker.start != marker.end else None
         self.checkpoint()
         return buffer
 
@@ -662,8 +683,7 @@ class Workstation:
             buffer.state.review_mode, buffer.state.review_number = previous
             raise
         buffer.content = body
-        buffer.state.cursor, buffer.state.selection = "1.0", None
-        buffer.state.yscroll = buffer.state.xscroll = 0.0
+        buffer.state.pane_views = [PaneViewState(), PaneViewState()]
         self.checkpoint()
         return body
 
@@ -693,7 +713,8 @@ class Workstation:
         buffer = self.buffer(identifier)
         if not buffer.editable or not buffer.state.path:
             raise WorkspaceError('The external editor requires a saved, editable project file')
-        line, column = map(int, buffer.state.cursor.split('.'))
+        pane = self._displayed_pane(buffer.state.id)
+        line, column = map(int, buffer.state.pane_views[pane].cursor.split('.'))
         return self.settings_store.editor_arguments(buffer.state.path, line, column + 1)
 
     def open_in_editor(self, identifier=None):

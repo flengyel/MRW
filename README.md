@@ -290,7 +290,9 @@ comparison preserve dirty text until the user explicitly saves or discards it.
 Open, Save, Save As, Refresh from disk, Find, Go to line, Split and Close buffer
 are available through menus. Each pane has a buffer selector and visible saved,
 modified, read-only, external-change or conflict state. **View → Split** allows
-two source or record buffers. The navigator and contextual facets can be hidden;
+two source or record buffers, or two passages of one shared file with independent
+cursor, selection and scroll positions. File content and private recovery remain
+shared. The navigator and contextual facets can be hidden;
 ordinary file editing does not require a wide identity inspector. Hashes are in
 expandable technical details.
 
@@ -313,8 +315,10 @@ unfinished marker** maintain the independent single unfinished-work location.
 Neither aid requires a descriptive form. Shelf entries are private local
 navigation anchors only, not provenance, citations, warrant records or
 mathematical-object identities, and nothing is automatically sent to a model.
-Version-3 sessions migrate to version 4 with an empty shelf at the next atomic
-checkpoint; existing recovery, unfinished marker and view state are preserved.
+Versions 3 and 4 migrate to version 5 at the next atomic checkpoint. Version 3
+gains an empty shelf; version 4 retains its shelf. Each legacy buffer position
+initializes two independent pane views; existing recovery, unfinished marker,
+split and PDF state are preserved.
 
 State, trusted tool settings, build outputs and private recovery are stored under:
 
