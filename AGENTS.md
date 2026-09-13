@@ -39,8 +39,14 @@ checkpoint, not characters that were never checkpointed. Flush synchronously at
 durability boundaries. Explicit Save
 and Save As alone write ordinary editor files, with revision-conflict detection
 and atomic replacement. A failed checkpoint must block close and quit unless an
-informed user explicitly discards the session. Use the separate cross-platform
+informed user explicitly discards the session. Use the separate
 mutable-file service; preserve immutable-record publication unchanged.
+Recovery deletion must compare exact expected bytes under the publication lock
+and synchronize the parent directory before reporting success. Any failed or
+uncertain deletion blocks workspace writes until close/reopen; never compensate
+with a recovery rewrite. Directory-sync errors must remain visible. Native
+Windows has no implemented portable directory-fsync boundary, so crash-durable
+mutable publication is unavailable there.
 Different projects may be open in different workstation processes. Concurrent
 workstation processes for the same project are unsupported because no
 interprocess lifetime lock exists. Add such a lock only in a separately

@@ -8,7 +8,6 @@ checks also detect external edits up to the final atomic replacement.
 
 from contextlib import contextmanager
 from hashlib import sha256
-import errno
 import os
 from pathlib import Path
 import stat
@@ -58,14 +57,11 @@ def file_lock(path: Path, lock_root: Path, *, wait=False):
 
 def sync_directory(path: Path):
     if os.name == 'nt':
-        return  # Windows has no portable stdlib directory-fsync operation.
+        raise MutableFileError('Crash-durable mutable publication is unavailable on native Windows: '
+                               'no portable directory synchronization is implemented')
     descriptor = os.open(path, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0))
     try:
-        try:
-            os.fsync(descriptor)
-        except OSError as exc:
-            if exc.errno not in (errno.EINVAL, errno.ENOTSUP, errno.EBADF):
-                raise
+        os.fsync(descriptor)
     finally:
         os.close(descriptor)
 
@@ -95,6 +91,26 @@ def verify_mutable(path: Path, previous: bytes, *, limit: int, lock_root: Path):
         observed = read_bounded(path, limit, 'cached mutable destination')
         if observed != previous:
             raise MutableFileError('File changed on disk; cached bytes are no longer current')
+        sync_directory(path.parent)
+
+
+def delete_mutable(path: Path, *, previous: bytes | None, limit: int, lock_root: Path):
+    """Delete exact bounded bytes, or verify expected absence, under the writer lock.
+
+    The parent must exist. Success includes directory synchronization, even for
+    expected absence. A post-unlink sync error is uncertain; never compensate by
+    rewriting the deleted file or report it as a completed deletion.
+    """
+    path = path.absolute()
+    with file_lock(path, lock_root):
+        try:
+            observed = read_bounded(path, limit, 'mutable deletion destination')
+        except FileNotFoundError:
+            observed = None
+        if observed != previous:
+            raise MutableFileError('File changed on disk; refusing to delete unexpected bytes or absence')
+        if observed is not None:
+            path.unlink()
         sync_directory(path.parent)
 
 

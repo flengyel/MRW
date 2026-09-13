@@ -14,7 +14,7 @@ import sys
 from uuid import uuid4
 
 from .local_files import read_bounded
-from .mutable_files import private_directory, save_mutable, verify_mutable
+from .mutable_files import delete_mutable, private_directory, save_mutable, verify_mutable
 
 SCHEMA = 'theorem-terminal.workspace'
 VERSION = 6
@@ -472,14 +472,12 @@ class WorkspaceStore:
 
     def clear_recovery(self, identifier):
         self.require_writable()
-        path = self.recovery_path(identifier)
-        # Remove after save/discard or a checkpointed return to clean text. A
-        # concurrent writer's different snapshot must never be removed.
-        from .mutable_files import file_lock
-        if path.exists():
-            with file_lock(path, self.lock_root):
-                expected = self.recovery_previous.get(identifier)
-                if expected is None or read_bounded(path, MAX_RECOVERY_BYTES, 'recovery snapshot') != expected:
-                    raise WorkspaceError('Recovery changed in another process; its text was retained')
-                path.unlink()
-        self.recovery_previous[identifier] = None
+        try:
+            path = self.recovery_path(identifier)
+            private_directory(path.parent)
+            delete_mutable(path, previous=self.recovery_previous.get(identifier),
+                           limit=MAX_RECOVERY_BYTES, lock_root=self.lock_root)
+            self.recovery_previous[identifier] = None
+        except (OSError, ValueError) as exc:
+            self.block_writes(exc)
+            raise

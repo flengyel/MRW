@@ -409,6 +409,226 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             save_mutable(path, b'stale', previous=original, lock_root=self.state_root / 'locks')
         self.assertEqual(path.read_bytes(), b'new')
 
+    def test_recovery_deletion_synchronizes_directory_after_unlink(self):
+        from theorem_terminal.mutable_files import sync_directory
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.edit(b.state.id, b.original + 'Unsaved recovery\n')
+        self.assertTrue(c.checkpoint())
+        path = c.store.recovery_path(b.state.id)
+        synchronized = []
+        def after_unlink(directory):
+            self.assertFalse(path.exists(), 'Recovery must be unlinked before directory synchronization')
+            synchronized.append(directory)
+            return sync_directory(directory)
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=after_unlink):
+            c.store.clear_recovery(b.state.id)
+        self.assertEqual(synchronized, [path.parent])
+        self.assertIsNone(c.store.recovery_previous[b.state.id])
+
+    def test_failed_recovery_deletion_blocks_without_forgetting_expected_bytes(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.edit(b.state.id, b.original + 'Unsaved recovery\n')
+        self.assertTrue(c.checkpoint())
+        path = c.store.recovery_path(b.state.id)
+        previous = c.store.recovery_previous[b.state.id]
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('deletion sync denied')):
+            with self.assertRaisesRegex(OSError, 'deletion sync denied'):
+                c.store.clear_recovery(b.state.id)
+        self.assertFalse(path.exists())
+        self.assertEqual(c.store.recovery_previous[b.state.id], previous)
+        self.assertTrue(c.store.blocked)
+        with ExitStack() as stack:
+            writes = [stack.enter_context(patch.object(service, method)) for service, method in
+                      ((c.store, 'write_recovery'), (c.store, 'save'),
+                       (c.store, 'clear_recovery'), (c.settings_store, 'save'))]
+            self.assertFalse(c.checkpoint())
+            for write in writes:
+                write.assert_not_called()
+        self.assertIn('close and reopen', c.persistence_error)
+        c.close_project(discard_session=True)
+        reopened = self.restored()
+        reopened.view(b.state.id)
+        self.assertIsNone(reopened.store.recovery_previous[b.state.id])
+        self.assertFalse(reopened.store.blocked)
+        self.assertTrue(reopened.checkpoint())
+        self.assertFalse(path.exists(), 'Reopening must not resurrect deleted recovery')
+
+    def test_recovery_deletion_rejects_unexpectedly_missing_snapshot(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.edit(b.state.id, b.original + 'Unsaved recovery\n')
+        self.assertTrue(c.checkpoint())
+        path = c.store.recovery_path(b.state.id)
+        previous = c.store.recovery_previous[b.state.id]
+        path.unlink()
+        with self.assertRaises((OSError, ValueError)):
+            c.store.clear_recovery(b.state.id)
+        self.assertEqual(c.store.recovery_previous[b.state.id], previous)
+        self.assertTrue(c.store.blocked)
+
+    def test_directory_sync_does_not_hide_unsupported_errors_or_windows(self):
+        import errno
+        from theorem_terminal.mutable_files import sync_directory
+        for number in (errno.EINVAL, errno.ENOTSUP, errno.EBADF):
+            with self.subTest(errno=number), patch('theorem_terminal.mutable_files.os.fsync',
+                                                  side_effect=OSError(number, 'directory sync failed')):
+                with self.assertRaises(OSError) as raised:
+                    sync_directory(self.home)
+                self.assertEqual(raised.exception.errno, number)
+        with self.subTest(platform='native Windows'), patch('theorem_terminal.mutable_files.os.name', 'nt'):
+            with self.assertRaisesRegex((OSError, MutableFileError), 'Windows'):
+                sync_directory(self.home)
+
+    def test_exact_delete_compares_under_publication_lock_then_unlinks_and_syncs(self):
+        from theorem_terminal.local_files import read_bounded
+        from theorem_terminal.mutable_files import delete_mutable, sync_directory
+        path, locks = self.home / 'exact-delete.json', self.state_root / 'locks'
+        path.write_bytes(b'{}')
+        with file_lock(path, locks), patch('theorem_terminal.mutable_files.read_bounded') as read:
+            with self.assertRaisesRegex(MutableFileError, 'Another process'):
+                delete_mutable(path, previous=b'{}', limit=2, lock_root=locks)
+            read.assert_not_called()
+        events = []
+        unlink = Path.unlink
+        def read_locked(destination, limit, description):
+            with self.assertRaisesRegex(MutableFileError, 'Another process'):
+                with file_lock(path, locks):
+                    self.fail('Comparison must hold the publication lock')
+            events.append('compare')
+            return read_bounded(destination, limit, description)
+        def remove(destination, **kwargs):
+            self.assertEqual(events, ['compare'])
+            self.assertEqual(destination.read_bytes(), b'{}')
+            events.append('unlink')
+            unlink(destination, **kwargs)
+        def synchronize(directory):
+            self.assertEqual(directory, path.parent)
+            self.assertFalse(path.exists())
+            events.append('sync')
+            sync_directory(directory)
+        with patch('theorem_terminal.mutable_files.read_bounded', side_effect=read_locked), \
+             patch.object(Path, 'unlink', autospec=True, side_effect=remove), \
+             patch('theorem_terminal.mutable_files.sync_directory', side_effect=synchronize):
+            delete_mutable(path, previous=b'{}', limit=2, lock_root=locks)
+        self.assertEqual(events, ['compare', 'unlink', 'sync'])
+        with patch.object(Path, 'unlink') as remove, \
+             patch('theorem_terminal.mutable_files.sync_directory', wraps=sync_directory) as sync:
+            delete_mutable(path, previous=None, limit=2, lock_root=locks)
+            remove.assert_not_called()
+            sync.assert_called_once_with(path.parent)
+
+    def test_exact_delete_rejects_changed_missing_symlink_and_nonregular_destinations(self):
+        from theorem_terminal.mutable_files import delete_mutable
+        target = self.home / 'retained-target'
+        target.write_bytes(b'{}')
+        for kind in ('changed', 'oversized', 'missing', 'symlink', 'broken-symlink', 'directory', 'unexpected'):
+            with self.subTest(kind=kind):
+                path = self.home / ('delete-' + kind)
+                if kind in ('changed', 'oversized', 'unexpected'):
+                    path.write_bytes(b'[] ' if kind == 'oversized' else b'[]')
+                elif kind in ('symlink', 'broken-symlink'):
+                    path.symlink_to(target if kind == 'symlink' else self.home / 'unavailable')
+                elif kind == 'directory':
+                    path.mkdir()
+                with patch.object(Path, 'unlink') as unlink, \
+                     patch('theorem_terminal.mutable_files.sync_directory') as sync:
+                    with self.assertRaises((ValueError, OSError)):
+                        delete_mutable(path, previous=None if kind == 'unexpected' else b'{}',
+                                       limit=2, lock_root=self.state_root / 'locks')
+                    unlink.assert_not_called()
+                    sync.assert_not_called()
+                if kind in ('changed', 'oversized', 'unexpected'):
+                    self.assertEqual(path.read_bytes(), b'[] ' if kind == 'oversized' else b'[]')
+                self.assertEqual(target.read_bytes(), b'{}')
+
+    def test_recovery_cleanup_validation_and_unlink_errors_block_the_store(self):
+        for fault in ('changed', 'symlink', 'unlink'):
+            with self.subTest(fault=fault):
+                c = Workstation(state_root=self.home / ('cleanup-' + fault))
+                c.open_project(self.root)
+                b = c.open_file(self.files['proof.md'])
+                c.edit(b.state.id, b.original + 'Private text\n')
+                self.assertTrue(c.checkpoint())
+                path = c.store.recovery_path(b.state.id)
+                previous = c.store.recovery_previous[b.state.id]
+                if fault == 'changed':
+                    path.write_bytes(b'changed')
+                elif fault == 'symlink':
+                    path.unlink()
+                    path.symlink_to(self.files['proof.md'])
+                with ExitStack() as stack:
+                    if fault == 'unlink':
+                        stack.enter_context(patch.object(Path, 'unlink', side_effect=OSError('unlink denied')))
+                    with self.assertRaises((ValueError, OSError)):
+                        c.store.clear_recovery(b.state.id)
+                self.assertEqual(c.store.recovery_previous[b.state.id], previous)
+                self.assertTrue(path.exists())
+                self.assertTrue(c.store.blocked)
+                with patch('theorem_terminal.workspace.delete_mutable') as delete, \
+                     patch('theorem_terminal.workspace.private_directory') as mkdir:
+                    with self.assertRaisesRegex(WorkspaceError, 'close and reopen'):
+                        c.store.clear_recovery(b.state.id)
+                    delete.assert_not_called()
+                    mkdir.assert_not_called()
+                self.assertFalse(c.checkpoint())
+
+    def test_save_discard_refresh_and_return_to_clean_require_durable_cleanup(self):
+        from theorem_terminal.mutable_files import sync_directory
+        for action in ('save', 'discard', 'refresh', 'return to clean'):
+            for fail in (False, True):
+                with self.subTest(action=action, sync_failure=fail):
+                    c = Workstation(state_root=self.home / f'cleanup-{action}-{fail}')
+                    c.open_project(self.root)
+                    b = c.open_file(self.files['proof.md'])
+                    original, content = b.original, b.original + 'Checkpointed private work α\n'
+                    c.edit(b.state.id, content)
+                    self.assertTrue(c.checkpoint())
+                    path = c.store.recovery_path(b.state.id)
+                    previous = c.store.recovery_previous[b.state.id]
+                    synchronized = []
+                    def after_delete(directory):
+                        if directory == path.parent and not path.exists():
+                            synchronized.append(directory)
+                            if fail:
+                                raise OSError('post-unlink directory sync denied')
+                        return sync_directory(directory)
+                    def perform():
+                        if action == 'return to clean':
+                            c.edit(b.state.id, original)
+                            return c.checkpoint()
+                        if action == 'refresh':
+                            return c.refresh(b.state.id, discard=True)
+                        return getattr(c, action)(b.state.id)
+                    with patch('theorem_terminal.mutable_files.sync_directory', side_effect=after_delete):
+                        if fail and action != 'return to clean':
+                            with self.assertRaisesRegex(OSError, 'post-unlink directory sync denied'):
+                                perform()
+                        elif action == 'return to clean':
+                            self.assertEqual(perform(), not fail)
+                        else:
+                            perform()
+                    self.assertEqual(synchronized, [path.parent])
+                    self.assertFalse(path.exists())
+                    self.assertEqual(self.files['proof.md'].read_text(encoding='utf-8'), content if action == 'save' else original)
+                    if fail:
+                        self.assertEqual(c.store.recovery_previous[b.state.id], previous)
+                        self.assertFalse(c.checkpoint())
+                        self.assertIn('post-unlink directory sync denied', c.persistence_error)
+                        c.close_project(discard_session=True)
+                    else:
+                        self.assertIsNone(c.store.recovery_previous[b.state.id])
+                        self.assertFalse(c.buffer(b.state.id).dirty)
+                        self.assertTrue(c.checkpoint())
+                        c.close_project(keep_recovery=True)
+                    reopened = Workstation(state_root=self.home / f'cleanup-{action}-{fail}')
+                    reopened.open_project(self.root)
+                    reopened.view(b.state.id)
+                    self.assertIsNone(reopened.store.recovery_previous[b.state.id])
+                    self.assertFalse(reopened.store.blocked)
+                    self.assertFalse(path.exists())
+
     def test_mixed_newline_edit_preserves_unchanged_bytes(self):
         from theorem_terminal.workstation import preserve_newlines
         previous = 'First α\r\nSecond β\nThird γ\rFourth δ'

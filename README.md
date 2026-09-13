@@ -355,6 +355,12 @@ unless the user explicitly chooses to discard the session. State uses a separate
 atomic mutable-file service; immutable record publication retains its existing
 service and semantics.
 
+Recovery cleanup after Save, Discard, Refresh or return to clean text checks the
+exact expected bytes under the publication lock, then unlinks and synchronizes
+the recovery directory. Failure blocks further workspace writes until close and
+reopen, including when unlink completed but synchronization failed. No recovery
+rewrite attempts to compensate for an uncertain deletion.
+
 ### External tools and LaTeX
 
 **Tools → Configure editor…** sets a trusted user-local argument template.
@@ -425,8 +431,11 @@ the platform and distribution. Native Windows and macOS GUI operation has not
 been exercised; **TeX building is unavailable there in this tranche**. Build
 supervision uses Linux/WSL2 subreaping and /proc to terminate and reap descendants,
 including children whose parent has exited. Mutable
-storage includes Windows and POSIX paths/locking; existing immutable publication
-still uses its Unix descriptor boundary. Project relocation and migration from
+storage includes Windows and POSIX paths/locking, but crash-durable mutable
+publication is unavailable on native Windows because portable directory
+synchronization is not implemented. Directory-sync failures are reported,
+including on filesystems that reject directory fsync. Existing immutable
+publication still uses its Unix descriptor boundary. Project relocation and migration from
 old experimental project-local state are not automatic.
 
 Ordinary UTF-8 text and notebooks are limited to 2 MiB, with up to 128 open buffer

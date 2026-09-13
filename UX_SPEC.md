@@ -112,6 +112,13 @@ completed checkpoint across an interrupted process, not uncheckpointed character
 final checkpoint must leave the work available until the user explicitly decides
 whether to discard it.
 
+Save, Discard, Refresh and return to clean text report successful recovery cleanup
+only after exact-byte validation, unlink and recovery-directory synchronization.
+An uncertain deletion blocks further workspace writes until close/reopen without
+a compensating rewrite. Native Windows currently lacks the directory-sync
+implementation required for crash-durable mutable publication and reports that
+limitation as a failure.
+
 In the current Qt GUI, wrapped views of one shared document keep equal editor
 viewport widths because that document has one layout width. Splitter movement
 and resizing preserve this constraint and both pane positions. Different buffers
