@@ -17,7 +17,7 @@ from .local_files import read_bounded
 from .mutable_files import private_directory, save_mutable
 
 SCHEMA = 'theorem-terminal.workspace'
-VERSION = 5
+VERSION = 6
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_TEXT_BYTES = 2 * 1024 * 1024
 MAX_RECOVERY_BYTES = 6 * MAX_TEXT_BYTES + 4096
@@ -31,14 +31,18 @@ V3_WORKSPACE_FIELDS = frozenset({'schema', 'schema_version', 'root', 'buffers', 
 V4_WORKSPACE_FIELDS = frozenset({'schema', 'schema_version', 'root', 'buffers', 'active',
     'visible', 'active_pane', 'split', 'recent', 'marker', 'selection_shelf', 'tex_root',
     'last_build', 'successful_build', 'pdf_page', 'pdf_zoom', 'pdf_scale', 'pdf_visible', 'window_size'})
+V5_WORKSPACE_FIELDS = frozenset({'schema', 'schema_version', 'root', 'buffers', 'active',
+    'visible', 'active_pane', 'split', 'recent', 'marker', 'selection_shelf', 'tex_root',
+    'last_build', 'successful_build', 'pdf_page', 'pdf_zoom', 'pdf_scale', 'pdf_visible', 'window_size'})
 LEGACY_BUFFER_FIELDS = frozenset({'id', 'path', 'format', 'revision', 'readonly', 'external',
     'companion', 'companion_revision', 'cursor', 'selection', 'yscroll', 'xscroll',
     'was_dirty', 'review_mode', 'review_number'})
 MARKER_FIELDS = frozenset({'path', 'revision', 'start', 'end'})
 PANE_VIEW_FIELDS = frozenset({'cursor', 'selection', 'yscroll', 'xscroll'})
-BUFFER_FIELDS = frozenset({'id', 'path', 'format', 'revision', 'readonly', 'external',
+V5_BUFFER_FIELDS = frozenset({'id', 'path', 'format', 'revision', 'readonly', 'external',
     'companion', 'companion_revision', 'pane_views', 'was_dirty', 'review_mode', 'review_number'})
-WORKSPACE_FIELDS = V4_WORKSPACE_FIELDS  # Version 5 changes only the buffer shape.
+BUFFER_FIELDS = V5_BUFFER_FIELDS
+WORKSPACE_FIELDS = V5_WORKSPACE_FIELDS | {'wrap'}
 _UNRECONCILED = object()
 
 
@@ -90,6 +94,7 @@ class Workspace:
     visible: list[str | None] = field(default_factory=lambda: [None, None])
     active_pane: int = 0
     split: bool = False
+    wrap: bool = True
     recent: list[str] = field(default_factory=list)
     marker: WorkMarker | None = None
     selection_shelf: list[WorkMarker] = field(default_factory=list)
@@ -155,14 +160,31 @@ def _position(value, *, legacy=False):
     return canonical
 
 
-def decode_pane_view(value, *, legacy=False):
+def decode_pane_view(value, *, legacy_version=None):
     _keys(value, PANE_VIEW_FIELDS, 'pane view')
+    legacy = legacy_version in (3, 4)
     cursor = _position(value['cursor'], legacy=legacy)
     selection = value['selection']
     if selection is not None:
         if not isinstance(selection, list) or len(selection) != 2:
             raise WorkspaceError('Invalid selection')
         selection = [_position(position, legacy=legacy) for position in selection]
+        if legacy_version is not None:
+            # v3/v4 rendered the listed endpoints, ignoring the stored cursor.
+            # v5 rendered from the first endpoint to the cursor, except that a
+            # cursor at the first endpoint used the second endpoint as anchor.
+            anchor = selection[0]
+            if legacy_version in (3, 4):
+                cursor = selection[1]
+            elif cursor == anchor:
+                anchor = selection[1]
+            selection = sorted((anchor, cursor), key=lambda p: tuple(map(int, p.split('.'))))
+            if selection[0] == selection[1]:
+                selection = None
+        else:
+            selection_span(*selection)
+            if cursor not in selection:
+                raise WorkspaceError('The selection cursor must be one endpoint')
     for key in ('yscroll', 'xscroll'):
         number = value[key]
         if type(number) not in (int, float) or not 0 <= number <= 1 or not math.isfinite(number):
@@ -172,26 +194,36 @@ def decode_pane_view(value, *, legacy=False):
 
 def _migrate_legacy(data):
     version = data['schema_version']
-    _keys(data, V3_WORKSPACE_FIELDS if version == 3 else V4_WORKSPACE_FIELDS, f'version-{version} editor state')
+    _keys(data, {3: V3_WORKSPACE_FIELDS, 4: V4_WORKSPACE_FIELDS, 5: V5_WORKSPACE_FIELDS}[version], f'version-{version} editor state')
     if not isinstance(data['buffers'], list) or len(data['buffers']) > MAX_BUFFERS:
         raise WorkspaceError('Invalid open buffer list')
     buffers = []
     for item in data['buffers']:
-        _keys(item, LEGACY_BUFFER_FIELDS, 'legacy buffer')
-        view = decode_pane_view({key: item[key] for key in PANE_VIEW_FIELDS}, legacy=True)
-        position = {key: getattr(view, key) for key in PANE_VIEW_FIELDS}
+        _keys(item, V5_BUFFER_FIELDS if version == 5 else LEGACY_BUFFER_FIELDS, 'legacy buffer')
+        old_views = item.get('pane_views') if version == 5 else [{key: item[key] for key in PANE_VIEW_FIELDS}] * 2
+        if not isinstance(old_views, list) or len(old_views) != 2:
+            raise WorkspaceError('A buffer requires exactly two pane views')
+        views = [decode_pane_view(view, legacy_version=version) for view in old_views]
         buffers.append({**{key: value for key, value in item.items() if key not in PANE_VIEW_FIELDS},
-                        'pane_views': [deepcopy(position), deepcopy(position)]})
+                        'pane_views': [{key: deepcopy(getattr(view, key)) for key in PANE_VIEW_FIELDS} for view in views]})
     def marker(item):
         _keys(item, MARKER_FIELDS, 'legacy work marker')
-        return {**item, 'start': _position(item['start'], legacy=True),
-                'end': _position(item['end'], legacy=True)}
+        return {**item, 'start': _position(item['start'], legacy=version < 5),
+                'end': _position(item['end'], legacy=version < 5)}
     shelf = [] if version == 3 else data['selection_shelf']
     if not isinstance(shelf, list) or len(shelf) > MAX_CONTEXT_SELECTIONS:
         raise WorkspaceError('Working context is limited to 32 selections')
-    return {**data, 'schema_version': VERSION, 'buffers': buffers,
+    selections, seen = [], []
+    for item in shelf:
+        if item in seen:
+            raise WorkspaceError('Duplicate context selection')
+        seen.append(item)
+        canonical = marker(item)
+        if canonical not in selections:
+            selections.append(canonical)
+    return {**deepcopy(data), 'schema_version': VERSION, 'buffers': buffers, 'wrap': True,
             'marker': marker(data['marker']) if data['marker'] is not None else None,
-            'selection_shelf': [marker(item) for item in shelf]}
+            'selection_shelf': selections}
 
 
 def selection_span(start, end):
@@ -208,14 +240,14 @@ def decode_workspace(raw: bytes) -> Workspace:
     if len(raw) > MAX_MANIFEST_BYTES:
         raise WorkspaceError('Editor state exceeds 1 MiB')
     data = strict_json(raw)
-    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, 4, VERSION):
+    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, 4, 5, VERSION):
         raise WorkspaceError('Unsupported editor-state version')
-    if data['schema_version'] in (3, 4):
+    if data['schema_version'] in (3, 4, 5):
         data = _migrate_legacy(data)
     _keys(data, WORKSPACE_FIELDS, 'editor state')
     _path(data['root'])
     root = Path(data['root'])
-    for key in ('split', 'pdf_visible'):
+    for key in ('split', 'pdf_visible', 'wrap'):
         if type(data[key]) is not bool:
             raise WorkspaceError('Invalid view flag')
     if type(data['active_pane']) is not int or data['active_pane'] not in (0, 1) or (not data['split'] and data['active_pane'] != 0):

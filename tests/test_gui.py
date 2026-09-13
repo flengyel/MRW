@@ -80,12 +80,12 @@ class GraphicalEditorTests(unittest.TestCase):
         return (pane.shown, pane.text.toPlainText(), cursor.position(), cursor.anchor(),
                 pane.text.verticalScrollBar().value(), pane.text.horizontalScrollBar().value())
 
-    def restart_window(self):
+    def restart_window(self, *, discard_session=False):
         from theorem_terminal.gui import WorkstationWindow
         from theorem_terminal.workstation import Workstation
-        wrap = self.window.actions['wrap'].isChecked()
-        self.window.flush()
-        self.controller.close_project(keep_recovery=True)
+        if not discard_session:
+            self.window.flush()
+        self.controller.close_project(keep_recovery=True, discard_session=discard_session)
         self.assertTrue(self.window.close())
         self.app.processEvents()
         self.error_patch.stop()
@@ -95,11 +95,271 @@ class GraphicalEditorTests(unittest.TestCase):
         self.error_patch.start()
         self.window.show()
         self.window.disk_timer.stop()
-        self.window.actions['wrap'].setChecked(wrap)
-        self.window.toggle_wrap(wrap)
         self.app.processEvents()
         self.window.open_project(self.root)
         self.wait_idle()
+
+    def shared_editors(self, *, wrapped=False):
+        self.open_project()
+        self.window.disk_timer.stop()
+        self.window.resize(1280, 820)
+        if self.window.actions['wrap'].isChecked() != wrapped:
+            self.window.actions['wrap'].trigger()
+        path = self.root / 'shared.txt'
+        path.write_text(''.join(f'{n:03d}: ' + ('wrapped text ' * 60 if wrapped and n == 40 else
+                                               'A logical passage with α and β. ' * (1 if wrapped else 12)) + '\n'
+                                for n in range(1, 241)), encoding='utf-8')
+        left = self.open_file(path)
+        self.window.actions['split'].trigger()
+        self.window.select(left.shown, 1)
+        self.app.processEvents()
+        right = self.window.panes[1]
+        self.select_passage(left, '20.0', '20.22')
+        self.select_passage(right, '180.0', '180.22')
+        return path, left, right
+
+    def test_shared_edits_track_passive_selection_and_one_controller_update(self):
+        from PySide6.QtGui import QTextCursor
+        path, left, right = self.shared_editors()
+        original = path.read_bytes()
+        selected = right.text.textCursor().selectedText()
+        for pane, passive, start, end, inserted in (
+                (left, right, '2.0', '2.0', 'Inserted complete line\n'),
+                (left, right, '3.0', '4.0', ''),
+                (right, left, '1.0', '1.4', 'Revised heading')):
+            retained = passive.text.textCursor().selectedText()
+            old_position = passive.text.textCursor().position()
+            self.select_passage(pane, start, end)
+            removed = pane.text.textCursor().selectionEnd() - pane.text.textCursor().selectionStart()
+            with patch.object(self.controller, 'edit', wraps=self.controller.edit) as edit:
+                pane.text.insertPlainText(inserted)
+                self.assertEqual(edit.call_count, 1)
+            self.app.processEvents()
+            self.assertEqual(passive.text.textCursor().selectedText(), retained)
+            self.assertEqual(passive.text.textCursor().position(), old_position + len(inserted) - removed)
+            self.assertEqual(left.text.toPlainText(), right.text.toPlainText())
+            self.assertEqual(left.text.toPlainText(), self.controller.buffer(left.shown).content)
+        self.assertEqual(selected, '180: A logical passage')
+        self.assertEqual(path.read_bytes(), original)
+        self.assertFalse(self.errors)
+
+    def test_shared_undo_redo_is_available_from_either_widget(self):
+        path, left, right = self.shared_editors()
+        original = left.text.toPlainText()
+        self.select_passage(left, '2.0', '2.0')
+        left.text.insertPlainText('First complete insertion\n')
+        after_first = left.text.toPlainText()
+        self.select_passage(right, '4.0', '5.0')
+        right.text.insertPlainText('Second replacement\n')
+        after_second = right.text.toPlainText()
+        for pane, operation, expected in ((left, 'undo', after_first), (right, 'undo', original),
+                                           (left, 'redo', after_first), (right, 'redo', after_second)):
+            pane.text.setFocus()
+            getattr(pane.text, operation)()
+            self.app.processEvents()
+            self.assertEqual(left.text.toPlainText(), expected)
+            self.assertEqual(right.text.toPlainText(), expected)
+            self.assertEqual(self.controller.buffer(left.shown).content, expected)
+        self.assertEqual(path.read_text(encoding='utf-8'), original)
+
+    def test_shared_qt_document_tracks_edits_inside_selection_and_has_bounded_lifetime(self):
+        from PySide6.QtGui import QTextCursor
+        path, left, right = self.shared_editors()
+        document = left.text.document()
+        identifier = left.shown
+        self.assertIs(document, right.text.document())
+        self.select_passage(right, '180.5', '182.22')
+        for start, end, inserted in (('181.0', '181.4', 'Inserted inside α'),
+                                      ('179.0', '180.10', ''), ('180.0', '184.0', 'Replacement\n')):
+            expected = QTextCursor(right.text.textCursor())
+            self.select_passage(left, start, end)
+            with patch.object(self.controller, 'edit', wraps=self.controller.edit) as edit, \
+                 patch.object(document, 'setPlainText', side_effect=AssertionError('per-edit replacement')):
+                left.text.insertPlainText(inserted)
+                self.assertEqual(edit.call_count, 1)
+            actual = right.text.textCursor()
+            self.assertEqual((actual.position(), actual.anchor(), actual.selectedText()),
+                             (expected.position(), expected.anchor(), expected.selectedText()))
+            self.assertEqual(left.text.toPlainText(), right.text.toPlainText())
+        self.select_passage(right, '200.0', '200.22')
+        retained = right.text.textCursor().selectedText()
+        position = right.text.textCursor().position()
+        self.window.actions['split'].trigger()
+        self.select_passage(left, '1.0', '1.0')
+        left.text.insertPlainText('Hidden-pane edit\n')
+        self.window.flush()
+        self.window.actions['split'].trigger()
+        for _ in range(5):
+            self.app.processEvents()
+        self.assertEqual(right.text.textCursor().selectedText(), retained)
+        self.assertEqual(right.text.textCursor().position(), position + len('Hidden-pane edit\n'))
+        other = self.open_file(self.files['proof.md'])
+        self.assertIsNot(other.text.document(), document)
+        other.text.insertPlainText('Independent edit')
+        content = document.toPlainText()
+        other.text.undo()
+        self.assertEqual(document.toPlainText(), content)
+        self.assertTrue(document.isUndoAvailable())
+        self.controller.discard(identifier)
+        self.controller.close_buffer(identifier)
+        self.window.render()
+        self.assertNotIn(identifier, self.window.documents)
+        self.controller.discard(other.shown)
+        self.assertTrue(self.window.close_project())
+        self.assertFalse(self.window.documents)
+
+    def test_geometry_changes_do_not_capture_transient_views_or_jump_to_offscreen_cursor(self):
+        from PySide6.QtCore import QPoint
+        from copy import deepcopy
+        path, left, right = self.shared_editors(wrapped=True)
+        self.select_passage(left, '40.10', '40.700')
+        left.text.ensureCursorVisible()
+        self.select_passage(right, '180.5', '180.22')
+        right.text.verticalScrollBar().setValue(100)
+        for _ in range(5):
+            self.app.processEvents()
+        for change in (lambda: self.window.navigator_dock.hide(), lambda: self.window.navigator_dock.show(),
+                       lambda: self.window.selection_dock.show(), lambda: self.window.selection_dock.hide(),
+                       lambda: self.window.toggle_pdf(False), lambda: self.window.pdf.show(),
+                       lambda: self.window.pdf.hide(), lambda: self.window.actions['wrap'].trigger(),
+                       lambda: self.window.actions['wrap'].trigger()):
+            anchor = right.text.cursorForPosition(QPoint(0, 0))
+            offset = right.text.cursorRect(anchor).top()
+            cursors = [(p.text.textCursor().position(), p.text.textCursor().anchor()) for p in (left, right)]
+            views = deepcopy(self.controller.buffer(left.shown).state.pane_views)
+            change()
+            # Even an explicit capture inside the layout interval is shielded.
+            for pane in (left, right):
+                if pane.text.reflow:
+                    pane.capture_position()
+                    self.assertEqual(self.controller.buffer(pane.shown).state.pane_views[pane.number], views[pane.number])
+            for _ in range(6):
+                self.app.processEvents()
+            self.assertEqual([(p.text.textCursor().position(), p.text.textCursor().anchor()) for p in (left, right)], cursors)
+            self.assertTrue(left.text.viewport().rect().contains(left.text.cursorRect().center()))
+            self.assertFalse(right.text.viewport().rect().intersects(right.text.cursorRect()))
+            self.assertAlmostEqual(right.text.cursorRect(anchor).top(), offset, delta=1)
+        self.window.actions['wrap'].trigger()
+        for _ in range(5):
+            self.app.processEvents()
+        for pane, scroll in ((left, 125), (right, 310)):
+            pane.text.horizontalScrollBar().setValue(scroll)
+        self.assertTrue(self.window.close_project())
+        self.assertFalse(self.window.documents)
+
+    def test_recovered_error_content_retains_both_views_and_diagnostics_capture_none(self):
+        from copy import deepcopy
+        path, left, right = self.shared_editors()
+        left.text.appendPlainText('Recovered unsaved work α')
+        for pane, start, end, scroll in ((left, '30.0', '35.12', 22), (right, '180.0', '185.12', 172)):
+            self.select_passage(pane, start, end)
+            pane.text.verticalScrollBar().setValue(scroll)
+            pane.capture_position()
+        recovered = left.text.toPlainText()
+        positions = [self.pane_position(p)[2:] for p in (left, right)]
+        for mutation in ('changed', 'missing'):
+            if mutation == 'changed':
+                path.write_text('Replacement disk text\n')
+            else:
+                path.unlink()
+            self.restart_window()
+            with self.subTest(base=mutation):
+                b = self.controller.buffer()
+                self.assertTrue(b.problem and b.recovery_warning and b.editable)
+                self.assertEqual([p.text.toPlainText() for p in self.window.panes], [recovered] * 2)
+                self.assertEqual([self.pane_position(p)[2:] for p in self.window.panes], positions)
+                views = deepcopy(b.state.pane_views)
+                self.window.flush()
+                self.assertEqual(b.state.pane_views, views)
+        # Remove recovery by explicit discard, then the unavailable diagnostic
+        # must not acquire a new document position on focus/capture/flush.
+        b = self.controller.buffer()
+        self.controller.discard(b.state.id)
+        b.problem = 'Missing saved base'
+        self.window.render()
+        views = deepcopy(b.state.pane_views)
+        for pane in self.window.panes:
+            pane.text.selectAll()
+            pane.capture_position()
+        self.window.flush()
+        self.assertEqual(b.state.pane_views, views)
+
+    def test_wrap_and_horizontal_position_restore_without_copying_widget_settings(self):
+        path, left, right = self.shared_editors()
+        for pane, value in ((left, 125), (right, 310)):
+            pane.text.horizontalScrollBar().setValue(value)
+            pane.text.verticalScrollBar().setValue(30 if pane is left else 175)
+            pane.capture_position()
+        expected = [self.pane_position(p)[2:] for p in (left, right)]
+        rendered = [(p.text.firstVisibleBlock().blockNumber(), p.text.cursorRect().getRect()) for p in (left, right)]
+        self.restart_window()
+        self.assertFalse(self.window.actions['wrap'].isChecked())
+        self.assertEqual([self.pane_position(p)[2:] for p in self.window.panes], expected)
+        self.assertEqual([(p.text.firstVisibleBlock().blockNumber(), p.text.cursorRect().getRect())
+                          for p in self.window.panes], rendered)
+
+    def test_close_captures_geometry_settled_during_the_recovery_dialog(self):
+        import json
+        path, left, right = self.shared_editors()
+        left.text.appendPlainText('Retained recovery')
+        self.select_passage(left, '30.0', '35.20')
+        self.select_passage(right, '180.0', '185.20')
+        def keep_after_resize(*args, **kwargs):
+            self.window.resize(960, 680)
+            for _ in range(5):
+                self.app.processEvents()
+            return 'keep'
+        manifest = self.controller.store.path
+        with patch.object(self.window, 'guard_buffer', side_effect=keep_after_resize):
+            self.assertTrue(self.window.close_project())
+        saved = json.loads(manifest.read_bytes())
+        self.assertEqual(saved['window_size'], [960, 680])
+        self.assertEqual([v['selection'] for v in saved['buffers'][0]['pane_views']],
+                         [['30.0', '35.20'], ['180.0', '185.20']])
+
+    def test_restoration_does_not_capture_an_intermediate_scrollbar_range(self):
+        from copy import deepcopy
+        path, left, right = self.shared_editors()
+        for pane, value in ((left, 30), (right, 175)):
+            pane.text.verticalScrollBar().setValue(value)
+            pane.capture_position()
+        views = deepcopy(self.controller.buffer().state.pane_views)
+        positions = [self.pane_position(p)[2:] for p in (left, right)]
+        bar = right.text.verticalScrollBar()
+        # Native Qt briefly reports a smaller range before laying out the
+        # horizontal scrollbar. Keep real widgets, then expose the final range.
+        with patch.object(bar, 'maximum', return_value=bar.maximum() - 1):
+            self.window.render()
+            self.assertEqual(self.controller.buffer().state.pane_views, views)
+        for _ in range(5):
+            self.app.processEvents()
+        self.assertEqual([self.pane_position(p)[2:] for p in (left, right)], positions)
+        self.assertEqual(self.controller.buffer().state.pane_views, views)
+
+    def test_live_wrapped_reflow_keeps_visible_cursor_and_offscreen_passage(self):
+        from PySide6.QtCore import QPoint
+        path, left, right = self.shared_editors(wrapped=True)
+        self.select_passage(left, '40.10', '40.700')
+        left.text.ensureCursorVisible()
+        self.select_passage(right, '180.5', '180.22')
+        right.text.verticalScrollBar().setValue(100)
+        self.app.processEvents()
+        cursors = [(p.text.textCursor().position(), p.text.textCursor().anchor()) for p in (left, right)]
+        anchor = right.text.cursorForPosition(QPoint(0, 0))
+        offset = right.text.cursorRect(anchor).top()
+        self.assertTrue(left.text.viewport().rect().contains(left.text.cursorRect().center()))
+        self.assertFalse(right.text.viewport().rect().intersects(right.text.cursorRect()))
+        for size in ((960, 680), (1280, 820)):
+            self.window.resize(*size)
+            for _ in range(5):
+                self.app.processEvents()
+            self.assertEqual([(p.text.textCursor().position(), p.text.textCursor().anchor()) for p in (left, right)], cursors)
+            with self.subTest(size=size, view='visible'):
+                self.assertTrue(left.text.viewport().rect().contains(left.text.cursorRect().center()),
+                                (left.text.cursorRect(), left.text.viewport().rect()))
+            with self.subTest(size=size, view='offscreen'):
+                self.assertFalse(right.text.viewport().rect().intersects(right.text.cursorRect()))
+                self.assertAlmostEqual(right.text.cursorRect(anchor).top(), offset, delta=1)
 
     def test_same_file_pane_views_survive_render_edit_split_and_restart(self):
         from PySide6.QtGui import QTextCursor
@@ -191,7 +451,6 @@ w = WorkstationWindow(c)
 errors = []
 w.show_error = errors.append
 w.show()
-w.toggle_wrap(False)
 app.processEvents()
 w.open_project(Path(sys.argv[1]))
 w.disk_timer.stop()
@@ -241,9 +500,10 @@ w.close()
             self.select_passage(pane, start, end)
             pane.text.verticalScrollBar().setValue(scroll)
             pane.capture_position()
-        expected = deepcopy(self.controller.buffer(identifier).state.pane_views)
-        widgets = [self.pane_position(p) for p in self.window.panes]
         self.window.flush()
+        expected = deepcopy(self.controller.buffer(identifier).state.pane_views)
+        self.assertEqual([view.cursor for view in expected], ['35.7', '185.7'])
+        widgets = [self.pane_position(p) for p in self.window.panes]
         self.controller.close_project(keep_recovery=True)
         self.window.close()
         self.app.processEvents()
@@ -253,7 +513,6 @@ w.close()
         self.error_patch = patch.object(self.window, 'show_error', side_effect=self.errors.append)
         self.error_patch.start()
         self.window.show()
-        self.window.actions['wrap'].trigger()
         self.window.disk_timer.stop()
         self.app.processEvents()
         ready, release = threading.Event(), threading.Event()
@@ -305,6 +564,10 @@ w.close()
         self.assertEqual(self.window.selection_list.count(), 1)
         self.assertFalse(self.controller.store.recovery_path(identifier).exists())
         self.errors.clear()
+        self.restart_window(discard_session=True)
+        pane = self.window.active_pane()
+        pane.text.appendPlainText('Unsaved A')
+        self.select_passage(pane, '1.0', '1.5')
         self.window.actions['context_add'].trigger()
         self.assertEqual(self.window.selection_list.count(), 1)
         self.assertEqual(self.controller.store.read_recovery(self.controller.buffer(identifier).state)['text'], text)
@@ -520,7 +783,8 @@ w.close()
         self.assertTrue(self.window.isVisible())
         self.assertIsNotNone(self.controller.workspace)
         self.assertIn('Unsaved exact work α', pane.text.toPlainText())
-        self.assertTrue(self.controller.checkpoint())
+        self.restart_window(discard_session=True)
+        self.assertIn('Unsaved exact work α', self.window.active_pane().text.toPlainText())
 
     def test_find_line_new_file_save_as_refresh_and_configured_editor_menu(self):
         self.open_project()

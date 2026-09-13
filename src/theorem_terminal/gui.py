@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from contextlib import ExitStack
+from contextlib import contextmanager
 import json
 from html import escape
 import os
@@ -11,14 +11,14 @@ import shlex
 import shutil
 import sys
 
-from PySide6.QtCore import (QBuffer, QByteArray, QDir, QIODevice, QObject, QPointF,
+from PySide6.QtCore import (QBuffer, QByteArray, QDir, QIODevice, QObject, QPoint, QPointF,
                             QRunnable, QSignalBlocker, QSortFilterProxyModel, Qt,
                             QThread, QThreadPool, QTimer, Signal, Slot)
-from PySide6.QtGui import QAction, QColor, QFontDatabase, QPainter, QTextCursor
+from PySide6.QtGui import QAction, QColor, QFontDatabase, QPainter, QTextCursor, QTextDocument, QTextOption
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
     QDockWidget, QFileDialog, QFileSystemModel, QHBoxLayout, QInputDialog, QLabel,
     QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMenu, QMessageBox,
-    QPlainTextEdit, QPushButton, QScrollArea, QSpinBox, QSplitter, QToolBar,
+    QPlainTextDocumentLayout, QPlainTextEdit, QPushButton, QScrollArea, QSpinBox, QSplitter, QToolBar,
     QToolButton, QTreeView, QVBoxLayout, QWidget)
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPdfWidgets import QPdfView
@@ -104,8 +104,16 @@ class LineNumbers(QWidget):
 class SourceEdit(QPlainTextEdit):
     focused = Signal()
 
-    def __init__(self):
+    def __init__(self, pane):
         super().__init__()
+        self.pane = pane
+        self.reflow = None
+        self.restored_scroll = None
+        self.stable_view = None
+        self.settling = False
+        self.reflow_timer = QTimer(self)
+        self.reflow_timer.setSingleShot(True)
+        self.reflow_timer.timeout.connect(self.finish_reflow)
         font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
         font.setPointSize(12)
         self.setFont(font)
@@ -129,6 +137,83 @@ class SourceEdit(QPlainTextEdit):
         # QPlainTextEdit lays out wrapped blocks lazily while painting. Refresh
         # numbering after that layout, including when a split changes width.
         self.gutter.update()
+        self.remember_view()
+
+    def view_anchor(self):
+        cursor = self.textCursor()
+        anchor = self.cursorForPosition(QPoint(0, 0))
+        return (QTextCursor(cursor), anchor, self.cursorRect(anchor).top(),
+                self.viewport().rect().contains(self.cursorRect()), self.horizontalScrollBar().value())
+
+    def remember_view(self):
+        if not self.reflow and not self.restored_scroll and not self.settling and not self.pane.window.view_updates and self.pane.genuine_content():
+            self.stable_view = self.view_anchor()
+
+    def restore_scroll(self, view):
+        if self.reflow is None:
+            self.restored_scroll = (QTextCursor(self.textCursor()), view.yscroll, view.xscroll)
+            self.reflow_timer.start(0)
+
+    def begin_reflow(self, *, cached=False):
+        if self.settling or not self.pane.isVisible() or not self.pane.genuine_content():
+            return
+        if self.reflow is None:
+            self.reflow = self.stable_view if cached and self.stable_view else self.view_anchor()
+        self.reflow_timer.start(0)
+
+    def finish_reflow(self):
+        if self.reflow is None and self.restored_scroll is None:
+            return
+        self.settling = True
+        try:
+            current = self.textCursor()
+            if self.restored_scroll is not None:
+                cursor, vertical, horizontal = self.restored_scroll
+                if (self.pane.genuine_content() and cursor.document() == self.document()
+                        and (current.position(), current.anchor()) == (cursor.position(), cursor.anchor())):
+                    # The initial range may precede scrollbar/gutter layout.
+                    # Restore against the painted document before capturing it.
+                    self.viewport().repaint()
+                    self.verticalScrollBar().setValue(round(vertical * self.verticalScrollBar().maximum()))
+                    self.horizontalScrollBar().setValue(round(horizontal * self.horizontalScrollBar().maximum()))
+                return
+            cursor, anchor, offset, visible, horizontal = self.reflow
+            if (self.pane.genuine_content() and cursor.document() == self.document()
+                    and (current.position(), current.anchor()) == (cursor.position(), cursor.anchor())):
+                # Materialize Qt's lazy wrapped layout before using geometry.
+                self.viewport().repaint()
+                bar = self.verticalScrollBar()
+                for _ in range(8):
+                    distance = self.cursorRect(anchor).top() - offset
+                    step = round(distance / self.fontMetrics().height())
+                    value = max(bar.minimum(), min(bar.maximum(), bar.value() + step))
+                    if value == bar.value():
+                        break
+                    bar.setValue(value)
+                self.horizontalScrollBar().setValue(horizontal)
+                if visible and not self.viewport().rect().contains(self.cursorRect()):
+                    self.ensureCursorVisible()
+        finally:
+            self.reflow = None
+            self.restored_scroll = None
+            self.settling = False
+            self.pane.capture_position()
+
+    def forget_view(self):
+        self.reflow_timer.stop()
+        self.reflow = self.stable_view = None
+        self.restored_scroll = None
+
+    def attach_document(self, document):
+        self.forget_view()
+        with QSignalBlocker(self):
+            # Reset the old viewport before detaching a shared, reflowed
+            # document. Qt can otherwise retain a top-line offset that is
+            # invalid in the new document while adjusting its scrollbars.
+            self.setTextCursor(QTextCursor(self.document()))
+            self.verticalScrollBar().setValue(0)
+            self.horizontalScrollBar().setValue(0)
+            self.setDocument(document)
 
     def layout_gutter(self, *_):
         width = 16 + self.fontMetrics().horizontalAdvance('9') * len(str(max(1, self.blockCount())))
@@ -136,6 +221,8 @@ class SourceEdit(QPlainTextEdit):
         self.gutter.setGeometry(0, 0, width, self.height())
 
     def resizeEvent(self, event):
+        if hasattr(self, 'gutter'):
+            self.pane.window.begin_reflow(cached=True)
         super().resizeEvent(event)
         self.layout_gutter()
 
@@ -145,7 +232,11 @@ class SourceEdit(QPlainTextEdit):
 
 
 def cursor_index(edit, position):
-    cursor = QTextCursor(edit.document())
+    return document_index(edit.document(), position)
+
+
+def document_index(document, position):
+    cursor = QTextCursor(document)
     cursor.setPosition(position)
     block = cursor.block()
     # Persistent columns count Unicode scalars; Qt document positions use UTF-16.
@@ -155,9 +246,89 @@ def cursor_index(edit, position):
 
 
 def qt_position(edit, index):
+    return document_position(edit.document(), index)
+
+
+def document_position(document, index):
     line, column = map(int, index.split('.'))
-    block = edit.document().findBlockByNumber(min(line - 1, edit.blockCount() - 1))
+    block = document.findBlockByNumber(min(line - 1, document.blockCount() - 1))
     return block.position() + len(block.text()[:column].encode('utf-16-le')) // 2
+
+
+class BufferDocument(QTextDocument):
+    """One GUI-owned document and undo stack for one loaded buffer."""
+    def __init__(self, window, identifier, font):
+        super().__init__(window)
+        self.window, self.identifier = window, identifier
+        self.installing = False
+        self.pane_cursors = []
+        self.setDocumentLayout(QPlainTextDocumentLayout(self))
+        self.setDefaultFont(font)
+        self.set_wrap(window.controller.current().wrap)
+        self.refresh_timer = QTimer(self)
+        self.refresh_timer.setSingleShot(True)
+        self.refresh_timer.timeout.connect(self.refresh_views)
+        self.contentsChanged.connect(self.edited)
+
+    def set_wrap(self, enabled):
+        option = self.defaultTextOption()
+        option.setWrapMode(QTextOption.WrapMode.WrapAtWordBoundaryOrAnywhere if enabled else QTextOption.WrapMode.NoWrap)
+        self.setDefaultTextOption(option)
+
+    def refresh_views(self):
+        self.refresh_timer.stop()
+        # appendPlainText optimizes the initiating widget's range. Notify every
+        # attached view once the document transaction has finished as well.
+        layout = self.documentLayout()
+        layout.documentSizeChanged.emit(layout.documentSize())
+        for pane in self.window.panes:
+            if pane.shown == self.identifier:
+                pane.capture_position()
+
+    def install(self, buffer):
+        normalized = buffer.content.replace('\r\n', '\n').replace('\r', '\n')
+        self.installing = True
+        try:
+            if self.toPlainText() != normalized:
+                self.setPlainText(normalized)
+                self.pane_cursors = []
+            if not self.pane_cursors:
+                for view in buffer.state.pane_views:
+                    cursor = QTextCursor(self)
+                    anchor = view.selection[1] if view.selection and view.cursor == view.selection[0] else (view.selection[0] if view.selection else view.cursor)
+                    cursor.setPosition(document_position(self, anchor))
+                    cursor.setPosition(document_position(self, view.cursor), QTextCursor.MoveMode.KeepAnchor)
+                    self.pane_cursors.append(cursor)
+            self.setModified(buffer.dirty)
+        finally:
+            self.installing = False
+
+    def edited(self):
+        if self.installing or self.identifier not in self.window.controller.buffers:
+            return
+        buffer = self.window.controller.buffer(self.identifier)
+        if not buffer.editable:
+            return
+        try:
+            positions = [(document_index(self, cursor.position()),
+                          [document_index(self, cursor.selectionStart()), document_index(self, cursor.selectionEnd())]
+                          if cursor.hasSelection() else None) for cursor in self.pane_cursors]
+            self.window.controller.edit(self.identifier, preserve_newlines(buffer.content, self.toPlainText()), pane_positions=positions)
+            self.setModified(buffer.dirty)
+        except (ValueError, OSError) as exc:
+            self.installing = True
+            try:
+                self.undo()
+            finally:
+                self.installing = False
+            self.window.show_error(str(exc))
+        for pane in self.window.panes:
+            if pane.shown == self.identifier:
+                pane.capture_position()
+        self.window.schedule_checkpoint()
+        self.refresh_timer.start(0)
+        self.window.update_actions()
+        self.window.mark_pdf_dirty()
 
 
 class EditorPane(QWidget):
@@ -194,10 +365,12 @@ class EditorPane(QWidget):
         self.retain = QPushButton('Retain displayed exact passage…')
         self.retain.clicked.connect(lambda: window.retain_passage(self))
         layout.addWidget(self.retain)
-        self.text = SourceEdit()
+        self.text = SourceEdit(self)
+        self.display_document = QTextDocument(self)
+        self.display_document.setDocumentLayout(QPlainTextDocumentLayout(self.display_document))
+        self.text.setDocument(self.display_document)
         layout.addWidget(self.text, 1)
         self.chooser.currentIndexChanged.connect(self.choose)
-        self.text.textChanged.connect(self.edited)
         self.text.cursorPositionChanged.connect(self.capture_position)
         self.text.selectionChanged.connect(self.capture_position)
         self.text.selectionChanged.connect(window.update_context_actions)
@@ -226,49 +399,33 @@ class EditorPane(QWidget):
             self.window.update_actions()
 
     def capture_position(self, *_):
-        if self.loading or not self.isVisible() or self.shown not in self.window.controller.buffers:
+        if not self.genuine_content() or not self.isVisible() or self.window.view_updates or self.text.reflow or self.text.restored_scroll or self.text.settling:
             return
         buffer = self.window.controller.buffer(self.shown)
-        if not buffer.loaded:
-            return
         state = self.window.controller.current()
         if state.visible[self.number] != self.shown or (self.number == 1 and not state.split):
             return
         cursor = self.text.textCursor()
+        self.window.documents[self.shown].pane_cursors[self.number] = QTextCursor(cursor)
         selection = [cursor_index(self.text, cursor.selectionStart()), cursor_index(self.text, cursor.selectionEnd())] if cursor.hasSelection() else None
         vertical, horizontal = self.text.verticalScrollBar(), self.text.horizontalScrollBar()
         self.window.controller.set_position(self.shown, pane=self.number, cursor=cursor_index(self.text, cursor.position()), selection=selection,
             yscroll=vertical.value() / max(1, vertical.maximum()), xscroll=horizontal.value() / max(1, horizontal.maximum()))
         self.window.schedule_checkpoint()
+        self.text.remember_view()
 
-    def edited(self):
-        if self.loading or self.shown not in self.window.controller.buffers:
-            return
-        buffer = self.window.controller.buffer(self.shown)
-        if not buffer.editable:
-            return
-        text = preserve_newlines(buffer.content, self.text.toPlainText())
-        try:
-            self.window.controller.edit(self.shown, text)
-        except (ValueError, OSError) as exc:
-            # Undo an oversized paste without losing the previously retained text.
-            with QSignalBlocker(self.text):
-                self.text.undo()
-            self.window.show_error(str(exc))
-        self.capture_position()
-        for pane in self.window.panes:
-            if pane is not self and pane.isVisible() and pane.shown == self.shown:
-                pane.show_buffer(self.shown, force=True)
-        self.window.update_actions()
-        self.window.mark_pdf_dirty()
+    def genuine_content(self):
+        buffer = self.window.controller.buffers.get(self.shown)
+        return bool(not self.loading and buffer and buffer.has_content
+                    and self.text.document() is self.window.documents.get(self.shown))
 
     def show_buffer(self, identifier, *, force=False):
         if identifier == self.shown and not force:
             self.choices()
             return
-        same_buffer = identifier == self.shown
         centered = False
         self.loading = True
+        self.window.view_updates += 1
         self.shown = identifier
         try:
             buffer = self.window.controller.buffer(identifier) if identifier else None
@@ -286,14 +443,21 @@ class EditorPane(QWidget):
                 text = buffer.content if not buffer.problem or buffer.recovery_warning else 'Document unavailable\n\n' + bounded_safe_diagnostic(buffer.problem)
                 self.text.setReadOnly(not buffer.editable)
             with QSignalBlocker(self.text):
-                normalized = text.replace('\r\n', '\n').replace('\r', '\n')
-                if not same_buffer or self.text.toPlainText() != normalized:
-                    self.text.setPlainText(normalized)
+                if buffer and buffer.has_content:
+                    document = self.window.documents.get(identifier)
+                    if document is None:
+                        document = self.window.documents[identifier] = BufferDocument(self.window, identifier, self.text.font())
+                    document.install(buffer)
+                else:
+                    document = self.display_document
+                    document.setPlainText(text)
+                if self.text.document() is not document:
+                    self.text.attach_document(document)
                 # blockCountChanged is suppressed while installing text. Set
                 # the final gutter width before restoring either scrollbar.
                 self.text.layout_gutter()
                 self.text.document().setModified(bool(buffer and buffer.dirty))
-                if buffer and buffer.loaded and not buffer.problem:
+                if buffer and buffer.has_content:
                     view = buffer.state.pane_views[self.number]
                     cursor = self.text.textCursor()
                     if view.selection:
@@ -306,6 +470,7 @@ class EditorPane(QWidget):
                     else:
                         cursor.setPosition(qt_position(self.text, view.cursor))
                     self.text.setTextCursor(cursor)
+                    document.pane_cursors[self.number] = QTextCursor(cursor)
                     if self.center_on_next_show:
                         self.text.centerCursor()
                         self.center_on_next_show = False
@@ -313,6 +478,7 @@ class EditorPane(QWidget):
                     else:
                         self.text.verticalScrollBar().setValue(round(view.yscroll * self.text.verticalScrollBar().maximum()))
                         self.text.horizontalScrollBar().setValue(round(view.xscroll * self.text.horizontalScrollBar().maximum()))
+                        self.text.restore_scroll(view)
                 if response:
                     self.passage.setValue(buffer.state.review_number)
                     self.retain.setEnabled(buffer.state.review_mode == 'passage' and not buffer.problem)
@@ -320,6 +486,8 @@ class EditorPane(QWidget):
             self.choices()
         finally:
             self.loading = False
+            self.window.view_updates -= 1
+        self.text.remember_view()
         if centered:
             self.capture_position()
 
@@ -471,6 +639,8 @@ class WorkstationWindow(QMainWindow):
     def __init__(self, controller=None):
         super().__init__()
         self.controller = controller or Workstation()
+        self.documents = {}
+        self.view_updates = 0
         self.setWindowTitle(TITLE)
         self.resize(1280, 820)
         self.setMinimumSize(760, 560)
@@ -678,10 +848,40 @@ class WorkstationWindow(QMainWindow):
     def schedule_checkpoint(self):
         self.checkpoint_timer.start(250)
 
+    def begin_reflow(self, *, cached=False):
+        for pane in getattr(self, 'panes', ()):
+            pane.text.begin_reflow(cached=cached)
+
+    @contextmanager
+    def updating_views(self):
+        # Suppress application capture, not Qt's scrollbar signals: Qt needs
+        # valueChanged itself to move the rendered viewport to the new value.
+        self.view_updates += 1
+        try:
+            yield
+        finally:
+            self.view_updates -= 1
+
+    def resizeEvent(self, event):
+        self.begin_reflow()
+        super().resizeEvent(event)
+
+    def prune_documents(self):
+        for identifier in set(self.documents) - self.controller.buffers.keys():
+            document = self.documents.pop(identifier)
+            for pane in self.panes:
+                if pane.text.document() is document:
+                    pane.text.attach_document(pane.display_document)
+            document.deleteLater()
+
     def flush(self):
         if self.controller.workspace:
+            for document in self.documents.values():
+                if document.refresh_timer.isActive():
+                    document.refresh_views()
             for pane in self.panes:
                 if pane.isVisible():
+                    pane.text.finish_reflow()
                     pane.capture_position()
             self.checkpoint_timer.stop()
             self.controller.current().window_size = [self.width(), self.height()]
@@ -780,13 +980,14 @@ class WorkstationWindow(QMainWindow):
 
     def render(self, *, balance_editors=False):
         state = self.controller.workspace
+        self.prune_documents()
+        if (balance_editors or self.panes[1].isVisible() != bool(state and state.split)
+                or self.pdf.isVisible() != bool(state and state.pdf_visible)):
+            self.begin_reflow()
         self.refresh_selection_shelf()
         # Split layout changes can emit position signals before document views
         # are restored. These signals describe geometry, not user navigation.
-        with ExitStack() as signals:
-            for pane in self.panes:
-                for widget in (pane.text, pane.text.verticalScrollBar(), pane.text.horizontalScrollBar()):
-                    signals.enter_context(QSignalBlocker(widget))
+        with self.updating_views():
             self.panes[1].setVisible(bool(state and state.split))
             self.pdf.setVisible(bool(state and state.pdf_visible))
             if balance_editors:
@@ -794,6 +995,9 @@ class WorkstationWindow(QMainWindow):
             for index, pane in enumerate(self.panes):
                 if index == 0 or state and state.split:
                     pane.show_buffer(state.visible[index] if state else None, force=True)
+        for pane in self.panes:
+            pane.text.remember_view()
+            pane.capture_position()
         self.update_context()
         self.update_actions()
 
@@ -829,6 +1033,10 @@ class WorkstationWindow(QMainWindow):
         if not self.close_project():
             return
         self.controller.open_project(Path(directory))
+        with QSignalBlocker(self.actions['wrap']):
+            self.actions['wrap'].setChecked(self.controller.current().wrap)
+        for pane in self.panes:
+            pane.text.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth if self.controller.current().wrap else QPlainTextEdit.LineWrapMode.NoWrap)
         root = self.controller.current().root
         self.filesystem.setRootPath(root)
         self.navigator.setRootIndex(self.file_filter.mapFromSource(self.filesystem.index(root)))
@@ -985,6 +1193,11 @@ class WorkstationWindow(QMainWindow):
         for identifier in list(self.controller.buffers):
             if not self.guard_buffer(identifier, recovery_option=True):
                 return False
+        # Native resize/focus events may complete inside a modal recovery
+        # dialog. Capture the final genuine views before closing the store.
+        self.flush()
+        if self.controller.persistence_error:
+            return self.failed_close()
         try:
             self.controller.close_project(keep_recovery=True)
         except WorkspaceError:
@@ -1030,6 +1243,7 @@ class WorkstationWindow(QMainWindow):
             event.ignore()
 
     def toggle_split(self, enabled):
+        self.begin_reflow()
         for pane in self.panes:
             if pane.isVisible():
                 pane.capture_position()
@@ -1037,10 +1251,17 @@ class WorkstationWindow(QMainWindow):
         self.render(balance_editors=True)
 
     def toggle_wrap(self, enabled):
+        self.begin_reflow()
+        if self.controller.workspace:
+            self.controller.current().wrap = bool(enabled)
         for pane in self.panes:
             pane.text.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth if enabled else QPlainTextEdit.LineWrapMode.NoWrap)
+        for document in self.documents.values():
+            document.set_wrap(enabled)
+        self.schedule_checkpoint()
 
     def toggle_pdf(self, enabled):
+        self.begin_reflow()
         self.controller.current().pdf_visible = enabled
         self.pdf.setVisible(enabled)
         if enabled:
@@ -1094,6 +1315,7 @@ class WorkstationWindow(QMainWindow):
             pane = 1 - pane
         def accepted(prepared):
             buffer = self.controller.accept_context_selection(index, prepared, pane)
+            self.begin_reflow()
             self.panes[1].setVisible(self.controller.current().split)
             target = self.panes[pane]
             target.center_on_next_show = True

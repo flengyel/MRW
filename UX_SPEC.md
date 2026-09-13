@@ -89,7 +89,12 @@ notebook must not execute it or expose editable raw JSON by default.
 
 Re-entry restores the open work, selected passage and rendering position. Two
 panes comparing the same file retain independent cursor, selection and scroll
-positions while sharing file content and one buffer/recovery identity. An
+positions while sharing one editable document, modified state, undo/redo history
+and buffer/recovery identity. Insertions and deletions adjust both views' text
+positions. Wrapping survives restart. Layout changes retain a visible cursor
+with minimal scrolling, or retain the visible passage when the cursor was
+deliberately offscreen. Recovery restores positions even with an unavailable
+saved base; placeholders and diagnostics never replace document positions. An
 optional unresolved-work marker anchors a file selection without demanding a
 written description. The implemented **Working context** shelf independently
 retains up to 32 ordered, exact revision-pinned selections across ordinary text

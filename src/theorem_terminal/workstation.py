@@ -39,6 +39,11 @@ class Buffer:
     recovery_raw: bytes | None = None
 
     @property
+    def has_content(self):
+        """Loaded document content, including recovery with an unavailable base."""
+        return self.loaded and (not self.problem or bool(self.recovery_warning))
+
+    @property
     def editable(self):
         return self.loaded and self.state.format == 'text' and not self.state.readonly and (not self.problem or bool(self.recovery_warning))
 
@@ -373,12 +378,19 @@ class Workstation:
             self.check_external(buffer.state.id)
         return buffer
 
-    def edit(self, identifier, text):
+    def edit(self, identifier, text, *, pane_positions=None):
         buffer = self.buffer(identifier)
         if not buffer.editable:
             raise WorkspaceError('This buffer is read-only or unavailable')
         if len(text.encode('utf-8')) > MAX_TEXT_BYTES or '\0' in text:
             raise WorkspaceError('Text exceeds the 2 MiB editor limit or contains an unsupported NUL')
+        if pane_positions is not None:
+            if len(pane_positions) != 2:
+                raise WorkspaceError('An edit requires two pane positions')
+            views = [decode_pane_view(dict(cursor=cursor, selection=selection,
+                         yscroll=view.yscroll, xscroll=view.xscroll))
+                     for (cursor, selection), view in zip(pane_positions, buffer.state.pane_views)]
+            buffer.state.pane_views = views
         buffer.content = text
         buffer.dirty = buffer.state.was_dirty = text != buffer.original
         # Per-keystroke work changes memory only. The UI coalesces checkpoints;
@@ -399,6 +411,8 @@ class Workstation:
 
     def set_position(self, identifier, *, cursor, selection, yscroll, xscroll, pane=None):
         pane = self._displayed_pane(identifier, pane)
+        if not self.buffer(identifier).has_content:
+            raise WorkspaceError('Loading and diagnostic displays have no document position')
         view = decode_pane_view(dict(cursor=cursor, selection=selection, yscroll=yscroll, xscroll=xscroll))
         self.buffer(identifier).state.pane_views[pane] = view
 

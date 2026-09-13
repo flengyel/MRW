@@ -291,13 +291,19 @@ Open, Save, Save As, Refresh from disk, Find, Go to line, Split and Close buffer
 are available through menus. Each pane has a buffer selector and visible saved,
 modified, read-only, external-change or conflict state. **View → Split** allows
 two source or record buffers, or two passages of one shared file with independent
-cursor, selection and scroll positions. File content and private recovery remain
-shared. The navigator and contextual facets can be hidden;
+cursor, selection and scroll positions. Both views share one editable document,
+modified state, undo/redo history and private recovery. Edits adjust the other
+pane's selection with the text. The navigator and contextual facets can be hidden;
 ordinary file editing does not require a wide identity inspector. Hashes are in
 expandable technical details.
 
 Session state retains the project root, open buffers, active buffer, cursor,
-selection, scroll, split, recent files and PDF view. **Work → Add current selection
+selection, scroll, wrapping, split, recent files and PDF view. Resizing, wrapping
+and layout changes keep a previously visible cursor visible with minimal scrolling;
+an offscreen cursor stays offscreen while the visible passage is retained.
+Recovered text restores both pane positions even if its saved base is unavailable.
+Loading and diagnostic displays never record document positions.
+**Work → Add current selection
 to working context** retains up to 32 ordered, revision-pinned passages from
 ordinary project text or explicitly opened external read-only text. The bottom
 **Working context** shelf shows paths and selection endpoints; tooltips show the
@@ -315,10 +321,12 @@ unfinished marker** maintain the independent single unfinished-work location.
 Neither aid requires a descriptive form. Shelf entries are private local
 navigation anchors only, not provenance, citations, warrant records or
 mathematical-object identities, and nothing is automatically sent to a model.
-Versions 3 and 4 migrate to version 5 at the next atomic checkpoint. Version 3
-gains an empty shelf; version 4 retains its shelf. Each legacy buffer position
-initializes two independent pane views; existing recovery, unfinished marker,
-split and PDF state are preserved.
+Versions 3, 4 and 5 migrate to version 6 at the next atomic checkpoint, defaulting
+to their historical wrapped display. Version 3 gains an empty shelf; existing
+shelves are retained, keeping the first anchor when canonicalization makes old
+spellings equivalent. Legacy positions preserve the historically rendered
+selection in independent pane views. Recovery, unfinished marker, split, PDF,
+build and window state are preserved.
 
 State, trusted tool settings, build outputs and private recovery are stored under:
 

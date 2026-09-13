@@ -56,8 +56,17 @@ def historical_workspace(root, version):
         active=identifier, visible=[identifier, identifier], active_pane=1, split=True,
         recent=[path], marker=marker, tex_root=None, last_build=None, successful_build=None,
         pdf_page=7, pdf_zoom='custom', pdf_scale=1.4, pdf_visible=True, window_size=[960, 680])
-    if version == 4:
+    if version in (4, 5):
         data['selection_shelf'] = [dict(path=path, revision='b' * 64, start='1.00', end='1.05'), marker.copy()]
+    if version == 5:
+        item = data['buffers'][0]
+        for key in ('cursor', 'selection', 'yscroll', 'xscroll'):
+            del item[key]
+        item['pane_views'] = [dict(cursor='3.7', selection=['3.0', '3.7'], yscroll=.7, xscroll=.2),
+                              dict(cursor='3.7', selection=['3.0', '3.7'], yscroll=.7, xscroll=.2)]
+        for entry in [data['marker'], *data['selection_shelf']]:
+            for key in ('start', 'end'):
+                entry[key] = '.'.join(str(int(n)) for n in entry[key].split('.'))
     return data
 
 
@@ -551,7 +560,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_invalid_versions_malformed_records_and_digest_mismatch_are_non_destructive(self):
         original = self.manifest.read_bytes()
-        for version in (0, 1, 2, 6, 99, True, False, 3.0, 4.0, 5.0, '3', '4', '5', None):
+        for version in (0, 1, 2, 7, 99, True, False, 3.0, 4.0, 5.0, 6.0, '3', '4', '5', '6', None):
             data = json.loads(original)
             data['schema_version'] = version
             with self.assertRaisesRegex(WorkspaceError, 'Unsupported'):
@@ -595,6 +604,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         old = json.loads(self.manifest.read_bytes())
         old['schema_version'] = 3
         del old['selection_shelf']
+        del old['wrap']
         for item, wanted in zip(old['buffers'], expected['buffers']):
             position = item.pop('pane_views')[1 if item['id'] == right.state.id else 0]
             item.update(position)
@@ -606,8 +616,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertEqual(asdict(migrated), expected)
             self.assertEqual(self.manifest.read_bytes(), raw)
             restored = self.restored()
-        self.assertEqual(VERSION, 5)
-        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 5)
+        self.assertEqual(VERSION, 6)
+        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 6)
         self.assertEqual(asdict(restored.current()), expected)
         self.assertEqual(recovery.read_bytes(), recovery_bytes)
         self.assertTrue(restored.view().recovery_warning)
@@ -616,9 +626,11 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
     def test_migration_and_shelf_schema_reject_malformed_manifests(self):
         original_raw = self.manifest.read_bytes()
         original = json.loads(original_raw)
-        for version in (3, 4, 5):
+        for version in (3, 4, 5, 6):
             valid = deepcopy(original)
             valid['schema_version'] = version
+            if version < 6:
+                del valid['wrap']
             if version == 3:
                 del valid['selection_shelf']
             for mutation in ({'split': 1}, {'marker': {}}, {'buffers': [{}]}, {'extra': None}):
@@ -645,7 +657,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertEqual(self.manifest.read_bytes(), original_raw)
 
     def test_literal_historical_migrations_normalize_and_keep_independent_views(self):
-        for version in (3, 4):
+        for version in (3, 4, 5):
             with self.subTest(version=version):
                 document = historical_workspace(self.root, version)
                 raw = encode(document)
@@ -666,7 +678,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                                  (7, 'custom', 1.4, [960, 680]))
                 self.assertEqual([(s.revision, s.start, s.end) for s in state.selection_shelf],
                                  [] if version == 3 else [('b' * 64, '1.0', '1.5'), ('a' * 64, '3.0', '3.7')])
-                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], 5)
+                self.assertTrue(state.wrap)
+                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], 6)
                 for key, value in (('cursor', '0.1'), ('yscroll', True), ('selection', ['1.0']), ('pane_views', [])):
                     malformed = deepcopy(document)
                     malformed['buffers'][0][key] = value
@@ -674,11 +687,14 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                         decode_workspace(encode(malformed))
         duplicate = historical_workspace(self.root, 4)
         duplicate['selection_shelf'][1] = {**duplicate['selection_shelf'][0], 'start': '1.0', 'end': '1.5'}
+        migrated = decode_workspace(encode(duplicate))
+        self.assertEqual([(s.start, s.end) for s in migrated.selection_shelf], [('1.0', '1.5')])
+        duplicate['selection_shelf'][1] = deepcopy(duplicate['selection_shelf'][0])
         with self.assertRaisesRegex(WorkspaceError, 'Duplicate'):
             decode_workspace(encode(duplicate))
 
     def test_historical_wire_shapes_do_not_follow_current_dataclass_fields(self):
-        for version in (3, 4):
+        for version in (3, 4, 5):
             document = historical_workspace(self.root, version)
             with ExitStack() as stack:
                 for cls in (Workspace, BufferState, WorkMarker, PaneViewState):
@@ -692,12 +708,13 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                     with self.assertRaises(WorkspaceError):
                         decode_workspace(encode(broken))
 
-    def test_version_five_rejects_malformed_pane_views_and_legacy_fields(self):
+    def test_version_six_rejects_malformed_pane_views_and_legacy_fields(self):
         valid = json.loads(encode_workspace(decode_workspace(encode(historical_workspace(self.root, 4)))))
         view = valid['buffers'][0]['pane_views'][0]
         invalid = [None, True, '', {}, [], [view], [view] * 3, [None, view], [[], view], [True, view]]
         mutations = [dict(cursor=value) for value in ('1.00', '01.0', '0.0', '1.-1', '1.1000000000', '', None, True, 1)]
         mutations += [dict(selection=value) for value in ([], ['1.0'], ['1.0'] * 3, '1.0', True, [None, '1.0'], ['1.00', '2.0'])]
+        mutations += [dict(selection=value) for value in (['3.7', '3.0'], ['3.7', '3.7'], ['1.0', '2.0'])]
         mutations += [{key: value} for key in ('yscroll', 'xscroll') for value in (True, False, None, '0', -1, 1.01, float('inf'), float('-inf'), float('nan'))]
         mutations += [{'extra': 0}]
         invalid.extend([{**view, **mutation}, view] for mutation in mutations)
@@ -719,6 +736,36 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         for value in (0, 1, .25):
             valid['buffers'][0]['pane_views'][0]['yscroll'] = value
             decode_workspace(encode(valid))
+        for value in (None, 0, 1, 'true', [], {}):
+            with self.assertRaises(WorkspaceError):
+                decode_workspace(encode({**valid, 'wrap': value}))
+
+    def test_legacy_incoherent_selections_migrate_to_the_historical_rendered_span(self):
+        cases = [('2.3', ['3.7', '1.0']), ('3.0', ['3.0', '3.7']),
+                 ('4.0', ['3.0', '3.7']), ('1.0', ['3.0', '3.0'])]
+        for version in (3, 4, 5):
+            for cursor, selection in cases:
+                data = historical_workspace(self.root, version)
+                old = dict(cursor=cursor, selection=selection, yscroll=.4, xscroll=.2)
+                item = data['buffers'][0]
+                if version == 5:
+                    item['pane_views'] = [deepcopy(old), deepcopy(old)]
+                    active = cursor
+                    anchor = selection[1] if cursor == selection[0] else selection[0]
+                else:
+                    item.update(old)
+                    anchor, active = selection
+                wanted = sorted((anchor, active), key=lambda p: tuple(map(int, p.split('.'))))
+                wanted = None if wanted[0] == wanted[1] else wanted
+                with self.subTest(version=version, cursor=cursor, selection=selection):
+                    state = decode_workspace(encode(data))
+                    for view in state.buffers[0].pane_views:
+                        self.assertEqual((view.cursor, view.selection), (active, wanted))
+                    encode_workspace(state)
+                    left, right = state.buffers[0].pane_views
+                    self.assertIsNot(left, right)
+                    if left.selection:
+                        self.assertIsNot(left.selection, right.selection)
 
     def test_pane_controller_keeps_shared_content_and_independent_navigation(self):
         c = self.controller
