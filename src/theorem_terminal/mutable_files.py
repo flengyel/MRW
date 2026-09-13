@@ -83,6 +83,21 @@ def save_mutable(path: Path, raw: bytes, *, previous: bytes | None,
         _replace_locked(path, raw, previous, mode)
 
 
+def verify_mutable(path: Path, previous: bytes, *, limit: int, lock_root: Path):
+    """Confirm exact cached bytes and directory durability without replacing.
+
+    A memory-cache hit is not evidence that the destination still exists or
+    contains these bytes. Use the same writer lock and bounded regular-file
+    check as publication, including parent synchronization on a true no-op.
+    """
+    path = path.absolute()
+    with file_lock(path, lock_root):
+        observed = read_bounded(path, limit, 'cached mutable destination')
+        if observed != previous:
+            raise MutableFileError('File changed on disk; cached bytes are no longer current')
+        sync_directory(path.parent)
+
+
 def update_mutable(path, transform, *, limit, lock_root, mode=0o600):
     """Read/merge/replace bounded mutable state under the same kernel lock."""
     with file_lock(path, lock_root, wait=True):

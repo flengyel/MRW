@@ -365,7 +365,12 @@ time.sleep(120)
                 self.controller.close_project(keep_recovery=True)
         self.assertIsNotNone(self.controller.workspace)
         self.assertEqual(self.controller.buffer().content, 'Irreplaceable unsaved text')
-        self.assertTrue(self.controller.checkpoint())
+        self.assertFalse(self.controller.checkpoint())
+        self.assertIn('close and reopen', self.controller.persistence_error)
+        self.controller.close_project(discard_session=True)
+        reopened = self.restored()
+        self.assertEqual(reopened.view().content, 'Irreplaceable unsaved text')
+        self.assertTrue(reopened.checkpoint())
 
     def test_kernel_lock_dies_with_process_and_does_not_block_later_saves(self):
         path = self.files['proof.md']
@@ -862,6 +867,13 @@ with patch.object(c.store, 'write_recovery', side_effect=OSError('duplicate reco
  else: raise AssertionError('duplicate addition reported false success')
 assert len(c.current().selection_shelf) == 1
 assert not c.store.recovery_path(b.state.id).exists()
+assert not c.checkpoint()
+c.close_project(discard_session=True)
+c = Workstation(state_root=Path(sys.argv[2]))
+c.open_project(Path(sys.argv[1]))
+b = c.view()
+c.edit(b.state.id, a)
+select()
 assert c.add_context_selection(b.state.id, '1.0', '1.5') == 0
 assert len(c.current().selection_shelf) == 1
 assert c.store.read_recovery(b.state)['text'] == a
@@ -926,72 +938,223 @@ os._exit(0)
                             path.unlink()
                         path.write_bytes(raw)
 
-    def test_failed_shelf_rollback_reconciles_cache_and_checkpoint_repairs_disk(self):
+    def test_cached_manifest_requires_exact_disk_verification(self):
+        for mutation in ('deleted', 'replaced', 'symlink', 'directory'):
+            with self.subTest(mutation=mutation):
+                c = Workstation(state_root=self.home / ('manifest-' + mutation))
+                c.open_project(self.root)
+                path, previous = c.store.path, c.store.previous
+                path.unlink()
+                if mutation == 'replaced':
+                    path.write_bytes(previous.replace(b'1280', b'1281'))
+                elif mutation == 'symlink':
+                    other = path.with_name('other.json')
+                    other.write_bytes(previous)
+                    path.symlink_to(other)
+                elif mutation == 'directory':
+                    path.mkdir()
+                self.assertFalse(c.checkpoint(), 'A cache match must verify the actual manifest')
+                self.assertIn('close and reopen', c.persistence_error)
+                self.assertEqual(c.store.previous, previous)
+
+    def test_cached_recovery_requires_exact_disk_verification(self):
+        for mutation in ('deleted', 'replaced', 'symlink', 'directory'):
+            with self.subTest(mutation=mutation):
+                c = Workstation(state_root=self.home / ('recovery-' + mutation))
+                c.open_project(self.root)
+                b = c.open_file(self.files['proof.md'])
+                c.edit(b.state.id, b.original + 'Unsaved A\n')
+                self.assertTrue(c.checkpoint())
+                path = c.store.recovery_path(b.state.id)
+                previous = c.store.recovery_previous[b.state.id]
+                path.unlink()
+                if mutation == 'replaced':
+                    path.write_bytes(previous.replace(b'Unsaved A', b'Unsaved B'))
+                elif mutation == 'symlink':
+                    other = path.with_name('other.json')
+                    other.write_bytes(previous)
+                    path.symlink_to(other)
+                elif mutation == 'directory':
+                    path.mkdir()
+                self.assertFalse(c.checkpoint(), 'A cache match must verify the actual recovery')
+                self.assertIn('close and reopen', c.persistence_error)
+                self.assertEqual(c.store.recovery_previous[b.state.id], previous)
+
+    def test_identical_candidate_from_another_writer_is_never_rolled_back(self):
         c = self.controller
         b = c.open_file(self.files['proof.md'])
-        self.add_selection(b)
-        c.set_position(b.state.id, cursor='3.7', selection=['3.0', '3.7'], yscroll=.3, xscroll=.1)
+        c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
         self.assertTrue(c.checkpoint())
-        previous = self.manifest.read_bytes()
-        old_shelf = deepcopy(c.current().selection_shelf)
+        other = self.restored()
+        other.view(b.state.id)
+        previous = c.store.previous
+        self.assertEqual(other.store.previous, previous)
+        save = c.store.save
+        def competing_candidate(candidate):
+            if candidate.selection_shelf:
+                other.add_context_selection(b.state.id, '1.0', '1.5')
+                self.assertEqual(encode_workspace(candidate), other.store.previous)
+            return save(candidate)
+        with patch.object(c.store, 'save', side_effect=competing_candidate):
+            with self.assertRaises(WorkspaceError):
+                c.add_context_selection(b.state.id, '1.0', '1.5')
+        self.assertEqual(self.manifest.read_bytes(), other.store.previous,
+                         'A failed writer must not undo the identical successful candidate')
+        self.assertFalse(c.current().selection_shelf)
+        self.assertEqual(len(other.current().selection_shelf), 1)
+        self.assertFalse(c.checkpoint())
+        self.assertIn('close and reopen', c.persistence_error)
+
+    def test_candidate_directory_sync_failure_never_replaces_manifest_twice(self):
         from theorem_terminal.mutable_files import sync_directory
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
+        self.assertTrue(c.checkpoint())
+        previous = c.store.previous
         def fail_candidate_sync(directory):
-            if directory == c.store.directory and len(json.loads(self.manifest.read_bytes())['selection_shelf']) == 2:
+            if directory == c.store.directory and json.loads(self.manifest.read_bytes())['selection_shelf']:
                 raise OSError('candidate directory sync denied')
             return sync_directory(directory)
         with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_candidate_sync), \
-             patch('theorem_terminal.workstation.save_mutable', side_effect=OSError('rollback replacement denied')):
-            with self.assertRaisesRegex(WorkspaceError, 'rollback replacement denied'):
-                c.add_context_selection(b.state.id, '3.0', '3.7')
+             patch('theorem_terminal.mutable_files.os.replace', wraps=os.replace) as replacement:
+            with self.assertRaisesRegex(WorkspaceError, 'candidate directory sync denied'):
+                c.add_context_selection(b.state.id, '1.0', '1.5')
+        self.assertEqual(replacement.call_count, 1, 'Publication failure must not attempt rollback')
         candidate = self.manifest.read_bytes()
         self.assertNotEqual(candidate, previous)
-        self.assertEqual(len(json.loads(candidate)['selection_shelf']), 2)
-        self.assertEqual(c.current().selection_shelf, old_shelf)
-        self.assertEqual(c.store.previous, candidate)
-        self.assertTrue(c.persistence_error)
-        with patch('theorem_terminal.workspace.save_mutable', wraps=save_mutable) as replace_manifest:
-            self.assertTrue(c.checkpoint())
-            self.assertEqual(replace_manifest.call_args.kwargs['previous'], candidate)
-        self.assertEqual(self.manifest.read_bytes(), previous)
-        self.assertEqual(c.store.previous, previous)
+        self.assertEqual(len(decode_workspace(candidate).selection_shelf), 1)
+        self.assertFalse(c.current().selection_shelf)
+        self.assertFalse(c.checkpoint(), 'Reading complete bytes is not proof of durability')
+        self.assertEqual(self.manifest.read_bytes(), candidate)
+        c.close_project(discard_session=True)
+        reopened = self.restored()
+        self.assertEqual(len(reopened.current().selection_shelf), 1)
+        self.assertTrue(reopened.checkpoint())
 
-    def test_unreconcilable_shelf_manifest_blocks_later_checkpoints(self):
+    def test_uncertain_publication_blocks_every_later_checkpoint_write(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
+        self.assertTrue(c.checkpoint())
+        save = c.store.save
+        def fail_candidate(candidate):
+            if candidate.selection_shelf:
+                raise OSError('uncertain candidate publication')
+            return save(candidate)
+        with patch.object(c.store, 'save', side_effect=fail_candidate):
+            with self.assertRaisesRegex(WorkspaceError, 'uncertain candidate publication'):
+                c.add_context_selection(b.state.id, '1.0', '1.5')
+        c.edit(b.state.id, b.original + 'Further in-memory work\n')
+        c.pending_recovery_cleanup.add(b.state.id)
+        with ExitStack() as stack:
+            writes = [stack.enter_context(patch.object(service, method)) for service, method in
+                      ((c.store, 'write_recovery'), (c.store, 'save'),
+                       (c.store, 'clear_recovery'), (c.settings_store, 'save'))]
+            self.assertFalse(c.checkpoint())
+            with self.assertRaisesRegex(WorkspaceError, 'Final checkpoint failed'):
+                c.close_project(keep_recovery=True)
+            for write in writes:
+                write.assert_not_called()
+        self.assertFalse(c.current().selection_shelf)
+        self.assertIn('close and reopen', c.persistence_error)
+
+    def test_cached_publications_sync_directory_without_replacement(self):
         from theorem_terminal.mutable_files import sync_directory
-        for failure in ('missing', 'unrelated', 'unreadable'):
-            with self.subTest(failure=failure):
-                root = self.home / failure
-                root.mkdir()
-                path = root / 'work.txt'
-                path.write_text('First line\nSecond line\n')
-                c = Workstation(state_root=self.home / (failure + '-state'))
-                c.open_project(root)
-                b = c.open_file(path)
-                c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
-                manifest = c.store.path
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.edit(b.state.id, b.original + 'Checkpointed work\n')
+        self.assertTrue(c.checkpoint())
+        before = self.manifest.read_bytes()
+        with patch('theorem_terminal.mutable_files.os.replace', wraps=os.replace) as replacement, \
+             patch('theorem_terminal.mutable_files.sync_directory', wraps=sync_directory) as sync:
+            self.assertTrue(c.checkpoint())
+            replacement.assert_not_called()
+            parents = [call.args[0] for call in sync.call_args_list]
+            self.assertIn(c.store.directory, parents)
+            self.assertIn(c.store.recovery_path(b.state.id).parent, parents)
+        self.assertEqual(self.manifest.read_bytes(), before)
+
+    def test_exact_noop_verification_uses_existing_lock_and_bounded_bytes(self):
+        from theorem_terminal.mutable_files import verify_mutable
+        path = self.home / 'mutable.json'
+        path.write_bytes(b'{}')
+        locks = self.state_root / 'locks'
+        inode = path.stat().st_ino
+        with file_lock(path, locks):
+            with self.assertRaisesRegex(MutableFileError, 'Another process'):
+                verify_mutable(path, b'{}', limit=2, lock_root=locks)
+        verify_mutable(path, b'{}', limit=2, lock_root=locks)
+        self.assertEqual(path.stat().st_ino, inode)
+        self.assertEqual(path.read_bytes(), b'{}')
+        path.write_bytes(b'[]')
+        with self.assertRaisesRegex(MutableFileError, 'changed on disk'):
+            verify_mutable(path, b'{}', limit=2, lock_root=locks)
+        path.write_bytes(b'{} ')
+        with self.assertRaisesRegex(ValueError, 'exceeds'):
+            verify_mutable(path, b'{}', limit=2, lock_root=locks)
+
+    def test_cached_directory_sync_failure_stays_blocked_despite_complete_bytes(self):
+        from theorem_terminal.mutable_files import sync_directory
+        for target in ('manifest', 'recovery'):
+            with self.subTest(target=target):
+                c = Workstation(state_root=self.home / ('sync-' + target))
+                c.open_project(self.root)
+                b = c.open_file(self.files['proof.md'])
+                c.edit(b.state.id, b.original + 'Private work\n')
+                self.assertTrue(c.checkpoint())
+                path = c.store.path if target == 'manifest' else c.store.recovery_path(b.state.id)
+                raw = path.read_bytes()
                 def fail_sync(directory):
-                    if directory == c.store.directory and json.loads(manifest.read_bytes())['selection_shelf']:
-                        raise OSError('candidate sync denied')
+                    if directory == path.parent:
+                        raise OSError('no-op directory sync denied')
                     return sync_directory(directory)
-                def fail_rollback(*args, **kwargs):
-                    if failure == 'missing':
-                        manifest.unlink()
-                    elif failure == 'unrelated':
-                        manifest.write_bytes(b'unrelated writer')
-                    raise OSError('rollback denied')
-                with ExitStack() as stack:
-                    stack.enter_context(patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_sync))
-                    stack.enter_context(patch('theorem_terminal.workstation.save_mutable', side_effect=fail_rollback))
-                    if failure == 'unreadable':
-                        stack.enter_context(patch('theorem_terminal.workspace.read_bounded', side_effect=OSError('read denied')))
-                    with self.assertRaises(WorkspaceError):
-                        c.add_context_selection(b.state.id, '1.0', '1.5')
-                actual = manifest.read_bytes() if manifest.exists() else None
-                self.assertIsNotNone(c.store.previous)
-                self.assertNotIsInstance(c.store.previous, bytes)
-                self.assertFalse(c.current().selection_shelf)
+                with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_sync), \
+                     patch('theorem_terminal.mutable_files.os.replace', wraps=os.replace) as replacement:
+                    self.assertFalse(c.checkpoint())
+                    replacement.assert_not_called()
+                self.assertEqual(path.read_bytes(), raw)
                 self.assertFalse(c.checkpoint())
-                self.assertIn('reconciled', c.persistence_error)
-                self.assertEqual(manifest.read_bytes() if manifest.exists() else None, actual)
+                self.assertIn('no-op directory sync denied', c.persistence_error)
+                self.assertIn('close and reopen', c.persistence_error)
+                with patch('theorem_terminal.workspace.save_mutable') as save, \
+                     patch('theorem_terminal.workspace.verify_mutable') as verify:
+                    for operation in (lambda: c.store.save(c.current()),
+                                      lambda: c.store.write_recovery(b),
+                                      lambda: c.store.clear_recovery(b.state.id)):
+                        with self.assertRaisesRegex(WorkspaceError, 'close and reopen'):
+                            operation()
+                    save.assert_not_called()
+                    verify.assert_not_called()
+                c.close_project(discard_session=True)
+                c.open_project(self.root)
+                self.assertEqual(c.view().content, b.content)
+                self.assertTrue(c.checkpoint())
+
+    def test_recovery_replacement_sync_failure_blocks_manifest_and_keeps_complete_text(self):
+        from theorem_terminal.mutable_files import sync_directory
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        self.assertTrue(c.checkpoint())
+        previous = self.manifest.read_bytes()
+        c.edit(b.state.id, b.original + 'Unsaved recovery A α\n')
+        path = c.store.recovery_path(b.state.id)
+        def fail_sync(directory):
+            if directory == path.parent:
+                raise OSError('recovery replacement sync denied')
+            return sync_directory(directory)
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_sync), \
+             patch.object(c.store, 'save') as save:
+            self.assertFalse(c.checkpoint())
+            save.assert_not_called()
+        self.assertEqual(json.loads(path.read_bytes())['text'], b.content)
+        self.assertEqual(self.manifest.read_bytes(), previous)
+        self.assertFalse(c.checkpoint())
+        c.close_project(discard_session=True)
+        reopened = self.restored()
+        self.assertEqual(reopened.view().content, b.content)
+        self.assertTrue(reopened.buffer().recovery_warning)
+        self.assertTrue(reopened.checkpoint())
 
     def test_context_selections_survive_process_restart_in_order_without_external_actions(self):
         external = self.home / 'external-reference.txt'
@@ -1101,50 +1264,45 @@ with ExitStack() as stack:
         self.assertEqual(restored.current().marker, marker)
         self.assertEqual(self.files['proof.md'].read_bytes(), original)
 
-    def test_context_shelf_add_remove_roll_back_on_checkpoint_failures(self):
-        c = self.controller
-        b = c.open_file(self.files['proof.md'])
-        c.mark(b.state.id, '3.0', '3.7')
-        marker = deepcopy(c.current().marker)
-        self.add_selection(b)
-        c.edit(b.state.id, b.content + 'Unsaved work.\n')
-        for service, method in ((c.store, 'write_recovery'), (c.store, 'save'), (c.settings_store, 'save')):
-            with patch.object(service, method, side_effect=OSError('checkpoint denied')):
-                for operation in (lambda: self.add_selection(b, '3.0', '3.7'), lambda: c.remove_context_selection(0)):
-                    with self.assertRaisesRegex(WorkspaceError, 'checkpoint failed'):
-                        operation()
-                    self.assertEqual(len(c.current().selection_shelf), 1)
-                    self.assertEqual(len(json.loads(self.manifest.read_bytes())['selection_shelf']), 1)
-        self.assertTrue(c.checkpoint())
-        save = c.store.save
-        def fail_candidate(state):
-            if len(state.selection_shelf) != 1:
-                raise OSError('shelf publication denied')
-            return save(state)
-        with patch.object(c.store, 'save', side_effect=fail_candidate):
-            for operation in (lambda: self.add_selection(b, '3.0', '3.7'), lambda: c.remove_context_selection(0)):
-                with self.assertRaisesRegex(WorkspaceError, 'publication denied'):
-                    operation()
-                self.assertEqual(len(c.current().selection_shelf), 1)
-                self.assertEqual(len(json.loads(self.manifest.read_bytes())['selection_shelf']), 1)
-        # Exercise a real replacement followed by a failed directory sync.
-        from theorem_terminal.mutable_files import sync_directory
-        failed = []
-        def fail_after_replace(directory):
-            if directory == c.store.directory and not failed and len(json.loads(self.manifest.read_bytes())['selection_shelf']) == 2:
-                failed.append(True)
-                raise OSError('post-replace sync denied')
-            return sync_directory(directory)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_after_replace):
-            with self.assertRaisesRegex(WorkspaceError, 'post-replace'):
-                self.add_selection(b, '3.0', '3.7')
-        self.assertTrue(failed)
-        self.assertEqual(len(c.current().selection_shelf), 1)
-        self.assertEqual(len(json.loads(self.manifest.read_bytes())['selection_shelf']), 1)
-        self.assertTrue(c.checkpoint())
-        c.remove_context_selection(0)
-        self.assertFalse(c.current().selection_shelf)
-        self.assertEqual(c.current().marker, marker)
+    def test_context_shelf_failures_keep_memory_and_block_until_reopen(self):
+        for boundary in ('recovery', 'manifest', 'settings', 'candidate'):
+            for operation in ('add', 'remove'):
+                with self.subTest(boundary=boundary, operation=operation):
+                    c = Workstation(state_root=self.home / (boundary + '-' + operation))
+                    c.open_project(self.root)
+                    b = c.open_file(self.files['proof.md'])
+                    c.mark(b.state.id, '3.0', '3.7')
+                    c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
+                    c.add_context_selection(b.state.id, '1.0', '1.5')
+                    shelf, marker = deepcopy(c.current().selection_shelf), deepcopy(c.current().marker)
+                    c.edit(b.state.id, b.content + 'Unsaved work.\n')
+                    c.set_position(b.state.id, cursor='3.7', selection=['3.0', '3.7'], yscroll=.3, xscroll=.1)
+                    save = c.store.save
+                    def candidate_only(state):
+                        if state.selection_shelf != shelf:
+                            raise OSError('candidate publication denied')
+                        return save(state)
+                    service, method = {'recovery': (c.store, 'write_recovery'),
+                                       'manifest': (c.store, 'save'),
+                                       'settings': (c.settings_store, 'save'),
+                                       'candidate': (c.store, 'save')}[boundary]
+                    fault = candidate_only if boundary == 'candidate' else OSError(boundary + ' denied')
+                    with patch.object(service, method, side_effect=fault):
+                        with self.assertRaisesRegex(WorkspaceError, 'checkpoint failed'):
+                            if operation == 'add':
+                                c.add_context_selection(b.state.id, '3.0', '3.7')
+                            else:
+                                c.remove_context_selection(0)
+                    self.assertEqual(c.current().selection_shelf, shelf)
+                    self.assertEqual(c.current().marker, marker)
+                    self.assertFalse(c.checkpoint())
+                    self.assertEqual(decode_workspace(c.store.path.read_bytes()).selection_shelf, shelf)
+                    c.close_project(discard_session=True)
+                    c.open_project(self.root)
+                    self.assertEqual(c.current().selection_shelf, shelf)
+                    c.remove_context_selection(0)
+                    self.assertFalse(c.current().selection_shelf)
+                    self.assertEqual(c.current().marker, marker)
 
     def test_context_open_validates_before_moving_either_pane(self):
         c = self.controller

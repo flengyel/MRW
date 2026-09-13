@@ -19,9 +19,9 @@ from .record_views import inspect_record, read_call_snapshot
 from .response_review import purpose_kind, render_response_review, select_passage
 from .source import SourceDocument
 from .tool_settings import SettingsStore, expand_arguments, launch_tool
-from .workspace import (BufferState, MAX_BUFFERS, MAX_CONTEXT_SELECTIONS, MAX_MANIFEST_BYTES,
+from .workspace import (BufferState, MAX_BUFFERS, MAX_CONTEXT_SELECTIONS,
                         MAX_TEXT_BYTES, PaneViewState, WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
-                        decode_pane_view, encode_workspace, selection_span, strict_json)
+                        decode_pane_view, selection_span, strict_json)
 
 
 @dataclass
@@ -162,6 +162,9 @@ class Workstation:
         if self.workspace is None:
             return True
         try:
+            # An uncertain publication can only be resolved by reopening. Do
+            # this before recovery, manifest, cleanup or settings can write.
+            self.store.require_writable()
             for buffer in self.buffers.values():
                 if buffer.loaded and buffer.dirty:
                     self.store.write_recovery(buffer)
@@ -171,7 +174,8 @@ class Workstation:
                 self.pending_recovery_cleanup.discard(identifier)
             self.settings_store.save()
         except (ValueError, OSError) as exc:
-            self.persistence_error = str(exc)
+            self.store.block_writes(exc)
+            self.persistence_error = self.store.blocked
             return False
         self.persistence_error = ''
         return True
@@ -548,22 +552,14 @@ class Workstation:
         # unsaved text. The shelf itself is the final atomic manifest write.
         if not self.checkpoint():
             raise WorkspaceError('Working context checkpoint failed: ' + self.persistence_error)
-        previous = self.store.previous
         candidate = replace(self.current(), selection_shelf=selections)
-        raw = encode_workspace(candidate)
         try:
             self.store.save(candidate)
         except (OSError, ValueError) as exc:
-            self.persistence_error = str(exc)
-            # A directory-sync error can follow atomic replacement. Restore
-            # only our exact candidate, never a concurrent writer's manifest.
-            try:
-                if read_bounded(self.store.path, MAX_MANIFEST_BYTES, 'editor state') == raw:
-                    save_mutable(self.store.path, previous, previous=raw, lock_root=self.store.lock_root)
-                    self.store.previous = previous
-            except (OSError, ValueError) as rollback:
-                self.persistence_error += '; could not restore the previous shelf: ' + str(rollback)
-            self.store.reconcile_failed_save(previous, raw)
+            # Equal bytes cannot identify their writer, and a read cannot
+            # prove directory durability. Never compensate with another write.
+            self.store.block_writes(exc)
+            self.persistence_error = self.store.blocked
             raise WorkspaceError('Working context checkpoint failed: ' + self.persistence_error) from exc
         self.current().selection_shelf = selections
 

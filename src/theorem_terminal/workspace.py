@@ -14,7 +14,7 @@ import sys
 from uuid import uuid4
 
 from .local_files import read_bounded
-from .mutable_files import private_directory, save_mutable
+from .mutable_files import private_directory, save_mutable, verify_mutable
 
 SCHEMA = 'theorem-terminal.workspace'
 VERSION = 6
@@ -43,7 +43,6 @@ V5_BUFFER_FIELDS = frozenset({'id', 'path', 'format', 'revision', 'readonly', 'e
     'companion', 'companion_revision', 'pane_views', 'was_dirty', 'review_mode', 'review_number'})
 BUFFER_FIELDS = V5_BUFFER_FIELDS
 WORKSPACE_FIELDS = V5_WORKSPACE_FIELDS | {'wrap'}
-_UNRECONCILED = object()
 
 
 class WorkspaceError(ValueError):
@@ -374,6 +373,15 @@ class WorkspaceStore:
         self.lock_root = state_root / 'locks'
         self.previous = previous
         self.recovery_previous: dict[str, bytes | None] = {}
+        self.blocked = ''
+
+    def block_writes(self, error):
+        if not self.blocked:
+            self.blocked = 'Workspace persistence failed; close and reopen before further writes: ' + str(error)
+
+    def require_writable(self):
+        if self.blocked:
+            raise WorkspaceError(self.blocked)
 
     @classmethod
     def for_project(cls, root: Path, state_root: Path | None = None):
@@ -392,23 +400,18 @@ class WorkspaceStore:
         return store, state
 
     def save(self, workspace: Workspace):
-        if self.previous is _UNRECONCILED:
-            raise WorkspaceError('Editor-state disk contents could not be reconciled; checkpoint remains blocked')
-        raw = encode_workspace(workspace)
-        if raw != self.previous:
-            private_directory(self.directory)
-            save_mutable(self.path, raw, previous=self.previous, lock_root=self.lock_root)
-            self.previous = raw
-
-    def reconcile_failed_save(self, previous, candidate):
-        """Cache observed bytes after failed publication/rollback, or fail closed."""
-        self.previous = _UNRECONCILED
+        self.require_writable()
         try:
-            observed = read_bounded(self.path, MAX_MANIFEST_BYTES, 'editor state')
-        except (OSError, ValueError):
-            return
-        if observed in (previous, candidate):
-            self.previous = observed
+            raw = encode_workspace(workspace)
+            if raw == self.previous:
+                verify_mutable(self.path, self.previous, limit=MAX_MANIFEST_BYTES, lock_root=self.lock_root)
+            else:
+                private_directory(self.directory)
+                save_mutable(self.path, raw, previous=self.previous, lock_root=self.lock_root)
+                self.previous = raw
+        except (OSError, ValueError) as exc:
+            self.block_writes(exc)
+            raise
 
     def recovery_path(self, identifier):
         if not isinstance(identifier, str) or re.fullmatch(r'[0-9a-f-]{36}', identifier) is None:
@@ -444,6 +447,14 @@ class WorkspaceStore:
         return value
 
     def write_recovery(self, buffer):
+        self.require_writable()
+        try:
+            self._write_recovery(buffer)
+        except (OSError, ValueError) as exc:
+            self.block_writes(exc)
+            raise
+
+    def _write_recovery(self, buffer):
         state = buffer.state
         path = self.recovery_path(state.id)
         if state.id not in self.recovery_previous:
@@ -452,12 +463,15 @@ class WorkspaceStore:
                               text=buffer.content, original=buffer.original))
         if len(raw) > MAX_RECOVERY_BYTES:
             raise WorkspaceError('Recovery snapshot exceeds its size limit')
-        if raw != self.recovery_previous[state.id]:
+        if raw == self.recovery_previous[state.id]:
+            verify_mutable(path, raw, limit=MAX_RECOVERY_BYTES, lock_root=self.lock_root)
+        else:
             private_directory(path.parent)
             save_mutable(path, raw, previous=self.recovery_previous[state.id], lock_root=self.lock_root)
             self.recovery_previous[state.id] = raw
 
     def clear_recovery(self, identifier):
+        self.require_writable()
         path = self.recovery_path(identifier)
         # Remove after save/discard or a checkpointed return to clean text. A
         # concurrent writer's different snapshot must never be removed.
