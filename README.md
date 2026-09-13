@@ -280,7 +280,8 @@ These are document dependencies, never corpus-specific application requirements.
 
 ### Ordinary files and re-entry
 
-Choose **Open Project Directory**, expand directories and double-click a file,
+Choose **Open Project Directory**, expand directories and activate a file with
+the pointer or keyboard,
 or use **File → Open**. **New file** creates an untitled buffer. **Save** checks
 the original disk revision before replacing a project file; **Save As** creates a
 new project file and refuses an existing destination. External references remain
@@ -312,8 +313,11 @@ Loading and diagnostic displays never record document positions.
 **Work → Add current selection
 to working context** retains up to 32 ordered, revision-pinned passages from
 ordinary project text or explicitly opened external read-only text. The bottom
-**Working context** shelf shows paths and selection endpoints; tooltips show the
-full path and SHA-256 revision. Open a selected passage in the active or other
+**Working context** shelf shows paths, one-based line/column locations and plain
+passage previews. Previews normalize whitespace and retain at most 120 Unicode
+characters in private session state; tooltips show the full path, pinned SHA-256
+revision and canonical stored span (whose columns remain zero-based).
+Open a selected passage in the active or other
 editor pane, or remove it, through the Work menu or dock buttons. Double-clicking
 opens a passage; single-clicking only selects its row. Different passages in one
 file coexist; adding the same exact selection again selects its existing row.
@@ -324,11 +328,25 @@ anchor and both editors in place. No similar-text search or relocation occurs.
 
 **Work → Mark unfinished work here**, **Return to unfinished work**, and **Clear
 unfinished marker** maintain the independent single unfinished-work location.
+Return identifies that location in its tooltip and validates it before moving
+either editor. In loaded editable ordinary text, both aids follow edits through
+the workstation's shared document and undo/redo history, independently of pane
+selections. Insertions at either boundary of a nonempty passage stay outside it;
+a point marker advances when text is inserted at its continuation point.
+Edits inside a retained passage update its preview. A completely deleted passage
+keeps its last completed pin, visibly changed, and cannot be opened at another
+location; undo can restore its range. Checkpoints publish recovery before the
+updated navigation pins. If distinct spans converge, a duplicate keeps its
+previous pin as changed rather than merging shelf rows.
+Known external changes freeze anchors and explicit
+opening fails without navigation or a replacement revision.
 Neither aid requires a descriptive form. Shelf entries are private local
 navigation anchors only, not provenance, citations, warrant records or
 mathematical-object identities, and nothing is automatically sent to a model.
-Versions 3, 4 and 5 migrate to version 6 at the next atomic checkpoint, defaulting
-to their historical wrapped display. Version 3 gains an empty shelf; existing
+Versions 3–6 migrate to version 7 at the next atomic checkpoint without reading
+source files. Migrated anchors have empty previews until explicitly opened or
+retained again. Versions 3–5 default to their historical wrapped display;
+version 6 preserves its wrap setting. Version 3 gains an empty shelf; existing
 shelves are retained, keeping the first anchor when canonicalization makes old
 spellings equivalent. Legacy positions preserve the historically rendered
 selection in independent pane views. Recovery, unfinished marker, split, PDF,

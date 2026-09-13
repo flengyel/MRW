@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass, field, replace
+from dataclasses import asdict, dataclass, field, replace
 from hashlib import sha256
 import os
 from pathlib import Path
@@ -21,7 +21,7 @@ from .source import SourceDocument
 from .tool_settings import SettingsStore, expand_arguments, launch_tool
 from .workspace import (BufferState, MAX_BUFFERS, MAX_CONTEXT_SELECTIONS,
                         MAX_TEXT_BYTES, PaneViewState, WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
-                        decode_pane_view, selection_span, strict_json)
+                        anchor_preview, decode_marker, decode_pane_view, selection_span, strict_json)
 
 
 @dataclass
@@ -134,6 +134,7 @@ class Workstation:
         self.buffers: dict[str, Buffer] = {}
         self.persistence_error = ''
         self.pending_recovery_cleanup = set()
+        self.completed_navigation = (None, [])
 
     def current(self) -> Workspace:
         if self.workspace is None:
@@ -153,6 +154,7 @@ class Workstation:
         # No source/record contents are read here. Widgets request bounded
         # snapshots of visible buffers on their worker queue.
         self.workspace, self.store = workspace, store
+        self._remember_navigation()
         self.buffers = {state.id: Buffer(state) for state in workspace.buffers}
         self.pending_recovery_cleanup.clear()
         self.settings_store.remember_project(workspace.root)
@@ -169,6 +171,7 @@ class Workstation:
                 if buffer.loaded and buffer.dirty:
                     self.store.write_recovery(buffer)
             self.store.save(self.workspace)
+            self._remember_navigation()
             for identifier in tuple(self.pending_recovery_cleanup):
                 self.store.clear_recovery(identifier)
                 self.pending_recovery_cleanup.discard(identifier)
@@ -382,19 +385,122 @@ class Workstation:
             self.check_external(buffer.state.id)
         return buffer
 
-    def edit(self, identifier, text, *, pane_positions=None):
+    def navigation_entries(self, identifier):
+        """Ordered scalar anchors for a buffer; no source reads or Qt objects."""
+        path = self.buffer(identifier).state.path
+        state = self.current()
+        entries = [('marker', state.marker)] if state.marker and state.marker.path == path else []
+        return entries + [(i, entry) for i, entry in enumerate(state.selection_shelf) if entry.path == path]
+
+    def _remember_navigation(self):
+        state = self.current()
+        self.completed_navigation = deepcopy((state.marker, state.selection_shelf))
+
+    @staticmethod
+    def _span_text(text, start, end, *, point=False):
+        from .workspace import _position
+        _position(start)
+        _position(end)
+        if not point or start != end:
+            selection_span(start, end)
+        lines = text.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+        positions = [tuple(map(int, value.split('.'))) for value in (start, end)]
+        if any(line > len(lines) or column > len(lines[line - 1]) for line, column in positions):
+            raise WorkspaceError('Selection is outside the current document')
+        offsets = [sum(len(line) + 1 for line in lines[:row - 1]) + column for row, column in positions]
+        return '\n'.join(lines)[offsets[0]:offsets[1]]
+
+    def edit(self, identifier, text, *, pane_positions=None, anchor_positions=None, revision=None, collapsed=()):
+        """Apply one document mutation. Live Qt edits supply a complete candidate.
+
+        Calls without anchor_positions are explicit whole-text replacements;
+        no correspondence through such a replacement is asserted. All supplied
+        pane and navigation positions are validated before any memory changes.
+        """
         buffer = self.buffer(identifier)
         if not buffer.editable:
             raise WorkspaceError('This buffer is read-only or unavailable')
+        if not isinstance(text, str):
+            raise WorkspaceError('Editor text must be Unicode')
         if len(text.encode('utf-8')) > MAX_TEXT_BYTES or '\0' in text:
             raise WorkspaceError('Text exceeds the 2 MiB editor limit or contains an unsupported NUL')
+        views = buffer.state.pane_views
         if pane_positions is not None:
-            if len(pane_positions) != 2:
+            if (not isinstance(pane_positions, (list, tuple)) or len(pane_positions) != 2
+                    or any(not isinstance(item, (list, tuple)) or len(item) != 2 for item in pane_positions)):
                 raise WorkspaceError('An edit requires two pane positions')
             views = [decode_pane_view(dict(cursor=cursor, selection=selection,
                          yscroll=view.yscroll, xscroll=view.xscroll))
                      for (cursor, selection), view in zip(pane_positions, buffer.state.pane_views)]
-            buffer.state.pane_views = views
+        state = self.current()
+        marker, shelf = state.marker, list(state.selection_shelf)
+        if anchor_positions is not None:
+            digest = sha256(text.encode('utf-8')).hexdigest()
+            self._match(digest, revision)
+            if pane_positions is None:
+                raise WorkspaceError('A live edit requires both pane views')
+            for view in views:
+                self._span_text(text, *(view.selection or [view.cursor, view.cursor]), point=True)
+            expected = self.navigation_entries(identifier)
+            if (not isinstance(collapsed, (list, tuple)) or len(collapsed) > len(expected)
+                    or any(type(key) not in (int, str) for key in collapsed)
+                    or len(set(collapsed)) != len(collapsed)
+                    or not set(collapsed) <= {key for key, _ in expected}):
+                raise WorkspaceError('Invalid collapsed navigation set')
+            if (not isinstance(anchor_positions, list) or len(anchor_positions) != len(expected)
+                    or any(not isinstance(item, tuple) or len(item) != 3 for item in anchor_positions)):
+                raise WorkspaceError('A live edit requires the complete ordered navigation set')
+            for (key, entry), (candidate_key, previous, span) in zip(expected, anchor_positions):
+                if type(candidate_key) is not type(key) or candidate_key != key or previous != entry:
+                    raise WorkspaceError('Navigation changed during the edit')
+                decode_marker(asdict(entry), shelf=key != 'marker')
+                if span is None:
+                    # A deleted passage keeps its last completed pin, not a
+                    # point or a newly guessed location in the changed text.
+                    changed = entry
+                    if key in collapsed:
+                        if entry.start == entry.end or buffer.problem or buffer.externally_changed:
+                            raise WorkspaceError('Only a live nonempty passage can collapse')
+                        pinned = self.completed_navigation[0] if key == 'marker' else self.completed_navigation[1][key]
+                        if not pinned or pinned.path != entry.path:
+                            raise WorkspaceError('A deleted anchor requires its completed pin')
+                        changed = pinned
+                else:
+                    if key in collapsed:
+                        raise WorkspaceError('A collapsed anchor cannot acquire a replacement span')
+                    if (not buffer.state.path or buffer.state.external or buffer.externally_changed
+                            or buffer.problem or record_kind(text)):
+                        raise WorkspaceError('Changed or unavailable sources cannot acquire replacement anchors')
+                    if not isinstance(span, tuple) or len(span) != 2:
+                        raise WorkspaceError('Invalid live anchor range')
+                    selected = self._span_text(text, *span, point=key == 'marker' and entry.start == entry.end)
+                    changed = WorkMarker(entry.path, digest, *span, anchor_preview(selected))
+                if key == 'marker':
+                    marker = changed
+                else:
+                    shelf[key] = changed
+            if len(shelf) > MAX_CONTEXT_SELECTIONS:
+                raise WorkspaceError('Working context is limited to 32 selections')
+            identities = [(s.path, s.revision, s.start, s.end) for s in shelf]
+            if len(set(identities)) != len(identities):
+                # Distinct overlapping passages can converge during deletion.
+                # Keep their rows independent without publishing duplicate pins
+                # or rejecting the text edit: a later collision retains its
+                # completed pin and becomes changed until explicitly retained.
+                seen = set()
+                for index, identity in enumerate(identities):
+                    if identity in seen:
+                        shelf[index] = deepcopy(self.completed_navigation[1][index])
+                        item = shelf[index]
+                        identity = item.path, item.revision, item.start, item.end
+                    if identity in seen:
+                        for key, _ in expected:
+                            if key != 'marker':
+                                shelf[key] = deepcopy(self.completed_navigation[1][key])
+                        break
+                    seen.add(identity)
+        buffer.state.pane_views = views
+        state.marker, state.selection_shelf = marker, shelf
         buffer.content = text
         buffer.dirty = buffer.state.was_dirty = text != buffer.original
         # Per-keystroke work changes memory only. The UI coalesces checkpoints;
@@ -529,17 +635,14 @@ class Workstation:
     def context_selection_supported(self, identifier):
         buffer = self.buffers.get(identifier)
         return bool(buffer and buffer.loaded and buffer.state.path and buffer.state.format == 'text'
-                    and not buffer.problem and not self._internal(Path(buffer.state.path))
+                    and not buffer.problem and not buffer.externally_changed and not self._internal(Path(buffer.state.path))
                     and (Path(buffer.state.path).is_relative_to(Path(self.current().root))
                          or (buffer.state.external and buffer.state.readonly))
                     and not record_kind(buffer.content))
 
     @staticmethod
     def _context_span(text, start, end):
-        positions = selection_span(start, end)
-        lines = text.replace('\r\n', '\n').replace('\r', '\n').split('\n')
-        if any(line > len(lines) or column > len(lines[line - 1]) for line, column in positions):
-            raise WorkspaceError('Selection is outside the current document')
+        return Workstation._span_text(text, start, end)
 
     def _context_selection(self, index):
         shelf = self.current().selection_shelf
@@ -562,6 +665,7 @@ class Workstation:
             self.persistence_error = self.store.blocked
             raise WorkspaceError('Working context checkpoint failed: ' + self.persistence_error) from exc
         self.current().selection_shelf = selections
+        self._remember_navigation()
 
     def add_context_selection(self, identifier, start, end, *, pane=None) -> int:
         if not self.context_selection_supported(identifier):
@@ -571,11 +675,14 @@ class Workstation:
         pane = self._displayed_pane(identifier, pane)
         if buffer.state.pane_views[pane].selection != [start, end]:
             raise WorkspaceError('Use the current nonempty editor selection')
-        entry = WorkMarker(buffer.state.path, sha256(buffer.content.encode('utf-8')).hexdigest(), start, end)
+        entry = WorkMarker(buffer.state.path, sha256(buffer.content.encode('utf-8')).hexdigest(), start, end,
+                           anchor_preview(self._context_span(buffer.content, start, end)))
+        self._validate_context_file(entry, buffer)
         shelf = self.current().selection_shelf
-        if entry in shelf:
-            self._checkpoint_selection_shelf(shelf)
-            return shelf.index(entry)
+        for index, old in enumerate(shelf):
+            if (old.path, old.revision, old.start, old.end) == (entry.path, entry.revision, start, end):
+                self._checkpoint_selection_shelf([*shelf[:index], entry, *shelf[index + 1:]])
+                return index
         if len(shelf) >= MAX_CONTEXT_SELECTIONS:
             raise WorkspaceError('Working context is limited to 32 selections; remove a passage first')
         self._checkpoint_selection_shelf([*shelf, entry])
@@ -588,7 +695,11 @@ class Workstation:
 
     def prepare_context_selection(self, index):
         """Explicit bounded read; return detached data without any navigation."""
-        entry = deepcopy(self._context_selection(index))
+        return self._prepare_navigation(self._context_selection(index))
+
+    def _prepare_navigation(self, entry, *, marker=False):
+        entry = deepcopy(entry)
+        decode_marker(asdict(entry), shelf=not marker)
         path = Path(entry.path)
         if path.resolve(strict=True) != path:
             raise WorkspaceError('Working-context path was redirected; the anchor was retained')
@@ -599,7 +710,7 @@ class Workstation:
             buffer = self.load_snapshot(existing.state.id)
         else:
             buffer = deepcopy(existing)
-        self._validate_context_content(entry, buffer)
+        self._validate_context_content(entry, buffer, marker=marker)
         self._validate_context_file(entry, buffer)
         return entry, buffer
 
@@ -609,28 +720,36 @@ class Workstation:
             raise WorkspaceError('Working-context path was redirected; the anchor was retained')
         self._match(buffer.state.revision, text_snapshot(path).revision)
 
-    def _validate_context_content(self, entry, buffer):
+    def _validate_context_content(self, entry, buffer, *, marker=False):
         if (not buffer.loaded or buffer.state.path != entry.path or buffer.state.format != 'text'
-                or buffer.problem or record_kind(buffer.content)):
+                or not buffer.has_content or record_kind(buffer.content)):
             raise WorkspaceError('Working-context document is unavailable; the anchor was retained')
-        self._match(entry.revision, sha256(buffer.content.encode('utf-8')).hexdigest())
-        self._context_span(buffer.content, entry.start, entry.end)
+        if entry.revision != sha256(buffer.content.encode('utf-8')).hexdigest():
+            raise WorkspaceError('Retained passage changed (SHA-256 mismatch); the anchor was retained')
+        self._span_text(buffer.content, entry.start, entry.end, point=marker)
 
     def accept_context_selection(self, index, prepared, pane=None):
         """Apply a checked read on the controller's owning (GUI) thread only."""
         entry, snapshot = prepared
         if entry != self._context_selection(index):
             raise WorkspaceError('Working context changed during the read; select the passage again')
+        return self._accept_navigation(entry, snapshot, pane, index=index)
+
+    def _accept_navigation(self, entry, snapshot, pane=None, *, index=None):
         state = self.current()
         pane = state.active_pane if pane is None else pane
         if type(pane) is not int or pane not in (0, 1):
             raise WorkspaceError('Select one of the two editor panes')
         existing = next((b for b in self.buffers.values() if b.state.path == entry.path), None)
         buffer = existing if existing and existing.loaded else snapshot
-        self._validate_context_content(entry, buffer)
+        marker = index is None
+        decode_marker(asdict(entry), shelf=not marker)
+        self._validate_context_content(entry, buffer, marker=marker)
         # The disk may have changed since the worker prepared this passage.
         # Compare against its base revision, independently of recovered text.
         self._validate_context_file(entry, snapshot)
+        buffer.problem = ''
+        buffer.externally_changed = False
         if existing is None:
             if len(state.buffers) >= MAX_BUFFERS:
                 raise WorkspaceError('Close a buffer before opening more than 128 documents')
@@ -639,8 +758,16 @@ class Workstation:
         elif not existing.loaded:
             buffer = self.accept_snapshot(snapshot)
         view = buffer.state.pane_views[pane]
-        view.cursor = entry.end
-        view.selection = [entry.start, entry.end]
+        view.cursor = entry.start if marker else entry.end
+        view.selection = [entry.start, entry.end] if entry.start != entry.end else None
+        # Historical anchors acquire previews only after this explicit,
+        # fully validated opening. Rendering itself performs no source read.
+        if not entry.preview:
+            entry = replace(entry, preview=anchor_preview(self._span_text(buffer.content, entry.start, entry.end, point=marker)))
+            if marker:
+                state.marker = entry
+            else:
+                state.selection_shelf[index] = entry
         if pane == 1:
             state.split = True
         self.activate(buffer.state.id, pane)
@@ -651,29 +778,43 @@ class Workstation:
 
     def mark(self, identifier, start, end):
         buffer = self.buffer(identifier)
-        if not buffer.loaded or not buffer.state.path or buffer.state.format != 'text' or buffer.problem:
+        if not self.context_selection_supported(identifier):
             raise WorkspaceError('Mark a selection in an ordinary project file')
         revision = SourceDocument.from_bytes(buffer.state.path, buffer.content.encode('utf-8')).revision
-        self.current().marker = WorkMarker(buffer.state.path, revision, start, end)
-        self.checkpoint()
+        selected = self._span_text(buffer.content, start, end, point=True)
+        marker = WorkMarker(buffer.state.path, revision, start, end, anchor_preview(selected))
+        self._validate_context_file(marker, buffer)
+        self._checkpoint_marker(marker)
 
-    def return_to_marker(self):
+    def _checkpoint_marker(self, marker):
+        if not self.checkpoint():
+            raise WorkspaceError('Unfinished marker checkpoint failed: ' + self.persistence_error)
+        try:
+            self.store.save(replace(self.current(), marker=marker))
+        except (OSError, ValueError) as exc:
+            self.store.block_writes(exc)
+            self.persistence_error = self.store.blocked
+            raise WorkspaceError('Unfinished marker checkpoint failed: ' + self.persistence_error) from exc
+        self.current().marker = marker
+        self._remember_navigation()
+
+    def prepare_marker(self):
         marker = self.current().marker
         if marker is None:
             raise WorkspaceError('No selection has been marked')
-        buffer = self.open_file(Path(marker.path))
-        if buffer.problem:
-            raise WorkspaceError(buffer.problem)
-        self._match(marker.revision, SourceDocument.from_bytes(marker.path, buffer.content.encode('utf-8')).revision)
-        view = buffer.state.pane_views[self.current().active_pane]
-        view.cursor = marker.start
-        view.selection = [marker.start, marker.end] if marker.start != marker.end else None
-        self.checkpoint()
-        return buffer
+        return self._prepare_navigation(marker, marker=True)
+
+    def accept_marker(self, prepared, pane=None):
+        marker, snapshot = prepared
+        if marker != self.current().marker:
+            raise WorkspaceError('Unfinished marker changed during the read; return again')
+        return self._accept_navigation(marker, snapshot, pane)
+
+    def return_to_marker(self):
+        return self.accept_marker(self.prepare_marker())
 
     def clear_marker(self):
-        self.current().marker = None
-        self.checkpoint()
+        self._checkpoint_marker(None)
     def _review(self, buffer):
         state = buffer.state
         snapshot, call = read_call_snapshot(Path(state.path))

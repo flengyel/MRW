@@ -102,8 +102,19 @@ files, including explicitly opened external read-only references. Its menu and
 dock actions open a passage in either of the two editors or remove an anchor.
 Restoring or displaying the shelf reads no source content; opening is explicit
 and fails without moving the editors if a path is missing or redirected or its
-current/recovered content does not match. Entries contain only the path, content
-revision and selection endpoints. They are private local navigation anchors,
+current/recovered content or saved base does not match. Entries contain only the
+path, content revision, selection endpoints and a plain preview of at most 120
+Unicode characters with display whitespace normalized. Displayed lines and
+columns are one-based; canonical stored columns remain zero-based. Previews
+survive restart without source reads and are never source quotations or records.
+In loaded editable ordinary text, the marker and shelf follow internal edits and
+undo/redo through their shared document, independently of both pane selections.
+Nonempty ranges exclude insertions at their outside boundaries; a point marker
+advances at its continuation point. A deleted passage retains its last completed
+pin, visibly changed, rather than relocating. Recovery becomes durable before
+updated pins are published. Known external changes do not re-pin anchors, and
+Return validates completely before navigation, just like shelf opening.
+They are private local navigation anchors,
 not provenance, citations, warrant records, mathematical-object identities or
 material automatically sent to a model. **Mark unfinished work here**, **Return
 to unfinished work** and **Clear unfinished marker** retain their independent
@@ -550,8 +561,11 @@ mathematical warrant, and \(m:D\) alone cannot derive \(F\).
 
 The completed Appendix A editor/build/render/re-entry smoke test used ordinary
 corpus-neutral project actions. It did **not** complete this mathematical re-entry
-and warrant session. The working-context shelf now supplies a bounded navigation
-aid; the complete mathematical re-entry and warrant workflow below remains
+and warrant session. Edit-stable unfinished-work and working-context anchors,
+including their bounded private previews, supply mutable navigation aids. They
+do not relocate immutable mathematical or documentary spans, source occurrences,
+provenance, admissions, verifications or checked warrants. The complete
+mathematical re-entry and warrant workflow below remains
 unfinished.
 
 Use `rs_Appendix_A.tex` as the mathematical source, the corresponding Lean

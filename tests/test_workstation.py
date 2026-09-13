@@ -56,9 +56,9 @@ def historical_workspace(root, version):
         active=identifier, visible=[identifier, identifier], active_pane=1, split=True,
         recent=[path], marker=marker, tex_root=None, last_build=None, successful_build=None,
         pdf_page=7, pdf_zoom='custom', pdf_scale=1.4, pdf_visible=True, window_size=[960, 680])
-    if version in (4, 5):
+    if version in (4, 5, 6):
         data['selection_shelf'] = [dict(path=path, revision='b' * 64, start='1.00', end='1.05'), marker.copy()]
-    if version == 5:
+    if version in (5, 6):
         item = data['buffers'][0]
         for key in ('cursor', 'selection', 'yscroll', 'xscroll'):
             del item[key]
@@ -67,6 +67,8 @@ def historical_workspace(root, version):
         for entry in [data['marker'], *data['selection_shelf']]:
             for key in ('start', 'end'):
                 entry[key] = '.'.join(str(int(n)) for n in entry[key].split('.'))
+    if version == 6:
+        data['wrap'] = False
     return data
 
 
@@ -785,7 +787,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_invalid_versions_malformed_records_and_digest_mismatch_are_non_destructive(self):
         original = self.manifest.read_bytes()
-        for version in (0, 1, 2, 7, 99, True, False, 3.0, 4.0, 5.0, 6.0, '3', '4', '5', '6', None):
+        for version in (0, 1, 2, 8, 99, True, False, 3.0, 4.0, 5.0, 6.0, 7.0, '3', '4', '5', '6', '7', None):
             data = json.loads(original)
             data['schema_version'] = version
             with self.assertRaisesRegex(WorkspaceError, 'Unsupported'):
@@ -812,6 +814,237 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.controller.set_position(buffer.state.id, cursor=end, selection=[start, end], yscroll=.2, xscroll=0)
         return self.controller.add_context_selection(buffer.state.id, start, end)
 
+    def test_failed_return_has_no_navigation_or_checkpoint_side_effects(self):
+        c = self.controller
+        target = c.open_file(self.files['proof.md'])
+        c.mark(target.state.id, '3.0', '3.7')
+        self.add_selection(target)
+        c.open_file(self.files['questions.txt'])
+        c.set_split(True)
+        c.open_file(self.files['notes/differences.tex'], pane=1)
+        path = Path(target.state.path)
+        raw = path.read_bytes()
+        for failure in ('changed', 'missing', 'redirected', 'malformed'):
+            with self.subTest(failure=failure):
+                before, buffers = deepcopy(c.current()), deepcopy(c.buffers)
+                disk = c.store.path.read_bytes()
+                if failure == 'changed':
+                    path.write_bytes(b'External replacement\n')
+                elif failure == 'malformed':
+                    path.write_bytes(b'\xff')
+                else:
+                    path.unlink()
+                    if failure == 'redirected':
+                        path.symlink_to(self.files['questions.txt'])
+                try:
+                    with patch.object(c, 'checkpoint', wraps=c.checkpoint) as checkpoint:
+                        with self.assertRaises((OSError, ValueError)):
+                            c.return_to_marker()
+                        self.assertEqual(c.current(), before)
+                        self.assertEqual(c.buffers, buffers)
+                        checkpoint.assert_not_called()
+                    self.assertEqual(c.store.path.read_bytes(), disk)
+                finally:
+                    if path.is_symlink():
+                        path.unlink()
+                    path.write_bytes(raw)
+
+    def test_new_selections_persist_bounded_plain_previews(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        text = '😀 lemma\t  α\r\n  exact passage ' + 'x' * 200
+        c.edit(b.state.id, text)
+        self.add_selection(b, '1.0', '2.150')
+        entry = c.current().selection_shelf[0]
+        self.assertEqual(getattr(entry, 'preview', None), ' '.join(text.split())[:120])
+        raw = c.store.path.read_bytes()
+        self.assertEqual(json.loads(raw)['schema_version'], 7)
+        with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration source read')):
+            restored = decode_workspace(raw)
+        self.assertEqual(restored.selection_shelf, [entry])
+
+    def live_candidate(self, c, b, text, spans):
+        return dict(pane_positions=[('1.0', None), ('1.0', None)],
+                    anchor_positions=[(key, entry, spans[key]) for key, entry in c.navigation_entries(b.state.id)],
+                    revision=sha256(text.encode('utf-8')).hexdigest())
+
+    def test_live_edit_validates_complete_candidate_before_mutating_any_state(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        self.add_selection(b)
+        self.add_selection(b, '3.0', '3.7')
+        c.mark(b.state.id, '3.0', '3.7')
+        text = 'Inserted α😀\r\n' + b.content
+        valid = self.live_candidate(c, b, text, {'marker': ('4.0', '4.7'), 0: ('2.0', '2.5'), 1: ('4.0', '4.7')})
+        mutations = [dict(revision='0' * 64), dict(pane_positions=None),
+                     dict(pane_positions=[('1.0', None)]),
+                     dict(pane_positions=[('1.0', None), ('99.0', None)]),
+                     dict(anchor_positions=valid['anchor_positions'][:-1]),
+                     dict(anchor_positions=list(reversed(valid['anchor_positions'])))]
+        for bad_span in (('4.0', '4.0'), ('4.7', '4.0'), ('4.0', '5.999'), ('4.00', '4.7'), (True, '4.7'), ('\ud800', '4.7')):
+            anchors = list(valid['anchor_positions'])
+            anchors[-1] = (1, anchors[-1][1], bad_span)
+            mutations.append(dict(anchor_positions=anchors))
+        for mutation in mutations:
+            before, buffers = deepcopy(c.current()), deepcopy(c.buffers)
+            with self.subTest(mutation=mutation), self.assertRaises((ValueError, OSError)):
+                c.edit(b.state.id, text, **{**valid, **mutation})
+            self.assertEqual(c.current(), before)
+            self.assertEqual(c.buffers, buffers)
+        for bad_text in ('\ud800', '\0', 'x' * (MAX_TEXT_BYTES + 1), None):
+            before = deepcopy(c.current())
+            with self.assertRaises(ValueError):
+                c.edit(b.state.id, bad_text, **valid)
+            self.assertEqual(c.current(), before)
+        with patch.object(c.store, 'write_recovery', side_effect=AssertionError('per-edit publication')), \
+             patch.object(c.store, 'save', side_effect=AssertionError('per-edit manifest')):
+            c.edit(b.state.id, text, **valid)
+        self.assertEqual([s.start for s in c.current().selection_shelf], ['2.0', '4.0'])
+        self.assertEqual(c.current().marker.start, '4.0')
+        self.assertEqual(b.content, text)
+        self.assertTrue(c.checkpoint())
+        self.assertEqual(c.store.read_recovery(b.state)['text'], text)
+        self.assertEqual(decode_workspace(c.store.path.read_bytes()), c.current())
+
+    def test_live_pins_publish_only_after_recovery_and_survive_save(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        self.add_selection(b, '3.0', '3.7')
+        c.mark(b.state.id, '3.0', '3.7')
+        original = Path(b.state.path).read_bytes()
+        old_manifest = c.store.path.read_bytes()
+        text = 'New α😀\r\n' + b.content
+        c.edit(b.state.id, text, **self.live_candidate(c, b, text, {'marker': ('4.0', '4.7'), 0: ('4.0', '4.7')}))
+        self.assertEqual(c.store.path.read_bytes(), old_manifest)
+        save = c.store.save
+        def after_recovery(state):
+            recovery = json.loads(c.store.recovery_path(b.state.id).read_bytes())
+            self.assertEqual(recovery['text'], text)
+            self.assertEqual(sha256(recovery['text'].encode()).hexdigest(), state.marker.revision)
+            self.assertEqual(state.marker.revision, state.selection_shelf[0].revision)
+            save(state)
+        with patch.object(c.store, 'save', side_effect=after_recovery):
+            self.assertTrue(c.checkpoint())
+        wanted = deepcopy((c.current().marker, c.current().selection_shelf))
+        self.assertEqual(Path(b.state.path).read_bytes(), original)
+        c.save(b.state.id)
+        c.close_project()
+        c = self.restored()
+        self.assertEqual((c.current().marker, c.current().selection_shelf), wanted)
+        self.assertEqual(c.return_to_marker().content, text)
+        self.assertEqual(Path(b.state.path).read_bytes(), text.encode('utf-8'))
+
+    def test_live_anchor_persistence_failures_retain_memory_and_block_later_writes(self):
+        from theorem_terminal.mutable_files import sync_directory
+        for boundary in ('recovery', 'manifest', 'directory'):
+            with self.subTest(boundary=boundary):
+                c = Workstation(state_root=self.home / ('anchors-' + boundary))
+                c.open_project(self.root)
+                b = c.open_file(self.files['proof.md'])
+                c.set_position(b.state.id, cursor='3.7', selection=['3.0', '3.7'], yscroll=0, xscroll=0)
+                c.add_context_selection(b.state.id, '3.0', '3.7')
+                c.mark(b.state.id, '3.0', '3.7')
+                previous = c.store.path.read_bytes()
+                text = 'Live insertion\n' + b.content
+                c.edit(b.state.id, text, **self.live_candidate(c, b, text, {'marker': ('4.0', '4.7'), 0: ('4.0', '4.7')}))
+                wanted = deepcopy(c.current())
+                def fail_manifest_sync(directory):
+                    if directory == c.store.directory:
+                        raise OSError('uncertain anchor publication')
+                    return sync_directory(directory)
+                with ExitStack() as stack:
+                    if boundary == 'directory':
+                        stack.enter_context(patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_manifest_sync))
+                    else:
+                        stack.enter_context(patch.object(c.store, 'write_recovery' if boundary == 'recovery' else 'save',
+                                                       side_effect=OSError('anchor publication denied')))
+                    self.assertFalse(c.checkpoint())
+                self.assertEqual(c.current(), wanted)
+                self.assertEqual(b.content, text)
+                if boundary != 'directory':
+                    self.assertEqual(c.store.path.read_bytes(), previous)
+                else:
+                    self.assertEqual(decode_workspace(c.store.path.read_bytes()), wanted)
+                    self.assertEqual(c.store.previous, previous, 'Uncertain directory durability must not advance the cache')
+                next_text = 'Further in-memory work\n' + text
+                c.edit(b.state.id, next_text, **self.live_candidate(c, b, next_text, {'marker': ('5.0', '5.7'), 0: ('5.0', '5.7')}))
+                with ExitStack() as stack:
+                    writes = [stack.enter_context(patch.object(service, method)) for service, method in
+                              ((c.store, 'write_recovery'), (c.store, 'save'), (c.store, 'clear_recovery'), (c.settings_store, 'save'))]
+                    self.assertFalse(c.checkpoint())
+                    with self.assertRaisesRegex(WorkspaceError, 'Final checkpoint failed'):
+                        c.close_project(keep_recovery=True)
+                    for write in writes:
+                        write.assert_not_called()
+                self.assertEqual(c.current().marker.start, '5.0')
+                c.close_project(discard_session=True)
+
+    def test_marker_prepare_accept_checks_identity_bounds_and_base_before_navigation(self):
+        c = self.controller
+        b = c.open_file(self.files['proof.md'])
+        c.mark(b.state.id, '3.0', '3.7')
+        c.open_file(self.files['questions.txt'])
+        path, raw = Path(b.state.path), Path(b.state.path).read_bytes()
+        for mutation in ('replacement', 'missing', 'symlink', 'identity', 'bounds'):
+            prepared = c.prepare_marker()
+            if mutation == 'identity':
+                c.current().marker = WorkMarker(str(path), sha256(raw).hexdigest(), '1.0', '1.5')
+            elif mutation == 'bounds':
+                prepared[1].content = 'short'
+            elif mutation == 'replacement':
+                path.write_bytes(b'Replacement\n')
+            else:
+                path.unlink()
+                if mutation == 'symlink':
+                    path.symlink_to(self.files['questions.txt'])
+            before, buffers = deepcopy(c.current()), deepcopy(c.buffers)
+            try:
+                with patch.object(c, 'checkpoint', side_effect=AssertionError('failed Return checkpoint')):
+                    with self.assertRaises((OSError, ValueError)):
+                        # An unloaded buffer requires the detached snapshot;
+                        # a loaded one must validate the current content too.
+                        if mutation == 'bounds':
+                            b.loaded = False
+                            buffers[b.state.id].loaded = False
+                        c.accept_marker(prepared)
+                self.assertEqual(c.current(), before)
+                self.assertEqual(c.buffers, buffers)
+            finally:
+                if path.is_symlink():
+                    path.unlink()
+                path.write_bytes(raw)
+                b.loaded = True
+                c.current().marker = WorkMarker(str(path), sha256(raw).hexdigest(), '3.0', '3.7')
+
+    def test_version_six_history_is_strict_and_gains_only_empty_previews(self):
+        old = historical_workspace(self.root, 6)
+        with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read')), \
+             patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('migration source read')):
+            current = decode_workspace(encode(old))
+        self.assertFalse(current.wrap)
+        self.assertEqual(current.marker.preview, '')
+        self.assertEqual([s.preview for s in current.selection_shelf], ['', ''])
+        for scope in ('workspace', 'buffer', 'marker', 'shelf', 'pane'):
+            for fault in ('missing', 'extra'):
+                broken = deepcopy(old)
+                target = {'workspace': broken, 'buffer': broken['buffers'][0], 'marker': broken['marker'],
+                          'shelf': broken['selection_shelf'][0], 'pane': broken['buffers'][0]['pane_views'][0]}[scope]
+                if fault == 'missing':
+                    target.pop(next(iter(target)))
+                else:
+                    target['preview'] = ''
+                with self.subTest(scope=scope, fault=fault), self.assertRaises(WorkspaceError):
+                    decode_workspace(encode(broken))
+        for selection in (['3.7', '3.0'], ['3.7', '3.7'], ['1.0', '2.0']):
+            broken = deepcopy(old)
+            broken['buffers'][0]['pane_views'][0]['selection'] = selection
+            with self.assertRaises(WorkspaceError):
+                decode_workspace(encode(broken))
+        duplicate = json.loads(encode_workspace(current))
+        duplicate['selection_shelf'][1] = {**duplicate['selection_shelf'][0], 'preview': 'different preview'}
+        with self.assertRaisesRegex(WorkspaceError, 'Duplicate'):
+            decode_workspace(encode(duplicate))
+
     def test_version_three_migration_preserves_complete_session_and_recovery(self):
         c = self.controller
         left = c.open_file(self.files['notes/differences.tex'])
@@ -828,6 +1061,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         recovery_bytes = recovery.read_bytes()
         old = json.loads(self.manifest.read_bytes())
         old['schema_version'] = 3
+        del old['marker']['preview']
+        expected['marker']['preview'] = ''
         del old['selection_shelf']
         del old['wrap']
         for item, wanted in zip(old['buffers'], expected['buffers']):
@@ -841,8 +1076,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertEqual(asdict(migrated), expected)
             self.assertEqual(self.manifest.read_bytes(), raw)
             restored = self.restored()
-        self.assertEqual(VERSION, 6)
-        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 6)
+        self.assertEqual(VERSION, 7)
+        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 7)
         self.assertEqual(asdict(restored.current()), expected)
         self.assertEqual(recovery.read_bytes(), recovery_bytes)
         self.assertTrue(restored.view().recovery_warning)
@@ -851,7 +1086,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
     def test_migration_and_shelf_schema_reject_malformed_manifests(self):
         original_raw = self.manifest.read_bytes()
         original = json.loads(original_raw)
-        for version in (3, 4, 5, 6):
+        for version in (3, 4, 5, 6, 7):
             valid = deepcopy(original)
             valid['schema_version'] = version
             if version < 6:
@@ -867,22 +1102,24 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                     decode_workspace(encode(broken))
         with self.assertRaises(WorkspaceError):
             decode_workspace(encode({**original, 'schema_version': 3}))
-        entry = dict(path=str(self.files['proof.md']), revision='a' * 64, start='1.0', end='1.5')
+        entry = dict(path=str(self.files['proof.md']), revision='a' * 64, start='1.0', end='1.5', preview='proof')
         invalid = [None, {}, '', True, [entry] * 2,
                    [{**entry, 'end': f'{n + 2}.0'} for n in range(33)]]
         for mutation in ({'path': 'relative'}, {'path': False}, {'revision': 'x'}, {'revision': True},
                          {'start': '0.0'}, {'start': ''}, {'start': '1.-1'}, {'start': True},
                          {'end': '1.0'}, {'start': '2.0'}, {'end': '1.1000000000'},
-                         {'title': 'forbidden'}, {'text': 'not retained'}):
+                         {'title': 'forbidden'}, {'text': 'not retained'}, {'preview': 'x' * 121},
+                         {'preview': '\ud800'}, {'preview': '\0'}, {'preview': True}, {'preview': None},
+                         {'preview': ' leading'}, {'preview': 'two  spaces'}, {'preview': 'two\nlines'}):
             invalid.append([{**entry, **mutation}])
         invalid.extend([{k: v for k, v in entry.items() if k != field}] for field in entry)
         for shelf in invalid:
             with self.subTest(shelf=shelf), self.assertRaises(WorkspaceError):
-                decode_workspace(encode({**original, 'selection_shelf': shelf}))
+                decode_workspace(json.dumps({**original, 'selection_shelf': shelf}, ensure_ascii=True).encode())
         self.assertEqual(self.manifest.read_bytes(), original_raw)
 
     def test_literal_historical_migrations_normalize_and_keep_independent_views(self):
-        for version in (3, 4, 5):
+        for version in (3, 4, 5, 6):
             with self.subTest(version=version):
                 document = historical_workspace(self.root, version)
                 raw = encode(document)
@@ -903,8 +1140,9 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                                  (7, 'custom', 1.4, [960, 680]))
                 self.assertEqual([(s.revision, s.start, s.end) for s in state.selection_shelf],
                                  [] if version == 3 else [('b' * 64, '1.0', '1.5'), ('a' * 64, '3.0', '3.7')])
-                self.assertTrue(state.wrap)
-                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], 6)
+                self.assertEqual(state.wrap, version != 6)
+                self.assertTrue(all(s.preview == '' for s in [state.marker, *state.selection_shelf]))
+                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], 7)
                 for key, value in (('cursor', '0.1'), ('yscroll', True), ('selection', ['1.0']), ('pane_views', [])):
                     malformed = deepcopy(document)
                     malformed['buffers'][0][key] = value
@@ -919,7 +1157,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             decode_workspace(encode(duplicate))
 
     def test_historical_wire_shapes_do_not_follow_current_dataclass_fields(self):
-        for version in (3, 4, 5):
+        for version in (3, 4, 5, 6):
             document = historical_workspace(self.root, version)
             with ExitStack() as stack:
                 for cls in (Workspace, BufferState, WorkMarker, PaneViewState):

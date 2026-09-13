@@ -29,6 +29,15 @@ equal through splitter movement and geometry changes. Different buffers and
 unwrapped views may have unequal widths. Preserve one document and undo history;
 this is a Qt presentation constraint, not a domain invariant.
 
+Unfinished-work and Working context anchors are private mutable navigation state.
+Only anchors attached to loaded editable ordinary text follow workstation edits
+and undo/redo. Their persisted fields are path, revision, scalar endpoints and a
+plain whitespace-normalized preview bounded at 120 Unicode characters. Render
+them without source reads; validate explicit navigation before moving a pane.
+Publish recovery before updated pins. Deleted passages and known external
+changes must not acquire guessed locations or replacement revisions. These aids
+never relocate immutable mathematical or documentary records or supply model input.
+
 Opening or viewing a project must not write inside it or read executable
 configuration from it. Mutable session state, trusted tool settings, private
 unsaved-text recovery and build storage belong in OS user-local application

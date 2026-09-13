@@ -118,6 +118,416 @@ class GraphicalEditorTests(unittest.TestCase):
         self.select_passage(right, '180.0', '180.22')
         return path, left, right
 
+    def anchor_text(self, entry):
+        from PySide6.QtGui import QTextCursor
+        document = next(d for i, d in self.window.documents.items()
+                        if self.controller.buffer(i).state.path == entry.path)
+        cursor = QTextCursor(document)
+        from theorem_terminal.gui import document_position
+        cursor.setPosition(document_position(document, entry.start))
+        cursor.setPosition(document_position(document, entry.end), QTextCursor.MoveMode.KeepAnchor)
+        return cursor.selectedText()
+
+    def test_live_marker_translates_before_edits_and_ignores_after_edits(self):
+        path, left, right = self.shared_editors()
+        self.window.select(left.shown, 0)
+        self.select_passage(left, '100.5', '100.22')
+        self.window.actions['mark'].trigger()
+        intended = left.text.textCursor().selectedText()
+        self.select_passage(left, '1.0', '1.0')
+        left.text.insertPlainText('Inserted above\n')
+        marker = self.controller.current().marker
+        self.assertEqual((marker.start, marker.end), ('101.5', '101.22'))
+        self.assertEqual(self.anchor_text(marker), intended)
+        self.select_passage(right, '1.0', '2.0')
+        right.text.insertPlainText('')
+        self.assertEqual(self.controller.current().marker.start, '100.5')
+        self.select_passage(right, '240.0', '240.0')
+        right.text.insertPlainText('Inserted below\n')
+        self.assertEqual(self.anchor_text(self.controller.current().marker), intended)
+        right.text.undo()
+        left.text.undo()
+        self.assertEqual(self.controller.current().marker.start, '101.5')
+        right.text.undo()
+        self.assertEqual(self.controller.current().marker.start, '100.5')
+        for pane in (left, right, left):
+            pane.text.redo()
+        self.assertEqual(self.anchor_text(self.controller.current().marker), intended)
+        self.assertFalse(self.errors)
+
+    def test_live_shelf_ranges_are_independent_and_update_inside_edits(self):
+        path, left, right = self.shared_editors()
+        self.window.select(left.shown, 0)
+        for start, end in (('40.5', '40.22'), ('180.5', '180.22')):
+            self.select_passage(left, start, end)
+            self.window.actions['context_add'].trigger()
+            for _ in range(5):
+                self.app.processEvents()
+        self.assertFalse(self.errors)
+        self.assertEqual(self.window.selection_list.count(), 2)
+        expected = [self.anchor_text(s) for s in self.controller.current().selection_shelf]
+        self.select_passage(left, '100.0', '100.0')
+        left.text.insertPlainText('Between the retained passages\n')
+        self.assertEqual([s.start for s in self.controller.current().selection_shelf], ['40.5', '181.5'])
+        self.assertEqual([self.anchor_text(s) for s in self.controller.current().selection_shelf], expected)
+        self.select_passage(right, '40.10', '40.10')
+        right.text.insertPlainText('😀 refined ')
+        entry = self.controller.current().selection_shelf[0]
+        self.assertEqual(self.anchor_text(entry), expected[0][:5] + '😀 refined ' + expected[0][5:])
+        self.assertEqual(entry.preview, self.anchor_text(entry))
+        self.assertEqual(self.controller.current().selection_shelf[1].start, '181.5')
+        self.assertIs(left.text.document(), right.text.document())
+        self.assertEqual(left.text.toPlainText(), self.controller.buffer(left.shown).content)
+        self.assertFalse(self.errors)
+
+    def test_retained_preview_coordinates_and_marker_location_are_source_free(self):
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.root / 'preview.tex'
+        path.write_bytes('α😀  lemma\r\n\t exact   passage\r\n'.encode('utf-8'))
+        pane = self.open_file(path)
+        self.select_passage(pane, '1.1', '2.8')
+        self.window.actions['context_add'].trigger()
+        self.window.actions['mark'].trigger()
+        entry = self.controller.current().selection_shelf[0]
+        self.assertEqual(getattr(entry, 'preview', None), '😀 lemma exact')
+        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('display read source')):
+            self.window.refresh_selection_shelf()
+            self.window.update_actions()
+        row = self.window.selection_list.item(0)
+        self.assertIn('1:2–2:9', row.text())
+        self.assertIn('😀 lemma exact', row.text())
+        self.assertIn('1.1–2.8', row.toolTip())
+        self.assertIn('preview.tex', self.window.actions['return'].toolTip())
+        self.assertIn('1:2', self.window.actions['return'].toolTip())
+        self.assertEqual((entry.start, entry.end), ('1.1', '2.8'))
+
+    def test_keyboard_navigator_activation_opens_exactly_once(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        self.open_project()
+        path = self.files['proof.md']
+        index = self.window.file_filter.mapFromSource(self.window.filesystem.index(str(path)))
+        self.assertTrue(index.isValid())
+        self.window.navigator.setCurrentIndex(index)
+        self.window.navigator.setFocus()
+        with patch.object(self.window, 'open_file', wraps=self.window.open_file) as opened:
+            QTest.keyClick(self.window.navigator, Qt.Key.Key_Return)
+            self.wait_idle()
+            self.assertEqual(opened.call_count, 1, 'Normal keyboard activation must open exactly once')
+        self.assertEqual(self.controller.buffer().state.path, str(path))
+
+    def test_live_anchor_boundary_affinity_deletion_and_undo(self):
+        from copy import deepcopy
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.root / 'affinity.txt'
+        path.write_bytes('α😀 before |retained text| after\r\nContinuation\r\n'.encode('utf-8'))
+        pane = self.open_file(path)
+        self.select_passage(pane, '1.11', '1.24')
+        self.window.actions['context_add'].trigger()
+        for _ in range(5):
+            self.app.processEvents()
+        self.select_passage(pane, '2.4', '2.4')
+        self.window.actions['mark'].trigger()
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained text')
+        for boundary in ('start', 'end'):
+            entry = self.controller.current().selection_shelf[0]
+            position = getattr(entry, boundary)
+            self.select_passage(pane, position, position)
+            pane.text.insertPlainText('outside😀')
+            self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained text')
+            pane.text.undo()
+            self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained text')
+            pane.text.redo()
+            self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained text')
+        self.select_passage(pane, '2.4', '2.4')
+        pane.text.insertPlainText('😀next')
+        self.assertEqual(self.controller.current().marker.start, '2.9')
+        self.assertEqual(self.controller.current().marker.end, '2.9')
+        pane.text.undo()
+        self.assertEqual(self.controller.current().marker.start, '2.4')
+        pane.text.redo()
+        self.assertEqual(self.controller.current().marker.start, '2.9')
+        self.window.flush()
+        pinned = deepcopy(self.controller.current().selection_shelf[0])
+        self.select_passage(pane, pinned.start, pinned.end)
+        pane.text.insertPlainText('')
+        self.assertEqual(self.controller.current().selection_shelf, [pinned])
+        self.assertIn('Changed', self.window.selection_list.item(0).text())
+        before = [self.pane_position(p) for p in self.window.panes]
+        self.window.actions['context_other'].trigger()
+        self.wait_idle()
+        self.assertEqual([self.pane_position(p) for p in self.window.panes], before)
+        self.assertFalse(self.controller.current().split)
+        self.assertTrue(self.errors)
+        self.errors.clear()
+        pane.text.undo()
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained text')
+        self.assertNotIn('Changed', self.window.selection_list.item(0).text())
+        pane.text.redo()
+        self.assertEqual(self.controller.current().selection_shelf, [pinned])
+        self.restart_window()
+        self.assertIn('Changed', self.window.selection_list.item(0).text())
+        self.assertEqual(self.controller.current().selection_shelf, [pinned])
+        self.assertEqual(path.read_bytes(), 'α😀 before |retained text| after\r\nContinuation\r\n'.encode('utf-8'))
+
+    def test_edited_anchors_ignore_pane_geometry_and_restore_recovery_then_saved_bytes(self):
+        from copy import deepcopy
+        from hashlib import sha256
+        path, left, right = self.shared_editors()
+        # Exercise scalar columns and exact CRLF recovery through real Qt edits.
+        self.controller.discard(left.shown)
+        raw = path.read_bytes().replace(b'\n', b'\r\n')
+        path.write_bytes(raw)
+        self.controller.refresh(left.shown)
+        self.window.render()
+        self.window.select(left.shown, 0)
+        for start, end in (('40.5', '40.22'), ('180.5', '180.22')):
+            self.select_passage(left, start, end)
+            self.window.actions['context_add'].trigger()
+            for _ in range(5):
+                self.app.processEvents()
+        self.select_passage(left, '100.5', '100.22')
+        self.window.actions['mark'].trigger()
+        marker_text = self.anchor_text(self.controller.current().marker)
+        self.select_passage(left, '1.0', '1.0')
+        left.text.insertPlainText('😀 inserted above\n' * 20)
+        self.select_passage(right, '261.0', '261.0')
+        right.text.insertPlainText('Added below\n' * 20)
+        self.select_passage(right, '60.10', '60.10')
+        right.text.insertPlainText('α😀 refinement ')
+        self.select_passage(left, '50.5', '50.22')
+        self.select_passage(right, '210.5', '210.22')
+        for pane, scroll in ((left, 40), (right, 195)):
+            pane.text.verticalScrollBar().setValue(scroll)
+            pane.capture_position()
+        wanted = deepcopy((self.controller.current().marker, self.controller.current().selection_shelf))
+        for action in (self.window.render, lambda: right.text.setFocus(),
+                       lambda: self.window.actions['wrap'].trigger(), lambda: self.window.actions['wrap'].trigger(),
+                       lambda: self.window.actions['split'].trigger(), lambda: self.window.actions['split'].trigger(),
+                       lambda: self.window.editors.moveSplitter(180, 1), lambda: self.window.resize(960, 680)):
+            action()
+            for _ in range(5):
+                self.app.processEvents()
+            self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), wanted)
+        self.window.flush()
+        expected = self.controller.buffer(left.shown).content
+        self.assertIn('\r\n', expected)
+        self.assertEqual(wanted[0].revision, sha256(expected.encode('utf-8')).hexdigest())
+        # Splitter ratios are not session fields. Compare exact scroll pixels
+        # at the same stable viewport dimensions used by a fresh window.
+        self.window.editors.setSizes([500, 500])
+        for _ in range(5):
+            self.app.processEvents()
+        self.window.flush()
+        positions = [self.pane_position(p) for p in self.window.panes]
+        self.restart_window()
+        self.assertEqual([self.pane_position(p) for p in self.window.panes], positions)
+        self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), wanted)
+        self.assertEqual(self.controller.buffer().content, expected)
+        self.assertEqual(self.anchor_text(self.controller.current().marker), marker_text)
+        self.window.actions['return'].trigger()
+        self.wait_idle()
+        self.assertEqual(self.window.active_pane().text.textCursor().selectedText(), marker_text)
+        self.window.actions['save'].trigger()
+        self.assertEqual(path.read_bytes(), expected.encode('utf-8'))
+        self.restart_window()
+        self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), wanted)
+        self.assertFalse(self.controller.buffer().dirty)
+        for index in range(2):
+            self.window.selection_list.setCurrentRow(index)
+            self.window.actions['context_other'].trigger()
+            self.wait_idle()
+            self.assertEqual(self.window.active_pane().text.textCursor().selectedText(),
+                             self.anchor_text(self.controller.current().selection_shelf[index]))
+        self.assertFalse(self.errors)
+
+    def test_live_anchor_history_handles_merged_typing_and_new_undo_branches(self):
+        from PySide6.QtTest import QTest
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.root / 'undo-note.txt'
+        path.write_text('head\nretained passage\nfoot\n', encoding='utf-8')
+        pane = self.open_file(path)
+        self.select_passage(pane, '2.0', '2.8')
+        self.window.actions['context_add'].trigger()
+        for _ in range(5):
+            self.app.processEvents()
+        self.select_passage(pane, '2.3', '2.3')
+        QTest.keyClicks(pane.text, 'ABC')
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retABCained')
+        pane.text.undo()
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained')
+        pane.text.redo()
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retABCained')
+        pane.text.undo()
+        self.select_passage(pane, '1.0', '1.0')
+        pane.text.insertPlainText('Different branch\n')
+        self.assertEqual(self.controller.current().selection_shelf[0].start, '3.0')
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'retained')
+        self.assertFalse(pane.text.document().isRedoAvailable())
+        pane.text.undo()
+        self.assertEqual(self.controller.current().selection_shelf[0].start, '2.0')
+        pane.text.redo()
+        self.assertEqual(self.controller.current().selection_shelf[0].start, '3.0')
+        self.assertFalse(self.errors)
+
+    def test_converging_live_ranges_keep_rows_and_text_without_duplicate_pins(self):
+        from copy import deepcopy
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.root / 'overlap.txt'
+        path.write_text('---aaKEEPbb---', encoding='utf-8')
+        pane = self.open_file(path)
+        for start, end in (('1.5', '1.9'), ('1.3', '1.11')):
+            self.select_passage(pane, start, end)
+            self.window.actions['context_add'].trigger()
+            for _ in range(5):
+                self.app.processEvents()
+        pinned = deepcopy(self.controller.current().selection_shelf[1])
+        self.select_passage(pane, '1.3', '1.5')
+        pane.text.insertPlainText('')
+        self.select_passage(pane, '1.7', '1.9')
+        pane.text.insertPlainText('')
+        self.assertEqual(pane.text.toPlainText(), '---KEEP---')
+        self.assertEqual(self.window.selection_list.count(), 2)
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[0]), 'KEEP')
+        self.assertEqual(self.controller.current().selection_shelf[1], pinned)
+        self.assertIn('Changed', self.window.selection_list.item(1).text())
+        pane.text.undo()
+        self.assertEqual(self.anchor_text(self.controller.current().selection_shelf[1]), 'KEEPbb')
+        pane.text.redo()
+        self.assertEqual(self.controller.current().selection_shelf[1], pinned)
+        self.assertTrue(self.controller.checkpoint())
+        self.assertFalse(self.errors)
+
+    def test_live_anchors_restore_with_missing_base_without_diagnostic_capture(self):
+        from copy import deepcopy
+        path, left, right = self.shared_editors()
+        self.window.select(left.shown, 0)
+        self.select_passage(left, '100.5', '100.22')
+        self.window.actions['mark'].trigger()
+        self.window.actions['context_add'].trigger()
+        for _ in range(5):
+            self.app.processEvents()
+        self.select_passage(left, '1.0', '1.0')
+        left.text.insertPlainText('Internal insertion\n')
+        self.window.flush()
+        wanted = deepcopy((self.controller.current().marker, self.controller.current().selection_shelf))
+        path.unlink()
+        self.restart_window()
+        self.assertTrue(self.controller.buffer().has_content)
+        for pane in self.window.panes:
+            pane.capture_position()
+        self.window.flush()
+        self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), wanted)
+
+        self.assertEqual(self.anchor_text(wanted[0]), 'A logical passage')
+        before = [self.pane_position(p) for p in self.window.panes]
+        self.window.actions['return'].trigger()
+        self.wait_idle()
+        self.assertTrue(self.errors)
+        self.assertEqual([self.pane_position(p) for p in self.window.panes], before)
+        self.errors.clear()
+        b = self.controller.buffer()
+        self.controller.discard(b.state.id)
+        self.window.render()
+        for pane in self.window.panes:
+            pane.text.selectAll()
+            pane.capture_position()
+        self.window.flush()
+        self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), wanted)
+
+    def test_five_previewed_passages_restart_in_order_without_automatic_actions(self):
+        from copy import deepcopy
+        self.open_project()
+        self.window.disk_timer.stop()
+        correspondence = self.root / 'correspondence.md'
+        correspondence.write_text('Lemma | formal declaration | proof note\n', encoding='utf-8')
+        paths = [self.files['notes/differences.tex'], self.files['formal/Basic.lean'], correspondence,
+                 self.files['proof.md'], self.files['proof.md']]
+        spans = [('2.0', '2.17'), ('1.0', '1.16'), ('1.0', '1.26'), ('1.0', '1.17'), ('3.0', '3.31')]
+        originals = {p: p.read_bytes() for p in paths}
+        with ExitStack() as stack:
+            for name in ('socket.socket', 'subprocess.Popen', 'os.system', 'urllib.request.urlopen',
+                         'theorem_terminal.documentary_warrant.run_lean_documentary_checker',
+                         'theorem_terminal.latex_build.run_latex'):
+                stack.enter_context(patch(name, side_effect=AssertionError('automatic external action')))
+            for path, span in zip(paths, spans):
+                pane = self.open_file(path)
+                self.select_passage(pane, *span)
+                self.window.actions['context_add'].trigger()
+                for _ in range(5):
+                    self.app.processEvents()
+            wanted = deepcopy(self.controller.current().selection_shelf)
+            self.assertEqual(len(wanted), 5)
+            self.assertEqual([s.path for s in wanted], [str(p) for p in paths])
+            self.assertTrue(all(s.preview for s in wanted))
+            rows = [self.window.selection_list.item(i).text() for i in range(5)]
+            self.restart_window()
+            self.assertEqual(self.controller.current().selection_shelf, wanted)
+            self.assertEqual([self.window.selection_list.item(i).text() for i in range(5)], rows)
+            with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('preview source read')):
+                self.window.refresh_selection_shelf()
+                self.window.update_actions()
+        self.assertEqual({p: p.read_bytes() for p in originals}, originals)
+        self.assertFalse(self.errors)
+
+    def test_failed_return_and_known_external_changes_never_repin_or_navigate(self):
+        from copy import deepcopy
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.files['proof.md']
+        pane = self.open_file(path)
+        identifier = pane.shown
+        self.select_passage(pane, '3.0', '3.7')
+        self.window.actions['mark'].trigger()
+        self.window.actions['context_add'].trigger()
+        self.open_file(self.files['questions.txt'])
+        self.window.flush()
+        before, buffers = deepcopy(self.controller.current()), deepcopy(self.controller.buffers)
+        positions = [self.pane_position(p) for p in self.window.panes]
+        disk = self.controller.store.path.read_bytes()
+        path.write_text('Externally changed saved base\n', encoding='utf-8')
+        with patch.object(self.controller, 'checkpoint', side_effect=AssertionError('failed Return checkpoint')):
+            self.window.actions['return'].trigger()
+            self.wait_idle()
+        self.assertEqual(self.controller.current(), before)
+        self.assertEqual(self.controller.buffers, buffers)
+        self.assertEqual([self.pane_position(p) for p in self.window.panes], positions)
+        self.assertEqual(self.controller.store.path.read_bytes(), disk)
+        self.assertIn('Changed or unavailable', self.window.actions['return'].toolTip())
+        self.assertTrue(self.errors)
+        self.errors.clear()
+        self.controller.check_external(identifier)
+        self.window.select(identifier, 0)
+        self.select_passage(pane, '1.0', '1.0')
+        pane.text.insertPlainText('Internal edit after the conflict became known\n')
+        self.assertEqual(self.controller.current().marker, before.marker)
+        self.assertEqual(self.controller.current().selection_shelf, before.selection_shelf)
+        self.assertIn('Changed', self.window.selection_list.item(0).text())
+        self.assertFalse(self.errors)
+
+    def test_external_newline_refresh_cannot_rebind_old_live_ranges(self):
+        from copy import deepcopy
+        self.open_project()
+        self.window.disk_timer.stop()
+        path = self.root / 'newlines.md'
+        path.write_bytes(b'First line\r\nRetained passage\r\n')
+        pane = self.open_file(path)
+        self.select_passage(pane, '2.0', '2.8')
+        self.window.actions['context_add'].trigger()
+        self.window.actions['mark'].trigger()
+        wanted = deepcopy((self.controller.current().marker, self.controller.current().selection_shelf))
+        path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n'))
+        self.window.actions['refresh'].trigger()
+        self.select_passage(pane, '1.0', '1.0')
+        pane.text.insertPlainText('Internal edit after explicit Refresh\n')
+        self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), wanted)
+        self.assertIn('Changed', self.window.selection_list.item(0).text())
+        self.assertFalse(self.errors)
+
     def test_shared_edits_track_passive_selection_and_one_controller_update(self):
         from PySide6.QtGui import QTextCursor
         path, left, right = self.shared_editors()
@@ -643,6 +1053,14 @@ w.close()
             pane.text.verticalScrollBar().setValue(scroll)
             pane.capture_position()
         self.window.flush()
+        self.controller.mark(identifier, '30.0', '35.7')
+        self.controller.add_context_selection(identifier, '180.0', '185.7', pane=1)
+        self.window.update_actions()
+        self.window.selection_dock.show()
+        for _ in range(5):
+            self.app.processEvents()
+        self.window.flush()
+        anchors = deepcopy((self.controller.current().marker, self.controller.current().selection_shelf))
         expected = deepcopy(self.controller.buffer(identifier).state.pane_views)
         self.assertEqual([view.cursor for view in expected], ['35.7', '185.7'])
         widgets = [self.pane_position(p) for p in self.window.panes]
@@ -675,6 +1093,7 @@ w.close()
                     pane.capture_position()
                 self.window.flush()
                 self.assertEqual(self.controller.buffer(identifier).state.pane_views, expected)
+                self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), anchors)
                 self.assertEqual(read.call_count, 1)
                 self.assertEqual(self.window.loading_buffers, {identifier})
             finally:
@@ -683,6 +1102,7 @@ w.close()
             self.assertEqual(read.call_count, 1)
         self.assertEqual([self.pane_position(p) for p in self.window.panes], widgets)
         self.assertEqual(len(self.controller.buffers), 1)
+        self.assertEqual((self.controller.current().marker, self.controller.current().selection_shelf), anchors)
         self.assertTrue(self.controller.buffer(identifier).recovery_warning)
         self.assertEqual(path.read_text(encoding='utf-8'), original)
         self.assertFalse(self.errors)
@@ -1036,6 +1456,8 @@ w.close()
             self.assertFalse(self.window.selection_dock.isVisible())
             paths = [tex, tex, self.files['formal/Basic.lean'], external, self.files['proof.md']]
             spans = [('1.2', '2.5'), ('1.2', '1.4'), ('1.0', '1.7'), ('1.0', '1.8'), ('1.0', '1.5')]
+            locations = ['1:3–2:6', '1:3–1:5', '1:1–1:8', '1:1–1:9', '1:1–1:6']
+            previews = ['α😀 base Proof', 'α😀', 'theorem', 'External', '# A p']
             for index, (path, span) in enumerate(zip(paths, spans)):
                 pane = self.open_file(path)
                 if path == self.files['proof.md']:
@@ -1052,7 +1474,7 @@ w.close()
                 self.assertIs(self.app.focusWidget(), focus)
                 self.assertTrue(self.window.selection_dock.isVisible())
                 label = str(path.relative_to(self.root)) if path.is_relative_to(self.root) else str(path)
-                self.assertEqual(self.window.selection_list.item(index).text(), f'{label} · {span[0]}–{span[1]}')
+                self.assertEqual(self.window.selection_list.item(index).text(), f'{label} · {locations[index]} · {previews[index]}')
                 self.assertIn(str(path), self.window.selection_list.item(index).toolTip())
                 self.assertIn(self.controller.current().selection_shelf[index].revision,
                               self.window.selection_list.item(index).toolTip())

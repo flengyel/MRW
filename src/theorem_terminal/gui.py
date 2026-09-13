@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from hashlib import sha256
 import json
 from html import escape
 import os
@@ -257,6 +258,38 @@ def document_position(document, index):
     return block.position() + len(block.text()[:column].encode('utf-16-le')) // 2
 
 
+def displayed_position(position):
+    line, column = map(int, position.split('.'))
+    return f'{line}:{column + 1}'
+
+
+class LiveRange:
+    """GUI-only endpoints and scalar undo snapshots, owned by one document.
+
+    Half-open spans exclude insertion at either outside boundary. A deliberate
+    point marker advances on insertion. Deleted spans stay invalid until an
+    undo restores their range; there is no quotation search or relocation.
+    """
+    def __init__(self, document, entry):
+        self.entry = entry
+        self.point = entry.start == entry.end
+        self.start, self.end = QTextCursor(document), QTextCursor(document)
+        self.start.setPosition(document_position(document, entry.start))
+        self.end.setPosition(document_position(document, entry.end))
+        self.end.setKeepPositionOnInsert(not self.point)
+        self.invalid = False
+        self.history = {}
+        self.remember(document.availableUndoSteps())
+
+    def remember(self, step):
+        self.history[step] = (self.start.position(), self.end.position(), self.invalid)
+
+    def restore(self, step):
+        start, end, self.invalid = self.history[step]
+        self.start.setPosition(start)
+        self.end.setPosition(end)
+
+
 class BufferDocument(QTextDocument):
     """One GUI-owned document and undo stack for one loaded buffer."""
     def __init__(self, window, identifier, font):
@@ -264,6 +297,10 @@ class BufferDocument(QTextDocument):
         self.window, self.identifier = window, identifier
         self.installing = False
         self.pane_cursors = []
+        self.anchors = {}
+        self.undo_step = 0
+        self.new_undo_command = False
+        self.revision = ''
         self.setDocumentLayout(QPlainTextDocumentLayout(self))
         self.setDefaultFont(font)
         self.set_wrap(window.controller.current().wrap)
@@ -271,6 +308,33 @@ class BufferDocument(QTextDocument):
         self.refresh_timer.setSingleShot(True)
         self.refresh_timer.timeout.connect(self.refresh_views)
         self.contentsChanged.connect(self.edited)
+        self.undoCommandAdded.connect(self.new_command)
+
+    def new_command(self):
+        if self.installing:
+            return
+        self.new_undo_command = True
+        for anchor in self.anchors.values():
+            anchor.history = {step: value for step, value in anchor.history.items() if step <= self.undo_step}
+
+    def sync_anchors(self):
+        buffer = self.window.controller.buffers.get(self.identifier)
+        if buffer is None:
+            return
+        old = list(self.anchors.values())
+        anchors = {}
+        for key, entry in self.window.controller.navigation_entries(self.identifier):
+            retained = next((anchor for anchor in old if anchor.entry is entry), None)
+            if retained is not None:
+                anchors[key] = retained
+            elif (buffer.editable and not buffer.problem and not buffer.externally_changed
+                  and entry.revision == self.revision):
+                try:
+                    self.window.controller._span_text(buffer.content, entry.start, entry.end, point=key == 'marker')
+                except WorkspaceError:
+                    continue
+                anchors[key] = LiveRange(self, entry)
+        self.anchors = anchors
 
     def set_wrap(self, enabled):
         option = self.defaultTextOption()
@@ -289,11 +353,20 @@ class BufferDocument(QTextDocument):
 
     def install(self, buffer):
         normalized = buffer.content.replace('\r\n', '\n').replace('\r', '\n')
+        revision = sha256(buffer.content.encode('utf-8')).hexdigest()
         self.installing = True
         try:
+            # Explicit replacement can change exact bytes without changing
+            # Qt's normalized display (for example CRLF -> LF on Refresh).
+            # Old navigation pins cannot follow that external replacement.
+            if revision != self.revision:
+                self.anchors = {}
             if self.toPlainText() != normalized:
                 self.setPlainText(normalized)
                 self.pane_cursors = []
+                self.anchors = {}
+                self.undo_step = self.availableUndoSteps()
+                self.new_undo_command = False
             if not self.pane_cursors:
                 for view in buffer.state.pane_views:
                     cursor = QTextCursor(self)
@@ -302,6 +375,8 @@ class BufferDocument(QTextDocument):
                     cursor.setPosition(document_position(self, view.cursor), QTextCursor.MoveMode.KeepAnchor)
                     self.pane_cursors.append(cursor)
             self.setModified(buffer.dirty)
+            self.revision = revision
+            self.sync_anchors()
         finally:
             self.installing = False
 
@@ -312,15 +387,52 @@ class BufferDocument(QTextDocument):
         if not buffer.editable:
             return
         try:
+            text = preserve_newlines(buffer.content, self.toPlainText())
+            if text == buffer.content:
+                return
+            step = self.availableUndoSteps()
+            candidates = []
+            collapsed = []
+            for key, entry in self.window.controller.navigation_entries(self.identifier):
+                anchor = self.anchors.get(key)
+                span = None
+                file_failure = self.window.anchor_errors.get(self.window.anchor_key(entry), False)
+                if anchor and not buffer.problem and not buffer.externally_changed and not file_failure:
+                    was_invalid = anchor.invalid
+                    if not self.new_undo_command and step != self.undo_step and step in anchor.history:
+                        anchor.restore(step)
+                    if not anchor.point and anchor.start.position() >= anchor.end.position():
+                        anchor.invalid = True
+                    if anchor.invalid and not was_invalid:
+                        collapsed.append(key)
+                    if not anchor.invalid:
+                        span = (document_index(self, anchor.start.position()), document_index(self, anchor.end.position()))
+                candidates.append((key, entry, span))
             positions = [(document_index(self, cursor.position()),
                           [document_index(self, cursor.selectionStart()), document_index(self, cursor.selectionEnd())]
                           if cursor.hasSelection() else None) for cursor in self.pane_cursors]
-            self.window.controller.edit(self.identifier, preserve_newlines(buffer.content, self.toPlainText()), pane_positions=positions)
+            revision = sha256(text.encode('utf-8')).hexdigest()
+            self.window.controller.edit(self.identifier, text, pane_positions=positions,
+                                        anchor_positions=candidates, revision=revision, collapsed=collapsed)
+            self.revision = revision
+            self.undo_step = step
+            self.new_undo_command = False
+            for key, entry in self.window.controller.navigation_entries(self.identifier):
+                if key in self.anchors:
+                    anchor = self.anchors[key]
+                    anchor.entry = entry
+                    if entry.revision != revision:
+                        anchor.invalid = True
+                    anchor.remember(step)
             self.setModified(buffer.dirty)
         except (ValueError, OSError) as exc:
             self.installing = True
             try:
                 self.undo()
+                for anchor in self.anchors.values():
+                    if self.undo_step in anchor.history:
+                        anchor.restore(self.undo_step)
+                self.new_undo_command = False
             finally:
                 self.installing = False
             self.window.show_error(str(exc))
@@ -396,7 +508,9 @@ class EditorPane(QWidget):
 
     def focused(self):
         if not self.loading and self.shown and self.window.controller.workspace:
-            self.window.controller.activate(self.shown, self.number)
+            state = self.window.controller.current()
+            if (state.active, state.active_pane) != (self.shown, self.number):
+                self.window.controller.activate(self.shown, self.number)
             self.window.update_context()
             self.window.update_actions()
 
@@ -643,6 +757,7 @@ class WorkstationWindow(QMainWindow):
         super().__init__()
         self.controller = controller or Workstation()
         self.documents = {}
+        self.anchor_errors = {}
         self.view_updates = 0
         self.normalizing_editor_widths = False
         self.editor_width_timer = QTimer(self)
@@ -686,7 +801,7 @@ class WorkstationWindow(QMainWindow):
         self.navigator.setModel(self.file_filter)
         for column in (1, 2, 3):
             self.navigator.hideColumn(column)
-        self.navigator.doubleClicked.connect(self.open_tree_file)
+        self.navigator.activated.connect(self.open_tree_file)
         self.navigator_dock.setWidget(self.navigator)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.navigator_dock)
         self.view_menu.addAction(self.navigator_dock.toggleViewAction())
@@ -793,6 +908,7 @@ class WorkstationWindow(QMainWindow):
         self.actions['wrap'].setChecked(True)
         self.add_action(self.view_menu, 'pdf', 'Source / PDF', self.toggle_pdf, checkable=True)
         work = self.menuBar().addMenu('Work')
+        work.setToolTipsVisible(True)
         self.add_action(work, 'mark', 'Mark unfinished work here', self.mark_selection)
         self.add_action(work, 'return', 'Return to unfinished work', self.return_to_marker)
         self.add_action(work, 'clear_marker', 'Clear unfinished marker', lambda: self.controller.clear_marker())
@@ -940,6 +1056,8 @@ class WorkstationWindow(QMainWindow):
         if not hasattr(self, 'panes') or not hasattr(self, 'persistence'):
             return
         state = self.controller.workspace
+        for document in self.documents.values():
+            document.sync_anchors()
         buffer = self.controller.buffer() if state and state.active else None
         busy = any(not job.background for job in self.jobs.values())
         for key, action in self.actions.items():
@@ -966,6 +1084,10 @@ class WorkstationWindow(QMainWindow):
         self.actions['build_details'].setEnabled(bool(state and state.last_build) and not busy)
         for key in ('return', 'clear_marker'):
             self.actions[key].setEnabled(bool(state and state.marker) and not busy)
+        marker = state.marker if state else None
+        self.actions['return'].setToolTip(
+            f'{marker.path} · {displayed_position(marker.start)}'
+            + (' · ' + self.anchor_status(marker) if self.anchor_status(marker) else '') if marker else 'No unfinished work marked')
         with QSignalBlocker(self.actions['split']):
             self.actions['split'].setChecked(bool(state and state.split))
         with QSignalBlocker(self.actions['pdf']):
@@ -989,7 +1111,7 @@ class WorkstationWindow(QMainWindow):
         self.recent_files.clear()
         for path in state.recent if state else []:
             self.recent_files.addAction(path, lambda path=path: self.perform(lambda: self.open_file(Path(path))))
-        self.update_context_actions()
+        self.refresh_selection_shelf()
 
     def update_context_actions(self, *_):
         if not hasattr(self, 'selection_list'):
@@ -1006,23 +1128,53 @@ class WorkstationWindow(QMainWindow):
 
     def refresh_selection_shelf(self):
         state = self.controller.workspace
-        rows = tuple((s.path, s.revision, s.start, s.end) for s in state.selection_shelf) if state else ()
+        current_keys = {self.anchor_key(s) for s in state.selection_shelf} if state else set()
+        if state and state.marker:
+            current_keys.add(self.anchor_key(state.marker))
+        self.anchor_errors = {key: value for key, value in self.anchor_errors.items() if key in current_keys}
+        rows = tuple((s.path, s.revision, s.start, s.end, s.preview, self.anchor_status(s))
+                     for s in state.selection_shelf) if state else ()
         if rows != self._selection_rows:
             selected = self.selection_list.currentRow()
             with QSignalBlocker(self.selection_list):
                 self.selection_list.clear()
-                for path, revision, start, end in rows:
+                for path, revision, start, end, preview, status in rows:
                     local = Path(path)
                     label = str(local.relative_to(Path(state.root))) if local.is_relative_to(Path(state.root)) else path
-                    item = QListWidgetItem(f'{label} · {start}–{end}')
-                    item.setToolTip('<qt>' + escape(path) + '<br>SHA-256: ' + revision + '</qt>')
+                    item = QListWidgetItem(f'{label} · {displayed_position(start)}–{displayed_position(end)} · '
+                                           + (preview or 'Preview unavailable') + (' · ' + status if status else ''))
+                    item.setToolTip('<qt>' + escape(path) + '<br>SHA-256: ' + revision
+                                    + '<br>Stored span: ' + start + '–' + end + '</qt>')
                     self.selection_list.addItem(item)
                 if rows:
                     self.selection_list.setCurrentRow(min(max(0, selected), len(rows) - 1))
             self._selection_rows = rows
         if state is None:
+            self.anchor_errors.clear()
             self.selection_dock.hide()
         self.update_context_actions()
+
+    @staticmethod
+    def anchor_key(entry):
+        return entry.path, entry.revision, entry.start, entry.end
+
+    def anchor_status(self, entry):
+        if self.anchor_errors.get(self.anchor_key(entry), False):
+            return 'Changed or unavailable'
+        buffer = next((b for b in self.controller.buffers.values() if b.state.path == entry.path), None)
+        if self.anchor_key(entry) in self.anchor_errors and (not buffer or not buffer.has_content):
+            return 'Changed or unavailable'
+        if buffer:
+            document = self.documents.get(buffer.state.id)
+            if document and any(a.entry is entry and a.invalid for a in document.anchors.values()):
+                return 'Changed · retained passage unavailable'
+            if buffer.problem or buffer.externally_changed:
+                return 'Changed or unavailable'
+            if buffer.has_content:
+                revision = document.revision if document else sha256(buffer.content.encode('utf-8')).hexdigest()
+                if entry.revision != revision:
+                    return 'Changed · pinned revision differs'
+        return ''
 
     def render(self, *, balance_editors=False):
         state = self.controller.workspace
@@ -1345,23 +1497,37 @@ class WorkstationWindow(QMainWindow):
 
     def add_context_selection(self):
         pane = self.active_pane()
+        pane.text.finish_reflow()
         pane.capture_position()
         cursor = pane.text.textCursor()
         index = self.controller.add_context_selection(pane.shown,
             cursor_index(pane.text, cursor.selectionStart()), cursor_index(pane.text, cursor.selectionEnd()), pane=pane.number)
+        self.anchor_errors.pop(self.anchor_key(self.controller.current().selection_shelf[index]), None)
         self.refresh_selection_shelf()
         self.selection_list.setCurrentRow(index)
         self.selection_dock.show()
 
     def open_context_selection(self, *, other=False):
+        self.open_navigation(self.selection_list.currentRow(), other=other)
+
+    def open_navigation(self, index=None, *, other=False):
         if self.jobs:
             raise WorkspaceError('Wait for the current read to finish')
-        index = self.selection_list.currentRow()
+        entry = self.controller.current().marker if index is None else self.controller._context_selection(index)
+        if entry is None:
+            raise WorkspaceError('No unfinished work has been marked')
+        key = self.anchor_key(entry)
         pane = self.controller.current().active_pane
         if other:
             pane = 1 - pane
         def accepted(prepared):
-            buffer = self.controller.accept_context_selection(index, prepared, pane)
+            try:
+                buffer = (self.controller.accept_marker(prepared, pane) if index is None
+                          else self.controller.accept_context_selection(index, prepared, pane))
+            except (OSError, ValueError) as exc:
+                self.anchor_errors[key] = not str(exc).startswith('Retained passage changed')
+                raise
+            self.anchor_errors.pop(key, None)
             self.begin_reflow()
             self.panes[1].setVisible(self.controller.current().split)
             target = self.panes[pane]
@@ -1371,7 +1537,10 @@ class WorkstationWindow(QMainWindow):
             target.show_buffer(buffer.state.id, force=True)
             target.text.setFocus()
             self.update_context()
-        self.submit(lambda: self.controller.prepare_context_selection(index), accepted)
+        def failed(_error):
+            self.anchor_errors[key] = not _error.startswith('Retained passage changed')
+        self.submit(self.controller.prepare_marker if index is None else lambda: self.controller.prepare_context_selection(index),
+                    accepted, failed)
 
     def remove_context_selection(self):
         self.controller.remove_context_selection(self.selection_list.currentRow())
@@ -1381,12 +1550,10 @@ class WorkstationWindow(QMainWindow):
         pane = self.active_pane()
         cursor = pane.text.textCursor()
         self.controller.mark(pane.shown, cursor_index(pane.text, cursor.selectionStart()), cursor_index(pane.text, cursor.selectionEnd()))
+        self.anchor_errors.pop(self.anchor_key(self.controller.current().marker), None)
 
     def return_to_marker(self):
-        self.controller.return_to_marker()
-        self.render()
-        self.active_pane().text.centerCursor()
-        self.active_pane().text.setFocus()
+        self.open_navigation()
 
     def retain_passage(self, pane):
         buffer = self.controller.buffer(pane.shown)
