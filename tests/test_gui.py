@@ -143,6 +143,148 @@ class GraphicalEditorTests(unittest.TestCase):
         self.assertEqual(path.read_bytes(), original)
         self.assertFalse(self.errors)
 
+    def test_wrapped_shared_document_keeps_equal_viewports_after_splitter_movement(self):
+        path, left, right = self.shared_editors(wrapped=True)
+        document = left.text.document()
+        for method in ('sizes', 'move'):
+            for sizes in ((180, 700), (700, 180)):
+                with self.subTest(method=method, sizes=sizes):
+                    if method == 'sizes':
+                        self.window.editors.setSizes(list(sizes))
+                    else:
+                        self.window.editors.moveSplitter(sizes[0], 1)
+                    for _ in range(8):
+                        self.app.processEvents()
+                    widths = [p.text.viewport().width() for p in (left, right)]
+                    overflow = [p.text.horizontalScrollBar().maximum() for p in (left, right)]
+                    geometry = f'viewports={widths}, horizontal overflow={overflow}, document width={document.textWidth()}'
+                    self.assertEqual(overflow, [0, 0], geometry)
+                    self.assertEqual(widths[0], widths[1], geometry)
+                    self.assertIs(left.text.document(), document)
+                    self.assertIs(right.text.document(), document)
+        self.assertEqual(left.text.toPlainText(), path.read_text(encoding='utf-8'))
+
+    def test_shared_wrap_geometry_preserves_views_document_and_recovery(self):
+        from copy import deepcopy
+        from PySide6.QtCore import QPoint, Qt
+        from PySide6.QtTest import QSignalSpy, QTest
+        path, left, right = self.shared_editors(wrapped=True)
+        original = path.read_bytes()
+        document = left.text.document()
+        self.select_passage(left, '240.0', '240.0')
+        left.text.insertPlainText('Checkpointed shared work α\n')
+        self.select_passage(left, '80.0', '80.22')
+        self.window.actions['mark'].trigger()
+        marker = deepcopy(self.controller.current().marker)
+        self.select_passage(left, '20.0', '20.22')
+        self.window.actions['context_add'].trigger()
+        self.select_passage(right, '180.0', '180.22')
+        right.text.setFocus()
+        self.window.actions['context_add'].trigger()
+        for _ in range(8):
+            self.app.processEvents()
+        self.select_passage(left, '40.10', '40.700')
+        left.text.ensureCursorVisible()
+        right.text.verticalScrollBar().setValue(100)
+        for _ in range(5):
+            self.app.processEvents()
+        active = self.controller.current().active_pane
+        text, undo_steps = document.toPlainText(), document.availableUndoSteps()
+        handle = self.window.editors.handle(1)
+        def drag(delta):
+            moved = QSignalSpy(self.window.editors.splitterMoved)
+            center = handle.rect().center()
+            QTest.mousePress(handle, Qt.MouseButton.LeftButton, pos=center)
+            QTest.mouseMove(handle, center + QPoint(delta, 0))
+            QTest.mouseRelease(handle, Qt.MouseButton.LeftButton, pos=center + QPoint(delta, 0))
+            self.assertGreater(moved.count(), 0)
+        for number, change in enumerate((lambda: drag(-300), lambda: drag(300),
+                       lambda: self.window.resize(961, 680), lambda: self.window.resize(1281, 820),
+                       lambda: self.window.resize(960, 680), lambda: self.window.resize(1280, 820),
+                       lambda: self.window.actions['split'].trigger(), lambda: self.window.actions['split'].trigger())):
+            anchor = right.text.cursorForPosition(QPoint(0, 0))
+            offset = right.text.cursorRect(anchor).top()
+            cursors = [(p.text.textCursor().position(), p.text.textCursor().anchor()) for p in (left, right)]
+            views = deepcopy(self.controller.buffer(left.shown).state.pane_views)
+            change()
+            for pane in (left, right):
+                if pane.text.reflow:
+                    pane.capture_position()
+                    self.assertEqual(self.controller.buffer(pane.shown).state.pane_views[pane.number], views[pane.number])
+            for _ in range(8):
+                self.app.processEvents()
+            self.assertEqual([(p.text.textCursor().position(), p.text.textCursor().anchor()) for p in (left, right)], cursors)
+            self.assertTrue(left.text.viewport().rect().contains(left.text.cursorRect().center()))
+            if right.isVisible():
+                self.assertEqual(left.text.viewport().width(), right.text.viewport().width())
+                self.assertEqual([p.text.horizontalScrollBar().maximum() for p in (left, right)], [0, 0])
+                self.assertFalse(right.text.viewport().rect().intersects(right.text.cursorRect()))
+                self.assertAlmostEqual(right.text.cursorRect(anchor).top(), offset, delta=1)
+            self.assertIs(left.text.document(), document)
+            self.assertIs(right.text.document(), document)
+            self.assertEqual(document.toPlainText(), text)
+            self.assertEqual(document.availableUndoSteps(), undo_steps)
+            self.assertTrue(document.isModified())
+            if number < 6:  # Hiding the split deliberately selects pane zero.
+                self.assertEqual(self.controller.current().active_pane, active)
+        self.window.flush()
+        positions = [self.pane_position(p) for p in (left, right)]
+        shelf = deepcopy(self.controller.current().selection_shelf)
+        self.assertEqual(len(list(self.controller.store.directory.glob('recovery/*.json'))), 1)
+        self.restart_window()
+        for _ in range(8):
+            self.app.processEvents()
+        self.assertTrue(self.controller.current().wrap)
+        self.assertEqual(self.controller.current().visible, [positions[0][0]] * 2)
+        self.assertEqual(len(self.window.documents), 1)
+        self.assertEqual(self.controller.current().selection_shelf, shelf)
+        self.assertEqual(self.controller.current().marker, marker)
+        for pane, expected in zip(self.window.panes, positions):
+            self.assertEqual(self.pane_position(pane), expected)
+            self.assertIn('recovered unsaved work', pane.notice.text())
+        self.assertEqual(path.read_bytes(), original)
+        self.assertFalse(self.errors)
+
+    def test_unequal_widths_remain_available_for_distinct_documents_and_no_wrap(self):
+        path, left, right = self.shared_editors(wrapped=True)
+        identifier, document = left.shown, left.text.document()
+        self.open_file(self.files['proof.md'])
+        for sizes in ([180, 700], [700, 180]):
+            self.window.editors.setSizes(sizes)
+            for _ in range(5):
+                self.app.processEvents()
+            actual = self.window.editors.sizes()
+            self.assertGreater(abs(actual[0] - actual[1]), 300)
+        self.window.select(identifier, 1)
+        for _ in range(5):
+            self.app.processEvents()
+        self.assertEqual(left.text.viewport().width(), right.text.viewport().width())
+        self.window.actions['wrap'].trigger()
+        for pane in (left, right):
+            self.select_passage(pane, '40.10', '40.30')
+            pane.text.ensureCursorVisible()
+        for _ in range(5):
+            self.app.processEvents()
+        # Ending the condition keeps the current split, not an earlier ratio.
+        self.assertLessEqual(abs(self.window.editors.sizes()[0] - self.window.editors.sizes()[1]), 1)
+        for sizes in ([180, 700], [700, 180]):
+            self.window.editors.setSizes(sizes)
+            for _ in range(5):
+                self.app.processEvents()
+            actual = self.window.editors.sizes()
+            self.assertGreater(abs(actual[0] - actual[1]), 300)
+            left.text.horizontalScrollBar().setValue(70)
+            right.text.horizontalScrollBar().setValue(170)
+            self.assertEqual([p.text.horizontalScrollBar().value() for p in (left, right)], [70, 170])
+            self.assertIs(left.text.document(), document)
+            self.assertIs(right.text.document(), document)
+        self.window.actions['wrap'].trigger()
+        for _ in range(8):
+            self.app.processEvents()
+        self.assertEqual(left.text.viewport().width(), right.text.viewport().width())
+        self.assertEqual([p.text.horizontalScrollBar().maximum() for p in (left, right)], [0, 0])
+        self.assertFalse(self.errors)
+
     def test_shared_undo_redo_is_available_from_either_widget(self):
         path, left, right = self.shared_editors()
         original = left.text.toPlainText()

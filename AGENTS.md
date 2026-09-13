@@ -23,6 +23,12 @@ version nor pane arrangement is a permanent domain invariant. Format-aware
 behavior must preserve source integrity and the distinction between editable
 text, rendered output and retained records.
 
+The shared Qt plain-text document has one layout width. When two visible panes
+show that document with wrapping enabled, keep their editor viewport widths
+equal through splitter movement and geometry changes. Different buffers and
+unwrapped views may have unequal widths. Preserve one document and undo history;
+this is a Qt presentation constraint, not a domain invariant.
+
 Opening or viewing a project must not write inside it or read executable
 configuration from it. Mutable session state, trusted tool settings, private
 unsaved-text recovery and build storage belong in OS user-local application

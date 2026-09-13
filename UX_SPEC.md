@@ -112,6 +112,12 @@ completed checkpoint across an interrupted process, not uncheckpointed character
 final checkpoint must leave the work available until the user explicitly decides
 whether to discard it.
 
+In the current Qt GUI, wrapped views of one shared document keep equal editor
+viewport widths because that document has one layout width. Splitter movement
+and resizing preserve this constraint and both pane positions. Different buffers
+or unwrapped views may have unequal widths; no earlier unequal ratio is restored
+automatically. This toolkit constraint is not a mathematical or domain invariant.
+
 When retained model or warrant material becomes relevant, inspect it alongside
 the work. Model attribution and response identity precede returned mathematical
 text; retaining a passage preserves its exact digest-anchored span. Provenance,

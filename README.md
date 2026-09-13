@@ -297,6 +297,12 @@ pane's selection with the text. The navigator and contextual facets can be hidde
 ordinary file editing does not require a wide identity inspector. Hashes are in
 expandable technical details.
 
+When both panes show the same document with wrapping enabled, the editor
+viewports stay equally wide, including after dragging the splitter or resizing.
+Qt's shared plain-text document has one layout width. Different documents and
+unwrapped views permit unequal widths; turning off the constraint does not
+restore an earlier splitter ratio. This is a Qt presentation constraint.
+
 Session state retains the project root, open buffers, active buffer, cursor,
 selection, scroll, wrapping, split, recent files and PDF view. Resizing, wrapping
 and layout changes keep a previously visible cursor visible with minimal scrolling;

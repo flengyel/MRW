@@ -162,6 +162,7 @@ class SourceEdit(QPlainTextEdit):
         self.reflow_timer.start(0)
 
     def finish_reflow(self):
+        self.pane.window.normalize_editor_widths()
         if self.reflow is None and self.restored_scroll is None:
             return
         self.settling = True
@@ -225,6 +226,7 @@ class SourceEdit(QPlainTextEdit):
             self.pane.window.begin_reflow(cached=True)
         super().resizeEvent(event)
         self.layout_gutter()
+        self.pane.window.schedule_editor_widths()
 
     def focusInEvent(self, event):
         super().focusInEvent(event)
@@ -487,6 +489,7 @@ class EditorPane(QWidget):
         finally:
             self.loading = False
             self.window.view_updates -= 1
+        self.window.normalize_editor_widths()
         self.text.remember_view()
         if centered:
             self.capture_position()
@@ -641,6 +644,10 @@ class WorkstationWindow(QMainWindow):
         self.controller = controller or Workstation()
         self.documents = {}
         self.view_updates = 0
+        self.normalizing_editor_widths = False
+        self.editor_width_timer = QTimer(self)
+        self.editor_width_timer.setSingleShot(True)
+        self.editor_width_timer.timeout.connect(self.normalize_editor_widths)
         self.setWindowTitle(TITLE)
         self.resize(1280, 820)
         self.setMinimumSize(760, 560)
@@ -687,6 +694,7 @@ class WorkstationWindow(QMainWindow):
         self.panes = [EditorPane(self, number) for number in (0, 1)]
         for pane in self.panes:
             self.editors.addWidget(pane)
+        self.editors.splitterMoved.connect(self.normalize_editor_widths)
         self.pdf = PdfPane(self)
         self.center = QSplitter(Qt.Orientation.Horizontal)
         self.center.addWidget(self.editors)
@@ -852,6 +860,43 @@ class WorkstationWindow(QMainWindow):
         for pane in getattr(self, 'panes', ()):
             pane.text.begin_reflow(cached=cached)
 
+    def schedule_editor_widths(self):
+        if not self.normalizing_editor_widths:
+            self.editor_width_timer.start(0)
+
+    def normalize_editor_widths(self, *_):
+        if self.normalizing_editor_widths or not hasattr(self, 'panes'):
+            return
+        self.editor_width_timer.stop()
+        state = self.controller.workspace
+        shared_wrap = (state and state.split and state.wrap
+                       and all(p.isVisible() and p.genuine_content() for p in self.panes)
+                       and self.panes[0].text.document() is self.panes[1].text.document())
+        self.normalizing_editor_widths = True
+        try:
+            with self.updating_views():
+                if not shared_wrap:
+                    if self.editors.contentsMargins().right():
+                        self.begin_reflow(cached=True)
+                        self.editors.setContentsMargins(0, 0, 0, 0)
+                    return
+                # QPlainTextDocumentLayout has one width, even with two views.
+                # Account for gutters and scrollbars, and reserve a spare pixel
+                # when necessary so the *viewports* can be exactly equal.
+                sizes = self.editors.sizes()
+                chrome = [size - pane.text.viewport().width() for size, pane in zip(sizes, self.panes)]
+                available = self.editors.width() - self.editors.handleWidth() - sum(chrome)
+                spare = available % 2
+                desired = [available // 2 + width for width in chrome]
+                if sizes != desired or self.editors.contentsMargins().right() != spare:
+                    self.begin_reflow(cached=True)
+                    self.editors.setContentsMargins(0, 0, spare, 0)
+                    self.editors.setSizes(desired)
+                    layout = self.panes[0].text.document().documentLayout()
+                    layout.documentSizeChanged.emit(layout.documentSize())
+        finally:
+            self.normalizing_editor_widths = False
+
     @contextmanager
     def updating_views(self):
         # Suppress application capture, not Qt's scrollbar signals: Qt needs
@@ -876,6 +921,7 @@ class WorkstationWindow(QMainWindow):
 
     def flush(self):
         if self.controller.workspace:
+            self.normalize_editor_widths()
             for document in self.documents.values():
                 if document.refresh_timer.isActive():
                     document.refresh_views()
@@ -1258,6 +1304,7 @@ class WorkstationWindow(QMainWindow):
             pane.text.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth if enabled else QPlainTextEdit.LineWrapMode.NoWrap)
         for document in self.documents.values():
             document.set_wrap(enabled)
+        self.normalize_editor_widths()
         self.schedule_checkpoint()
 
     def toggle_pdf(self, enabled):
