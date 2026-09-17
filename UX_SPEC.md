@@ -68,15 +68,30 @@ metadata. Mathematical hypotheses belong in the text or formal declarations.
 The navigator and contextual information should leave room for the current work.
 All operations must be available through visible menus without required key chords.
 Also provide platform-standard Open, Save, Find and Find-next shortcuts, show
-them in menus, and keep keyboard focus predictable. A completed marker action
+them in menus, and keep keyboard focus predictable. Save acts on the clearly
+identified editable text target; it cannot overwrite a PDF. R1 Find/Find-next
+are text operations. When PDF has focus, disable them or explain that PDF search
+is unavailable; do not silently search a hidden or unrelated editor. Preserve
+inherited text editing shortcuts. A completed marker action
 must visibly identify the marked passage; an unavailable Return action must
 make the reason discoverable. Do not make successful marker creation something
 the user must infer from a later restart.
 
-A reader must be able to open an existing local PDF beside an ordinary work
-note without TeX source or a build. Preserve its document identity, page and
-zoom independently of generated-output provenance. Add search, outline and
-internal navigation in bounded increments required by actual reading; an
+A reader must be able to select an existing local PDF through ordinary Open or
+the project navigator and see it beside an editable ordinary work note, without
+TeX source or a build. Keep PDF bytes outside editable text buffers, text
+recovery and text anchors. Preserve its document identity, page and zoom
+independently of generated-output provenance; restore the PDF and note after
+reopening. Missing, invalid, unreadable or changed PDF content must be reported
+without discarding the note or silently claiming the old reading location
+still identifies the same passage. Failed loads must not overwrite the last
+valid reading state. Workspace migration validates stored state without reading
+source files; actual document loading validates the selected document.
+
+The bounded R1 delivery includes independent opening, page/zoom restoration,
+ordinary note editing, standard shortcuts and marker feedback. PDF search,
+outline, SyncTeX and text extraction are deferred beyond this handoff. Add
+navigation capabilities later when required by actual reading; an
 internal document link must not silently launch an external action. Keep
 the reader's note and return location available during a definition lookup.
 Opening a PDF does not imply reliable text extraction or a source mapping.

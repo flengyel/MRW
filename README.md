@@ -7,6 +7,11 @@ remains available for testing, automation, reproducibility, and low-level
 operations. Repository, executable, Python package, Lean namespaces, and
 serialized record identities retain their existing technical names.
 
+For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
+The next task is the bounded R1 PDF-plus-note implementation; R2 adds direct
+mathematical assistance and R3 adds correction and continued investigation.
+
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an
@@ -941,8 +946,10 @@ problem families before selecting a problem.
 - `VOCABULARY.md` — controlled terminology used across the design documents.
 - `DOMAIN_MODEL.md` — entities, information classes, and invariants.
 - `UX_SPEC.md` — the mathematical workflow the system supports.
-- [CODEX_PLAN.md](CODEX_PLAN.md) — active outcome roadmap, research basis and
-  retained implementation contracts.
+- [CODEX_PLAN.md](CODEX_PLAN.md) — active outcome roadmap, implementation status,
+  research basis and retained implementation contracts.
+- [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) — copyable prompt for
+  the next bounded implementation task and its delivery criteria.
 - `AGENTS.md` — instructions for Codex and other coding agents.
 - `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` — the bounded warrant-composition
   experiment and its cut line.

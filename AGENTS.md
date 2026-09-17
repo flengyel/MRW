@@ -17,6 +17,13 @@ capability identifier or integration machinery. Preserve the legacy
 Appendix-specific CLI and its source checks. Corpus-neutral format and tool
 integrations are permitted when invoked by direct user action.
 
+R1 adds a read-only existing-PDF path through ordinary file actions. Keep PDF
+identity and page/zoom state separate from generated-build provenance and text
+buffers, recovery and anchors. Preserve work notes on PDF loading failures or
+changed content. Opening or restoring a PDF never invokes TeX or creates a
+Verification. Use the focus and restoration semantics in UX_SPEC.md; no imported
+PDF may be represented as a fabricated successful build.
+
 The current GUI uses PySide6 Qt Widgets and QtPdf. Keep widgets separate from the
 controller, record validation and persistence services. Neither toolkit, schema
 version nor pane arrangement is a permanent domain invariant. Format-aware
@@ -94,13 +101,20 @@ Do not redesign the calculus, add JAM semantics or invoke Lean automatically.
 
 Exercise toolkit-independent controllers and actual Qt widgets with
 `THEOREM_TERMINAL_GUI_TESTS=1` (an offscreen Qt platform can run widget tests).
-Use an ordinary temporary project with TeX, Lean, Sage, Python, Markdown and text
-files; no test-only controller subclass may stand in for the GUI. Check real
-LaTeX rendering, diagnostics, Vim/Neovim handoff, source integrity, checkpoint recovery
-and re-entry visually at 1280×820 and 960×680 when changing widgets. Open a real
-integration corpus through ordinary project and file actions only when the current
-task explicitly authorizes access. A visual check must not modify the external
-project.
+Use ordinary test documents; no test-only controller subclass may stand in for
+the GUI. When changing widgets, exercise the affected user workflow visibly at
+1280×820 and 960×680. R1 specifically requires a local PDF beside an editable
+note, keyboard actions, position restoration and visible marker feedback.
+Exercise LaTeX rendering, diagnostics or external-editor handoff when those
+paths change; they are not repeated manual gates for every widget edit.
+Preserve regression coverage for source integrity and recovery. Run focused
+tests during development and one final broader regression pass for a code
+change; repeat it only after relevant changes or to resolve a concrete failure.
+An installed launch check should confirm the delivered package and entry point,
+without requiring another full acceptance campaign. Record unavailable runtime
+checks accurately; never substitute offscreen checks for claimed visible use.
+Open a real integration corpus only when the task authorizes access, and do not
+modify its authoritative files during a visual check.
 
 The current GUI directly provides ordinary-file editing, external-editor and
 Jupyter handoff, staged LaTeX building, PDF rendering, recovery and retained-record
@@ -115,7 +129,9 @@ slots may apply completion results to controllers or widgets.
 
 Read `README.md`, `VISION.md`, `VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`,
 `CODEX_PLAN.md`, and `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` before changing
-behavior.
+behavior. Then read `docs/CODEX_CONTINUATION.md` for the current bounded
+implementation task. `CODEX_PLAN.md` controls priority; the continuation file
+turns that priority into a handoff, not a competing roadmap.
 
 The active delivery order is R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,
@@ -131,7 +147,11 @@ user work for continuation; disposable copies serve destructive tests, not as
 the only copy of study notes. An inconclusive prescribed session is not a human
 failure. A confirmed data-loss defect has priority; fix observed interaction
 blockers and defer incidental polish. Documentation-only changes need document
-validation, not GUI, compiler or full-suite reruns.
+validation, not GUI, compiler or full-suite reruns. On delivery, update the
+roadmap's implementation status, README capability claims, any changed UX
+behavior and the continuation handoff together. Mark mathematical usefulness
+pending when it has not been observed; do not fabricate human acceptance or
+leave authorized implementation blocked on a manual study ceremony.
 
 Implementation is authorized. The legacy CLI experiment uses `rs_Appendix_A.tex`
 from `flengyel/Categorical_Rice_Shapiro` as its first corpus. Its ordered

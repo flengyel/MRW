@@ -5,6 +5,13 @@ bridge are executable. The provider-backed Stage 1 mathematical-assistance
 trial remains pending. This document does not claim that every mathematical
 reason should be encoded in justification logic.
 
+Development priority is controlled by the active R1–R3 roadmap in
+[CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
+The acceptance conditions here govern the separately requested warrant
+experiment in [UX_SPEC.md §9.3](../UX_SPEC.md#93-independent-formal-correspondence-and-warrant-experiment).
+They do not gate readable study, a useful model exchange, or the current
+[Codex implementation handoff](CODEX_CONTINUATION.md).
+
 ## Purpose
 
 The current model records where a claim came from and what checks were run, but
@@ -356,11 +363,13 @@ assistance event.
 
 ## Reuse by the AI-interaction experiment
 
-Stage 1 will reuse this executable boundary for one selected response span at a
-genuine mathematical obstruction. That later trial adds an actual provider
-request, mathematical use or disposition of the proposal, and either an
-explicitly based substantive route or an honest no-bridge outcome. It does not
-create an AI-specific logic or epistemic data model.
+When the separate model-response warrant experiment is requested, it reuses
+this executable boundary for one selected response span from genuine
+mathematical work. That experiment includes an actual provider request,
+mathematical use or disposition of the proposal, and either an explicitly based
+substantive route or an honest no-bridge outcome. The R2 assistance workflow
+is evaluated independently and does not require this experiment. No AI-specific
+logic or epistemic data model is created.
 After the call is finalized and the selected representation and admissions are
 frozen, the Lean justification checker is invoked explicitly in its pinned build
 environment and emits a deterministic documentary-warrant bundle. Model-response handling
@@ -427,7 +436,7 @@ If acceptance or knowledge-production semantics are later required, they need a
 separately specified justification-logic extension; they are not fields added
 to `ModelCall` or `Representation`.
 
-The later Stage 1 trial is accepted only when:
+The separately requested model-response warrant trial is accepted only when:
 
 - the call, raw-response digest, span, and lossless representation identify one
   immutable documentary atom;
@@ -473,5 +482,5 @@ No JAM, general `why` database, corpus-wide justification graph, model-call
 requirement inside the Appendix A slice, Stacks/Kerodon change, or
 nonmathematical application belongs to this slice. The executable offline
 documentary bridge is a mechanics fixture over the same generic checker. It is
-not the subsequent Stage 1 trial and supplies no evidence that model assistance
-improved mathematics.
+not a real assistance exchange or the subsequent model-response warrant trial,
+and supplies no evidence that model assistance improved mathematics.

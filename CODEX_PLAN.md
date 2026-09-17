@@ -59,7 +59,7 @@ The following are design inputs, not proof that this application works.
 One product increment is active at a time. These are proposed delivery targets,
 not claims of implemented capability or promises about calendar dates.
 
-| Priority | Deliverable | Evidence required to advance |
+| Priority | Deliverable | Evidence of mathematical usefulness |
 |---|---|---|
 | R1 — Read and work | Open an existing local PDF without building it, keep it beside a durable work note, preserve page/zoom, and provide standard application shortcuts and clear marker feedback | Use a real source to write a useful explanation, example or question; close/reopen and continue from the saved work |
 | R2 — Ask about the work | From selected source/work passages, ask one natural-language mathematical question, preview exact outbound context, explicitly send through the existing adapter, inspect an attributed answer, and retain/edit/reject a contribution | One actual obstruction is helped through an in-application exchange, with inspectable sources and a useful resulting work artifact |
@@ -75,8 +75,9 @@ Use an explicit user-selected durable project; disposable test copies are
 appropriate for destructive verification, not the user's only surviving work.
 
 Complete R1 in bounded increments. First deliver independent PDF opening,
-source/note comparison, position restoration and standard Open/Save/Find
-bindings. Once this minimum works, move to R2. PDF search, outline and richer
+source/note comparison, position restoration, standard Open/Save/Find/Find-next
+bindings and the small marker-feedback improvement. Once this minimum works,
+move to R2. PDF search, outline and richer
 internal navigation wait unless their absence demonstrably blocks the chosen
 task. Internal document navigation must not silently dispatch external URLs,
 files or commands. Exact source/PDF mapping
@@ -123,6 +124,54 @@ Before claiming general usefulness, test both reading/re-entry and actual
 problem work, including an example or counterexample. Do not infer research
 capability from a single guided-reading success.
 
+### Development handoff and status
+
+[docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) is the copyable
+implementation handoff. This roadmap controls priority; the handoff defines the
+current bounded task and must be advanced when that task is delivered.
+
+| Milestone | Implementation status at 2026-09-17 | Product evidence |
+|---|---|---|
+| R1 | Next implementation task; independent PDF opening and explicit standard application shortcuts are not implemented | Existing editor/recovery evidence only; PDF-plus-note study remains to be observed |
+| R2 | Planned after R1's minimum working delivery; adapter and response inspection are reusable foundations | No in-application assistance exchange demonstrated |
+| R3 | Planned after the first assistance workflow | No in-application research collaboration demonstrated |
+
+Keep implementation delivery, automated/visual verification and observed
+mathematical usefulness separate in status reports. A verified implementation
+can be delivered while user observation remains pending. That pending observation
+does not block the next authorized R1–R3 increment. It does block claims that
+the product has demonstrated usefulness or readiness to expand beyond R1–R3.
+
+For the next R1 task, use these bounded decisions:
+
+- Route a PDF selected through ordinary Open or the project navigator to the
+  existing QtPdf view, read-only, beside an editable ordinary work note. Preserve
+  the note while switching documents or views. Do not put binary PDF bytes into
+  editable text buffers, text recovery or text anchors.
+- Give an existing PDF its own validated identity and page/zoom state, separate
+  from a successful TeX build. Restore that PDF and note after reopening without
+  invoking TeX. On missing, unreadable, invalid or changed content, report the
+  condition and keep the note safe; do not silently apply an old location to
+  different bytes or replace valid state with a failed load.
+- Bind platform-standard Open, Save, Find and Find-next and show their bindings
+  in menus. Save addresses the clearly identified editable text target and can
+  never write a PDF. Find/Find-next remain text operations in R1: while PDF has
+  focus, visibly explain or disable unavailable search rather than searching an
+  unrelated or hidden text pane. Preserve inherited editor shortcuts.
+- Include the small marker-feedback improvement already named in R1: visibly
+  confirm successful marking and make the reason for an unavailable Return
+  discoverable. Keep the established anchor semantics.
+- Use the smallest validated workspace-state change required. Preserve all
+  supported historical migrations, recovery, pane positions, wrap preference
+  and anchors. Migration must not read source files or fabricate build records.
+
+R1 ends with the above working through actual GUI actions, meaningful controller
+and Qt regressions, a visible PDF/note exercise at both supported review sizes,
+and updated status and handoff documents. PDF search, outline, SyncTeX, text
+extraction, AI requests and broader reader redesign are outside this task.
+Move next to R2; add a deferred reader capability earlier only if a demonstrated
+obstruction makes it necessary.
+
 ### Evaluation and drift control
 
 Evaluate each delivered increment during a short, natural study session.
@@ -143,8 +192,8 @@ Before expanding beyond R1–R3, require useful work in two separate sessions
 and one later continuation. This is a chosen adoption check, not a
 research-validated threshold. User observation evaluates benefit; it is not a
 manual preflight gate on authorized implementation. If the user is unavailable,
-finish the bounded deliverable and report usefulness as pending. If benefit is absent, identify one concrete
-obstruction, make a bounded correction and observe again. If that still fails,
+finish the bounded deliverable and report usefulness as pending. If benefit is
+absent, identify one concrete obstruction, make a bounded correction and observe again. If that still fails,
 reconsider the affected workflow before adding features. Never leave the human
 repeating an inconclusive setup ritual while development accumulates elsewhere.
 
