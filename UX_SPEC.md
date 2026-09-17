@@ -3,9 +3,10 @@
 The mathematician's workflow the interface must support. Companion to
 `VISION.md` (why the system exists) and `DOMAIN_MODEL.md` (entities and
 invariants). Present implementation and limitations are documented in README.
-The current GUI provides ordinary-file editing, external-editor and Jupyter
-handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
-inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+The current GUI provides ordinary-file editing, existing local PDF reading,
+external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
+rendering, checkpoint recovery and retained-record inspection. Proof-assistant,
+computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows below remain
 unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 prioritizes readable study, task-local assistance and continued investigation.
@@ -88,8 +89,11 @@ still identifies the same passage. Failed loads must not overwrite the last
 valid reading state. Workspace migration validates stored state without reading
 source files; actual document loading validates the selected document.
 
-The bounded R1 delivery includes independent opening, page/zoom restoration,
-ordinary note editing, standard shortcuts and marker feedback. PDF search,
+The delivered R1 increment includes independent opening, exact-identity
+page/zoom restoration, ordinary note editing, platform-standard Open, Save,
+Find and Find-next shortcuts, explicit PDF-versus-editor focus status and marker
+feedback. Save names the editable text target even while the PDF is focused;
+Find and Find-next are visibly unavailable until an editor has focus. PDF search,
 outline, SyncTeX and text extraction are deferred beyond this handoff. Add
 navigation capabilities later when required by actual reading; an
 internal document link must not silently launch an external action. Keep
@@ -595,6 +599,10 @@ The saved work is sufficient to continue the actual attempt. A checked warrant
 and a disposition for every sentence are not prerequisites.
 
 ### 9.2 Mathematical reading and re-entry
+
+R1's PDF-plus-note workflow is implemented and technically verified. Its
+contribution to mathematical usefulness remains pending a natural reading and
+later continuation; automated and visual checks do not establish that outcome.
 
 The supplied September 14 evidence shows useful saved notes, reopened panes and
 one retained manuscript passage. The guidance came from the surrounding

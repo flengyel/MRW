@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
 from hashlib import sha256
+import math
 import os
 from pathlib import Path
 import stat
@@ -20,8 +21,12 @@ from .response_review import purpose_kind, render_response_review, select_passag
 from .source import SourceDocument
 from .tool_settings import SettingsStore, expand_arguments, launch_tool
 from .workspace import (BufferState, MAX_BUFFERS, MAX_CONTEXT_SELECTIONS,
-                        MAX_TEXT_BYTES, PaneViewState, WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
-                        anchor_preview, decode_marker, decode_pane_view, selection_span, strict_json)
+                        MAX_TEXT_BYTES, ImportedPdfState, PaneViewState, WorkMarker, Workspace,
+                        WorkspaceError, WorkspaceStore, anchor_preview, decode_imported_pdf,
+                        decode_marker, decode_pane_view, selection_span, strict_json)
+
+
+MAX_PDF_BYTES = 64 * 1024 * 1024
 
 
 @dataclass
@@ -70,6 +75,14 @@ class Buffer:
 class DirectoryEntry:
     path: Path
     directory: bool
+
+
+@dataclass(frozen=True)
+class ImportedPdfSnapshot:
+    """Detached exact bytes for one explicitly selected or restored local PDF."""
+    reference: ImportedPdfState
+    raw: bytes
+    expected: ImportedPdfState | None = None
 
 
 def record_kind(text: str) -> str | None:
@@ -295,7 +308,7 @@ class Workstation:
         if self._internal(path):
             raise WorkspaceError('Git metadata is not an editable mathematical file')
         if path.suffix.lower() in ('.pdf', '.png', '.jpg', '.jpeg', '.zip', '.olean'):
-            raise WorkspaceError('Unsupported text format; PDF build outputs use the rendered PDF view')
+            raise WorkspaceError('Unsupported text format; open PDFs through the read-only rendered PDF view')
         source = text_snapshot(path)
         kind = record_kind(source.text)
         if kind in ('model_call', 'projection'):
@@ -312,6 +325,77 @@ class Workstation:
         if kind == 'protected':
             buffer.sections += (('Retained record', 'Protected text. Open the compatible Verification/bundle pair or complete documentary package to validate it.'),)
         return buffer
+
+    def prepare_pdf(self, path: Path | None = None, *, restore=False):
+        """Read an existing PDF without creating a text buffer or build record."""
+        state = self.current()
+        expected = deepcopy(state.imported_pdf) if restore else None
+        if restore:
+            if expected is None:
+                raise WorkspaceError('No imported PDF has been selected')
+            path = Path(expected.path)
+            try:
+                if path.resolve(strict=True) != path:
+                    raise WorkspaceError('Imported PDF path was redirected; the saved reading position was not restored')
+            except OSError as exc:
+                raise WorkspaceError('Imported PDF is missing or unreadable; the work note was retained') from exc
+        elif path is None:
+            raise WorkspaceError('Select an existing local PDF')
+        else:
+            try:
+                path = path.expanduser().resolve(strict=True)
+            except OSError as exc:
+                raise WorkspaceError('Selected PDF is missing or unreadable; the work note was retained') from exc
+        if path.suffix.lower() != '.pdf':
+            raise WorkspaceError('Select a PDF document')
+        if self._internal(path):
+            raise WorkspaceError('Git metadata is not a readable mathematical document')
+        try:
+            raw = read_bounded(path, MAX_PDF_BYTES, 'PDF document')
+        except (OSError, ValueError) as exc:
+            raise WorkspaceError('PDF could not be read; the work note was retained: ' + str(exc)) from exc
+        if not raw.startswith(b'%PDF-'):
+            raise WorkspaceError('Selected file is not a PDF; the work note was retained')
+        revision = sha256(raw).hexdigest()
+        if expected is not None and (expected.path != str(path) or expected.revision != revision):
+            raise WorkspaceError('Imported PDF changed (SHA-256 mismatch); its saved page and zoom were not restored. The work note was retained')
+        current = state.imported_pdf
+        if not restore and current is not None and (current.path, current.revision) == (str(path), revision):
+            reference = deepcopy(current)
+            expected = deepcopy(current)
+        else:
+            reference = deepcopy(expected) if expected is not None else ImportedPdfState(str(path), revision)
+        return ImportedPdfSnapshot(reference, raw, expected)
+
+    def imported_pdf_snapshot(self):
+        return self.prepare_pdf(restore=True)
+
+    @staticmethod
+    def _validate_imported_pdf_snapshot(snapshot):
+        if not isinstance(snapshot, ImportedPdfSnapshot):
+            raise WorkspaceError('Invalid imported PDF snapshot')
+        decode_imported_pdf(asdict(snapshot.reference))
+        if snapshot.expected is not None:
+            decode_imported_pdf(asdict(snapshot.expected))
+        if not snapshot.raw.startswith(b'%PDF-') or sha256(snapshot.raw).hexdigest() != snapshot.reference.revision:
+            raise WorkspaceError('Imported PDF snapshot identity does not match its exact bytes')
+
+    def accept_imported_pdf(self, snapshot):
+        """Publish a GUI-validated imported PDF identity without touching text state."""
+        self._validate_imported_pdf_snapshot(snapshot)
+        state = self.current()
+        if snapshot.expected is not None and state.imported_pdf != snapshot.expected:
+            raise WorkspaceError('Imported PDF selection changed during the read; open it again')
+        previous = deepcopy((state.imported_pdf, state.pdf_source, state.pdf_visible, state.recent))
+        state.imported_pdf = deepcopy(snapshot.reference)
+        state.pdf_source = 'imported'
+        state.pdf_visible = True
+        path = snapshot.reference.path
+        state.recent = [path, *(item for item in state.recent if item != path)][:12]
+        if not self.checkpoint():
+            state.imported_pdf, state.pdf_source, state.pdf_visible, state.recent = previous
+            raise WorkspaceError('Imported PDF was readable, but its workspace checkpoint failed: ' + self.persistence_error)
+        return state.imported_pdf
 
     def _install(self, buffer, pane=None):
         workspace = self.current()
@@ -975,7 +1059,30 @@ class Workstation:
             stale.append('Selected TeX root changed')
         return report, pdf_bytes(self.build_storage, report), stale
 
-    def set_pdf_view(self, *, page, zoom, scale, visible=True):
+    def accept_generated_pdf(self, report):
+        """Select a successfully rendered retained build after Qt validates it."""
         state = self.current()
-        state.pdf_page, state.pdf_zoom, state.pdf_scale = page, zoom, scale
+        if not isinstance(report, dict) or report.get('id') != state.successful_build or not report.get('success'):
+            raise WorkspaceError('Generated PDF no longer matches the last successful build')
+        previous = state.pdf_source, state.pdf_visible
+        state.pdf_source, state.pdf_visible = 'generated', True
+        if not self.checkpoint():
+            state.pdf_source, state.pdf_visible = previous
+            raise WorkspaceError('Generated PDF was readable, but its workspace checkpoint failed: ' + self.persistence_error)
+
+    def set_pdf_view(self, *, page, zoom, scale, visible=True, source=None):
+        state = self.current()
+        source = state.pdf_source if source is None else source
+        if source not in ('generated', 'imported') or source != state.pdf_source:
+            raise WorkspaceError('PDF view changed while its position was being captured')
+        if type(page) is not int or not 0 <= page <= 100000 or zoom not in ('width', 'page', 'custom'):
+            raise WorkspaceError('Invalid PDF navigation state')
+        if type(scale) not in (int, float) or not 0.1 <= scale <= 8 or not math.isfinite(scale):
+            raise WorkspaceError('Invalid PDF scale')
+        if source == 'imported':
+            if state.imported_pdf is None:
+                raise WorkspaceError('No imported PDF is selected')
+            state.imported_pdf = replace(state.imported_pdf, page=page, zoom=zoom, scale=scale)
+        else:
+            state.pdf_page, state.pdf_zoom, state.pdf_scale = page, zoom, scale
         state.pdf_visible = visible

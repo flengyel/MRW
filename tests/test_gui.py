@@ -1,6 +1,7 @@
 """Actual PySide6 widgets, with temporary ordinary mathematical projects."""
 
 from contextlib import ExitStack
+from copy import deepcopy
 import os
 from pathlib import Path
 import shutil
@@ -11,7 +12,7 @@ from unittest.mock import patch
 
 from test_latex_build import tex_project
 from test_model_projection import model_call_document, encode
-from test_workstation import mathematical_project, verification_fixture
+from test_workstation import mathematical_project, minimal_pdf, verification_fixture
 
 
 @unittest.skipUnless(os.environ.get('THEOREM_TERMINAL_GUI_TESTS') == '1', 'set THEOREM_TERMINAL_GUI_TESTS=1 to exercise actual Qt widgets')
@@ -216,6 +217,17 @@ class GraphicalEditorTests(unittest.TestCase):
             self.wait_idle()
             self.assertEqual(opened.call_count, 1, 'Normal keyboard activation must open exactly once')
         self.assertEqual(self.controller.buffer().state.path, str(path))
+        pdf = self.root / 'navigator-reference.pdf'
+        pdf.write_bytes(minimal_pdf())
+        index = self.window.file_filter.mapFromSource(self.window.filesystem.index(str(pdf)))
+        self.assertTrue(index.isValid())
+        self.window.navigator.setCurrentIndex(index)
+        self.window.navigator.setFocus()
+        QTest.keyClick(self.window.navigator, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.assertEqual(self.window.pdf.kind, 'imported')
+        self.assertEqual(self.controller.buffer().state.path, str(path))
+        self.assertFalse(any(buffer.state.path == str(pdf) for buffer in self.controller.buffers.values()))
 
     def test_live_anchor_boundary_affinity_deletion_and_undo(self):
         from copy import deepcopy
@@ -1593,6 +1605,171 @@ w.close()
             self.assertTrue(self.errors)
             self.errors.clear()
             path.write_bytes(original)
+
+    def test_imported_pdf_note_keyboard_focus_marker_and_restart(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtGui import QKeySequence, QTextCursor
+        from PySide6.QtTest import QTest
+        from theorem_terminal.gui import qt_position
+
+        self.open_project()
+        pdf = self.root / 'reading.pdf'
+        pdf_raw = minimal_pdf()
+        pdf.write_bytes(pdf_raw)
+        pane = self.open_file(self.files['proof.md'])
+        pane.text.moveCursor(QTextCursor.MoveOperation.End)
+        pane.text.insertPlainText('\nterm one\nterm two\nA durable reading note. α\n')
+        note_id = pane.shown
+        self.assertFalse(self.window.actions['return'].isEnabled())
+        self.assertIn('Return unavailable', self.window.navigation_status.text())
+
+        for key, standard in (('open', QKeySequence.StandardKey.Open),
+                              ('save', QKeySequence.StandardKey.Save),
+                              ('find', QKeySequence.StandardKey.Find),
+                              ('find_next', QKeySequence.StandardKey.FindNext)):
+            self.assertIn(self.window.actions[key].shortcut(), QKeySequence.keyBindings(standard))
+        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(pdf), '')), \
+             patch.object(self.controller, 'build_latex', side_effect=AssertionError('ordinary PDF open built TeX')), \
+             patch('theorem_terminal.workstation.launch_tool', side_effect=AssertionError('ordinary PDF open launched a tool')):
+            pane.text.setFocus()
+            QTest.keySequence(pane.text, self.window.actions['open'].shortcut())
+            self.wait_idle()
+
+        self.assertEqual(self.controller.current().active, note_id)
+        self.assertEqual(self.window.pdf.kind, 'imported')
+        self.assertEqual(self.window.pdf.document.pageCount(), 2)
+        self.assertTrue(self.window.pdf.isVisible())
+        self.assertEqual(pdf.read_bytes(), pdf_raw)
+        self.assertIsNone(self.controller.current().successful_build)
+        self.assertFalse(any(buffer.state.path == str(pdf) for buffer in self.controller.buffers.values()))
+        self.assertTrue(self.window.pdf_has_focus())
+        self.assertFalse(self.window.actions['find'].isEnabled())
+        self.assertIn('Find unavailable', self.window.focus_status.text())
+        self.assertIn('proof.md', self.window.actions['save'].toolTip())
+
+        QTest.keySequence(self.window.pdf.view, self.window.actions['save'].shortcut())
+        self.app.processEvents()
+        self.assertIn('A durable reading note. α', self.files['proof.md'].read_text())
+        self.assertEqual(pdf.read_bytes(), pdf_raw)
+
+        pane.text.setFocus()
+        self.app.processEvents()
+        self.assertTrue(self.window.actions['find'].isEnabled())
+        cursor = pane.text.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
+        pane.text.setTextCursor(cursor)
+        with patch('theorem_terminal.gui.QInputDialog.getText', return_value=('term', True)):
+            QTest.keySequence(pane.text, self.window.actions['find'].shortcut())
+        first = pane.text.textCursor().selectionStart()
+        self.assertEqual(pane.text.textCursor().selectedText(), 'term')
+        QTest.keySequence(pane.text, self.window.actions['find_next'].shortcut())
+        self.assertEqual(pane.text.textCursor().selectedText(), 'term')
+        self.assertGreater(pane.text.textCursor().selectionStart(), first)
+
+        cursor = pane.text.textCursor()
+        cursor.setPosition(qt_position(pane.text, '3.0'))
+        cursor.setPosition(qt_position(pane.text, '3.7'), QTextCursor.MoveMode.KeepAnchor)
+        pane.text.setTextCursor(cursor)
+        self.window.actions['mark'].trigger()
+        self.assertIn('Unfinished: proof.md · 3:1', self.window.navigation_status.text())
+        self.assertIn('proof.md', self.window.actions['return'].toolTip())
+
+        self.window.pdf.goto(2)
+        self.window.pdf.zoom.setCurrentIndex(self.window.pdf.zoom.findData('custom'))
+        self.window.pdf.view.setZoomFactor(1.4)
+        self.window.pdf.capture()
+        self.window.flush()
+        self.restart_window()
+        self.assertEqual(self.window.pdf.kind, 'imported')
+        self.assertEqual(self.window.pdf.page.value(), 2)
+        self.assertEqual(self.window.pdf.zoom.currentData(), 'custom')
+        self.assertAlmostEqual(self.window.pdf.view.zoomFactor(), 1.4, places=2)
+        self.assertIn('Imported local PDF', self.window.pdf.notice.text())
+        self.assertIn('Unfinished: proof.md · 3:1', self.window.navigation_status.text())
+        self.open_file(self.files['questions.txt'])
+        self.window.actions['return'].trigger()
+        self.wait_idle()
+        self.assertEqual(self.controller.buffer().state.path, str(self.files['proof.md']))
+        self.assertEqual(self.window.active_pane().text.textCursor().selectedText(), 'Expand ')
+        for width, height in ((1280, 820), (960, 680)):
+            self.window.resize(width, height)
+            self.app.processEvents()
+            self.assertGreater(self.window.active_pane().text.width(), 200)
+            self.assertGreater(self.window.pdf.view.width(), 200)
+        self.assertFalse(self.errors)
+
+    def test_pdf_cancel_invalid_change_and_imported_generated_switching_preserve_work(self):
+        from PySide6.QtTest import QTest
+
+        self.open_project()
+        valid = self.root / 'valid.pdf'
+        invalid = self.root / 'invalid.pdf'
+        valid_raw = minimal_pdf()
+        valid.write_bytes(valid_raw)
+        invalid.write_bytes(b'%PDF-1.4\nnot a valid PDF\n')
+        pane = self.open_file(self.files['questions.txt'])
+        pane.text.insertPlainText('Durable note before a failed PDF load. ')
+        self.window.save(pane.shown)
+        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(valid), '')):
+            QTest.keySequence(pane.text, self.window.actions['open'].shortcut())
+            self.wait_idle()
+        old_document = self.window.pdf.document
+        old_identity = deepcopy(self.controller.current().imported_pdf)
+        note_text = self.controller.buffer(pane.shown).content
+
+        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=('', '')):
+            QTest.keySequence(self.window.pdf.view, self.window.actions['open'].shortcut())
+        self.app.processEvents()
+        self.assertIs(self.window.pdf.document, old_document)
+        self.assertEqual(self.controller.current().imported_pdf, old_identity)
+
+        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(invalid), '')):
+            QTest.keySequence(self.window.pdf.view, self.window.actions['open'].shortcut())
+            self.wait_idle()
+        self.assertIs(self.window.pdf.document, old_document)
+        self.assertEqual(self.window.pdf.kind, 'imported')
+        self.assertEqual(self.controller.current().imported_pdf, old_identity)
+        self.assertEqual(self.controller.buffer(pane.shown).content, note_text)
+        self.assertTrue(self.window.pdf.problem.isVisible())
+        self.assertTrue(self.errors)
+        self.errors.clear()
+
+        self.window.pdf.goto(2)
+        imported_page = self.controller.current().imported_pdf.page
+        report = {'id': '11111111-1111-1111-1111-111111111111', 'project': str(self.root),
+                  'success': True, 'tex_root': str(self.root / 'main.tex'),
+                  'dependency_coverage': 'test fixture'}
+        self.controller.accept_build(report)
+        with patch.object(self.controller, 'pdf_snapshot', return_value=(report, b'%PDF-1.4\ninvalid generated output', [])):
+            self.window.reload_pdf(source='generated')
+            self.wait_idle()
+        self.assertEqual(self.controller.current().pdf_source, 'imported')
+        self.assertIs(self.window.pdf.document, old_document)
+        self.errors.clear()
+        with patch.object(self.controller, 'pdf_snapshot', return_value=(report, minimal_pdf(1), [])):
+            self.window.reload_pdf(source='generated')
+            self.wait_idle()
+        self.assertEqual((self.controller.current().pdf_source, self.window.pdf.kind), ('generated', 'generated'))
+        self.assertEqual(self.window.pdf.report['id'], report['id'])
+        self.window.open_pdf(valid)
+        self.wait_idle()
+        self.assertEqual((self.controller.current().pdf_source, self.window.pdf.kind), ('imported', 'imported'))
+        self.assertEqual(self.window.pdf.page.value(), imported_page + 1)
+
+        self.window.flush()
+        self.assertTrue(self.window.close_project())
+        valid.write_bytes(valid_raw + b'\n% changed bytes\n')
+        self.window.open_project(self.root)
+        self.wait_idle()
+        self.assertEqual(self.controller.current().imported_pdf, old_identity.__class__(
+            old_identity.path, old_identity.revision, imported_page, old_identity.zoom, old_identity.scale))
+        self.assertIsNone(self.window.pdf.kind)
+        self.assertTrue(self.window.pdf.problem.isVisible())
+        self.assertIn('changed', self.window.pdf.problem.text())
+        restored = self.controller.view()
+        self.assertEqual(restored.content, note_text)
+        self.assertFalse(restored.dirty)
+        self.assertTrue(self.errors)
 
     @unittest.skipUnless(shutil.which('pdflatex'), 'No real TeX tool available')
     def test_actual_qtpdf_build_diagnostic_navigation_sizes_and_resumption(self):

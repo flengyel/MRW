@@ -15,7 +15,8 @@ import sys
 from PySide6.QtCore import (QBuffer, QByteArray, QDir, QIODevice, QObject, QPoint, QPointF,
                             QRunnable, QSignalBlocker, QSortFilterProxyModel, Qt,
                             QThread, QThreadPool, QTimer, Signal, Slot)
-from PySide6.QtGui import QAction, QColor, QFontDatabase, QPainter, QTextCursor, QTextDocument, QTextOption
+from PySide6.QtGui import (QAction, QColor, QFontDatabase, QKeySequence, QPainter,
+                           QTextCursor, QTextDocument, QTextOption)
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
     QDockWidget, QFileDialog, QFileSystemModel, QHBoxLayout, QInputDialog, QLabel,
     QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMenu, QMessageBox,
@@ -29,7 +30,7 @@ from .workstation import Workstation, preserve_newlines, record_kind
 from .workspace import MAX_TEXT_BYTES, WorkspaceError
 
 TITLE = 'Mathematical Research Workstation'
-FILE_FILTER = 'Mathematical files (*.tex *.lean *.sage *.py *.md *.txt *.ipynb *.json);;All files (*)'
+FILE_FILTER = 'Mathematical files (*.pdf *.tex *.lean *.sage *.py *.md *.txt *.ipynb *.json);;PDF documents (*.pdf);;All files (*)'
 
 
 class JobSignals(QObject):
@@ -618,6 +619,12 @@ class EditorPane(QWidget):
 
 class LocalPdfView(QPdfView):
     """Read-only local pages. Document links do not dispatch external actions."""
+    focused = Signal()
+
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        self.focused.emit()
+
     def mousePressEvent(self, event):
         event.accept()
 
@@ -633,7 +640,9 @@ class PdfPane(QWidget):
         super().__init__()
         self.window = window
         self.loading = False
+        self.kind = None
         self.report = None
+        self.imported = None
         self.device = None
         self.document = QPdfDocument(self)
         layout = QVBoxLayout(self)
@@ -668,50 +677,146 @@ class PdfPane(QWidget):
             zoom_row.addWidget(button)
         reload_button = QPushButton('Reload')
         reload_button.setMaximumWidth(70)
-        reload_button.clicked.connect(window.reload_pdf)
+        reload_button.clicked.connect(lambda: window.reload_pdf())
         zoom_row.addWidget(reload_button)
         layout.addLayout(zoom_row)
-        self.notice = QLabel('No successful PDF build yet.')
+        self.notice = QLabel('No PDF selected. Open an existing PDF or build trusted LaTeX explicitly.')
         self.notice.setWordWrap(True)
         self.notice.setTextFormat(Qt.TextFormat.PlainText)
         layout.addWidget(self.notice)
+        self.problem = QLabel('')
+        self.problem.setWordWrap(True)
+        self.problem.setTextFormat(Qt.TextFormat.PlainText)
+        self.problem.setStyleSheet('color: #9c381c;')
+        self.problem.hide()
+        layout.addWidget(self.problem)
         self.view = LocalPdfView()
+        self.view.setAccessibleName('Read-only local PDF')
+        self.view.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.view.setDocument(self.document)
         self.view.setPageMode(QPdfView.PageMode.SinglePage)
         self.view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
         self.view.pageNavigator().currentPageChanged.connect(self.page_changed)
         self.view.zoomFactorChanged.connect(lambda *_: self.capture())
+        self.view.focused.connect(window.update_actions)
         layout.addWidget(self.view, 1)
 
-    def show_snapshot(self, snapshot):
-        report, raw, stale = snapshot
+    def prepare_document(self, raw):
+        """Validate with Qt before replacing either reading state or view."""
+        device = QBuffer(self)
+        device.setData(QByteArray(raw))
+        device.open(QIODevice.OpenModeFlag.ReadOnly)
+        document = QPdfDocument(self)
+        document.load(device)
+        if document.status() == QPdfDocument.Status.Error or document.pageCount() < 1:
+            document.close()
+            device.close()
+            document.deleteLater()
+            device.deleteLater()
+            raise WorkspaceError('QtPdf could not render this local PDF; the work note and previous reading state were retained')
+        return document, device
+
+    @staticmethod
+    def _position(reference):
+        return reference.page, reference.zoom, reference.scale
+
+    def commit_document(self, prepared, *, kind, position, report=None, imported=None, stale=()):
+        document, device = prepared
         self.loading = True
+        old_document, old_device = self.document, self.device
         try:
-            state = self.window.controller.current()
-            self.document.close()
-            if self.device:
-                self.device.close()
-            self.device = QBuffer(self)
-            self.device.setData(QByteArray(raw))
-            self.device.open(QIODevice.OpenModeFlag.ReadOnly)
-            self.document.load(self.device)
-            if self.document.status() == QPdfDocument.Status.Error:
-                raise WorkspaceError('QtPdf could not render this retained output')
-            self.report = report
-            count = self.document.pageCount()
+            self.document, self.device = document, device
+            self.kind, self.report, self.imported = kind, report, imported
+            self.view.setDocument(document)
+            count = document.pageCount()
             self.page.setRange(1, max(1, count))
             self.total.setText(f'/ {count}')
-            self.zoom.setCurrentIndex(self.zoom.findData(state.pdf_zoom))
-            self.view.setZoomFactor(state.pdf_scale)
+            page, zoom, scale = position
+            self.zoom.setCurrentIndex(self.zoom.findData(zoom))
+            self.view.setZoomFactor(scale)
             self.zoom_changed()
-            self.goto(min(state.pdf_page + 1, max(1, count)))
-            self.set_stale(stale)
+            self.goto(min(page + 1, max(1, count)))
+            if kind == 'generated':
+                self.set_stale(stale)
+            else:
+                self.set_imported()
+            self.set_failure('')
         finally:
             self.loading = False
+        if old_document is not document:
+            old_document.close()
+            old_document.deleteLater()
+        if old_device is not None and old_device is not device:
+            old_device.close()
+            old_device.deleteLater()
         self.capture()
 
+    def show_snapshot(self, snapshot):
+        """Show the retained output of a successful explicit build."""
+        report, raw, stale = snapshot
+        try:
+            prepared = self.prepare_document(raw)
+            self.window.controller.accept_generated_pdf(report)
+            state = self.window.controller.current()
+            self.commit_document(prepared, kind='generated', report=report, stale=stale,
+                                 position=(state.pdf_page, state.pdf_zoom, state.pdf_scale))
+        except (OSError, ValueError) as exc:
+            self.set_failure(str(exc))
+            if 'prepared' in locals():
+                prepared[0].close()
+                prepared[1].close()
+            raise
+
+    def show_imported_snapshot(self, snapshot):
+        try:
+            prepared = self.prepare_document(snapshot.raw)
+            reference = self.window.controller.accept_imported_pdf(snapshot)
+            self.commit_document(prepared, kind='imported', imported=reference,
+                                 position=self._position(reference))
+        except (OSError, ValueError) as exc:
+            self.set_failure(str(exc))
+            if 'prepared' in locals():
+                prepared[0].close()
+                prepared[1].close()
+            raise
+
+    def set_imported(self):
+        if self.kind != 'imported' or self.imported is None:
+            return
+        path = Path(self.imported.path)
+        self.notice.setText(path.name + ' · Imported local PDF · read-only · PDF search unavailable in R1.')
+        self.notice.setToolTip(str(path) + '\nSHA-256: ' + self.imported.revision)
+        self.notice.setStyleSheet('color: #34475a;')
+
+    def set_failure(self, message):
+        self.problem.setText(message)
+        self.problem.setVisible(bool(message))
+
+    def clear(self):
+        self.loading = True
+        try:
+            old_document = self.document
+            self.document = QPdfDocument(self)
+            self.view.setDocument(self.document)
+            old_document.close()
+            old_document.deleteLater()
+            if self.device:
+                self.device.close()
+                self.device.deleteLater()
+            self.device = None
+            self.kind = self.report = self.imported = None
+            self.page.setRange(1, 1)
+            self.page.setValue(1)
+            self.total.setText('/ 0')
+            self.notice.setText('No PDF selected. Open an existing PDF or build trusted LaTeX explicitly.')
+            self.notice.setToolTip('')
+            self.notice.setStyleSheet('')
+            self.set_failure('')
+        finally:
+            self.loading = False
+
     def set_stale(self, paths):
-        if not self.report:
+        if self.kind != 'generated' or not self.report:
             return
         message = ('STALE · input revisions changed. Last successful output retained.' if paths
                    else 'Recorded project inputs unchanged.')
@@ -744,11 +849,15 @@ class PdfPane(QWidget):
         self.capture()
 
     def capture(self):
-        if self.loading or not self.report or not self.window.controller.workspace:
+        if self.loading or self.kind not in ('generated', 'imported') or not self.window.controller.workspace:
             return
         self.previous_button.setEnabled(self.page.value() > 1)
         self.next_button.setEnabled(self.page.value() < self.document.pageCount())
-        self.window.controller.set_pdf_view(page=self.page.value() - 1, zoom=self.zoom.currentData(), scale=max(0.1, min(8, self.view.zoomFactor())), visible=self.window.controller.current().pdf_visible)
+        self.window.controller.set_pdf_view(page=self.page.value() - 1, zoom=self.zoom.currentData(),
+            scale=max(0.1, min(8, self.view.zoomFactor())),
+            visible=self.window.controller.current().pdf_visible, source=self.kind)
+        if self.kind == 'imported':
+            self.imported = self.window.controller.current().imported_pdf
         self.window.schedule_checkpoint()
 
 
@@ -868,12 +977,19 @@ class WorkstationWindow(QMainWindow):
         self.persistence = QLabel('')
         self.persistence.setTextFormat(Qt.TextFormat.PlainText)
         self.persistence.setStyleSheet('color: #a42e20;')
+        self.focus_status = QLabel('')
+        self.focus_status.setTextFormat(Qt.TextFormat.PlainText)
+        self.navigation_status = QLabel('')
+        self.navigation_status.setTextFormat(Qt.TextFormat.PlainText)
+        self.statusBar().addPermanentWidget(self.focus_status)
+        self.statusBar().addPermanentWidget(self.navigation_status)
         self.statusBar().addPermanentWidget(self.persistence)
         self.resizeDocks([self.navigator_dock], [210], Qt.Orientation.Horizontal)
         self.resizeDocks([self.context_dock], [300], Qt.Orientation.Horizontal)
         self.resizeDocks([self.diagnostics_dock], [170], Qt.Orientation.Vertical)
         self.resizeDocks([self.selection_dock], [150], Qt.Orientation.Vertical)
         self.setStyleSheet('QToolButton, QPushButton, QComboBox, QSpinBox { min-height: 26px; } QTreeView::item, QListView::item { min-height: 26px; } QScrollBar:vertical { width: 16px; } QScrollBar:horizontal { height: 16px; } QMenu::item { padding: 7px 24px; }')
+        QApplication.instance().focusChanged.connect(self.focus_changed)
         self.render()
 
     def add_action(self, menu, key, label, callback, *, checkable=False):
@@ -906,7 +1022,7 @@ class WorkstationWindow(QMainWindow):
         self.add_action(self.view_menu, 'split', 'Split two documents', self.toggle_split, checkable=True)
         self.add_action(self.view_menu, 'wrap', 'Wrap long lines', self.toggle_wrap, checkable=True)
         self.actions['wrap'].setChecked(True)
-        self.add_action(self.view_menu, 'pdf', 'Source / PDF', self.toggle_pdf, checkable=True)
+        self.add_action(self.view_menu, 'pdf', 'Show / hide PDF', self.toggle_pdf, checkable=True)
         work = self.menuBar().addMenu('Work')
         work.setToolTipsVisible(True)
         self.add_action(work, 'mark', 'Mark unfinished work here', self.mark_selection)
@@ -920,7 +1036,7 @@ class WorkstationWindow(QMainWindow):
         latex = self.menuBar().addMenu('LaTeX')
         self.add_action(latex, 'tex_root', 'Set as TeX root', lambda: self.controller.set_tex_root())
         self.add_action(latex, 'build', 'Build LaTeX', self.build_latex)
-        self.add_action(latex, 'reload_pdf', 'Reload last successful PDF', self.reload_pdf)
+        self.add_action(latex, 'reload_pdf', 'Show last successful generated PDF', lambda: self.reload_pdf(source='generated'))
         self.add_action(latex, 'build_details', 'Inspect build provenance and logs', self.show_build_details)
         self.records_menu = self.menuBar().addMenu('Records')
         for kind, label in (('model_call', 'Open completed ModelCall…'), ('projection', 'Open exact projection…'),
@@ -932,6 +1048,12 @@ class WorkstationWindow(QMainWindow):
         self.add_action(self.tools_menu, 'jupyter', 'Open in configured Jupyter', self.open_in_jupyter)
         self.add_action(self.tools_menu, 'jupyter_config', 'Configure Jupyter/JupyterLab…', lambda: self.configure_tool('jupyter'))
         self.add_action(self.tools_menu, 'tex_config', 'Configure TeX executable…', lambda: self.configure_tool('tex_engine'))
+        for key, standard in (('open', QKeySequence.StandardKey.Open),
+                              ('save', QKeySequence.StandardKey.Save),
+                              ('find', QKeySequence.StandardKey.Find),
+                              ('find_next', QKeySequence.StandardKey.FindNext)):
+            self.actions[key].setShortcuts(QKeySequence.keyBindings(standard))
+            self.actions[key].setShortcutContext(Qt.ShortcutContext.WindowShortcut)
 
     def show_error(self, message):
         box = QMessageBox(QMessageBox.Icon.Warning, TITLE, bounded_safe_diagnostic(message), QMessageBox.StandardButton.Ok, self)
@@ -968,6 +1090,14 @@ class WorkstationWindow(QMainWindow):
 
     def active_pane(self):
         return self.panes[self.controller.current().active_pane]
+
+    def pdf_has_focus(self):
+        widget = QApplication.focusWidget()
+        return bool(widget and hasattr(self, 'pdf') and (widget is self.pdf or self.pdf.isAncestorOf(widget)))
+
+    def focus_changed(self, *_):
+        if hasattr(self, 'persistence'):
+            self.update_actions()
 
     def schedule_checkpoint(self):
         self.checkpoint_timer.start(250)
@@ -1045,6 +1175,8 @@ class WorkstationWindow(QMainWindow):
                 if pane.isVisible():
                     pane.text.finish_reflow()
                     pane.capture_position()
+            if self.pdf.isVisible():
+                self.pdf.capture()
             self.checkpoint_timer.stop()
             self.controller.current().window_size = [self.width(), self.height()]
             self.controller.checkpoint()
@@ -1060,6 +1192,8 @@ class WorkstationWindow(QMainWindow):
             document.sync_anchors()
         buffer = self.controller.buffer() if state and state.active else None
         busy = any(not job.background for job in self.jobs.values())
+        pdf_focused = self.pdf_has_focus()
+        text_focused = not pdf_focused
         for key, action in self.actions.items():
             action.setEnabled(not busy)
         for key in ('open', 'reference', 'new', 'split', 'close_project', 'model_call', 'projection', 'verification', 'documentary_package'):
@@ -1067,20 +1201,21 @@ class WorkstationWindow(QMainWindow):
         for key in ('project', 'quit'):
             self.actions[key].setEnabled(not self.jobs)
         self.actions['close_project'].setEnabled(state is not None and not self.jobs)
-        for key in ('save', 'external', 'undo', 'redo', 'cut', 'paste'):
-            self.actions[key].setEnabled(bool(buffer and buffer.editable) and not busy)
+        self.actions['save'].setEnabled(bool(buffer and buffer.editable) and not busy)
+        for key in ('external', 'undo', 'redo', 'cut', 'paste'):
+            self.actions[key].setEnabled(bool(text_focused and buffer and buffer.editable) and not busy)
         for key in ('save_as', 'refresh', 'compare', 'close', 'find', 'find_next', 'line', 'copy', 'selectAll', 'mark'):
-            self.actions[key].setEnabled(bool(buffer and buffer.loaded) and not busy)
-        self.actions['save_as'].setEnabled(bool(buffer and buffer.loaded and buffer.state.format == 'text' and not record_kind(buffer.content)) and not busy)
-        self.actions['external'].setEnabled(bool(buffer and buffer.editable and buffer.state.path) and not busy)
-        self.actions['jupyter'].setEnabled(bool(buffer and buffer.state.format == 'notebook' and not buffer.state.external) and not busy)
-        self.actions['tex_root'].setEnabled(bool(buffer and buffer.editable and buffer.state.path and Path(buffer.state.path).suffix.lower() == '.tex') and not busy)
+            self.actions[key].setEnabled(bool(text_focused and buffer and buffer.loaded) and not busy)
+        self.actions['save_as'].setEnabled(bool(text_focused and buffer and buffer.loaded and buffer.state.format == 'text' and not record_kind(buffer.content)) and not busy)
+        self.actions['external'].setEnabled(bool(text_focused and buffer and buffer.editable and buffer.state.path) and not busy)
+        self.actions['jupyter'].setEnabled(bool(text_focused and buffer and buffer.state.format == 'notebook' and not buffer.state.external) and not busy)
+        self.actions['tex_root'].setEnabled(bool(text_focused and buffer and buffer.editable and buffer.state.path and Path(buffer.state.path).suffix.lower() == '.tex') and not busy)
         from .latex_build import build_supported
         self.actions['build'].setEnabled(bool(state and state.tex_root) and not busy and build_supported())
         self.actions['build'].setToolTip('Explicit trusted-TeX build' if build_supported()
             else 'TeX building is unavailable on this platform; Linux/WSL2 process supervision is required')
-        for key in ('pdf', 'reload_pdf'):
-            self.actions[key].setEnabled(bool(state and state.successful_build) and not busy)
+        self.actions['pdf'].setEnabled(bool(state and (state.successful_build or state.imported_pdf)) and not busy)
+        self.actions['reload_pdf'].setEnabled(bool(state and state.successful_build) and not busy)
         self.actions['build_details'].setEnabled(bool(state and state.last_build) and not busy)
         for key in ('return', 'clear_marker'):
             self.actions[key].setEnabled(bool(state and state.marker) and not busy)
@@ -1088,6 +1223,22 @@ class WorkstationWindow(QMainWindow):
         self.actions['return'].setToolTip(
             f'{marker.path} · {displayed_position(marker.start)}'
             + (' · ' + self.anchor_status(marker) if self.anchor_status(marker) else '') if marker else 'No unfinished work marked')
+        self.actions['find'].setToolTip('PDF search is unavailable in R1; focus an editor to search text.' if pdf_focused else 'Find literal text in the focused editor')
+        self.actions['find_next'].setToolTip(self.actions['find'].toolTip())
+        target = self.buffer_name(buffer.state.id) if buffer and buffer.editable else 'no editable text target'
+        self.actions['save'].setToolTip('Save editable target: ' + target)
+        self.focus_status.setText(('PDF focus · Find unavailable · ' if pdf_focused else '') + 'Save → ' + target)
+        self.focus_status.setToolTip('PDFs are read-only. Save always addresses the named editable text buffer.')
+        if marker:
+            path = Path(marker.path)
+            label = str(path.relative_to(Path(state.root))) if path.is_relative_to(Path(state.root)) else str(path)
+            marker_message = 'Unfinished: ' + label + ' · ' + displayed_position(marker.start)
+            status = self.anchor_status(marker)
+            self.navigation_status.setText(marker_message + (' · ' + status if status else ''))
+            self.navigation_status.setToolTip(self.actions['return'].toolTip())
+        else:
+            self.navigation_status.setText('Return unavailable — no unfinished work marked')
+            self.navigation_status.setToolTip('Use Work → Mark unfinished work here in an ordinary text file.')
         with QSignalBlocker(self.actions['split']):
             self.actions['split'].setChecked(bool(state and state.split))
         with QSignalBlocker(self.actions['pdf']):
@@ -1119,7 +1270,7 @@ class WorkstationWindow(QMainWindow):
         state = self.controller.workspace
         ready = state is not None and not self.jobs
         pane = self.active_pane() if state else None
-        self.actions['context_add'].setEnabled(bool(ready and pane.text.textCursor().hasSelection()
+        self.actions['context_add'].setEnabled(bool(ready and not self.pdf_has_focus() and pane.text.textCursor().hasSelection()
             and self.controller.context_selection_supported(pane.shown)))
         selected = bool(ready and 0 <= self.selection_list.currentRow() < len(state.selection_shelf))
         for key, button in self.context_buttons.items():
@@ -1244,8 +1395,12 @@ class WorkstationWindow(QMainWindow):
         self.render()
         if self.controller.current().last_build:
             self.submit(self.controller.build_report, self.show_build_result)
-        if self.controller.current().pdf_visible and self.controller.current().successful_build:
-            self.reload_pdf()
+        if self.controller.current().pdf_visible:
+            state = self.controller.current()
+            if state.pdf_source == 'imported' and state.imported_pdf:
+                self.reload_pdf(source='imported')
+            elif state.pdf_source == 'generated' and state.successful_build:
+                self.reload_pdf(source='generated')
 
     def open_tree_file(self, index):
         original = self.file_filter.mapToSource(index)
@@ -1258,6 +1413,8 @@ class WorkstationWindow(QMainWindow):
         if not path:
             return
         path = Path(path)
+        if path.suffix.lower() == '.pdf':
+            return self.open_pdf(path)
         pane = self.controller.current().active_pane
         def install(buffer):
             installed = self.controller._install(buffer, pane)
@@ -1277,6 +1434,19 @@ class WorkstationWindow(QMainWindow):
                 self.render()
                 return
         self.submit(lambda: self.controller.prepare_file(path, reference=reference), install)
+
+    def open_pdf(self, path):
+        def install(snapshot):
+            first = self.pdf.kind is None
+            self.pdf.show_imported_snapshot(snapshot)
+            self.pdf.show()
+            if first:
+                self.center.setSizes([650, 550])
+            self.pdf.view.setFocus()
+            self.update_actions()
+        def failed(error):
+            self.pdf.set_failure(error)
+        self.submit(lambda: self.controller.prepare_pdf(Path(path)), install, failed)
 
     def new_file(self):
         self.controller.new_buffer()
@@ -1400,8 +1570,8 @@ class WorkstationWindow(QMainWindow):
             self.controller.close_project(keep_recovery=True)
         except WorkspaceError:
             return self.failed_close()
-        self.pdf.document.close()
-        self.pdf.report = None
+        self.pdf.clear()
+        self.pdf.hide()
         self.diagnostics_dock.hide()
         self.context_dock.hide()
         self.filesystem.setRootPath('')
@@ -1551,6 +1721,7 @@ class WorkstationWindow(QMainWindow):
         cursor = pane.text.textCursor()
         self.controller.mark(pane.shown, cursor_index(pane.text, cursor.selectionStart()), cursor_index(pane.text, cursor.selectionEnd()))
         self.anchor_errors.pop(self.anchor_key(self.controller.current().marker), None)
+        self.update_actions()
 
     def return_to_marker(self):
         self.open_navigation()
@@ -1655,7 +1826,7 @@ class WorkstationWindow(QMainWindow):
             self.controller.accept_build(report)
             self.show_build_result(report)
             if report['success']:
-                self.reload_pdf()
+                self.reload_pdf(source='generated')
             elif self.pdf.report:
                 from .latex_build import stale_inputs
                 self.submit(lambda: stale_inputs(self.pdf.report), self.pdf.set_stale)
@@ -1688,15 +1859,27 @@ class WorkstationWindow(QMainWindow):
                 return
             self.perform(lambda: self.open_file(path, line=item['line']))
 
-    def reload_pdf(self):
+    def reload_pdf(self, *, source=None):
+        state = self.controller.current()
+        source = source or state.pdf_source
+        first = self.pdf.kind is None
         def accepted(snapshot):
-            self.controller.current().pdf_visible = True
+            if source == 'imported':
+                self.pdf.show_imported_snapshot(snapshot)
+            else:
+                self.pdf.show_snapshot(snapshot)
             self.pdf.show()
-            if not self.pdf.report:
-                self.center.setSizes([500, 650])
-            self.pdf.show_snapshot(snapshot)
+            if first:
+                self.center.setSizes([650, 550])
             self.update_actions()
-        self.submit(self.controller.pdf_snapshot, accepted)
+        def failed(error):
+            self.pdf.set_failure(error)
+            if self.controller.workspace and self.controller.current().pdf_visible:
+                self.pdf.show()
+                if first:
+                    self.center.setSizes([650, 550])
+        task = self.controller.imported_pdf_snapshot if source == 'imported' else self.controller.pdf_snapshot
+        self.submit(task, accepted, failed)
 
     def set_facets(self, sections):
         container = QWidget()

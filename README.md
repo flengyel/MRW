@@ -9,8 +9,8 @@ serialized record identities retain their existing technical names.
 
 For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
-The next task is the bounded R1 PDF-plus-note implementation; R2 adds direct
-mathematical assistance and R3 adds correction and continued investigation.
+R1's PDF-plus-note workflow is delivered. The next task is R2's bounded direct
+mathematical-assistance exchange; R3 adds correction and continued investigation.
 
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
@@ -117,22 +117,25 @@ resumption. Research sources, limitations and concrete acceptance criteria are
 recorded there. Formal correspondence and warrants remain integral and optional
 during study; their independent evaluation does not gate these priorities.
 
-The next deliverable is existing local PDF reading beside a work note without
-a TeX build, with preserved reading position and standard application shortcuts.
-These are planned changes. Current PDF viewing is tied to successful builds;
-application Open/Save/Find actions lack explicit standard shortcut bindings,
-although inherited text-edit shortcuts can work. The GUI can inspect completed
-ModelCalls but cannot yet initiate a mathematical question.
+R1 is implemented: an existing local PDF opens read-only through ordinary Open
+or the project navigator beside an editable work note, without TeX source or a
+compiler. Its exact path/digest identity and page/zoom are retained separately
+from generated-build provenance and restored with the note. Open, Save, Find and
+Find-next have platform-standard shortcuts and explicit focus behavior. The GUI
+can inspect completed ModelCalls but cannot yet initiate a mathematical question;
+that task-local exchange is the next R2 deliverable.
 
 
 The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
 Directory** displays the actual directory tree lazily. Ordinary mathematical
-files open in editable buffers; external references are read-only. The implemented
-workflow covers LaTeX source, explicit root selection and build, a rendered PDF
-beside the source, navigable file-and-line diagnostics, and resumption at a marked
-passage. It has been exercised with an unrelated mathematical project and the
-real Categorical Rice–Shapiro manuscript. No mathematical questionnaire precedes
-work, and typesetting success supplies no mathematical verification.
+files open in editable buffers; external references and PDFs are read-only. The
+implemented workflow covers an existing PDF beside an ordinary note, LaTeX
+source, explicit root selection and build, generated PDF output, navigable
+file-and-line diagnostics, and resumption at a marked passage. It has been
+exercised with ordinary test projects; the broader editor/build workflow has
+also been exercised with the real Categorical Rice–Shapiro manuscript. No
+mathematical questionnaire precedes work, and typesetting success supplies no
+mathematical verification.
 
 Mutable session state and recovery of the latest completed checkpoint live outside the project
 in user-local application storage. Opening, viewing and closing a project do not
@@ -153,9 +156,10 @@ checker, issuing a new Verification or inferring a human decision.
 Projects, navigation and persistence are corpus-independent. Startup, restoration
 and viewing run no external program and make no network or provider call. Build,
 external-editor and notebook handoff actions require direct user action. This GUI
-directly provides ordinary-file editing, external-editor and Jupyter handoff,
-out-of-tree staged LaTeX builds, PDF rendering, checkpoint recovery and retained-record
-inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+directly provides ordinary-file editing, existing local PDF reading,
+external-editor and Jupyter handoff, out-of-tree staged LaTeX builds,
+generated-PDF rendering, checkpoint recovery and retained-record inspection.
+Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows remain
 unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
 material; focused questions and prerequisite lookup need not repeat it.
@@ -314,9 +318,24 @@ new project file and refuses an existing destination. External references remain
 read-only, with Save As available for an explicit new project copy. Refresh and
 comparison preserve dirty text until the user explicitly saves or discards it.
 
+A `.pdf` selected through **File → Open**, Recent files, or the project
+navigator opens in the read-only QtPdf pane beside the current editable note.
+This path needs neither TeX source nor a compiler and never creates a text
+buffer, recovery snapshot, text anchor, build report or mathematical
+Verification. The imported PDF's canonical path, SHA-256 identity, page and
+zoom are retained independently of the last generated build. Reload and restart
+require the same exact bytes before restoring its location. A missing,
+unreadable, invalid or changed PDF is reported visibly while the note and the
+last valid reading state remain intact. Explicitly opening changed bytes starts
+a new imported-document identity at the first page.
+
 Open, Save, Save As, Refresh from disk, Find, Go to line, Split and Close buffer
-are available through menus. Each pane has a buffer selector and visible saved,
-modified, read-only, external-change or conflict state. **View → Split** allows
+are available through menus. Open, Save, Find and Find-next also use the
+platform-standard key bindings displayed there. With PDF focus, text Find and
+Find-next are disabled and the status bar says PDF search is unavailable; Save
+continues to name and address the current editable text target, never the PDF.
+Focus an editor to search its text. Each pane has a buffer selector and visible
+saved, modified, read-only, external-change or conflict state. **View → Split** allows
 two source or record buffers, or two passages of one shared file with independent
 cursor, selection and scroll positions. Both views share one editable document,
 modified state, undo/redo history and private recovery. Edits adjust the other
@@ -354,8 +373,9 @@ anchor and both editors in place. No similar-text search or relocation occurs.
 
 **Work → Mark unfinished work here**, **Return to unfinished work**, and **Clear
 unfinished marker** maintain the independent single unfinished-work location.
-Return identifies that location in its tooltip and validates it before moving
-either editor. In loaded editable ordinary text, both aids follow edits through
+The status bar immediately shows the marked path and location; with no marker it
+states why Return is unavailable. Return also identifies that location in its
+tooltip and validates it before moving either editor. In loaded editable ordinary text, both aids follow edits through
 the workstation's shared document and undo/redo history, independently of pane
 selections. Insertions at either boundary of a nonempty passage stay outside it;
 a point marker advances when text is inserted at its continuation point.
@@ -369,14 +389,15 @@ opening fails without navigation or a replacement revision.
 Neither aid requires a descriptive form. Shelf entries are private local
 navigation anchors only, not provenance, citations, warrant records or
 mathematical-object identities, and nothing is automatically sent to a model.
-Versions 3–6 migrate to version 7 at the next atomic checkpoint without reading
-source files. Migrated anchors have empty previews until explicitly opened or
+Versions 3–7 migrate to version 8 at the next atomic checkpoint without reading
+source files. Version 7 gains empty imported-PDF state and retains its generated
+PDF position. Migrated anchors have empty previews until explicitly opened or
 retained again. Versions 3–5 default to their historical wrapped display;
 version 6 preserves its wrap setting. Version 3 gains an empty shelf; existing
 shelves are retained, keeping the first anchor when canonicalization makes old
 spellings equivalent. Legacy positions preserve the historically rendered
-selection in independent pane views. Recovery, unfinished marker, split, PDF,
-build and window state are preserved.
+selection in independent pane views. Recovery, unfinished marker, split,
+generated PDF, build and window state are preserved.
 
 State, trusted tool settings, build outputs and private recovery are stored under:
 
@@ -440,12 +461,16 @@ snapshots bounded ordinary project inputs into user-local storage and runs there
 keeping generated auxiliary and bibliography files outside the project. Opening or viewing a source never copies
 it or initiates a build.
 
-The source/PDF view provides previous/next page, a page number, fit width, fit
-page, zoom and reload. A failed build retains the last successful PDF. A changed
-recorded input revision, dirty input buffer or different root marks that output
-stale. Root, source position, PDF page, zoom and source/PDF visibility survive
-restart. Build diagnostics occupy a separate view; activating a file-and-line
-entry opens that project file at the reported line.
+The text/PDF view provides previous/next page, a page number, fit width, fit page,
+zoom and reload for both imported and generated PDFs. Imported identity and
+position remain separate from generated output and its build report. Opening the
+same exact imported PDF restores its position; **LaTeX → Show last successful
+generated PDF** switches back to generated output without discarding the
+imported location. A failed build retains the last successful generated PDF. A
+changed recorded input revision, dirty input buffer or different root marks that
+output stale. Root, source position, both PDF positions and PDF visibility
+survive restart. Build diagnostics occupy a separate view; activating a
+file-and-line entry opens that project file at the reported line.
 
 Build provenance is captured from the action: executable and version, exact
 arguments, working directory, times, stdout, stderr, exit code, log and output
@@ -468,9 +493,10 @@ full-response viewing. **Retain displayed exact passage** uses the existing UTF-
 service. Viewing or cancelling creates no record. Context facets keep provenance,
 admission, contextual derivability and mathematical verification separate.
 
-The current increment has been exercised on Linux/WSL, including a disposable
-project on `/mnt/c`, real TeX and Vim, actual Qt widgets, and desktop sizes
-1280×820 and 960×680. Qt/runtime and TeX installation prerequisites depend on
+The desktop has been exercised on Linux/WSL with real TeX and Vim and,
+historically, a disposable project on `/mnt/c`. R1's existing-PDF path was
+exercised without TeX beside a saved note using actual Qt widgets at 1280×820
+and 960×680. Qt/runtime and TeX installation prerequisites depend on
 the platform and distribution. Native Windows and macOS GUI operation has not
 been exercised; **TeX building is unavailable there in this tranche**. Build
 supervision uses Linux/WSL2 subreaping and /proc to terminate and reap descendants,
@@ -485,7 +511,7 @@ old experimental project-local state are not automatic.
 Ordinary UTF-8 text and notebooks are limited to 2 MiB, with up to 128 open buffer
 references. Reads of visible documents are deferred and bounded. Standard relative
 TeX inputs are staged with a 4096-file/256 MiB inventory limit; individual build
-inputs and PDFs are limited to 64 MiB. Each tool invocation is monitored for
+inputs, generated PDFs and imported PDFs are limited to 64 MiB. Each tool invocation is monitored for
 1024 generated entries and 128 MiB of generated data, including non-stdio
 auxiliaries and replaced staged inputs. Output scans run on the 20 ms polling
 loop and prune staged-input descendants, which are scanned on a slower one-second
@@ -497,8 +523,9 @@ and tools, not confinement.
 A quota failure stops descendants, removes that invocation's staged/generated
 files and retains at most 64 KiB of each diagnostic stream plus its bounded
 report. Missing, oversized and unsupported files
-produce visible errors. Custom build recipes, staging external/symlink dependencies,
-SyncTeX, complete TeX-log interpretation, automatic build-history cleanup,
+produce visible errors. Custom build recipes, PDF search and outlines,
+extraction/OCR, staging external/symlink dependencies, SyncTeX, complete TeX-log
+interpretation, automatic build-history cleanup,
 language servers, notebook execution and GUI checker invocation are outside this
 increment. Installed TeX packages are not a frozen reproducible environment.
 

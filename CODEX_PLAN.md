@@ -1,15 +1,15 @@
 # CODEX_PLAN.md
 
-Active product roadmap, reviewed 2026-09-17 against application commit
-`4b68c0986748e3c5db6568e41f8605257425a9ba`, the supplied September 13–14 session
-reports, and the research below. It inherits the information-class invariants
-in `DOMAIN_MODEL.md` and the purpose in `VISION.md`.
+Active product roadmap, reviewed 2026-09-17 against the delivered R1
+implementation, the supplied September 13–14 session reports, and the research
+below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
+purpose in `VISION.md`.
 
 ## Active roadmap: mathematical usefulness first
 
 **Assessment: the project is not yet on track for its intended user outcomes.**
-It has a reusable editor, build/render path, durable recovery, navigation
-anchors and exact retained-record services. It has not demonstrated a useful
+It has a reusable editor, independent local-PDF and build/render paths, durable
+recovery, navigation anchors and exact retained-record services. It has not demonstrated a useful
 in-application mathematical assistance exchange or research collaboration.
 Continue from this foundation; do not restart the architecture.
 
@@ -26,8 +26,8 @@ actual warrant question.
 | Area | Evidence at review | Product implication |
 |---|---|---|
 | Preservation and navigation | Implemented recovery and live anchors; the supplied September 14 report and screenshot show a saved note, two reopened panes and one persisted manuscript shelf entry | Preserve these services and their regression coverage; stop treating another anchor demonstration as the main product milestone |
-| Readable mathematics | QtPdf displays successful trusted TeX builds, but the GUI has no independent existing-PDF opening, PDF search or outline; its PDF view consumes mouse events | Ordinary literature reading is incomplete. Reuse the renderer and remove the build prerequisite for existing PDFs |
-| Routine operation | Application actions have no explicit standard shortcut bindings; inherited editor shortcuts can still work | Add discoverable Open, Save, Find and Find-next actions using platform conventions, and visible marker/Return feedback |
+| Readable mathematics | R1 opens an exact-identity local PDF independently of TeX beside an editable note and restores page/zoom; PDF search and outline remain absent | The minimum literature-reading entry point is delivered. Observe real use before adding deferred reader features |
+| Routine operation | R1 binds platform-standard Open, Save, Find and Find-next, makes PDF-versus-text focus explicit, and shows marker/Return status | Preserve these behaviors while R2 adds one task-local question action |
 | Study benefit | The September 14 session saved useful purpose, definition and near-product notes; explanatory guidance came from the surrounding assistant interaction | This supports the value of the study activity, not a delivered workstation guidance feature |
 | AI collaboration | A bounded provider adapter and retained-response inspector exist; the GUI cannot initiate a mathematical question | Deliver the missing user interaction before expanding record or formal machinery |
 | Re-entry evidence | Five-anchor evaluation was incomplete; marker creation was unconfirmed; the original historical note was unavailable | No anchor defect, crash, mislanding or historical reduction is established. Use a fresh prospective continuation test |
@@ -35,8 +35,9 @@ actual warrant question.
 The failed prescribed sessions are evidence about the product and evaluation
 design, not a failure by the human participant. Starting at a local lifting
 lemma without adequate orientation and excluding rendered reading from a
-study session both obscured the intended use. Existing PDF rendering must be
-credited accurately; it still needs a practical literature-reading entry point.
+study session both obscured the intended use. R1 now supplies the practical
+literature-reading entry point; its contribution to mathematical work has not
+yet been observed.
 
 ### Research basis and limits
 
@@ -66,18 +67,16 @@ not claims of implemented capability or promises about calendar dates.
 | R3 — Continue an investigation | Support an explicit linked follow-up, correction or alternative approach; preserve the current question, conclusions, unresolved issue and selected evidence; resume later | A continued proof, counterexample, hypothesis comparison or exposition survives interruption, and the assistant's contribution and corrections remain distinguishable |
 | Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3 justifies each addition; evaluate each on its own terms |
 
-**Next implementation deliverable: R1's existing-PDF-plus-note workflow.**
-Keep ordinary source editing and the existing trusted TeX build path. An
-existing PDF is a read-only document with its own identity and position; opening
-it must not require TeX source, a compiler or invented build provenance.
-Preserve the work note while navigating and make switching back inexpensive.
-Use an explicit user-selected durable project; disposable test copies are
-appropriate for destructive verification, not the user's only surviving work.
+**Next implementation deliverable: R2's task-local assistance exchange.**
+R1 is delivered: ordinary Open and navigator actions route an existing PDF to
+the read-only QtPdf pane without a build; its canonical path, exact digest and
+page/zoom are distinct from generated-build provenance and text state. Failed,
+missing, invalid or changed loads retain the note and last valid reading state.
+Platform-standard Open, Save, Find and Find-next have explicit focus behavior,
+and marker/Return status is visible. Controller and actual-widget checks cover
+the implementation; mathematical usefulness remains pending observation.
 
-Complete R1 in bounded increments. First deliver independent PDF opening,
-source/note comparison, position restoration, standard Open/Save/Find/Find-next
-bindings and the small marker-feedback improvement. Once this minimum works,
-move to R2. PDF search, outline and richer
+Keep the R1 cut line while implementing R2. PDF search, outline and richer
 internal navigation wait unless their absence demonstrably blocks the chosen
 task. Internal document navigation must not silently dispatch external URLs,
 files or commands. Exact source/PDF mapping
@@ -132,8 +131,8 @@ current bounded task and must be advanced when that task is delivered.
 
 | Milestone | Implementation status at 2026-09-17 | Product evidence |
 |---|---|---|
-| R1 | Next implementation task; independent PDF opening and explicit standard application shortcuts are not implemented | Existing editor/recovery evidence only; PDF-plus-note study remains to be observed |
-| R2 | Planned after R1's minimum working delivery; adapter and response inspection are reusable foundations | No in-application assistance exchange demonstrated |
+| R1 | Implemented and technically verified: independent exact-identity PDF opening, separate imported/generated positions, durable note restoration, standard shortcuts and visible marker/focus status | A natural PDF-plus-note study and later continuation remain to be observed; usefulness is pending |
+| R2 | Next implementation task; adapter and response inspection are reusable foundations, but the GUI question/preview/send/answer workflow is absent | No in-application assistance exchange demonstrated |
 | R3 | Planned after the first assistance workflow | No in-application research collaboration demonstrated |
 
 Keep implementation delivery, automated/visual verification and observed
@@ -142,7 +141,7 @@ can be delivered while user observation remains pending. That pending observatio
 does not block the next authorized R1–R3 increment. It does block claims that
 the product has demonstrated usefulness or readiness to expand beyond R1–R3.
 
-For the next R1 task, use these bounded decisions:
+The delivered R1 boundary is:
 
 - Route a PDF selected through ordinary Open or the project navigator to the
   existing QtPdf view, read-only, beside an editable ordinary work note. Preserve
@@ -165,11 +164,11 @@ For the next R1 task, use these bounded decisions:
   supported historical migrations, recovery, pane positions, wrap preference
   and anchors. Migration must not read source files or fabricate build records.
 
-R1 ends with the above working through actual GUI actions, meaningful controller
-and Qt regressions, a visible PDF/note exercise at both supported review sizes,
-and updated status and handoff documents. PDF search, outline, SyncTeX, text
-extraction, AI requests and broader reader redesign are outside this task.
-Move next to R2; add a deferred reader capability earlier only if a demonstrated
+R1 ended with the above working through actual GUI actions, meaningful
+controller and Qt regressions, a visible PDF/note exercise at both supported
+review sizes, and updated status and handoff documents. PDF search, outline,
+SyncTeX, text extraction and broader reader redesign remain deferred. Move next
+to R2; add a deferred reader capability earlier only if a demonstrated
 obstruction makes it necessary.
 
 ### Evaluation and drift control
@@ -353,9 +352,10 @@ Commit `d82685f7b28e26f9502827e5f3bcd6f5f9d9a4ee` recorded the seven modified
 and eleven added GUI/LaTeX paths on `main`. All committed paths have Git mode
 `100644`; DrvFS working-tree modes do not determine Git index modes.
 
-The GUI directly provides ordinary-file editing, external-editor and Jupyter
-handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
-inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+The GUI directly provides ordinary-file editing, existing local PDF reading,
+external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
+rendering, checkpoint recovery and retained-record inspection. Proof-assistant,
+computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows remain
 unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
 material; focused questions and prerequisite lookup may begin directly.

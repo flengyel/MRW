@@ -43,6 +43,30 @@ def mathematical_project(root):
     return result
 
 
+def minimal_pdf(pages=2):
+    """Small valid local PDF fixture; no TeX source or compiler is involved."""
+    stream = b'q\nQ\n'
+    objects = [b'<< /Type /Catalog /Pages 2 0 R >>']
+    page_ids = [3 + 2 * index for index in range(pages)]
+    objects.append(('<< /Type /Pages /Kids [' + ' '.join(f'{item} 0 R' for item in page_ids)
+                    + f'] /Count {pages} >>').encode())
+    for page_id in page_ids:
+        objects.extend([
+            f'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents {page_id + 1} 0 R >>'.encode(),
+            b'<< /Length %d >>\nstream\n' % len(stream) + stream + b'endstream',
+        ])
+    raw = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'
+    offsets = []
+    for number, body in enumerate(objects, 1):
+        offsets.append(len(raw))
+        raw += f'{number} 0 obj\n'.encode() + body + b'\nendobj\n'
+    xref = len(raw)
+    raw += f'xref\n0 {len(objects) + 1}\n'.encode() + b'0000000000 65535 f \n'
+    raw += b''.join(f'{offset:010d} 00000 n \n'.encode() for offset in offsets)
+    return raw + (f'trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n'
+                  f'startxref\n{xref}\n%%EOF\n').encode()
+
+
 def historical_workspace(root, version):
     """Literal v3/v4 wire data; never generated from the current dataclasses."""
     path = str(root / 'proof.md')
@@ -225,6 +249,102 @@ for command in sys.stdin:
         self.assertEqual(before, self.snapshot())
         self.assertFalse((self.root / '.theorem-terminal').exists())
         self.assertFalse(self.manifest.is_relative_to(self.root))
+
+    def test_imported_pdf_is_a_separate_identity_and_restores_with_the_work_note(self):
+        pdf = self.root / 'reference.pdf'
+        raw = minimal_pdf()
+        pdf.write_bytes(raw)
+        note = self.controller.open_file(self.files['proof.md'])
+        changed_note = note.content + '\nA durable explanation beside the reference. α\n'
+        self.controller.edit(note.state.id, changed_note)
+        before_buffers = list(self.controller.buffers)
+        with patch.object(self.controller, 'build_latex', side_effect=AssertionError('PDF open invoked TeX')), \
+             patch('theorem_terminal.workstation.launch_tool', side_effect=AssertionError('PDF open invoked an external action')):
+            snapshot = self.controller.prepare_pdf(pdf)
+            reference = self.controller.accept_imported_pdf(snapshot)
+        self.assertEqual(pdf.read_bytes(), raw)
+        self.assertEqual(list(self.controller.buffers), before_buffers)
+        self.assertEqual(self.controller.buffer(note.state.id).content, changed_note)
+        self.assertEqual((reference.path, reference.revision), (str(pdf), sha256(raw).hexdigest()))
+        self.assertIsNone(self.controller.current().successful_build)
+        self.assertEqual(self.controller.current().pdf_source, 'imported')
+        self.controller.set_pdf_view(page=1, zoom='custom', scale=1.6, source='imported')
+        self.controller.close_project(keep_recovery=True)
+
+        restored = self.restored()
+        self.assertFalse(any(buffer.loaded for buffer in restored.buffers.values()))
+        imported = restored.current().imported_pdf
+        self.assertEqual((imported.path, imported.revision, imported.page, imported.zoom, imported.scale),
+                         (str(pdf), sha256(raw).hexdigest(), 1, 'custom', 1.6))
+        self.assertEqual(restored.imported_pdf_snapshot().raw, raw)
+        self.assertEqual(restored.view(note.state.id).content, changed_note)
+        self.assertTrue(restored.buffer(note.state.id).dirty)
+        self.assertEqual(pdf.read_bytes(), raw)
+
+    def test_missing_changed_and_failed_imported_pdf_reads_keep_note_and_last_identity(self):
+        pdf = self.root / 'reference.pdf'
+        original = minimal_pdf()
+        pdf.write_bytes(original)
+        note = self.controller.open_file(self.files['questions.txt'])
+        self.controller.edit(note.state.id, note.content + 'Retain this work note.\n')
+        self.controller.accept_imported_pdf(self.controller.prepare_pdf(pdf))
+        self.controller.set_pdf_view(page=1, zoom='page', scale=.8, source='imported')
+        expected = deepcopy(self.controller.current().imported_pdf)
+        note_text = note.content
+
+        changed = original + b'\n% changed exact identity\n'
+        pdf.write_bytes(changed)
+        with self.assertRaisesRegex(WorkspaceError, 'changed.*work note'):
+            self.controller.imported_pdf_snapshot()
+        self.assertEqual(self.controller.current().imported_pdf, expected)
+        self.assertEqual(note.content, note_text)
+        replacement = self.controller.prepare_pdf(pdf)
+        self.assertEqual((replacement.reference.page, replacement.reference.zoom, replacement.reference.scale),
+                         (0, 'width', 1.0))
+        self.assertIsNone(replacement.expected)
+
+        pdf.unlink()
+        with self.assertRaisesRegex(WorkspaceError, 'missing or unreadable'):
+            self.controller.imported_pdf_snapshot()
+        self.assertEqual(self.controller.current().imported_pdf, expected)
+        self.assertEqual(note.content, note_text)
+        with patch('theorem_terminal.workstation.read_bounded', side_effect=OSError('permission denied')):
+            pdf.write_bytes(original)
+            with self.assertRaisesRegex(WorkspaceError, 'work note was retained'):
+                self.controller.prepare_pdf(pdf)
+        self.assertEqual(self.controller.current().imported_pdf, expected)
+
+    def test_version_seven_migration_and_imported_pdf_schema_are_strict_and_source_free(self):
+        pdf = self.root / 'reference.pdf'
+        raw = minimal_pdf()
+        pdf.write_bytes(raw)
+        self.controller.accept_imported_pdf(self.controller.prepare_pdf(pdf))
+        self.controller.set_pdf_view(page=1, zoom='custom', scale=1.25, source='imported')
+        current = json.loads(encode_workspace(self.controller.current()))
+        old = {key: value for key, value in current.items() if key not in ('pdf_source', 'imported_pdf')}
+        old['schema_version'] = 7
+        with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read a source')):
+            migrated = decode_workspace(encode(old))
+        self.assertEqual((migrated.pdf_source, migrated.imported_pdf), ('generated', None))
+        self.assertEqual((migrated.pdf_page, migrated.pdf_zoom, migrated.pdf_scale),
+                         (current['pdf_page'], current['pdf_zoom'], current['pdf_scale']))
+
+        malformed = [
+            {'pdf_source': 'other'},
+            {'pdf_source': 'imported', 'imported_pdf': None},
+            {'imported_pdf': {**current['imported_pdf'], 'path': 'relative.pdf'}},
+            {'imported_pdf': {**current['imported_pdf'], 'revision': 'bad'}},
+            {'imported_pdf': {**current['imported_pdf'], 'page': True}},
+            {'imported_pdf': {**current['imported_pdf'], 'page': -1}},
+            {'imported_pdf': {**current['imported_pdf'], 'zoom': 'search'}},
+            {'imported_pdf': {**current['imported_pdf'], 'scale': 9}},
+            {'imported_pdf': {**current['imported_pdf'], 'extra': None}},
+        ]
+        malformed.extend({'imported_pdf': {key: value for key, value in current['imported_pdf'].items() if key != field}}
+                         for field in current['imported_pdf'])
+        for mutation in malformed:
+            with self.subTest(mutation=mutation), self.assertRaises(WorkspaceError):
+                decode_workspace(encode({**current, **mutation}))
 
     def test_project_content_cannot_configure_tools_or_restore_external_files(self):
         path = self.root / '.theorem-terminal' / 'editor-state.json'
@@ -787,7 +907,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_invalid_versions_malformed_records_and_digest_mismatch_are_non_destructive(self):
         original = self.manifest.read_bytes()
-        for version in (0, 1, 2, 8, 99, True, False, 3.0, 4.0, 5.0, 6.0, 7.0, '3', '4', '5', '6', '7', None):
+        for version in (0, 1, 2, 9, 99, True, False, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, '3', '4', '5', '6', '7', '8', None):
             data = json.loads(original)
             data['schema_version'] = version
             with self.assertRaisesRegex(WorkspaceError, 'Unsupported'):
@@ -858,7 +978,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         entry = c.current().selection_shelf[0]
         self.assertEqual(getattr(entry, 'preview', None), ' '.join(text.split())[:120])
         raw = c.store.path.read_bytes()
-        self.assertEqual(json.loads(raw)['schema_version'], 7)
+        self.assertEqual(json.loads(raw)['schema_version'], VERSION)
         with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration source read')):
             restored = decode_workspace(raw)
         self.assertEqual(restored.selection_shelf, [entry])
@@ -1061,6 +1181,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         recovery_bytes = recovery.read_bytes()
         old = json.loads(self.manifest.read_bytes())
         old['schema_version'] = 3
+        del old['pdf_source']
+        del old['imported_pdf']
         del old['marker']['preview']
         expected['marker']['preview'] = ''
         del old['selection_shelf']
@@ -1076,8 +1198,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertEqual(asdict(migrated), expected)
             self.assertEqual(self.manifest.read_bytes(), raw)
             restored = self.restored()
-        self.assertEqual(VERSION, 7)
-        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], 7)
+        self.assertEqual(VERSION, 8)
+        self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], VERSION)
         self.assertEqual(asdict(restored.current()), expected)
         self.assertEqual(recovery.read_bytes(), recovery_bytes)
         self.assertTrue(restored.view().recovery_warning)
@@ -1089,6 +1211,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         for version in (3, 4, 5, 6, 7):
             valid = deepcopy(original)
             valid['schema_version'] = version
+            del valid['pdf_source']
+            del valid['imported_pdf']
             if version < 6:
                 del valid['wrap']
             if version == 3:
@@ -1142,7 +1266,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                                  [] if version == 3 else [('b' * 64, '1.0', '1.5'), ('a' * 64, '3.0', '3.7')])
                 self.assertEqual(state.wrap, version != 6)
                 self.assertTrue(all(s.preview == '' for s in [state.marker, *state.selection_shelf]))
-                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], 7)
+                self.assertEqual(json.loads(encode_workspace(state))['schema_version'], VERSION)
                 for key, value in (('cursor', '0.1'), ('yscroll', True), ('selection', ['1.0']), ('pane_views', [])):
                     malformed = deepcopy(document)
                     malformed['buffers'][0][key] = value

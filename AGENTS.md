@@ -17,7 +17,7 @@ capability identifier or integration machinery. Preserve the legacy
 Appendix-specific CLI and its source checks. Corpus-neutral format and tool
 integrations are permitted when invoked by direct user action.
 
-R1 adds a read-only existing-PDF path through ordinary file actions. Keep PDF
+R1 provides a read-only existing-PDF path through ordinary file actions. Keep PDF
 identity and page/zoom state separate from generated-build provenance and text
 buffers, recovery and anchors. Preserve work notes on PDF loading failures or
 changed content. Opening or restoring a PDF never invokes TeX or creates a
@@ -103,8 +103,8 @@ Exercise toolkit-independent controllers and actual Qt widgets with
 `THEOREM_TERMINAL_GUI_TESTS=1` (an offscreen Qt platform can run widget tests).
 Use ordinary test documents; no test-only controller subclass may stand in for
 the GUI. When changing widgets, exercise the affected user workflow visibly at
-1280×820 and 960×680. R1 specifically requires a local PDF beside an editable
-note, keyboard actions, position restoration and visible marker feedback.
+1280×820 and 960×680. Preserve R1 regression coverage for a local PDF beside an
+editable note, keyboard actions, position restoration and visible marker feedback.
 Exercise LaTeX rendering, diagnostics or external-editor handoff when those
 paths change; they are not repeated manual gates for every widget edit.
 Preserve regression coverage for source integrity and recovery. Run focused
@@ -116,9 +116,10 @@ checks accurately; never substitute offscreen checks for claimed visible use.
 Open a real integration corpus only when the task authorizes access, and do not
 modify its authoritative files during a visual check.
 
-The current GUI directly provides ordinary-file editing, external-editor and
-Jupyter handoff, staged LaTeX building, PDF rendering, recovery and retained-record
-inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+The current GUI directly provides ordinary-file editing, existing local PDF
+reading, external-editor and Jupyter handoff, staged LaTeX building,
+generated-PDF rendering, recovery and retained-record inspection.
+Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows remain
 unimplemented. Appendix A supplied a corpus-neutral editor/build/render/re-entry
 smoke test. The September 14 supplied evidence adds saved reading notes and
@@ -135,7 +136,8 @@ turns that priority into a handoff, not a competing roadmap.
 
 The active delivery order is R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,
-as specified in `CODEX_PLAN.md`. This supersedes old Appendix-first execution
+as specified in `CODEX_PLAN.md`. R1 is delivered; R2 is the current bounded
+implementation task. This supersedes old Appendix-first execution
 ordering and evaluation prompts that require five anchors or a warrant before
 study. Keep one bounded product increment active and evaluate its contribution
 to actual mathematical work. Preserve existing recovery and record invariants;

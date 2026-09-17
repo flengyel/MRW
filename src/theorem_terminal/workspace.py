@@ -17,7 +17,7 @@ from .local_files import read_bounded
 from .mutable_files import delete_mutable, private_directory, save_mutable, verify_mutable
 
 SCHEMA = 'theorem-terminal.workspace'
-VERSION = 7
+VERSION = 8
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_TEXT_BYTES = 2 * 1024 * 1024
 MAX_RECOVERY_BYTES = 6 * MAX_TEXT_BYTES + 4096
@@ -49,9 +49,11 @@ V6_BUFFER_FIELDS = frozenset({'id', 'path', 'format', 'revision', 'readonly', 'e
 V6_WORKSPACE_FIELDS = frozenset({'schema', 'schema_version', 'root', 'buffers', 'active',
     'visible', 'active_pane', 'split', 'wrap', 'recent', 'marker', 'selection_shelf', 'tex_root',
     'last_build', 'successful_build', 'pdf_page', 'pdf_zoom', 'pdf_scale', 'pdf_visible', 'window_size'})
+V7_WORKSPACE_FIELDS = V6_WORKSPACE_FIELDS
 BUFFER_FIELDS = V6_BUFFER_FIELDS
-WORKSPACE_FIELDS = V6_WORKSPACE_FIELDS
+WORKSPACE_FIELDS = V7_WORKSPACE_FIELDS | {'pdf_source', 'imported_pdf'}
 MARKER_FIELDS = LEGACY_MARKER_FIELDS | {'preview'}
+IMPORTED_PDF_FIELDS = frozenset({'path', 'revision', 'page', 'zoom', 'scale'})
 
 
 class WorkspaceError(ValueError):
@@ -96,6 +98,15 @@ class WorkMarker:
 
 
 @dataclass
+class ImportedPdfState:
+    path: str
+    revision: str
+    page: int = 0
+    zoom: str = 'width'
+    scale: float = 1.0
+
+
+@dataclass
 class Workspace:
     root: str
     buffers: list[BufferState] = field(default_factory=list)
@@ -114,6 +125,8 @@ class Workspace:
     pdf_zoom: str = 'width'
     pdf_scale: float = 1.0
     pdf_visible: bool = False
+    pdf_source: str = 'generated'
+    imported_pdf: ImportedPdfState | None = None
     window_size: list[int] = field(default_factory=lambda: [1280, 820])
 
 
@@ -239,7 +252,14 @@ def _migrate_legacy(data):
             selections.append(canonical)
     return {**deepcopy(data), 'schema_version': VERSION, 'buffers': buffers, 'wrap': data['wrap'] if version == 6 else True,
             'marker': marker(data['marker']) if data['marker'] is not None else None,
-            'selection_shelf': selections}
+            'selection_shelf': selections, 'pdf_source': 'generated', 'imported_pdf': None}
+
+
+def _migrate_v7(data):
+    """Add imported-document state without reading or interpreting a source."""
+    _keys(data, V7_WORKSPACE_FIELDS, 'version-7 editor state')
+    return {**deepcopy(data), 'schema_version': VERSION,
+            'pdf_source': 'generated', 'imported_pdf': None}
 
 
 def selection_span(start, end):
@@ -274,14 +294,31 @@ def decode_marker(value, *, shelf=False):
     return WorkMarker(**value)
 
 
+def decode_imported_pdf(value):
+    _keys(value, IMPORTED_PDF_FIELDS, 'imported PDF state')
+    _path(value['path'])
+    _revision(value['revision'])
+    if Path(value['path']).suffix.lower() != '.pdf':
+        raise WorkspaceError('Imported document must be a PDF')
+    if type(value['page']) is not int or not 0 <= value['page'] <= 100000:
+        raise WorkspaceError('Invalid imported PDF page')
+    if value['zoom'] not in ('width', 'page', 'custom'):
+        raise WorkspaceError('Invalid imported PDF zoom')
+    if type(value['scale']) not in (int, float) or not 0.1 <= value['scale'] <= 8 or not math.isfinite(value['scale']):
+        raise WorkspaceError('Invalid imported PDF scale')
+    return ImportedPdfState(**value)
+
+
 def decode_workspace(raw: bytes) -> Workspace:
     if len(raw) > MAX_MANIFEST_BYTES:
         raise WorkspaceError('Editor state exceeds 1 MiB')
     data = strict_json(raw)
-    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, 4, 5, 6, VERSION):
+    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, 4, 5, 6, 7, VERSION):
         raise WorkspaceError('Unsupported editor-state version')
     if data['schema_version'] in (3, 4, 5, 6):
         data = _migrate_legacy(data)
+    elif data['schema_version'] == 7:
+        data = _migrate_v7(data)
     _keys(data, WORKSPACE_FIELDS, 'editor state')
     _path(data['root'])
     root = Path(data['root'])
@@ -361,13 +398,19 @@ def decode_workspace(raw: bytes) -> Workspace:
             raise WorkspaceError('Invalid local build reference')
     if type(data['pdf_page']) is not int or not 0 <= data['pdf_page'] <= 100000 or data['pdf_zoom'] not in ('width', 'page', 'custom'):
         raise WorkspaceError('Invalid PDF navigation state')
-    if type(data['pdf_scale']) not in (int, float) or not 0.1 <= data['pdf_scale'] <= 8:
+    if type(data['pdf_scale']) not in (int, float) or not 0.1 <= data['pdf_scale'] <= 8 or not math.isfinite(data['pdf_scale']):
         raise WorkspaceError('Invalid PDF scale')
+    if data['pdf_source'] not in ('generated', 'imported'):
+        raise WorkspaceError('Invalid PDF source')
+    imported_pdf = decode_imported_pdf(data['imported_pdf']) if data['imported_pdf'] is not None else None
+    if data['pdf_source'] == 'imported' and imported_pdf is None:
+        raise WorkspaceError('Selected imported PDF is missing its identity')
     size = data['window_size']
     if not isinstance(size, list) or len(size) != 2 or any(type(n) is not int or not 480 <= n <= 16384 for n in size):
         raise WorkspaceError('Invalid window size')
     values = {key: data[key] for key in WORKSPACE_FIELDS - {'schema', 'schema_version'}}
-    values.update(buffers=buffers, marker=marker, selection_shelf=selections)
+    values.update(buffers=buffers, marker=marker, selection_shelf=selections,
+                  imported_pdf=imported_pdf)
     return Workspace(**values)
 
 
