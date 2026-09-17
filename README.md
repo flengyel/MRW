@@ -12,7 +12,7 @@ integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an
 inactive project, or a subject not studied or taught for years.
 
-It is an assistant's assistant. It preserves the mathematical work produced
+It is intended to be an assistant's assistant. Its design preserves the mathematical work produced
 while consulting source literature and using machine assistants, proof
 assistants, and computer algebra systems: source locations, problems attempted,
 proof drafts, computations, diagrams, examples, counterexamples, formal checks,
@@ -103,10 +103,27 @@ The design rests on six principles:
 
 ## Status
 
+**Roadmap review, 2026-09-17:** the project has useful preservation and editing
+foundations, but is not yet delivering its intended study and human/AI research
+workflow. The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+now prioritizes (R1) readable source beside a durable note, (R2) one inspectable
+mathematical question and response, and (R3) correction, continuation and later
+resumption. Research sources, limitations and concrete acceptance criteria are
+recorded there. Formal correspondence and warrants remain integral and optional
+during study; their independent evaluation does not gate these priorities.
+
+The next deliverable is existing local PDF reading beside a work note without
+a TeX build, with preserved reading position and standard application shortcuts.
+These are planned changes. Current PDF viewing is tied to successful builds;
+application Open/Save/Find actions lack explicit standard shortcut bindings,
+although inherited text-edit shortcuts can work. The GUI can inspect completed
+ModelCalls but cannot yet initiate a mathematical question.
+
+
 The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
 Directory** displays the actual directory tree lazily. Ordinary mathematical
-files open in editable buffers; external references are read-only. The working
-vertical slice is LaTeX source, explicit root selection and build, a rendered PDF
+files open in editable buffers; external references are read-only. The implemented
+workflow covers LaTeX source, explicit root selection and build, a rendered PDF
 beside the source, navigable file-and-line diagnostics, and resumption at a marked
 passage. It has been exercised with an unrelated mathematical project and the
 real Categorical Rice–Shapiro manuscript. No mathematical questionnaire precedes
@@ -135,12 +152,16 @@ directly provides ordinary-file editing, external-editor and Jupyter handoff,
 out-of-tree staged LaTeX builds, PDF rendering, checkpoint recovery and retained-record
 inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows remain
-unimplemented. Kallenberg ordering will govern mathematical guidance when
-requested; it is not a startup activity or a set of mandatory forms.
+unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
+material; focused questions and prerequisite lookup need not repeat it.
 
 Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.
-It did not complete the mathematical re-entry and warrant session specified in
-UX_SPEC.md §9.2.
+The supplied September 14 report and screenshot additionally show useful saved
+reading notes, two restored panes and one retained manuscript passage. The
+guidance was supplied outside the application. Five-anchor re-entry was
+incomplete, marker creation was unconfirmed, and no historical reduction or
+anchor defect was established. Study/re-entry, assistance and the optional
+warrant experiment now have separate criteria in UX_SPEC.md §§9.1–9.3.
 
 The prototype's original CLI path studies
 `rs_Appendix_A.tex` in Kallenberg's top-down order. `orient` presents the
@@ -920,7 +941,8 @@ problem families before selecting a problem.
 - `VOCABULARY.md` — controlled terminology used across the design documents.
 - `DOMAIN_MODEL.md` — entities, information classes, and invariants.
 - `UX_SPEC.md` — the mathematical workflow the system supports.
-- `CODEX_PLAN.md` — staged implementation plan.
+- [CODEX_PLAN.md](CODEX_PLAN.md) — active outcome roadmap, research basis and
+  retained implementation contracts.
 - `AGENTS.md` — instructions for Codex and other coding agents.
 - `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` — the bounded warrant-composition
   experiment and its cut line.

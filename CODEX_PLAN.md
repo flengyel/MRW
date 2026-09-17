@@ -1,10 +1,169 @@
 # CODEX_PLAN.md
 
-Plan for the first experimental implementation (Stages −1 through 5), including
-one bounded justification-logic slice inside the Appendix A experiment, and a
-separately authorized later large-corpus experiment (Stage 6). It inherits the
-purposes in `VISION.md`, the entities and invariants in `DOMAIN_MODEL.md`, and
-the workflows in `UX_SPEC.md`.
+Active product roadmap, reviewed 2026-09-17 against application commit
+`4b68c0986748e3c5db6568e41f8605257425a9ba`, the supplied September 13–14 session
+reports, and the research below. It inherits the information-class invariants
+in `DOMAIN_MODEL.md` and the purpose in `VISION.md`.
+
+## Active roadmap: mathematical usefulness first
+
+**Assessment: the project is not yet on track for its intended user outcomes.**
+It has a reusable editor, build/render path, durable recovery, navigation
+anchors and exact retained-record services. It has not demonstrated a useful
+in-application mathematical assistance exchange or research collaboration.
+Continue from this foundation; do not restart the architecture.
+
+This section controls implementation priority. It supersedes the old
+Appendix-first serial execution order and any evaluation prompt that makes
+five anchors or a warrant inspection a prerequisite for useful study.
+Stages −1 through 6 below retain detailed implementation contracts and
+independent experiments; their numbering no longer determines delivery order.
+The warrant architecture remains integral, with evaluation triggered by an
+actual warrant question.
+
+### Evidence and diagnosis
+
+| Area | Evidence at review | Product implication |
+|---|---|---|
+| Preservation and navigation | Implemented recovery and live anchors; the supplied September 14 report and screenshot show a saved note, two reopened panes and one persisted manuscript shelf entry | Preserve these services and their regression coverage; stop treating another anchor demonstration as the main product milestone |
+| Readable mathematics | QtPdf displays successful trusted TeX builds, but the GUI has no independent existing-PDF opening, PDF search or outline; its PDF view consumes mouse events | Ordinary literature reading is incomplete. Reuse the renderer and remove the build prerequisite for existing PDFs |
+| Routine operation | Application actions have no explicit standard shortcut bindings; inherited editor shortcuts can still work | Add discoverable Open, Save, Find and Find-next actions using platform conventions, and visible marker/Return feedback |
+| Study benefit | The September 14 session saved useful purpose, definition and near-product notes; explanatory guidance came from the surrounding assistant interaction | This supports the value of the study activity, not a delivered workstation guidance feature |
+| AI collaboration | A bounded provider adapter and retained-response inspector exist; the GUI cannot initiate a mathematical question | Deliver the missing user interaction before expanding record or formal machinery |
+| Re-entry evidence | Five-anchor evaluation was incomplete; marker creation was unconfirmed; the original historical note was unavailable | No anchor defect, crash, mislanding or historical reduction is established. Use a fresh prospective continuation test |
+
+The failed prescribed sessions are evidence about the product and evaluation
+design, not a failure by the human participant. Starting at a local lifting
+lemma without adequate orientation and excluding rendered reading from a
+study session both obscured the intended use. Existing PDF rendering must be
+credited accurately; it still needs a practical literature-reading entry point.
+
+### Research basis and limits
+
+The following are design inputs, not proof that this application works.
+
+| Primary source | Finding and limit | Design decision |
+|---|---|---|
+| [Nørgaard and Hornbæk, DIS 2006](https://hjemmesider.diku.dk/~kash/papers/dis2006_noergaard.pdf) | Observation of 14 professional think-aloud sessions found procedural usability concerns often displaced questions of utility; this was exploratory, not a controlled comparison | Observe a real mathematical task and its resulting work; do not make completion of an evaluator's script the benefit |
+| [Head et al., ScholarPhi, CHI 2021](https://arxiv.org/html/2009.14237v3) | In a 27-person study on one scientific paper, contextual definitions reduced time and traversal but did not significantly improve correctness; incomplete definitions could mislead | Make definitions and notation accessible at the passage, with source links and visible gaps; defer automatic comprehensive concept maps |
+| [Hornbæk and Frøkjær, TOCHI 2003](https://hjemmesider.diku.dk/~kash/papers/TOCHI2003_hornbaek.pdf) | In 20 participants, overview-plus-detail improved essay quality while slowing question answering; the tasks were not research mathematics | Assess the quality of the mathematical work as well as friction; fewer searches alone is not success |
+| [Trafton et al., IJHCS 2003](https://interruptions.net/literature/Trafton-IJHCS03.pdf) | Preparation helped 17 participants resume a laboratory resource-allocation task; transfer to multi-day research remains untested | Preserve the current question, last useful conclusion and intended next step with their source passages, using an ordinary note |
+| [Mejía-Ramos and Weber, 2014](https://sites.math.rutgers.edu/~jpmejia/files/Mejia-Ramos%20%26%20Weber%20%28survey%29.pdf) | A 118-response self-report survey emphasizes reusable ideas, main arguments and examples; it does not measure actual reading frequencies | Support conceptual explanation, examples, proof methods and hypothesis exploration, not only validation and storage |
+| [Inglis and Alcock, 2018](https://repository.lboro.ac.uk/articles/conference_contribution/Watching_mathematicians_read_mathematics/9376565) | An eye-movement study found no evidence of the initial skimming reported in prior surveys; this does not show experts never skim | Keep top-down orientation available for unfamiliar material, while allowing focused questions and prerequisite lookup at any time |
+| [Thurston, 1994](https://arxiv.org/pdf/math/9404236) | An expert reflective account distinguishes proof correctness from understanding and communication; it is not an experiment | Treat a clarified idea, explanatory example or corrected argument as a substantive outcome |
+| [Amershi et al., CHI 2019](https://www.microsoft.com/en-us/research/wp-content/uploads/2019/01/Guidelines-for-Human-AI-Interaction-camera-ready.pdf) | Human–AI guidelines evaluated with design practitioners emphasize accessible invocation, dismissal, correction and clear limitations; they do not establish mathematical performance | Provide explicit, inspectable requests and easy correction or rejection, with no autonomous calls |
+| [Collins et al., CheckMate, 2023](https://arxiv.org/html/2306.01694v2) | Interactive mathematics evaluation found correctness and helpfulness can diverge, and corrections can stall; the small cohort, undergraduate tasks and then-current models limit generalization | Evaluate an exchange and its contribution to ongoing work, including correction cost, rather than counting responses or citing current model capability |
+
+### Delivery order
+
+One product increment is active at a time. These are proposed delivery targets,
+not claims of implemented capability or promises about calendar dates.
+
+| Priority | Deliverable | Evidence required to advance |
+|---|---|---|
+| R1 — Read and work | Open an existing local PDF without building it, keep it beside a durable work note, preserve page/zoom, and provide standard application shortcuts and clear marker feedback | Use a real source to write a useful explanation, example or question; close/reopen and continue from the saved work |
+| R2 — Ask about the work | From selected source/work passages, ask one natural-language mathematical question, preview exact outbound context, explicitly send through the existing adapter, inspect an attributed answer, and retain/edit/reject a contribution | One actual obstruction is helped through an in-application exchange, with inspectable sources and a useful resulting work artifact |
+| R3 — Continue an investigation | Support an explicit linked follow-up, correction or alternative approach; preserve the current question, conclusions, unresolved issue and selected evidence; resume later | A continued proof, counterexample, hypothesis comparison or exposition survives interruption, and the assistant's contribution and corrections remain distinguishable |
+| Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3 justifies each addition; evaluate each on its own terms |
+
+**Next implementation deliverable: R1's existing-PDF-plus-note workflow.**
+Keep ordinary source editing and the existing trusted TeX build path. An
+existing PDF is a read-only document with its own identity and position; opening
+it must not require TeX source, a compiler or invented build provenance.
+Preserve the work note while navigating and make switching back inexpensive.
+Use an explicit user-selected durable project; disposable test copies are
+appropriate for destructive verification, not the user's only surviving work.
+
+Complete R1 in bounded increments. First deliver independent PDF opening,
+source/note comparison, position restoration and standard Open/Save/Find
+bindings. Once this minimum works, move to R2. PDF search, outline and richer
+internal navigation wait unless their absence demonstrably blocks the chosen
+task. Internal document navigation must not silently dispatch external URLs,
+files or commands. Exact source/PDF mapping
+is a separate task where source and build metadata exist; lack of SyncTeX or
+editable source must not prevent ordinary PDF study. Do not hold R2 behind
+complete PDF feature parity, a new editor, a new rendering framework or
+comprehensive document analysis. Preserve text-only and source-only work.
+
+R2 is the first assistance milestone, not another retained-record-only release.
+Offer one task-local question action; explanation, a definition, an example,
+a strategic hint and criticism of a proof step are ordinary questions, not
+separate modes requiring new schemas. Keep relevant definitions and cited
+source passages reachable without losing the question or note. A user can ask
+for purpose and prerequisites before a lemma, or go directly to a local issue.
+Show readable mathematical notation with the raw answer still inspectable;
+rendering must not execute returned code, fetch content or alter exact records.
+
+Reuse the existing provider adapter, immutable ModelCall and exact projection
+services. Derive metadata from the selected work; do not expose developer JSON
+as a mathematician's form. Send only inspected context, distinguish supplied
+sources from unsupported model citations, and make incomplete context visible.
+A PDF excerpt must be inspectable before sending: record document revision and
+page/location plus exact sent text, and do not claim that imperfect extraction
+preserves the mathematical notation. Let the user correct an excerpt as a
+separate attributed transcription or use the corresponding source text.
+No provider call is authorized merely by adopting this roadmap; each real call
+requires the explicit transmission action already specified in the UX.
+
+R3 tests collaboration through reciprocal work: ask, inspect, challenge,
+revise, compare and continue. A saved question with a raw answer is not by
+itself research collaboration. Retain useful model passages as attributed
+proposals and human revisions or syntheses as separate authored work linked to
+their inputs. Keep rejected suggestions and corrections inspectable without
+requiring a disposition form for every sentence. A later handoff to another
+human or assistant should expose the question, notation, assumptions, worked
+attempts, evidence and remaining issue through ordinary files and existing
+records. Multiuser synchronization, autonomous agents and a provider registry
+are not prerequisites.
+
+The Appendix A material remains an available task, not a gate on all other
+mathematics. An unfamiliar chapter or problem in a locally available source
+without formalization may be used as soon as it serves the current study need.
+Before claiming general usefulness, test both reading/re-entry and actual
+problem work, including an example or counterexample. Do not infer research
+capability from a single guided-reading success.
+
+### Evaluation and drift control
+
+Evaluate each delivered increment during a short, natural study session.
+The user's next mathematical question determines the task. Capture only the
+source used, question or obstruction, resulting mathematical work, consequential
+friction, and what remains to do. Existing notes and automatic records should
+supply most of this evidence; no comprehension questionnaire or anchor quota.
+
+Use the user's ordinary PDF reader/editor/assistant workflow as the practical
+comparison. Record setup, navigation and correction burden when consequential,
+but judge whether the workstation helps produce and resume worthwhile work.
+A repeat of the same learned task is not a controlled speed comparison.
+No historical improvement claim is available without a comparable baseline.
+Observe prospective resumption from the actual saved work instead of repeatedly
+reconstructing a missing historical seed.
+
+Before expanding beyond R1–R3, require useful work in two separate sessions
+and one later continuation. This is a chosen adoption check, not a
+research-validated threshold. User observation evaluates benefit; it is not a
+manual preflight gate on authorized implementation. If the user is unavailable,
+finish the bounded deliverable and report usefulness as pending. If benefit is absent, identify one concrete
+obstruction, make a bounded correction and observe again. If that still fails,
+reconsider the affected workflow before adding features. Never leave the human
+repeating an inconclusive setup ritual while development accumulates elsewhere.
+
+Triage defects by effect: protect work immediately when loss or corruption is
+demonstrated; fix interaction failures that block the current study; defer
+cosmetic differences that do not affect the work. Retain controller and widget
+regressions for the invariants they protect. Run broader verification when code
+changes warrant it, not after documentation-only work or every study session.
+A source repository advancing independently is not a study blocker: record the
+revision actually used and inspect relevant changes without forcing unrelated
+repositories to move together.
+
+The following remain deferred until demanded by useful work: corpus ingestion,
+a universal knowledge graph, elaborate review scheduling, additional providers,
+autonomous research agents, multiuser infrastructure, and further formal-warrant
+machinery. Keep the existing warrant semantics and provenance distinctions;
+their preservation does not require putting them in front of ordinary study.
+
+## Retained implementation contracts
 
 ## Governing constraint
 
@@ -20,13 +179,12 @@ Two initial experiments test distinct functions:
    `Lean/docs/AppendixA.md`;
 2. problem-centered study in a source with little or no formalization.
 
-Implementation was authorized on 2026-08-25 with Appendix A first. Its first
-executable operation is top-down orientation in `rs_Appendix_A.tex`, followed by
-selection and study of a result. No session record precedes orientation. The
-same Kallenberg order governs the later problem-centered experiment: book or
-chapter purpose and organization; central concepts, results, and problem
-families; selected problem; proposed method; detailed proof, calculation, or
-construction.
+The original 2026-08-25 authorization began with Appendix A and a top-down
+orientation command. That legacy CLI behavior remains. The active GUI roadmap
+above supersedes the old corpus order. For requested guidance in unfamiliar
+material, offer purpose, organization, concepts and examples before unnecessary
+detail; allow the user to go directly to a selected problem or local question.
+No session record or completed orientation sequence is an entry requirement.
 
 Apart from the later explicitly authorized general GUI tranche below,
 infrastructure is added only when one of these sessions requires it. Evidence
@@ -80,7 +238,8 @@ project, built its 76-page manuscript, restored a file/PDF position at the selec
 opened the relevant Lean source and existing expert-authored correspondence
 document through the same navigator. This was a corpus-neutral
 editor/build/render/re-entry smoke test. It did not complete the mathematical
-re-entry and warrant session in UX_SPEC.md §9.2, establish Stage 1 model
+re-entry and warrant evaluations now separated in UX_SPEC.md §§9.2–9.3,
+establish Stage 1 model
 usefulness, or supply mathematical verification.
 
 The initial real build exposed latexmk/BibTeX writing into the source directory
@@ -149,8 +308,8 @@ The GUI directly provides ordinary-file editing, external-editor and Jupyter
 handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
 inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows remain
-unimplemented. Kallenberg ordering will govern mathematical guidance when
-requested, not startup or mandatory forms.
+unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
+material; focused questions and prerequisite lookup may begin directly.
 
 Later notebook support must preserve cells, outputs, execution order, kernel
 identity and explicit execution provenance. The current handoff executes no
@@ -169,7 +328,7 @@ Stages 0 through 5 do not attempt:
 - a domain map authored before mathematical work begins;
 - questionnaires, confidence ratings, or comprehension forms;
 - automated correctness decisions for informal proofs;
-- GUI scope beyond the explicitly authorized desktop increment above;
+- GUI scope beyond R1–R3 and the retained desktop contracts;
 - Mathlib-scale Lean analysis;
 - simultaneous support for multiple model services, autonomous follow-up calls,
   or a general chat interface;
@@ -196,7 +355,8 @@ service selection, routing, or AI-specific trust structure.
 
 ## Target
 
-Complete both experimental sessions in `UX_SPEC.md` §9:
+Demonstrate both study/re-entry and unformalized problem work in `UX_SPEC.md` §9,
+following R1–R3 above:
 
 - re-enter the mathematics in `rs_Appendix_A.tex`, continue mathematical work,
   and inspect the corresponding Lean declarations and
@@ -204,16 +364,15 @@ Complete both experimental sessions in `UX_SPEC.md` §9:
 - solve, resume, and later reconstruct selected problems from an unformalized,
   problem-centered source.
 
-The Appendix A target is executed first. It tests reconstruction of prior work
-and, only when useful, maintenance of explicit informal/formal relations. The
-problem-centered target tests learning, task-mediated model assistance, and
-retention. It includes at least one bounded model call attached to an actual
-obstruction in the work. Success in either does not establish success in the
-other.
+The active study question determines which source is used next. Appendix A
+tests reconstruction and, when useful, informal/formal relations. The
+problem-centered target tests learning, task-mediated assistance and retention.
+The assistance evaluation includes a bounded model call attached to an actual
+obstruction; success in one experiment does not establish success in the other.
 
-The justification-logic work is a bounded vertical slice of the Appendix A
-target, not a third corpus experiment. It begins only after the active task has
-reached and reviewed the exact selected manuscript--Lean correspondence.
+The bounded justification experiment remains separately evaluable under
+`UX_SPEC.md` §9.3. Its Appendix fixture begins only after the active task has
+reviewed the selected manuscript--Lean correspondence. It does not gate R1–R3.
 
 ---
 
@@ -236,6 +395,10 @@ stages will be evaluated.
 ---
 
 ## Stage 0 — Orient in and work the benchmark mathematics
+
+This is an optional benchmark protocol, not an R1–R3 prerequisite. Current
+sources and focused questions may be used directly; its prescribed orientation
+tests that particular mode of study.
 
 **Goal.** Establish the book or chapter's purpose and organization and its
 central concepts, results, and problem families; then select a small coherent
@@ -268,8 +431,8 @@ before implementation.
 
 ## Stage 1 — Minimal support for oriented problem work
 
-**Goal.** Support the problem-centered session of `UX_SPEC.md` §9.1 on the Stage
-0 cluster.
+**Goal.** Support the selected active mathematical task and the problem-centered
+session of `UX_SPEC.md` §9.1.
 
 **Deliverable.** A local experimental application that can:
 
@@ -305,9 +468,11 @@ before implementation.
   visible, initially indexes passages rather than flooding the terminal, and
   lets the mathematician select visible exact text without entering byte
   offsets; compute and validate digest-anchored UTF-8 spans internally;
-- render every record-derived string through an exact safe terminal renderer;
-  emit no terminal hyperlink escapes and never interpret or dispatch returned
-  markup, commands, or URLs, while preserving the recorded response unchanged;
+- for CLI output, render every record-derived string through the exact safe
+  terminal renderer; emit no terminal hyperlink escapes and never interpret or
+  dispatch returned markup, commands or URLs. GUI mathematics rendering is a
+  separate non-executing presentation with no network effects; preserve the
+  exact recorded response and its raw inspection view;
 - extract only proposals that enter the work or whose correction, rejection, or
   abandonment is recorded, each with
   `Provenance.origin = ai_proposal`, a lossless half-open UTF-8 byte span
@@ -321,15 +486,18 @@ before implementation.
 - keep source suggestions proposed until the cited material is independently
   retrieved and identified, and keep reported calculations or checks proposed
   until separately performed or attested;
-- for one selected response span, create the documentary opaque atom
+- only in the separately requested documentary-warrant experiment, for one
+  selected response span create the documentary opaque atom
   \(D=\operatorname{ModelProduced}(C,h,s,R)\), distinct from the substantive
   mathematical atom \(F\), using the generic `ClaimAtomVersion` record;
-- admit \(m:D\) only when its exact call, digest, span, and representation are
+- in that warrant experiment, admit \(m:D\) only when its exact call, digest,
+  span and representation are
   displayed as external basis; if the proposal itself is relied upon, admit the
   separately scoped bridge \(r:(D\to F)\) and check \(r\cdot m:F\) with the
   Task 4.2 \(J_0/J(CS)\) checker;
-- when independent reconstruction, retrieval, computation, or formal checking
-  instead supplies \(v:F\), preserve that direct warrant and leave the model
+- in that warrant experiment, when independent reconstruction, retrieval,
+  computation or formal checking supplies \(v:F\), preserve that direct warrant
+  and leave the model
   call outside the mathematical derivation;
 - treat model output as untrusted content, with no executable markup, command
   execution, link opening, tool invocation, or resubmission without a user
@@ -465,28 +633,31 @@ advance and never contains its own expected digest. Python renders the bundle
 later; handling a model response never invokes Lean implicitly, and ordinary
 problem work requires neither Lean nor logic entry.
 
-**Acceptance.** A proof problem and a computational or example-driven problem
-can each be attempted end to end. Both sessions begin with the Stage 0
-top-down orientation; detailed attempts then begin with a selected problem,
-work without any formal artifact, and require no comprehension form. At least one
-model call is traceable from selected context and exact input through raw
-response to a proposal that is used, corrected, rejected, or abandoned. No
-generated claim becomes a source fact, verification, or human judgment
-automatically. For one exact span, the system also records the documentary atom
-and either checks an explicitly admitted \(r\cdot m:F\) route or records that no
-AI-to-claim bridge was admitted and displays the independently based \(v:F\)
-route used instead, or records rejection or abandonment with no warrant for
-\(F\). Tests show that \(m:D\) alone cannot derive \(F\). Withdrawing an
-admission deactivates only the dependent current route and preserves the call,
-proposal, old context, and certificate. Ordinary mathematical sessions need not
-make a model call; the required call exists to evaluate Stage 1.
+**Study and assistance acceptance.** A proof problem and an example-driven or
+computational problem can each be attempted without a formal artifact or a
+comprehension form. Offer orientation where needed, then support the selected
+mathematical work. At least one real model call is traceable from inspected
+context and exact input through raw response to a contribution used, corrected,
+rejected or abandoned. Demonstrate its effect on subsequent work and account
+for correction cost. No generated claim becomes a source fact, verification
+or human judgment automatically. Ordinary sessions need not make a call;
+the assistance evaluation deliberately tests one.
+
+**Independent warrant acceptance.** When the documentary-warrant experiment
+is actually run, trace one exact span to its documentary atom and either an
+explicitly admitted \(r\cdot m:F\) route, an independently based \(v:F\) route
+with no AI-to-claim bridge, or rejection/abandonment without a warrant for
+\(F\). Tests must show \(m:D\) alone cannot derive \(F\), and withdrawing an
+admission changes only the dependent current route while preserving prior
+records. These obligations remain; they are not prerequisites for accepting
+a useful study exchange.
 
 **Non-goals.** No general ingestion, comprehensive topic map, formal theorem
 analysis, graph rendering, support for a second model service or adapter,
-automatic model selection, provider tools, autonomous calls, conversation
-interface, prompt library, or framework beyond the authorized desktop increment.
-No capture or reconstruction
-of provider-internal reasoning, hidden chain of thought, internal search, or
+automatic model selection, provider tools, autonomous calls, a general-purpose
+conversation interface unrelated to the active mathematical work, a prompt
+library, or a framework beyond R1–R3 and the retained desktop contracts.
+No capture or reconstruction of provider-internal reasoning, hidden chain of thought, internal search, or
 unreturned alternatives. No `AITrust`, `AIWarrant`, `ModelAuthority`,
 provider-wide truth bridge, generic support edge, or trust, reliability,
 confidence, acceptance, correctness, authority, weight, integration, or
@@ -499,9 +670,11 @@ adoption field on model records.
 **Goal.** Resume interrupted work and test retention through later mathematical
 performance.
 
-**Deliverable.** Persistence of source location, current attempt, revisions,
-computations, unresolved step, and assistance used; `ReviewItem`s derived from
-the work; `ReviewState` generated from `TaskEvidence`.
+**Immediate deliverable.** Preserve source location, current attempt, revisions,
+computations, unresolved step and assistance used through ordinary work files
+and existing state. R1–R3 do not require ReviewItem or ReviewState machinery.
+The later retention experiment may derive `ReviewItem`s from the work and
+generate `ReviewState` from `TaskEvidence` when that experiment is undertaken.
 
 Review tasks include reconstructing a proof, completing a gap, solving a related
 problem, varying a hypothesis, producing an example or counterexample, and
@@ -509,9 +682,10 @@ repeating a Lean or Sage task. They do not request a confidence rating or a
 written description of comprehension.
 
 **Acceptance.** After an interruption, the exact unfinished mathematical step
-can be resumed without recreating the surrounding context. After a later
-interval, at least one solution is reconstructed or one related problem is
-solved, and the resulting artifact updates `ReviewState` mechanically.
+can be resumed without recreating the surrounding context. This is evaluated
+independently of the later retention experiment, in which a reconstructed
+solution or related problem supplies TaskEvidence and updates ReviewState
+mechanically if that machinery is implemented.
 
 **Non-goals.** No scheduling-algorithm research, reference-string grading of
 proof ideas, or manually asserted proficiency score.
@@ -528,11 +702,11 @@ the result as evidence against the other functions.
 **Goal.** Re-enter the mathematics of `rs_Appendix_A.tex` and continue
 mathematical work after an interruption.
 
-**Deliverable.** The Appendix A path first presents the appendix's purpose and
-organization and its central concepts and results. It then selects a result and
-proceeds through its role, statement, governing idea, proof skeleton, and
-technical detail only as requested. Re-entry may begin from a mathematical
-question, manuscript result, unfinished proof, or earlier `WorkArtifact` in
+**Deliverable.** The legacy Appendix A guidance path presents purpose,
+organization and central concepts before a selected result. In the general
+GUI, make that orientation available when requested; a returning user may
+resume directly at the relevant question, definition or unfinished argument.
+Re-entry may begin from a mathematical question, manuscript result, unfinished proof, or earlier `WorkArtifact` in
 `rs_Appendix_A.tex`. Stable manuscript occurrences, relevant prior artifacts,
 unresolved questions, and the source locations and relations needed to resume
 are available. The corresponding Lean declarations and
@@ -694,8 +868,9 @@ admission, and derivability into generic support edges.
 
 ## Stage 5 — Evaluate the experiment
 
-**Goal.** Decide which components helped actual mathematical work and which
-should be removed or revised before another corpus is attempted.
+**Goal.** Evaluate each delivered increment while it is used, rather than waiting
+for all numbered stages. Decide which components helped mathematical work and
+which should be removed or revised before expanding the product scope.
 
 **Deliverable.** An evaluation based on completed and abandoned
 `WorkArtifact`s, `TaskEvidence`, source-recovery operations, `ModelCall`s,
@@ -782,8 +957,8 @@ for it.
   published interfaces provide its hierarchy, stable identifiers,
   cross-references, and revision information.
 - Storage beyond the files needed by the first sessions.
-- Whether the application edits TeX and Sage work directly or opens existing
-  tools and records their artifacts.
+- Which additional external tool handoffs actual study requires; ordinary
+  source editing and the implemented editor/Jupyter handoffs already exist.
 - Which single model and service supplies Stage 1 assistance; the selection is
   configuration and every call records the exact model used.
 - Whether later experiments should add tool-enabled calls, another model service,
@@ -795,20 +970,16 @@ for it.
 
 ## Order and stopping
 
-Implementation is authorized. The execution order is:
+The controlling delivery order is R1 readable study, R2 task-local assistance,
+then R3 continued investigation and resumption. Evaluate usefulness within each
+increment. Preserve the detailed contracts above for the components actually
+changed; numbered legacy stages are not a serial release gate.
 
-1. Appendix A orientation and mathematical re-entry (Stage 3);
-2. resumption of actual Appendix A work (the relevant part of Stage 2);
-3. optional formal correspondence and, when explicitly requested after that
-   correspondence is reviewed, the bounded Appendix A justification experiment
-   (Stage 4);
-4. top-down orientation and benchmark work in the problem-centered source
-   (Stage 0), followed by only the application support that work requires
-   (Stage 1);
-5. evaluation of both experiments on their own terms (Stage 5).
+Formal correspondence and warrant experiments remain available on demand and
+retain their independent acceptance obligations. Appendix A completion, a
+five-anchor rehearsal, a checked documentary response fixture, and generated
+review schedules do not gate ordinary study or the first assistance workflow.
 
-Each checkpoint evaluates a specific component. Failure revises or stops that
-component unless the evidence bears on the full thesis in `VISION.md`.
-
-Stage 6 does not begin automatically after Stage 5. It requires a separate
-decision authorizing the large-corpus experiment.
+If an increment fails its usefulness check, revise the specific obstruction
+before expanding scope. Stage 6 still requires a separate authorization; it does
+not begin automatically after an editor, model or warrant demonstration.

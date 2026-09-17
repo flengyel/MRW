@@ -22,8 +22,9 @@ implementation).
   versioned premises and bridges.
 * AI may increase the rate of mathematical production and the amount of work
   requiring evaluation, reconstruction, and integration.
-* Kallenberg's top-down approach determines the order in which available
-  mathematical material is presented.
+* Kallenberg's top-down approach guides requested orientation in unfamiliar
+  mathematics; focused questions and prerequisite lookup remain available
+  without completing that sequence.
 * Curry's account of increasing but never absolute precision explains why
   informal and formal representations remain distinct.
 * Theorem Terminal explores tools for learning, solving problems,
@@ -193,7 +194,7 @@ the theory, selected problems may supply omitted arguments and establish command
 of examples. After an initial orientation, solving those problems is the study
 method.
 
-The top-down order used here is:
+The default top-down order for requested orientation is:
 
 1. the purpose and organization of the subject or chapter;
 2. its central concepts, results, and problem families;
@@ -203,7 +204,10 @@ The top-down order used here is:
 
 This order applies only to material that exists. It neither assumes a
 machine-checked proof nor requires a complete informal proof before study can
-begin.
+begin. It is an exposition aid, not a compulsory reading algorithm or a claim
+about all experts' behavior. A returning researcher can ask directly about a
+local inference; an unfamiliar definition or example can be examined at any
+point. The research basis and its limits are in the active CODEX_PLAN roadmap.
 
 A theorem view therefore opens with the result's role and mathematical effect.
 A problem view opens with the problem, its exact source location, the relevant
@@ -218,8 +222,8 @@ Research and formalization need not proceed in this order. Formal work may show
 that an asserted assumption is derivable, that an identity uses fewer axioms
 than expected, or that a manuscript hypothesis is unnecessary. The interface
 must accept these results and update the relationships among the affected
-artifacts. Top-down study determines presentation order, not discovery order or
-dependency.
+artifacts. Top-down study supplies a default orientation, not a required
+discovery order, dependency order or interaction sequence.
 
 ## 4. Curry: the representation model
 
@@ -445,9 +449,10 @@ The design makes distinct, falsifiable claims:
   suggest relevant material to obtain or a computation to perform, identify a
   specific gap, criticize an attempted step, or supply requested assistance
   without displacing the mathematician's choice of method. The response and its
-  later use, correction, or rejection must remain observable. For one selected
-  exact response span, the trial must also expose either an explicit checked
-  AI-to-claim bridge or the deliberate absence of that bridge when independent
+  later use, correction, or rejection must remain observable.
+  In the separately requested warrant experiment, one selected exact response
+  span must expose either an explicit checked AI-to-claim bridge or the
+  deliberate absence of that bridge when independent
   work supplies the mathematical warrant. An incorrect or irrelevant proposal
   may instead end with no bridge and no warrant for its substantive claim; its
   rejection or abandonment remains task evidence.

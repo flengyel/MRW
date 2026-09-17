@@ -107,7 +107,9 @@ Jupyter handoff, staged LaTeX building, PDF rendering, recovery and retained-rec
 inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows remain
 unimplemented. Appendix A supplied a corpus-neutral editor/build/render/re-entry
-smoke test, not the mathematical re-entry and warrant session in UX_SPEC.md §9.2.
+smoke test. The September 14 supplied evidence adds saved reading notes and
+one persisted passage, not a completed study-assistance or warrant evaluation.
+See UX_SPEC.md §§9.1–9.3 for the now-independent evaluations.
 Keep Qt worker results detached; only explicitly queued main-thread QObject
 slots may apply completion results to controllers or widgets.
 
@@ -115,14 +117,32 @@ Read `README.md`, `VISION.md`, `VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`,
 `CODEX_PLAN.md`, and `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` before changing
 behavior.
 
+The active delivery order is R1 readable source plus durable note, R2 a
+task-local assistance exchange, then R3 continued investigation and resumption,
+as specified in `CODEX_PLAN.md`. This supersedes old Appendix-first execution
+ordering and evaluation prompts that require five anchors or a warrant before
+study. Keep one bounded product increment active and evaluate its contribution
+to actual mathematical work. Preserve existing recovery and record invariants;
+do not expand their machinery merely to produce another successful audit.
+
+No study session requires all repositories to match a shared entry-lock ritual.
+Record the source revision actually used and protect unrelated work. Use durable
+user work for continuation; disposable copies serve destructive tests, not as
+the only copy of study notes. An inconclusive prescribed session is not a human
+failure. A confirmed data-loss defect has priority; fix observed interaction
+blockers and defer incidental polish. Documentation-only changes need document
+validation, not GUI, compiler or full-suite reruns.
+
 Implementation is authorized. The legacy CLI experiment uses `rs_Appendix_A.tex`
 from `flengyel/Categorical_Rice_Shapiro` as its first corpus. Its ordered
 mathematical guidance begins with top-down orientation. This does not impose a
 corpus or a preliminary activity on the general editor.
 
-When mathematical guidance is requested, Kallenberg ordering will govern it.
-It is not a startup requirement or a mandatory form. For that guidance, including
-a problem-centered text, preserve this order:
+For requested orientation in unfamiliar mathematics, use Kallenberg ordering
+as the default exposition. It is not a startup requirement, mandatory form or
+required sequence before a focused question. A reader may request a definition,
+example, prerequisite or local proof explanation at any time. The default
+orientation, including for a problem-centered text, is:
 
 1. purpose and organization of the subject or chapter;
 2. central concepts, results, and problem families;
@@ -130,7 +150,7 @@ a problem-centered text, preserve this order:
 4. its governing idea or proposed method;
 5. detailed proof, calculation, or construction.
 
-An explicitly requested `why` view follows these levels and is never a
+The legacy explicitly requested `why` view follows these levels and is never a
 substitute for them. In the first stateless CLI, `why` must assume no earlier
 command or hidden session state. It cumulatively presents purpose and
 organization, central concepts and results, the selected result's role and
@@ -209,9 +229,10 @@ Stage 1 is authorized to reuse them for the single model-response trial
 specified there; it must not add a second logic or checker. Checker invocation
 for either fixture remains task-dependent in ordinary mathematical sessions and
 does not alter or gate `orient`, `study`, or problem work. The Appendix fixture
-and model-response trial are nevertheless required acceptance tests once their respective
-authorized evaluation stages are executed. Do not commit a checked bundle or
-executable Lean checker until the pinned Lean command has actually compiled and
+and model-response warrant trial retain their acceptance obligations when
+those respective experiments are executed (UX_SPEC.md §9.3). They do not gate
+R1–R3, ordinary assistance, or acceptance of useful study. Do not commit a
+checked bundle or executable Lean checker until the pinned Lean command has actually compiled and
 checked it; never hand-author a placeholder that claims checked status.
 
 The single bounded OpenAI Responses API provider adapter is implemented as
@@ -286,9 +307,11 @@ Ordinary orientation, study, and problem work remain independent of model
 assistance and justification-logic entry. The current transient request JSON is
 a low-level developer integration envelope, not a form for mathematicians and
 not the task-facing live workflow; deriving its request metadata and limits
-still waits for active mathematical work and a genuine Stage 1 obstruction.
-The response-review precursor authorizes no live request and does not
-establish Stage 1 usefulness.
+is part of R2, driven by the selected mathematical question. The explicit
+September 17 study-assistance requirement justifies implementing that GUI
+workflow. Each transmission still requires its own explicit user action and
+exact-context preview; this roadmap authorizes no background provider call.
+The response-review precursor does not establish assistance usefulness.
 
 For the warrant layer:
 

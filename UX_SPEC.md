@@ -7,8 +7,10 @@ The current GUI provides ordinary-file editing, external-editor and Jupyter
 handoff, staged LaTeX building, PDF rendering, checkpoint recovery and retained-record
 inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, live-model and Kallenberg-guidance GUI workflows below remain
-unimplemented. Kallenberg ordering will govern requested mathematical guidance,
-not startup or mandatory forms. Qt/runtime and TeX prerequisites remain
+unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+prioritizes readable study, task-local assistance and continued investigation.
+Kallenberg ordering guides requested orientation in unfamiliar material; a
+focused question need not repeat it. Qt/runtime and TeX prerequisites remain
 platform-dependent; they are not permanent workflow invariants.
 
 ## 1. Design principle
@@ -65,6 +67,23 @@ Editing, viewing a source and comparing two documents require no preliminary
 metadata. Mathematical hypotheses belong in the text or formal declarations.
 The navigator and contextual information should leave room for the current work.
 All operations must be available through visible menus without required key chords.
+Also provide platform-standard Open, Save, Find and Find-next shortcuts, show
+them in menus, and keep keyboard focus predictable. A completed marker action
+must visibly identify the marked passage; an unavailable Return action must
+make the reason discoverable. Do not make successful marker creation something
+the user must infer from a later restart.
+
+A reader must be able to open an existing local PDF beside an ordinary work
+note without TeX source or a build. Preserve its document identity, page and
+zoom independently of generated-output provenance. Add search, outline and
+internal navigation in bounded increments required by actual reading; an
+internal document link must not silently launch an external action. Keep
+the reader's note and return location available during a definition lookup.
+Opening a PDF does not imply reliable text extraction or a source mapping.
+When sending a PDF excerpt, show the exact extracted or transcribed text and
+its document revision/page so that damaged notation can be corrected explicitly.
+A corrected transcription is distinct from the original source.
+
 Different projects may be open in different workstation processes. This increment
 supports only one active workstation process per project, without a lifetime lock.
 
@@ -106,7 +125,8 @@ current/recovered content or saved base does not match. Entries contain only the
 path, content revision, selection endpoints and a plain preview of at most 120
 Unicode characters with display whitespace normalized. Displayed lines and
 columns are one-based; canonical stored columns remain zero-based. Previews
-survive restart without source reads and are never source quotations or records.
+survive restart without source reads; they are display excerpts, not immutable
+source-quotation or provenance records.
 In loaded editable ordinary text, the marker and shelf follow internal edits and
 undo/redo through their shared document, independently of both pane selections.
 Nonempty ranges exclude insertions at their outside boundaries; a point marker
@@ -220,7 +240,10 @@ development already exists.
 
 ## 3. The theorem view
 
-The default order for theorem study is:
+When the reader requests an introduction to an unfamiliar result, offer this
+default presentation. It is not a required sequence of screens or completed
+steps. Definitions, examples, prerequisites and local proof questions remain
+accessible at any point; a focused expert question begins where the user asks.
 
 ```
 Title
@@ -251,9 +274,11 @@ admitted premises and policy,” never “true,” “known,” or “verified.�
 **The statement precedes the proof idea.** Everything above the statement
 answers *why am I reading this*; everything below answers *why is it true*.
 
-**Dependencies follow the skeleton.** Which results a proof uses becomes
-informative after the shape of the argument is visible. Formal dependencies and
-conceptual prerequisites remain distinct.
+**Expose dependencies when they help.** A proof skeleton can make the role of
+a cited result clearer, but an unfamiliar definition or prerequisite may need
+attention earlier. Formal dependencies and conceptual prerequisites remain
+distinct. A source-linked explanation must make missing context visible rather
+than suggesting that an incomplete definition list is exhaustive.
 
 Each section links to its source and to related work. Any section may be absent.
 An absent formalization is an ordinary state of the corpus, not a gap the
@@ -383,6 +408,28 @@ constructs the request from the current problem or object, displayed source
 passages, and displayed `WorkArtifact`s. Before submission, the mathematician
 can inspect and reduce the exact outbound context. Nothing else is sent.
 
+The R2–R3 live GUI workflow supports this interaction; the explicit linked
+follow-up in step 6 belongs to R3:
+
+1. Select source or work passages and write the mathematical question.
+2. Inspect the provider/model and exact outbound content; remove unwanted
+   context and explicitly authorize this request.
+3. Read an attributed answer with mathematical notation rendered clearly and
+   exact raw content still inspectable. Rendering neither executes code nor
+   fetches content.
+4. Open a supplied source passage, inspect an unsupported citation, or compare
+   a proposed step with the work without losing the question or note.
+5. Retain a useful exact passage or write a separately attributed correction or
+   synthesis in the work. Reject or leave the rest unused without a mandatory
+   sentence-by-sentence classification.
+6. If useful, explicitly request a linked follow-up with the correction or
+   alternative assumption, then continue the mathematical work.
+
+No developer request JSON, declaration name, formal artifact, warrant or
+five-anchor setup precedes this workflow. A natural-language question is enough;
+metadata comes from the chosen work. The UI must not label an unverified model
+citation as a retrieved source, or an answer as complete when context is missing.
+
 Each explicit user action creates at most one provider request. The request
 obeys configured input, output, and timeout limits, invokes no provider tools,
 and performs no automatic retry or recursive request. A retry or user-requested
@@ -499,112 +546,102 @@ validator.
 
 ---
 
-## 9. Initial experimental sessions
+## 9. Study and collaboration evaluation
 
-The first implementation is evaluated through two distinct sessions. Neither
-session substitutes for the other.
+Evaluate usefulness as each R1–R3 increment is delivered. Source choice follows
+the current mathematical need. Reading/re-entry and unformalized problem work
+test distinct capabilities; neither substitutes for the other. The warrant
+experiment in §9.3 has independent acceptance criteria.
 
 ### 9.1 Problem-centered study without formalization
 
-Use a coherent cluster from a problem-centered algebraic number theory text.
+Use a locally available mathematical source and a problem worth doing; a
+coherent algebraic number theory cluster remains a suitable candidate.
 
-1. Enter through a chapter objective or a selected problem family.
-2. See a concise orientation: relevant definitions and results, nearby examples,
-   and previously completed problems that may be useful.
-3. Open one problem and begin an attempt in an ordinary work file, such as a TeX
-   file, Sage worksheet, or diagram, without first completing a subject map or
-   questionnaire.
-4. Request help only when useful: a source locator, definition reminder, related
-   result, strategic hint, intermediate lemma, computation, criticism, or
-   comparison with a solution when one is available.
-5. At one genuine obstruction, make a bounded call to the configured model.
-   Inspect the selected outbound context, submit the request, and preserve the
-   `ModelCall` and raw response.
-6. Inspect the response progressively. Select visible passages without entering
-   byte offsets; retain only exact spans that enter the work or whose correction,
-   rejection, or abandonment is recorded. Record only candidate routes that the
-   response actually states or the mathematician records in a work artifact.
-7. If a selected passage suggests a source or reports a calculation or check,
-   retrieve, identify, calculate, or check it independently. Until then it
-   remains a proposal.
-8. If a paraphrase or synthesis helps continued work, preserve it as a separate
-   derived representation linked to its exact selected sources.
-9. For one selected substantive claim, inspect the generic warrant projection.
-   Either review separate admissions \(m:D\) and \(r:(D\to F)\) and the checked
-   route \(r\cdot m:F\), or retain an explicit no-bridge outcome and display the
-   independent reason \(v:F\) that actually warrants the mathematics. If the
-   proposal is wrong or irrelevant, retain \(D\) without an active bridge or
-   admission and record rejection or abandonment; no warrant for \(F\) is
-   required.
-10. Preserve the attempt, revisions, calculations, exact sources consulted, and
-    assistance used.
-11. Resume later at the unfinished mathematical step.
-12. Test retention by reconstructing the solution or solving a related problem.
+1. Open the source and a work note. Offer purpose, definitions, relevant results
+   and examples when needed, without forcing a completed orientation sequence.
+2. Begin a proof, calculation, example or counterexample in an ordinary file.
+3. At a genuine obstruction, select relevant context and request an explanation,
+   hint, criticism or other bounded help through the workflow in §8.
+4. Assess the answer through the actual mathematics. Retrieve suggested sources
+   or perform checks explicitly when useful; otherwise suggestions remain
+   unverified. A proposed calculation is not a computation that has been run.
+5. Preserve useful passages, revisions, corrections and the resulting work,
+   linked to their exact sources. Keep a synthesis distinct from its inputs.
+6. Leave the next question or unfinished step in the note and continue later.
+   A related problem or reconstructed argument can test later retention.
 
-**Acceptance.** The session is useful when no formal artifact exists. It begins
-with top-down orientation and proceeds directly to substantive problem work,
-preserves enough evidence to resume and test the work, and requires no
-declaration of comprehension. At least one model call is
-traceable from exact outbound context through raw response to a proposal that is
-used, corrected, rejected, or abandoned during the mathematical attempt. The
-selected material is recoverable from visible text without user-supplied byte
-arithmetic; every paraphrase or synthesis remains linked to its lossless
-sources. The derived candidate-route view contains no inferred provider-internal search,
-and a source suggestion is either independently retrieved and identified or
-remains visibly unverified. One exact response span is also traceable through
-its documentary atom and explicit admissions to a checked derivation, or to a
-recorded no-bridge decision and the independent warrant used instead, or to rejection or abandonment with no
-warrant for \(F\). Proposal disposition alone is task evidence, not a
-mathematical warrant, and \(m:D\) alone cannot derive \(F\).
+**Acceptance.** Useful mathematical work is possible without a formal artifact.
+One real assistance exchange is traceable from inspected outbound context
+through raw response to a contribution used, corrected, rejected or abandoned.
+Assess its effect on subsequent work, including correction and record-keeping
+cost. Exact passages are selectable without user-supplied byte arithmetic.
+The saved work is sufficient to continue the actual attempt. A checked warrant
+and a disposition for every sentence are not prerequisites.
 
-### 9.2 Mathematical re-entry and formal correspondence
+### 9.2 Mathematical reading and re-entry
 
-The completed Appendix A editor/build/render/re-entry smoke test used ordinary
-corpus-neutral project actions. It did **not** complete this mathematical re-entry
-and warrant session. Edit-stable unfinished-work and working-context anchors,
-including their bounded private previews, supply mutable navigation aids. They
-do not relocate immutable mathematical or documentary spans, source occurrences,
-provenance, admissions, verifications or checked warrants. The complete
-mathematical re-entry and warrant workflow below remains
-unfinished.
+The supplied September 14 evidence shows useful saved notes, reopened panes and
+one retained manuscript passage. The guidance came from the surrounding
+assistant interaction; it does not establish implemented GUI guidance.
+Five-anchor restoration and confirmed marker Return were not completed, and
+the unavailable historical seed prevents a historical reduction claim. No
+anchor persistence defect or crash follows from these observations.
 
-Use `rs_Appendix_A.tex` as the mathematical source, the corresponding Lean
-declarations when relevant, and `Lean/docs/AppendixA.md` as the existing
-correspondence record.
+Use the actual saved work in a durable project, or begin a clearly identified
+new prospective session if it is unavailable. Do not repeatedly reconstruct a
+missing note as a substitute for testing continuation. Appendix A is available
+for this experiment; another current mathematical source is also legitimate.
 
-1. Orient in the appendix's purpose and organization, central concepts, and
-   named results before selecting detailed material.
-2. Begin from a mathematical question, manuscript result, unfinished proof, or
-   earlier work product.
-3. Recover the relevant source occurrences, prior attempts, computations, and
-   unresolved questions.
-4. Reconstruct or continue the mathematical argument.
-5. When a formal counterpart exists and is useful, inspect its declaration,
-   dependencies, axiom usage, and verification status.
-6. Check explicit correspondences and resolve any discrepancy exposed by the
-   mathematical or formal work.
-7. For the bounded justification experiment, explicitly request `why` for
-   `lem:range-lifting-pullback-section` after the correspondence has been
-   reviewed.
-8. Inspect the immutable manuscript claim, exact proposition of
-   `Dom.exists_total_lift_iff_rangeLiftPullback_section`, pinned
-   kernel-attestation claim, separately admitted bridges, and checked
-   \(J_0\) certificate.
-9. Change a source, formal environment, or admission in a test fixture. Confirm
-   that a successor context deactivates only the dependent current route while
-   preserving the old certificate for its pinned snapshot.
-10. Resume later from the preserved work product or perform a related task.
+1. Open the source and previous note at the current question. For unfamiliar
+   material, establish purpose and needed definitions before unnecessary proof
+   detail; a returning reader may proceed directly to the unfinished argument.
+2. Locate the passages and examples needed to understand or continue the work.
+   Retain only the context the user finds helpful, with no required anchor count.
+3. Produce a substantive continuation: clarify a definition, explain a method,
+   repair a proof step, construct an example or identify a precise open issue.
+4. Save the conclusion and intended next step in ordinary work. Marking a
+   passage is optional and must give visible success feedback when used.
+5. Close and reopen; resume from the saved work and continue the mathematics.
+   Compare consequential reconstruction effort prospectively, without claiming
+   an unavailable historical baseline.
 
-**Acceptance.** The session restores enough specific context to continue work
-after an interruption. Its formal features are tested only on objects for which
-formal material exists. The warrant slice succeeds when its displayed
-application term exposes the formal-proof-policy and formal--manuscript bridges,
-reports only contextual derivability, and supports later inspection without
-requiring logic entry before study.
+**Acceptance.** The reader can continue meaningful work with the source, note
+and relevant locations available. Quality of the explanation or argument and
+the burden of resuming matter together. Search counts, a restored cursor and
+a shelf quota do not independently establish mathematical usefulness.
+Formal counterparts are consulted only when useful.
 
-The first session tests problem-centered learning in an unformalized source. The
-second tests re-entry and optional informal/formal correspondence in an existing
-project.
+Edit-stable anchors and their bounded previews remain mutable navigation aids.
+They do not relocate immutable quotations, source occurrences, provenance,
+admissions, verifications or warrants.
+
+### 9.3 Independent formal correspondence and warrant experiment
+
+Run this when the active mathematical question calls for it, separately from
+acceptance of readable study and live assistance.
+
+For the Appendix fixture, inspect the relevant manuscript result, Lean
+declaration and `Lean/docs/AppendixA.md` correspondence. Then explicitly request
+`why` for `lem:range-lifting-pullback-section`. Inspect the immutable manuscript
+claim, exact proposition of
+`Dom.exists_total_lift_iff_rangeLiftPullback_section`, pinned kernel-attestation
+claim, separately admitted bridges and checked \(J_0\) certificate.
+In a test fixture, vary a source, formal environment or admission and confirm
+that only dependent current routes deactivate while old certificates remain.
+
+For the documentary model-response experiment, trace one exact response span
+to its documentary atom. Inspect either explicitly admitted \(m:D\) and
+\(r:(D\to F)\) with checked \(r\cdot m:F\), an independently based
+\(v:F\) route with no AI-to-claim bridge, or rejection/abandonment without a
+warrant for \(F\). Never manufacture a bridge to complete the experiment.
+
+**Acceptance.** Display only contextual derivability and keep source identity,
+external verification, premise admission and human judgment distinct.
+\(m:D\) alone cannot derive \(F\). The visible derivation exposes the actual
+bridges, and withdrawing an admission preserves the old record while
+deactivating the dependent current route. These requirements govern the
+warrant experiment, not entry into mathematical study.
 
 ---
 
@@ -635,7 +672,15 @@ corpus. A source revision identifies the stored records that require inspection.
 
 ## 11. Failure modes
 
-The interface has failed if:
+The interface has failed if it requires or encourages:
+
+- treating an incomplete prescribed evaluation ritual as a failure by the user;
+- requiring five anchors, formal correspondence or a warrant before useful study;
+- counting tests, searches, responses or preserved records as mathematical benefit;
+- improving provenance machinery while the user still cannot read the source
+  comfortably or ask a task-local mathematical question.
+
+It has also failed if:
 
 - a subject map, inventory, or comprehension form must be completed before
   mathematical work begins;
