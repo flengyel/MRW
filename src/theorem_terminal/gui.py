@@ -28,7 +28,8 @@ from PySide6.QtPdfWidgets import QPdfView
 
 from .response_review import bounded_safe_diagnostic, passage_count
 from .workstation import (ASSISTANCE_MODEL_ENV, MAX_ASSISTANCE_CONTEXTS,
-                          Workstation, preserve_newlines, record_kind)
+                          AssistanceOutcome, Workstation, preserve_newlines,
+                          record_kind)
 from .workspace import MAX_TEXT_BYTES, WorkspaceError
 
 TITLE = 'Mathematical Research Workstation'
@@ -873,6 +874,9 @@ class AssistancePanel(QWidget):
         self.target = None
         self.prepared = None
         self.outcome = None
+        self.parent = None
+        self.parent_passage_numbers = []
+        self.parent_passages = []
         self.in_flight = False
         self.installing = False
 
@@ -894,6 +898,107 @@ class AssistancePanel(QWidget):
         provider_row.addWidget(self.model, 1)
         layout.addLayout(provider_row)
 
+        continuation_actions = QHBoxLayout()
+        self.load_parent_button = QPushButton('Continue retained answer…')
+        self.load_parent_button.setAccessibleName(
+            'Select completed parent ModelCall for one continuation'
+        )
+        self.load_parent_button.clicked.connect(
+            lambda: window.perform(window.load_continuation_parent)
+        )
+        continuation_actions.addWidget(self.load_parent_button)
+        self.resume_button = QPushButton('Resume saved investigation')
+        self.resume_button.clicked.connect(
+            lambda: window.perform(window.resume_investigation)
+        )
+        self.resume_button.setEnabled(False)
+        continuation_actions.addWidget(self.resume_button)
+        layout.addLayout(continuation_actions)
+
+        self.continuation_widget = QWidget()
+        continuation_layout = QVBoxLayout(self.continuation_widget)
+        continuation_layout.setContentsMargins(0, 0, 0, 0)
+        self.parent_attribution = QLabel('')
+        self.parent_attribution.setWordWrap(True)
+        self.parent_attribution.setTextFormat(Qt.TextFormat.PlainText)
+        self.parent_attribution.setSizePolicy(
+            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+        )
+        continuation_layout.addWidget(self.parent_attribution)
+        parent_select = QHBoxLayout()
+        self.parent_passage = QSpinBox()
+        self.parent_passage.setRange(1, 1)
+        self.parent_passage.setPrefix('Prior passage ')
+        self.parent_passage.setAccessibleName('Prior response passage number')
+        parent_select.addWidget(self.parent_passage)
+        self.add_parent_passage_button = QPushButton('Add exact prior passage')
+        self.add_parent_passage_button.clicked.connect(
+            lambda: window.perform(self.add_parent_passage)
+        )
+        parent_select.addWidget(self.add_parent_passage_button)
+        continuation_layout.addLayout(parent_select)
+        self.parent_passage_list = QListWidget()
+        self.parent_passage_list.setAccessibleName(
+            'Selected exact prior response passages'
+        )
+        self.parent_passage_list.setWordWrap(True)
+        self.parent_passage_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.parent_passage_list.setMaximumHeight(82)
+        self.parent_passage_list.currentRowChanged.connect(
+            self.show_parent_passage
+        )
+        continuation_layout.addWidget(self.parent_passage_list)
+        self.remove_parent_passage_button = QPushButton('Remove prior passage')
+        self.remove_parent_passage_button.clicked.connect(
+            lambda: window.perform(self.remove_parent_passage)
+        )
+        self.remove_parent_passage_button.setEnabled(False)
+        continuation_layout.addWidget(self.remove_parent_passage_button)
+        self.parent_passage_text = QPlainTextEdit()
+        self.parent_passage_text.setReadOnly(True)
+        self.parent_passage_text.setAccessibleName(
+            'Exact selected prior response text'
+        )
+        self.parent_passage_text.setMaximumHeight(120)
+        continuation_layout.addWidget(self.parent_passage_text)
+        continuation_layout.addWidget(QLabel(
+            'Human correction / changed assumption / alternative (ordinary work):'
+        ))
+        self.correction = QPlainTextEdit()
+        self.correction.setAccessibleName(
+            'Human correction or changed assumption'
+        )
+        self.correction.setMaximumHeight(82)
+        continuation_layout.addWidget(self.correction)
+        continuation_layout.addWidget(QLabel('Last useful conclusion (human-maintained):'))
+        self.last_conclusion = QPlainTextEdit()
+        self.last_conclusion.setAccessibleName('Last useful conclusion')
+        self.last_conclusion.setMaximumHeight(72)
+        continuation_layout.addWidget(self.last_conclusion)
+        continuation_layout.addWidget(QLabel('Unresolved issue (human-maintained):'))
+        self.unresolved_issue = QPlainTextEdit()
+        self.unresolved_issue.setAccessibleName('Unresolved issue')
+        self.unresolved_issue.setMaximumHeight(72)
+        continuation_layout.addWidget(self.unresolved_issue)
+        summary_buttons = QHBoxLayout()
+        self.save_summary_button = QPushButton('Save task summary')
+        self.save_summary_button.clicked.connect(
+            lambda: window.perform(self.save_summary)
+        )
+        self.save_summary_button.setEnabled(False)
+        summary_buttons.addWidget(self.save_summary_button)
+        self.insert_handoff_button = QPushButton('Insert task handoff into note')
+        self.insert_handoff_button.clicked.connect(
+            lambda: window.perform(self.insert_handoff)
+        )
+        self.insert_handoff_button.setEnabled(False)
+        summary_buttons.addWidget(self.insert_handoff_button)
+        continuation_layout.addLayout(summary_buttons)
+        self.continuation_widget.hide()
+        layout.addWidget(self.continuation_widget)
+
         context_label = QLabel(
             'Explicit selected ordinary text (PDF bytes, hidden buffers, history, '
             'and unselected note text are not included):'
@@ -903,6 +1008,10 @@ class AssistancePanel(QWidget):
         layout.addWidget(context_label)
         self.context_list = QListWidget()
         self.context_list.setAccessibleName('Assistance selected contexts')
+        self.context_list.setWordWrap(True)
+        self.context_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         self.context_list.setMaximumHeight(92)
         self.context_list.currentRowChanged.connect(self.show_context)
         layout.addWidget(self.context_list)
@@ -984,6 +1093,17 @@ class AssistancePanel(QWidget):
         self.answer_notice.setTextFormat(Qt.TextFormat.PlainText)
         self.answer_notice.hide()
         layout.addWidget(self.answer_notice)
+        self.continue_current_button = QPushButton(
+            'Continue this answer once…'
+        )
+        self.continue_current_button.setAccessibleName(
+            'Continue this completed answer once'
+        )
+        self.continue_current_button.clicked.connect(
+            lambda: window.perform(self.continue_current_answer)
+        )
+        self.continue_current_button.hide()
+        layout.addWidget(self.continue_current_button)
         self.answer = QPlainTextEdit()
         self.answer.setReadOnly(True)
         self.answer.setAccessibleName('Readable inert model response')
@@ -1046,6 +1166,9 @@ class AssistancePanel(QWidget):
 
         self.question.textChanged.connect(self.draft_changed)
         self.model.textChanged.connect(self.draft_changed)
+        self.correction.textChanged.connect(self.draft_changed)
+        self.last_conclusion.textChanged.connect(self.draft_changed)
+        self.unresolved_issue.textChanged.connect(self.draft_changed)
         self._set_response_controls(False)
 
     def _set_response_controls(self, enabled):
@@ -1058,10 +1181,23 @@ class AssistancePanel(QWidget):
                        self.remove_context_button, self.question,
                        self.preview_button):
             widget.setEnabled(enabled)
+        self.load_parent_button.setEnabled(enabled)
+        continuation_enabled = enabled and self.parent is not None
+        for widget in (self.parent_passage, self.add_parent_passage_button,
+                       self.parent_passage_list, self.remove_parent_passage_button,
+                       self.correction, self.last_conclusion,
+                       self.unresolved_issue):
+            widget.setEnabled(continuation_enabled)
         self.dismiss_button.setEnabled(enabled)
 
     def draft_changed(self, *_):
-        if self.installing or self.in_flight or self.outcome is not None:
+        if self.installing or self.in_flight:
+            return
+        if self.outcome is not None:
+            if self.parent is not None and self.window.controller.workspace:
+                self.save_summary_button.setEnabled(
+                    self.window.controller.current().investigation is not None
+                )
             return
         self.prepared = None
         self.send_button.setEnabled(False)
@@ -1070,6 +1206,110 @@ class AssistancePanel(QWidget):
         self.status.setText(
             'Draft changed. Preview the complete exact request before Send.'
         )
+
+    def install_parent(self, parent, *, passages=(), question='', correction='',
+                       last_conclusion='', unresolved_issue=''):
+        """Enter the one-parent/one-child continuation mode."""
+        if self.in_flight:
+            raise WorkspaceError('Wait for the in-flight request to finish')
+        self.reset()
+        self.installing = True
+        try:
+            self.parent = parent
+            self.parent_passages = list(passages)
+            self.parent_passage_numbers = [item.number for item in passages]
+            self.parent_attribution.setText('\n'.join((
+                f'Completed parent ModelCall: {parent.call.id}',
+                f'Provider / model: {parent.call.provider} / {parent.call.model}',
+                f'Response SHA-256: {parent.call.raw_response_digest}',
+                f'Retained record: {parent.path}',
+                'Prior text remains an attributed, unverified model proposal.',
+            )))
+            count = passage_count(parent.call.raw_response)
+            self.parent_passage.setRange(1, max(1, count))
+            self.continuation_widget.show()
+            self.question.setPlainText(question)
+            self.correction.setPlainText(correction)
+            self.last_conclusion.setPlainText(last_conclusion)
+            self.unresolved_issue.setPlainText(unresolved_issue)
+            self.refresh_parent_passages()
+            self.status.setText(
+                'Continuation draft loaded. Add one or more exact prior passages, '
+                'write the follow-up and any human correction, then inspect a new '
+                'complete preview. No provider conversation state is used.'
+            )
+        finally:
+            self.installing = False
+        self._set_draft_controls(True)
+        self.remove_parent_passage_button.setEnabled(
+            bool(self.parent_passage_numbers)
+        )
+        self.question.setFocus()
+
+    def refresh_parent_passages(self, selected=0):
+        if self.parent is not None and self.parent_passage_numbers:
+            self.parent, passages = self.window.controller.select_investigation_passages(
+                self.parent, tuple(self.parent_passage_numbers)
+            )
+            self.parent_passages = list(passages)
+        elif not self.parent_passage_numbers:
+            self.parent_passages = []
+        with QSignalBlocker(self.parent_passage_list):
+            self.parent_passage_list.clear()
+            for passage in self.parent_passages:
+                preview = ' '.join(passage.text.split())[:90]
+                self.parent_passage_list.addItem(
+                    f'Passage {passage.number} · UTF-8 bytes '
+                    f'[{passage.start_byte}, {passage.end_byte}) · {preview}'
+                )
+            if self.parent_passages:
+                self.parent_passage_list.setCurrentRow(
+                    min(max(0, selected), len(self.parent_passages) - 1)
+                )
+        self.show_parent_passage(self.parent_passage_list.currentRow())
+        self.remove_parent_passage_button.setEnabled(
+            bool(self.parent_passages) and not self.in_flight
+        )
+
+    def show_parent_passage(self, row):
+        if 0 <= row < len(self.parent_passages):
+            passage = self.parent_passages[row]
+            self.parent_passage_text.setPlainText(
+                f'Exact prior response UTF-8 bytes '
+                f'[{passage.start_byte}, {passage.end_byte})\n\n'
+                + passage.text
+            )
+            self.parent_passage_text.moveCursor(QTextCursor.MoveOperation.Start)
+        else:
+            self.parent_passage_text.setPlainText(
+                'No prior response passage selected. At least one exact passage is '
+                'required for a linked continuation.'
+            )
+
+    def add_parent_passage(self):
+        if self.parent is None:
+            raise WorkspaceError('Select a completed retained parent ModelCall first')
+        number = self.parent_passage.value()
+        if number not in self.parent_passage_numbers:
+            self.parent_passage_numbers.append(number)
+        self.refresh_parent_passages(
+            self.parent_passage_numbers.index(number)
+        )
+        self.draft_changed()
+
+    def remove_parent_passage(self):
+        row = self.parent_passage_list.currentRow()
+        if not 0 <= row < len(self.parent_passage_numbers):
+            raise WorkspaceError('Select a prior passage to remove')
+        del self.parent_passage_numbers[row]
+        self.refresh_parent_passages(row)
+        self.draft_changed()
+
+    def continue_current_answer(self):
+        if (self.parent is not None or not self.outcome or not self.outcome.terminal
+                or self.outcome.terminal.status != 'completed'):
+            raise WorkspaceError('No initial completed answer is available to continue')
+        self.window.load_continuation_parent(self.outcome.path)
 
     @staticmethod
     def context_key(context):
@@ -1150,14 +1390,26 @@ class AssistancePanel(QWidget):
         )
 
     def prepare_request(self):
-        if self.target is None:
-            raise WorkspaceError('Add a visible ordinary-text selection first')
-        prepared = self.window.controller.prepare_assistance(
-            target=self.target,
-            contexts=tuple(self.contexts),
-            question=self.question.toPlainText(),
-            model=self.model.text(),
-        )
+        if self.parent is not None:
+            prepared = self.window.controller.prepare_continuation(
+                parent=self.parent,
+                passage_numbers=tuple(self.parent_passage_numbers),
+                contexts=tuple(self.contexts),
+                question=self.question.toPlainText(),
+                correction=self.correction.toPlainText(),
+                last_conclusion=self.last_conclusion.toPlainText(),
+                unresolved_issue=self.unresolved_issue.toPlainText(),
+                model=self.model.text(),
+            )
+        else:
+            if self.target is None:
+                raise WorkspaceError('Add a visible ordinary-text selection first')
+            prepared = self.window.controller.prepare_assistance(
+                target=self.target,
+                contexts=tuple(self.contexts),
+                question=self.question.toPlainText(),
+                model=self.model.text(),
+            )
         self.prepared = prepared
         self.preview_text.setPlainText(prepared.preview)
         self.preview_text.moveCursor(QTextCursor.MoveOperation.Start)
@@ -1190,6 +1442,11 @@ class AssistancePanel(QWidget):
                 raise
             self.in_flight = False
             self.outcome = outcome
+            if prepared.continuation is not None and outcome.terminal is not None:
+                try:
+                    self.window.controller.retain_investigation(prepared, outcome)
+                except (OSError, ValueError) as exc:
+                    self.window.show_error(str(exc))
             self.show_outcome()
             QTimer.singleShot(0, self.scroll_to_outcome)
         def failed(error):
@@ -1217,6 +1474,20 @@ class AssistancePanel(QWidget):
         self._set_draft_controls(False)
         self.dismiss_button.setEnabled(True)
         self.send_button.setEnabled(False)
+        self.continue_current_button.setVisible(bool(
+            terminal and terminal.status == 'completed' and self.parent is None
+            and self.window.controller.current().investigation is None
+        ))
+        retained_investigation = bool(
+            self.parent is not None and self.window.controller.workspace
+            and self.window.controller.current().investigation is not None
+        )
+        self.save_summary_button.setEnabled(retained_investigation)
+        self.insert_handoff_button.setEnabled(retained_investigation)
+        if retained_investigation:
+            for widget in (self.question, self.correction, self.last_conclusion,
+                           self.unresolved_issue):
+                widget.setEnabled(True)
         if outcome and outcome.raw_record is not None:
             self.raw_record.setPlainText(outcome.raw_record.decode('utf-8'))
             self.record_toggle.setVisible(True)
@@ -1338,6 +1609,101 @@ class AssistancePanel(QWidget):
             'active note. Later edits do not alter the raw ModelCall.'
         )
 
+    def save_summary(self):
+        self.window.controller.update_investigation_summary(
+            question=self.question.toPlainText(),
+            correction=self.correction.toPlainText(),
+            last_conclusion=self.last_conclusion.toPlainText(),
+            unresolved_issue=self.unresolved_issue.toPlainText(),
+        )
+        self.status.setText(
+            'Human-maintained investigation summary saved privately. Immutable parent '
+            'and child ModelCall records were not changed.'
+        )
+        self.save_summary_button.setEnabled(True)
+
+    def insert_handoff(self):
+        state = self.window.controller.current()
+        pane = self.window.panes[state.active_pane]
+        buffer = self.window.controller.buffer(pane.shown)
+        if not pane.genuine_content() or not buffer.editable:
+            raise WorkspaceError('Focus an editable ordinary work note before inserting')
+        cursor = pane.text.textCursor()
+        cursor.clearSelection()
+        pane.text.setTextCursor(cursor)
+        pane.text.insertPlainText(self.window.controller.investigation_handoff())
+        pane.text.setFocus()
+        self.status.setText(
+            'Inserted an editable human task handoff with immutable parent/child '
+            'identities. Model prose was not copied or reclassified.'
+        )
+
+    def install_restored(self, restored):
+        """Show saved task text even when an immutable record is unavailable."""
+        if restored is None:
+            self.resume_button.setEnabled(False)
+            return
+        state = restored.state
+        if restored.parent is not None:
+            self.install_parent(
+                restored.parent,
+                passages=restored.passages,
+                question=state.question,
+                correction=state.correction,
+                last_conclusion=state.last_conclusion,
+                unresolved_issue=state.unresolved_issue,
+            )
+        else:
+            self.reset()
+            self.installing = True
+            try:
+                self.continuation_widget.show()
+                self.parent_attribution.setText('\n'.join((
+                    f'Saved parent ModelCall: {state.parent_id}',
+                    f'Saved response SHA-256: {state.parent_response_digest}',
+                    f'Retained record unavailable or changed: {state.parent_path}',
+                )))
+                self.question.setPlainText(state.question)
+                self.correction.setPlainText(state.correction)
+                self.last_conclusion.setPlainText(state.last_conclusion)
+                self.unresolved_issue.setPlainText(state.unresolved_issue)
+                self.parent_passage_list.clear()
+                for passage in state.parent_passages:
+                    self.parent_passage_list.addItem(
+                        f'Saved passage {passage.number} · UTF-8 bytes '
+                        f'[{passage.start_byte}, {passage.end_byte}) · exact text unavailable'
+                    )
+                self.parent_passage_text.setPlainText(
+                    'Exact prior text is unavailable because the retained parent record '
+                    'did not validate. No replacement passage was guessed.'
+                )
+            finally:
+                self.installing = False
+        self.prepared = None
+        self.outcome = None
+        if restored.child is not None:
+            self.outcome = AssistanceOutcome(
+                'restored-investigation', Path(state.child_path), restored.child,
+                restored.child_raw, restored.error,
+            )
+            self.show_outcome()
+        else:
+            self._set_draft_controls(False)
+            self.status.setText(
+                restored.error or 'Saved investigation task summary restored.'
+            )
+        for widget in (self.question, self.correction, self.last_conclusion,
+                       self.unresolved_issue):
+            widget.setEnabled(True)
+        self.save_summary_button.setEnabled(True)
+        self.insert_handoff_button.setEnabled(True)
+        if restored.error:
+            self.status.setText(restored.error)
+        self.continue_current_button.hide()
+        self.resume_button.setEnabled(True)
+        self.window.assistance_dock.show()
+        self.window.update_actions()
+
     def toggle_record(self, shown):
         self.raw_record.setVisible(bool(shown))
         self.record_toggle.setText(
@@ -1350,10 +1716,20 @@ class AssistancePanel(QWidget):
         try:
             self.contexts = []
             self.target = self.prepared = self.outcome = None
+            self.parent = None
+            self.parent_passage_numbers = []
+            self.parent_passages = []
             self.in_flight = False
             self.context_list.clear()
             self.context_text.clear()
             self.question.clear()
+            self.correction.clear()
+            self.last_conclusion.clear()
+            self.unresolved_issue.clear()
+            self.parent_attribution.clear()
+            self.parent_passage_list.clear()
+            self.parent_passage_text.clear()
+            self.continuation_widget.hide()
             if not self.model.text():
                 self.model.setText(os.environ.get(ASSISTANCE_MODEL_ENV, ''))
             self.preview_text.clear()
@@ -1367,11 +1743,20 @@ class AssistancePanel(QWidget):
             self.raw_record.hide()
             self.record_toggle.setChecked(False)
             self.record_toggle.hide()
+            self.continue_current_button.hide()
             self.status.setText('No request has been prepared.')
             self.send_button.setEnabled(False)
             self._set_response_controls(False)
             self._set_draft_controls(True)
             self.remove_context_button.setEnabled(False)
+            self.remove_parent_passage_button.setEnabled(False)
+            retained = bool(
+                self.window.controller.workspace
+                and self.window.controller.current().investigation is not None
+            )
+            self.resume_button.setEnabled(retained)
+            self.save_summary_button.setEnabled(False)
+            self.insert_handoff_button.setEnabled(False)
         finally:
             self.installing = False
 
@@ -1496,7 +1881,9 @@ class WorkstationWindow(QMainWindow):
         self.selection_dock.hide()
         self.view_menu.addAction(self.selection_dock.toggleViewAction())
         self._selection_rows = None
-        self.assistance_dock = QDockWidget('Mathematical assistance · one exchange', self)
+        self.assistance_dock = QDockWidget(
+            'Mathematical assistance · question and one continuation', self
+        )
         self.assistance_dock.setAllowedAreas(
             Qt.DockWidgetArea.RightDockWidgetArea
             | Qt.DockWidgetArea.BottomDockWidgetArea
@@ -1504,6 +1891,9 @@ class WorkstationWindow(QMainWindow):
         self.assistance_scroll = QScrollArea()
         self.assistance_scroll.setWidgetResizable(True)
         self.assistance_scroll.setMinimumWidth(360)
+        self.assistance_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         self.assistance = AssistancePanel(self)
         self.assistance_scroll.setWidget(self.assistance)
         self.assistance_dock.setWidget(self.assistance_scroll)
@@ -1574,6 +1964,11 @@ class WorkstationWindow(QMainWindow):
         self.add_action(work, 'ask', 'Ask about current selection…', self.ask_about_selection)
         self.actions['ask'].setShortcut(QKeySequence('Ctrl+Alt+Q'))
         self.actions['ask'].setShortcutContext(Qt.ShortcutContext.WindowShortcut)
+        self.add_action(work, 'continue_assistance',
+                        'Continue a retained completed answer…',
+                        self.load_continuation_parent)
+        self.add_action(work, 'resume_investigation',
+                        'Resume saved investigation', self.resume_investigation)
         latex = self.menuBar().addMenu('LaTeX')
         self.add_action(latex, 'tex_root', 'Set as TeX root', lambda: self.controller.set_tex_root())
         self.add_action(latex, 'build', 'Build LaTeX', self.build_latex)
@@ -1742,8 +2137,13 @@ class WorkstationWindow(QMainWindow):
         text_focused = not pdf_focused
         for key, action in self.actions.items():
             action.setEnabled(not busy)
-        for key in ('open', 'reference', 'new', 'split', 'close_project', 'model_call', 'projection', 'verification', 'documentary_package'):
+        for key in ('open', 'reference', 'new', 'split', 'close_project', 'model_call',
+                    'projection', 'verification', 'documentary_package',
+                    'continue_assistance'):
             self.actions[key].setEnabled(state is not None and not busy)
+        self.actions['resume_investigation'].setEnabled(bool(
+            state and state.investigation and not busy
+        ))
         for key in ('project', 'quit'):
             self.actions[key].setEnabled(not self.jobs)
         self.actions['close_project'].setEnabled(state is not None and not self.jobs)
@@ -1971,6 +2371,11 @@ class WorkstationWindow(QMainWindow):
                 self.reload_pdf(source='imported')
             elif state.pdf_source == 'generated' and state.successful_build:
                 self.reload_pdf(source='generated')
+        if self.controller.current().investigation:
+            self.submit(
+                self.controller.restore_investigation,
+                self.assistance.install_restored,
+            )
 
     def open_tree_file(self, index):
         original = self.file_filter.mapToSource(index)
@@ -2256,6 +2661,37 @@ class WorkstationWindow(QMainWindow):
         )
         self.assistance.question.setFocus()
         self.update_actions()
+
+    def load_continuation_parent(self, path=None):
+        """Explicitly load one completed retained call as the sole R3 parent."""
+        if self.controller.assistance_in_flight is not None:
+            raise WorkspaceError('Wait for the in-flight request to finish')
+        if self.controller.current().investigation is not None:
+            raise WorkspaceError(
+                'This project already has a saved parent/child investigation. '
+                'Resume it; R3 does not create a branch or second follow-up.'
+            )
+        if path is None:
+            path = QFileDialog.getOpenFileName(
+                self, 'Select completed parent ModelCall', '',
+                'JSON records (*.json);;All files (*)'
+            )[0]
+        if not path:
+            return
+        self.submit(
+            lambda: self.controller.investigation_parent(Path(path)),
+            self.assistance.install_parent,
+        )
+        self.assistance_dock.show()
+
+    def resume_investigation(self):
+        if not self.controller.current().investigation:
+            raise WorkspaceError('No saved investigation is available')
+        self.submit(
+            self.controller.restore_investigation,
+            self.assistance.install_restored,
+        )
+        self.assistance_dock.show()
 
     def add_context_selection(self):
         pane = self.active_pane()

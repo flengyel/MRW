@@ -122,11 +122,13 @@ Open a real integration corpus only when the task authorizes access, and do not
 modify its authoritative files during a visual check.
 
 The current GUI directly provides ordinary-file editing, existing local PDF
-reading, one explicitly previewed task-local model exchange, external-editor and
+reading, one explicitly previewed task-local model exchange, one bounded linked
+continuation with private restart restoration, external-editor and
 Jupyter handoff, staged LaTeX building, generated-PDF rendering, recovery and
 retained-record inspection. Proof-assistant, computer-algebra,
-notebook-execution, repository, literature-service, linked model follow-up and
-Kallenberg-guidance GUI workflows remain unimplemented. Appendix A supplied a corpus-neutral editor/build/render/re-entry
+notebook-execution, repository, literature-service, branching/general model
+conversation and Kallenberg-guidance GUI workflows remain unimplemented.
+Appendix A supplied a corpus-neutral editor/build/render/re-entry
 smoke test. The September 14 supplied evidence adds saved reading notes and
 one persisted passage, not a completed study-assistance or warrant evaluation.
 See UX_SPEC.md §§9.1–9.3 for the now-independent evaluations.
@@ -139,10 +141,11 @@ behavior. Then read `docs/CODEX_CONTINUATION.md` for the current bounded
 implementation task. `CODEX_PLAN.md` controls priority; the continuation file
 turns that priority into a handoff, not a competing roadmap.
 
-The active delivery order is R1 readable source plus durable note, R2 a
+The active delivery order was R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,
-as specified in `CODEX_PLAN.md`. R1 and R2 are delivered; R3 is the current
-bounded implementation task. This supersedes old Appendix-first execution
+as specified in `CODEX_PLAN.md`. R1–R3 are delivered; the current bounded task is
+to observe them in genuine mathematical work and implement only a demonstrated
+blocker before expanding scope. This supersedes old Appendix-first execution
 ordering and evaluation prompts that require five anchors or a warrant before
 study. Keep one bounded product increment active and evaluate its contribution
 to actual mathematical work. Preserve existing recovery and record invariants;
@@ -344,10 +347,11 @@ explicit user action and exact-context preview; this roadmap authorizes no
 background provider call. Synthetic transport and widget checks do not establish
 assistance usefulness.
 
-R3 may add one explicit linked follow-up, correction or alternative and durable
-investigation resumption. Preserve R2's per-request preview and adapter boundary;
-do not use provider conversation state, `previous_response_id`, automatic retry,
-source retrieval, provider tools, a second provider or autonomous requests.
+R3 provides one explicit linked follow-up, correction or alternative and durable
+investigation resumption. Preserve its one-initial-parent/one-child cut line,
+R2's per-request preview and the adapter boundary; do not use provider
+conversation state, `previous_response_id`, automatic retry, branching, source
+retrieval, provider tools, a second provider or autonomous requests.
 
 For the warrant layer:
 

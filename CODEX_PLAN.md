@@ -1,6 +1,6 @@
 # CODEX_PLAN.md
 
-Active product roadmap, reviewed 2026-09-17 against the delivered R1 and R2
+Active product roadmap, reviewed 2026-09-18 against the delivered R1–R3
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
 purpose in `VISION.md`.
@@ -10,10 +10,11 @@ purpose in `VISION.md`.
 **Assessment: the project has reached the interaction needed to test its intended
 user outcomes, but has not yet demonstrated them.** It has a reusable editor,
 independent local-PDF and build/render paths, durable recovery, navigation
-anchors, exact retained-record services, and one bounded task-local assistance
-exchange. No genuine mathematical obstruction has yet been helped through that
-exchange, and no continued in-application research collaboration has been
-observed. Continue from this foundation; do not restart the architecture.
+anchors, exact retained-record services, one bounded task-local assistance
+exchange and one explicitly linked, resumable continuation. No genuine
+mathematical obstruction has yet been helped through those exchanges, and no
+continued in-application research collaboration has been observed. Continue
+from this foundation; do not restart the architecture.
 
 This section controls implementation priority. It supersedes the old
 Appendix-first serial execution order and any evaluation prompt that makes
@@ -29,9 +30,9 @@ actual warrant question.
 |---|---|---|
 | Preservation and navigation | Implemented recovery and live anchors; the supplied September 14 report and screenshot show a saved note, two reopened panes and one persisted manuscript shelf entry | Preserve these services and their regression coverage; stop treating another anchor demonstration as the main product milestone |
 | Readable mathematics | R1 opens an exact-identity local PDF independently of TeX beside an editable note and restores page/zoom; PDF search and outline remain absent | The minimum literature-reading entry point is delivered. Observe real use before adding deferred reader features |
-| Routine operation | R1 binds platform-standard Open, Save, Find and Find-next, makes PDF-versus-text focus explicit, and shows marker/Return status | Preserve these behaviors while R3 adds explicit continuation |
+| Routine operation | R1 binds platform-standard Open, Save, Find and Find-next, makes PDF-versus-text focus explicit, and shows marker/Return status | Preserve these behaviors while evaluating the delivered continuation |
 | Study benefit | The September 14 session saved useful purpose, definition and near-product notes; explanatory guidance came from the surrounding assistant interaction | This supports the value of the study activity, not a delivered workstation guidance feature |
-| AI collaboration | R2 can initiate one explicitly previewed question from selected ordinary text, show an attributed inert answer with exact raw-record access, retain an exact passage and insert an attributed editable copy | Observe a genuine use and add only explicit linked correction/continuation in R3; synthetic responses establish mechanics, not benefit |
+| AI collaboration | R2 can initiate one explicitly previewed question; R3 can send one independently previewed child from selected exact parent passages plus separate human correction/current context, then restore the parent, correction, child and task summary | Observe a genuine use; synthetic responses establish mechanics, not benefit, and do not justify a conversation tree |
 | Re-entry evidence | Five-anchor evaluation was incomplete; marker creation was unconfirmed; the original historical note was unavailable | No anchor defect, crash, mislanding or historical reduction is established. Use a fresh prospective continuation test |
 
 The failed prescribed sessions are evidence about the product and evaluation
@@ -59,8 +60,9 @@ The following are design inputs, not proof that this application works.
 
 ### Delivery order
 
-One product increment is active at a time. These are proposed delivery targets,
-not claims of implemented capability or promises about calendar dates.
+One product increment is active at a time. R1–R3 are delivered implementation
+boundaries; their usefulness columns remain prospective observations, not claims
+from automated checks.
 
 | Priority | Deliverable | Evidence of mathematical usefulness |
 |---|---|---|
@@ -69,7 +71,8 @@ not claims of implemented capability or promises about calendar dates.
 | R3 — Continue an investigation | Support an explicit linked follow-up, correction or alternative approach; preserve the current question, conclusions, unresolved issue and selected evidence; resume later | A continued proof, counterexample, hypothesis comparison or exposition survives interruption, and the assistant's contribution and corrections remain distinguishable |
 | Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3 justifies each addition; evaluate each on its own terms |
 
-**Next implementation deliverable: R3's explicit continued investigation.**
+**Next product step: observe the delivered R1–R3 workflow in genuine mathematical
+work before authorizing a broader feature increment.**
 R1 is delivered: ordinary Open and navigator actions route an existing PDF to
 the read-only QtPdf pane without a build; its canonical path, exact digest and
 page/zoom are distinct from generated-build provenance and text state. Failed,
@@ -85,14 +88,24 @@ answers are attributed inert plain text with exact raw access. Existing passage
 selection creates the same lossless projection, while note insertion creates a
 separately attributed editable copy. Controller and actual-widget checks cover
 the implementation. They made no live provider request, so mathematical
-usefulness remains pending observation.
+usefulness remains pending observation. R3 is delivered as one bounded parent
+and one child: the user selects one to eight deterministic passages from an
+initial completed call, may add current ordinary-text selections, keeps a human
+correction/changed assumption distinct, and sees the complete independent child
+body before a separate Send. The child records `in_reply_to` but sends no
+`previous_response_id` or provider conversation state. Parent evidence,
+correction and child answer remain visible together. Exact record pointers and
+the human-maintained question, conclusion and unresolved issue restore from
+private workspace state; an explicit editable handoff can be inserted into an
+ordinary note. Missing or changed records are reported without guessed
+replacement revisions or loss of the task summary.
 
-Keep the R1 and R2 cut lines while implementing R3. PDF search, outline and richer
+Keep the R1–R3 cut lines while evaluating actual use. PDF search, outline and richer
 internal navigation wait unless their absence demonstrably blocks the chosen
 task. Internal document navigation must not silently dispatch external URLs,
 files or commands. Exact source/PDF mapping
 is a separate task where source and build metadata exist; lack of SyncTeX or
-editable source must not prevent ordinary PDF study. Do not hold R3 behind
+editable source must not prevent ordinary PDF study. Do not hold evaluation behind
 complete PDF feature parity, a new editor, a new rendering framework or
 comprehensive document analysis. Preserve text-only and source-only work.
 
@@ -130,11 +143,11 @@ capability from a single guided-reading success.
 implementation handoff. This roadmap controls priority; the handoff defines the
 current bounded task and must be advanced when that task is delivered.
 
-| Milestone | Implementation status at 2026-09-17 | Product evidence |
+| Milestone | Implementation status at 2026-09-18 | Product evidence |
 |---|---|---|
 | R1 | Implemented and technically verified: independent exact-identity PDF opening, separate imported/generated positions, durable note restoration, standard shortcuts and visible marker/focus status | A natural PDF-plus-note study and later continuation remain to be observed; usefulness is pending |
 | R2 | Implemented and technically verified: exact selected ordinary-text context, natural-language question, removable context, exact request preview, separate Send, off-thread single-attempt transport, terminal-status inspection, inert attributed answer, exact projection and attributed editable note insertion | No live provider request or genuine mathematical use was performed; usefulness remains pending |
-| R3 | Next implementation task: explicit linked correction/follow-up and durable investigation resumption without hidden provider conversation state | No in-application continued research collaboration demonstrated |
+| R3 | Implemented and technically verified: one initial completed parent, exact selected prior passages and optional current context, separate human correction/task summary, complete child preview and Send, `in_reply_to`, inert terminal handling, exact child projection/note insertion and private restart restoration with changed-record reporting | No live provider request or genuine continued mathematical investigation was performed; usefulness remains pending |
 
 Keep implementation delivery, automated/visual verification and observed
 mathematical usefulness separate in status reports. A verified implementation
@@ -168,9 +181,8 @@ The delivered R1 boundary is:
 R1 ended with the above working through actual GUI actions, meaningful
 controller and Qt regressions, a visible PDF/note exercise at both supported
 review sizes, and updated status and handoff documents. PDF search, outline,
-SyncTeX, text extraction and broader reader redesign remain deferred. Move next
-to R3; add a deferred reader capability earlier only if a demonstrated
-obstruction makes it necessary.
+SyncTeX, text extraction and broader reader redesign remain deferred. Add a
+deferred reader capability only if a demonstrated obstruction makes it necessary.
 
 The delivered R2 boundary is:
 
@@ -196,10 +208,32 @@ The delivered R2 boundary is:
 
 R2 ended with deterministic injected transports, controller and actual-widget
 coverage, visible checks at the two review sizes, and no live provider call.
-Those results establish technical behavior only. R3 may add one explicit linked
-follow-up, correction or alternative and durable resumption; it must not add
-automatic conversation state, retries, source retrieval, provider tools or a
-second provider.
+Those results establish technical behavior only.
+
+The delivered R3 boundary is:
+
+- Continue only an initial completed retained `ModelCall`, with one child and no
+  branch or child-of-child continuation in this bounded workflow.
+- Select one to eight exact deterministic prior-response passages and optional
+  current ordinary-text selections. Keep the human correction, changed
+  assumption or alternative and the task summary visibly distinct from both
+  model responses.
+- Preview provider/model, exact parent identity/digest/spans, current context,
+  limits, destination and every child request-body byte; require a separate Send.
+  Record `in_reply_to` while using neither `previous_response_id` nor hidden
+  provider conversation state.
+- Retain every terminal child outcome without retry. Preserve parent and note
+  bytes, keep returned content inert and reuse exact projection and attributed
+  note insertion for a completed child.
+- Persist only bounded private task text and exact immutable-record pointers.
+  Restore the visible parent/correction/child comparison after restart; report
+  missing or changed records while retaining the human task summary. Permit an
+  explicit editable handoff in an ordinary work note.
+
+R3 ended with deterministic controller and actual-widget checks and visible
+exercises at both review sizes. No live provider call or genuine mathematical
+investigation was performed. Automatic conversation state, branching, retries,
+source retrieval, provider tools and a second provider remain outside R1–R3.
 
 ### Evaluation and drift control
 
@@ -383,11 +417,13 @@ and eleven added GUI/LaTeX paths on `main`. All committed paths have Git mode
 `100644`; DrvFS working-tree modes do not determine Git index modes.
 
 The GUI directly provides ordinary-file editing, existing local PDF reading,
-one explicitly previewed task-local model exchange, external-editor and Jupyter
+one explicitly previewed task-local model exchange plus one bounded linked
+continuation and restart summary, external-editor and Jupyter
 handoff, staged LaTeX building, generated-PDF rendering, checkpoint recovery and
 retained-record inspection. Proof-assistant, computer-algebra,
-notebook-execution, repository, literature-service, linked model follow-up and
-Kallenberg-guidance GUI workflows remain unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
+notebook-execution, repository, literature-service, branching/general model
+conversation and Kallenberg-guidance GUI workflows remain unimplemented.
+Kallenberg ordering guides requested orientation in unfamiliar
 material; focused questions and prerequisite lookup may begin directly.
 
 Later notebook support must preserve cells, outputs, execution order, kernel

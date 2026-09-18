@@ -321,7 +321,8 @@ for command in sys.stdin:
         self.controller.accept_imported_pdf(self.controller.prepare_pdf(pdf))
         self.controller.set_pdf_view(page=1, zoom='custom', scale=1.25, source='imported')
         current = json.loads(encode_workspace(self.controller.current()))
-        old = {key: value for key, value in current.items() if key not in ('pdf_source', 'imported_pdf')}
+        old = {key: value for key, value in current.items()
+               if key not in ('pdf_source', 'imported_pdf', 'investigation')}
         old['schema_version'] = 7
         with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read a source')):
             migrated = decode_workspace(encode(old))
@@ -907,7 +908,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_invalid_versions_malformed_records_and_digest_mismatch_are_non_destructive(self):
         original = self.manifest.read_bytes()
-        for version in (0, 1, 2, 9, 99, True, False, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, '3', '4', '5', '6', '7', '8', None):
+        for version in (0, 1, 2, 10, 99, True, False, 3.0, 4.0, 5.0, 6.0,
+                        7.0, 8.0, 9.0, '3', '4', '5', '6', '7', '8', '9', None):
             data = json.loads(original)
             data['schema_version'] = version
             with self.assertRaisesRegex(WorkspaceError, 'Unsupported'):
@@ -1183,6 +1185,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         old['schema_version'] = 3
         del old['pdf_source']
         del old['imported_pdf']
+        del old['investigation']
         del old['marker']['preview']
         expected['marker']['preview'] = ''
         del old['selection_shelf']
@@ -1198,7 +1201,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertEqual(asdict(migrated), expected)
             self.assertEqual(self.manifest.read_bytes(), raw)
             restored = self.restored()
-        self.assertEqual(VERSION, 8)
+        self.assertEqual(VERSION, 9)
         self.assertEqual(json.loads(self.manifest.read_bytes())['schema_version'], VERSION)
         self.assertEqual(asdict(restored.current()), expected)
         self.assertEqual(recovery.read_bytes(), recovery_bytes)
@@ -1208,11 +1211,13 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
     def test_migration_and_shelf_schema_reject_malformed_manifests(self):
         original_raw = self.manifest.read_bytes()
         original = json.loads(original_raw)
-        for version in (3, 4, 5, 6, 7):
+        for version in (3, 4, 5, 6, 7, 8):
             valid = deepcopy(original)
             valid['schema_version'] = version
-            del valid['pdf_source']
-            del valid['imported_pdf']
+            del valid['investigation']
+            if version < 8:
+                del valid['pdf_source']
+                del valid['imported_pdf']
             if version < 6:
                 del valid['wrap']
             if version == 3:

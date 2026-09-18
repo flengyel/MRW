@@ -17,13 +17,15 @@ from .local_files import read_bounded
 from .mutable_files import delete_mutable, private_directory, save_mutable, verify_mutable
 
 SCHEMA = 'theorem-terminal.workspace'
-VERSION = 8
+VERSION = 9
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_TEXT_BYTES = 2 * 1024 * 1024
 MAX_RECOVERY_BYTES = 6 * MAX_TEXT_BYTES + 4096
 MAX_BUFFERS = 128
 MAX_CONTEXT_SELECTIONS = 32
 MAX_ANCHOR_PREVIEW = 120  # Unicode scalars, after display-whitespace normalization.
+MAX_INVESTIGATION_PASSAGES = 8
+MAX_INVESTIGATION_TEXT_BYTES = 16 * 1024
 FORMATS = {'text', 'notebook', 'model_call', 'projection', 'documentary_package', 'verification'}
 # Historical wire shapes are literal contracts, independent of live dataclasses.
 V3_WORKSPACE_FIELDS = frozenset({'schema', 'schema_version', 'root', 'buffers', 'active',
@@ -51,9 +53,19 @@ V6_WORKSPACE_FIELDS = frozenset({'schema', 'schema_version', 'root', 'buffers', 
     'last_build', 'successful_build', 'pdf_page', 'pdf_zoom', 'pdf_scale', 'pdf_visible', 'window_size'})
 V7_WORKSPACE_FIELDS = V6_WORKSPACE_FIELDS
 BUFFER_FIELDS = V6_BUFFER_FIELDS
-WORKSPACE_FIELDS = V7_WORKSPACE_FIELDS | {'pdf_source', 'imported_pdf'}
+V8_WORKSPACE_FIELDS = V7_WORKSPACE_FIELDS | {'pdf_source', 'imported_pdf'}
+WORKSPACE_FIELDS = V8_WORKSPACE_FIELDS | {'investigation'}
 MARKER_FIELDS = LEGACY_MARKER_FIELDS | {'preview'}
 IMPORTED_PDF_FIELDS = frozenset({'path', 'revision', 'page', 'zoom', 'scale'})
+INVESTIGATION_FIELDS = frozenset({
+    'parent_path', 'parent_record_revision', 'parent_id',
+    'parent_response_digest', 'parent_passages', 'child_path',
+    'child_record_revision', 'child_id', 'child_response_digest',
+    'question', 'correction', 'last_conclusion', 'unresolved_issue',
+})
+INVESTIGATION_PASSAGE_FIELDS = frozenset({
+    'number', 'start_byte', 'end_byte',
+})
 
 
 class WorkspaceError(ValueError):
@@ -107,6 +119,32 @@ class ImportedPdfState:
 
 
 @dataclass
+class InvestigationPassageState:
+    number: int
+    start_byte: int
+    end_byte: int
+
+
+@dataclass
+class InvestigationState:
+    """Private resume pointer for one explicit parent/child exchange."""
+
+    parent_path: str
+    parent_record_revision: str
+    parent_id: str
+    parent_response_digest: str
+    parent_passages: list[InvestigationPassageState]
+    child_path: str
+    child_record_revision: str
+    child_id: str
+    child_response_digest: str | None
+    question: str
+    correction: str
+    last_conclusion: str
+    unresolved_issue: str
+
+
+@dataclass
 class Workspace:
     root: str
     buffers: list[BufferState] = field(default_factory=list)
@@ -127,6 +165,7 @@ class Workspace:
     pdf_visible: bool = False
     pdf_source: str = 'generated'
     imported_pdf: ImportedPdfState | None = None
+    investigation: InvestigationState | None = None
     window_size: list[int] = field(default_factory=lambda: [1280, 820])
 
 
@@ -250,7 +289,7 @@ def _migrate_legacy(data):
         canonical = marker(item, shelf=True)
         if canonical not in selections:
             selections.append(canonical)
-    return {**deepcopy(data), 'schema_version': VERSION, 'buffers': buffers, 'wrap': data['wrap'] if version == 6 else True,
+    return {**deepcopy(data), 'schema_version': 8, 'buffers': buffers, 'wrap': data['wrap'] if version == 6 else True,
             'marker': marker(data['marker']) if data['marker'] is not None else None,
             'selection_shelf': selections, 'pdf_source': 'generated', 'imported_pdf': None}
 
@@ -258,8 +297,14 @@ def _migrate_legacy(data):
 def _migrate_v7(data):
     """Add imported-document state without reading or interpreting a source."""
     _keys(data, V7_WORKSPACE_FIELDS, 'version-7 editor state')
-    return {**deepcopy(data), 'schema_version': VERSION,
+    return {**deepcopy(data), 'schema_version': 8,
             'pdf_source': 'generated', 'imported_pdf': None}
+
+
+def _migrate_v8(data):
+    """Add a blank private investigation pointer without reading any record."""
+    _keys(data, V8_WORKSPACE_FIELDS, 'version-8 editor state')
+    return {**deepcopy(data), 'schema_version': VERSION, 'investigation': None}
 
 
 def selection_span(start, end):
@@ -309,16 +354,68 @@ def decode_imported_pdf(value):
     return ImportedPdfState(**value)
 
 
+def _bounded_investigation_text(value, label, *, nonempty=False):
+    _text(value, label, nonempty=nonempty)
+    if len(value.encode('utf-8')) > MAX_INVESTIGATION_TEXT_BYTES:
+        raise WorkspaceError(
+            f'{label.capitalize()} exceeds its {MAX_INVESTIGATION_TEXT_BYTES}-byte limit'
+        )
+    return value
+
+
+def decode_investigation(value):
+    _keys(value, INVESTIGATION_FIELDS, 'investigation state')
+    for key in ('parent_path', 'child_path'):
+        _path(value[key])
+    for key in ('parent_record_revision', 'parent_response_digest',
+                'child_record_revision'):
+        _revision(value[key])
+    if value['child_response_digest'] is not None:
+        _revision(value['child_response_digest'])
+    for key in ('parent_id', 'child_id'):
+        _text(value[key], f'investigation {key}', nonempty=True)
+    passages = value['parent_passages']
+    if (not isinstance(passages, list) or not passages
+            or len(passages) > MAX_INVESTIGATION_PASSAGES):
+        raise WorkspaceError('Investigation requires one to eight parent passages')
+    decoded_passages = []
+    seen = set()
+    for item in passages:
+        _keys(item, INVESTIGATION_PASSAGE_FIELDS, 'investigation passage')
+        number, start, end = item['number'], item['start_byte'], item['end_byte']
+        if (type(number) is not int or number <= 0 or type(start) is not int
+                or type(end) is not int or not 0 <= start < end <= 4 * 1024 * 1024):
+            raise WorkspaceError('Invalid investigation response passage')
+        if number in seen:
+            raise WorkspaceError('Duplicate investigation response passage')
+        seen.add(number)
+        decoded_passages.append(InvestigationPassageState(number, start, end))
+    text = {
+        key: _bounded_investigation_text(
+            value[key], 'investigation ' + key.replace('_', ' '),
+            nonempty=key == 'question',
+        )
+        for key in ('question', 'correction', 'last_conclusion', 'unresolved_issue')
+    }
+    return InvestigationState(**{
+        **value,
+        **text,
+        'parent_passages': decoded_passages,
+    })
+
+
 def decode_workspace(raw: bytes) -> Workspace:
     if len(raw) > MAX_MANIFEST_BYTES:
         raise WorkspaceError('Editor state exceeds 1 MiB')
     data = strict_json(raw)
-    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, 4, 5, 6, 7, VERSION):
+    if not isinstance(data, dict) or data.get('schema') != SCHEMA or type(data.get('schema_version')) is not int or data['schema_version'] not in (3, 4, 5, 6, 7, 8, VERSION):
         raise WorkspaceError('Unsupported editor-state version')
     if data['schema_version'] in (3, 4, 5, 6):
         data = _migrate_legacy(data)
     elif data['schema_version'] == 7:
         data = _migrate_v7(data)
+    if data['schema_version'] == 8:
+        data = _migrate_v8(data)
     _keys(data, WORKSPACE_FIELDS, 'editor state')
     _path(data['root'])
     root = Path(data['root'])
@@ -405,12 +502,14 @@ def decode_workspace(raw: bytes) -> Workspace:
     imported_pdf = decode_imported_pdf(data['imported_pdf']) if data['imported_pdf'] is not None else None
     if data['pdf_source'] == 'imported' and imported_pdf is None:
         raise WorkspaceError('Selected imported PDF is missing its identity')
+    investigation = (decode_investigation(data['investigation'])
+                     if data['investigation'] is not None else None)
     size = data['window_size']
     if not isinstance(size, list) or len(size) != 2 or any(type(n) is not int or not 480 <= n <= 16384 for n in size):
         raise WorkspaceError('Invalid window size')
     values = {key: data[key] for key in WORKSPACE_FIELDS - {'schema', 'schema_version'}}
     values.update(buffers=buffers, marker=marker, selection_shelf=selections,
-                  imported_pdf=imported_pdf)
+                  imported_pdf=imported_pdf, investigation=investigation)
     return Workspace(**values)
 
 

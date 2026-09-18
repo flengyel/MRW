@@ -5,10 +5,11 @@ The mathematician's workflow the interface must support. Companion to
 invariants). Present implementation and limitations are documented in README.
 The current GUI provides ordinary-file editing, existing local PDF reading,
 external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
-rendering, checkpoint recovery, one explicit task-local OpenAI exchange and
-retained-record inspection. Proof-assistant, computer-algebra,
-notebook-execution, repository, literature-service, linked model follow-up and
-Kallenberg-guidance GUI workflows below remain unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+rendering, checkpoint recovery, one explicit task-local OpenAI exchange, one
+bounded linked continuation with restart restoration, and retained-record
+inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
+literature-service, branching/general model conversation and Kallenberg-guidance
+GUI workflows below remain unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 prioritizes readable study, task-local assistance and continued investigation.
 Kallenberg ordering guides requested orientation in unfamiliar material; a
 focused question need not repeat it. Qt/runtime and TeX prerequisites remain
@@ -438,8 +439,8 @@ passages, and displayed `WorkArtifact`s. Before submission, the mathematician
 can inspect and reduce the exact outbound context. Nothing else is sent.
 
 R2 delivers one initial exchange in steps 1–3 and the exact-retain/edit/dismiss
-part of step 5. Source/citation retrieval in step 4 is not automatic, and the
-explicit linked follow-up in step 6 belongs to R3:
+part of step 5. R3 delivers one bounded explicit linked follow-up in step 6.
+Source/citation retrieval in step 4 is not automatic:
 
 1. Select source or work passages and write the mathematical question.
 2. Inspect the provider/model and exact outbound content; remove unwanted
@@ -479,11 +480,41 @@ existing adapter retains completed, refused, incomplete or failed terminal
 records when possible; only a completed record enables passage projection or
 note contribution. Dismissal records no mandatory disposition.
 
+R3 starts only from an initial completed retained call. The mathematician
+selects one to eight deterministic exact response passages, may add current
+visible ordinary-text selections, and enters one new question. A correction,
+changed assumption or alternative remains a separately labeled human-authored
+field; the last useful conclusion and unresolved issue are editable task-summary
+fields. Editing or removing any input invalidates the preview. The preview shows
+the exact parent identity and response digest, every selected half-open UTF-8
+span and text, all current context, human fields, provider/model, limits,
+destination and every request-body byte. The child records `in_reply_to` but the
+adapter sends no `previous_response_id`, provider conversation state, unselected
+parent response or hidden history.
+
+Parent selected text, human correction and terminal child result remain visible
+together. A completed child reuses exact projection and separately attributed
+editable insertion. Refused, incomplete and failed children remain retained
+terminal outcomes without retry. After a terminal child, private workspace state
+stores only bounded human task text plus exact record paths/revisions,
+parent/child identities and selected response spans. Reopening validates those
+immutable records off the GUI thread and restores the comparison without a
+provider call. A missing, redirected or changed record is reported while the
+human task summary remains available; no replacement span or revision is
+guessed. An explicit ordinary-note handoff records the human task summary and
+immutable identities without copying or verifying model prose.
+
+The R3 cut line is one initial parent and one child. The child cannot become a
+new parent in this workflow, and an existing saved investigation cannot be
+silently overwritten to create a branch. General conversation history,
+automatic summaries, branching, retry, source retrieval and provider tools stay
+outside this interaction.
+
 Each explicit user action creates at most one provider request. The request
 obeys configured input, output, and timeout limits, invokes no provider tools,
 and performs no automatic retry or recursive request. R2 supplies no retry or
-follow-up action. A later explicit retry or user-requested follow-up creates
-another `ModelCall` linked to the preceding call.
+follow-up action. R3's one user-requested follow-up creates another `ModelCall`
+linked to the preceding call and no further live child.
 
 Each request produces a local `ModelCall`. The record contains every
 application-supplied instruction and message, the source and artifact versions
@@ -621,9 +652,10 @@ coherent algebraic number theory cluster remains a suitable candidate.
 6. Leave the next question or unfinished step in the note and continue later.
    A related problem or reconstructed argument can test later retention.
 
-R2 has been technically verified with deterministic local responses only. No
-live provider request or genuine mathematical-obstruction trial was performed,
-so the following acceptance remains unobserved rather than inferred from tests.
+R1–R3 have been technically verified with deterministic local responses for
+assistance. No live provider request or genuine mathematical-obstruction trial
+was performed, so the following acceptance remains unobserved rather than
+inferred from tests.
 
 **Acceptance.** Useful mathematical work is possible without a formal artifact.
 One real assistance exchange is traceable from inspected outbound context

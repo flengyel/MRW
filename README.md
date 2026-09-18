@@ -9,9 +9,10 @@ serialized record identities retain their existing technical names.
 
 For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
-R1's PDF-plus-note workflow and R2's bounded direct mathematical-assistance
-exchange are delivered. The next task is R3's explicit correction, linked
-follow-up and continued investigation.
+R1's PDF-plus-note workflow, R2's bounded direct mathematical-assistance
+exchange and R3's one linked, resumable continuation are delivered. The next
+product step is a genuine mathematical-use observation across those workflows,
+not a broader automatic conversation feature.
 
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
@@ -109,7 +110,7 @@ The design rests on six principles:
 
 ## Status
 
-**Roadmap review, 2026-09-17:** the project has useful preservation and editing
+**Roadmap review, 2026-09-18:** the project has useful preservation and editing
 foundations, but is not yet delivering its intended study and human/AI research
 workflow. The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 now prioritizes (R1) readable source beside a durable note, (R2) one inspectable
@@ -129,7 +130,15 @@ bounded request, requires a separate Send, and shows an attributed inert
 plain-text presentation with access to the exact raw retained response. It can retain an exact response passage or insert a
 separately attributed editable copy into the active note. Tests and visual
 checks use deterministic local transports and establish technical behavior only;
-no live request or mathematical usefulness claim was made.
+no live request or mathematical usefulness claim was made. R3 is also
+implemented: one initial completed answer can be continued once from explicitly
+selected exact response passages, an optional current ordinary-text selection,
+and a separately authored human correction or changed assumption. The complete
+independent child request is previewed before Send; its retained `ModelCall`
+links through `in_reply_to` without provider conversation state. The parent
+evidence, correction and child answer remain visible together, and bounded
+human-maintained task state restores after reopening. These checks likewise
+establish mechanics only; continued mathematical usefulness remains unobserved.
 
 
 The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
@@ -163,11 +172,13 @@ Projects, navigation and persistence are corpus-independent. Startup, restoratio
 and viewing run no external program and make no network or provider call. Build,
 external-editor and notebook handoff actions require direct user action. This GUI
 directly provides ordinary-file editing, existing local PDF reading, one
-explicit OpenAI Responses assistance exchange, external-editor and Jupyter
+explicit OpenAI Responses assistance exchange and one bounded linked
+continuation, external-editor and Jupyter
 handoff, out-of-tree staged LaTeX builds, generated-PDF rendering, checkpoint
 recovery and retained-record inspection. Proof-assistant, computer-algebra,
-notebook-execution, repository, literature-service, linked model follow-up and
-Kallenberg-guidance GUI workflows remain unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
+notebook-execution, repository, literature-service, branching/general model
+conversation and Kallenberg-guidance GUI workflows remain unimplemented.
+Kallenberg ordering guides requested orientation in unfamiliar
 material; focused questions and prerequisite lookup need not repeat it.
 
 Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.
@@ -435,7 +446,7 @@ the recovery directory. Failure blocks further workspace writes until close and
 reopen, including when unlink completed but synchronization failed. No recovery
 rewrite attempts to compensate for an uncertain deletion.
 
-### One task-local mathematical-assistance exchange
+### Task-local mathematical assistance and one linked continuation
 
 R2 adds one initial exchange to the principal GUI. Select a nonempty passage in
 visible ordinary source or work text and choose **Work → Ask about current
@@ -485,12 +496,48 @@ Choose a visible deterministic passage number to inspect its exact UTF-8 span.
 creates no premise or warrant. **Insert attributed copy into active note** adds
 an explicitly unverified, human-editable contribution at the current cursor;
 later edits affect only the ordinary note, never the immutable response.
-**Cancel / dismiss** needs no disposition form. R2 has no linked follow-up,
-automatic retry, source retrieval, PDF extraction, citation verification or
-provider conversation state; explicit correction and continuation are the R3
-task. Automated and visual checks inject local deterministic transports and make
-no live provider request. Their success does not establish mathematical
-usefulness.
+**Cancel / dismiss** needs no disposition form. R2 makes no automatic follow-up,
+retry, source retrieval, PDF extraction, citation verification or provider
+conversation request. Automated and visual checks inject local deterministic
+transports and make no live provider request. Their success does not establish
+mathematical usefulness.
+
+R3 adds one explicit continuation of an initial completed retained call. Choose
+**Continue this answer once…** after an R2 completion, **Work → Continue a
+retained completed answer…**, or the corresponding button in the assistance
+dock. Select one to eight exact numbered prior-response passages. You may add
+current visible ordinary-text selections, and you can remove those contexts
+before Send. Enter the new question and, separately, any human correction,
+changed assumption or alternative. The human-maintained **last useful
+conclusion** and **unresolved issue** fields are task-resumption aids, not model
+output or epistemic status.
+
+**Preview exact request** shows the parent call and response digest, every
+selected UTF-8 span and exact text, current contexts, human-authored fields,
+provider/model, limits, disclosure, destination and the complete independent
+child body. **Send exact preview** remains a separate one-attempt action. The
+child record's `in_reply_to` names the exact parent, while the HTTP body uses no
+`previous_response_id`, provider conversation state, unselected parent text or
+hidden history. A linked child cannot become another parent in this bounded R3
+workflow, and an existing saved investigation is not overwritten to create a
+branch.
+
+Completed child text is inert and supports the same exact-passage projection
+and separately attributed editable note insertion as R2. Refused, incomplete
+and failed children remain terminal and inspectable without retry or note loss.
+Parent selected text, the human correction and the child result are presented
+together. After a child terminates, **Save task summary** checkpoints the current
+question, correction, conclusion and unresolved issue in private user-local
+workspace state, alongside exact parent/child record pointers and selected
+spans. **Insert task handoff into note** writes an editable human summary with
+those immutable identities but does not copy or verify model prose.
+
+Reopening the project restores that bounded comparison without sending a
+request. If a retained parent or child record is missing, redirected or changed,
+the dock reports it, keeps the human task summary and guesses neither a passage
+nor a replacement revision. **Work → Resume saved investigation** reopens the
+same retained state. R3 does not add a conversation tree, automatic summary,
+source retrieval, citation verification, provider tools or another provider.
 
 ### External tools and LaTeX
 

@@ -1,149 +1,92 @@
-# Codex continuation: R3 continue an investigation
+# Codex continuation: observe the delivered R1–R3 workflow
 
-Use this document as the next implementation prompt. The active roadmap is
+Use this document as the next bounded handoff. The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
-R1's PDF-plus-note workflow and R2's single task-local assistance exchange are
-delivered and are regression boundaries. Current task: **implement and deliver
-one explicit linked correction, alternative or follow-up that can be resumed as
-ordinary mathematical work**. Do not begin R3 during the R2 delivery turn.
+R1's PDF-plus-note workflow, R2's single task-local assistance exchange and
+R3's one linked, resumable continuation are implemented and technically
+verified. The next task is **a genuine mathematical-use observation**, not a
+new feature tranche.
 
 ## Objective
 
-In `flengyel/theorem_terminal`, let a mathematician continue one completed R2
-exchange by selecting exact prior answer material, writing a correction,
-changed assumption, alternative request or follow-up question, inspecting the
-entire new outbound context, and explicitly sending one independently bounded
-request. Preserve enough ordinary task state—current question, last useful
-conclusion, unresolved issue and selected evidence—to close and reopen the
-project and continue without reconstructing hidden conversation state. Complete
-the code, verification, documentation and focused commit; do not stop at a plan.
+With a mathematical source and problem chosen by the user, observe whether the
+delivered workstation helps produce and later resume worthwhile mathematical
+work. Use the ordinary note as the durable work product. If an actual
+interaction blocker appears, diagnose it and make only the smallest authorized
+correction needed for that task; otherwise make no code change.
 
-R3 tests reciprocal mathematical work, not chat accumulation. A natural
-follow-up or correction is sufficient. Do not require a disposition form,
-confidence score, formal declaration, warrant inspection or anchor ceremony.
+Keep implementation status, synthetic verification and observed mathematical
+benefit separate. The deterministic R1–R3 tests establish mechanics only. Do
+not claim that the workstation is useful, that an answer is correct, or that a
+continuation works for real research until the corresponding human work has
+actually been observed.
 
-## Establish the working context once
+## Establish context once
 
-Read `AGENTS.md` and all documents it names, especially the active roadmap,
-UX_SPEC sections 8 and 9, and the R2 controller/widget tests. Inspect the current
-branch and local work, preserve unrelated tracked and untracked files, and do
-not reset, discard or force-push. No unrelated mathematical repository must
-match a particular commit.
+Read `AGENTS.md` and the documents it names. Inspect the branch and preserve
+unrelated tracked and untracked files. Confirm that the installed GUI being used
+contains the delivered R1–R3 commit. Do not repeat the implementation acceptance
+campaign merely to begin a study session.
 
-Start with `src/theorem_terminal/gui.py`, `workstation.py`,
-`openai_response.py`, `model_projection.py` and `response_review.py`, plus
-`tests/test_assistance.py` and `tests/test_assistance_gui.py`. Reuse R2's exact
-selection snapshot, preview, worker, in-flight exclusion, immutable terminal
-`ModelCall`, deterministic passage selection and private no-overwrite
-persistence. Preserve the adapter's fixed endpoint, environment-only
-`OPENAI_API_KEY`, redirect rejection, one-attempt behavior, `store:false`,
-ceilings, terminal status retention and raw-response digest. Do not weaken or
-duplicate these services for a conversation widget.
+Use a durable user project for the note. A disposable copy is appropriate for a
+destructive test, not as the only copy of mathematical work. A real integration
+corpus may be opened only when the user authorizes it, and its authoritative
+files must not be modified during a visual check.
 
-## Implement the bounded R3 workflow
+## Run one natural task
 
-1. **Continue only by explicit action.** From a completed retained R2 call, let
-   the user start one linked continuation. They may select one or more exact
-   deterministic response passages, add visible ordinary source/work selections,
-   and write one correction, changed assumption, alternative request or
-   follow-up question. No completion may trigger another request automatically.
-2. **Make the link and content explicit.** Set the new `ModelCall.in_reply_to`
-   to the exact prior call identity. Show that identity and digest, every selected
-   prior response span, every current ordinary-text context, the user's new text,
-   provider/model, limits, disclosure, destination and complete exact UTF-8
-   request body. Permit removal of any context before Send. Do not use
-   `previous_response_id`, provider conversation state or unshown history; the
-   provider receives only the newly previewed body.
-3. **Preserve authorship and correction.** A human correction or synthesis is
-   ordinary editable work, separately attributed from model prose. Selecting a
-   prior answer proves only exact production and span identity. It does not make
-   the answer, correction or new request true, accepted, verified or admitted.
-   Do not overwrite the earlier call or projection.
-4. **Send one bounded continuation.** Keep preview and Send separate. Run the
-   request off the Qt thread, prevent duplicate sends, make no retry and retain
-   every terminal outcome exactly as R2 does. A refusal, incomplete response or
-   failure must leave the prior answer and all notes intact.
-5. **Support correction and comparison.** Present prior selected text, the
-   explicit human correction/changed assumption and the new attributed answer
-   together without rendering or executing returned markup. Let the user retain
-   an exact new passage or insert another separately attributed editable copy.
-   Dismissal remains valid and needs no sentence-by-sentence disposition.
-6. **Resume the investigation.** Preserve the smallest useful task-local state
-   needed to reopen the project and see the current question, last useful
-   conclusion, unresolved issue and selected evidence. Prefer an ordinary work
-   note plus immutable call/projection links; add a private workspace field only
-   if a concrete restore requirement cannot be met otherwise. Any schema change
-   must retain every supported historical migration and must not read source
-   files during migration. Missing or changed immutable records must be reported
-   without losing the ordinary note.
-7. **Preserve R1 and R2.** Existing PDF/note identity and restoration, standard
-   shortcuts, recovery, live anchors, explicit builds, one initial assistance
-   exchange, terminal-status handling, exact projection and note insertion must
-   remain unchanged.
+1. Open the relevant local PDF or ordinary source and an editable work note.
+   Resume at the actual current question; do not require a questionnaire,
+   orientation ceremony, anchor quota, formal artifact or warrant inspection.
+2. Do enough mathematics to identify a genuine question or obstruction. Record
+   the attempt, useful source location and current assumption in the note.
+3. If the user chooses model assistance, select only the visible context they
+   want sent, inspect the complete R2 preview and let the user perform the
+   explicit Send. No agent, test or roadmap authorization may substitute for
+   that per-request user action or expose a credential.
+4. Assess the returned proposal through the mathematics. Returned citations,
+   code and claims remain unverified until separately checked. Retain or insert
+   only material the user finds useful; dismissal is a valid outcome.
+5. If a correction, changed assumption or focused follow-up is useful, select
+   the exact prior passages, keep the human correction separate, inspect the
+   complete R3 child preview and let the user explicitly Send once. Do not add a
+   branch, child-of-child continuation, retry or provider conversation state.
+6. Save the current question, last useful conclusion and unresolved issue. Put
+   an editable handoff in the ordinary note when that helps. Close and reopen
+   later, then continue from the restored note and bounded investigation state.
 
-Choose the smallest interaction that supports one parent and one child call.
-Do not turn the dock into a general chat client. The task summary must be
-inspectable and editable by the mathematician; it is not an automatically
-generated epistemic status.
+No live provider request is authorized merely by this handoff. It occurs only
+if the user explicitly chooses Send after inspecting that request's preview.
+
+## Record only consequential evidence
+
+Capture the source used, the real question or obstruction, the resulting
+mathematical work, any consequential interaction friction and what remains to
+do. Note whether the later reopen reduced reconstruction burden and whether
+model and human contributions remained distinguishable. Do not ask for a
+confidence score or sentence-by-sentence disposition.
+
+An inconclusive session is not a human failure. If benefit is absent, identify
+one concrete obstruction. A confirmed data-loss defect has priority. For an
+interaction blocker, make a bounded correction and observe it once; defer
+incidental polish and new subsystems.
 
 ## Keep the cut line
 
-Deliver one explicit child `ModelCall` linked to one completed parent. Defer
-branching conversation trees, more than one follow-up in the live widget,
-automatic retry, provider-side conversation or response IDs as state, hidden
-history, autonomous requests, summaries generated without a separate call,
-source/citation retrieval, source verification, PDF extraction/OCR/SyncTeX,
-provider tools, a second provider, a provider registry, collaborative sync, new
-warrant machinery, general corpus ingestion and a broad rendering architecture.
+Do not add automatic follow-ups, branching conversation trees, hidden history,
+provider response IDs as conversation state, source retrieval, citation
+verification, PDF extraction/OCR/SyncTeX, autonomous requests, another provider,
+new warrant machinery, general corpus ingestion or a broad rendering redesign
+without a separately authorized, observed requirement.
 
-Do not solicit hidden chain of thought or claim access to provider-internal
-reasoning. A cited route remains unverified until separately retrieved and
-checked. No answer, correction, task summary, projection or link automatically
-creates a premise, correspondence, Verification, acceptance or warrant.
+R1–R3 ordinary work remains independent of Lean and justification-logic entry.
+A model response, human correction, task summary, projection or link creates no
+premise, Verification, acceptance or warrant.
 
-No live provider request is authorized by implementation, tests or this
-handoff. Every real parent or child transmission requires the user's own exact
-preview and explicit Send. Automated and visual checks must inject deterministic
-local transports and must not expose a credential. A later genuine mathematical
-investigation evaluates usefulness; synthetic linked calls do not.
+## Finish the observation
 
-## Verify proportionately and deliver
-
-Use toolkit-independent controller tests and actual Qt widgets. Cover at least:
-
-- exact parent identity/digest and multibyte prior-response passage spans in the
-  child request, with no hidden parent text or workspace data;
-- a visible human correction or changed assumption kept distinct from both
-  model responses;
-- context removal, exact child-body preview, cancellation, missing
-  configuration, duplicate-send prevention and injected completion;
-- refused, incomplete and failed child outcomes without retry, false completion,
-  prior-record mutation or note loss;
-- `in_reply_to` linkage while the HTTP body uses no provider conversation state
-  or `previous_response_id`;
-- concurrent note edits and view switches while the child request runs;
-- inert returned markup/URLs/code, visibly unverified citations, exact new
-  passage projection and attributed editable insertion;
-- close/reopen restoration of the bounded investigation state, including
-  missing or changed retained-record handling; and
-- established R1 PDF/note, recovery, marker, build and all R2 regressions.
-
-Do not count direct QAction invocation as a keyboard test where a shortcut is
-part of the interaction. Run focused tests during development, then one final
-GUI-enabled full Python suite, compilation and whitespace checks. Exercise the
-parent/correction/child/resumption flow visibly at 1280×820 and 960×680 with
-deterministic local responses, and verify one installed-wheel launch. Report
-genuine dependency skips or unavailable runtime checks; do not weaken tests or
-claim mathematical usefulness from synthetic calls.
-
-Update CODEX_PLAN's implementation status, README's delivered capabilities,
-UX_SPEC's final interaction decisions and AGENTS only where development
-instructions change. Replace this file with the next bounded handoff after R3
-is delivered. Keep implementation, technical verification and observed
-mathematical benefit separate.
-
-Review the complete diff, commit only focused changes and publish through the
-normal branch workflow without force-pushing. Finish with the commit/branch,
-implemented behavior, verification and limits, launch/use instructions and the
-next bounded task. Stop after the reviewable R3 delivery; do not silently begin
-the following increment.
+Preserve the actual note and immutable records. Report the mathematical outcome,
+resume outcome, concrete friction and any bounded correction separately from
+automated verification. Update the roadmap and handoff only if the observation
+changes evidence or authorizes a next increment. Do not infer a broader feature
+roadmap from synthetic checks or silently begin later-stage implementation.
