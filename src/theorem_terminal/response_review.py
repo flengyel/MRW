@@ -115,6 +115,15 @@ def passages(response: str) -> tuple[Passage, ...]:
     return tuple(_iter_passages(response.encode("utf-8")))
 
 
+def passage_count(response: str) -> int:
+    """Count deterministic passages in one scan without retaining their spans."""
+
+    count = 0
+    for passage in _iter_passages(response.encode("utf-8")):
+        count = passage.number
+    return count
+
+
 def _scan(
     response: str,
     *,

@@ -5,10 +5,10 @@ The mathematician's workflow the interface must support. Companion to
 invariants). Present implementation and limitations are documented in README.
 The current GUI provides ordinary-file editing, existing local PDF reading,
 external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
-rendering, checkpoint recovery and retained-record inspection. Proof-assistant,
-computer-algebra, notebook-execution, repository,
-literature-service, live-model and Kallenberg-guidance GUI workflows below remain
-unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+rendering, checkpoint recovery, one explicit task-local OpenAI exchange and
+retained-record inspection. Proof-assistant, computer-algebra,
+notebook-execution, repository, literature-service, linked model follow-up and
+Kallenberg-guidance GUI workflows below remain unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 prioritizes readable study, task-local assistance and continued investigation.
 Kallenberg ordering guides requested orientation in unfamiliar material; a
 focused question need not repeat it. Qt/runtime and TeX prerequisites remain
@@ -102,6 +102,16 @@ Opening a PDF does not imply reliable text extraction or a source mapping.
 When sending a PDF excerpt, show the exact extracted or transcribed text and
 its document revision/page so that damaged notation can be corrected explicitly.
 A corrected transcription is distinct from the original source.
+
+The delivered R2 increment begins only from a nonempty visible selection in an
+ordinary text buffer. Its non-modal dock freezes the selected text, current
+in-memory revision and scalar location, accepts one question, permits context
+removal, shows the exact request body and requires a separate Send. It includes
+no PDF bytes or implicit extraction. A PDF-motivated question therefore uses an
+explicit ordinary-text transcription or corresponding source selection. The
+answer remains inert attributed plain text with exact raw-record access. Exact
+passage retention and separately attributed editable note insertion are
+explicit; neither creates a premise, Verification, warrant or disposition.
 
 Different projects may be open in different workstation processes. This increment
 supports only one active workstation process per project, without a lifetime lock.
@@ -427,15 +437,17 @@ constructs the request from the current problem or object, displayed source
 passages, and displayed `WorkArtifact`s. Before submission, the mathematician
 can inspect and reduce the exact outbound context. Nothing else is sent.
 
-The R2–R3 live GUI workflow supports this interaction; the explicit linked
-follow-up in step 6 belongs to R3:
+R2 delivers one initial exchange in steps 1–3 and the exact-retain/edit/dismiss
+part of step 5. Source/citation retrieval in step 4 is not automatic, and the
+explicit linked follow-up in step 6 belongs to R3:
 
 1. Select source or work passages and write the mathematical question.
 2. Inspect the provider/model and exact outbound content; remove unwanted
    context and explicitly authorize this request.
-3. Read an attributed answer with mathematical notation rendered clearly and
-   exact raw content still inspectable. Rendering neither executes code nor
-   fetches content.
+3. Read an attributed answer as a selectable inert plain-text presentation.
+   Returned markup, links, citations and code stay inert and visibly unverified;
+   the complete exact raw response and terminal record remain inspectable. A later safe notation view
+   must preserve this exact access and may neither execute nor fetch content.
 4. Open a supplied source passage, inspect an unsupported citation, or compare
    a proposed step with the work without losing the question or note.
 5. Retain a useful exact passage or write a separately attributed correction or
@@ -449,10 +461,29 @@ five-anchor setup precedes this workflow. A natural-language question is enough;
 metadata comes from the chosen work. The UI must not label an unverified model
 citation as a retrieved source, or an answer as complete when context is missing.
 
+The delivered R2 dock is non-modal so the selected source and ordinary note stay
+reachable. It shows OpenAI and the requested model, every exact selected context
+with source identity/current revision/scalar range, the question, complete
+instructions/input, configured limits, destination, retention disclosure and
+the exact UTF-8 body with its byte count and digest. Context removal or any draft
+edit invalidates the preview. The requested model is a non-secret per-request
+field optionally initialized by `THEOREM_TERMINAL_OPENAI_MODEL`; the credential
+is read only from `OPENAI_API_KEY` at the separate Send action. No credential is
+stored or displayed.
+
+Transport runs off the Qt thread and keeps ordinary note editing available. One
+in-flight slot prevents duplicate sends. Closing or switching a source view does
+not change the frozen request, and a completion never replaces concurrent note
+edits. Cancellation before Send makes no request or artifact. After Send, the
+existing adapter retains completed, refused, incomplete or failed terminal
+records when possible; only a completed record enables passage projection or
+note contribution. Dismissal records no mandatory disposition.
+
 Each explicit user action creates at most one provider request. The request
 obeys configured input, output, and timeout limits, invokes no provider tools,
-and performs no automatic retry or recursive request. A retry or user-requested
-follow-up creates another `ModelCall` linked to the preceding call.
+and performs no automatic retry or recursive request. R2 supplies no retry or
+follow-up action. A later explicit retry or user-requested follow-up creates
+another `ModelCall` linked to the preceding call.
 
 Each request produces a local `ModelCall`. The record contains every
 application-supplied instruction and message, the source and artifact versions
@@ -589,6 +620,10 @@ coherent algebraic number theory cluster remains a suitable candidate.
    linked to their exact sources. Keep a synthesis distinct from its inputs.
 6. Leave the next question or unfinished step in the note and continue later.
    A related problem or reconstructed argument can test later retention.
+
+R2 has been technically verified with deterministic local responses only. No
+live provider request or genuine mathematical-obstruction trial was performed,
+so the following acceptance remains unobserved rather than inferred from tests.
 
 **Acceptance.** Useful mathematical work is possible without a formal artifact.
 One real assistance exchange is traceable from inspected outbound context

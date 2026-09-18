@@ -236,6 +236,25 @@ class FinalizedModelCall:
 
 
 @dataclass(frozen=True)
+class TerminalModelCall:
+    """A validated terminal snapshot, including non-completed outcomes."""
+
+    document: Mapping[str, object]
+    id: str
+    status: str
+    raw_response: str | None
+    raw_response_digest: str | None
+    provider: str
+    requested_model: str
+    resolved_model: str | None
+    finalized_at: str
+
+    @property
+    def model(self) -> str:
+        return self.resolved_model or self.requested_model
+
+
+@dataclass(frozen=True)
 class ResponseSpan:
     """A half-open UTF-8 byte span anchored to a response digest."""
 
@@ -265,9 +284,8 @@ class DocumentaryClaimAtom:
     content_hash: str
 
 
-def parse_finalized_model_call(raw: bytes) -> FinalizedModelCall:
-    """Parse and freeze one exact finalized completed-call JSON record."""
-
+def _parse_model_call_document(raw: bytes) -> Mapping[str, object]:
+    """Validate and freeze the fields shared by every terminal ModelCall."""
     if not isinstance(raw, bytes):
         raise TypeError("raw model-call record must be bytes")
     if len(raw) > MAX_MODEL_CALL_BYTES:
@@ -343,34 +361,79 @@ def parse_finalized_model_call(raw: bytes) -> FinalizedModelCall:
     _require_nullable_string(record["resolved_model"], "model_call.resolved_model")
     _require_nullable_string(record["in_reply_to"], "model_call.in_reply_to")
     _require_nullable_string(record["response_id"], "model_call.response_id")
-    if record["status"] != "completed":
-        raise ModelProjectionError("model_call.status must be completed")
+    return _freeze_json(record)
 
-    response = _require_string(
-        record["raw_response"],
-        "model_call.raw_response",
-        allow_empty=True,
-    )
-    response_digest = _require_digest(
-        record["raw_response_digest"],
-        "model_call.raw_response_digest",
-    )
-    response_bytes = response.encode("utf-8", errors="strict")
-    if sha256(response_bytes).hexdigest() != response_digest:
-        raise ModelProjectionError(
-            "model_call.raw_response_digest does not match raw_response UTF-8 bytes"
+
+def parse_terminal_model_call(raw: bytes) -> TerminalModelCall:
+    """Parse one exact terminal record without inventing a completed answer."""
+
+    record = _parse_model_call_document(raw)
+    status = _require_string(record["status"], "model_call.status")
+    if status not in ("completed", "failed", "refused", "incomplete"):
+        raise ModelProjectionError("model_call.status is not terminal")
+
+    response_value = record["raw_response"]
+    digest_value = record["raw_response_digest"]
+    if response_value is None:
+        if digest_value is not None:
+            raise ModelProjectionError(
+                "model_call.raw_response_digest must be null when raw_response is null"
+            )
+        response = None
+        response_digest = None
+    else:
+        response = _require_string(
+            response_value,
+            "model_call.raw_response",
+            allow_empty=True,
         )
-    resolved = record["resolved_model"]
-    model = resolved if isinstance(resolved, str) else record["requested_model"]
-    assert isinstance(model, str)
-    return FinalizedModelCall(
-        document=_freeze_json(record),
+        response_digest = _require_digest(
+            digest_value,
+            "model_call.raw_response_digest",
+        )
+        response_bytes = response.encode("utf-8", errors="strict")
+        if sha256(response_bytes).hexdigest() != response_digest:
+            raise ModelProjectionError(
+                "model_call.raw_response_digest does not match raw_response UTF-8 bytes"
+            )
+    if status == "completed" and (response is None or response_digest is None):
+        raise ModelProjectionError(
+            "completed model_call must contain raw_response and its digest"
+        )
+    return TerminalModelCall(
+        document=record,
         id=str(record["id"]),
+        status=status,
         raw_response=response,
         raw_response_digest=response_digest,
         provider=str(record["provider"]),
-        model=model,
+        requested_model=str(record["requested_model"]),
+        resolved_model=(
+            str(record["resolved_model"])
+            if record["resolved_model"] is not None
+            else None
+        ),
         finalized_at=str(record["finalized_at"]),
+    )
+
+
+def parse_finalized_model_call(raw: bytes) -> FinalizedModelCall:
+    """Parse and freeze one exact finalized completed-call JSON record."""
+
+    terminal = parse_terminal_model_call(raw)
+    if terminal.status != "completed":
+        raise ModelProjectionError("model_call.status must be completed")
+    assert terminal.raw_response is not None
+    assert terminal.raw_response_digest is not None
+
+    return FinalizedModelCall(
+        document=terminal.document,
+        id=terminal.id,
+        raw_response=terminal.raw_response,
+        raw_response_digest=terminal.raw_response_digest,
+        provider=terminal.provider,
+        model=terminal.model,
+        finalized_at=terminal.finalized_at,
     )
 
 

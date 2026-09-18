@@ -9,8 +9,9 @@ serialized record identities retain their existing technical names.
 
 For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
-R1's PDF-plus-note workflow is delivered. The next task is R2's bounded direct
-mathematical-assistance exchange; R3 adds correction and continued investigation.
+R1's PDF-plus-note workflow and R2's bounded direct mathematical-assistance
+exchange are delivered. The next task is R3's explicit correction, linked
+follow-up and continued investigation.
 
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
@@ -121,9 +122,14 @@ R1 is implemented: an existing local PDF opens read-only through ordinary Open
 or the project navigator beside an editable work note, without TeX source or a
 compiler. Its exact path/digest identity and page/zoom are retained separately
 from generated-build provenance and restored with the note. Open, Save, Find and
-Find-next have platform-standard shortcuts and explicit focus behavior. The GUI
-can inspect completed ModelCalls but cannot yet initiate a mathematical question;
-that task-local exchange is the next R2 deliverable.
+Find-next have platform-standard shortcuts and explicit focus behavior. R2 is
+implemented: from an exact visible ordinary-text selection, the GUI accepts one
+natural-language question, lets the user remove context, previews the exact
+bounded request, requires a separate Send, and shows an attributed inert
+plain-text presentation with access to the exact raw retained response. It can retain an exact response passage or insert a
+separately attributed editable copy into the active note. Tests and visual
+checks use deterministic local transports and establish technical behavior only;
+no live request or mathematical usefulness claim was made.
 
 
 The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
@@ -156,12 +162,12 @@ checker, issuing a new Verification or inferring a human decision.
 Projects, navigation and persistence are corpus-independent. Startup, restoration
 and viewing run no external program and make no network or provider call. Build,
 external-editor and notebook handoff actions require direct user action. This GUI
-directly provides ordinary-file editing, existing local PDF reading,
-external-editor and Jupyter handoff, out-of-tree staged LaTeX builds,
-generated-PDF rendering, checkpoint recovery and retained-record inspection.
-Proof-assistant, computer-algebra, notebook-execution, repository,
-literature-service, live-model and Kallenberg-guidance GUI workflows remain
-unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
+directly provides ordinary-file editing, existing local PDF reading, one
+explicit OpenAI Responses assistance exchange, external-editor and Jupyter
+handoff, out-of-tree staged LaTeX builds, generated-PDF rendering, checkpoint
+recovery and retained-record inspection. Proof-assistant, computer-algebra,
+notebook-execution, repository, literature-service, linked model follow-up and
+Kallenberg-guidance GUI workflows remain unimplemented. Kallenberg ordering guides requested orientation in unfamiliar
 material; focused questions and prerequisite lookup need not repeat it.
 
 Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.
@@ -231,20 +237,23 @@ obstruction. It supplies no evidence that model assistance improved
 mathematical work.
 
 One provider-backed operation is also implemented, but no live request is made
-by installation or testing. `request-assistance` displays the exact bounded
-OpenAI Responses API JSON and selected context, requires the user to type
-`SEND`, makes at most one request with `store: false`, and atomically creates a
-terminal `ModelCall`. Projection, admission, and Lean checking remain separate
-explicit commands.
+by installation or testing. The low-level `request-assistance` CLI displays the
+exact bounded OpenAI Responses API JSON and selected context and requires the
+user to type `SEND`. The R2 GUI derives the same request from the visible task,
+shows its exact body and uses a separate **Send exact preview** action. Both use
+the same adapter, make at most one request with `store: false`, and atomically
+create a terminal `ModelCall`. Projection, admission, and Lean checking remain
+separate explicit actions.
 
-The local response-review and selection precursor is executable over completed
-`ModelCall` records. It keeps attribution visible, indexes returned passages
+The local response-review and selection service is executable over completed
+`ModelCall` records and is reused by the R2 dock. It keeps attribution visible, indexes returned passages
 deterministically, and lets the mathematician select visible exact text without
 calculating byte offsets. It makes no model call, retrieves no source, performs
 no automatic summary, admits no premise, and invokes no Lean process.
 Justification logic remains the integral downstream warrant layer; it is not
-required merely to view or discard a response. This precursor does not complete
-Stage 1 or select its genuine mathematical obstruction.
+required merely to view or discard a response. The technically delivered GUI
+exchange does not complete the genuine-obstruction Stage 1 trial or establish
+mathematical usefulness.
 
 The implementation is an experiment conducted through actual mathematical
 work. It tests which source relations and work artifacts can be
@@ -426,6 +435,63 @@ the recovery directory. Failure blocks further workspace writes until close and
 reopen, including when unlink completed but synchronization failed. No recovery
 rewrite attempts to compensate for an uncertain deletion.
 
+### One task-local mathematical-assistance exchange
+
+R2 adds one initial exchange to the principal GUI. Select a nonempty passage in
+visible ordinary source or work text and choose **Work → Ask about current
+selection…**, or use `Ctrl+Alt+Q`. The non-modal assistance dock freezes that
+exact Unicode text, its current in-memory SHA-256 revision and scalar
+line/column range. This includes unsaved visible text and explicitly opened
+read-only text references. It does not include PDF bytes, hidden buffers,
+workspace history or unselected note text. Up to eight explicit selections can
+be added; each can be inspected exactly and removed before transmission.
+
+Enter one natural-language mathematical question and a requested OpenAI model.
+The model field can be initialized before launch with the non-secret
+`THEOREM_TERMINAL_OPENAI_MODEL` environment variable. Choose **Preview exact
+request** to see the provider/model, target and context identities, question,
+complete instructions/input, limits, destination, retention disclosure, body
+byte length and SHA-256, and every exact UTF-8 request-body byte. Changing the
+question, model or context invalidates that preview. **Send exact preview** is a
+separate per-request action. At Send time the credential is read only from
+`OPENAI_API_KEY`; it is never placed in a workspace, preview, retained record or
+diagnostic. For example:
+
+```bash
+export THEOREM_TERMINAL_OPENAI_MODEL='MODEL'
+export OPENAI_API_KEY='YOUR_KEY'
+theorem-terminal gui /absolute/path/to/project
+```
+
+The fixed OpenAI Responses adapter sends at most one request off the Qt thread,
+with no redirect, retry, provider tool, remote prompt, streaming, previous
+response or conversation state, and `store: false`. The R2 task-local limits are
+256 KiB for the exact body, 1 MiB for the provider response, 800 requested
+output tokens and 60 seconds. A second in-flight send is refused. Cancelling a
+preview sends nothing and creates no record. Once transmission begins, a
+completed, refused, incomplete or failed terminal `ModelCall` is retained in
+private user-local project state when the adapter can do so.
+
+A completed answer shows provider, requested/resolved model and call identity
+before a readable read-only plain-text presentation. Returned markup is not
+rendered, URLs are not dispatched, code is not run and citations are explicitly
+unverified. The complete exact raw response remains available in the retained
+terminal record in the same dock. Refused, incomplete and failed calls remain
+inspectable without being presented as completed answers and without changing
+the note or retrying.
+
+Choose a visible deterministic passage number to inspect its exact UTF-8 span.
+**Retain exact passage…** uses the existing lossless projection service and
+creates no premise or warrant. **Insert attributed copy into active note** adds
+an explicitly unverified, human-editable contribution at the current cursor;
+later edits affect only the ordinary note, never the immutable response.
+**Cancel / dismiss** needs no disposition form. R2 has no linked follow-up,
+automatic retry, source retrieval, PDF extraction, citation verification or
+provider conversation state; explicit correction and continuation are the R3
+task. Automated and visual checks inject local deterministic transports and make
+no live provider request. Their success does not establish mathematical
+usefulness.
+
 ### External tools and LaTeX
 
 **Tools → Configure editor…** sets a trusted user-local argument template.
@@ -496,7 +562,9 @@ admission, contextual derivability and mathematical verification separate.
 The desktop has been exercised on Linux/WSL with real TeX and Vim and,
 historically, a disposable project on `/mnt/c`. R1's existing-PDF path was
 exercised without TeX beside a saved note using actual Qt widgets at 1280×820
-and 960×680. Qt/runtime and TeX installation prerequisites depend on
+and 960×680. R2's question, exact preview, deterministic answer, passage and
+editable-note flow was exercised visibly at the same sizes with an injected
+local transport and no provider request. Qt/runtime and TeX installation prerequisites depend on
 the platform and distribution. Native Windows and macOS GUI operation has not
 been exercised; **TeX building is unavailable there in this tranche**. Build
 supervision uses Linux/WSL2 subreaping and /proc to terminate and reap descendants,
@@ -792,13 +860,11 @@ maliciously replaced persistence store.
 
 ### Create one finalized OpenAI ModelCall
 
-The current integration surface consumes a low-level developer integration
-envelope containing only existing request-side `ModelCall` information. This
-transient JSON is intended eventually to be generated from the active task;
-mathematicians should not author it, and it is not yet the task-facing live
-workflow. A later task-facing operation must derive the initiator, target,
-purpose, context references, and limits from the active mathematical work. The
-envelope has exactly these fields:
+The low-level CLI integration surface consumes a developer envelope containing
+only existing request-side `ModelCall` information. The delivered R2 GUI now
+derives this transient JSON from the selected active task and does not expose it
+as a form; mathematicians should not author it. For CLI testing and automation,
+the envelope has exactly these fields:
 
 ```json
 {

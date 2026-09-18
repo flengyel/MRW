@@ -105,6 +105,11 @@ Use ordinary test documents; no test-only controller subclass may stand in for
 the GUI. When changing widgets, exercise the affected user workflow visibly at
 1280×820 and 960×680. Preserve R1 regression coverage for a local PDF beside an
 editable note, keyboard actions, position restoration and visible marker feedback.
+Preserve R2 coverage for exact Unicode and unsaved selection, context removal,
+separate preview/Send, off-thread single-attempt transport, every terminal
+status, inert returned content, exact projection and concurrent note edits. Use
+only deterministic injected transports in automated and visual checks; no live
+provider request is an implementation test.
 Exercise LaTeX rendering, diagnostics or external-editor handoff when those
 paths change; they are not repeated manual gates for every widget edit.
 Preserve regression coverage for source integrity and recovery. Run focused
@@ -117,11 +122,11 @@ Open a real integration corpus only when the task authorizes access, and do not
 modify its authoritative files during a visual check.
 
 The current GUI directly provides ordinary-file editing, existing local PDF
-reading, external-editor and Jupyter handoff, staged LaTeX building,
-generated-PDF rendering, recovery and retained-record inspection.
-Proof-assistant, computer-algebra, notebook-execution, repository,
-literature-service, live-model and Kallenberg-guidance GUI workflows remain
-unimplemented. Appendix A supplied a corpus-neutral editor/build/render/re-entry
+reading, one explicitly previewed task-local model exchange, external-editor and
+Jupyter handoff, staged LaTeX building, generated-PDF rendering, recovery and
+retained-record inspection. Proof-assistant, computer-algebra,
+notebook-execution, repository, literature-service, linked model follow-up and
+Kallenberg-guidance GUI workflows remain unimplemented. Appendix A supplied a corpus-neutral editor/build/render/re-entry
 smoke test. The September 14 supplied evidence adds saved reading notes and
 one persisted passage, not a completed study-assistance or warrant evaluation.
 See UX_SPEC.md §§9.1–9.3 for the now-independent evaluations.
@@ -136,8 +141,8 @@ turns that priority into a handoff, not a competing roadmap.
 
 The active delivery order is R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,
-as specified in `CODEX_PLAN.md`. R1 is delivered; R2 is the current bounded
-implementation task. This supersedes old Appendix-first execution
+as specified in `CODEX_PLAN.md`. R1 and R2 are delivered; R3 is the current
+bounded implementation task. This supersedes old Appendix-first execution
 ordering and evaluation prompts that require five anchors or a warrant before
 study. Keep one bounded product increment active and evaluate its contribution
 to actual mathematical work. Preserve existing recovery and record invariants;
@@ -260,14 +265,15 @@ checked it; never hand-author a placeholder that claims checked status.
 The single bounded OpenAI Responses API provider adapter is implemented as
 infrastructure for the later Stage 1 trial. It uses the fixed endpoint, obtains
 its credential only from `OPENAI_API_KEY`, rejects redirects, performs no
-retries, and transmits only the exact frozen UTF-8 body shown in its preview
-after the user enters `SEND`. Once transmission begins it atomically retains a
+retries, and transmits only the exact frozen UTF-8 body shown in its preview.
+The low-level CLI requires the exact token `SEND`; the R2 GUI requires its
+separate **Send exact preview** action after the same body is displayed. Once transmission begins it atomically retains a
 completed, failed, refused, or incomplete `ModelCall` when possible. Do not
 change its transport or publication boundary unless a demonstrated defect
 requires it. It never automatically projects a response, admits a premise,
 invokes Lean, or creates a mathematical warrant.
 
-The deterministic local response-review and selection precursor is implemented
+The deterministic local response-review and selection service is implemented
 over completed, finalized `ModelCall` records. It:
 
 - make no network, provider, tool, or Lean call;
@@ -313,7 +319,7 @@ over completed, finalized `ModelCall` records. It:
   non-completed calls, mode `0600`,
   no overwrite, concurrent destinations, and failure cleanup.
 
-This implemented precursor must not automatically summarize, semantically classify, retrieve
+This implemented review/selection service must not automatically summarize, semantically classify, retrieve
 a source, record a disposition, make a second model call, admit a premise, or
 invoke Lean. It records only routes present in the returned text. The task-facing
 generator must not solicit hidden chain of thought; the current adapter sends no
@@ -326,14 +332,22 @@ linked `ModelCall`. Source retrieval, verification, premise admission, and
 justification checking remain separate explicit actions.
 
 Ordinary orientation, study, and problem work remain independent of model
-assistance and justification-logic entry. The current transient request JSON is
-a low-level developer integration envelope, not a form for mathematicians and
-not the task-facing live workflow; deriving its request metadata and limits
-is part of R2, driven by the selected mathematical question. The explicit
-September 17 study-assistance requirement justifies implementing that GUI
-workflow. Each transmission still requires its own explicit user action and
-exact-context preview; this roadmap authorizes no background provider call.
-The response-review precursor does not establish assistance usefulness.
+assistance and justification-logic entry. The transient request JSON remains a
+low-level developer integration envelope, not a form for mathematicians. The
+delivered R2 GUI derives it from one selected task, shows the exact selected
+ordinary text and complete UTF-8 body, permits context removal, and requires a
+separate Send. It performs transport off the Qt thread, prevents duplicate
+in-flight sends, presents returned text inertly and reuses exact passage
+projection; an editable note copy remains separately attributed. It sends no
+PDF bytes or implicit extraction. Each transmission still requires its own
+explicit user action and exact-context preview; this roadmap authorizes no
+background provider call. Synthetic transport and widget checks do not establish
+assistance usefulness.
+
+R3 may add one explicit linked follow-up, correction or alternative and durable
+investigation resumption. Preserve R2's per-request preview and adapter boundary;
+do not use provider conversation state, `previous_response_id`, automatic retry,
+source retrieval, provider tools, a second provider or autonomous requests.
 
 For the warrant layer:
 

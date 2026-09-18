@@ -18,15 +18,17 @@ from PySide6.QtCore import (QBuffer, QByteArray, QDir, QIODevice, QObject, QPoin
 from PySide6.QtGui import (QAction, QColor, QFontDatabase, QKeySequence, QPainter,
                            QTextCursor, QTextDocument, QTextOption)
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
-    QDockWidget, QFileDialog, QFileSystemModel, QHBoxLayout, QInputDialog, QLabel,
+    QDockWidget, QFileDialog, QFileSystemModel, QGridLayout, QHBoxLayout, QInputDialog, QLabel,
     QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMenu, QMessageBox,
-    QPlainTextDocumentLayout, QPlainTextEdit, QPushButton, QScrollArea, QSpinBox, QSplitter, QToolBar,
+    QPlainTextDocumentLayout, QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy,
+    QSpinBox, QSplitter, QToolBar,
     QToolButton, QTreeView, QVBoxLayout, QWidget)
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPdfWidgets import QPdfView
 
-from .response_review import bounded_safe_diagnostic
-from .workstation import Workstation, preserve_newlines, record_kind
+from .response_review import bounded_safe_diagnostic, passage_count
+from .workstation import (ASSISTANCE_MODEL_ENV, MAX_ASSISTANCE_CONTEXTS,
+                          Workstation, preserve_newlines, record_kind)
 from .workspace import MAX_TEXT_BYTES, WorkspaceError
 
 TITLE = 'Mathematical Research Workstation'
@@ -861,6 +863,526 @@ class PdfPane(QWidget):
         self.window.schedule_checkpoint()
 
 
+class AssistancePanel(QWidget):
+    """One non-modal, explicitly previewed mathematical-assistance exchange."""
+
+    def __init__(self, window):
+        super().__init__()
+        self.window = window
+        self.contexts = []
+        self.target = None
+        self.prepared = None
+        self.outcome = None
+        self.in_flight = False
+        self.installing = False
+
+        layout = QVBoxLayout(self)
+        heading = QLabel(
+            'Ask one question about text you explicitly select. Nothing is sent '
+            'until you inspect the exact preview and choose Send.'
+        )
+        heading.setWordWrap(True)
+        heading.setTextFormat(Qt.TextFormat.PlainText)
+        layout.addWidget(heading)
+
+        provider_row = QHBoxLayout()
+        provider_row.addWidget(QLabel('Provider: OpenAI'))
+        provider_row.addWidget(QLabel('Requested model:'))
+        self.model = QLineEdit(os.environ.get(ASSISTANCE_MODEL_ENV, ''))
+        self.model.setPlaceholderText(f'Set here or with {ASSISTANCE_MODEL_ENV}')
+        self.model.setAccessibleName('Requested OpenAI model')
+        provider_row.addWidget(self.model, 1)
+        layout.addLayout(provider_row)
+
+        context_label = QLabel(
+            'Explicit selected ordinary text (PDF bytes, hidden buffers, history, '
+            'and unselected note text are not included):'
+        )
+        context_label.setWordWrap(True)
+        context_label.setTextFormat(Qt.TextFormat.PlainText)
+        layout.addWidget(context_label)
+        self.context_list = QListWidget()
+        self.context_list.setAccessibleName('Assistance selected contexts')
+        self.context_list.setMaximumHeight(92)
+        self.context_list.currentRowChanged.connect(self.show_context)
+        layout.addWidget(self.context_list)
+        context_buttons = QHBoxLayout()
+        self.add_context_button = QPushButton('Add current selection')
+        self.add_context_button.clicked.connect(
+            lambda: window.perform(window.ask_about_selection)
+        )
+        context_buttons.addWidget(self.add_context_button)
+        self.remove_context_button = QPushButton('Remove context')
+        self.remove_context_button.setAccessibleName('Remove selected assistance context')
+        self.remove_context_button.clicked.connect(
+            lambda: window.perform(self.remove_context)
+        )
+        self.remove_context_button.setEnabled(False)
+        context_buttons.addWidget(self.remove_context_button)
+        layout.addLayout(context_buttons)
+        self.context_text = QPlainTextEdit()
+        self.context_text.setReadOnly(True)
+        self.context_text.setAccessibleName('Exact selected context text')
+        self.context_text.setMaximumHeight(105)
+        layout.addWidget(self.context_text)
+
+        layout.addWidget(QLabel('One natural-language mathematical question:'))
+        self.question = QPlainTextEdit()
+        self.question.setAccessibleName('Mathematical assistance question')
+        self.question.setPlaceholderText(
+            'For example: What is the governing idea here, and which step needs justification?'
+        )
+        self.question.setMaximumHeight(100)
+        layout.addWidget(self.question)
+        request_buttons = QGridLayout()
+        self.preview_button = QPushButton('Preview exact request')
+        self.preview_button.clicked.connect(
+            lambda: window.perform(self.prepare_request)
+        )
+        request_buttons.addWidget(self.preview_button, 0, 0)
+        self.send_button = QPushButton('Send exact preview')
+        self.send_button.setAccessibleName('Send exact assistance preview')
+        self.send_button.clicked.connect(
+            lambda: window.perform(self.send_request)
+        )
+        self.send_button.setEnabled(False)
+        request_buttons.addWidget(self.send_button, 0, 1)
+        self.dismiss_button = QPushButton('Cancel / dismiss')
+        self.dismiss_button.clicked.connect(self.dismiss)
+        request_buttons.addWidget(self.dismiss_button, 1, 0, 1, 2)
+        layout.addLayout(request_buttons)
+
+        self.status = QLabel('No request has been prepared.')
+        self.status.setWordWrap(True)
+        self.status.setTextFormat(Qt.TextFormat.PlainText)
+        layout.addWidget(self.status)
+        self.preview_text = QPlainTextEdit()
+        self.preview_text.setReadOnly(True)
+        self.preview_text.setAccessibleName('Exact assistance request preview')
+        self.preview_text.setPlaceholderText(
+            'Provider, model, question, context, limits, disclosure, destination, '
+            'and exact UTF-8 request body will appear here.'
+        )
+        self.preview_text.setMinimumHeight(180)
+        layout.addWidget(self.preview_text)
+
+        self.answer_attribution = QLabel('')
+        self.answer_attribution.setWordWrap(True)
+        self.answer_attribution.setTextFormat(Qt.TextFormat.PlainText)
+        # ModelCall paths and identities are intentionally exact and can be one
+        # long token.  They must wrap inside the dock rather than setting its
+        # minimum width and squeezing the mathematical work out of view.
+        self.answer_attribution.setSizePolicy(
+            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+        )
+        layout.addWidget(self.answer_attribution)
+        self.answer_notice = QLabel(
+            'Model prose and any markup, URLs, citations, code, or mathematical '
+            'claims are inert plain text and remain unverified.'
+        )
+        self.answer_notice.setWordWrap(True)
+        self.answer_notice.setTextFormat(Qt.TextFormat.PlainText)
+        self.answer_notice.hide()
+        layout.addWidget(self.answer_notice)
+        self.answer = QPlainTextEdit()
+        self.answer.setReadOnly(True)
+        self.answer.setAccessibleName('Readable inert model response')
+        self.answer.setMinimumHeight(170)
+        self.answer.hide()
+        layout.addWidget(self.answer)
+
+        passage_row = QHBoxLayout()
+        self.passage = QSpinBox()
+        self.passage.setRange(1, 1)
+        self.passage.setPrefix('Passage ')
+        self.passage.setAccessibleName('Assistance response passage number')
+        passage_row.addWidget(self.passage)
+        self.show_passage_button = QPushButton('Show exact passage')
+        self.show_passage_button.clicked.connect(
+            lambda: window.perform(self.show_passage)
+        )
+        passage_row.addWidget(self.show_passage_button)
+        layout.addLayout(passage_row)
+        self.passage_text = QPlainTextEdit()
+        self.passage_text.setReadOnly(True)
+        self.passage_text.setAccessibleName('Exact selected response passage')
+        self.passage_text.setMaximumHeight(130)
+        self.passage_text.hide()
+        layout.addWidget(self.passage_text)
+        use_row = QGridLayout()
+        self.retain_button = QPushButton('Retain exact passage…')
+        self.retain_button.clicked.connect(
+            lambda: window.perform(self.retain_passage)
+        )
+        use_row.addWidget(self.retain_button, 0, 0)
+        self.copy_button = QPushButton('Copy attributed text')
+        self.copy_button.setAccessibleName('Copy attributed assistance contribution')
+        self.copy_button.clicked.connect(
+            lambda: window.perform(self.copy_contribution)
+        )
+        use_row.addWidget(self.copy_button, 0, 1)
+        self.insert_button = QPushButton('Insert into active note')
+        self.insert_button.setAccessibleName(
+            'Insert attributed assistance copy into active note'
+        )
+        self.insert_button.clicked.connect(
+            lambda: window.perform(self.insert_contribution)
+        )
+        use_row.addWidget(self.insert_button, 1, 0, 1, 2)
+        layout.addLayout(use_row)
+
+        self.record_toggle = QPushButton('Show exact retained ModelCall record')
+        self.record_toggle.setCheckable(True)
+        self.record_toggle.toggled.connect(self.toggle_record)
+        self.record_toggle.hide()
+        layout.addWidget(self.record_toggle)
+        self.raw_record = QPlainTextEdit()
+        self.raw_record.setReadOnly(True)
+        self.raw_record.setAccessibleName('Exact retained ModelCall record')
+        self.raw_record.setMinimumHeight(180)
+        self.raw_record.hide()
+        layout.addWidget(self.raw_record)
+        layout.addStretch()
+
+        self.question.textChanged.connect(self.draft_changed)
+        self.model.textChanged.connect(self.draft_changed)
+        self._set_response_controls(False)
+
+    def _set_response_controls(self, enabled):
+        for widget in (self.passage, self.show_passage_button, self.retain_button,
+                       self.copy_button, self.insert_button):
+            widget.setEnabled(enabled)
+
+    def _set_draft_controls(self, enabled):
+        for widget in (self.model, self.context_list, self.add_context_button,
+                       self.remove_context_button, self.question,
+                       self.preview_button):
+            widget.setEnabled(enabled)
+        self.dismiss_button.setEnabled(enabled)
+
+    def draft_changed(self, *_):
+        if self.installing or self.in_flight or self.outcome is not None:
+            return
+        self.prepared = None
+        self.send_button.setEnabled(False)
+        if self.preview_text.toPlainText():
+            self.preview_text.clear()
+        self.status.setText(
+            'Draft changed. Preview the complete exact request before Send.'
+        )
+
+    @staticmethod
+    def context_key(context):
+        return (context.source_identity, context.source_revision,
+                context.start, context.end)
+
+    def add_context(self, context):
+        if self.in_flight:
+            raise WorkspaceError('Wait for the in-flight request to finish')
+        if self.outcome is not None:
+            self.reset()
+        if self.target is None:
+            self.target = context
+        key = self.context_key(context)
+        existing = next((index for index, old in enumerate(self.contexts)
+                         if self.context_key(old) == key), None)
+        if existing is None:
+            if len(self.contexts) >= MAX_ASSISTANCE_CONTEXTS:
+                raise WorkspaceError(
+                    f'At most {MAX_ASSISTANCE_CONTEXTS} selected contexts can be sent'
+                )
+            self.contexts.append(context)
+            self.refresh_contexts(len(self.contexts) - 1)
+        else:
+            self.refresh_contexts(existing)
+        self.draft_changed()
+        self.status.setText(
+            'Selected context is frozen exactly as displayed. Write one question, '
+            'then preview; remove any context you do not want transmitted.'
+        )
+
+    def refresh_contexts(self, selected=0):
+        with QSignalBlocker(self.context_list):
+            self.context_list.clear()
+            for number, context in enumerate(self.contexts, 1):
+                name = Path(context.source_path).name if context.source_path else 'Untitled work buffer'
+                preview = ' '.join(context.text.split())[:80]
+                self.context_list.addItem(
+                    f'{number}. {name} · {displayed_position(context.start)}–'
+                    f'{displayed_position(context.end)} · {context.state} · {preview}'
+                )
+            if self.contexts:
+                self.context_list.setCurrentRow(
+                    min(max(0, selected), len(self.contexts) - 1)
+                )
+        self.show_context(self.context_list.currentRow())
+        self.remove_context_button.setEnabled(bool(self.contexts) and not self.in_flight)
+
+    def show_context(self, row):
+        if 0 <= row < len(self.contexts):
+            context = self.contexts[row]
+            saved = context.saved_revision or 'none (untitled)'
+            self.context_text.setPlainText('\n'.join((
+                f'Source identity: {context.source_identity}',
+                f'Captured text SHA-256: {context.source_revision}',
+                f'Saved/base SHA-256: {saved}',
+                f'Scalar location: {context.start}–{context.end}',
+                f'State: {context.state}',
+                f'Exact text ({len(context.text)} scalars, '
+                f'{len(context.text.encode("utf-8"))} UTF-8 bytes):',
+                context.text,
+            )))
+        else:
+            self.context_text.setPlainText(
+                'No selected text. If sent, only the question and an explicit '
+                'no-context notice will be transmitted.'
+            )
+
+    def remove_context(self):
+        row = self.context_list.currentRow()
+        if not 0 <= row < len(self.contexts):
+            raise WorkspaceError('Select a context row to remove')
+        del self.contexts[row]
+        self.refresh_contexts(row)
+        self.draft_changed()
+        self.status.setText(
+            'Context removed. Preview again to inspect the reduced exact request.'
+        )
+
+    def prepare_request(self):
+        if self.target is None:
+            raise WorkspaceError('Add a visible ordinary-text selection first')
+        prepared = self.window.controller.prepare_assistance(
+            target=self.target,
+            contexts=tuple(self.contexts),
+            question=self.question.toPlainText(),
+            model=self.model.text(),
+        )
+        self.prepared = prepared
+        self.preview_text.setPlainText(prepared.preview)
+        self.preview_text.moveCursor(QTextCursor.MoveOperation.Start)
+        self.status.setText(
+            'Preview frozen. Send is a separate action and authorizes exactly the '
+            'displayed UTF-8 body once.'
+        )
+        self.send_button.setEnabled(True)
+
+    def send_request(self):
+        if self.prepared is None:
+            raise WorkspaceError('Preview the exact request before Send')
+        prepared = self.prepared
+        api_key = os.environ.get('OPENAI_API_KEY', '')
+        self.window.controller.begin_assistance(prepared, api_key)
+        self.in_flight = True
+        self._set_draft_controls(False)
+        self.send_button.setEnabled(False)
+        self.status.setText(
+            'Sending one request off the GUI thread… No retry or follow-up will occur.'
+        )
+        def accepted(transmission):
+            try:
+                outcome = self.window.controller.accept_assistance(
+                    prepared, transmission
+                )
+            except Exception:
+                self.in_flight = False
+                self._set_draft_controls(True)
+                raise
+            self.in_flight = False
+            self.outcome = outcome
+            self.show_outcome()
+            QTimer.singleShot(0, self.scroll_to_outcome)
+        def failed(error):
+            self.window.controller.abandon_assistance(prepared)
+            self.in_flight = False
+            self._set_draft_controls(True)
+            self.send_button.setEnabled(False)
+            self.status.setText('The worker failed before a validated terminal outcome: ' + error)
+        try:
+            self.window.submit(
+                lambda: self.window.controller.transmit_assistance(prepared, api_key),
+                accepted,
+                failed,
+                background=True,
+            )
+        except Exception:
+            self.window.controller.abandon_assistance(prepared)
+            self.in_flight = False
+            self._set_draft_controls(True)
+            raise
+
+    def show_outcome(self):
+        outcome = self.outcome
+        terminal = outcome.terminal if outcome else None
+        self._set_draft_controls(False)
+        self.dismiss_button.setEnabled(True)
+        self.send_button.setEnabled(False)
+        if outcome and outcome.raw_record is not None:
+            self.raw_record.setPlainText(outcome.raw_record.decode('utf-8'))
+            self.record_toggle.setVisible(True)
+        else:
+            self.raw_record.clear()
+            self.record_toggle.hide()
+        if terminal is None:
+            self.status.setText(
+                'No validated terminal ModelCall is available. No answer was inserted '
+                'and the note was not changed.' + (f' {outcome.error}' if outcome and outcome.error else '')
+            )
+            self.answer_attribution.clear()
+            self.answer.hide()
+            self.answer_notice.hide()
+            self._set_response_controls(False)
+            return
+        path = str(outcome.path)
+        requested = terminal.requested_model
+        resolved = terminal.resolved_model or 'not supplied'
+        self.answer_attribution.setText('\n'.join((
+            f'Terminal status: {terminal.status}',
+            f'Provider: {terminal.provider}',
+            f'Requested model: {requested}',
+            f'Resolved model: {resolved}',
+            f'ModelCall: {terminal.id}',
+            f'Retained record: {path}',
+        )))
+        self.answer_notice.show()
+        if terminal.status == 'completed':
+            response = terminal.raw_response
+            assert response is not None
+            self.status.setText(
+                'Completed attributed answer retained. The box below is a readable '
+                'inert plain-text presentation; the exact raw response is available '
+                'in the retained ModelCall record. Citations remain unverified.'
+            )
+            self.answer.setPlainText(response)
+            self.answer.moveCursor(QTextCursor.MoveOperation.Start)
+            self.answer.show()
+            count = passage_count(response)
+            self.passage.setRange(1, max(1, count))
+            self._set_response_controls(count > 0)
+            self.passage_text.setVisible(count > 0)
+            if count:
+                self.show_passage()
+            else:
+                self.passage_text.clear()
+        else:
+            detail = terminal.raw_response or ''
+            self.status.setText(
+                f'The provider operation ended {terminal.status}. The terminal record '
+                'is retained and inspectable; no completed answer or automatic retry '
+                'was created.' + (f' {outcome.error}' if outcome.error else '')
+            )
+            self.answer.setPlainText(detail)
+            self.answer.setVisible(bool(detail))
+            self._set_response_controls(False)
+            self.passage_text.hide()
+
+    def scroll_to_outcome(self):
+        """Reveal the attributed terminal result without stealing editor focus."""
+        target = self.answer_attribution if self.outcome and self.outcome.terminal else self.status
+        self.window.assistance_scroll.verticalScrollBar().setValue(
+            max(0, target.y() - 8)
+        )
+
+    def show_passage(self):
+        if not self.outcome or not self.outcome.terminal or self.outcome.terminal.status != 'completed':
+            raise WorkspaceError('No completed response passage is available')
+        _call, selected, exact = self.window.controller.assistance_passage(
+            self.outcome.path, self.passage.value()
+        )
+        self.passage_text.setPlainText(
+            f'Exact UTF-8 bytes [{selected.start_byte}, {selected.end_byte})\n\n' + exact
+        )
+        self.passage_text.moveCursor(QTextCursor.MoveOperation.Start)
+
+    def retain_passage(self):
+        if not self.outcome:
+            raise WorkspaceError('No completed response passage is available')
+        path = QFileDialog.getSaveFileName(
+            self, 'Retain exact response passage', self.window.controller.current().root,
+            'JSON record (*.json)', options=QFileDialog.Option.DontConfirmOverwrite
+        )[0]
+        if not path:
+            return
+        self.window.controller.project_model_call_passage(
+            self.outcome.path, self.passage.value(), Path(path)
+        )
+        self.window.render()
+
+    def contribution(self):
+        if not self.outcome:
+            raise WorkspaceError('No completed response passage is available')
+        return self.window.controller.attributed_assistance_contribution(
+            self.outcome.path, self.passage.value()
+        )
+
+    def copy_contribution(self):
+        QApplication.clipboard().setText(self.contribution())
+        self.status.setText(
+            'Attributed, unverified editable copy placed on the clipboard. The '
+            'immutable ModelCall was not changed.'
+        )
+
+    def insert_contribution(self):
+        state = self.window.controller.current()
+        pane = self.window.panes[state.active_pane]
+        buffer = self.window.controller.buffer(pane.shown)
+        if not pane.genuine_content() or not buffer.editable:
+            raise WorkspaceError('Focus an editable ordinary work note before inserting')
+        cursor = pane.text.textCursor()
+        cursor.clearSelection()
+        pane.text.setTextCursor(cursor)
+        pane.text.insertPlainText(self.contribution())
+        pane.text.setFocus()
+        self.status.setText(
+            'Inserted a separately attributed, unverified editable copy into the '
+            'active note. Later edits do not alter the raw ModelCall.'
+        )
+
+    def toggle_record(self, shown):
+        self.raw_record.setVisible(bool(shown))
+        self.record_toggle.setText(
+            'Hide exact retained ModelCall record' if shown
+            else 'Show exact retained ModelCall record'
+        )
+
+    def reset(self):
+        self.installing = True
+        try:
+            self.contexts = []
+            self.target = self.prepared = self.outcome = None
+            self.in_flight = False
+            self.context_list.clear()
+            self.context_text.clear()
+            self.question.clear()
+            if not self.model.text():
+                self.model.setText(os.environ.get(ASSISTANCE_MODEL_ENV, ''))
+            self.preview_text.clear()
+            self.answer_attribution.clear()
+            self.answer.clear()
+            self.answer.hide()
+            self.answer_notice.hide()
+            self.passage_text.clear()
+            self.passage_text.hide()
+            self.raw_record.clear()
+            self.raw_record.hide()
+            self.record_toggle.setChecked(False)
+            self.record_toggle.hide()
+            self.status.setText('No request has been prepared.')
+            self.send_button.setEnabled(False)
+            self._set_response_controls(False)
+            self._set_draft_controls(True)
+            self.remove_context_button.setEnabled(False)
+        finally:
+            self.installing = False
+
+    def dismiss(self):
+        if self.in_flight:
+            raise WorkspaceError('Wait for the in-flight request to finish')
+        self.reset()
+        self.window.assistance_dock.hide()
+        self.window.update_actions()
+
+
 class WorkstationWindow(QMainWindow):
     def __init__(self, controller=None):
         super().__init__()
@@ -974,6 +1496,20 @@ class WorkstationWindow(QMainWindow):
         self.selection_dock.hide()
         self.view_menu.addAction(self.selection_dock.toggleViewAction())
         self._selection_rows = None
+        self.assistance_dock = QDockWidget('Mathematical assistance · one exchange', self)
+        self.assistance_dock.setAllowedAreas(
+            Qt.DockWidgetArea.RightDockWidgetArea
+            | Qt.DockWidgetArea.BottomDockWidgetArea
+        )
+        self.assistance_scroll = QScrollArea()
+        self.assistance_scroll.setWidgetResizable(True)
+        self.assistance_scroll.setMinimumWidth(360)
+        self.assistance = AssistancePanel(self)
+        self.assistance_scroll.setWidget(self.assistance)
+        self.assistance_dock.setWidget(self.assistance_scroll)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.assistance_dock)
+        self.assistance_dock.hide()
+        self.view_menu.addAction(self.assistance_dock.toggleViewAction())
         self.persistence = QLabel('')
         self.persistence.setTextFormat(Qt.TextFormat.PlainText)
         self.persistence.setStyleSheet('color: #a42e20;')
@@ -986,6 +1522,7 @@ class WorkstationWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.persistence)
         self.resizeDocks([self.navigator_dock], [210], Qt.Orientation.Horizontal)
         self.resizeDocks([self.context_dock], [300], Qt.Orientation.Horizontal)
+        self.resizeDocks([self.assistance_dock], [410], Qt.Orientation.Horizontal)
         self.resizeDocks([self.diagnostics_dock], [170], Qt.Orientation.Vertical)
         self.resizeDocks([self.selection_dock], [150], Qt.Orientation.Vertical)
         self.setStyleSheet('QToolButton, QPushButton, QComboBox, QSpinBox { min-height: 26px; } QTreeView::item, QListView::item { min-height: 26px; } QScrollBar:vertical { width: 16px; } QScrollBar:horizontal { height: 16px; } QMenu::item { padding: 7px 24px; }')
@@ -1033,6 +1570,10 @@ class WorkstationWindow(QMainWindow):
         self.add_action(work, 'context_open', 'Open selected context passage', self.open_context_selection)
         self.add_action(work, 'context_other', 'Open selected context passage in other pane', lambda: self.open_context_selection(other=True))
         self.add_action(work, 'context_remove', 'Remove selected context passage', self.remove_context_selection)
+        work.addSeparator()
+        self.add_action(work, 'ask', 'Ask about current selection…', self.ask_about_selection)
+        self.actions['ask'].setShortcut(QKeySequence('Ctrl+Alt+Q'))
+        self.actions['ask'].setShortcutContext(Qt.ShortcutContext.WindowShortcut)
         latex = self.menuBar().addMenu('LaTeX')
         self.add_action(latex, 'tex_root', 'Set as TeX root', lambda: self.controller.set_tex_root())
         self.add_action(latex, 'build', 'Build LaTeX', self.build_latex)
@@ -1094,6 +1635,11 @@ class WorkstationWindow(QMainWindow):
     def pdf_has_focus(self):
         widget = QApplication.focusWidget()
         return bool(widget and hasattr(self, 'pdf') and (widget is self.pdf or self.pdf.isAncestorOf(widget)))
+
+    def assistance_has_focus(self):
+        widget = QApplication.focusWidget()
+        return bool(widget and hasattr(self, 'assistance_dock')
+                    and self.assistance_dock.isAncestorOf(widget))
 
     def focus_changed(self, *_):
         if hasattr(self, 'persistence'):
@@ -1229,6 +1775,13 @@ class WorkstationWindow(QMainWindow):
         self.actions['save'].setToolTip('Save editable target: ' + target)
         self.focus_status.setText(('PDF focus · Find unavailable · ' if pdf_focused else '') + 'Save → ' + target)
         self.focus_status.setToolTip('PDFs are read-only. Save always addresses the named editable text buffer.')
+        if self.assistance_has_focus():
+            self.actions['find'].setToolTip(
+                'Find searches the active ordinary-text editor; the assistance '
+                'response is exact selectable plain text.'
+            )
+            self.actions['find_next'].setToolTip(self.actions['find'].toolTip())
+            self.focus_status.setText('Assistance focus · Save → ' + target)
         if marker:
             path = Path(marker.path)
             label = str(path.relative_to(Path(state.root))) if path.is_relative_to(Path(state.root)) else str(path)
@@ -1263,15 +1816,32 @@ class WorkstationWindow(QMainWindow):
         for path in state.recent if state else []:
             self.recent_files.addAction(path, lambda path=path: self.perform(lambda: self.open_file(Path(path))))
         self.refresh_selection_shelf()
+        if hasattr(self, 'assistance') and self.assistance.outcome is not None:
+            terminal = self.assistance.outcome.terminal
+            completed = bool(terminal and terminal.status == 'completed')
+            self.assistance.insert_button.setEnabled(
+                completed and bool(buffer and buffer.editable)
+            )
 
     def update_context_actions(self, *_):
         if not hasattr(self, 'selection_list'):
             return
         state = self.controller.workspace
-        ready = state is not None and not self.jobs
+        ready = state is not None and not any(
+            not job.background for job in self.jobs.values()
+        )
         pane = self.active_pane() if state else None
         self.actions['context_add'].setEnabled(bool(ready and not self.pdf_has_focus() and pane.text.textCursor().hasSelection()
             and self.controller.context_selection_supported(pane.shown)))
+        assistance_ready = bool(
+            ready and not self.pdf_has_focus() and pane.text.textCursor().hasSelection()
+            and self.controller.assistance_selection_supported(pane.shown)
+            and self.controller.assistance_in_flight is None
+            and (not hasattr(self, 'assistance') or self.assistance.outcome is None)
+        )
+        self.actions['ask'].setEnabled(assistance_ready)
+        if hasattr(self, 'assistance'):
+            self.assistance.add_context_button.setEnabled(assistance_ready)
         selected = bool(ready and 0 <= self.selection_list.currentRow() < len(state.selection_shelf))
         for key, button in self.context_buttons.items():
             self.actions[key].setEnabled(selected)
@@ -1574,6 +2144,8 @@ class WorkstationWindow(QMainWindow):
         self.pdf.hide()
         self.diagnostics_dock.hide()
         self.context_dock.hide()
+        self.assistance.reset()
+        self.assistance_dock.hide()
         self.filesystem.setRootPath('')
         self.navigator.setRootIndex(self.file_filter.mapFromSource(self.filesystem.index('')))
         self.render()
@@ -1664,6 +2236,26 @@ class WorkstationWindow(QMainWindow):
             edit.setTextCursor(cursor)
             edit.centerCursor()
             edit.setFocus()
+
+    def ask_about_selection(self):
+        """Add exactly the current visible selection to the R2 question."""
+        pane = self.active_pane()
+        pane.text.finish_reflow()
+        pane.capture_position()
+        cursor = pane.text.textCursor()
+        context = self.controller.capture_assistance_context(
+            pane.shown,
+            cursor_index(pane.text, cursor.selectionStart()),
+            cursor_index(pane.text, cursor.selectionEnd()),
+            pane=pane.number,
+        )
+        self.assistance.add_context(context)
+        self.assistance_dock.show()
+        self.resizeDocks(
+            [self.assistance_dock], [410], Qt.Orientation.Horizontal
+        )
+        self.assistance.question.setFocus()
+        self.update_actions()
 
     def add_context_selection(self):
         pane = self.active_pane()

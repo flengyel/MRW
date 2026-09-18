@@ -22,7 +22,7 @@ from uuid import uuid4
 
 from theorem_terminal.model_projection import (
     MAX_MODEL_CALL_BYTES,
-    parse_finalized_model_call,
+    parse_terminal_model_call,
 )
 from theorem_terminal.private_persistence import persist_private_new
 
@@ -446,7 +446,13 @@ def _validate_provider_unicode(value: object, path: str) -> None:
             _validate_provider_unicode(item, f"{path}[{index}]")
 
 
-def render_preview(operation: PreparedOperation) -> str:
+def render_preview(
+    operation: PreparedOperation,
+    *,
+    confirmation_prompt: str = (
+        "Type SEND to transmit exactly the displayed request-body bytes: "
+    ),
+) -> str:
     request = operation.request
     return "\n".join(
         (
@@ -466,7 +472,7 @@ def render_preview(operation: PreparedOperation) -> str:
             json.dumps(_plain_json(request["limits"]), ensure_ascii=False, sort_keys=True),
             f"Output destination: {operation.output}",
             "OpenAI data handling remains governed by its policies; store:false does not claim to disable every form of processing or retention.",
-            "Type SEND to transmit exactly the displayed request-body bytes: ",
+            confirmation_prompt,
         )
     )
 
@@ -517,10 +523,7 @@ def _terminal_record(
 
 def _serialize_terminal(record: Mapping[str, object]) -> bytes:
     raw = encode_canonical(record)
-    if record["status"] == "completed":
-        parse_finalized_model_call(raw)
-    elif record["status"] not in ("failed", "refused", "incomplete"):
-        raise OpenAIResponseError("terminal ModelCall status is invalid")
+    parse_terminal_model_call(raw)
     return raw
 
 
@@ -664,7 +667,10 @@ def request_assistance(
     """Complete every preflight before preview, confirmation, and transport."""
 
     try:
-        snapshot = parse_prepared_request(encode_canonical(request))
+        # A previously previewed PreparedOperation deliberately exposes a
+        # deeply frozen Mapping/tuple snapshot. Accept that exact snapshot as
+        # well as the original mutable JSON-shaped input.
+        snapshot = parse_prepared_request(encode_canonical(_plain_json(request)))
     except (TypeError, ValueError, UnicodeEncodeError) as exc:
         if isinstance(exc, OpenAIResponseError):
             raise
