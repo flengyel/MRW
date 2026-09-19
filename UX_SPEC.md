@@ -6,10 +6,11 @@ invariants). Present implementation and limitations are documented in README.
 The current GUI provides ordinary-file editing, existing local PDF reading,
 external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
 rendering, checkpoint recovery, one explicit task-local OpenAI exchange, one
-bounded linked continuation with restart restoration, and retained-record
+bounded linked continuation with restart restoration, an explicit end-and-
+begin-again lifecycle, and retained-record
 inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
 literature-service, branching/general model conversation and Kallenberg-guidance
-GUI workflows below remain unimplemented. The active R1–R3 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+GUI workflows below remain unimplemented. The active R1–R3.1 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 prioritizes readable study, task-local assistance and continued investigation.
 Kallenberg ordering guides requested orientation in unfamiliar material; a
 focused question need not repeat it. Qt/runtime and TeX prerequisites remain
@@ -510,6 +511,25 @@ silently overwritten to create a branch. General conversation history,
 automatic summaries, branching, retry, source retrieval and provider tools stay
 outside this interaction.
 
+R3.1 supplies the missing terminal lifecycle for that single slot. **End
+investigation…** is available in the Work menu and the assistance dock. Because
+an inserted handoff is an ordinary editable note rather than workspace metadata,
+the application does not read or search note content to infer whether insertion
+already occurred. Ending therefore requires one explicit choice: insert the
+existing human task handoff and end, end without insertion, or cancel. The first
+choice makes the existing ordinary-note edit before clearing; the second changes
+no note text; cancel changes nothing.
+
+Ending durably replaces only the private active-investigation pointer with no
+pointer. It deletes or rewrites no `ModelCall`, projection, selected passage,
+anchor, recovery entry, ordinary file or unrelated workspace field. Recovery and
+workspace publication must complete before the UI reports success. On any
+checkpoint or publication failure, the existing investigation remains active
+and the error stays visible. After a successful end and application restart, a
+new independent bounded parent/child investigation may be started in the same
+project. This is sequential reuse of one slot, not simultaneous investigations,
+an archive browser, a conversation tree or child-of-child chat.
+
 Each explicit user action creates at most one provider request. The request
 obeys configured input, output, and timeout limits, invokes no provider tools,
 and performs no automatic retry or recursive request. R2 supplies no retry or
@@ -629,7 +649,7 @@ validator.
 
 ## 9. Study and collaboration evaluation
 
-Evaluate usefulness as each R1–R3 increment is delivered. Source choice follows
+Evaluate usefulness as each R1–R3.1 increment is delivered. Source choice follows
 the current mathematical need. Reading/re-entry and unformalized problem work
 test distinct capabilities; neither substitutes for the other. The warrant
 experiment in §9.3 has independent acceptance criteria.
@@ -652,7 +672,7 @@ coherent algebraic number theory cluster remains a suitable candidate.
 6. Leave the next question or unfinished step in the note and continue later.
    A related problem or reconstructed argument can test later retention.
 
-R1–R3 have been technically verified with deterministic local responses for
+R1–R3.1 have been technically verified with deterministic local responses for
 assistance. No live provider request or genuine mathematical-obstruction trial
 was performed, so the following acceptance remains unobserved rather than
 inferred from tests.

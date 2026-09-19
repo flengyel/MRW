@@ -1499,6 +1499,19 @@ class Workstation:
             state, question=question, **values
         ))
 
+    def end_investigation(self):
+        """Durably release the sole active slot without changing retained records."""
+        state = self.current().investigation
+        if state is None:
+            raise WorkspaceError('No retained investigation is available')
+        if self.assistance_in_flight is not None:
+            raise WorkspaceError(
+                'Wait for the mathematical-assistance request to finish before '
+                'ending the investigation'
+            )
+        self._checkpoint_investigation(None)
+        return state
+
     def restore_investigation(self):
         """Validate exact linked records for display without replacing task text."""
         state = self.current().investigation

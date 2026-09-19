@@ -10,9 +10,10 @@ serialized record identities retain their existing technical names.
 For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
 R1's PDF-plus-note workflow, R2's bounded direct mathematical-assistance
-exchange and R3's one linked, resumable continuation are delivered. The next
-product step is a genuine mathematical-use observation across those workflows,
-not a broader automatic conversation feature.
+exchange, R3's one linked resumable continuation and R3.1's explicit end-and-
+begin-again lifecycle are delivered. The next product step is a genuine
+mathematical-use observation across those workflows, not a broader automatic
+conversation feature.
 
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
@@ -139,6 +140,10 @@ links through `in_reply_to` without provider conversation state. The parent
 evidence, correction and child answer remain visible together, and bounded
 human-maintained task state restores after reopening. These checks likewise
 establish mechanics only; continued mathematical usefulness remains unobserved.
+R3.1 adds an explicit **End investigation…** action that durably releases only
+the active workspace pointer after an insert-handoff, end-without-insertion or
+cancel choice. It retains the immutable records and all unrelated workspace
+state, and a failed checkpoint leaves the investigation active.
 
 
 The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
@@ -409,15 +414,17 @@ opening fails without navigation or a replacement revision.
 Neither aid requires a descriptive form. Shelf entries are private local
 navigation anchors only, not provenance, citations, warrant records or
 mathematical-object identities, and nothing is automatically sent to a model.
-Versions 3–7 migrate to version 8 at the next atomic checkpoint without reading
-source files. Version 7 gains empty imported-PDF state and retains its generated
-PDF position. Migrated anchors have empty previews until explicitly opened or
-retained again. Versions 3–5 default to their historical wrapped display;
-version 6 preserves its wrap setting. Version 3 gains an empty shelf; existing
-shelves are retained, keeping the first anchor when canonicalization makes old
-spellings equivalent. Legacy positions preserve the historically rendered
-selection in independent pane views. Recovery, unfinished marker, split,
-generated PDF, build and window state are preserved.
+Workspace schema version 9 stores the optional bounded-investigation pointer.
+Versions 3–8 migrate to version 9 at the next atomic checkpoint without reading
+source or retained-record files. Version 8 gains an empty investigation pointer;
+version 7 gains empty imported-PDF state and retains its generated PDF position.
+Migrated anchors have empty previews until explicitly opened or retained again.
+Versions 3–5 default to their historical wrapped display; version 6 preserves
+its wrap setting. Version 3 gains an empty shelf; existing shelves are retained,
+keeping the first anchor when canonicalization makes old spellings equivalent.
+Legacy positions preserve the historically rendered selection in independent
+pane views. Recovery, unfinished marker, split, generated and imported PDF,
+build and window state are preserved.
 
 State, trusted tool settings, build outputs and private recovery are stored under:
 
@@ -539,6 +546,20 @@ nor a replacement revision. **Work → Resume saved investigation** reopens the
 same retained state. R3 does not add a conversation tree, automatic summary,
 source retrieval, citation verification, provider tools or another provider.
 
+When that investigation is over, choose **Work → End investigation…** or the
+matching dock button. The confirmation offers exactly three outcomes: **Insert
+handoff and end**, **End without insertion**, and **Cancel**. The application
+does not scan ordinary notes to guess whether a handoff is already present, so
+this explicit choice is always shown. Insertion uses the existing editable human
+handoff and remains an ordinary unsaved note edit; ending without insertion
+does not modify the note. Only the private active-investigation pointer is
+cleared. Parent and child `ModelCall`s, exact projections, retained passages,
+anchors and unrelated workspace state remain. If recovery or workspace
+publication fails, the pointer stays active and the failure is reported. After
+a successful end and restart, another independent one-parent/one-child
+investigation may be started in the same project. R3.1 adds no archive browser,
+record deletion, simultaneous investigation, branch or child-of-child call.
+
 ### External tools and LaTeX
 
 **Tools → Configure editor…** sets a trusted user-local argument template.
@@ -611,7 +632,11 @@ historically, a disposable project on `/mnt/c`. R1's existing-PDF path was
 exercised without TeX beside a saved note using actual Qt widgets at 1280×820
 and 960×680. R2's question, exact preview, deterministic answer, passage and
 editable-note flow was exercised visibly at the same sizes with an injected
-local transport and no provider request. Qt/runtime and TeX installation prerequisites depend on
+local transport and no provider request. R3's restored comparison and R3.1's
+three-choice end action were likewise exercised visibly at both sizes; the
+deterministic sequence ended one investigation without changing the note,
+restarted, created another, and ended it with an explicit in-memory handoff
+insertion. Qt/runtime and TeX installation prerequisites depend on
 the platform and distribution. Native Windows and macOS GUI operation has not
 been exercised; **TeX building is unavailable there in this tranche**. Build
 supervision uses Linux/WSL2 subreaping and /proc to terminate and reap descendants,
@@ -1089,7 +1114,7 @@ problem families before selecting a problem.
 - [CODEX_PLAN.md](CODEX_PLAN.md) — active outcome roadmap, implementation status,
   research basis and retained implementation contracts.
 - [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) — copyable prompt for
-  the next bounded implementation task and its delivery criteria.
+  the current mathematical-use observation handoff and its evidence criteria.
 - `AGENTS.md` — instructions for Codex and other coding agents.
 - `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` — the bounded warrant-composition
   experiment and its cut line.

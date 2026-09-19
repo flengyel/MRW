@@ -1,11 +1,13 @@
-# Codex continuation: observe the delivered R1–R3 workflow
+# Codex continuation: observe the delivered R1–R3.1 workflow
 
 Use this document as the next bounded handoff. The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
 R1's PDF-plus-note workflow, R2's single task-local assistance exchange and
 R3's one linked, resumable continuation are implemented and technically
-verified. The next task is **a genuine mathematical-use observation**, not a
-new feature tranche.
+verified. R3.1 can explicitly end that sole active investigation without
+deleting its records, then permit a new bounded investigation after restart.
+The next task is **a genuine mathematical-use observation**, not a new feature
+tranche.
 
 ## Objective
 
@@ -16,7 +18,7 @@ interaction blocker appears, diagnose it and make only the smallest authorized
 correction needed for that task; otherwise make no code change.
 
 Keep implementation status, synthetic verification and observed mathematical
-benefit separate. The deterministic R1–R3 tests establish mechanics only. Do
+benefit separate. The deterministic R1–R3.1 tests establish mechanics only. Do
 not claim that the workstation is useful, that an answer is correct, or that a
 continuation works for real research until the corresponding human work has
 actually been observed.
@@ -25,7 +27,7 @@ actually been observed.
 
 Read `AGENTS.md` and the documents it names. Inspect the branch and preserve
 unrelated tracked and untracked files. Confirm that the installed GUI being used
-contains the delivered R1–R3 commit. Do not repeat the implementation acceptance
+contains the delivered R1–R3.1 commit. Do not repeat the implementation acceptance
 campaign merely to begin a study session.
 
 Use a durable user project for the note. A disposable copy is appropriate for a
@@ -54,6 +56,11 @@ files must not be modified during a visual check.
 6. Save the current question, last useful conclusion and unresolved issue. Put
    an editable handoff in the ordinary note when that helps. Close and reopen
    later, then continue from the restored note and bounded investigation state.
+7. When that investigation is genuinely over, use **End investigation…** and
+   explicitly choose insert-handoff-and-end, end-without-insertion, or cancel.
+   Restart before beginning a separate investigation when sequential reuse is
+   relevant to the task. Ending clears only the active pointer; it is not record
+   deletion or archival.
 
 No live provider request is authorized merely by this handoff. It occurs only
 if the user explicitly chooses Send after inspecting that request's preview.
@@ -79,9 +86,14 @@ verification, PDF extraction/OCR/SyncTeX, autonomous requests, another provider,
 new warrant machinery, general corpus ingestion or a broad rendering redesign
 without a separately authorized, observed requirement.
 
-R1–R3 ordinary work remains independent of Lean and justification-logic entry.
+R1–R3.1 ordinary work remains independent of Lean and justification-logic entry.
 A model response, human correction, task summary, projection or link creates no
 premise, Verification, acceptance or warrant.
+
+R3.1 still permits only one active investigation and one child. It adds no
+archive browser, simultaneous slot, branch, child-of-child request, automatic
+summary or retry. If ending cannot checkpoint durably, the old investigation
+must remain active and the failure must be reported.
 
 ## Finish the observation
 

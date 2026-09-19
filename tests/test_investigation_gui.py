@@ -177,6 +177,21 @@ class InvestigationWidgetTests(unittest.TestCase):
         panel.unresolved_issue.setPlainText("Uniformity of the last estimate is unresolved.")
         panel.model.setText("local-r3-gui")
 
+    def create_retained_investigation(self):
+        parent_outcome = self.create_parent()
+        panel = self.load_parent(parent_outcome)
+        self.fill_draft(panel)
+        panel.preview_button.click()
+        self.responses.append(completed_response(
+            "resp-child-end-gui",
+            "Completed child text stays only in its immutable record.\n",
+        ))
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "local-only"}, clear=False):
+            panel.send_button.click()
+        self.wait_idle()
+        self.assertIsNotNone(self.controller.current().investigation)
+        return panel, parent_outcome
+
     def test_context_removal_preview_missing_key_and_cancel_create_no_child(self):
         from PySide6.QtTest import QTest
 
@@ -316,6 +331,86 @@ class InvestigationWidgetTests(unittest.TestCase):
         self.assertEqual(degraded.answer.toPlainText(), response)
         self.assertEqual(len(self.transport_calls), 2)
         self.assertFalse(self.errors)
+
+    def test_end_cancel_then_without_insertion_leaves_note_bytes_unchanged(self):
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        memory_before = self.controller.buffer(note_id).content
+        disk_before = self.files["questions.txt"].read_bytes()
+
+        with patch.object(
+            self.window, "choose_end_investigation", return_value=None
+        ):
+            panel.end_investigation_button.click()
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.buffer(note_id).content, memory_before)
+        self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
+
+        with patch.object(
+            self.window, "choose_end_investigation", return_value="without"
+        ):
+            self.window.actions["end_investigation"].trigger()
+        self.assertIsNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.buffer(note_id).content, memory_before)
+        self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
+        self.assertIn("Investigation ended", panel.status.text())
+        self.assertFalse(self.window.actions["end_investigation"].isEnabled())
+        self.assertFalse(self.errors)
+
+    def test_end_with_explicit_handoff_insertion_changes_only_editable_note(self):
+        from PySide6.QtGui import QTextCursor
+
+        self.open_project()
+        panel, parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        memory_before = self.controller.buffer(note_id).content
+        disk_before = self.files["questions.txt"].read_bytes()
+        parent_hash = parent_outcome.path.read_bytes()
+        child_path = Path(self.controller.current().investigation.child_path)
+        child_hash = child_path.read_bytes()
+        pane.text.moveCursor(QTextCursor.MoveOperation.End)
+
+        with patch.object(
+            self.window, "choose_end_investigation", return_value="insert"
+        ):
+            panel.end_investigation_button.click()
+
+        changed = self.controller.buffer(note_id).content
+        self.assertIsNone(self.controller.current().investigation)
+        self.assertNotEqual(changed, memory_before)
+        self.assertIn("Investigation handoff — editable human task summary", changed)
+        self.assertIn("Human correction: assume sequential compactness only.", changed)
+        self.assertNotIn("Completed child text stays only", changed)
+        self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
+        self.assertEqual(parent_outcome.path.read_bytes(), parent_hash)
+        self.assertEqual(child_path.read_bytes(), child_hash)
+        self.assertTrue(self.controller.buffer(note_id).dirty)
+        self.assertFalse(self.errors)
+
+    def test_end_persistence_failure_reports_and_keeps_investigation_active(self):
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        note_before = self.controller.buffer(note_id).content
+
+        with patch.object(
+            self.window, "choose_end_investigation", return_value="without"
+        ), patch.object(
+            self.controller, "checkpoint", return_value=True
+        ), patch.object(
+            self.controller.store, "save", side_effect=OSError("end denied")
+        ):
+            self.window.actions["end_investigation"].trigger()
+
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.buffer(note_id).content, note_before)
+        self.assertRegex(self.errors[-1], "Investigation checkpoint failed")
+        self.assertTrue(panel.end_investigation_button.isEnabled())
+        self.controller.close_project(discard_session=True)
 
 
 if __name__ == "__main__":

@@ -996,6 +996,15 @@ class AssistancePanel(QWidget):
         self.insert_handoff_button.setEnabled(False)
         summary_buttons.addWidget(self.insert_handoff_button)
         continuation_layout.addLayout(summary_buttons)
+        self.end_investigation_button = QPushButton('End investigation…')
+        self.end_investigation_button.setAccessibleName(
+            'End the active investigation'
+        )
+        self.end_investigation_button.clicked.connect(
+            lambda: window.perform(window.end_investigation)
+        )
+        self.end_investigation_button.setEnabled(False)
+        continuation_layout.addWidget(self.end_investigation_button)
         self.continuation_widget.hide()
         layout.addWidget(self.continuation_widget)
 
@@ -1484,6 +1493,7 @@ class AssistancePanel(QWidget):
         )
         self.save_summary_button.setEnabled(retained_investigation)
         self.insert_handoff_button.setEnabled(retained_investigation)
+        self.end_investigation_button.setEnabled(retained_investigation)
         if retained_investigation:
             for widget in (self.question, self.correction, self.last_conclusion,
                            self.unresolved_issue):
@@ -1697,6 +1707,7 @@ class AssistancePanel(QWidget):
             widget.setEnabled(True)
         self.save_summary_button.setEnabled(True)
         self.insert_handoff_button.setEnabled(True)
+        self.end_investigation_button.setEnabled(True)
         if restored.error:
             self.status.setText(restored.error)
         self.continue_current_button.hide()
@@ -1757,8 +1768,19 @@ class AssistancePanel(QWidget):
             self.resume_button.setEnabled(retained)
             self.save_summary_button.setEnabled(False)
             self.insert_handoff_button.setEnabled(False)
+            self.end_investigation_button.setEnabled(False)
         finally:
             self.installing = False
+
+    def investigation_ended(self):
+        """Leave the dock ready for unrelated work after pointer publication."""
+        self.reset()
+        self.status.setText(
+            'Investigation ended. Its immutable ModelCall records, projections, '
+            'passages and ordinary notes were retained. A new investigation may '
+            'now be started.'
+        )
+        self.window.assistance_dock.show()
 
     def dismiss(self):
         if self.in_flight:
@@ -1969,6 +1991,8 @@ class WorkstationWindow(QMainWindow):
                         self.load_continuation_parent)
         self.add_action(work, 'resume_investigation',
                         'Resume saved investigation', self.resume_investigation)
+        self.add_action(work, 'end_investigation',
+                        'End investigation…', self.end_investigation)
         latex = self.menuBar().addMenu('LaTeX')
         self.add_action(latex, 'tex_root', 'Set as TeX root', lambda: self.controller.set_tex_root())
         self.add_action(latex, 'build', 'Build LaTeX', self.build_latex)
@@ -2142,6 +2166,9 @@ class WorkstationWindow(QMainWindow):
                     'continue_assistance'):
             self.actions[key].setEnabled(state is not None and not busy)
         self.actions['resume_investigation'].setEnabled(bool(
+            state and state.investigation and not busy
+        ))
+        self.actions['end_investigation'].setEnabled(bool(
             state and state.investigation and not busy
         ))
         for key in ('project', 'quit'):
@@ -2692,6 +2719,56 @@ class WorkstationWindow(QMainWindow):
             self.assistance.install_restored,
         )
         self.assistance_dock.show()
+
+    def choose_end_investigation(self):
+        """Ask how to handle the ordinary-note handoff before releasing R3."""
+        box = QMessageBox(self)
+        box.setWindowTitle('End investigation')
+        box.setTextFormat(Qt.TextFormat.PlainText)
+        box.setText(
+            'End the active investigation?\n\n'
+            'This clears only its private workspace pointer. ModelCall records, '
+            'projections, retained passages, anchors and ordinary files remain. '
+            'The application does not inspect notes to guess whether the handoff '
+            'was already inserted.'
+        )
+        insert = box.addButton(
+            'Insert handoff and end', QMessageBox.ButtonRole.AcceptRole
+        )
+        without = box.addButton(
+            'End without insertion', QMessageBox.ButtonRole.DestructiveRole
+        )
+        cancel = box.addButton(QMessageBox.StandardButton.Cancel)
+        box.setDefaultButton(QMessageBox.StandardButton.Cancel)
+        box.setEscapeButton(cancel)
+        box.exec()
+        clicked = box.clickedButton()
+        if clicked is insert:
+            return 'insert'
+        if clicked is without:
+            return 'without'
+        return None
+
+    def end_investigation(self):
+        """Explicitly end one parent/child investigation and release its slot."""
+        if self.controller.current().investigation is None:
+            raise WorkspaceError('No saved investigation is available')
+        if self.controller.assistance_in_flight is not None:
+            raise WorkspaceError(
+                'Wait for the mathematical-assistance request to finish before '
+                'ending the investigation'
+            )
+        choice = self.choose_end_investigation()
+        if choice is None:
+            return False
+        if choice == 'insert':
+            self.assistance.insert_handoff()
+        elif choice != 'without':
+            raise WorkspaceError('Invalid end-investigation choice')
+        self.controller.end_investigation()
+        self.assistance.investigation_ended()
+        self.update_actions()
+        return True
 
     def add_context_selection(self):
         pane = self.active_pane()

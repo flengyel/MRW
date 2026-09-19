@@ -1,6 +1,6 @@
 # CODEX_PLAN.md
 
-Active product roadmap, reviewed 2026-09-18 against the delivered R1–R3
+Active product roadmap, reviewed 2026-09-19 against the delivered R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
 purpose in `VISION.md`.
@@ -11,7 +11,8 @@ purpose in `VISION.md`.
 user outcomes, but has not yet demonstrated them.** It has a reusable editor,
 independent local-PDF and build/render paths, durable recovery, navigation
 anchors, exact retained-record services, one bounded task-local assistance
-exchange and one explicitly linked, resumable continuation. No genuine
+exchange, one explicitly linked resumable continuation, and an explicit way to
+end that investigation before beginning another. No genuine
 mathematical obstruction has yet been helped through those exchanges, and no
 continued in-application research collaboration has been observed. Continue
 from this foundation; do not restart the architecture.
@@ -32,7 +33,7 @@ actual warrant question.
 | Readable mathematics | R1 opens an exact-identity local PDF independently of TeX beside an editable note and restores page/zoom; PDF search and outline remain absent | The minimum literature-reading entry point is delivered. Observe real use before adding deferred reader features |
 | Routine operation | R1 binds platform-standard Open, Save, Find and Find-next, makes PDF-versus-text focus explicit, and shows marker/Return status | Preserve these behaviors while evaluating the delivered continuation |
 | Study benefit | The September 14 session saved useful purpose, definition and near-product notes; explanatory guidance came from the surrounding assistant interaction | This supports the value of the study activity, not a delivered workstation guidance feature |
-| AI collaboration | R2 can initiate one explicitly previewed question; R3 can send one independently previewed child from selected exact parent passages plus separate human correction/current context, then restore the parent, correction, child and task summary | Observe a genuine use; synthetic responses establish mechanics, not benefit, and do not justify a conversation tree |
+| AI collaboration | R2 can initiate one explicitly previewed question; R3 can send one independently previewed child from selected exact parent passages plus separate human correction/current context, then restore the parent, correction, child and task summary; R3.1 can explicitly end that active pointer without deleting its records | Observe genuine sequential use; synthetic responses establish mechanics, not benefit, and do not justify simultaneous investigations or a conversation tree |
 | Re-entry evidence | Five-anchor evaluation was incomplete; marker creation was unconfirmed; the original historical note was unavailable | No anchor defect, crash, mislanding or historical reduction is established. Use a fresh prospective continuation test |
 
 The failed prescribed sessions are evidence about the product and evaluation
@@ -60,7 +61,7 @@ The following are design inputs, not proof that this application works.
 
 ### Delivery order
 
-One product increment is active at a time. R1–R3 are delivered implementation
+One product increment is active at a time. R1–R3.1 are delivered implementation
 boundaries; their usefulness columns remain prospective observations, not claims
 from automated checks.
 
@@ -69,9 +70,10 @@ from automated checks.
 | R1 — Read and work | Open an existing local PDF without building it, keep it beside a durable work note, preserve page/zoom, and provide standard application shortcuts and clear marker feedback | Use a real source to write a useful explanation, example or question; close/reopen and continue from the saved work |
 | R2 — Ask about the work | From selected source/work passages, ask one natural-language mathematical question, preview exact outbound context, explicitly send through the existing adapter, inspect an attributed answer, and retain/edit/reject a contribution | One actual obstruction is helped through an in-application exchange, with inspectable sources and a useful resulting work artifact |
 | R3 — Continue an investigation | Support an explicit linked follow-up, correction or alternative approach; preserve the current question, conclusions, unresolved issue and selected evidence; resume later | A continued proof, counterexample, hypothesis comparison or exposition survives interruption, and the assistant's contribution and corrections remain distinguishable |
-| Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3 justifies each addition; evaluate each on its own terms |
+| R3.1 — End and begin again | Explicitly release the sole active investigation pointer while preserving immutable records, note choice and unrelated state, then permit another bounded investigation after restart | Two independent investigations can be completed sequentially in one real project without losing either one's mathematical record |
+| Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3.1 justifies each addition; evaluate each on its own terms |
 
-**Next product step: observe the delivered R1–R3 workflow in genuine mathematical
+**Next product step: observe the delivered R1–R3.1 workflow in genuine mathematical
 work before authorizing a broader feature increment.**
 R1 is delivered: ordinary Open and navigator actions route an existing PDF to
 the read-only QtPdf pane without a build; its canonical path, exact digest and
@@ -99,8 +101,16 @@ the human-maintained question, conclusion and unresolved issue restore from
 private workspace state; an explicit editable handoff can be inserted into an
 ordinary note. Missing or changed records are reported without guessed
 replacement revisions or loss of the task summary.
+R3.1 completes the bounded lifecycle: **End investigation…** offers insert the
+existing handoff and end, end without insertion, or cancel. Successful ending
+atomically clears only the private active pointer; a checkpoint or publication
+failure leaves it active. Immutable calls, projections, passages, anchors,
+ordinary note bytes and unrelated workspace state are not deleted or rewritten.
+After restart, a new independent bounded parent/child investigation may occupy
+the released slot. This is sequential reuse, not multiple active investigations
+or a conversation archive.
 
-Keep the R1–R3 cut lines while evaluating actual use. PDF search, outline and richer
+Keep the R1–R3.1 cut lines while evaluating actual use. PDF search, outline and richer
 internal navigation wait unless their absence demonstrably blocks the chosen
 task. Internal document navigation must not silently dispatch external URLs,
 files or commands. Exact source/PDF mapping
@@ -137,23 +147,26 @@ Before claiming general usefulness, test both reading/re-entry and actual
 problem work, including an example or counterexample. Do not infer research
 capability from a single guided-reading success.
 
-### Development handoff and status
+### Observation handoff and status
 
 [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) is the copyable
-implementation handoff. This roadmap controls priority; the handoff defines the
-current bounded task and must be advanced when that task is delivered.
+mathematical-use observation handoff. This roadmap controls priority; the
+handoff defines the current bounded observation and must be advanced when that
+evidence changes.
 
 | Milestone | Implementation status at 2026-09-18 | Product evidence |
 |---|---|---|
 | R1 | Implemented and technically verified: independent exact-identity PDF opening, separate imported/generated positions, durable note restoration, standard shortcuts and visible marker/focus status | A natural PDF-plus-note study and later continuation remain to be observed; usefulness is pending |
 | R2 | Implemented and technically verified: exact selected ordinary-text context, natural-language question, removable context, exact request preview, separate Send, off-thread single-attempt transport, terminal-status inspection, inert attributed answer, exact projection and attributed editable note insertion | No live provider request or genuine mathematical use was performed; usefulness remains pending |
 | R3 | Implemented and technically verified: one initial completed parent, exact selected prior passages and optional current context, separate human correction/task summary, complete child preview and Send, `in_reply_to`, inert terminal handling, exact child projection/note insertion and private restart restoration with changed-record reporting | No live provider request or genuine continued mathematical investigation was performed; usefulness remains pending |
+| R3.1 | Implemented and technically verified: explicit three-choice ending, pointer-only durable release, failure retention, preservation of terminal records and unrelated state, and a second bounded investigation after restart | Sequential use in a genuine mathematical project remains unobserved; usefulness remains pending |
 
 Keep implementation delivery, automated/visual verification and observed
 mathematical usefulness separate in status reports. A verified implementation
 can be delivered while user observation remains pending. That pending observation
-does not block the next authorized R1–R3 increment. It does block claims that
-the product has demonstrated usefulness or readiness to expand beyond R1–R3.
+does not block the authorized bounded correction to R1–R3.1. It does block
+claims that the product has demonstrated usefulness or readiness to expand
+beyond R1–R3.1.
 
 The delivered R1 boundary is:
 
@@ -233,7 +246,28 @@ The delivered R3 boundary is:
 R3 ended with deterministic controller and actual-widget checks and visible
 exercises at both review sizes. No live provider call or genuine mathematical
 investigation was performed. Automatic conversation state, branching, retries,
-source retrieval, provider tools and a second provider remain outside R1–R3.
+source retrieval, provider tools and a second provider remain outside R1–R3.1.
+
+The delivered R3.1 boundary is:
+
+- Offer an explicit **End investigation…** GUI action for the sole active
+  parent/child pointer.
+- Require the explicit choice to insert the existing editable handoff and end,
+  end without insertion, or cancel. Do not infer insertion by scanning ordinary
+  note contents.
+- Publish `investigation: null` only after required recovery and workspace
+  checkpoints succeed. Any failure retains the existing pointer and reports the
+  error rather than presenting a false completed lifecycle.
+- Preserve parent and child `ModelCall` bytes, projections, retained passages,
+  anchors, ordinary note bytes when insertion was not chosen, and every other
+  workspace field.
+- Permit a new independent one-parent/one-child investigation after ending and
+  restarting. Do not add simultaneous slots, an archive browser, record
+  deletion, branching or child-of-child continuation.
+
+R3.1 ended with deterministic controller and actual-widget coverage for every
+terminal child status. No provider request or genuine sequential mathematical
+investigation was performed.
 
 ### Evaluation and drift control
 
@@ -251,7 +285,7 @@ No historical improvement claim is available without a comparable baseline.
 Observe prospective resumption from the actual saved work instead of repeatedly
 reconstructing a missing historical seed.
 
-Before expanding beyond R1–R3, require useful work in two separate sessions
+Before expanding beyond R1–R3.1, require useful work in two separate sessions
 and one later continuation. This is a chosen adoption check, not a
 research-validated threshold. User observation evaluates benefit; it is not a
 manual preflight gate on authorized implementation. If the user is unavailable,
@@ -443,7 +477,7 @@ Stages 0 through 5 do not attempt:
 - a domain map authored before mathematical work begins;
 - questionnaires, confidence ratings, or comprehension forms;
 - automated correctness decisions for informal proofs;
-- GUI scope beyond R1–R3 and the retained desktop contracts;
+- GUI scope beyond R1–R3.1 and the retained desktop contracts;
 - Mathlib-scale Lean analysis;
 - simultaneous support for multiple model services, autonomous follow-up calls,
   or a general chat interface;
@@ -471,7 +505,7 @@ service selection, routing, or AI-specific trust structure.
 ## Target
 
 Demonstrate both study/re-entry and unformalized problem work in `UX_SPEC.md` §9,
-following R1–R3 above:
+following R1–R3.1 above:
 
 - re-enter the mathematics in `rs_Appendix_A.tex`, continue mathematical work,
   and inspect the corresponding Lean declarations and
@@ -487,7 +521,7 @@ obstruction; success in one experiment does not establish success in the other.
 
 The bounded justification experiment remains separately evaluable under
 `UX_SPEC.md` §9.3. Its Appendix fixture begins only after the active task has
-reviewed the selected manuscript--Lean correspondence. It does not gate R1–R3.
+reviewed the selected manuscript--Lean correspondence. It does not gate R1–R3.1.
 
 ---
 
@@ -511,7 +545,7 @@ stages will be evaluated.
 
 ## Stage 0 — Orient in and work the benchmark mathematics
 
-This is an optional benchmark protocol, not an R1–R3 prerequisite. Current
+This is an optional benchmark protocol, not an R1–R3.1 prerequisite. Current
 sources and focused questions may be used directly; its prescribed orientation
 tests that particular mode of study.
 
@@ -772,7 +806,7 @@ a useful study exchange.
 analysis, graph rendering, support for a second model service or adapter,
 automatic model selection, provider tools, autonomous calls, a general-purpose
 conversation interface unrelated to the active mathematical work, a prompt
-library, or a framework beyond R1–R3 and the retained desktop contracts.
+library, or a framework beyond R1–R3.1 and the retained desktop contracts.
 No capture or reconstruction of provider-internal reasoning, hidden chain of thought, internal search, or
 unreturned alternatives. No `AITrust`, `AIWarrant`, `ModelAuthority`,
 provider-wide truth bridge, generic support edge, or trust, reliability,
@@ -788,7 +822,7 @@ performance.
 
 **Immediate deliverable.** Preserve source location, current attempt, revisions,
 computations, unresolved step and assistance used through ordinary work files
-and existing state. R1–R3 do not require ReviewItem or ReviewState machinery.
+and existing state. R1–R3.1 do not require ReviewItem or ReviewState machinery.
 The later retention experiment may derive `ReviewItem`s from the work and
 generate `ReviewState` from `TaskEvidence` when that experiment is undertaken.
 
