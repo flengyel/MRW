@@ -1,6 +1,6 @@
 # CODEX_PLAN.md
 
-Active product roadmap, reviewed 2026-09-19 against the delivered R1–R3.1
+Active product roadmap, reviewed 2026-09-20 against the integrated R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
 purpose in `VISION.md`.
@@ -16,6 +16,15 @@ end that investigation before beginning another. No genuine
 mathematical obstruction has yet been helped through those exchanges, and no
 continued in-application research collaboration has been observed. Continue
 from this foundation; do not restart the architecture.
+
+**Integration status, 2026-09-20:** reviewed repair
+`d91e35bc56d5e66778c115e1c8ffea4d6937cd28` is now the live `main` commit as
+well as the preserved review-branch tip. The combined focused investigation
+suite passed 21 deterministic controller/widget tests, the installed module
+matches the integrated source bytes, and the GUI entry point launched against a
+durable study project. An ordinary note has been prepared outside this
+repository, but no mathematical source or question has been selected. The
+system is **ready for study; usefulness remains unobserved**.
 
 This section controls implementation priority. It supersedes the old
 Appendix-first serial execution order and any evaluation prompt that makes
@@ -159,7 +168,7 @@ mathematical-use observation handoff. This roadmap controls priority; the
 handoff defines the current bounded observation and must be advanced when that
 evidence changes.
 
-| Milestone | Implementation status at 2026-09-19 | Product evidence |
+| Milestone | Implementation status at 2026-09-20 | Product evidence |
 |---|---|---|
 | R1 | Implemented and technically verified: independent exact-identity PDF opening, separate imported/generated positions, durable note restoration, standard shortcuts and visible marker/focus status | A natural PDF-plus-note study and later continuation remain to be observed; usefulness is pending |
 | R2 | Implemented and technically verified: exact selected ordinary-text context, natural-language question, removable context, exact request preview, separate Send, off-thread single-attempt transport, terminal-status inspection, inert attributed answer, exact projection and attributed editable note insertion | No live provider request or genuine mathematical use was performed; usefulness remains pending |

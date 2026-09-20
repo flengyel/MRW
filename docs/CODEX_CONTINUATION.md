@@ -1,4 +1,4 @@
-# Codex continuation: observe the delivered R1–R3.1 workflow
+# Codex continuation: begin study on integrated R1–R3.1
 
 Use this document as the next bounded handoff. The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
@@ -7,14 +7,22 @@ R3's one linked, resumable continuation are implemented and technically
 verified. R3.1 can explicitly end that sole active investigation without
 deleting its records, preserves latest visible handoff edits, rejects stale
 restore completion and then permits a new bounded investigation after restart.
-The next task is **one genuine mathematical study-and-explanation observation**,
-not a new feature tranche.
+Reviewed repair `d91e35bc56d5e66778c115e1c8ffea4d6937cd28` is integrated
+on live `main` and remains on its review branch. The focused controller/widget
+gate passed 21 deterministic tests; the installed module matches the integrated
+source and its GUI entry point launched against a durable study project. A
+private ordinary note has been prepared outside this repository. No source or
+question has yet been selected, so the system is **ready for study; usefulness
+is unobserved**. The next task is one genuine mathematical
+study-and-explanation observation, not a new feature tranche.
 
 ## Objective
 
 With a mathematical source and problem chosen by the user, observe whether the
 delivered workstation helps produce and later resume worthwhile mathematical
-work. Use the ordinary note as the durable work product. If an actual
+work. Aim first for a useful explanation, reconstructed argument, worked
+example or diagnosed error, then preserve it for a genuinely later
+continuation. Use the ordinary note as the durable work product. If an actual
 interaction blocker appears, diagnose it and make only the smallest authorized
 correction needed for that task; otherwise make no code change.
 
@@ -27,9 +35,10 @@ actually been observed.
 ## Establish context once
 
 Read `AGENTS.md` and the documents it names. Inspect the branch and preserve
-unrelated tracked and untracked files. Confirm that the installed GUI being used
-contains the delivered R1–R3.1 commit. Do not repeat the implementation acceptance
-campaign merely to begin a study session.
+unrelated tracked and untracked files. The integration and focused gate above
+are complete; do not repeat them or the implementation acceptance campaign
+merely to begin a study session. Reconfirm installation only if the environment
+or integrated commit changes.
 
 Use a durable user project for the note. A disposable copy is appropriate for a
 destructive test, not as the only copy of mathematical work. A real integration
@@ -109,4 +118,6 @@ Preserve the actual note and immutable records. Report the mathematical outcome,
 resume outcome, concrete friction and any bounded correction separately from
 automated verification. Update the roadmap and handoff only if the observation
 changes evidence or authorizes a next increment. Do not infer a broader feature
-roadmap from synthetic checks or silently begin later-stage implementation.
+roadmap from synthetic checks or silently begin later-stage implementation. A
+same-session close/reopen can establish restoration, but reduced reconstruction
+burden remains pending until a genuinely later continuation occurs.
