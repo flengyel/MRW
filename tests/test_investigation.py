@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -360,6 +361,72 @@ class InvestigationControllerTests(unittest.TestCase):
         self.controller = Workstation(state_root=self.home / "state")
         self.controller.open_project(self.root)
         self.assertEqual(self.controller.current().investigation, original)
+
+    def test_end_initial_checkpoint_failure_keeps_original_investigation_active(self):
+        parent, _parent_outcome = self.make_parent()
+        prepared, note = self.prepare_child(parent)
+        outcome = self.send(prepared)
+        self.controller.retain_investigation(prepared, outcome)
+        original = deepcopy(self.controller.current().investigation)
+        manifest_before = self.controller.store.path.read_bytes()
+        note_before = note.content
+        self.controller.persistence_error = "deterministic recovery denial"
+
+        with patch.object(
+            self.controller, "checkpoint", return_value=False
+        ), self.assertRaisesRegex(WorkspaceError, "deterministic recovery denial"):
+            self.controller.end_investigation()
+
+        self.assertEqual(self.controller.current().investigation, original)
+        self.assertEqual(self.controller.store.path.read_bytes(), manifest_before)
+        self.assertEqual(note.content, note_before)
+
+    def test_end_post_replacement_sync_failure_keeps_live_pointer_without_rollback(self):
+        from theorem_terminal.mutable_files import sync_directory
+
+        parent, parent_outcome = self.make_parent()
+        prepared, _note = self.prepare_child(parent)
+        outcome = self.send(prepared)
+        self.controller.retain_investigation(prepared, outcome)
+        original = deepcopy(self.controller.current().investigation)
+        previous = self.controller.store.previous
+        parent_hash = sha256(parent_outcome.path.read_bytes()).hexdigest()
+        child_hash = sha256(outcome.path.read_bytes()).hexdigest()
+
+        def fail_after_null_replacement(directory):
+            if (directory == self.controller.store.directory
+                    and self.controller.store.path.exists()
+                    and decode_workspace(
+                        self.controller.store.path.read_bytes()
+                    ).investigation is None):
+                raise OSError("deterministic post-replacement directory sync denial")
+            return sync_directory(directory)
+
+        with patch(
+            "theorem_terminal.mutable_files.sync_directory",
+            side_effect=fail_after_null_replacement,
+        ), patch(
+            "theorem_terminal.mutable_files.os.replace", wraps=os.replace
+        ) as replacement, self.assertRaisesRegex(
+            WorkspaceError, "post-replacement directory sync denial"
+        ):
+            self.controller.end_investigation()
+
+        self.assertEqual(replacement.call_count, 1)
+        self.assertEqual(self.controller.current().investigation, original)
+        self.assertEqual(self.controller.store.previous, previous)
+        self.assertIsNone(
+            decode_workspace(self.controller.store.path.read_bytes()).investigation
+        )
+        self.assertIn("close and reopen", self.controller.persistence_error)
+        self.assertFalse(self.controller.checkpoint())
+        self.assertEqual(sha256(parent_outcome.path.read_bytes()).hexdigest(), parent_hash)
+        self.assertEqual(sha256(outcome.path.read_bytes()).hexdigest(), child_hash)
+
+        self.controller.close_project(discard_session=True)
+        self.controller = Workstation(state_root=self.home / "state")
+        self.controller.open_project(self.root)
+        self.assertIsNone(self.controller.current().investigation)
 
     def test_failed_child_is_retained_once_and_prior_work_is_unchanged(self):
         parent, parent_outcome = self.make_parent()

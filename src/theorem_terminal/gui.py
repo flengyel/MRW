@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from contextlib import contextmanager
 from hashlib import sha256
 import json
@@ -879,6 +880,7 @@ class AssistancePanel(QWidget):
         self.parent_passages = []
         self.in_flight = False
         self.installing = False
+        self.displayed_investigation_identity = None
 
         layout = QVBoxLayout(self)
         heading = QLabel(
@@ -1185,6 +1187,59 @@ class AssistancePanel(QWidget):
                        self.copy_button, self.insert_button):
             widget.setEnabled(enabled)
 
+    def displays_investigation(self, state=None):
+        if not self.window.controller.workspace:
+            return False
+        if state is None:
+            state = self.window.controller.current().investigation
+        return bool(
+            state is not None
+            and self.displayed_investigation_identity is not None
+            and self.window.controller.investigation_identity(state)
+                == self.displayed_investigation_identity
+        )
+
+    def visible_summary(self, *, required=False):
+        """Return task text only when these widgets show the active pointer."""
+        state = self.window.controller.current().investigation
+        if not self.displays_investigation(state):
+            if required:
+                raise WorkspaceError(
+                    'Resume the active investigation before saving its visible task text'
+                )
+            return None
+        return {
+            'question': self.question.toPlainText(),
+            'correction': self.correction.toPlainText(),
+            'last_conclusion': self.last_conclusion.toPlainText(),
+            'unresolved_issue': self.unresolved_issue.toPlainText(),
+        }
+
+    def handoff_text(self, *, expected_identity=None):
+        state = self.window.controller.current().investigation
+        if state is None:
+            raise WorkspaceError('No saved investigation is available')
+        identity = self.window.controller.investigation_identity(state)
+        if expected_identity is not None and identity != expected_identity:
+            raise WorkspaceError(
+                'The active investigation changed; review it before inserting a handoff'
+            )
+        summary = self.visible_summary()
+        return self.window.controller.investigation_handoff(
+            summary=summary,
+            expected_identity=expected_identity or identity,
+        )
+
+    def editable_handoff_target(self):
+        state = self.window.controller.current()
+        pane = self.window.panes[state.active_pane]
+        if not pane.genuine_content():
+            raise WorkspaceError('Focus an editable ordinary work note before inserting')
+        buffer = self.window.controller.buffer(pane.shown)
+        if not buffer.editable:
+            raise WorkspaceError('Focus an editable ordinary work note before inserting')
+        return pane
+
     def _set_draft_controls(self, enabled):
         for widget in (self.model, self.context_list, self.add_context_button,
                        self.remove_context_button, self.question,
@@ -1203,7 +1258,7 @@ class AssistancePanel(QWidget):
         if self.installing or self.in_flight:
             return
         if self.outcome is not None:
-            if self.parent is not None and self.window.controller.workspace:
+            if self.parent is not None and self.displays_investigation():
                 self.save_summary_button.setEnabled(
                     self.window.controller.current().investigation is not None
                 )
@@ -1487,9 +1542,32 @@ class AssistancePanel(QWidget):
             terminal and terminal.status == 'completed' and self.parent is None
             and self.window.controller.current().investigation is None
         ))
+        state = (self.window.controller.current().investigation
+                 if self.window.controller.workspace else None)
         retained_investigation = bool(
-            self.parent is not None and self.window.controller.workspace
-            and self.window.controller.current().investigation is not None
+            self.parent is not None and terminal is not None and state is not None
+            and state.parent_path == str(self.parent.path)
+            and state.parent_record_revision == self.parent.record_revision
+            and state.parent_id == self.parent.call.id
+            and state.parent_response_digest == self.parent.call.raw_response_digest
+            and tuple(
+                (item.number, item.start_byte, item.end_byte)
+                for item in state.parent_passages
+            ) == tuple(
+                (item.number, item.start_byte, item.end_byte)
+                for item in self.parent_passages
+            )
+            and self.outcome is not None
+            and state.child_path == str(self.outcome.path.resolve())
+            and self.outcome.raw_record is not None
+            and state.child_record_revision
+                == sha256(self.outcome.raw_record).hexdigest()
+            and state.child_id == terminal.id
+            and state.child_response_digest == terminal.raw_response_digest
+        )
+        self.displayed_investigation_identity = (
+            self.window.controller.investigation_identity(state)
+            if retained_investigation else None
         )
         self.save_summary_button.setEnabled(retained_investigation)
         self.insert_handoff_button.setEnabled(retained_investigation)
@@ -1620,11 +1698,10 @@ class AssistancePanel(QWidget):
         )
 
     def save_summary(self):
+        summary = self.visible_summary(required=True)
         self.window.controller.update_investigation_summary(
-            question=self.question.toPlainText(),
-            correction=self.correction.toPlainText(),
-            last_conclusion=self.last_conclusion.toPlainText(),
-            unresolved_issue=self.unresolved_issue.toPlainText(),
+            **summary,
+            expected_identity=self.displayed_investigation_identity,
         )
         self.status.setText(
             'Human-maintained investigation summary saved privately. Immutable parent '
@@ -1632,16 +1709,13 @@ class AssistancePanel(QWidget):
         )
         self.save_summary_button.setEnabled(True)
 
-    def insert_handoff(self):
-        state = self.window.controller.current()
-        pane = self.window.panes[state.active_pane]
-        buffer = self.window.controller.buffer(pane.shown)
-        if not pane.genuine_content() or not buffer.editable:
-            raise WorkspaceError('Focus an editable ordinary work note before inserting')
+    def insert_handoff(self, *, expected_identity=None):
+        pane = self.editable_handoff_target()
+        handoff = self.handoff_text(expected_identity=expected_identity)
         cursor = pane.text.textCursor()
         cursor.clearSelection()
         pane.text.setTextCursor(cursor)
-        pane.text.insertPlainText(self.window.controller.investigation_handoff())
+        pane.text.insertPlainText(handoff)
         pane.text.setFocus()
         self.status.setText(
             'Inserted an editable human task handoff with immutable parent/child '
@@ -1652,7 +1726,10 @@ class AssistancePanel(QWidget):
         """Show saved task text even when an immutable record is unavailable."""
         if restored is None:
             self.resume_button.setEnabled(False)
-            return
+            return False
+        if (not self.window.controller.workspace
+                or self.window.controller.current().investigation != restored.state):
+            return False
         state = restored.state
         if restored.parent is not None:
             self.install_parent(
@@ -1705,6 +1782,9 @@ class AssistancePanel(QWidget):
         for widget in (self.question, self.correction, self.last_conclusion,
                        self.unresolved_issue):
             widget.setEnabled(True)
+        self.displayed_investigation_identity = (
+            self.window.controller.investigation_identity(state)
+        )
         self.save_summary_button.setEnabled(True)
         self.insert_handoff_button.setEnabled(True)
         self.end_investigation_button.setEnabled(True)
@@ -1714,6 +1794,7 @@ class AssistancePanel(QWidget):
         self.resume_button.setEnabled(True)
         self.window.assistance_dock.show()
         self.window.update_actions()
+        return True
 
     def toggle_record(self, shown):
         self.raw_record.setVisible(bool(shown))
@@ -1731,6 +1812,7 @@ class AssistancePanel(QWidget):
             self.parent_passage_numbers = []
             self.parent_passages = []
             self.in_flight = False
+            self.displayed_investigation_identity = None
             self.context_list.clear()
             self.context_text.clear()
             self.question.clear()
@@ -2030,6 +2112,9 @@ class WorkstationWindow(QMainWindow):
             self.update_actions()
             return None
 
+    def foreground_busy(self):
+        return any(not job.background for job in self.jobs.values())
+
     def submit(self, task, done, failed=None, *, background=False):
         job = Job(task)
         job.background = background
@@ -2156,7 +2241,8 @@ class WorkstationWindow(QMainWindow):
         for document in self.documents.values():
             document.sync_anchors()
         buffer = self.controller.buffer() if state and state.active else None
-        busy = any(not job.background for job in self.jobs.values())
+        busy = self.foreground_busy()
+        assistance_busy = self.controller.assistance_in_flight is not None
         pdf_focused = self.pdf_has_focus()
         text_focused = not pdf_focused
         for key, action in self.actions.items():
@@ -2169,8 +2255,16 @@ class WorkstationWindow(QMainWindow):
             state and state.investigation and not busy
         ))
         self.actions['end_investigation'].setEnabled(bool(
-            state and state.investigation and not busy
+            state and state.investigation and not busy and not assistance_busy
         ))
+        if hasattr(self, 'assistance'):
+            self.assistance.resume_button.setEnabled(bool(
+                state and state.investigation and not busy and not assistance_busy
+            ))
+            self.assistance.end_investigation_button.setEnabled(bool(
+                state and state.investigation and not busy and not assistance_busy
+                and self.assistance.displays_investigation(state.investigation)
+            ))
         for key in ('project', 'quit'):
             self.actions[key].setEnabled(not self.jobs)
         self.actions['close_project'].setEnabled(state is not None and not self.jobs)
@@ -2399,10 +2493,7 @@ class WorkstationWindow(QMainWindow):
             elif state.pdf_source == 'generated' and state.successful_build:
                 self.reload_pdf(source='generated')
         if self.controller.current().investigation:
-            self.submit(
-                self.controller.restore_investigation,
-                self.assistance.install_restored,
-            )
+            self.submit_investigation_restore()
 
     def open_tree_file(self, index):
         original = self.file_filter.mapToSource(index)
@@ -2714,11 +2805,31 @@ class WorkstationWindow(QMainWindow):
     def resume_investigation(self):
         if not self.controller.current().investigation:
             raise WorkspaceError('No saved investigation is available')
-        self.submit(
-            self.controller.restore_investigation,
-            self.assistance.install_restored,
-        )
         self.assistance_dock.show()
+        if self.assistance.displays_investigation():
+            return
+        self.submit_investigation_restore()
+
+    def submit_investigation_restore(self):
+        """Validate a captured pointer and ignore a late obsolete result."""
+        current = self.controller.current()
+        if current.investigation is None:
+            raise WorkspaceError('No saved investigation is available')
+        root = current.root
+        snapshot = deepcopy(current.investigation)
+
+        def install(restored):
+            workspace = self.controller.workspace
+            if (workspace is None or workspace.root != root
+                    or workspace.investigation != snapshot
+                    or restored is None or restored.state != snapshot):
+                return
+            self.assistance.install_restored(restored)
+
+        self.submit(
+            lambda: self.controller.restore_investigation(snapshot),
+            install,
+        )
 
     def choose_end_investigation(self):
         """Ask how to handle the ordinary-note handoff before releasing R3."""
@@ -2730,7 +2841,9 @@ class WorkstationWindow(QMainWindow):
             'This clears only its private workspace pointer. ModelCall records, '
             'projections, retained passages, anchors and ordinary files remain. '
             'The application does not inspect notes to guess whether the handoff '
-            'was already inserted.'
+            'was already inserted. End without insertion leaves the ordinary note '
+            'unchanged and explicitly discards the private human question, correction, '
+            'conclusion and unresolved-issue text from the active pointer.'
         )
         insert = box.addButton(
             'Insert handoff and end', QMessageBox.ButtonRole.AcceptRole
@@ -2751,21 +2864,68 @@ class WorkstationWindow(QMainWindow):
 
     def end_investigation(self):
         """Explicitly end one parent/child investigation and release its slot."""
-        if self.controller.current().investigation is None:
+        current = self.controller.current()
+        if current.investigation is None:
             raise WorkspaceError('No saved investigation is available')
+        if self.foreground_busy():
+            raise WorkspaceError(
+                'Wait for the current read or restore to finish before ending the investigation'
+            )
         if self.controller.assistance_in_flight is not None:
             raise WorkspaceError(
                 'Wait for the mathematical-assistance request to finish before '
                 'ending the investigation'
             )
+        expected_root = current.root
+        expected_identity = self.controller.investigation_identity(
+            current.investigation
+        )
         choice = self.choose_end_investigation()
         if choice is None:
             return False
+        current = self.controller.current()
+        if (current.root != expected_root
+                or self.controller.investigation_identity(current.investigation)
+                    != expected_identity):
+            raise WorkspaceError(
+                'The active investigation changed while confirmation was open; it was not ended'
+            )
+        if self.foreground_busy():
+            raise WorkspaceError(
+                'Work began while confirmation was open; the investigation was not ended'
+            )
+        if self.controller.assistance_in_flight is not None:
+            raise WorkspaceError(
+                'A mathematical-assistance request began while confirmation was open; '
+                'the investigation was not ended'
+            )
+        inserted = False
         if choice == 'insert':
-            self.assistance.insert_handoff()
+            # Target, pointer identity, and the latest visible human task text are
+            # all validated after the modal confirmation returns.
+            self.assistance.insert_handoff(
+                expected_identity=expected_identity
+            )
+            inserted = True
         elif choice != 'without':
             raise WorkspaceError('Invalid end-investigation choice')
-        self.controller.end_investigation()
+        try:
+            self.controller.end_investigation()
+        except (OSError, ValueError) as exc:
+            if inserted:
+                message = (
+                    'The handoff was inserted into the note, but ending the '
+                    'investigation failed. The investigation remains active and the '
+                    'note edit remains unsaved; it was not retried, duplicated, or '
+                    'undone automatically. ' + str(exc)
+                )
+            else:
+                message = (
+                    'The investigation was not ended. Its active pointer and visible '
+                    'human task text remain available. ' + str(exc)
+                )
+            self.assistance.status.setText(message)
+            raise WorkspaceError(message) from exc
         self.assistance.investigation_ended()
         self.update_actions()
         return True

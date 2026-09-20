@@ -509,26 +509,46 @@ The R3 cut line is one initial parent and one child. The child cannot become a
 new parent in this workflow, and an existing saved investigation cannot be
 silently overwritten to create a branch. General conversation history,
 automatic summaries, branching, retry, source retrieval and provider tools stay
-outside this interaction.
+outside this interaction. This is the current implementation boundary, not a
+permanent product requirement; deeper follow-up needs evidence from real use.
 
 R3.1 supplies the missing terminal lifecycle for that single slot. **End
 investigation…** is available in the Work menu and the assistance dock. Because
 an inserted handoff is an ordinary editable note rather than workspace metadata,
 the application does not read or search note content to infer whether insertion
 already occurred. Ending therefore requires one explicit choice: insert the
-existing human task handoff and end, end without insertion, or cancel. The first
-choice makes the existing ordinary-note edit before clearing; the second changes
-no note text; cancel changes nothing.
+human task handoff and end, end without insertion, or cancel. If the dock shows
+the active investigation, insertion captures and validates its latest visible
+question, correction, conclusion and unresolved issue rather than an older
+checkpoint, including for the standalone insertion action. It does not use an
+unrelated draft or empty widgets when that investigation is not displayed. The
+first choice makes an ordinary unsaved-note edit before clearing; the second
+explicitly discards the private human task text and changes no note text; cancel
+changes nothing. Validation failure preserves the visible fields, note and
+active pointer.
 
 Ending durably replaces only the private active-investigation pointer with no
 pointer. It deletes or rewrites no `ModelCall`, projection, selected passage,
 anchor, recovery entry, ordinary file or unrelated workspace field. Recovery and
-workspace publication must complete before the UI reports success. On any
-checkpoint or publication failure, the existing investigation remains active
-and the error stays visible. After a successful end and application restart, a
-new independent bounded parent/child investigation may be started in the same
-project. This is sequential reuse of one slot, not simultaneous investigations,
-an archive browser, a conversation tree or child-of-child chat.
+workspace publication must complete before the UI reports success. Both menu and
+dock End actions are disabled during foreground work, and the handler rechecks
+busy state, active identity and any editable target after the modal confirmation
+returns. Restore workers validate a captured pointer; an obsolete completion is
+ignored rather than reinstalling an ended or replaced panel.
+
+On an initial checkpoint or pre-publication failure, the live pointer and visible
+human edits remain and the error stays visible under the existing blocked-write
+policy. If an explicitly requested handoff was inserted first, that unsaved note
+edit and the active pointer both remain; the application reports that ending
+failed and neither retries, duplicates nor undoes the insertion. It claims no
+durable recovery for text whose checkpoint did not finish. If directory
+synchronization fails after atomic replacement, publication is uncertain: the
+live session keeps its old pointer and blocks writes, but reopen may observe the
+complete no-pointer replacement. No rollback is attempted. After a successful
+end and application restart, a new independent bounded parent/child
+investigation may be started in the same project. This is sequential reuse of
+one slot, not simultaneous investigations, an archive browser, a conversation
+tree or child-of-child chat.
 
 Each explicit user action creates at most one provider request. The request
 obeys configured input, output, and timeout limits, invokes no provider tools,

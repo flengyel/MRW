@@ -102,13 +102,18 @@ private workspace state; an explicit editable handoff can be inserted into an
 ordinary note. Missing or changed records are reported without guessed
 replacement revisions or loss of the task summary.
 R3.1 completes the bounded lifecycle: **End investigation…** offers insert the
-existing handoff and end, end without insertion, or cancel. Successful ending
-atomically clears only the private active pointer; a checkpoint or publication
-failure leaves it active. Immutable calls, projections, passages, anchors,
-ordinary note bytes and unrelated workspace state are not deleted or rewritten.
-After restart, a new independent bounded parent/child investigation may occupy
-the released slot. This is sequential reuse, not multiple active investigations
-or a conversation archive.
+handoff and end, end without insertion, or cancel. When the active investigation
+is displayed, insertion validates and uses its latest visible human question,
+correction, conclusion and unresolved issue even if **Save task summary** was not
+pressed; it never substitutes an unrelated or empty draft. Successful ending
+clears only the private active pointer after the recovery-first checkpoint and
+candidate publication return successfully. End is unavailable during a restore,
+the handler rechecks the active identity and editable target after confirmation,
+and a late obsolete restore result is ignored. Immutable calls, projections,
+passages, anchors, ordinary note bytes and unrelated workspace state are not
+deleted or rewritten. After restart, a new independent bounded parent/child
+investigation may occupy the released slot. This is sequential reuse, not
+multiple active investigations or a conversation archive.
 
 Keep the R1–R3.1 cut lines while evaluating actual use. PDF search, outline and richer
 internal navigation wait unless their absence demonstrably blocks the chosen
@@ -154,12 +159,12 @@ mathematical-use observation handoff. This roadmap controls priority; the
 handoff defines the current bounded observation and must be advanced when that
 evidence changes.
 
-| Milestone | Implementation status at 2026-09-18 | Product evidence |
+| Milestone | Implementation status at 2026-09-19 | Product evidence |
 |---|---|---|
 | R1 | Implemented and technically verified: independent exact-identity PDF opening, separate imported/generated positions, durable note restoration, standard shortcuts and visible marker/focus status | A natural PDF-plus-note study and later continuation remain to be observed; usefulness is pending |
 | R2 | Implemented and technically verified: exact selected ordinary-text context, natural-language question, removable context, exact request preview, separate Send, off-thread single-attempt transport, terminal-status inspection, inert attributed answer, exact projection and attributed editable note insertion | No live provider request or genuine mathematical use was performed; usefulness remains pending |
 | R3 | Implemented and technically verified: one initial completed parent, exact selected prior passages and optional current context, separate human correction/task summary, complete child preview and Send, `in_reply_to`, inert terminal handling, exact child projection/note insertion and private restart restoration with changed-record reporting | No live provider request or genuine continued mathematical investigation was performed; usefulness remains pending |
-| R3.1 | Implemented and technically verified: explicit three-choice ending, pointer-only durable release, failure retention, preservation of terminal records and unrelated state, and a second bounded investigation after restart | Sequential use in a genuine mathematical project remains unobserved; usefulness remains pending |
+| R3.1 | Implemented and technically verified: explicit three-choice ending, validated latest-visible handoff text, synchronized End/restore entry points, stale-result rejection, recovery-first pointer-only release, precise failure retention, preservation of terminal records and unrelated state, and a second bounded investigation after restart | Sequential use in a genuine mathematical project remains unobserved; usefulness remains pending |
 
 Keep implementation delivery, automated/visual verification and observed
 mathematical usefulness separate in status reports. A verified implementation
@@ -252,12 +257,21 @@ The delivered R3.1 boundary is:
 
 - Offer an explicit **End investigation…** GUI action for the sole active
   parent/child pointer.
-- Require the explicit choice to insert the existing editable handoff and end,
-  end without insertion, or cancel. Do not infer insertion by scanning ordinary
-  note contents.
+- Require the explicit choice to insert an editable handoff and end, end without
+  insertion, or cancel. A requested insertion uses the latest validated visible
+  human summary belonging to the active investigation; standalone insertion uses
+  the same path. Do not infer insertion by scanning ordinary note contents.
+- Disable both End entry points during foreground restoration, recheck busy
+  state, active identity and any editable insertion target after modal
+  confirmation, and reject a late restore result for an ended or replaced
+  pointer.
 - Publish `investigation: null` only after required recovery and workspace
-  checkpoints succeed. Any failure retains the existing pointer and reports the
-  error rather than presenting a false completed lifecycle.
+  checkpoints succeed. Initial checkpoint and pre-publication failures retain
+  the live pointer and visible human edits. If handoff insertion precedes a
+  failure, retain that unsaved note edit and the active pointer without retry,
+  duplication or automatic undo. If directory synchronization fails after
+  replacement, retain the live pointer and block writes as uncertain even though
+  reopen may observe the complete null-pointer replacement; never roll it back.
 - Preserve parent and child `ModelCall` bytes, projections, retained passages,
   anchors, ordinary note bytes when insertion was not chosen, and every other
   workspace field.
@@ -266,7 +280,9 @@ The delivered R3.1 boundary is:
   deletion, branching or child-of-child continuation.
 
 R3.1 ended with deterministic controller and actual-widget coverage for every
-terminal child status. No provider request or genuine sequential mathematical
+terminal child status, unsaved-summary insertion, cancellation and validation,
+delayed restore completion, confirmation reentrancy and all three persistence
+failure phases. No provider request or genuine sequential mathematical
 investigation was performed.
 
 ### Evaluation and drift control

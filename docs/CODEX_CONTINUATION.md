@@ -5,9 +5,10 @@ Use this document as the next bounded handoff. The active roadmap is
 R1's PDF-plus-note workflow, R2's single task-local assistance exchange and
 R3's one linked, resumable continuation are implemented and technically
 verified. R3.1 can explicitly end that sole active investigation without
-deleting its records, then permit a new bounded investigation after restart.
-The next task is **a genuine mathematical-use observation**, not a new feature
-tranche.
+deleting its records, preserves latest visible handoff edits, rejects stale
+restore completion and then permits a new bounded investigation after restart.
+The next task is **one genuine mathematical study-and-explanation observation**,
+not a new feature tranche.
 
 ## Objective
 
@@ -41,21 +42,25 @@ files must not be modified during a visual check.
    Resume at the actual current question; do not require a questionnaire,
    orientation ceremony, anchor quota, formal artifact or warrant inspection.
 2. Do enough mathematics to identify a genuine question or obstruction. Record
-   the attempt, useful source location and current assumption in the note.
+   the attempt, useful source location and current assumption in the durable
+   ordinary note.
 3. If the user chooses model assistance, select only the visible context they
-   want sent, inspect the complete R2 preview and let the user perform the
-   explicit Send. No agent, test or roadmap authorization may substitute for
-   that per-request user action or expose a credential.
-4. Assess the returned proposal through the mathematics. Returned citations,
-   code and claims remain unverified until separately checked. Retain or insert
-   only material the user finds useful; dismissal is a valid outcome.
+   want sent, ask for an explanation at the actual obstruction, inspect the
+   complete R2 preview and let the user perform the explicit Send. No agent,
+   test or roadmap authorization may substitute for that per-request user action
+   or expose a credential.
+4. Assess and, when useful, challenge or correct the returned proposal through
+   the mathematics. Returned citations, code and claims remain unverified until
+   separately checked. Retain or insert only material the user finds useful;
+   dismissal is a valid outcome.
 5. If a correction, changed assumption or focused follow-up is useful, select
    the exact prior passages, keep the human correction separate, inspect the
    complete R3 child preview and let the user explicitly Send once. Do not add a
    branch, child-of-child continuation, retry or provider conversation state.
-6. Save the current question, last useful conclusion and unresolved issue. Put
-   an editable handoff in the ordinary note when that helps. Close and reopen
-   later, then continue from the restored note and bounded investigation state.
+6. Preserve the resulting explanation, worked example, correction or unresolved
+   step in the ordinary note. Save the current question, last useful conclusion
+   and unresolved issue when useful. Close and reopen later, then continue from
+   the durable note and bounded investigation state.
 7. When that investigation is genuinely over, use **End investigation…** and
    explicitly choose insert-handoff-and-end, end-without-insertion, or cancel.
    Restart before beginning a separate investigation when sequential reuse is
@@ -90,10 +95,13 @@ R1–R3.1 ordinary work remains independent of Lean and justification-logic entr
 A model response, human correction, task summary, projection or link creates no
 premise, Verification, acceptance or warrant.
 
-R3.1 still permits only one active investigation and one child. It adds no
+R3.1 currently permits only one active investigation and one child. This is a
+bounded implementation cut, not a permanent product requirement. It adds no
 archive browser, simultaneous slot, branch, child-of-child request, automatic
 summary or retry. If ending cannot checkpoint durably, the old investigation
-must remain active and the failure must be reported.
+must remain active and the failure must be reported. Record any actual
+obstruction caused by PDF transcription, response notation or insufficient
+follow-up depth; do not implement those expansions during the observation.
 
 ## Finish the observation
 

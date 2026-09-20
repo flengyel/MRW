@@ -111,7 +111,7 @@ The design rests on six principles:
 
 ## Status
 
-**Roadmap review, 2026-09-18:** the project has useful preservation and editing
+**Roadmap review, 2026-09-19:** the project has useful preservation and editing
 foundations, but is not yet delivering its intended study and human/AI research
 workflow. The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 now prioritizes (R1) readable source beside a durable note, (R2) one inspectable
@@ -143,7 +143,11 @@ establish mechanics only; continued mathematical usefulness remains unobserved.
 R3.1 adds an explicit **End investigation…** action that durably releases only
 the active workspace pointer after an insert-handoff, end-without-insertion or
 cancel choice. It retains the immutable records and all unrelated workspace
-state, and a failed checkpoint leaves the investigation active.
+state. Handoff insertion validates and uses the active investigation's latest
+visible human task fields, including edits not separately checkpointed with
+**Save task summary**. Menu and dock End actions are disabled during foreground
+restoration; the handler revalidates identity and target after confirmation, and
+an obsolete restore completion cannot repopulate an ended investigation.
 
 
 The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
@@ -551,14 +555,30 @@ matching dock button. The confirmation offers exactly three outcomes: **Insert
 handoff and end**, **End without insertion**, and **Cancel**. The application
 does not scan ordinary notes to guess whether a handoff is already present, so
 this explicit choice is always shown. Insertion uses the existing editable human
-handoff and remains an ordinary unsaved note edit; ending without insertion
+handoff and remains an ordinary unsaved note edit. If the dock is displaying the
+active investigation, that handoff uses the latest validated visible question,
+correction, conclusion and unresolved issue even when they have not been saved
+as private task state. It never substitutes an unrelated draft or empty dock.
+Ending without insertion explicitly discards that private human task text and
 does not modify the note. Only the private active-investigation pointer is
 cleared. Parent and child `ModelCall`s, exact projections, retained passages,
-anchors and unrelated workspace state remain. If recovery or workspace
-publication fails, the pointer stays active and the failure is reported. After
-a successful end and restart, another independent one-parent/one-child
-investigation may be started in the same project. R3.1 adds no archive browser,
-record deletion, simultaneous investigation, branch or child-of-child call.
+anchors and unrelated workspace state remain.
+
+Both End controls are unavailable during foreground restoration. After the
+confirmation closes, the handler rechecks foreground work, the active
+investigation identity and the editable insertion target; a late restore result
+for an ended or replaced pointer is ignored. An initial checkpoint or candidate
+publication failure keeps the live pointer and visible dock edits. If insertion
+already occurred, its unsaved note edit is retained without retry, duplication
+or automatic undo while ending reports failure. A directory-sync failure after
+atomic replacement is uncertain: the current session retains its live pointer
+and blocks later writes, while reopen may observe the complete null-pointer
+replacement. The application does not attempt rollback. After a successful end
+and restart, another independent one-parent/one-child investigation may be
+started in the same project. That one-child limit is the present bounded
+implementation, not a permanent product requirement. R3.1 adds no archive
+browser, record deletion, simultaneous investigation, branch or child-of-child
+call.
 
 ### External tools and LaTeX
 

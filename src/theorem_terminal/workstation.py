@@ -1475,12 +1475,38 @@ class Workstation:
         )
         return self._checkpoint_investigation(state)
 
-    def update_investigation_summary(self, *, question, correction,
-                                     last_conclusion, unresolved_issue):
-        """Save only human-maintained task text; immutable call pointers stay fixed."""
+    @staticmethod
+    def investigation_identity(state):
+        """Return the immutable identity of one active parent/child pointer."""
+        if state is None:
+            return None
+        return (
+            state.parent_path,
+            state.parent_record_revision,
+            state.parent_id,
+            state.parent_response_digest,
+            tuple(
+                (item.number, item.start_byte, item.end_byte)
+                for item in state.parent_passages
+            ),
+            state.child_path,
+            state.child_record_revision,
+            state.child_id,
+            state.child_response_digest,
+        )
+
+    def validate_investigation_summary(self, *, question, correction,
+                                       last_conclusion, unresolved_issue,
+                                       expected_identity=None):
+        """Validate visible human task text against the active investigation."""
         state = self.current().investigation
         if state is None:
             raise WorkspaceError('No retained investigation is available')
+        if (expected_identity is not None
+                and self.investigation_identity(state) != expected_identity):
+            raise WorkspaceError(
+                'The active investigation changed; review it before using this task text'
+            )
         question = self._validate_assistance_text(
             question, 'current mathematical question', MAX_INVESTIGATION_TEXT_BYTES
         )
@@ -1495,9 +1521,20 @@ class Workstation:
                 unresolved_issue, 'unresolved issue'
             ),
         }
-        return self._checkpoint_investigation(replace(
-            state, question=question, **values
-        ))
+        return replace(state, question=question, **values)
+
+    def update_investigation_summary(self, *, question, correction,
+                                     last_conclusion, unresolved_issue,
+                                     expected_identity=None):
+        """Save only human-maintained task text; immutable call pointers stay fixed."""
+        state = self.validate_investigation_summary(
+            question=question,
+            correction=correction,
+            last_conclusion=last_conclusion,
+            unresolved_issue=unresolved_issue,
+            expected_identity=expected_identity,
+        )
+        return self._checkpoint_investigation(state)
 
     def end_investigation(self):
         """Durably release the sole active slot without changing retained records."""
@@ -1512,11 +1549,15 @@ class Workstation:
         self._checkpoint_investigation(None)
         return state
 
-    def restore_investigation(self):
+    def restore_investigation(self, state=None):
         """Validate exact linked records for display without replacing task text."""
-        state = self.current().investigation
+        if state is None:
+            state = self.current().investigation
         if state is None:
             return None
+        # A GUI worker receives a captured value.  Never re-read or retain a live
+        # mutable workspace object while record validation is off-thread.
+        state = decode_investigation(asdict(state))
         parent = None
         passages = ()
         parent_error = None
@@ -1578,11 +1619,26 @@ class Workstation:
             state, parent, passages, child, child_raw, error
         )
 
-    def investigation_handoff(self):
+    def investigation_handoff(self, *, summary=None, expected_identity=None):
         """Render an editable ordinary-note handoff without copying model prose."""
         state = self.current().investigation
         if state is None:
             raise WorkspaceError('No retained investigation is available')
+        if (expected_identity is not None
+                and self.investigation_identity(state) != expected_identity):
+            raise WorkspaceError(
+                'The active investigation changed; review it before inserting a handoff'
+            )
+        if summary is not None:
+            if (not isinstance(summary, dict)
+                    or set(summary) != {
+                        'question', 'correction', 'last_conclusion',
+                        'unresolved_issue',
+                    }):
+                raise WorkspaceError('Invalid visible investigation task text')
+            state = self.validate_investigation_summary(
+                **summary, expected_identity=expected_identity
+            )
         spans = ', '.join(
             f'passage {item.number} bytes [{item.start_byte}, {item.end_byte})'
             for item in state.parent_passages

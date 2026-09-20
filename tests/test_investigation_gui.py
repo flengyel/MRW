@@ -339,6 +339,10 @@ class InvestigationWidgetTests(unittest.TestCase):
         note_id = pane.shown
         memory_before = self.controller.buffer(note_id).content
         disk_before = self.files["questions.txt"].read_bytes()
+        panel.question.setPlainText("Unsaved question retained by Cancel?")
+        panel.correction.setPlainText("Unsaved correction retained by Cancel.")
+        panel.last_conclusion.setPlainText("Unsaved conclusion retained by Cancel.")
+        panel.unresolved_issue.setPlainText("Unsaved issue retained by Cancel.")
 
         with patch.object(
             self.window, "choose_end_investigation", return_value=None
@@ -347,6 +351,14 @@ class InvestigationWidgetTests(unittest.TestCase):
         self.assertIsNotNone(self.controller.current().investigation)
         self.assertEqual(self.controller.buffer(note_id).content, memory_before)
         self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
+        self.assertEqual(panel.question.toPlainText(),
+                         "Unsaved question retained by Cancel?")
+        self.assertEqual(panel.correction.toPlainText(),
+                         "Unsaved correction retained by Cancel.")
+        self.assertEqual(panel.last_conclusion.toPlainText(),
+                         "Unsaved conclusion retained by Cancel.")
+        self.assertEqual(panel.unresolved_issue.toPlainText(),
+                         "Unsaved issue retained by Cancel.")
 
         with patch.object(
             self.window, "choose_end_investigation", return_value="without"
@@ -356,8 +368,61 @@ class InvestigationWidgetTests(unittest.TestCase):
         self.assertEqual(self.controller.buffer(note_id).content, memory_before)
         self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
         self.assertIn("Investigation ended", panel.status.text())
+        self.assertEqual(panel.question.toPlainText(), "")
+        self.assertEqual(panel.correction.toPlainText(), "")
         self.assertFalse(self.window.actions["end_investigation"].isEnabled())
         self.assertFalse(self.errors)
+
+    def test_standalone_handoff_uses_latest_visible_unsaved_summary(self):
+        from PySide6.QtGui import QTextCursor
+
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        before = self.controller.buffer(note_id).content
+        stored = self.controller.current().investigation
+        pane.text.moveCursor(QTextCursor.MoveOperation.End)
+        panel.question.setPlainText("Standalone newest question?")
+        panel.correction.setPlainText("Standalone newest correction.")
+        panel.last_conclusion.setPlainText("Standalone newest conclusion.")
+        panel.unresolved_issue.setPlainText("Standalone newest issue.")
+
+        panel.insert_handoff_button.click()
+
+        changed = self.controller.buffer(note_id).content
+        self.assertIn("Standalone newest question?", changed)
+        self.assertIn("Standalone newest correction.", changed)
+        self.assertIn("Standalone newest conclusion.", changed)
+        self.assertIn("Standalone newest issue.", changed)
+        self.assertNotEqual(changed, before)
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.current().investigation.question,
+                         stored.question)
+        self.assertFalse(self.errors)
+
+    def test_handoff_validation_failure_preserves_widgets_note_and_pointer(self):
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        note_before = self.controller.buffer(note_id).content
+        disk_before = self.files["questions.txt"].read_bytes()
+        panel.question.setPlainText("   ")
+        panel.correction.setPlainText("Keep this correction after validation fails.")
+
+        with patch.object(
+            self.window, "choose_end_investigation", return_value="insert"
+        ):
+            panel.end_investigation_button.click()
+
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.buffer(note_id).content, note_before)
+        self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
+        self.assertEqual(panel.question.toPlainText(), "   ")
+        self.assertEqual(panel.correction.toPlainText(),
+                         "Keep this correction after validation fails.")
+        self.assertRegex(self.errors[-1], "nonempty current mathematical question")
 
     def test_end_with_explicit_handoff_insertion_changes_only_editable_note(self):
         from PySide6.QtGui import QTextCursor
@@ -373,6 +438,11 @@ class InvestigationWidgetTests(unittest.TestCase):
         child_hash = child_path.read_bytes()
         pane.text.moveCursor(QTextCursor.MoveOperation.End)
 
+        panel.question.setPlainText("Newest unsaved question?")
+        panel.correction.setPlainText("Newest unsaved human correction.")
+        panel.last_conclusion.setPlainText("Newest unsaved useful conclusion.")
+        panel.unresolved_issue.setPlainText("Newest unsaved unresolved issue.")
+
         with patch.object(
             self.window, "choose_end_investigation", return_value="insert"
         ):
@@ -382,7 +452,11 @@ class InvestigationWidgetTests(unittest.TestCase):
         self.assertIsNone(self.controller.current().investigation)
         self.assertNotEqual(changed, memory_before)
         self.assertIn("Investigation handoff — editable human task summary", changed)
-        self.assertIn("Human correction: assume sequential compactness only.", changed)
+        self.assertIn("Newest unsaved question?", changed)
+        self.assertIn("Newest unsaved human correction.", changed)
+        self.assertIn("Newest unsaved useful conclusion.", changed)
+        self.assertIn("Newest unsaved unresolved issue.", changed)
+        self.assertNotIn("Human correction: assume sequential compactness only.", changed)
         self.assertNotIn("Completed child text stays only", changed)
         self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
         self.assertEqual(parent_outcome.path.read_bytes(), parent_hash)
@@ -411,6 +485,136 @@ class InvestigationWidgetTests(unittest.TestCase):
         self.assertRegex(self.errors[-1], "Investigation checkpoint failed")
         self.assertTrue(panel.end_investigation_button.isEnabled())
         self.controller.close_project(discard_session=True)
+
+    def test_end_initial_checkpoint_failure_preserves_visible_edits(self):
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        note_before = self.controller.buffer(note_id).content
+        panel.question.setPlainText("Visible question after checkpoint failure?")
+        panel.correction.setPlainText("Visible correction after checkpoint failure.")
+
+        self.controller.persistence_error = "deterministic recovery checkpoint denial"
+        with patch.object(
+            self.window, "choose_end_investigation", return_value="without"
+        ), patch.object(self.controller, "checkpoint", return_value=False):
+            panel.end_investigation_button.click()
+
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.buffer(note_id).content, note_before)
+        self.assertEqual(panel.question.toPlainText(),
+                         "Visible question after checkpoint failure?")
+        self.assertEqual(panel.correction.toPlainText(),
+                         "Visible correction after checkpoint failure.")
+        self.assertIn("active pointer", panel.status.text())
+        self.assertRegex(self.errors[-1], "deterministic recovery checkpoint denial")
+        self.controller.close_project(discard_session=True)
+
+    def test_insert_then_end_failure_keeps_note_edit_and_active_pointer(self):
+        from PySide6.QtGui import QTextCursor
+
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        disk_before = self.files["questions.txt"].read_bytes()
+        pane.text.moveCursor(QTextCursor.MoveOperation.End)
+        panel.question.setPlainText("Newest question before failed ending?")
+        panel.correction.setPlainText("Newest correction before failed ending.")
+        save = self.controller.store.save
+
+        def fail_end_candidate(candidate):
+            if candidate.investigation is None:
+                raise OSError("deterministic end publication denial")
+            return save(candidate)
+
+        with patch.object(
+            self.window, "choose_end_investigation", return_value="insert"
+        ), patch.object(
+            self.controller.store, "save", side_effect=fail_end_candidate
+        ):
+            panel.end_investigation_button.click()
+
+        changed = self.controller.buffer(note_id).content
+        self.assertIn("Newest question before failed ending?", changed)
+        self.assertIn("Newest correction before failed ending.", changed)
+        self.assertTrue(self.controller.buffer(note_id).dirty)
+        self.assertEqual(self.files["questions.txt"].read_bytes(), disk_before)
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(panel.question.toPlainText(),
+                         "Newest question before failed ending?")
+        self.assertIn("handoff was inserted", panel.status.text().lower())
+        self.assertIn("remains unsaved", panel.status.text().lower())
+        self.assertIn("not retried, duplicated, or undone", panel.status.text())
+        self.assertRegex(self.errors[-1], "ending the investigation failed")
+        self.controller.close_project(discard_session=True)
+
+    def test_end_revalidates_editable_target_after_confirmation(self):
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        pane = self.open_file(self.files["questions.txt"])
+        note_id = pane.shown
+        note_before = self.controller.buffer(note_id).content
+        external = self.home / "read-only-reference.txt"
+        external.write_text("Read-only reference.\n", encoding="utf-8")
+        read_only = self.controller.open_file(external, reference=True)
+        self.window.render()
+        self.window.select(note_id, 0)
+        panel.question.setPlainText("Keep this visible after target rejection?")
+
+        def change_target():
+            self.window.select(read_only.state.id, 0)
+            return "insert"
+
+        with patch.object(
+            self.window, "choose_end_investigation", side_effect=change_target
+        ):
+            panel.end_investigation_button.click()
+
+        self.assertIsNotNone(self.controller.current().investigation)
+        self.assertEqual(self.controller.buffer(note_id).content, note_before)
+        self.assertEqual(panel.question.toPlainText(),
+                         "Keep this visible after target rejection?")
+        self.assertRegex(self.errors[-1], "editable ordinary work note")
+
+    def test_delayed_restore_cannot_reinstall_an_ended_investigation(self):
+        from theorem_terminal.workspace import WorkspaceError
+
+        self.open_project()
+        panel, _parent_outcome = self.create_retained_investigation()
+        snapshot = self.controller.current().investigation
+        panel.dismiss_button.click()
+        original_restore = self.controller.restore_investigation
+        started = threading.Event()
+        self.release = threading.Event()
+
+        def delayed_restore(state=None):
+            restored = original_restore(state)
+            started.set()
+            self.release.wait(10)
+            return restored
+
+        with patch.object(
+            self.controller, "restore_investigation", side_effect=delayed_restore
+        ):
+            self.window.resume_investigation()
+            self.wait_until(started.is_set)
+            self.assertFalse(self.window.actions["end_investigation"].isEnabled())
+            self.assertFalse(panel.end_investigation_button.isEnabled())
+            with self.assertRaisesRegex(WorkspaceError, "restore to finish"):
+                self.window.end_investigation()
+
+            self.assertEqual(self.controller.end_investigation(), snapshot)
+            panel.investigation_ended()
+            self.release.set()
+            self.wait_idle()
+
+        self.assertIsNone(self.controller.current().investigation)
+        self.assertIsNone(panel.displayed_investigation_identity)
+        self.assertIn("Investigation ended", panel.status.text())
+        self.assertFalse(self.window.actions["end_investigation"].isEnabled())
+        self.assertFalse(panel.end_investigation_button.isEnabled())
 
 
 if __name__ == "__main__":
