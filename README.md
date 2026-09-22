@@ -599,6 +599,13 @@ replaced. A notebook (`.ipynb`) opens as a read-only notebook summary; configure
 and invoke its Jupyter/JupyterLab handoff deliberately. No kernel runs inside
 this GUI.
 
+Notebook study with a SageMath kernel is now a requested, planned increment:
+a standard `.ipynb` may replace or accompany a Markdown note, using JupyterLab
+for rendered mathematics, code and outputs. The current handoff is the starting
+point; embedded notebook editing, kernel execution inside MRW and direct
+notebook-cell assistance are not delivered. See
+[the notebook/SageMath roadmap](CODEX_PLAN.md#requested-notebook-and-sagemath-workflow).
+
 Open the root `.tex` file and choose **LaTeX → Set as TeX root**, then **Build
 LaTeX**. Building executes **trusted project TeX only**, using trusted installed
 tools. An out-of-tree staged build is **not a security sandbox**. This tranche

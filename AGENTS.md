@@ -194,7 +194,12 @@ formal artifact is assumed. Formal material is optional and follows the
 informal mathematical context. Never require a comprehension report, confidence
 score, subject inventory, or formal declaration before mathematical work.
 Ordinary TeX, Sage, code, diagram, and note files remain the primary work
-artifacts.
+artifacts. A standard Jupyter notebook may replace or accompany a Markdown
+study note; do not require duplicate prose or treat `study_notes.md` as a
+mandatory format. The notebook/SageMath workflow in `CODEX_PLAN.md` is requested
+and planned. Build from the existing external Jupyter handoff when implementing
+that increment; do not claim that its current summary view supplies notebook
+editing, a SageMath kernel, or a notebook-cell bridge to R2/R3.
 
 The justification-logic warrant subsystem is architecturally integral to
 Theorem Terminal. Its object language, profiles, derivations, constant

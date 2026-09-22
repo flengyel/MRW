@@ -137,6 +137,18 @@ On return, compare changed disk content with any unsaved work before refreshing.
 Notebook execution likewise requires a deliberate tool action; merely opening a
 notebook must not execute it or expose editable raw JSON by default.
 
+The requested notebook/SageMath workflow permits a standard `.ipynb` as the
+primary study document or alongside Markdown/TeX. Narrative, mathematical
+notation, executable examples and outputs should remain together without a
+duplicate note requirement. The planned first increment uses external
+JupyterLab and an installed SageMath kernel; it does not embed a notebook
+editor. Current MRW provides only a read-only notebook summary and configured
+handoff. Keep the notebook's location available on re-entry, protect externally
+saved edits, and distinguish saved outputs from live kernel state. Notebook
+cell selection into assistance and response insertion require a later explicit
+bridge; the handoff alone does not supply them. See the notebook section of
+`CODEX_PLAN.md` for the bounded implementation target.
+
 Re-entry restores the open work, selected passage and rendering position. Two
 panes comparing the same file retain independent cursor, selection and scroll
 positions while sharing one editable document, modified state, undo/redo history

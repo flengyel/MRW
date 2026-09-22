@@ -80,6 +80,7 @@ from automated checks.
 | R2 — Ask about the work | From selected source/work passages, ask one natural-language mathematical question, preview exact outbound context, explicitly send through the existing adapter, inspect an attributed answer, and retain/edit/reject a contribution | One actual obstruction is helped through an in-application exchange, with inspectable sources and a useful resulting work artifact |
 | R3 — Continue an investigation | Support an explicit linked follow-up, correction or alternative approach; preserve the current question, conclusions, unresolved issue and selected evidence; resume later | A continued proof, counterexample, hypothesis comparison or exposition survives interruption, and the assistant's contribution and corrections remain distinguishable |
 | R3.1 — End and begin again | Explicitly release the sole active investigation pointer while preserving immutable records, note choice and unrelated state, then permit another bounded investigation after restart | Two independent investigations can be completed sequentially in one real project without losing either one's mathematical record |
+| Requested notebook/SageMath workflow — planned | Standard study notebooks through JupyterLab with an installed SageMath kernel, building on the existing handoff | A saved explanation and computation can be continued later; kernel state and reproducibility are assessed separately |
 | Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3.1 justifies each addition; evaluate each on its own terms |
 
 **Next product step: observe the delivered R1–R3.1 workflow in genuine mathematical
@@ -161,6 +162,55 @@ Before claiming general usefulness, test both reading/re-entry and actual
 problem work, including an example or counterexample. Do not infer research
 capability from a single guided-reading success.
 
+### Requested notebook and SageMath workflow
+
+The September 22 request adds Jupyter notebooks as ordinary study documents,
+either instead of or alongside Markdown notes. `study_notes.md` is one prepared
+file, not a required format. Notebook support serves explanations with rendered
+mathematics, examples, calculations and plots kept together. It is an explicit
+study requirement; no unsuccessful Markdown-only session is needed to record it.
+
+**Current boundary:** the GUI recognizes an existing `.ipynb`, shows a read-only
+summary and can launch a configured Jupyter/JupyterLab command. It does not edit
+or render notebook cells, execute kernels, or connect notebook cells directly to
+R2/R3 selection and response insertion. The title already uses Mathematical
+Research Workstation; the `theorem-terminal` command and package identity remain.
+
+**Planned first increment:** make the existing external Jupyter handoff usable
+for a durable study notebook and an installed SageMath kernel.
+
+- Provide a clear New/Open study notebook path, saving a standard `.ipynb` in
+  the chosen study project. Preserve existing Markdown/TeX notes; require no
+  duplicate account of the mathematics.
+- Configure or discover the intended JupyterLab installation and its available
+  kernels. Select an installed SageMath kernelspec by its actual name. Report an
+  unavailable kernel; do not silently run Sage code as ordinary Python.
+- Let JupyterLab provide notebook editing, rendered mathematical prose, code
+  execution and output display. Opening/restoring the MRW project must not run
+  cells. Execution remains an explicit notebook action.
+- Keep the notebook path and source reference available for later continuation.
+  Detect externally saved changes without waiting for a long-running Jupyter
+  server to exit; never overwrite the notebook with a stale MRW snapshot.
+- Distinguish saved cells and outputs from live kernel state. Reopening a file
+  does not establish that its computation can be reproduced. Where the task
+  requires reproduction, explicitly rerun the relevant computation in a fresh
+  kernel and record its dependencies.
+
+Status: requested and planned; no new notebook capability is delivered by this
+roadmap change. Use the existing handoff for study when suitable. A real example
+should combine an explanation with a Sage calculation or plot, save the work,
+and continue it later. Report setup checks separately from mathematical benefit.
+
+Embedded notebook editing, kernel orchestration and a direct notebook-cell AI
+bridge are later increments. The first handoff must not be described as
+integrated cell selection, automatic response insertion or restored kernel
+memory. Broader work must address a concrete limitation of this workflow.
+
+Implementation references: [JupyterLab notebooks](https://jupyterlab.readthedocs.io/en/stable/user/notebook.html),
+[SageMath's Jupyter kernel setup](https://doc.sagemath.org/html/en/installation/launching.html),
+[notebook file format](https://nbformat.readthedocs.io/en/stable/format_description.html),
+and [JupyterLab kernel/session management](https://jupyterlab.readthedocs.io/en/stable/user/running.html).
+
 ### Observation handoff and status
 
 [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) is the copyable
@@ -179,8 +229,9 @@ Keep implementation delivery, automated/visual verification and observed
 mathematical usefulness separate in status reports. A verified implementation
 can be delivered while user observation remains pending. That pending observation
 does not block the authorized bounded correction to R1–R3.1. It does block
-claims that the product has demonstrated usefulness or readiness to expand
-beyond R1–R3.1.
+claims that the product has demonstrated usefulness. Explicit user requests,
+including the notebook/SageMath workflow above, can define a bounded next
+increment without a prescribed preliminary study test.
 
 The delivered R1 boundary is:
 
