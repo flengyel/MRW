@@ -2,6 +2,16 @@
 
 Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
 
+The project should help people work with mathematics whose justification exceeds
+their present understanding, while making further understanding possible
+wherever it can. Follow VISION.md's distinction between epistemic, practical,
+explanatory, and organizational benefit. Evaluate each on its own evidence;
+neither full proof reconstruction nor eventual human comprehensibility is a
+universal acceptance condition. Preserve the separate scopes of provenance,
+verification, non-factive derivability, and human judgment. This design principle
+creates no automatic truth or comprehension status and no new implementation
+claim.
+
 The editor-centered GUI is the principal user-facing interface; launch it with
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
 identities unchanged. Open Project Directory is the principal entry: show the

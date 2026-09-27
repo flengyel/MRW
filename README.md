@@ -20,6 +20,18 @@ integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an
 inactive project, or a subject not studied or taught for years.
 
+The project should help people work with mathematics whose justification exceeds
+their present understanding, while making further understanding possible
+wherever it can. It assumes no guarantee that human understanding will encompass
+every verifiable result. Its intended benefits are **epistemic** (inspectable
+grounds for acceptance), **practical** (appropriate application), **explanatory**
+(examples, connections, and insight), and **organizational** (retrieval and
+resumption). Each requires its own evidence; unresolved explanation does not
+erase independently established value in another category. See
+[the philosophical distinction and evaluation criteria](VISION.md#justification-understanding-and-benefit).
+These criteria describe the purpose; the delivery status below describes
+implemented capabilities and remaining observations.
+
 It is intended to be an assistant's assistant. Its design preserves the mathematical work produced
 while consulting source literature and using machine assistants, proof
 assistants, and computer algebra systems: source locations, problems attempted,
@@ -70,11 +82,12 @@ preserving attempts and computations, and resuming unfinished work.
 AI adds two demands. It may increase the rate at which mathematical results,
 proofs, formalizations, and examples are produced, and it can produce
 mathematics that is correct or formally verified without being understood by
-the mathematician receiving it. Understanding such a result requires
+the mathematician receiving it. Further understanding may involve
 reconstructing the relevant human-developed mathematics from which current
-systems learn and which the result uses or extends. Tao discusses both the
-prospect of verified proofs without human understanding and the dependence of
-mathematical AI on canonical theories developed and organized by mathematicians
+systems learn and which the result uses or extends. Such reconstruction is not
+a universal prerequisite for justified acceptance or appropriate use. Tao
+discusses both the prospect of verified proofs without human understanding and
+the dependence of mathematical AI on canonical theories developed and organized by mathematicians
 [@taoMathematicsAgeAI2026].
 
 Theorem Terminal supports learning, reconstruction, integration, and retention

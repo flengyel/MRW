@@ -11,9 +11,12 @@ Reviewed repair `d91e35bc56d5e66778c115e1c8ffea4d6937cd28` is integrated
 on live `main` and remains on its review branch. The focused controller/widget
 gate passed 21 deterministic tests; the installed module matches the integrated
 source and its GUI entry point launched against a durable study project. A
-private ordinary note has been prepared outside this repository. No source or
-question has yet been selected, so the system is **ready for study; usefulness
-is unobserved**. The next task is one genuine mathematical
+private ordinary note has been prepared outside this repository. The selected
+next source is Daniel Marcus's *Number Fields*; the user has the book and some
+exercise answers. The specific passage or exercise remains to be selected. No
+new in-application study evidence has been supplied: the system is **ready for
+study; the intended benefits of this trial remain unobserved**.
+The next task is one genuine mathematical
 study-and-explanation observation, not a new feature tranche.
 
 ## Objective
@@ -27,11 +30,19 @@ product; the prepared Markdown file is optional. If an actual
 interaction blocker appears, diagnose it and make only the smallest authorized
 correction needed for that task; otherwise make no code change.
 
-Keep implementation status, synthetic verification and observed mathematical
-benefit separate. The deterministic R1–R3.1 tests establish mechanics only. Do
-not claim that the workstation is useful, that an answer is correct, or that a
-continuation works for real research until the corresponding human work has
-actually been observed.
+The governing purpose, clarified 2026-09-27, is to help people work with
+mathematics whose justification exceeds their present understanding, while
+making further understanding possible wherever it can. This study trial tests
+a particular function; it does not require every justified result to admit a
+complete human explanation. Use the four benefit categories in
+[VISION.md](../VISION.md#justification-understanding-and-benefit).
+
+Keep implementation checks, mathematical evidence, and observed benefit
+separate. The deterministic R1–R3.1 tests establish mechanics only. Claim
+correctness only on identified mathematical grounds within their scope, and
+claim each benefit only on the corresponding evidence. A successful check does
+not demonstrate comprehension; an unresolved explanation does not negate an
+independently observed epistemic, practical, or organizational benefit.
 
 ## Establish context once
 
@@ -109,9 +120,15 @@ do. Note whether the later reopen reduced reconstruction burden and whether
 model and human contributions remained distinguishable. Do not ask for a
 confidence score or sentence-by-sentence disposition.
 
-An inconclusive session is not a human failure. If benefit is absent, identify
-one concrete obstruction. A confirmed data-loss defect has priority. For an
-interaction blocker, make a bounded correction and observe it once; defer
+Identify which benefit was observed: epistemic (inspectable grounds and limits),
+practical (appropriate application), explanatory (a clearer idea or argument),
+or organizational (retrieval and resumption). Leave the others unassessed when
+evidence is absent. Record explanatory limits without demanding full proof
+reconstruction as a prerequisite for using a justified result.
+
+An inconclusive session is not a human failure. If the benefit under evaluation
+is absent, identify one concrete obstruction. A confirmed data-loss defect has
+priority. For an interaction blocker, make a bounded correction and observe it once; defer
 incidental polish and new subsystems.
 
 ## Keep the cut line

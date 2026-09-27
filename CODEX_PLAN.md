@@ -5,7 +5,33 @@ implementations, the supplied September 13–14 session reports, and the researc
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
 purpose in `VISION.md`.
 
+Documentation clarification, 2026-09-27: justification may exceed present
+understanding; the four benefit categories below refine evaluation without
+changing implementation status or the delivered R1–R3.1 boundaries.
+
 ## Active roadmap: mathematical usefulness first
+
+### Justification and distinct benefits
+
+The project should help people work with mathematics whose justification exceeds
+their present understanding, while making further understanding possible
+wherever it can. [VISION.md](VISION.md#justification-understanding-and-benefit)
+states the distinction: neither complete human explanation nor eventual
+comprehensibility is assumed as a condition of accepting justified mathematics.
+
+| Benefit | Purpose | Evidence in actual work |
+|---|---|---|
+| Epistemic | Preserve statements, assumptions, dependencies, and grounds for acceptance | A result's evidence and its limits can be inspected without confusing origin, checking, and justification |
+| Practical | Support appropriate application without reconstructing the entire proof | A result is applied with its hypotheses and scope accounted for, even when its proof remains partly opaque |
+| Explanatory | Develop examples, connections, partial explanations, or simpler arguments | A specific idea, inference, or relation becomes clearer through observable mathematical work |
+| Organizational | Make accumulated mathematics retrievable and unfinished investigations resumable | Needed material is recovered or actual work continues from the saved context |
+
+Assess these benefits separately. An unresolved explanation does not invalidate
+an independently observed benefit in another category. Formal checks retain
+their stated scope; this distinction adds no automatic acceptance, comprehension
+status, or inference of truth from the non-factive warrant layer.
+
+### Current assessment
 
 **Assessment: the project has reached the interaction needed to test its intended
 user outcomes, but has not yet demonstrated them.** It has a reusable editor,
@@ -228,8 +254,10 @@ evidence changes.
 Keep implementation delivery, automated/visual verification and observed
 mathematical usefulness separate in status reports. A verified implementation
 can be delivered while user observation remains pending. That pending observation
-does not block the authorized bounded correction to R1–R3.1. It does block
-claims that the product has demonstrated usefulness. Explicit user requests,
+does not block the authorized bounded correction to R1–R3.1. Pending observation
+blocks claims about the corresponding benefit. Record epistemic, practical,
+explanatory, and organizational outcomes separately; no deterministic
+implementation check establishes all four. Explicit user requests,
 including the notebook/SageMath workflow above, can define a bounded next
 increment without a prescribed preliminary study test.
 
@@ -352,6 +380,10 @@ The user's next mathematical question determines the task. Capture only the
 source used, question or obstruction, resulting mathematical work, consequential
 friction, and what remains to do. Existing notes and automatic records should
 supply most of this evidence; no comprehension questionnaire or anchor quota.
+Name the benefit being evaluated and its evidence. Record unchanged or
+unassessed understanding without classifying other demonstrated benefits as
+failures. The selected study trial evaluates its particular function and does
+not decide the value of every workstation function.
 
 Use the user's ordinary PDF reader/editor/assistant workflow as the practical
 comparison. Record setup, navigation and correction burden when consequential,

@@ -29,6 +29,16 @@ or examine generated mathematics. The mathematician begins the mathematical
 work in the ordinary medium appropriate to it. Theorem Terminal supplies source
 context, prior work, computations, and assistance when relevant.
 
+The interface supports work with mathematics whose justification exceeds the
+mathematician's present understanding, while making further understanding
+possible wherever it can. Statements, evidence, and applicable checks remain
+accessible without a complete explanatory account. Appropriate application
+requires access to the relevant hypotheses and scope, not reconstruction of
+every proof step. Missing explanation and missing justification are distinct.
+The four benefit categories in
+[VISION.md](VISION.md#justification-understanding-and-benefit) govern evaluation;
+they add no comprehension questionnaire or automatic acceptance status.
+
 Five constraints follow from `VISION.md` and apply throughout this
 specification.
 
@@ -327,6 +337,11 @@ Each section links to its source and to related work. Any section may be absent.
 An absent formalization is an ordinary state of the corpus, not a gap the
 mathematician must fill. A formal proof without an explanation is likewise
 displayed without treating verification as comprehension.
+Missing explanatory material does not erase independently established evidence
+or prevent appropriate use within its scope. The result remains available for
+further study without making missing explanation a failed acceptance condition.
+Ordinary retained model output remains a proposal until separately assessed; showing it does not supply
+justification.
 
 ---
 
@@ -685,6 +700,13 @@ Evaluate usefulness as each R1–R3.1 increment is delivered. Source choice foll
 the current mathematical need. Reading/re-entry and unformalized problem work
 test distinct capabilities; neither substitutes for the other. The warrant
 experiment in §9.3 has independent acceptance criteria.
+
+Report epistemic, practical, explanatory, and organizational benefit separately,
+using the evidence appropriate to each. A restored file demonstrates a mechanism;
+resuming actual mathematical work can demonstrate organizational benefit without
+establishing a new conceptual insight. Conversely, a clarified argument does
+not establish durable resumption. Absence of explanatory progress leaves that
+benefit unproved, without cancelling a demonstrated benefit elsewhere.
 
 ### 9.1 Problem-centered study without formalization
 
