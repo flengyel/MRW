@@ -12,6 +12,17 @@ verification, non-factive derivability, and human judgment. This design principl
 creates no automatic truth or comprehension status and no new implementation
 claim.
 
+The primary use is gaining working access to existing mathematical literature
+and approaching chosen research questions. Prioritize orientation, needed
+prerequisites, connections between sources, and cumulative study. Preserve
+source locations and distinguish source assertions, proposed dependencies,
+checked correspondences, and human synthesis. Do not promise complete
+prerequisite maps, effortless mastery, or a verified research frontier. Assess
+reduced search and reconstruction effort only from actual work; no summary or
+exercise quota demonstrates benefit. The current bounded study source is
+Marcus's *Number Fields*. This priority adds no implemented guidance capability
+and does not authorize general corpus ingestion or automatic source retrieval.
+
 The editor-centered GUI is the principal user-facing interface; launch it with
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
 identities unchanged. Open Project Directory is the principal entry: show the

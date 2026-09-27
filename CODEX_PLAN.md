@@ -31,6 +31,31 @@ an independently observed benefit in another category. Formal checks retain
 their stated scope; this distinction adds no automatic acceptance, comprehension
 status, or inference of truth from the non-factive warrant layer.
 
+### Primary use: access to existing literature
+
+The principal use is entering and navigating the existing mathematical
+literature toward a chosen question or area of research. Prioritize orientation,
+needed prerequisites, connections between sources, and cumulative study that can
+be resumed. This complements the epistemic purpose above: a useful source route
+or appropriate application can count as progress while a proof remains partly
+opaque.
+
+The selected next source is Daniel Marcus's *Number Fields*. Begin with one
+chosen section, result, or exercise, using an outline, relevant prerequisites,
+or a representative argument as the task requires. Preserve precise source
+locations, the resulting work, and the next question in the chosen note or
+notebook. Record whether these aids enable the actual task and later
+continuation, including consequential search, transcription, and reconstruction
+effort. A summary count or a completed exercise count does not establish benefit;
+comparative time savings require a comparable baseline.
+
+This clarification sets product priority without changing R1–R3.1's delivered
+capabilities or authorizing corpus-wide ingestion, automatic concept maps, or
+background literature retrieval. Ordinary study across existing sources does
+not wait for the separate large-corpus ingestion experiment. Use the bounded
+Marcus task to identify the next concrete interaction obstacle; assess each of
+the four benefits on its own evidence.
+
 ### Current assessment
 
 **Assessment: the project has reached the interaction needed to test its intended

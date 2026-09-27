@@ -44,6 +44,28 @@ claim each benefit only on the corresponding evidence. A successful check does
 not demonstrate comprehension; an unresolved explanation does not negate an
 independently observed epistemic, practical, or organizational benefit.
 
+## Existing-literature objective
+
+The primary use is gaining working access to the existing mathematical
+literature and progressively approaching the questions of interest. For Marcus,
+choose a section, result, or exercise and develop only the orientation needed
+for that task: its purpose, relevant definitions and prior results, and a
+representative argument or example. An outline is a useful possible work product;
+it is not a mandatory preliminary exercise.
+
+Preserve exact source locations and distinguish an author's statement from a
+model's suggested connection or the reader's synthesis. Record absent sources
+and unresolved prerequisites without inventing a complete dependency map.
+Observe whether this work makes the selected material usable and whether the
+saved route supports later continuation. A justified application or successful
+retrieval may be useful while explanation remains incomplete. Compare effort
+only when evidence supports the comparison.
+
+This is a bounded study observation using the delivered workflow. Literature
+guidance remains an intended capability; assistance supplied outside the
+application does not demonstrate an integrated feature. General ingestion and
+automatic literature retrieval remain outside the current increment.
+
 ## Establish context once
 
 Read `AGENTS.md` and the documents it names. Inspect the branch and preserve

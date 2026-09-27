@@ -10,6 +10,15 @@ Mathematical Research Workstation should help people work with mathematics whose
 justification exceeds their present understanding, while making further
 understanding possible wherever it can.
 
+Its primary use is gaining working access to the existing mathematical
+literature: entering unfamiliar subjects, recovering earlier studies, connecting
+sources, and progressively approaching the research questions of interest.
+Reducing the time and effort spent locating prerequisites, reconciling notation,
+and repeatedly reconstructing context is a central objective. Work with
+AI-generated mathematics is an additional application of this purpose. The
+distinctions between justification, appropriate use, and understanding apply to
+both.
+
 * Learning a large body of mathematics requires orientation, mathematical work,
   integration, and retention.
 * Returning to mathematics after a lapse may require reconstructing context not
@@ -65,6 +74,30 @@ response, resulting mathematical representations and work artifacts,
 provenance, checking status, and the state at which work stopped. No one
 assistant becomes the authority. The system does not require a mathematician
 to complete a description of what is supposedly understood.
+
+### Access to existing literature
+
+The intended workflow begins with a chosen mathematical question or source.
+It should help identify the purpose and organization of a chapter or paper,
+recover the definitions and earlier results needed at a particular passage,
+reconcile notation and hypotheses across sources, and preserve the resulting
+route for later continuation. An outline, a worked example, a comparison of
+formulations, or a located prerequisite may make further work possible without
+a complete account of every proof.
+
+Reading routes and proposed connections must remain linked to identifiable
+sources. A source's assertion, a suggested dependency, a checked correspondence,
+and the reader's own synthesis have different evidential roles. Missing sources
+and uncertain connections remain visible. A proposed route toward a research
+question does not establish that the question is open or that the literature
+search is complete.
+
+This is a design objective to evaluate through actual study. The system should
+reduce avoidable search, transcription, and repeated reconstruction while
+supporting the mathematical work still needed. It promises neither effortless
+mastery nor a complete map of a field. Useful local progress does not require
+reaching a research frontier, and the four benefit categories below remain
+independently assessable.
 
 ---
 
@@ -433,8 +466,9 @@ they already provide the required function.
 
 ## 9. Corpora with different available evidence
 
-`flengyel/Categorical_Rice_Shapiro` is the first corpus. Its named
-mathematical re-entry and informal/formal-correspondence test uses
+`flengyel/Categorical_Rice_Shapiro` supplied the initial formal-correspondence
+corpus. Its named mathematical re-entry and informal/formal-correspondence test
+uses
 `rs_Appendix_A.tex`, the corresponding Lean declarations, and
 `Lean/docs/AppendixA.md`.
 
@@ -456,8 +490,8 @@ examples, corrections, and assistance used. A formal counterpart is included
 only when one already exists or is deliberately produced during the
 mathematical work.
 
-After the first two experiments are evaluated, a separately authorized
-large-corpus experiment will use either the Stacks Project
+A separately authorized large-corpus ingestion experiment will use either the
+Stacks Project
 [@stacksprojectauthorsStacksProject2021] or Kerodon. It will import the source's
 published hierarchy, stable identifiers, cross-references, and revision
 information. Statements, proofs, examples, and surrounding context will be
@@ -492,6 +526,12 @@ checks and observed benefits remain separate:
   formalization or manual population of a knowledge model. It fails if
   preparation of the system requires more effort than beginning the mathematics
   directly.
+- An existing-literature study trial tests whether a selected passage or
+  question becomes accessible through an outline, located prerequisites,
+  clarified notation, or connections to earlier results. The evidence is the
+  mathematical work that these aids enable and its later continuation. Counts
+  of retrieved sources or generated summaries do not establish benefit.
+  Comparative time savings require a comparable baseline.
 - A later large-corpus trial tests whether, beginning from a subject-level
   question, a mathematician can identify an ordered sequence of relevant source
   locations, study selected material, preserve the resulting work, resume after
@@ -523,6 +563,8 @@ checks and observed benefits remain separate:
 The initial two trials test different functions. A corpus with an extensive
 formal development cannot establish that the problem-centered workflow works,
 and a mostly unformalized problem collection cannot test maintenance of
-source-to-formal correspondences. The large-corpus trial begins only after both
-initial trials have been evaluated, requires separate authorization, and is not
-part of the first implementation.
+source-to-formal correspondences. The large-corpus ingestion trial requires
+separate authorization and is not
+part of the first implementation. Its scheduling follows the active roadmap;
+it does not gate ordinary navigation among existing sources or the selected
+Marcus study trial.

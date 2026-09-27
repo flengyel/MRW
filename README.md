@@ -20,6 +20,15 @@ integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an
 inactive project, or a subject not studied or taught for years.
 
+The primary use is gaining working access to the existing mathematical
+literature and progressively approaching chosen research questions. The design
+aims to reduce the effort of locating relevant sources and prerequisites,
+reconciling notation and assumptions, and reconstructing context after an
+interruption. Orientation, source connections, and cumulative study serve this
+purpose alongside explanation of AI-generated mathematics. These are intended
+benefits; the current application has not demonstrated a reduction in the time
+or effort needed to approach a research frontier.
+
 The project should help people work with mathematics whose justification exceeds
 their present understanding, while making further understanding possible
 wherever it can. It assumes no guarantee that human understanding will encompass

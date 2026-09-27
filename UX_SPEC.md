@@ -39,6 +39,16 @@ The four benefit categories in
 [VISION.md](VISION.md#justification-understanding-and-benefit) govern evaluation;
 they add no comprehension questionnaire or automatic acceptance status.
 
+The primary use is working into the existing literature from a chosen source
+or question. The intended interface should make a passage's role, relevant
+prerequisites, and connections to other sources accessible, with precise source
+locations and explicit uncertainty about proposed connections. An outline or
+local prerequisite lookup can support immediate work; no complete subject map
+or proof reconstruction is required. Preserve these study artifacts and the
+next question in an ordinary note or notebook so that progress can accumulate.
+These guidance capabilities remain design requirements, subject to the
+implementation limits stated above.
+
 Five constraints follow from `VISION.md` and apply throughout this
 specification.
 
@@ -707,6 +717,14 @@ resuming actual mathematical work can demonstrate organizational benefit without
 establishing a new conceptual insight. Conversely, a clarified argument does
 not establish durable resumption. Absence of explanatory progress leaves that
 benefit unproved, without cancelling a demonstrated benefit elsewhere.
+
+For existing-literature study, observe whether an outline, located prerequisite,
+notation comparison, or source connection enables work on a selected passage or
+question. Preserve the supporting locations, actual mathematical work, and
+unresolved step, then observe later continuation. Source retrieval alone does
+not establish understanding; a useful source route or appropriate application
+may establish another benefit. Record consequential effort without inventing
+comparative time savings.
 
 ### 9.1 Problem-centered study without formalization
 
