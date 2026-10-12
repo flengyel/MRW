@@ -279,6 +279,25 @@ calculation, or ordinary note produced during the work. The system may also
 record an explicit relation or discrepancy. No second account of comprehension
 is required.
 
+### Proof outlines by vertex elimination
+
+**Accepted requirement, 2026-10-12; not implemented.** For a selected proof,
+retain mathematical milestones and hide intervening vertices while preserving
+dependency paths. Every summarized region shows a claim with its necessary
+assumptions and an explanation of the omitted argument and its purpose. Offer
+source navigation and expansion to the hidden steps. The reader may select
+regions manually, explicitly request an AI proposal, and revise the proposed
+selection or explanation.
+
+Preserve joint premises and local scope. Identify whether the input is a
+declaration map, source regions, tactic states, or elaborated proof structure;
+these supply different levels of detail. Keep indirect edges expandable and
+retain the exact source revision. A changed source invalidates the current
+association without deleting the earlier outline. Inspection creates no
+Verification or premise admission, and generated explanations retain separate
+attribution. See [the full requirement](docs/PROOF_OUTLINES.md), including the
+preferred VS Code frontend trial and the separate mathematical-use evaluation.
+
 ### Review
 
 Perform mathematics selected from earlier work: reconstruct an argument,

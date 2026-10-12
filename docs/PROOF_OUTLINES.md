@@ -1,0 +1,146 @@
+# Proof outlines by vertex elimination
+
+**Status, 2026-10-12:** accepted product requirement; not implemented. The
+workstation should help a reader obtain and inspect a mathematical outline of
+a selected Lean proof. AI may propose which details to hide and explain the
+retained claims. The original proof and its evidence remain available.
+
+## Visible claims and explanations
+
+The reader retains useful intermediate claims and hides the arguments between
+them. Every summarized proof region has a visible claim and an explanation of
+the omitted argument and its role in the proof. Each summary offers expansion
+to the underlying steps and navigation to their source. Existing local lemmas
+can provide boundaries; AI may propose boundaries inside longer calculations.
+The reader can revise that selection and the explanations.
+
+A claim keeps its necessary hypotheses, quantified variables, and local
+assumptions. Its exact source statement is available for inspection. A prose
+paraphrase remains linked to that statement; it does not acquire the original
+statement's checking status merely by describing it. A newly proposed
+intermediate lemma requires its own checking or correspondence evidence.
+
+The overview should explain the governing construction, principal reductions,
+and the work done by the selected lemmas. A smaller graph is not an acceptance
+criterion. Explanation depends on the mathematical question and available
+background; no unique or optimal outline is assumed.
+
+## Graph operation
+
+Identify the representation before applying vertex elimination: declaration
+dependencies, source regions, tactic states, and elaborated proof structure
+are different inputs. A declaration map does not supply the internal argument
+of a proof. Source inspection is not elaboration-graph extraction.
+
+For a finite directed acyclic graph \(G=(V,E)\), let \(R\subseteq V\) be the
+retained vertices and \(V\setminus R\) the hidden vertices. Between distinct
+vertices \(u,v\in R\), the displayed graph has an edge \(u\to v\) exactly when
+the original graph has a directed path from \(u\) to \(v\) whose internal
+vertices are hidden. Operationally, eliminate a vertex by joining each of its
+predecessors to each of its successors and then removing it. This preserves
+reachability between retained vertices.
+
+Each added edge expands to an original path. Conversely, replacing hidden
+segments of an original path by their displayed edges gives a path between
+the same retained endpoints.
+
+Retain the original graph, the selection, and witness information for
+expansion. Distinguish original edges from edges obtained through hidden
+vertices. Where several paths support the same edge, expansion must not
+present an arbitrary path as the complete argument. Vertex elimination is
+distinct from grouping a region into a synthetic node and from transitive
+reduction, which removes edges. The original graph remains unchanged.
+
+Reachability alone does not express inference. Preserve which premises are
+needed jointly, alternative derivations, variable binding, and local scope.
+An assumption with no retained predecessor must not disappear from the visible
+claim. Every hidden inference region keeps its premise and conclusion
+boundaries. Graph operations provide navigation; they create no theorem or
+Verification.
+
+## Source and evidence
+
+Bind the outline to the exact proof/source revision and, where available, the
+graph generator and Lean environment. Use existing `Representation`,
+`VersionedSpan`, `Trace`, `FormalFact`, `Correspondence`, and `Verification`
+boundaries when they supply the needed information. This is a behavior
+requirement, not a new serialized schema or a second copy of generated facts.
+
+Keep explanation attribution and human review separate from the original
+proof's checking evidence. Preserve exact AI-response provenance for a
+selection or explanation generated through a `ModelCall`. A changed source
+invalidates the current association; the earlier outline remains inspectable
+against its pinned source. Do not silently reassign it to similar-looking nodes.
+
+The outline service invokes no model or compiler merely to open, hide, expand,
+or restore an existing outline. An installed Lean extension may process a
+source file opened through navigation; that is a separate tool action, not an
+outline-service check or a new MRW Verification. Requesting an AI outline is an
+explicit action using the existing bounded preview/Send boundary. Checking a
+newly proposed formal claim is a separate action. These actions do not admit
+premises into the warrant layer.
+
+## First bounded increment
+
+Consume existing graph/export output for one selected proof before writing
+another extractor. Keep the input kind visible and expose only claims actually
+supplied by that representation. Use the existing Lean editor/viewer ecosystem;
+the preferred frontend trial is one VS Code extension over the independent
+core. Choice of an open-source editor distribution is deferred. This update
+implements no frontend; ordinary files remain the work artifacts.
+
+Demonstrate:
+
+1. A retained theorem and intermediate claims, each with a visible explanation,
+   source link, and expansion control.
+2. Manual selection and an explicit AI-proposal route; the reader can alter the
+   proposed selection and explanation.
+3. Agreement between displayed edges and paths through hidden vertices,
+   including a branching example requiring premises jointly.
+4. Expansion without losing assumptions, scope, or alternative paths; hiding
+   and expansion do not change the proof or its records.
+5. Source-change detection, honest evidence labels, and restoration of the
+   selection and explanations after reopening.
+
+Deterministic checks establish graph and retention behavior. Mathematical use
+must separately establish whether the outline helps reconstruct or continue
+the argument. R1–R3.1 and the Marcus observation retain their separate evidence;
+they are not preliminary ceremonies for this increment.
+
+## Source-based illustration
+
+The pinned proof
+[`Subgraph.Equation387_implies_Equation43`](https://github.com/teorth/equational_theories/blob/1aec8a7acf223b7c56e4830977b6e90d4ef1924b/equational_theories/Subgraph.lean)
+provides three local lemmas and a concluding rewrite block. Let \(G\) have a
+binary operation \(\diamond\), assume
+\(x\diamond y=(y\diamond y)\diamond x\) for all \(x,y\in G\), and write
+\(s(x)=x\diamond x\).
+
+| Selected source region | Visible claim | Explanation |
+|---|---|---|
+| `idem` | Squares are idempotent: \(s(x)\diamond s(x)=s(x)\). | Apply the assumed identity twice to reduce the product of two squares to one square. |
+| `comm` | Every square commutes with every element: \(s(x)\diamond y=y\diamond s(x)\). | Apply the assumed identity with the idempotent element \(s(x)\), whose square is itself. |
+| `op_idem` | Squaring both factors preserves their product: \(s(x)\diamond s(y)=x\diamond y\). | Rewrite first to \(s(y)\diamond x\), then to \(x\diamond y\). |
+| Concluding rewrite block | The operation is commutative. | Replace both factors by their squares, exchange the squares, and undo the replacement. |
+
+The final chain is
+\(x\diamond y=s(x)\diamond s(y)=s(y)\diamond s(x)=y\diamond x\).
+All claims use the assumed identity; `comm` additionally uses `idem`, and the
+conclusion uses `comm` and `op_idem` jointly. These are source boundaries,
+not an extracted elaborated graph or a new Lean run. The project's
+[blueprint](https://github.com/teorth/equational_theories/blob/1aec8a7acf223b7c56e4830977b6e90d4ef1924b/blueprint/src/chapter/implications.tex)
+provides a corresponding prose argument. This illustration supplies no evidence
+of implementation or observed workstation use.
+
+## References
+
+- Rankooh and Rintanen, [*Propositional Encodings of Acyclicity and Reachability
+  by using Vertex Elimination*](https://arxiv.org/html/2105.12908v1), §2.2,
+  defines the directed elimination operation.
+- The [Lean reference on proof states](https://lean-lang.org/doc/reference/latest/Tactic-Proofs/Reading-Proof-States/)
+  supplies the target and local-context distinction at proof boundaries.
+- Davis and Kirk, *Lecture Notes in Algebraic Topology*, AMS, 2001, Preface,
+  p. xi, motivates attention to the overall structure of difficult proofs.
+  [Author's bibliography](https://jfdavis.pages.iu.edu/books/); the
+  [online draft](https://www.maths.gla.ac.uk/~mpowell/Davis_Kirk_Lecture%20notes%20in%20algebraic%20topology.pdf)
+  places the passage on p. ix.

@@ -143,6 +143,16 @@ the source revision.
 Formal facts may be absent. Their absence does not prevent study, problem
 solving, reconstruction, or review.
 
+## Vertex elimination
+
+A graph operation that removes a vertex after joining each of its predecessors
+to each of its successors. In the planned proof-outline view, hidden vertices
+are eliminated while the original graph and witnesses remain available for
+expansion. Each summarized proof region has a visible claim and explanation;
+required assumptions and joint premises are preserved. This is distinct from
+transitive reduction, node grouping, and proof checking. See
+[PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md).
+
 ## Claim atom version
 
 An immutable identifier for one opaque proposition used by the
