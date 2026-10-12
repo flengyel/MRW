@@ -11,9 +11,9 @@ For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-ma
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
 R1's PDF-plus-note workflow, R2's bounded direct mathematical-assistance
 exchange, R3's one linked resumable continuation and R3.1's explicit end-and-
-begin-again lifecycle are delivered. The next product step is a genuine
-mathematical-use observation across those workflows, not a broader automatic
-conversation feature.
+begin-again lifecycle are delivered. Their genuine mathematical-use observation
+remains pending. The separately requested proof-outline increment below is
+planned; it does not add broader automatic conversation.
 
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
@@ -211,6 +211,15 @@ notebook-execution, repository, literature-service, branching/general model
 conversation and Kallenberg-guidance GUI workflows remain unimplemented.
 Kallenberg ordering guides requested orientation in unfamiliar
 material; focused questions and prerequisite lookup need not repeat it.
+
+**Requirement accepted 2026-10-12:** proof outlines should support vertex
+elimination with a visible claim and explanation for each summarized proof
+region, source links, and expansion to the hidden steps. AI may propose the
+selection and explanations; source assumptions, proof evidence, and explanation
+attribution remain distinct. The preferred frontend trial uses a VS Code
+extension over the existing core. This is planned behavior, not an implemented
+proof viewer or extension. See [the proof-outline specification](docs/PROOF_OUTLINES.md)
+and [the bounded roadmap increment](CODEX_PLAN.md#requested-proof-outlines-and-editor-integration).
 
 Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.
 The supplied September 14 report and screenshot additionally show useful saved
@@ -1163,7 +1172,9 @@ problem families before selecting a problem.
 - [CODEX_PLAN.md](CODEX_PLAN.md) — active outcome roadmap, implementation status,
   research basis and retained implementation contracts.
 - [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) — copyable prompt for
-  the current mathematical-use observation handoff and its evidence criteria.
+  the mathematical-use observation and requested proof-outline increment.
+- [docs/PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md) — accepted vertex-elimination
+  requirement, visible claims and explanations, expansion, and evidence limits.
 - `AGENTS.md` — instructions for Codex and other coding agents.
 - `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` — the bounded warrant-composition
   experiment and its cut line.

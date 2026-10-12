@@ -1,10 +1,15 @@
-# DOMAIN_MODEL.md — v8
+# DOMAIN_MODEL.md — v9
 
 Draft. Companion to `VISION.md` (why the system exists), `UX_SPEC.md` (what a
 mathematician does with it), and `CODEX_PLAN.md` (staged implementation).
 
 Fixes entities and invariants. Does not fix storage technology, schema syntax,
 or GUI framework.
+
+Changes from v8: the requested proof-outline view uses vertex elimination with
+visible claims and explanations. Source boundaries, local assumptions,
+reversible expansion, and explanation provenance remain separate from proof
+checking. This adds a planned behavior contract, not a deployed record schema.
 
 Changes from v7: response digestion made explicit as a human-led workflow over existing
 records, not a new AI-specific schema; task evidence extended to mathematical-
@@ -600,6 +605,24 @@ Nothing requires one representation kind to exist before another. A problem
 with no formal statement, an outline with no formal proof, and a formal proof
 with no outline are all legitimate states. The absence of formal material never
 prevents study, problem solving, review, or reconstruction.
+
+### Proof outlines by vertex elimination
+
+**Planned requirement, 2026-10-12.** A proof outline may retain selected claims
+and hide intervening graph vertices, with explanations and expansion to the
+original steps. Use existing statement, explanation, outline, and diagram
+`Representation`s; bind selections and source references to the exact proof
+revision. Use `Trace` or generated `FormalFact` references when the selected
+representation supplies them. Do not hand-edit or duplicate generated facts.
+
+The graph selection is navigation state. Any retained explanation or paraphrase
+has its own provenance and version; it does not inherit the original proof's
+Verification. Preserve required assumptions, joint premises, and binder scope,
+as well as witnesses for paths through hidden vertices. Source changes
+invalidate the current association while preserving the earlier outline for
+its pinned source. The full contract is in
+[docs/PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md); a concrete serialization will
+be chosen only in the bounded implementation.
 
 ### ModelCall
 

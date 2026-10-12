@@ -1,4 +1,4 @@
-# Codex continuation: begin study on integrated R1–R3.1
+# Codex continuation: study and requested proof outlines
 
 Use this document as the next bounded handoff. The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
@@ -16,8 +16,10 @@ next source is Daniel Marcus's *Number Fields*; the user has the book and some
 exercise answers. The specific passage or exercise remains to be selected. No
 new in-application study evidence has been supplied: the system is **ready for
 study; the intended benefits of this trial remain unobserved**.
-The next task is one genuine mathematical
-study-and-explanation observation, not a new feature tranche.
+The Marcus study-and-explanation observation remains pending. The explicit
+2026-10-12 request separately authorizes the bounded proof-outline requirement
+below; its implementation and evaluation must not be reported as completed by
+this documentation update.
 
 ## Objective
 
@@ -43,6 +45,37 @@ correctness only on identified mathematical grounds within their scope, and
 claim each benefit only on the corresponding evidence. A successful check does
 not demonstrate comprehension; an unresolved explanation does not negate an
 independently observed epistemic, practical, or organizational benefit.
+
+## Requested proof-outline increment
+
+Read [PROOF_OUTLINES.md](PROOF_OUTLINES.md) and the roadmap's
+[requested increment](../CODEX_PLAN.md#requested-proof-outlines-and-editor-integration).
+For one selected Lean proof, support vertex elimination with visible claims and
+explanations, source links, and expansion to the hidden steps. AI may propose
+the selection; the reader must be able to revise it.
+
+First inspect existing exporter/viewer output and identify whether it describes
+declarations, source regions, tactic states, or elaborated proof structure. The
+specification's pinned Equation 387 proof supplies a small source-based example,
+not a pre-existing elaboration graph or run attestation. Consume actual machine
+output before adding another extractor. Preserve joint premises, local scope,
+exact source revisions, and the existing evidence boundaries.
+
+The preferred frontend trial is one VS Code extension over the independent
+Python services, reusing the established Lean and mathematical-tool ecosystem.
+Let the host own text documents and undo; retain research records in the core.
+Choosing an open-source editor distribution is deferred. Do not represent this
+direction as an already delivered extension or silently replace the Qt GUI.
+
+The outline service performs no model request or compiler invocation merely to
+open or expand an existing outline; separately identify processing initiated by
+an installed Lean extension when navigating to source. An AI proposal uses the
+bounded exact preview and separate Send;
+this handoff does not authorize a live request on its own. Check a newly proposed
+formal claim separately. Test reversible graph navigation and retained state,
+then observe whether the outline helps reconstruct or continue the proof.
+Update status from the actual results. The Marcus observation remains a
+separate task and is not a required preliminary ceremony for this increment.
 
 ## Existing-literature objective
 

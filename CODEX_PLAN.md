@@ -262,6 +262,32 @@ Implementation references: [JupyterLab notebooks](https://jupyterlab.readthedocs
 [notebook file format](https://nbformat.readthedocs.io/en/stable/format_description.html),
 and [JupyterLab kernel/session management](https://jupyterlab.readthedocs.io/en/stable/user/running.html).
 
+### Requested proof outlines and editor integration
+
+The explicit request of 2026-10-12 defines a bounded proof-outline increment:
+support vertex elimination with a visible claim and explanation for each
+summarized region, source links, and expansion to the omitted proof steps. AI
+may propose the selection and explanations; the reader can alter them. Preserve
+joint premises, local scope, source revision, and the separate status of proof
+evidence and explanation. The full contract and source-based illustration are
+in [docs/PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md).
+
+**Status:** requirement recorded; no proof-outline GUI, graph exporter,
+automatic selection, or VS Code extension is implemented by this update.
+The preferred interface trial is one VS Code extension using the existing core
+and established mathematical tools. Choice of an open-source editor
+distribution is deferred. The existing Qt application and R1–R3.1 retain their
+delivery status; their mathematical-use observation remains independent.
+
+Begin with Task 4.0 reconnaissance for one selected proof and consume existing
+graph/export output. Identify its granularity before selecting regions. Add
+only missing information needed for retained claims, explanations, and
+reversible expansion; do not parse Lean source in Python or infer proof steps
+from a declaration map. Apply the existing explicit model-request boundary to
+AI proposals. Test graph behavior, assumption preservation, source-change
+detection, and restoration, then evaluate reconstruction or continued work on
+that proof. A smaller graph alone supplies no evidence of mathematical benefit.
+
 ### Observation handoff and status
 
 [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) is the copyable
@@ -1016,6 +1042,11 @@ corresponding to the selected manuscript material and inspect what they emit:
 `lean4export`, `doc-gen4`, `ntp-toolkit`, and LeanArchitect. Consume existing
 output unless a required formal fact is absent.
 
+The [requested proof-outline increment](#requested-proof-outlines-and-editor-integration)
+uses this reconnaissance on one selected proof. Its vertex elimination is a
+presentation operation with claims, explanations, and reversible expansion;
+it supplies no new theorem or checking attestation.
+
 **Task 4.1 — minimal extraction, only if required.** Obtain declaration types,
 signatures, dependencies, axiom usage, verification status, and environment
 revision mechanically. Nothing parses Lean source in Python, and generated facts
@@ -1133,9 +1164,10 @@ route while preserving the old checked certificate for its pinned context.
 Existing `orient` and `study` behavior remains unchanged, and neither command
 requires Lean, a warrant record, or user-authored logic.
 
-**Non-goals.** No Mathlib-scale extraction, elaboration traces, proof-state
-archive, automatic repair, notifications, or formal coverage outside the
-selected region. No factivity, positive introspection, JAM, Fitting semantics,
+**Non-goals.** No Mathlib-scale extraction, general proof-state archive,
+automatic repair, notifications, or formal coverage outside the selected
+region. Existing bounded trace output may be consumed for the explicitly
+requested proof-outline increment. No factivity, positive introspection, JAM, Fitting semantics,
 quantifiers, multi-agent logic, corpus-wide warrant graph, confidence score, or
 Python reimplementation of the checker.
 

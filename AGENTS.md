@@ -51,6 +51,17 @@ version nor pane arrangement is a permanent domain invariant. Format-aware
 behavior must preserve source integrity and the distinction between editable
 text, rendered output and retained records.
 
+The user-requested proof-outline increment is specified in
+`docs/PROOF_OUTLINES.md`: vertex elimination with visible claims, explanations,
+and expansion to the original steps. Preserve joint premises, local scope,
+source revisions, and explanation attribution separately from proof evidence.
+Identify the proof representation before selecting regions; declaration maps
+do not expose internal proof structure. The preferred frontend trial is one
+VS Code extension over the independent services; the editor owns its documents
+and undo. Choice of an open-source distribution is deferred. This requirement
+is planned, not an implemented viewer or extension. Follow the bounded roadmap
+and handoff without making ordinary work depend on Lean or a new warrant.
+
 The shared Qt plain-text document has one layout width. When two visible panes
 show that document with wrapping enabled, keep their editor viewport widths
 equal through splitter movement and geometry changes. Different buffers and
@@ -164,9 +175,11 @@ turns that priority into a handoff, not a competing roadmap.
 
 The active delivery order was R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,
-as specified in `CODEX_PLAN.md`. R1–R3 are delivered; the current bounded task is
-to observe them in genuine mathematical work and implement only a demonstrated
-blocker before expanding scope. This supersedes old Appendix-first execution
+as specified in `CODEX_PLAN.md`. R1–R3 are delivered; observe them in genuine
+mathematical work and implement demonstrated blockers. The explicit
+2026-10-12 proof-outline request separately defines the bounded increment in
+`docs/PROOF_OUTLINES.md`; it does not wait for a preliminary study ceremony.
+This supersedes old Appendix-first execution
 ordering and evaluation prompts that require five anchors or a warrant before
 study. Keep one bounded product increment active and evaluate its contribution
 to actual mathematical work. Preserve existing recovery and record invariants;
