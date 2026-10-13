@@ -82,8 +82,10 @@ undo and document recovery. The Qt application remains available.
 Run the extension from `vscode/` using the supplied F5 configuration; see
 [setup, commands and limitations](vscode/README.md). No Qt installation is
 needed for its record actions. Linux/WSL is the initial service target.
-R2 preview/Send, R3 investigations, and proof-outline vertex elimination are not
-ported by this increment. Automated bridge and command checks establish
+R2 preview/Send is now available through shared request services: capture
+ordinary text, inspect the complete request, and explicitly Send once. R3
+investigations and proof-outline vertex elimination remain to be ported or
+implemented. Automated bridge and command checks establish
 mechanics; an actual Extension Development Host run and mathematical-use
 observation remain pending in this environment.
 

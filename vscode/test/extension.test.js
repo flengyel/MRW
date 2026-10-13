@@ -53,7 +53,7 @@ async function harness(root, state = new Map()) {
     workspace: {
       isTrusted: true, workspaceFolders: [{ uri: uri(root) }],
       getWorkspaceFolder: () => ({ uri: uri(root) }),
-      getConfiguration: () => ({ get: (name, fallback) => name === 'pythonExecutable' ? 'python3' : fallback || 'https://example.org/proofs/' }),
+      getConfiguration: () => ({ get: (name, fallback) => name === 'pythonExecutable' ? 'python3' : name === 'proofViewerUrl' ? 'https://example.org/proofs/' : fallback }),
       registerTextDocumentContentProvider(scheme, provider) { providers.set(scheme, provider); return disposable; },
       onDidCloseTextDocument: () => disposable,
       async openTextDocument(location) {
@@ -79,7 +79,7 @@ async function harness(root, state = new Map()) {
     languages: { async setTextDocumentLanguage() {} }, env: { async openExternal() { return true; } },
   };
   const extension = path.resolve(__dirname, '..');
-  const context = { extensionPath: extension, subscriptions: [], workspaceState: {
+  const context = { extensionPath: extension, storageUri: uri(path.join(root, "private-state")), subscriptions: [], workspaceState: {
     get: key => state.get(key), keys: () => [...state.keys()],
     async update(key, value) { if (value === undefined) state.delete(key); else state.set(key, value); },
   } };
@@ -88,12 +88,13 @@ async function harness(root, state = new Map()) {
   const requires = name => {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
+    if (name === './assistance') return require('../src/assistance');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };
     return require(name);
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
-  return { api, commands, errors, shown, reads, requests, opens, inputs, state, document, editor,
+  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, state, document, editor,
     setService: fn => { service = fn; }, focus: ed => { api.window.activeTextEditor = ed; activeListener(ed); } };
 }
 
@@ -174,4 +175,105 @@ test('cancelled record and proof dialogs leave project and marker state untouche
   await h.commands.get('mrw.review')(); await h.commands.get('mrw.openProof')();
   assert.equal(h.requests.length, 0); assert.equal(h.state.size, 0); assert.equal(h.errors.length, 0);
   assert.equal(await fs.readFile(file, 'utf8'), 'note');
+});
+
+async function ask(h, root) {
+  const doc = h.document(path.join(root, 'note.md'), 'α😀\r\nPRIVATE UNSELECTED');
+  doc.isDirty = true;
+  const ed = h.editor(doc);
+  ed.selection = new Selection(new Position(0, 0), new Position(0, 3));
+  h.focus(ed); h.inputs.push('Why α?', 'fake-model');
+  await h.commands.get('mrw.ask')();
+  return doc;
+}
+
+test('unsaved Unicode preview contains only selection; remove and discard send nothing', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const doc = await ask(h, root);
+  assert.equal(h.errors.length, 0);
+  assert.equal(h.requests[0].draft.target.end, '1.2');
+  assert.equal(h.requests[0].draft.contexts[0].text, 'α😀');
+  assert.ok(!h.shown.at(-1).text.includes('PRIVATE UNSELECTED'));
+  const frozen = h.shown.at(-1).text;
+  doc.text = 'later edits'; doc.version++;
+  assert.equal(h.shown.at(-1).text, frozen);
+  await h.commands.get('mrw.removeContext')();
+  assert.equal(h.requests.at(-1).draft.contexts.length, 0);
+  await h.commands.get('mrw.discardRequest')();
+  await h.commands.get('mrw.sendRequest')();
+  assert.match(h.errors.at(-1), /current exact request preview/);
+  assert.ok(h.requests.every(r => r.method === 'prepare_assistance'));
+});
+
+test('send consumes one preview, blocks duplicates, and presents terminal failure', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  let finish;
+  h.setService(async (...args) => {
+    assert.equal(args[2].method, 'send_assistance');
+    return new Promise(resolve => { finish = resolve; });
+  });
+  const pending = h.commands.get('mrw.sendRequest')();
+  await h.commands.get('mrw.sendRequest')();
+  assert.match(h.errors.at(-1), /Wait for/);
+  assert.equal(h.requests.filter(r => r.method === 'send_assistance').length, 1);
+  finish({ status: 'failed', retained: true, body: 'Mathematical assistance: failed', path: '/unused' });
+  await pending;
+  assert.match(h.shown.at(-1).text, /failed/);
+  await h.commands.get('mrw.sendRequest')();
+  assert.equal(h.requests.filter(r => r.method === 'send_assistance').length, 1);
+});
+
+test('old preview cannot authorize replacement; preparation error invalidates Send', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  const old = h.shown.at(-1);
+  h.inputs.push('New question'); await h.commands.get('mrw.editQuestion')();
+  h.focus(h.editor(old)); await h.commands.get('mrw.sendRequest')();
+  assert.match(h.errors.at(-1), /current exact request preview/);
+  h.setService(async () => { throw new Error('synthetic preparation failure'); });
+  await h.commands.get('mrw.previewRequest')();
+  await h.commands.get('mrw.sendRequest')();
+  assert.ok(h.requests.every(r => r.method === 'prepare_assistance'));
+});
+
+test('cancelled question and malformed Unicode never prepare or send', async t => {
+  const root = await temporary(t), h = await harness(root);
+  h.focus(h.editor(h.document(path.join(root, 'note.md'), 'ordinary work')));
+  await h.commands.get('mrw.ask')();
+  assert.equal(h.requests.length, 0);
+  h.focus(h.editor(h.document(path.join(root, 'bad.md'), '\ud800broken')));
+  await h.commands.get('mrw.ask')();
+  assert.equal(h.requests.length, 0);
+  assert.match(h.errors.at(-1), /incomplete Unicode/);
+});
+
+test('blank restored preview cannot send; completed outcome enters validated review', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  const preview = h.shown.at(-1), exact = preview.text;
+  preview.text = '';
+  await h.commands.get('mrw.sendRequest')();
+  assert.equal(h.requests.filter(r => r.method === 'send_assistance').length, 0);
+  preview.text = exact;
+  const fixture = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
+  h.setService(async (...args) => args[2].method === 'send_assistance'
+    ? { status: 'completed', retained: true, body: 'completed synthetic request', path: fixture }
+    : runBridge(...args));
+  await h.commands.get('mrw.sendRequest')();
+  assert.equal(h.requests.filter(r => r.method === 'send_assistance').length, 1);
+  assert.equal(h.requests.at(-1).method, 'review');
+  assert.match(h.shown.at(-1).text, /Response|response/);
+});
+
+test('additional context uses captured text and scalar locations from untitled CRLF work', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  const doc = h.document('Untitled-2', '😀\r\nβ lemma', 'untitled'), ed = h.editor(doc);
+  ed.selection = new Selection(new Position(0, 0), new Position(1, 1));
+  h.focus(ed); await h.commands.get('mrw.addContext')();
+  assert.equal(h.errors.length, 0);
+  const c = h.requests.at(-1).draft.contexts[1];
+  assert.equal(c.text, '😀\r\nβ'); assert.equal(c.start, '1.0'); assert.equal(c.end, '2.1');
+  assert.equal(c.source_path, null);
 });

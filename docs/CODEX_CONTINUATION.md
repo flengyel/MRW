@@ -6,17 +6,24 @@ The user explicitly requested beginning the VS Code extension and transferring
 existing code. The first increment is now in `vscode/`; read its README.
 `record_actions.py` supplies the shared projection and attributed-copy functions
 used by Qt and the extension. `editor_bridge.py` exposes bounded explicit
-record actions without owning text buffers, importing Qt, or invoking Lean or
-a model. The host owns documents and undo. Return markers and local Lean/HTTPS
+record and explicitly previewed assistance actions without owning text
+buffers, importing Qt, or invoking Lean. Only Send invokes the model adapter. The host owns documents and undo. Return markers and local Lean/HTTPS
 handoffs are present; proof graph extraction and vertex elimination are absent.
 
-Next validate the extension in an actual Extension Development Host using the
-workflow in `vscode/README.md`, then transfer the existing R2 preview/Send
-workflow by extracting independent request preparation and lifecycle services.
-Keep the adapter's transport and publication boundary intact. Do not migrate
-Qt buffer, recovery, or investigation state by silently reinterpreting it.
-R3 needs an explicit later host-state design. A complete replacement of the
-standalone application has not been delivered.
+PR #2 was merged into main at `f6fcc66ae4d9e9ed27a6ef49d13c8a138d96b43e`.
+The follow-on increment implements R2 preview/Send: `assistance_actions.py` supplies
+shared preparation, preview, transmission and terminal matching. Qt delegates;
+VS Code captures ordinary selections and owns the transient draft. A separate
+Send requires the active current preview and consumes it before transmission.
+No live request is authorized by this migration or its tests.
+
+Next validate these workflows in an actual Extension Development Host using
+`vscode/README.md`, then port bounded R3 investigation continuation and restart
+resumption with an explicit host-state design. Preserve one parent/one child,
+per-request previews, exact record identities, human task notes, and explicit
+ending. Do not silently migrate Qt buffer, recovery, or investigation state.
+Vertex elimination remains a separate requested increment; no complete
+replacement of the standalone application has been delivered.
 
 The Python/Node checks use synthetic data and make no provider request. This
 environment has no installed VS Code executable or PySide6; command API doubles

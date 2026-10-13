@@ -4,6 +4,7 @@ const vscode = require('vscode');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { runBridge } = require('./bridge');
+const { registerAssistance } = require('./assistance');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
 function activate(context) {
@@ -18,10 +19,10 @@ function activate(context) {
         return await action();
       } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));
-  const bridge = request => {
+  const bridge = (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
     return runBridge(context.extensionPath,
-      vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request);
+      vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options);
   };
   const provider = {
     provideTextDocumentContent: uri => documents.get(uri.toString()) || '',
@@ -42,6 +43,7 @@ function activate(context) {
     const document = await vscode.workspace.openTextDocument(uri);
     await vscode.languages.setTextDocumentLanguage(document, 'plaintext');
     await vscode.window.showTextDocument(document, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    return uri;
   }
   async function choosePath(title, directory = false) {
     const choices = await vscode.window.showOpenDialog({ title, canSelectMany: false,
@@ -222,10 +224,12 @@ function activate(context) {
     const applied = await editor.edit(edit => edit.insert(selection.active, result.body), { undoStopBefore: true, undoStopAfter: true });
     if (!applied) throw new Error('The editor declined the insertion. The note was not saved.');
   });
+  const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review });
   const tree = {
     onDidChangeTreeData: changed.event,
     getChildren: () => {
       const rows = [
+        ...assistanceRows(),
         ...savedMarkers().map(({ marker }) => [`Return: ${path.basename(marker.path)}:${marker.start[0] + 1} ${marker.preview}`, 'mrw.return']),
         ['Open Lean proof…', 'mrw.openProof'],
         ['Open external proof viewer', 'mrw.openViewer'], ['Inspect retained record…', 'mrw.inspect'],

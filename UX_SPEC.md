@@ -43,8 +43,16 @@ Lean-source handoff opens a user-selected file and line beside the work. An
 installed Lean extension may process that file. HTTPS viewer handoff sends no
 source or appended local path. Neither action extracts a graph or supplies a
 Verification. PDF/Lean/LaTeX/notebook behavior supplied by other extensions
-remains their responsibility. R2/R3 and vertex elimination are not transferred
-by this initial increment. See [extension instructions](vscode/README.md).
+remains their responsibility. R2 preview/Send is transferred: **Ask About
+Selected Work** captures exact visible ordinary text, including unsaved and
+untitled documents. Up to eight contexts can be added or removed; changing
+context or the question invalidates the previous preview. The read-only current
+preview must be active for the separate **Send Exact Preview** command. Send
+consumes that preview before launching the asynchronous Python adapter, so
+duplicate actions cannot resend it. Terminal records live in private VS Code
+workspace storage; unsent drafts are transient. Host interruption can leave a
+request outcome uncertain and never triggers an automatic retry. R3 resumption
+and vertex elimination remain unimplemented in the extension. See [extension instructions](vscode/README.md).
 
 ## 1. Design principle
 

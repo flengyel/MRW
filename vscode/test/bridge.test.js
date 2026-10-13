@@ -32,7 +32,7 @@ test('bridge rejects changed records, unavailable Python, and oversized requests
   await assert.rejects(runBridge(extension, 'python3', { method: 'review', path: fixture,
     mode: 'passage', number: 1, revision: '0'.repeat(64) }), /changed/);
   await assert.rejects(runBridge(extension, '/unavailable/mrw-python', {}), /Cannot start/);
-  await assert.rejects(runBridge(extension, 'python3', { value: 'x'.repeat(65536) }), /too large/);
+  await assert.rejects(runBridge(extension, 'python3', { value: 'x'.repeat(4 * 1024 * 1024) }), /too large/);
 });
 
 test('source snapshot detects byte changes and rejects binary, large, and symlink files', async () => {

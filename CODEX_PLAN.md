@@ -281,13 +281,15 @@ editing, save, undo and recovery. Saved revision-pinned return locations and
 explicit Lean/browser handoffs are implemented. Source changes block return;
 no outline graph or correspondence is inferred.
 
-The extension is the active frontend migration target. R2 preview/Send and R3
-investigation state remain in Qt pending their transfer. An actual Extension
-Development Host run is unavailable in this execution environment; command
-simulation and the real Python bridge are tested separately. The next port
-should extract request preparation and lifecycle services from `Workstation`
-without importing its buffer/recovery ownership into VS Code. Preserve exact
-preview, separate Send, one-attempt transport and immutable terminal records.
+The extension is the active frontend migration target. R2 preview/Send is now
+transferred through `assistance_actions.py`; Qt delegates to the same functions.
+The extension captures ordinary and untitled editor selections, allows explicit
+context changes, displays the exact request, and consumes the preview on its
+separate Send action. The existing adapter and immutable publication boundary
+are unchanged. No live request was made during implementation.
+R3 investigation state remains in Qt pending an explicit host-state design.
+An actual Extension Development Host run is unavailable in this environment;
+command simulation and the real Python bridge are tested separately.
 The proof-outline increment still requires actual exporter/viewer output for
 one selected proof before graph navigation is implemented. See
 [vscode/README.md](vscode/README.md) for the delivered boundary and host check.

@@ -62,8 +62,8 @@ Identify the proof representation before selecting regions; declaration maps
 do not expose internal proof structure. The preferred frontend trial is one
 VS Code extension over the independent services; the editor owns its documents
 and undo. Choice of an open-source distribution is deferred. Vertex elimination
-remains planned. The first extension provides record actions and explicit
-proof-source and browser handoffs; it does not implement an internal proof
+remains planned. The extension provides shared record actions, R2 exact preview/Send, and
+explicit proof-source and browser handoffs; it does not implement an internal proof
 viewer. Follow the bounded roadmap and handoff without making ordinary work
 depend on Lean or a new warrant.
 

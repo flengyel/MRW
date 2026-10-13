@@ -1,8 +1,9 @@
 # Mathematical Research Workstation for VS Code
 
-This first extension increment moves retained-record inspection, response
+The extension moves retained-record inspection, response
 review, exact passage retention and attributed note insertion onto the existing
 Python core. It adds saved return locations and explicit Lean/browser handoffs.
+It also supports selected-context request preview and a separate explicit Send.
 VS Code owns ordinary files, editing, undo, saving, and document recovery.
 
 ## Run from this checkout
@@ -31,6 +32,38 @@ publisher field identifies the package; no Marketplace publication is implied.
 The generated Python directory is ignored by Git and is rebuilt from `src/`.
 
 ## Workflows
+
+**Ask about selected work.** Select ordinary text, including unsaved or untitled
+work, then choose **Ask About Selected Work**. Enter the mathematical question
+and a model identifier (or set `mrw.model` in User/Remote settings). The complete
+request opens as a read-only plain-text preview. **Add Selection to Request**,
+**Remove Request Context**, and **Edit Mathematical Question** produce a new
+preview. Up to eight captured passages may be included; removing all of them
+sends only the question and the displayed no-context notice. Later document
+edits do not alter an already captured passage. To use changed text, remove the
+old context and select the new passage explicitly.
+
+With the current preview active, choose **Send Exact Preview**. This is the
+only provider action. The extension reads `OPENAI_API_KEY` from its host
+process environment at Send time; start VS Code/its remote server with that
+variable configured. Never put credentials in workspace settings or notes.
+The existing adapter performs one attempt with its existing limits and retains
+an immutable terminal ModelCall in VS Code's private workspace storage. The
+preview shows its exact destination. No automatic retry occurs. Completed
+answers open through the existing attributed response review; failed, refused,
+and incomplete outcomes remain distinct. A timeout or host interruption can
+leave the outcome uncertain: inspect the shown record destination before a new
+request. The extension cannot prevent closing the host while transmission is
+in progress. Unsent drafts are memory-only and are discarded on host restart;
+terminal records survive independently. R3 task resumption is not yet ported.
+
+The preview includes captured source identities, hashes, scalar positions,
+selected text, instructions, exact request JSON, limits, disclosure, and output
+path. The editor may normalize display line endings; the adapter sends the
+frozen UTF-8 body whose digest is shown. Opening, previewing, removing context,
+and discarding a request make no provider call. Preparation may create an empty
+private record directory; it creates no ModelCall or project file. Host state
+is separate from Qt's recovery and investigation state.
 
 **Read and inspect a proof.** Keep a saved UTF-8 source or note active, then
 choose **Open Lean Proof and Keep Return Location**. Select a `.lean` file and
@@ -77,6 +110,7 @@ premise.
 | Exact response selection and attributed copying | Shared `record_actions.py`; Qt delegates to the same functions |
 | Record validation and presentation | Existing `record_views.py` and `response_review.py` through `editor_bridge.py` |
 | Immutable passage publication | Existing `private_persistence.py`; unchanged no-overwrite boundary |
+| Request preparation and transmission | Shared `assistance_actions.py`; existing adapter and immutable publication unchanged |
 | Return location | One saved revision-pinned selection per canonical project in private VS Code workspace state |
 | Proof inspection | Explicit opening of local Lean source or configured HTTPS viewer |
 
@@ -90,15 +124,16 @@ responsibility; the Qt checkpoint guarantee is not claimed for this frontend.
 Record commands launch the bundled Python service only when invoked, using
 `-I`, an argument vector, and the extension directory as working directory.
 Activation and sidebar display launch nothing and read no source files. The
-bridge accepts one bounded JSON request, uses a fixed operation allowlist and
-existing bounded record readers, and exits. Workspace executable configuration
+bridge accepts one JSON request bounded at 4 MiB, uses a fixed operation
+allowlist and existing bounded record readers, and exits. The outbound provider
+body retains its independent 256 KiB limit. Only `send_assistance` can transmit. Workspace executable configuration
 is not loaded. Untrusted and virtual workspaces are unsupported in this increment.
 
 Native Windows immutable retention inherits the core's POSIX directory and
 hard-link requirements; use Remote WSL for that action. Native macOS has not
 been exercised. Linux bridge checks do not establish cross-platform GUI support.
 
-R2 request preview/Send, R3 investigation continuation, PDF position tracking,
+R3 investigation continuation, PDF position tracking,
 Qt state migration, internal Lean graphs, vertex elimination, and AI outline
 proposals remain to be transferred or implemented. PDF, LaTeX, Lean and notebook
 editing can use installed host extensions under their own settings and execution
@@ -139,3 +174,23 @@ API references: [tree views](https://code.visualstudio.com/api/extension-guides/
   without Qt, Lean or a provider request.
 - VS Code and PySide6 are unavailable here. There is no claimed visible host
   run, Qt widget regression run, VSIX installation, or mathematical-use result.
+
+### Preview/Send increment, 2026-10-13
+
+Request preparation, preview rendering, transmission and terminal-record
+matching are extracted from `Workstation` into shared independent services. Qt
+delegates to them. VS Code supplies editor selection, transient draft commands,
+a single in-flight action, and a consumed-on-Send preview. No provider adapter,
+transport, record schema, or publication rule is changed.
+
+The host validation remains pending: in a real Development Host, capture an
+unsaved Unicode passage, remove/add context, edit the question, inspect and
+discard the preview, then review/insert the synthetic completed-response
+fixture. Do not use a live provider request as an implementation test.
+
+Validation for this increment: all 15 Node bridge/command tests and all seven
+new Python assistance-bridge tests pass. The complete Python suite ran 284
+tests: 219 passed, 64 skipped, and the previously recorded TeX descendant-reaping
+error recurred. TeX supervision is unchanged. Installed-package preview, Python
+compilation, JavaScript syntax, and diff checks pass. No live provider request,
+Lean check, Qt widget run, or actual VS Code UI run was performed.

@@ -2,7 +2,7 @@
 
 const { spawn } = require('node:child_process');
 const path = require('node:path');
-const MAX_REQUEST = 64 * 1024;
+const MAX_REQUEST = 4 * 1024 * 1024;
 const MAX_REPLY = 64 * 1024 * 1024;
 
 function runBridge(extensionPath, executable, request, options = {}) {
@@ -25,7 +25,7 @@ function runBridge(extensionPath, executable, request, options = {}) {
     };
     const timer = setTimeout(() => {
       child.kill();
-      finish(new Error('Record action timed out. Check the destination before retrying a retention action.'));
+      finish(new Error('Action timed out. The outcome may be uncertain; inspect the destination before any new action.'));
     }, options.timeout || 30000);
     child.on('error', error => finish(new Error(`Cannot start Python service: ${error.message}`)));
     child.stdin.on('error', error => finish(new Error(`Python input failed: ${error.message}`)));
