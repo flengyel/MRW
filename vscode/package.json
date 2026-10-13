@@ -1,0 +1,63 @@
+{
+  "name": "theorem-terminal",
+  "displayName": "Mathematical Research Workstation",
+  "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
+  "version": "0.1.0",
+  "publisher": "flengyel",
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "https://github.com/flengyel/theorem_terminal.git" },
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "main": "./src/extension.js",
+  "extensionKind": ["workspace"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": false, "description": "Record actions launch the bundled Python service on explicit command." },
+    "virtualWorkspaces": { "supported": false, "description": "This increment requires local files in the extension host (including WSL/SSH)." }
+  },
+  "contributes": {
+    "commands": [
+      { "command": "mrw.mark", "title": "Mark Return Location", "category": "MRW", "icon": "$(bookmark)" },
+      { "command": "mrw.return", "title": "Return to Marked Location", "category": "MRW", "icon": "$(go-to-file)" },
+      { "command": "mrw.clearMark", "title": "Clear Return Location", "category": "MRW" },
+      { "command": "mrw.openProof", "title": "Open Lean Proof and Keep Return Location", "category": "MRW" },
+      { "command": "mrw.openViewer", "title": "Open External Proof Viewer", "category": "MRW" },
+      { "command": "mrw.inspect", "title": "Inspect Retained Record", "category": "MRW" },
+      { "command": "mrw.review", "title": "Review Model Response", "category": "MRW" },
+      { "command": "mrw.passage", "title": "Show Response Passage", "category": "MRW" },
+      { "command": "mrw.index", "title": "Show Response Index Page", "category": "MRW" },
+      { "command": "mrw.fullResponse", "title": "Show Full Response", "category": "MRW" },
+      { "command": "mrw.retain", "title": "Retain Response Passage", "category": "MRW" },
+      { "command": "mrw.insert", "title": "Insert Attributed Passage into Active Note", "category": "MRW" }
+    ],
+    "views": { "explorer": [{ "id": "mrw.research", "name": "Mathematical Research" }] },
+    "menus": {
+      "view/title": [
+        { "command": "mrw.mark", "when": "view == mrw.research", "group": "navigation" },
+        { "command": "mrw.return", "when": "view == mrw.research", "group": "navigation" }
+      ],
+      "editor/context": [
+        { "command": "mrw.mark", "when": "resourceScheme == file", "group": "mrw" },
+        { "command": "mrw.openProof", "when": "resourceScheme == file", "group": "mrw" }
+      ]
+    },
+    "configuration": {
+      "title": "Mathematical Research Workstation",
+      "properties": {
+        "mrw.pythonExecutable": {
+          "type": "string", "default": "python3", "scope": "machine",
+          "description": "Python 3.11+ executable on the extension host. One executable, without shell arguments. Configure in User or Remote settings."
+        },
+        "mrw.proofViewerUrl": {
+          "type": "string", "default": "https://arkitect-lab.k-inside.com/proofmaps/", "scope": "machine",
+          "description": "HTTPS proof viewer opened only by its explicit command. No local source or path is appended or uploaded."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "bundle-core": "python3 scripts/bundle-core.py",
+    "vscode:prepublish": "npm run bundle-core",
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js"
+  }
+}

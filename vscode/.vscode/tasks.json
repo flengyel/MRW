@@ -1,0 +1,7 @@
+{
+  "version": "2.0.0",
+  "tasks": [{
+    "label": "bundle-core", "type": "process", "command": "python3",
+    "args": ["scripts/bundle-core.py"], "problemMatcher": []
+  }]
+}

@@ -12,17 +12,16 @@ import stat
 from typing import Callable
 from uuid import uuid4
 
-from .documentary_warrant import DocumentaryProjection, encode_documentary_projection
 from .local_files import read_bounded
 from .model_projection import (FinalizedModelCall, MAX_MODEL_CALL_BYTES, TerminalModelCall,
-                               extract_lossless_representation, make_model_produced_claim,
                                parse_terminal_model_call)
 from .mutable_files import save_mutable
 from .openai_response import (ADAPTER_VERSION, PROVIDER, PreparedOperation, Transport,
                               prepare_operation, render_preview, request_assistance)
-from .private_persistence import persist_private_new
 from .record_views import inspect_record, read_call_snapshot
-from .response_review import purpose_kind, render_response_review, select_passage
+from .record_actions import (record_kind, call_passage, persist_call_passage,
+                             attributed_contribution)
+from .response_review import render_response_review, select_passage
 from .source import SourceDocument
 from .tool_settings import SettingsStore, expand_arguments, launch_tool
 from .workspace import (BufferState, InvestigationPassageState, InvestigationState,
@@ -212,26 +211,6 @@ class AssistanceOutcome:
     terminal: TerminalModelCall | None
     raw_record: bytes | None
     error: str | None = None
-
-
-def record_kind(text: str) -> str | None:
-    """Structural dispatch only; each supported record uses its existing parser."""
-    if not text.lstrip().startswith('{'):
-        return None
-    try:
-        value = strict_json(text.encode('utf-8'))
-    except WorkspaceError:
-        return None
-    if not isinstance(value, dict):
-        return None
-    schema = value.get('schema')
-    if schema == 'theorem-terminal.model-call':
-        return 'model_call'
-    if schema == 'theorem-terminal.documentary-projection':
-        return 'projection'
-    if (isinstance(schema, str) and schema.startswith('theorem-terminal.')) or {'artifact_identity', 'artifact_digest', 'method', 'subject'} <= value.keys():
-        return 'protected'
-    return None
 
 
 def text_snapshot(path):
@@ -1673,37 +1652,10 @@ class Workstation:
 
     @staticmethod
     def _call_passage(path, number):
-        snapshot, call = read_call_snapshot(Path(path))
-        selected = select_passage(call.raw_response, number)
-        exact = call.raw_response.encode('utf-8')[
-            selected.start_byte:selected.end_byte
-        ].decode('utf-8')
-        return snapshot, call, selected, exact
+        return call_passage(path, number)
 
     def _persist_call_passage(self, call, number, destination):
-        selected = select_passage(call.raw_response, number)
-        representation = extract_lossless_representation(
-            call,
-            representation_id=f'representation-{uuid4()}',
-            version='1',
-            subject=call.document['target'],
-            kind=purpose_kind(call),
-            start_byte=selected.start_byte,
-            end_byte=selected.end_byte,
-        )
-        claim = make_model_produced_claim(
-            call,
-            representation,
-            claim_id=f'claim-{uuid4()}',
-            display_name='Model produced selected response span',
-            description='Documentary attribution of exact model-response UTF-8 bytes only.',
-        )
-        persist_private_new(
-            destination,
-            encode_documentary_projection(
-                DocumentaryProjection(call, representation, claim)
-            ),
-        )
+        persist_call_passage(call, number, destination)
         return self.open_record(destination, 'projection')
 
     def project_model_call_passage(self, path, number, destination):
@@ -1724,23 +1676,7 @@ class Workstation:
     def attributed_assistance_contribution(path, number):
         """Create an explicitly editable note contribution from one exact passage."""
         call, selected, exact = Workstation.assistance_passage(path, number)
-        heading = '\n'.join((
-            '',
-            '[Model contribution — unverified editable copy]',
-            f'Provider: {call.provider}',
-            f'Model: {call.model}',
-            f'ModelCall: {call.id}',
-            f'Exact source span: response SHA-256 {call.raw_response_digest}, '
-            f'UTF-8 bytes [{selected.start_byte}, {selected.end_byte})',
-            'Returned citations, links, code, and mathematical claims are unverified.',
-            '[Begin copied response passage]',
-            '',
-        ))
-        ending = '\n'.join((
-            '[End copied response passage]',
-            '',
-        ))
-        return heading + exact + ('' if exact.endswith('\n') else '\n') + ending
+        return attributed_contribution(call, selected, exact)
 
     def context_selection_supported(self, identifier):
         buffer = self.buffers.get(identifier)

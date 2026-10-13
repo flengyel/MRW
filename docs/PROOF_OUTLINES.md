@@ -1,6 +1,8 @@
 # Proof outlines by vertex elimination
 
-**Status, 2026-10-12:** accepted product requirement; not implemented. The
+**Status, 2026-10-13:** vertex elimination remains an accepted product requirement,
+not implemented. The first VS Code extension now supplies shared record actions
+and explicit Lean-source/browser handoffs; see [its README](../vscode/README.md). The
 workstation should help a reader obtain and inspect a mathematical outline of
 a selected Lean proof. AI may propose which details to hide and explain the
 retained claims. The original proof and its evidence remain available.
@@ -86,8 +88,9 @@ Consume existing graph/export output for one selected proof before writing
 another extractor. Keep the input kind visible and expose only claims actually
 supplied by that representation. Use the existing Lean editor/viewer ecosystem;
 the preferred frontend trial is one VS Code extension over the independent
-core. Choice of an open-source editor distribution is deferred. This update
-implements no frontend; ordinary files remain the work artifacts.
+core. Choice of an open-source editor distribution is deferred. The initial
+extension implements those handoffs and record actions, not graph extraction
+or elimination; ordinary files remain the work artifacts.
 
 Demonstrate:
 

@@ -16,6 +16,36 @@ Kallenberg ordering guides requested orientation in unfamiliar material; a
 focused question need not repeat it. Qt/runtime and TeX prerequisites remain
 platform-dependent; they are not permanent workflow invariants.
 
+## VS Code frontend migration — 2026-10-13
+
+The initial extension supplies an Explorer research view and MRW commands for
+record inspection, response review, exact retention, attributed note insertion,
+and Lean/browser handoffs. Ordinary documents, save, undo and recovery belong
+to the host. This section describes the extension; the existing R1–R3.1 Qt
+contracts below retain their implementation status.
+
+A saved UTF-8 text selection can be marked as a return location. Its canonical
+path, exact byte revision, host text revision, UTF-16 selection, and bounded
+preview live in private VS Code workspace state, with one marker per canonical
+project. The shelf displays it without reading the source. Returning checks
+both disk and editor contents before moving the editor. Dirty or changed text
+blocks return; markers do not track edits in this first increment. Host state
+persistence is not presented as the Qt recovery checkpoint protocol.
+
+Record views are read-only plain text and reuse existing validators. Showing a
+passage selects its exact reviewed record revision. Retention creates a new
+projection with no overwrite. Insertion adds an attributed editable copy at the
+active note cursor, preserving selected work and one undo boundary; it does
+not save the note. Concurrent note/selection changes cancel insertion.
+Opening an earlier review tab reselects its record and passage.
+
+Lean-source handoff opens a user-selected file and line beside the work. An
+installed Lean extension may process that file. HTTPS viewer handoff sends no
+source or appended local path. Neither action extracts a graph or supplies a
+Verification. PDF/Lean/LaTeX/notebook behavior supplied by other extensions
+remains their responsibility. R2/R3 and vertex elimination are not transferred
+by this initial increment. See [extension instructions](vscode/README.md).
+
 ## 1. Design principle
 
 The interface supports doing and studying mathematics. It does not require a

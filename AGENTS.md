@@ -23,7 +23,10 @@ exercise quota demonstrates benefit. The current bounded study source is
 Marcus's *Number Fields*. This priority adds no implemented guidance capability
 and does not authorize general corpus ingestion or automatic source retrieval.
 
-The editor-centered GUI is the principal user-facing interface; launch it with
+The VS Code extension is the active frontend migration target, explicitly
+authorized on 2026-10-13. Its first increment lives in `vscode/`; read
+`vscode/README.md` for its boundaries and development launch. The existing
+editor-centered Qt GUI remains available as
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
 identities unchanged. Open Project Directory is the principal entry: show the
 actual directory tree lazily and open ordinary mathematical files as buffers.
@@ -58,9 +61,11 @@ source revisions, and explanation attribution separately from proof evidence.
 Identify the proof representation before selecting regions; declaration maps
 do not expose internal proof structure. The preferred frontend trial is one
 VS Code extension over the independent services; the editor owns its documents
-and undo. Choice of an open-source distribution is deferred. This requirement
-is planned, not an implemented viewer or extension. Follow the bounded roadmap
-and handoff without making ordinary work depend on Lean or a new warrant.
+and undo. Choice of an open-source distribution is deferred. Vertex elimination
+remains planned. The first extension provides record actions and explicit
+proof-source and browser handoffs; it does not implement an internal proof
+viewer. Follow the bounded roadmap and handoff without making ordinary work
+depend on Lean or a new warrant.
 
 The shared Qt plain-text document has one layout width. When two visible panes
 show that document with wrapping enabled, keep their editor viewport widths

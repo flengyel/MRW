@@ -1,4 +1,29 @@
-# Codex continuation: study and requested proof outlines
+# Codex continuation: VS Code migration and proof outlines
+
+## Active migration handoff — 2026-10-13
+
+The user explicitly requested beginning the VS Code extension and transferring
+existing code. The first increment is now in `vscode/`; read its README.
+`record_actions.py` supplies the shared projection and attributed-copy functions
+used by Qt and the extension. `editor_bridge.py` exposes bounded explicit
+record actions without owning text buffers, importing Qt, or invoking Lean or
+a model. The host owns documents and undo. Return markers and local Lean/HTTPS
+handoffs are present; proof graph extraction and vertex elimination are absent.
+
+Next validate the extension in an actual Extension Development Host using the
+workflow in `vscode/README.md`, then transfer the existing R2 preview/Send
+workflow by extracting independent request preparation and lifecycle services.
+Keep the adapter's transport and publication boundary intact. Do not migrate
+Qt buffer, recovery, or investigation state by silently reinterpreting it.
+R3 needs an explicit later host-state design. A complete replacement of the
+standalone application has not been delivered.
+
+The Python/Node checks use synthetic data and make no provider request. This
+environment has no installed VS Code executable or PySide6; command API doubles
+and service checks do not establish visible UI acceptance. Keep that validation
+limit explicit. The existing study observation below remains independent, and
+its instruction to make no code change during observation does not revoke the
+new migration request.
 
 Use this document as the next bounded handoff. The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
