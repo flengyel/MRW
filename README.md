@@ -2,8 +2,9 @@
 
 Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
 
-The GUI is the principal user-facing interface. The `theorem-terminal` CLI
-remains available for testing, automation, reproducibility, and low-level
+The VS Code extension is the active frontend migration target. Its initial
+implementation and launch instructions are in [vscode/README.md](vscode/README.md).
+The existing Qt GUI remains available. The `theorem-terminal` CLI remains available for testing, automation, reproducibility, and low-level
 operations. Repository, executable, Python package, Lean namespaces, and
 serialized record identities retain their existing technical names.
 
@@ -69,6 +70,22 @@ than origin and checking status. A bounded Appendix A experiment uses
 non-factive Artemov--Fitting justification logic to record how explicitly
 admitted reasons compose. Source provenance, verification, admitted premises,
 checked derivability, and human use or rejection remain distinct.
+
+## VS Code migration — 2026-10-13
+
+The initial extension reuses the Python core for validated retained-record
+inspection, completed-response review, exact passage retention and attributed
+note insertion. It adds a saved, revision-pinned return location and explicit
+Lean-source and HTTPS viewer handoffs. VS Code owns ordinary editing, saving,
+undo and document recovery. The Qt application remains available.
+
+Run the extension from `vscode/` using the supplied F5 configuration; see
+[setup, commands and limitations](vscode/README.md). No Qt installation is
+needed for its record actions. Linux/WSL is the initial service target.
+R2 preview/Send, R3 investigations, and proof-outline vertex elimination are not
+ported by this increment. Automated bridge and command checks establish
+mechanics; an actual Extension Development Host run and mathematical-use
+observation remain pending in this environment.
 
 ## Motivation
 
@@ -217,8 +234,9 @@ elimination with a visible claim and explanation for each summarized proof
 region, source links, and expansion to the hidden steps. AI may propose the
 selection and explanations; source assumptions, proof evidence, and explanation
 attribution remain distinct. The preferred frontend trial uses a VS Code
-extension over the existing core. This is planned behavior, not an implemented
-proof viewer or extension. See [the proof-outline specification](docs/PROOF_OUTLINES.md)
+extension over the existing core. Vertex elimination and an internal proof viewer remain planned. The first
+VS Code extension increment now supplies shared record actions and explicit
+Lean-source/browser handoffs. See [the proof-outline specification](docs/PROOF_OUTLINES.md)
 and [the bounded roadmap increment](CODEX_PLAN.md#requested-proof-outlines-and-editor-integration).
 
 Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.

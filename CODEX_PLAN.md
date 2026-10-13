@@ -134,8 +134,9 @@ from automated checks.
 | Requested notebook/SageMath workflow — planned | Standard study notebooks through JupyterLab with an installed SageMath kernel, building on the existing handoff | A saved explanation and computation can be continued later; kernel state and reproducibility are assessed separately |
 | Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3.1 justifies each addition; evaluate each on its own terms |
 
-**Next product step: observe the delivered R1–R3.1 workflow in genuine mathematical
-work before authorizing a broader feature increment.**
+**Active implementation priority, 2026-10-13: begin the explicitly requested
+VS Code migration over the existing core.** The R1–R3.1 mathematical-use
+observation remains independent and pending.
 R1 is delivered: ordinary Open and navigator actions route an existing PDF to
 the read-only QtPdf pane without a build; its canonical path, exact digest and
 page/zoom are distinct from generated-build provenance and text state. Failed,
@@ -272,10 +273,28 @@ joint premises, local scope, source revision, and the separate status of proof
 evidence and explanation. The full contract and source-based illustration are
 in [docs/PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md).
 
-**Status:** requirement recorded; no proof-outline GUI, graph exporter,
-automatic selection, or VS Code extension is implemented by this update.
-The preferred interface trial is one VS Code extension using the existing core
-and established mathematical tools. Choice of an open-source editor
+**Status, 2026-10-13:** the first VS Code extension increment is implemented
+under `vscode/`. Shared record actions now live in `record_actions.py`, with Qt
+delegating to them. A bounded one-shot Python bridge serves record inspection,
+response review, attributed copying and immutable projection. The host owns
+editing, save, undo and recovery. Saved revision-pinned return locations and
+explicit Lean/browser handoffs are implemented. Source changes block return;
+no outline graph or correspondence is inferred.
+
+The extension is the active frontend migration target. R2 preview/Send and R3
+investigation state remain in Qt pending their transfer. An actual Extension
+Development Host run is unavailable in this execution environment; command
+simulation and the real Python bridge are tested separately. The next port
+should extract request preparation and lifecycle services from `Workstation`
+without importing its buffer/recovery ownership into VS Code. Preserve exact
+preview, separate Send, one-attempt transport and immutable terminal records.
+The proof-outline increment still requires actual exporter/viewer output for
+one selected proof before graph navigation is implemented. See
+[vscode/README.md](vscode/README.md) for the delivered boundary and host check.
+
+No proof-outline GUI, graph exporter, or automatic selection is implemented.
+The interface trial uses one VS Code extension with the existing core and
+established mathematical tools. Choice of an open-source editor
 distribution is deferred. The existing Qt application and R1–R3.1 retain their
 delivery status; their mathematical-use observation remains independent.
 

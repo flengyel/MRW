@@ -221,7 +221,7 @@ class BuildTests(unittest.TestCase):
         project_before = {p.name: p.read_bytes() for p in self.project.iterdir()}
         records_before = set(self.state.rglob('*.json'))
         with (
-            patch('theorem_terminal.workstation.persist_private_new',
+            patch('theorem_terminal.record_actions.persist_private_new',
                   side_effect=AssertionError('immutable record publication')),
             patch('theorem_terminal.documentary_warrant.create_documentary_warrant_package',
                   side_effect=AssertionError('warrant creation')),

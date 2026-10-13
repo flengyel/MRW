@@ -1,0 +1,141 @@
+# Mathematical Research Workstation for VS Code
+
+This first extension increment moves retained-record inspection, response
+review, exact passage retention and attributed note insertion onto the existing
+Python core. It adds saved return locations and explicit Lean/browser handoffs.
+VS Code owns ordinary files, editing, undo, saving, and document recovery.
+
+## Run from this checkout
+
+Prerequisites: VS Code 1.85 or later and Python 3.11 or later on the extension
+host. Linux/WSL is the initial tested service platform. There are no npm runtime
+dependencies and no Qt dependency for extension actions.
+
+1. Open this `vscode/` directory in VS Code.
+2. Run `python3 scripts/bundle-core.py`, or use the provided F5 launch task.
+3. Press F5 to launch an Extension Development Host. Open a trusted local
+   mathematical project there. Under Remote WSL/SSH, Python and source paths
+   belong to that remote host.
+4. Open the **Mathematical Research** view in Explorer, or search **MRW:** in
+   the Command Palette.
+
+If Python is named differently, set `mrw.pythonExecutable` in User or Remote
+settings. It is one executable path, without arguments or a shell template.
+The development bundling task separately uses `python3`; run the bundling
+script with the available Python executable if necessary.
+
+For a VSIX using an installed `@vscode/vsce` development tool, run `vsce package`
+in this directory. Its prepublish step stages the current repository Python
+sources. Install the result using **Extensions: Install from VSIX…**. The
+publisher field identifies the package; no Marketplace publication is implied.
+The generated Python directory is ignored by Git and is rebuilt from `src/`.
+
+## Workflows
+
+**Read and inspect a proof.** Keep a saved UTF-8 source or note active, then
+choose **Open Lean Proof and Keep Return Location**. Select a `.lean` file and
+line. The proof opens beside the work. An installed Lean extension supplies its
+usual proof inspection and may process the source when opened; MRW neither
+extracts a proof graph nor records a new verification. **Return to Marked
+Location** restores the pinned source selection, including after restarting
+the host. The Explorer view displays the saved file, line and bounded excerpt.
+
+**Use an external viewer.** From the saved source choose **Open External Proof
+Viewer**. It marks the return location and opens `mrw.proofViewerUrl` as HTTPS.
+The default is ProofMaps. No file, source text, declaration or path is appended
+or uploaded. Arbitrary-project support, deep links, and embedding are not
+assumed. This is a browser handoff, not an integrated proof map.
+
+**Review retained assistance.** Choose **Review Model Response**, select an
+existing completed `ModelCall`, then **Show Response Passage**, **Show Response
+Index Page**, or **Show Full Response**. Attribution and digest precede returned
+text. Views are read-only plain-text virtual documents using the core's safe
+rendering, not rendered Markdown. Reopening an earlier review tab selects that
+tab's exact record and passage for subsequent actions. A changed record must
+be reviewed again.
+
+**Keep a useful passage.** After showing a passage, **Retain Response Passage**
+publishes a new immutable documentary projection through the existing private,
+atomic no-overwrite service. It never overwrites even when a Save dialog offers
+replacement. **Insert Attributed Passage into Active Note** inserts an explicitly
+unverified editable copy at the cursor in an ordinary note. It preserves selected
+work, creates one editor undo step, and does not save automatically. A changed
+note or selection during preparation cancels insertion. Notebook-cell insertion
+is not implemented.
+
+**Inspect a warrant.** **Inspect Retained Record** accepts a completed ModelCall,
+projection, Verification with its exact bundle, or documentary package directory.
+It reuses the core validators and exposes provenance, admissions, context,
+derivation, and verification separately. It never invokes Lean or admits a
+premise.
+
+## Migration boundary
+
+| Existing responsibility | Extension implementation |
+|---|---|
+| Text editing, save, undo, recovery | Owned by VS Code; no Qt buffer/controller port |
+| Exact response selection and attributed copying | Shared `record_actions.py`; Qt delegates to the same functions |
+| Record validation and presentation | Existing `record_views.py` and `response_review.py` through `editor_bridge.py` |
+| Immutable passage publication | Existing `private_persistence.py`; unchanged no-overwrite boundary |
+| Return location | One saved revision-pinned selection per canonical project in private VS Code workspace state |
+| Proof inspection | Explicit opening of local Lean source or configured HTTPS viewer |
+
+Return markers require saved text and retain exact byte revisions. They do not
+follow edits: a changed or unsaved source blocks return until it matches again
+or is explicitly re-marked. They are navigation aids, not citations or
+immutable evidence. Qt workspace/recovery state is neither imported nor
+rewritten. Host document recovery and workspace-state durability are VS Code's
+responsibility; the Qt checkpoint guarantee is not claimed for this frontend.
+
+Record commands launch the bundled Python service only when invoked, using
+`-I`, an argument vector, and the extension directory as working directory.
+Activation and sidebar display launch nothing and read no source files. The
+bridge accepts one bounded JSON request, uses a fixed operation allowlist and
+existing bounded record readers, and exits. Workspace executable configuration
+is not loaded. Untrusted and virtual workspaces are unsupported in this increment.
+
+Native Windows immutable retention inherits the core's POSIX directory and
+hard-link requirements; use Remote WSL for that action. Native macOS has not
+been exercised. Linux bridge checks do not establish cross-platform GUI support.
+
+R2 request preview/Send, R3 investigation continuation, PDF position tracking,
+Qt state migration, internal Lean graphs, vertex elimination, and AI outline
+proposals remain to be transferred or implemented. PDF, LaTeX, Lean and notebook
+editing can use installed host extensions under their own settings and execution
+behavior. MRW does not configure or attest to those tools.
+
+## Checks
+
+From the repository root:
+
+```sh
+python3 vscode/scripts/bundle-core.py
+npm run check --prefix vscode
+npm test --prefix vscode
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+python3 -m compileall -q src tests
+```
+
+The Node tests exercise the actual bundled Python bridge and command workflows
+using a VS Code API double. They are not visible UI or Extension Development
+Host acceptance. No provider request occurs. The next host check is: open a
+saved note, hand off to Lean, return, review the synthetic fixture, insert a
+passage, undo it, retain a projection, then restart and return again. Test at
+1280×820 and 960×680. Mathematical usefulness needs a separate real task.
+
+API references: [tree views](https://code.visualstudio.com/api/extension-guides/tree-view),
+[workspace trust](https://code.visualstudio.com/api/extension-guides/workspace-trust),
+[virtual documents](https://code.visualstudio.com/api/extension-guides/virtual-documents).
+
+### Recorded validation, 2026-10-13
+
+- All 9 new Python bridge tests and all 9 Node bridge/command tests pass.
+- The complete Python suite ran 277 tests: 212 passed, 64 skipped, and one
+  existing TeX descendant-reaping test failed. The same failure was reproduced
+  from the exact unchanged `63fc23be` baseline in this container. No TeX
+  supervision code was changed.
+- Python compilation, JavaScript syntax checks, and an installed-package bridge
+  launch pass. The installed bridge reads the synthetic multibyte fixture
+  without Qt, Lean or a provider request.
+- VS Code and PySide6 are unavailable here. There is no claimed visible host
+  run, Qt widget regression run, VSIX installation, or mathematical-use result.
