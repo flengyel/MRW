@@ -286,7 +286,11 @@ transferred through `assistance_actions.py`; Qt delegates to the same functions.
 The extension captures ordinary and untitled editor selections, allows explicit
 context changes, displays the exact request, and consumes the preview on its
 separate Send action. The existing adapter and immutable publication boundary
-are unchanged. No live request was made during implementation.
+are unchanged. Review repairs pin automatic response display to exact retained
+bytes, preserve response identity across virtual-document lifecycle events,
+expose all terminal records, and preserve known-unsent drafts after preflight
+rejection. Native Windows Send is blocked before transport. No live request
+was made during implementation or review.
 R3 investigation state remains in Qt pending an explicit host-state design.
 An actual Extension Development Host run is unavailable in this environment;
 command simulation and the real Python bridge are tested separately.

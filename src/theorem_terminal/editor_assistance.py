@@ -1,5 +1,6 @@
 """Editor protocol for explicit preview and Send; no persistent draft state."""
 from dataclasses import fields
+from hashlib import sha256
 import os
 import re
 
@@ -8,6 +9,11 @@ from .assistance_actions import (AssistanceContext, prepare_assistance,
 from .model_projection import parse_terminal_model_call
 from .response_review import safe_terminal_text
 from .workspace import selection_span
+
+
+# The shared immutable publisher requires descriptor-relative POSIX operations.
+# Reject unsupported hosts before the irreversible provider request.
+POSIX_PUBLICATION_SUPPORTED = os.name == 'posix'
 
 
 def decode_context(value):
@@ -48,16 +54,32 @@ def prepare_editor_assistance(value):
 
 
 def assistance_action(request, *, transport=None):
-    prepared = prepare_editor_assistance(request['draft'])
     if request['method'] == 'prepare_assistance':
+        prepared = prepare_editor_assistance(request['draft'])
         return {'preview': prepared.preview}
-    if request['preview'] != prepared.preview:
-        raise ValueError('Frozen request changed after preview; prepare it again')
-    if request['confirmation'] != 'SEND':
-        raise ValueError('The separate Send exact preview action is required')
     key = os.environ.get('OPENAI_API_KEY', '')
-    if not key:
-        raise ValueError('OPENAI_API_KEY is not configured on the extension host')
+    try:
+        prepared = prepare_editor_assistance(request['draft'])
+        if request['preview'] != prepared.preview:
+            raise ValueError('Frozen request changed after preview; prepare it again')
+        if request['confirmation'] != 'SEND':
+            raise ValueError('The separate Send exact preview action is required')
+        if not key:
+            raise ValueError('OPENAI_API_KEY is not configured on the extension host')
+        if not POSIX_PUBLICATION_SUPPORTED:
+            raise ValueError('Assistance retention requires a POSIX host; use Remote WSL on Windows')
+    except (ValueError, OSError, TypeError, KeyError) as exc:
+        # Only preflight is inside this block. A transport/publication failure
+        # must never be reported as proof that nothing was sent.
+        error = str(exc).replace(key, '[redacted]') if key else str(exc)
+        draft = request.get('draft')
+        output = draft.get('output') if isinstance(draft, dict) else None
+        if not isinstance(output, str) or '\0' in output:
+            output = None
+        body = ('Mathematical assistance: not sent\n'
+                'No provider request was made by this action.\n' + safe_terminal_text(error))
+        return {'status': 'not_sent', 'path': output, 'body': body,
+                'error': error, 'retained': False, 'revision': None}
     kwargs = {} if transport is None else {'transport': transport}
     sent = transmit_assistance(prepared, key, **kwargs)
     terminal = parse_terminal_model_call(sent.raw_record) if sent.raw_record else None
@@ -73,4 +95,5 @@ def assistance_action(request, *, transport=None):
     if status == 'unretained':
         body += '\nNo matching terminal record was recovered. Do not assume the request was unsent.'
     return {'status': status, 'path': str(prepared.operation.output), 'body': body,
-            'error': error, 'retained': terminal is not None}
+            'error': error, 'retained': terminal is not None,
+            'revision': sha256(sent.raw_record).hexdigest() if terminal else None}

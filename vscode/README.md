@@ -44,13 +44,15 @@ edits do not alter an already captured passage. To use changed text, remove the
 old context and select the new passage explicitly.
 
 With the current preview active, choose **Send Exact Preview**. This is the
-only provider action. The extension reads `OPENAI_API_KEY` from its host
+only provider action. The Python service reads `OPENAI_API_KEY` from its inherited host
 process environment at Send time; start VS Code/its remote server with that
 variable configured. Never put credentials in workspace settings or notes.
 The existing adapter performs one attempt with its existing limits and retains
 an immutable terminal ModelCall in VS Code's private workspace storage. The
-preview shows its exact destination. No automatic retry occurs. Completed
-answers open through the existing attributed response review; failed, refused,
+preview shows its exact destination. No automatic retry occurs. A known preflight rejection retains the question
+and selected contexts, reports **not sent**, and requires a new preview before
+another Send. Completed answers open through the existing attributed response
+review, pinned to the exact retained-record digest; failed, refused,
 and incomplete outcomes remain distinct. A timeout or host interruption can
 leave the outcome uncertain: inspect the shown record destination before a new
 request. The extension cannot prevent closing the host while transmission is
@@ -96,9 +98,11 @@ work, creates one editor undo step, and does not save automatically. A changed
 note or selection during preparation cancels insertion. Notebook-cell insertion
 is not implemented.
 
-**Inspect a warrant.** **Inspect Retained Record** accepts a completed ModelCall,
+**Inspect a warrant.** **Inspect Retained Record** accepts any terminal ModelCall,
 projection, Verification with its exact bundle, or documentary package directory.
-It reuses the core validators and exposes provenance, admissions, context,
+Completed, failed, refused, and incomplete calls can all be inspected as
+validated records. Passage review and projection still require a completed
+response. It reuses the core validators and exposes provenance, admissions, context,
 derivation, and verification separately. It never invokes Lean or admits a
 premise.
 
@@ -129,8 +133,10 @@ allowlist and existing bounded record readers, and exits. The outbound provider
 body retains its independent 256 KiB limit. Only `send_assistance` can transmit. Workspace executable configuration
 is not loaded. Untrusted and virtual workspaces are unsupported in this increment.
 
-Native Windows immutable retention inherits the core's POSIX directory and
-hard-link requirements; use Remote WSL for that action. Native macOS has not
+Native Windows Send is blocked before transmission because immutable retention
+requires the core's POSIX directory and hard-link operations; use Remote WSL.
+Read-only inspection and preview remain available. Other persistence failures
+may still occur on supported hosts and are reported without automatic retries. Native macOS has not
 been exercised. Linux bridge checks do not establish cross-platform GUI support.
 
 R3 investigation continuation, PDF position tracking,
@@ -194,3 +200,17 @@ tests: 219 passed, 64 skipped, and the previously recorded TeX descendant-reapin
 error recurred. TeX supervision is unchanged. Installed-package preview, Python
 compilation, JavaScript syntax, and diff checks pass. No live provider request,
 Lean check, Qt widget run, or actual VS Code UI run was performed.
+
+### Review repairs, 2026-10-13
+
+The review addresses exact record identity when opening a newly received
+answer, inspection of all terminal outcomes, and recoverable preflight
+rejections. It also exercises virtual-document language changes and restored
+tabs so that the visible response cannot silently select another record.
+See [the review report](../docs/VS_CODE_ASSISTANCE_REVIEW.md).
+
+All 20 Node bridge/command tests and all 21 focused Python editor tests pass.
+The complete Python suite ran 289 tests: 224 passed, 64 skipped, and the same
+existing TeX descendant-reaping error. Installed-package terminal inspection,
+Python compilation, JavaScript syntax, and diff checks pass. Actual VS Code
+host acceptance remains pending.

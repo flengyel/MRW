@@ -15,6 +15,11 @@ The follow-on increment implements R2 preview/Send: `assistance_actions.py` supp
 shared preparation, preview, transmission and terminal matching. Qt delegates;
 VS Code captures ordinary selections and owns the transient draft. A separate
 Send requires the active current preview and consumes it before transmission.
+The review repairs additionally pin received records by digest, preserve
+virtual-tab record identity, inspect all terminal statuses, and distinguish
+known preflight rejection from uncertain transmission. Native Windows Send
+is rejected before transport; a known-unsent draft needs a new preview. See
+[the review report](VS_CODE_ASSISTANCE_REVIEW.md) for findings and validation.
 No live request is authorized by this migration or its tests.
 
 Next validate these workflows in an actual Extension Development Host using

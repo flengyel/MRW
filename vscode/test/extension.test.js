@@ -24,12 +24,14 @@ function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file,
 async function harness(root, state = new Map()) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map();
   const opens = [], inputs = [], picks = [];
-  let activeListener = () => {}, service = runBridge;
+  let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
   const disposable = { dispose() {} };
   const offset = (text, point) => text.split('\n').slice(0, point.line).reduce((n, line) => n + line.length + 1, 0) + point.character;
   function document(file, text, scheme = 'file') {
     const doc = { uri: uri(file, scheme), version: 1, isDirty: false, isClosed: false, text,
+      // Exercise a user's *.txt language association for every virtual view.
+      languageId: scheme === 'mrw-record' ? 'markdown' : 'plaintext',
       getText(range) { return range ? this.text.slice(offset(this.text, range.start), offset(this.text, range.end)) : this.text; },
       get lineCount() { return this.text.split('\n').length; }, validateRange: range => range };
     storedDocuments.set(doc.uri.toString(), doc);
@@ -55,7 +57,8 @@ async function harness(root, state = new Map()) {
       getWorkspaceFolder: () => ({ uri: uri(root) }),
       getConfiguration: () => ({ get: (name, fallback) => name === 'pythonExecutable' ? 'python3' : name === 'proofViewerUrl' ? 'https://example.org/proofs/' : fallback }),
       registerTextDocumentContentProvider(scheme, provider) { providers.set(scheme, provider); return disposable; },
-      onDidCloseTextDocument: () => disposable,
+      onDidCloseTextDocument(fn) { closeListener = fn; return disposable; },
+      onDidOpenTextDocument(fn) { openListener = fn; return disposable; },
       async openTextDocument(location) {
         reads.push(location.toString());
         const existing = storedDocuments.get(location.toString());
@@ -76,7 +79,13 @@ async function harness(root, state = new Map()) {
         shown.push(doc); const next = editor(doc); api.window.activeTextEditor = next; activeListener(next); return next;
       },
     },
-    languages: { async setTextDocumentLanguage() {} }, env: { async openExternal() { return true; } },
+    languages: { async setTextDocumentLanguage(doc, languageId) {
+      if (doc.languageId !== languageId) {
+        // A language change emits close/open without disposing the document.
+        closeListener(doc); doc.languageId = languageId; openListener(doc);
+      }
+      return doc;
+    } }, env: { async openExternal() { return true; } },
   };
   const extension = path.resolve(__dirname, '..');
   const context = { extensionPath: extension, storageUri: uri(path.join(root, "private-state")), subscriptions: [], workspaceState: {
@@ -94,7 +103,8 @@ async function harness(root, state = new Map()) {
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
-  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, state, document, editor,
+  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, state, document, editor, providers,
+    closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
     setService: fn => { service = fn; }, focus: ed => { api.window.activeTextEditor = ed; activeListener(ed); } };
 }
 
@@ -258,7 +268,7 @@ test('blank restored preview cannot send; completed outcome enters validated rev
   preview.text = exact;
   const fixture = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
   h.setService(async (...args) => args[2].method === 'send_assistance'
-    ? { status: 'completed', retained: true, body: 'completed synthetic request', path: fixture }
+    ? { status: 'completed', retained: true, body: 'completed synthetic request', path: fixture, revision: navigation.digest(await fs.readFile(fixture)) }
     : runBridge(...args));
   await h.commands.get('mrw.sendRequest')();
   assert.equal(h.requests.filter(r => r.method === 'send_assistance').length, 1);
@@ -276,4 +286,102 @@ test('additional context uses captured text and scalar locations from untitled C
   const c = h.requests.at(-1).draft.contexts[1];
   assert.equal(c.text, '😀\r\nβ'); assert.equal(c.start, '1.0'); assert.equal(c.end, '2.1');
   assert.equal(c.source_path, null);
+});
+
+test('known unsent request keeps its question but requires a new preview before Send', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  const original = h.requests[0].draft;
+  h.setService(async (...args) => args[2].method === 'send_assistance'
+    ? { status: 'not_sent', retained: false, revision: null, body: 'Request not sent: missing credential.' }
+    : runBridge(...args));
+  await h.commands.get('mrw.sendRequest')();
+  assert.match(h.shown.at(-1).text, /not sent/);
+  assert.ok(!h.shown.at(-1).text.includes('uncertain'));
+  await h.commands.get('mrw.sendRequest')();
+  assert.equal(h.requests.filter(r => r.method === 'send_assistance').length, 1);
+  await h.commands.get('mrw.previewRequest')();
+  assert.deepEqual(h.requests.at(-1).draft, original);
+  assert.equal(h.errors.length, 1); // The second Send had no current preview.
+});
+
+test('record replaced after Send is rejected and does not erase the known terminal outcome', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  const fixture = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
+  const recorded = await fs.readFile(fixture);
+  const replacement = path.join(root, 'call.json');
+  // Even a whitespace-only replacement is a different retained-file identity.
+  await fs.writeFile(replacement, Buffer.concat([recorded, Buffer.from(' ')]));
+  h.setService(async (...args) => args[2].method === 'send_assistance'
+    ? { status: 'completed', retained: true, body: 'Mathematical assistance: completed',
+      path: replacement, revision: navigation.digest(recorded) }
+    : runBridge(...args));
+  await h.commands.get('mrw.sendRequest')();
+  assert.equal(h.requests.at(-1).revision, navigation.digest(recorded));
+  assert.match(h.errors.at(-1), /changed since review/);
+  assert.match(h.shown.at(-1).text, /completed/);
+  assert.ok(h.shown.every(doc => !doc.text.includes('outcome is uncertain')));
+});
+
+test('language changes preserve the selected review identity and visible content', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const first = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
+  const second = path.join(root, 'another-call.json');
+  await fs.copyFile(first, second);
+  h.opens.push([uri(first)]); await h.commands.get('mrw.review')();
+  h.inputs.push('1'); await h.commands.get('mrw.passage')();
+  const firstPassage = h.shown.at(-1);
+  h.opens.push([uri(second)]); await h.commands.get('mrw.review')();
+  h.inputs.push('1'); await h.commands.get('mrw.passage')();
+  // The initial *.txt association already caused a language-change close/open.
+  // Exercise a later manual language change on the older review as well.
+  await h.api.languages.setTextDocumentLanguage(firstPassage, 'markdown');
+  assert.equal(firstPassage.isClosed, false);
+  assert.equal(h.providers.get('mrw-record').provideTextDocumentContent(firstPassage.uri), firstPassage.text);
+  h.focus(h.editor(firstPassage));
+  h.focus(h.editor(h.document(path.join(root, 'note.md'), 'ordinary work')));
+  await h.commands.get('mrw.insert')();
+  assert.equal(h.requests.at(-1).method, 'contribution');
+  assert.equal(h.requests.at(-1).path, first);
+  assert.equal(h.requests.at(-1).number, 1);
+  assert.deepEqual(h.errors, []);
+});
+
+test('new activation cannot attach a new record to a restored virtual document', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const fixture = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
+  h.opens.push([uri(fixture)]); await h.commands.get('mrw.review')();
+  const old = h.shown.at(-1);
+  const resumed = await harness(root);
+  // A restored editor is already cached before the next explicit record action.
+  const restored = resumed.document(old.uri.path, 'Previous-session content', 'mrw-record');
+  resumed.opens.push([uri(fixture)]); await resumed.commands.get('mrw.review')();
+  const fresh = resumed.shown.at(-1);
+  assert.notEqual(fresh.uri.toString(), old.uri.toString());
+  assert.notEqual(fresh.text, 'Previous-session content');
+  assert.deepEqual(resumed.errors, []);
+  resumed.inputs.push('1'); await resumed.commands.get('mrw.passage')();
+  resumed.focus(resumed.editor(restored));
+  resumed.focus(resumed.editor(resumed.document(path.join(root, 'note.md'), 'ordinary work')));
+  const before = resumed.requests.length;
+  await resumed.commands.get('mrw.insert')();
+  assert.equal(resumed.requests.length, before);
+  assert.match(resumed.errors.at(-1), /Review Model Response first/);
+});
+
+test('disposed virtual documents release content and cannot select a different review', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const fixture = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
+  h.opens.push([uri(fixture)]); await h.commands.get('mrw.review')();
+  h.inputs.push('1'); await h.commands.get('mrw.passage')();
+  const old = h.shown.at(-1);
+  h.closeDocument(old);
+  const reopened = await h.api.workspace.openTextDocument(old.uri);
+  assert.match(reopened.text, /no longer available/);
+  h.focus(h.editor(reopened));
+  const before = h.requests.length;
+  await h.commands.get('mrw.fullResponse')();
+  assert.equal(h.requests.length, before);
+  assert.match(h.errors.at(-1), /Review Model Response first/);
 });

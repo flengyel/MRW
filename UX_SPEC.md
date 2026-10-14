@@ -37,7 +37,9 @@ passage selects its exact reviewed record revision. Retention creates a new
 projection with no overwrite. Insertion adds an attributed editable copy at the
 active note cursor, preserving selected work and one undo boundary; it does
 not save the note. Concurrent note/selection changes cancel insertion.
-Opening an earlier review tab reselects its record and passage.
+Opening an earlier review tab reselects its record and passage. This association
+survives document language changes. Each activation uses a distinct virtual
+document namespace so restored tabs cannot acquire a new record identity.
 
 Lean-source handoff opens a user-selected file and line beside the work. An
 installed Lean extension may process that file. HTTPS viewer handoff sends no
@@ -49,7 +51,13 @@ untitled documents. Up to eight contexts can be added or removed; changing
 context or the question invalidates the previous preview. The read-only current
 preview must be active for the separate **Send Exact Preview** command. Send
 consumes that preview before launching the asynchronous Python adapter, so
-duplicate actions cannot resend it. Terminal records live in private VS Code
+duplicate actions cannot resend it. An explicit preflight rejection reports
+**not sent** and preserves the draft for a newly displayed preview. A known
+terminal outcome remains distinct from a later display failure; automatic
+response review checks the exact retained-record digest. All four terminal
+statuses can be inspected, while passage extraction remains completed-only.
+Native Windows Send is blocked before transport because immutable publication
+is unsupported there. Terminal records live in private VS Code
 workspace storage; unsent drafts are transient. Host interruption can leave a
 request outcome uncertain and never triggers an automatic retry. R3 resumption
 and vertex elimination remain unimplemented in the extension. See [extension instructions](vscode/README.md).

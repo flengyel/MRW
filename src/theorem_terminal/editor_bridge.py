@@ -50,7 +50,7 @@ def dispatch(request):
     fields = {
         'prepare_assistance': ({'draft'}, set()),
         'send_assistance': ({'draft', 'preview', 'confirmation'}, set()),
-        'inspect': ({'path', 'format'}, {'companion'}),
+        'inspect': ({'path', 'format'}, {'companion', 'revision'}),
         'review': ({'path', 'mode', 'number'}, {'revision'}),
         'contribution': ({'path', 'number', 'revision'}, set()),
         'project': ({'path', 'number', 'revision', 'destination'}, set()),
@@ -66,10 +66,13 @@ def dispatch(request):
     path = _path(request['path'])
     if method == 'inspect':
         format = request['format']
-        if format not in ('model_call', 'projection', 'verification', 'documentary_package'):
+        if format not in ('model_call', 'terminal_call', 'projection', 'verification', 'documentary_package'):
             raise ValueError('Unsupported retained record format')
         companion = _path(request['companion']) if 'companion' in request else None
-        return asdict(inspect_record(path, format, companion))
+        result = inspect_record(path, format, companion)
+        if 'revision' in request and result.revision != _revision(request['revision']):
+            raise ValueError('Retained record changed since inspection; open it again')
+        return asdict(result)
     number = _number(request['number'])
     if method == 'review':
         mode = request['mode']

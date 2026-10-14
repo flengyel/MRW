@@ -107,15 +107,26 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     busy = true; draft = undefined; invalidate();
     const status = vscode.window.setStatusBarMessage('MRW: sending one request…');
     try {
-      const result = await bridge({ method: 'send_assistance', ...sending, confirmation: 'SEND' }, { timeout: 90000 });
+      let result;
+      try {
+        result = await bridge({ method: 'send_assistance', ...sending, confirmation: 'SEND' }, { timeout: 90000 });
+      } catch (error) {
+        await show(`The assistance outcome is uncertain.\nRecord destination: ${sending.draft.output}\n` +
+          'Inspect that destination before preparing another request. No automatic retry was made.', 'Assistance-outcome');
+        throw error;
+      }
+      if (result.status === 'not_sent') {
+        // Only an explicit Python preflight result establishes that transport
+        // never began. Keep the work, but require a newly displayed preview.
+        draft = sending.draft;
+      }
       await show(result.body, 'Assistance-outcome');
       if (result.status === 'completed' && result.retained) {
-        await review({ method: 'review', path: result.path, mode: 'index', number: 1 });
+        if (typeof result.revision !== 'string' || !/^[0-9a-f]{64}$/.test(result.revision)) {
+          throw new Error('The completed record has no valid revision. Inspect the recorded destination.');
+        }
+        await review({ method: 'review', path: result.path, revision: result.revision, mode: 'index', number: 1 });
       }
-    } catch (error) {
-      await show(`The assistance outcome is uncertain.\nRecord destination: ${sending.draft.output}\n` +
-        'Inspect that destination before preparing another request. No automatic retry was made.', 'Assistance-outcome');
-      throw error;
     } finally { busy = false; status?.dispose(); changed.fire(); }
   });
   return () => {
