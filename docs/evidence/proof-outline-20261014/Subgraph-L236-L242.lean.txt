@@ -1,0 +1,7 @@
+/-- This proof is from https://mathoverflow.net/a/450905/766 -/
+@[equational_result]
+theorem Equation387_implies_Equation43 (G: Type*) [Magma G] (h: Equation387 G) : Equation43 G := by
+  have idem (x : G) : (x ◇ x) ◇ (x ◇ x) = (x ◇ x) := by repeat rw [← h]
+  have comm (x y : G) : (x ◇ x) ◇ y = y ◇ (x ◇ x) := by rw [← idem, ← h, idem]
+  have op_idem (x y : G) : (x ◇ x) ◇ (y ◇ y) = x ◇ y := by repeat rw [← h]
+  exact fun _ _ ↦ by rw [← op_idem, comm, op_idem]

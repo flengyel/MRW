@@ -1,7 +1,9 @@
 # Proof outlines by vertex elimination
 
-**Status, 2026-10-13:** vertex elimination remains an accepted product requirement,
-not implemented. The first VS Code extension now supplies shared record actions
+**Status, 2026-10-14:** the bounded Task 4.0 reconnaissance is complete; see
+[actual outputs, source/tool revisions and the recommended first consumer](PROOF_OUTLINE_RECONNAISSANCE.md).
+Vertex elimination remains an accepted product requirement, not implemented.
+The VS Code extension supplies shared record actions
 and explicit Lean-source/browser handoffs; see [its README](../vscode/README.md). The
 workstation should help a reader obtain and inspect a mathematical outline of
 a selected Lean proof. AI may propose which details to hide and explain the
@@ -84,8 +86,9 @@ premises into the warrant layer.
 
 ## First bounded increment
 
-Consume existing graph/export output for one selected proof before writing
-another extractor. Keep the input kind visible and expose only claims actually
+The pinned example's existing export/server output has been inspected in the
+reconnaissance linked above. Consume it before writing another extractor. Keep
+the input kind visible and expose only claims actually
 supplied by that representation. Use the existing Lean editor/viewer ecosystem;
 the preferred frontend trial is one VS Code extension over the independent
 core. Choice of an open-source editor distribution is deferred. The initial
@@ -129,8 +132,9 @@ binary operation \(\diamond\), assume
 The final chain is
 \(x\diamond y=s(x)\diamond s(y)=s(y)\diamond s(x)=y\diamond x\).
 All claims use the assumed identity; `comm` additionally uses `idem`, and the
-conclusion uses `comm` and `op_idem` jointly. These are source boundaries,
-not an extracted elaborated graph or a new Lean run. The project's
+conclusion uses `comm` and `op_idem` jointly. These are selected source boundaries;
+this illustration itself is not machine output. The subsequent pinned
+exporter/server runs are recorded in the reconnaissance report. The project's
 [blueprint](https://github.com/teorth/equational_theories/blob/1aec8a7acf223b7c56e4830977b6e90d4ef1924b/blueprint/src/chapter/implications.tex)
 provides a corresponding prose argument. This illustration supplies no evidence
 of implementation or observed workstation use.

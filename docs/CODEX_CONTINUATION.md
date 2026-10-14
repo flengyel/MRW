@@ -1,6 +1,33 @@
 # Codex continuation: VS Code migration and proof outlines
 
-## Active migration handoff — 2026-10-13
+## Active handoff — proof-outline reconnaissance, 2026-10-14
+
+The requested bounded Task 4.0 reconnaissance is complete for the pinned
+`Subgraph.Equation387_implies_Equation43` example. Read
+[the findings](PROOF_OUTLINE_RECONNAISSANCE.md) and its retained raw outputs and
+provenance before proposing implementation. The exact source compiled under
+Lean 4.29.1 and its pinned Mathlib revision. lean4export retained three typed
+local `letE` bindings; native Lean goal responses supplied their statements,
+local assumptions and a local-definition source jump. Published doc-gen4 output
+supplied the theorem statement and pinned source link. LeanArchitect emitted
+an empty array for the unannotated module. ntp-toolkit was inspected but not
+ported from its 4.24.0 environment; local doc-gen4 generation was unavailable.
+
+The smallest recommended implementation is an offline, manually selected
+source-region consumer using those existing outputs: exact claims with full
+boundary contexts, separately attributed explanations, source navigation and
+verbatim expansion. Keep the original source and output bytes pinned. This
+partial trial is not full vertex elimination. No captured output provides
+ready-made joint-premise region boundaries or hidden-path witnesses. Do not
+infer those from declaration dependencies, local-context membership or tactic
+order. No new extractor or outline GUI was implemented during reconnaissance.
+
+R3/R3.1 at `c69a9c2` is synced; its completed host acceptance need not be
+repeated. This request ends with findings and the handoff, not an outline
+implementation. Mathematical usefulness and full outline acceptance remain
+pending. No live provider request is authorized.
+
+## Delivered VS Code migration — 2026-10-13–14
 
 The user explicitly requested beginning the VS Code extension and transferring
 existing code. The first increment is now in `vscode/`; read its README.
@@ -54,8 +81,8 @@ ending failure/cancel/success and sequential independent investigations with
 deterministic responses. Repeated views now reuse an existing MRW editor group.
 See [the R3 results and limits](VS_CODE_ASSISTANCE_REVIEW.md#r3r31-extension-migration).
 Usefulness remains unobserved; do not repeat this acceptance campaign merely to
-begin another bounded task. The next separately requested proof-outline step is
-reconnaissance on one selected existing proof representation. Vertex elimination
+begin another bounded task. The subsequently requested proof-outline
+reconnaissance is recorded above. Vertex elimination
 remains planned; no complete replacement of the standalone application has been delivered.
 
 The Python/Node checks use synthetic data and make no provider request. The
@@ -130,12 +157,13 @@ For one selected Lean proof, support vertex elimination with visible claims and
 explanations, source links, and expansion to the hidden steps. AI may propose
 the selection; the reader must be able to revise it.
 
-First inspect existing exporter/viewer output and identify whether it describes
-declarations, source regions, tactic states, or elaborated proof structure. The
-specification's pinned Equation 387 proof supplies a small source-based example,
-not a pre-existing elaboration graph or run attestation. Consume actual machine
-output before adding another extractor. Preserve joint premises, local scope,
-exact source revisions, and the existing evidence boundaries.
+The bounded inspection of existing exporter/viewer output is now recorded in
+[the reconnaissance report](PROOF_OUTLINE_RECONNAISSANCE.md). It distinguishes
+declarations, source regions, tactic states and elaborated terms for the pinned
+Equation 387 example. Its raw exports and goal responses are actual machine
+output; the source-based illustration remains separate from an inference graph.
+Consume that output, preserving joint premises, local scope, exact source
+revisions and the existing evidence boundaries.
 
 The preferred frontend trial is one VS Code extension over the independent
 Python services, reusing the established Lean and mathematical-tool ecosystem.

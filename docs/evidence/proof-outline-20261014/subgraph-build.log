@@ -1,0 +1,13 @@
+✔ [3284/3291] Built equational_theories.Homomorphisms (7.5s)
+✔ [3286/3297] Built Mathlib.Tactic (9.3s)
+✔ [3288/3297] Built equational_theories.FreeMagma (6.2s)
+✔ [3289/3297] Built equational_theories.MagmaLaw (9.7s)
+✔ [3290/3297] Built equational_theories.Preorder (3.9s)
+✔ [3291/3297] Built equational_theories.EquationLawConversion (4.4s)
+✔ [3292/3297] Built equational_theories.ParseImplications (5.3s)
+✔ [3293/3297] Built equational_theories.Equations.Command (5.2s)
+✔ [3294/3297] Built equational_theories.Equations.Basic (4.7s)
+✔ [3295/3297] Built equational_theories.EquationalResult (5.5s)
+✔ [3296/3297] Built equational_theories.FreeSemigroup (4.0s)
+✔ [3297/3297] Built equational_theories.Subgraph (16s)
+Build completed successfully (3297 jobs).

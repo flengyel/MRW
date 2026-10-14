@@ -99,6 +99,11 @@ Repeated research views reuse an existing host editor group. The
 [R3 persistence contract and commands](vscode/README.md#investigation-persistence-boundary)
 keep ordinary documents and recovery under VS Code ownership.
 
+The bounded [proof-outline reconnaissance](docs/PROOF_OUTLINE_RECONNAISSANCE.md)
+records actual output for the pinned Equation 387 proof and recommends a
+consumer of source regions and recorded Lean states. No outline GUI or vertex
+elimination is implemented.
+
 ## Motivation
 
 Mathematical context can be lost even when papers, notes, books, or formal

@@ -1,0 +1,159 @@
+[
+  {
+    "label": "before_idem",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 238,
+        "character": 2
+      }
+    },
+    "result": {
+      "goals": [
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\n⊢ Equation43 G"
+      ],
+      "rendered": "```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\n⊢ Equation43 G\n```"
+    }
+  },
+  {
+    "label": "idem_proof",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 238,
+        "character": 64
+      }
+    },
+    "result": {
+      "goals": [
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nx : G\n⊢ (x ◇ x) ◇ (x ◇ x) = x ◇ x",
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nx : G\n⊢ (x ◇ x) ◇ x = x ◇ x"
+      ],
+      "rendered": "```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nx : G\n⊢ (x ◇ x) ◇ (x ◇ x) = x ◇ x\n```\n---\n```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nx : G\n⊢ (x ◇ x) ◇ x = x ◇ x\n```"
+    }
+  },
+  {
+    "label": "comm_proof",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 239,
+        "character": 68
+      }
+    },
+    "result": {
+      "goals": [
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\nx y : G\n⊢ ((x ◇ x) ◇ (x ◇ x)) ◇ y = y ◇ ((x ◇ x) ◇ (x ◇ x))"
+      ],
+      "rendered": "```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\nx y : G\n⊢ ((x ◇ x) ◇ (x ◇ x)) ◇ y = y ◇ ((x ◇ x) ◇ (x ◇ x))\n```"
+    }
+  },
+  {
+    "label": "op_idem_proof",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 240,
+        "character": 68
+      }
+    },
+    "result": {
+      "goals": [
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nx y : G\n⊢ (x ◇ x) ◇ (y ◇ y) = x ◇ y",
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nx y : G\n⊢ (y ◇ y) ◇ x = x ◇ y"
+      ],
+      "rendered": "```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nx y : G\n⊢ (x ◇ x) ◇ (y ◇ y) = x ◇ y\n```\n---\n```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nx y : G\n⊢ (y ◇ y) ◇ x = x ◇ y\n```"
+    }
+  },
+  {
+    "label": "final_context",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 241,
+        "character": 2
+      }
+    },
+    "result": {
+      "goals": [
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nop_idem : ∀ (x y : G), (x ◇ x) ◇ (y ◇ y) = x ◇ y\n⊢ Equation43 G"
+      ],
+      "rendered": "```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nop_idem : ∀ (x y : G), (x ◇ x) ◇ (y ◇ y) = x ◇ y\n⊢ Equation43 G\n```"
+    }
+  },
+  {
+    "label": "final_rewrite",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 241,
+        "character": 25
+      }
+    },
+    "result": {
+      "goals": [
+        "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nop_idem : ∀ (x y : G), (x ◇ x) ◇ (y ◇ y) = x ◇ y\nx✝¹ x✝ : G\n⊢ x✝¹ ◇ x✝ = x✝ ◇ x✝¹"
+      ],
+      "rendered": "```lean\nG : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nidem : ∀ (x : G), (x ◇ x) ◇ (x ◇ x) = x ◇ x\ncomm : ∀ (x y : G), (x ◇ x) ◇ y = y ◇ (x ◇ x)\nop_idem : ∀ (x y : G), (x ◇ x) ◇ (y ◇ y) = x ◇ y\nx✝¹ x✝ : G\n⊢ x✝¹ ◇ x✝ = x✝ ◇ x✝¹\n```"
+    }
+  },
+  {
+    "label": "comm_source_definition",
+    "params": {
+      "textDocument": {
+        "uri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      },
+      "position": {
+        "line": 241,
+        "character": 37
+      }
+    },
+    "result": [
+      {
+        "originSelectionRange": {
+          "end": {
+            "character": 40,
+            "line": 241
+          },
+          "start": {
+            "character": 36,
+            "line": 241
+          }
+        },
+        "targetRange": {
+          "end": {
+            "character": 11,
+            "line": 239
+          },
+          "start": {
+            "character": 7,
+            "line": 239
+          }
+        },
+        "targetSelectionRange": {
+          "end": {
+            "character": 11,
+            "line": 239
+          },
+          "start": {
+            "character": 7,
+            "line": 239
+          }
+        },
+        "targetUri": "file:///tmp/mrw-proof-outline-20261014/equational_theories/equational_theories/Subgraph.lean"
+      }
+    ]
+  }
+]

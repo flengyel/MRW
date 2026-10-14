@@ -345,8 +345,12 @@ checks, terminal outcomes, ending failures and sequential slot reuse. A visible
 view-placement defect was corrected by reusing the existing research editor
 group. The full results and remaining runtime limits are recorded in the
 [R3 validation report](docs/VS_CODE_ASSISTANCE_REVIEW.md#r3r31-extension-migration).
-The proof-outline increment still requires actual exporter/viewer output for
-one selected proof before graph navigation is implemented. See
+The bounded Equation 387 reconnaissance now supplies actual exporter and Lean
+server output, published documentation, tool/source pins and explicit limits;
+see [the findings](docs/PROOF_OUTLINE_RECONNAISSANCE.md). The recommended first
+consumer is a manually selected source-region outline. Joint-premise region
+boundaries and elimination witnesses are not supplied by a declaration map.
+Graph navigation and vertex elimination remain unimplemented. See
 [vscode/README.md](vscode/README.md) for the delivered boundary and host check.
 
 No proof-outline GUI, graph exporter, or automatic selection is implemented.
@@ -355,9 +359,8 @@ established mathematical tools. Choice of an open-source editor
 distribution is deferred. The existing Qt application and R1–R3.1 retain their
 delivery status; their mathematical-use observation remains independent.
 
-When the proof-outline increment becomes active, begin with Task 4.0
-reconnaissance for one selected proof and consume existing
-graph/export output. Identify its granularity before selecting regions. Add
+Task 4.0's bounded proof-outline reconnaissance is complete; consume its existing
+export/server output and keep its granularity visible when selecting regions. Add
 only missing information needed for retained claims, explanations, and
 reversible expansion; do not parse Lean source in Python or infer proof steps
 from a declaration map. Apply the existing explicit model-request boundary to
@@ -1123,6 +1126,14 @@ changes can be detected precisely.
 corresponding to the selected manuscript material and inspect what they emit:
 `lean4export`, `doc-gen4`, `ntp-toolkit`, and LeanArchitect. Consume existing
 output unless a required formal fact is absent.
+
+The bounded proof-outline reconnaissance is complete for
+`Subgraph.Equation387_implies_Equation43` at the pinned source revision; see
+[the 2026-10-14 findings and actual outputs](docs/PROOF_OUTLINE_RECONNAISSANCE.md).
+It recommends a bounded consumer of source regions and recorded Lean states;
+it implements no extractor or outline GUI and does not complete the separate
+Appendix A correspondence experiment. Full vertex-elimination acceptance and
+mathematical usefulness remain pending.
 
 The [requested proof-outline increment](#requested-proof-outlines-and-editor-integration)
 uses this reconnaissance on one selected proof. Its vertex elimination is a

@@ -9,3 +9,4 @@ __pycache__/
 /vscode/LICENSE
 /vscode/*.vsix
 /.codex-work/vscode-host*/
+/.codex-work/proof-outline-recon*/
