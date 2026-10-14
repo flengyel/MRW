@@ -12,6 +12,7 @@ import re
 import sys
 
 from .editor_assistance import assistance_action
+from .editor_investigation import editor_investigation_action
 from .record_actions import call_passage, persist_call_passage, attributed_contribution
 from .record_views import inspect_record, read_call_snapshot
 from .response_review import render_response_review
@@ -54,6 +55,13 @@ def dispatch(request):
         'review': ({'path', 'mode', 'number'}, {'revision'}),
         'contribution': ({'path', 'number', 'revision'}, set()),
         'project': ({'path', 'number', 'revision', 'destination'}, set()),
+        'investigation_parent': ({'path'}, {'revision'}),
+        'investigation_state': ({'store', 'project_root'}, set()),
+        'resume_investigation': ({'store', 'project_root', 'revision'}, set()),
+        'update_investigation': ({'store', 'project_root', 'revision', 'summary'}, set()),
+        'investigation_view': ({'store', 'project_root', 'revision', 'summary'}, set()),
+        'investigation_handoff': ({'store', 'project_root', 'revision', 'summary'}, set()),
+        'end_investigation': ({'store', 'project_root', 'revision'}, set()),
     }
     if not isinstance(method, str) or method not in fields:
         raise ValueError('Unknown editor action')
@@ -63,6 +71,10 @@ def dispatch(request):
         raise ValueError('Invalid editor action fields')
     if method in ('prepare_assistance', 'send_assistance'):
         return assistance_action(request)
+    if method in ('investigation_parent', 'investigation_state', 'resume_investigation',
+                  'update_investigation', 'investigation_view', 'investigation_handoff',
+                  'end_investigation'):
+        return editor_investigation_action(request)
     path = _path(request['path'])
     if method == 'inspect':
         format = request['format']

@@ -36,12 +36,27 @@ The smaller visible check used ordinary host layout adjustments. Manual dialogs,
 VSIX installation, external-browser handoff and mathematical usefulness were
 not established. Do not repeat this campaign merely to begin the next increment.
 
-Next port bounded R3 investigation continuation and restart
-resumption with an explicit host-state design. Preserve one parent/one child,
-per-request previews, exact record identities, human task notes, and explicit
-ending. Do not silently migrate Qt buffer, recovery, or investigation state.
-Vertex elimination remains a separate requested increment; no complete
-replacement of the standalone application has been delivered.
+The host-validation harness/report is committed as `e4e65ba` and was synced by
+the user. The subsequent bounded R3/R3.1 migration is implemented through
+shared `investigation_actions.py` and independent `editor_investigation.py`.
+Its persistence boundary is in
+[vscode/README.md](../vscode/README.md#investigation-persistence-boundary).
+The core reserves one pending child before Send, pins terminal identities,
+restores explicitly without retry, and publishes only the private pointer and
+bounded human text. The host owns documents, saving, undo and recovery. No Qt
+workspace or recovery state is imported. Explicit ending uses the latest
+matching human fields and retains immutable records; private publication
+failure keeps live state and any inserted note text and blocks later private
+writes until reload.
+
+Normal WSL Development Hosts exercised restart, changed-record reporting,
+ending failure/cancel/success and sequential independent investigations with
+deterministic responses. Repeated views now reuse an existing MRW editor group.
+See [the R3 results and limits](VS_CODE_ASSISTANCE_REVIEW.md#r3r31-extension-migration).
+Usefulness remains unobserved; do not repeat this acceptance campaign merely to
+begin another bounded task. The next separately requested proof-outline step is
+reconnaissance on one selected existing proof representation. Vertex elimination
+remains planned; no complete replacement of the standalone application has been delivered.
 
 The Python/Node checks use synthetic data and make no provider request. The
 review environment had no installed VS Code executable or PySide6; command API
@@ -56,7 +71,7 @@ VS Code owns text documents, saving, undo, and document recovery. Keep shared
 record validation and immutable publication in Python. Port only the bounded
 research-state behavior that the host does not supply. Do not reproduce Qt
 buffers, checkpoint machinery, widgets, or splitter constraints in the extension.
-R3/R3.1 and proof-outline vertex elimination are not implemented in VS Code.
+R3/R3.1 is implemented in VS Code; proof-outline vertex elimination is not.
 
 ## Separate Qt study observation and historical evidence
 

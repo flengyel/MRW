@@ -23,7 +23,7 @@ function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file,
 
 async function harness(root, state = new Map()) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map();
-  const opens = [], inputs = [], picks = [];
+  const opens = [], inputs = [], picks = [], endings = [];
   let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
   const disposable = { dispose() {} };
@@ -38,7 +38,7 @@ async function harness(root, state = new Map()) {
     return doc;
   }
   function editor(doc) {
-    return { document: doc, selection: new Selection(new Position(0, 0), new Position(0, 1)),
+    return { document: doc, viewColumn: 1, selection: new Selection(new Position(0, 0), new Position(0, 1)),
       revealRange() {}, async edit(callback) {
         callback({ insert(point, text) {
           const at = offset(doc.text, point);
@@ -49,7 +49,7 @@ async function harness(root, state = new Map()) {
   }
   const api = {
     Position, Range, Selection, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => uri(x, 'https') },
-    ViewColumn: { Beside: 2 }, TextEditorRevealType: { InCenter: 1, InCenterIfOutsideViewport: 2 },
+    ViewColumn: { One: 1, Two: 2, Beside: -2 }, TextEditorRevealType: { InCenter: 1, InCenterIfOutsideViewport: 2 },
     EventEmitter: class { event() {} fire() {} dispose() {} }, TreeItem: class { constructor(label) { this.label = label; } },
     commands: { registerCommand(name, action) { commands.set(name, action); return disposable; } },
     workspace: {
@@ -75,8 +75,12 @@ async function harness(root, state = new Map()) {
       async showOpenDialog() { return opens.shift(); },
       async showInputBox() { return inputs.shift(); },
       async showQuickPick(options) { return picks.length ? picks.shift() : options[0]; },
-      async showTextDocument(doc) {
-        shown.push(doc); const next = editor(doc); api.window.activeTextEditor = next; activeListener(next); return next;
+      async showWarningMessage() { return endings.shift(); },
+      async showTextDocument(doc, options = {}) {
+        shown.push(doc); const next = editor(doc);
+        next.viewColumn = options.viewColumn === -2 ? (api.window.activeTextEditor?.viewColumn || 1) + 1 : (options.viewColumn || 1);
+        api.window.visibleTextEditors = [...(api.window.visibleTextEditors || []).filter(e => e.viewColumn !== next.viewColumn), next];
+        api.window.activeTextEditor = next; activeListener(next); return next;
       },
     },
     languages: { async setTextDocumentLanguage(doc, languageId) {
@@ -88,7 +92,7 @@ async function harness(root, state = new Map()) {
     } }, env: { async openExternal() { return true; } },
   };
   const extension = path.resolve(__dirname, '..');
-  const context = { extensionPath: extension, storageUri: uri(path.join(root, "private-state")), subscriptions: [], workspaceState: {
+  const context = { extensionPath: extension, storageUri: uri(path.join(root, '..', 'private-state')), subscriptions: [], workspaceState: {
     get: key => state.get(key), keys: () => [...state.keys()],
     async update(key, value) { if (value === undefined) state.delete(key); else state.set(key, value); },
   } };
@@ -103,14 +107,15 @@ async function harness(root, state = new Map()) {
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
-  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, state, document, editor, providers,
+  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, state, document, editor, providers,
     closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
     setService: fn => { service = fn; }, focus: ed => { api.window.activeTextEditor = ed; activeListener(ed); } };
 }
 
 async function temporary(t) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'mrw-command-'));
-  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'mrw-command-'));
+  const root = path.join(directory, 'project'); await fs.mkdir(root);
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
   return root;
 }
 
@@ -384,4 +389,126 @@ test('disposed virtual documents release content and cannot select a different r
   await h.commands.get('mrw.fullResponse')();
   assert.equal(h.requests.length, before);
   assert.match(h.errors.at(-1), /Review Model Response first/);
+});
+
+async function continuation(h) {
+  const fixture = path.resolve(__dirname, '../../tests/fixtures/mechanical_model_call.json');
+  h.opens.push([uri(fixture)]); await h.commands.get('mrw.review')();
+  h.inputs.push('1', 'Follow-up question', 'Human correction α😀', 'fake-model');
+  await h.commands.get('mrw.continueAnswer')();
+  assert.deepEqual(h.errors, []);
+  return h.requests.findLast(r => r.method === 'prepare_assistance').draft;
+}
+async function deterministicSend(h, draft, status = 'completed') {
+  const cp = require('node:child_process');
+  const artifacts = path.dirname(draft.output);
+  await fs.mkdir(artifacts, { recursive: true });
+  h.setService((extension, executable, request, options = {}) => runBridge(extension, executable, request, { ...options,
+    spawn: (exe, args, settings) => cp.spawn(exe, ['-I', path.join(extension, 'test/host/deterministic_bridge.py'), artifacts, status], settings) }));
+  await h.commands.get('mrw.sendRequest')();
+  assert.deepEqual(h.errors, []);
+}
+
+test('bounded continuation previews exact evidence, persists, resumes and ends without deleting records', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const draft = await continuation(h);
+  assert.equal(draft.passage_numbers[0], 1);
+  assert.match(h.shown.at(-1).text, /Linked mathematical continuation preview/);
+  assert.match(h.shown.at(-1).text, /Human correction α😀/);
+  assert.ok(h.requests.every(r => r.method !== 'send_assistance'));
+  await deterministicSend(h, draft);
+  const child = await fs.readFile(draft.output);
+  const pointer = path.join(draft.store, 'active.json');
+  assert.equal(JSON.parse(await fs.readFile(pointer)).active.phase, 'terminal');
+  const restarted = await harness(root);
+  await restarted.commands.get('mrw.resumeInvestigation')();
+  assert.match(restarted.shown.at(-1).text, /Human correction α😀/);
+  assert.match(restarted.shown.at(-1).text, /Child terminal status: completed/);
+  restarted.endings.push('Cancel'); await restarted.commands.get('mrw.endInvestigation')();
+  assert.notEqual(JSON.parse(await fs.readFile(pointer)).active, null);
+  restarted.endings.push('End without insertion'); await restarted.commands.get('mrw.endInvestigation')();
+  assert.equal(JSON.parse(await fs.readFile(pointer)).active, null);
+  assert.deepEqual(await fs.readFile(draft.output), child);
+  assert.deepEqual(restarted.errors, []);
+});
+
+test('ending inserts the latest unsaved human summary once and preserves the selected note', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const draft = await continuation(h); await deterministicSend(h, draft);
+  h.inputs.push('Latest unsaved issue'); await h.commands.get('mrw.editIssue')();
+  const pointer = path.join(draft.store, 'active.json');
+  assert.equal(JSON.parse(await fs.readFile(pointer)).active.summary.unresolved_issue, '');
+  const note = h.document(path.join(root, 'note.md'), 'ordinary argument'), editor = h.editor(note);
+  h.focus(editor); h.endings.push('Insert handoff and end');
+  await h.commands.get('mrw.endInvestigation')();
+  assert.match(note.text, /Latest unsaved issue/);
+  assert.ok(note.text.startsWith('o')); assert.ok(note.text.endsWith('rdinary argument'));
+  assert.equal(note.text.split('[Investigation handoff').length, 2);
+  assert.equal(JSON.parse(await fs.readFile(pointer)).active, null);
+  assert.deepEqual(h.errors, []);
+});
+
+test('restore blocks ending, and publication failure keeps human text and inserted handoff', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const draft = await continuation(h); await deterministicSend(h, draft);
+  const original = await fs.readFile(path.join(draft.store, 'active.json'));
+  const restarted = await harness(root);
+  let complete;
+  restarted.setService(async (...args) => args[2].method === 'resume_investigation'
+    ? new Promise(resolve => { complete = () => runBridge(...args).then(resolve); }) : runBridge(...args));
+  const restore = restarted.commands.get('mrw.resumeInvestigation')();
+  while (!complete) await new Promise(resolve => setTimeout(resolve, 10));
+  await restarted.commands.get('mrw.endInvestigation')();
+  assert.match(restarted.errors.pop(), /Wait for/);
+  complete(); await restore;
+  restarted.inputs.push('Latest task text'); await restarted.commands.get('mrw.editConclusion')();
+  restarted.focus(restarted.editor(restarted.document(path.join(root, 'note.md'), 'work')));
+  const note = restarted.api.window.activeTextEditor.document;
+  restarted.setService(async (...args) => args[2].method === 'end_investigation'
+    ? { blocked: true, write_error: 'synthetic sync failure' } : runBridge(...args));
+  restarted.endings.push('Insert handoff and end'); await restarted.commands.get('mrw.endInvestigation')();
+  assert.match(restarted.errors.pop(), /publication failed/);
+  assert.match(note.text, /Latest task text/);
+  assert.deepEqual(await fs.readFile(path.join(draft.store, 'active.json')), original);
+  await restarted.commands.get('mrw.endInvestigation')();
+  assert.match(restarted.errors.pop(), /blocked/);
+});
+
+test('ending revalidates the note after confirmation and changed records keep the summary', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const draft = await continuation(h); await deterministicSend(h, draft);
+  const note = h.document(path.join(root, 'note.md'), 'work'), ed = h.editor(note); h.focus(ed);
+  h.api.window.showWarningMessage = async () => { note.version++; note.text += ' concurrent'; return 'Insert handoff and end'; };
+  await h.commands.get('mrw.endInvestigation')();
+  assert.match(h.errors.pop(), /note or selection changed/);
+  assert.equal(note.text, 'work concurrent');
+  await fs.appendFile(draft.output, ' ');
+  await h.commands.get('mrw.resumeInvestigation')();
+  assert.match(h.shown.at(-1).text, /missing or changed/);
+  assert.match(h.shown.at(-1).text, /Human correction α😀/);
+  assert.deepEqual(h.errors, []);
+});
+
+test('an unrelated R2 draft cannot replace the active investigation handoff question', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const child = await continuation(h); await deterministicSend(h, child);
+  await ask(h, root);
+  h.inputs.push('Current investigation question'); await h.commands.get('mrw.editInvestigationQuestion')();
+  h.focus(h.editor(h.document(path.join(root, 'handoff.md'), 'saved work')));
+  h.endings.push('Insert handoff and end'); await h.commands.get('mrw.endInvestigation')();
+  const text = h.api.window.activeTextEditor.document.text;
+  assert.match(text, /Current investigation question/);
+  assert.ok(!text.includes('Why α?'));
+  assert.deepEqual(h.errors, []);
+});
+
+test('repeated request views reuse the host research group', async t => {
+  const root = await temporary(t), h = await harness(root);
+  await ask(h, root);
+  const column = h.api.window.activeTextEditor.viewColumn;
+  for (let i = 0; i < 3; i++) {
+    h.inputs.push(`Revised question ${i}`); await h.commands.get('mrw.editQuestion')();
+    assert.equal(h.api.window.activeTextEditor.viewColumn, column);
+  }
+  assert.deepEqual(h.errors, []);
 });

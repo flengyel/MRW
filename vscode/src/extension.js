@@ -55,7 +55,13 @@ function activate(context) {
     document = await vscode.languages.setTextDocumentLanguage(document, 'plaintext');
     documents.set(uri.toString(), body);
     if (record) reviewDocuments.set(uri.toString(), record);
-    await vscode.window.showTextDocument(document, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    // Reuse an existing research-view group. Repeated previews/comparisons must
+    // not keep splitting the host when their own view already has focus.
+    const activeEditor = vscode.window.activeTextEditor;
+    const existing = activeEditor?.document.uri.scheme === 'mrw-record' ? activeEditor :
+      vscode.window.visibleTextEditors?.find(editor => editor.document.uri.scheme === 'mrw-record');
+    await vscode.window.showTextDocument(document, { preview: false,
+      viewColumn: existing?.viewColumn ?? vscode.ViewColumn.Beside });
     return uri;
   }
   async function choosePath(title, directory = false) {
@@ -238,7 +244,8 @@ function activate(context) {
     const applied = await editor.edit(edit => edit.insert(selection.active, result.body), { undoStopBefore: true, undoStopAfter: true });
     if (!applied) throw new Error('The editor declined the insertion. The note was not saved.');
   });
-  const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review });
+  const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
+    ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview } });
   const tree = {
     onDidChangeTreeData: changed.event,
     getChildren: () => {
@@ -256,7 +263,7 @@ function activate(context) {
     },
     getTreeItem: row => {
       const item = new vscode.TreeItem(row.label);
-      item.command = { command: row.command, title: row.label };
+      if (row.command) item.command = { command: row.command, title: row.label };
       return item;
     },
   };

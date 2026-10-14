@@ -13,8 +13,8 @@ and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
 R1's PDF-plus-note workflow, R2's bounded direct mathematical-assistance
 exchange, R3's one linked resumable continuation and R3.1's explicit end-and-
 begin-again lifecycle are delivered in the standalone Qt application. The
-extension currently supplies record actions and R2 preview/Send; R3/R3.1 are
-not yet ported. Their genuine mathematical-use observation
+extension supplies record actions, R2 preview/Send and the bounded R3/R3.1
+continuation, private resumption and explicit ending. Their genuine mathematical-use observation
 remains pending. The separately requested proof-outline increment below is
 planned; it does not add broader automatic conversation.
 
@@ -87,13 +87,17 @@ needed for its record actions. Linux/WSL is the initial service target.
 R2 preview/Send is now available through shared request services: capture
 ordinary text, inspect the complete request, and explicitly Send once. Review
 repairs preserve exact response identity and distinguish preflight rejection
-from uncertain transmission; see [the review report](docs/VS_CODE_ASSISTANCE_REVIEW.md). R3
-investigations and proof-outline vertex elimination remain to be ported or
-implemented. Automated bridge and command checks establish
+from uncertain transmission; see [the review report](docs/VS_CODE_ASSISTANCE_REVIEW.md).
+R3/R3.1 now adds one exact linked child, independent private investigation state,
+restart resumption, and explicit ending through the same core. Proof-outline
+vertex elimination remains planned. Automated bridge and command checks establish
 mechanics. Scoped real-host command and restart checks now pass in Windows
 VS Code connected to WSL with deterministic responses; see
 [host results and limits](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 Mathematical-use observation remains pending.
+Repeated research views reuse an existing host editor group. The
+[R3 persistence contract and commands](vscode/README.md#investigation-persistence-boundary)
+keep ordinary documents and recovery under VS Code ownership.
 
 ## Motivation
 

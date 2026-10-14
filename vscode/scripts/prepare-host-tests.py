@@ -10,12 +10,24 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--artifacts', type=Path, required=True)
 parser.add_argument('--project', type=Path)
 parser.add_argument('--persistence-phase', choices=('seed', 'restart'))
+parser.add_argument('--investigation-phase', choices=('seed', 'resume_end', 'sequential'))
+parser.add_argument('--investigation-outcome', choices=('failed', 'refused', 'incomplete'))
 args = parser.parse_args()
+if args.investigation_outcome and args.investigation_phase != 'sequential':
+    parser.error('--investigation-outcome requires --investigation-phase sequential')
 extension = Path(__file__).resolve().parents[1]
 artifacts = args.artifacts.resolve()
 artifacts.mkdir(parents=True, exist_ok=True)
 config_path = extension.parent / '.codex-work/vscode-host/config.json'
 config_path.parent.mkdir(parents=True, exist_ok=True)
+if args.investigation_phase and args.investigation_phase != 'seed':
+    staged_config = artifacts / 'persistence-extension/host-test.json'
+    value = json.loads(staged_config.read_text())
+    value['phase'] = args.investigation_phase
+    value['outcome'] = args.investigation_outcome
+    staged_config.write_text(json.dumps(value, indent=2))
+    print(staged_config.parent)
+    raise SystemExit(0)
 if args.persistence_phase:
     config = json.loads(config_path.read_text())
     if config['artifacts'] != str(artifacts):
@@ -47,7 +59,7 @@ config_path.write_text(json.dumps(config, indent=2))
 staged = artifacts / 'persistence-extension'
 shutil.copytree(extension, staged, ignore=shutil.ignore_patterns('.vscode', '*.vsix', '__pycache__'), dirs_exist_ok=True)
 manifest = json.loads((staged / 'package.json').read_text())
-manifest['main'] = './test/host/persistence.js'
+manifest['main'] = './test/host/investigation.js' if args.investigation_phase else './test/host/persistence.js'
 manifest['activationEvents'] = ['*']
 (staged / 'package.json').write_text(json.dumps(manifest, indent=2))
 (staged / 'host-test.json').write_text(json.dumps(dict(config, phase='seed'), indent=2))

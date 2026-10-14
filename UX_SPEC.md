@@ -68,8 +68,47 @@ statuses can be inspected, while passage extraction remains completed-only.
 Native Windows Send is blocked before transport because immutable publication
 is unsupported there. Terminal records live in private VS Code
 workspace storage; unsent drafts are transient. Host interruption can leave a
-request outcome uncertain and never triggers an automatic retry. R3 resumption
-and vertex elimination remain unimplemented in the extension. See [extension instructions](vscode/README.md).
+request outcome uncertain and never triggers an automatic retry. R3/R3.1 is
+implemented as described below; vertex elimination remains planned.
+See [extension instructions](vscode/README.md).
+
+R3 starts from one exact reviewed initial completed ModelCall. Choose one to
+eight numbered prior passages, explicitly add/remove current ordinary-text
+selections, and keep the human correction and task summary separate. Every
+draft change invalidates its complete independent preview; Send is a separate
+one-attempt action. The child records `in_reply_to` without provider conversation
+state. An initial parent has one child in the active investigation; a linked
+child cannot be continued again, and an existing slot cannot be overwritten.
+
+The extension's versioned private state contains bounded human task fields and
+exact record pointers/spans, with a pending reservation published before Send.
+It uses the core's existing mutable-file publication service under private
+extension storage, keyed by canonical project identity. No Qt workspace,
+buffer or recovery state is imported. Explicit **Resume Saved Investigation**
+restores the parent/human/child comparison after exact validation. A pending
+destination is reconciled only against its reserved request fingerprint;
+missing or changed known records leave the human summary and pins intact.
+Opening the host starts no bridge or request. No automatic retry occurs.
+
+Human fields are edited through commands and displayed in the plain-text
+comparison. **Save Human Task Summary** persists them; accepted edits not yet
+saved remain in memory. The investigation's current-question command is
+independent of an unrelated R2 draft. Handoff insertion uses the latest matching
+human fields and immutable identities without copying model prose. Repeated
+previews and comparisons reuse an existing MRW editor group.
+
+**End Investigation…** offers insert-handoff-and-end, end-without-insertion or
+cancel. Busy/restore entry points are guarded, and the handler revalidates active
+identity and the intended ordinary note after confirmation and preparation.
+Successful ending clears only the active pointer after private publication.
+Insertion remains an ordinary unsaved host edit with undo; no automatic Save or
+Qt recovery guarantee is claimed. If ending fails, live state and any inserted
+note text remain without duplicate insertion, retry or automatic undo. Failed
+or uncertain publication blocks further private writes until reload; a complete
+post-replacement result may be visible on disk after an uncertain sync failure.
+Preserve unsaved human edits through a handoff before reload when needed.
+Another independent bounded investigation can use the released slot after
+restart. Records are retained; no archive browser or branching conversation is added.
 
 The 2026-10-13 Windows/WSL Development Host checks exercised these command,
 document, undo and record workflows with scripted dialogs and deterministic

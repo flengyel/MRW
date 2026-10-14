@@ -16,6 +16,17 @@ from .workspace import selection_span
 POSIX_PUBLICATION_SUPPORTED = os.name == 'posix'
 
 
+def _not_sent(exc, request, key):
+    error = str(exc).replace(key, '[redacted]') if key else str(exc)
+    draft = request.get('draft')
+    output = draft.get('output') if isinstance(draft, dict) else None
+    if not isinstance(output, str) or '\0' in output:
+        output = None
+    return {'status': 'not_sent', 'path': output,
+            'body': 'Mathematical assistance: not sent\nNo provider request was made by this action.\n' + safe_terminal_text(error),
+            'error': error, 'retained': False, 'revision': None}
+
+
 def decode_context(value):
     names = {f.name for f in fields(AssistanceContext)}
     if not isinstance(value, dict) or set(value) != names:
@@ -37,6 +48,9 @@ def decode_context(value):
 
 
 def prepare_editor_assistance(value):
+    if isinstance(value, dict) and 'parent' in value:
+        from .editor_investigation import prepare_editor_continuation
+        return prepare_editor_continuation(value)
     if not isinstance(value, dict) or set(value) != {
         'project_root', 'target', 'contexts', 'question', 'model', 'output', 'exchange_id'
     }:
@@ -71,16 +85,19 @@ def assistance_action(request, *, transport=None):
     except (ValueError, OSError, TypeError, KeyError) as exc:
         # Only preflight is inside this block. A transport/publication failure
         # must never be reported as proof that nothing was sent.
-        error = str(exc).replace(key, '[redacted]') if key else str(exc)
-        draft = request.get('draft')
-        output = draft.get('output') if isinstance(draft, dict) else None
-        if not isinstance(output, str) or '\0' in output:
-            output = None
-        body = ('Mathematical assistance: not sent\n'
-                'No provider request was made by this action.\n' + safe_terminal_text(error))
-        return {'status': 'not_sent', 'path': output, 'body': body,
-                'error': error, 'retained': False, 'revision': None}
+        return _not_sent(exc, request, key)
     kwargs = {} if transport is None else {'transport': transport}
+    investigation_store = None
+    if prepared.continuation is not None:
+        from .editor_investigation import reserve_child
+        try:
+            investigation_store, reservation = reserve_child(prepared, request['draft'])
+        except (ValueError, OSError, TypeError, KeyError) as exc:
+            return _not_sent(exc, request, key)
+        if reservation.get('blocked'):
+            return dict(status='not_sent', retained=False, path=str(prepared.operation.output),
+                revision=None, body='Request not sent: investigation reservation failed.',
+                investigation=reservation)
     sent = transmit_assistance(prepared, key, **kwargs)
     terminal = parse_terminal_model_call(sent.raw_record) if sent.raw_record else None
     if terminal and not terminal_matches(prepared, terminal):
@@ -94,6 +111,14 @@ def assistance_action(request, *, transport=None):
         body += '\n' + safe_terminal_text(error)
     if status == 'unretained':
         body += '\nNo matching terminal record was recovered. Do not assume the request was unsent.'
-    return {'status': status, 'path': str(prepared.operation.output), 'body': body,
+    result = {'status': status, 'path': str(prepared.operation.output), 'body': body,
             'error': error, 'retained': terminal is not None,
             'revision': sha256(sent.raw_record).hexdigest() if terminal else None}
+    if investigation_store is not None:
+        from .editor_investigation import bind_terminal
+        if terminal is not None:
+            result['investigation'] = investigation_store.publish(
+                bind_terminal(investigation_store.active, sent.raw_record))
+        else:
+            result['investigation'] = investigation_store.result()
+    return result

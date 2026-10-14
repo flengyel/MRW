@@ -19,12 +19,13 @@ checkpoint protocol, widgets, and layout are not extension requirements.
 | Ordinary editing and recovery | Provided by VS Code; do not duplicate | Application-owned implementation |
 | Existing PDF and TeX/notebook tools | Other host integrations; MRW does not claim parity | PDF reading, staged TeX build, and external Jupyter handoff delivered |
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
-| R3 continuation, restart resumption, and R3.1 ending | Pending explicit host-state design and port | Delivered |
+| R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
-Immediate order: validate the existing extension in a real Extension Development
-Host with deterministic responses, address observed defects, then port bounded
-R3/R3.1. Use `vscode/README.md` and `docs/CODEX_CONTINUATION.md`. Proof-outline
+The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
+Use `vscode/README.md` for the independent private pointer, explicit Resume and
+ending commands, and failure boundaries. Mathematical usefulness remains pending.
+`docs/CODEX_CONTINUATION.md` records the next bounded handoff. Proof-outline
 reconnaissance remains a separately authorized increment, not a competing
 instruction to begin multiple implementations. The 2026-10-13 host validation
 completed the scoped command checks and a normal-host persistence check;
@@ -322,15 +323,28 @@ bytes, preserve response identity across virtual-document lifecycle events,
 expose all terminal records, and preserve known-unsent drafts after preflight
 rejection. Native Windows Send is blocked before transport. No live request
 was made during implementation or review.
-R3 investigation state remains in Qt pending an explicit host-state design.
+R3/R3.1 is now transferred. Shared `investigation_actions.py` supplies exact
+parent/passage selection, independent child preparation, restoration and human
+handoff for both callers. `editor_investigation.py` owns a separate versioned
+private pointer in extension storage; it reads no Qt workspace or recovery data.
+The sole slot is durably reserved before Send and pins the first matching child
+terminal record. Explicit Resume validates identities without a request or retry.
+Human task edits, explicit saving, handoff insertion and three-choice ending
+preserve the bounded lifecycle. Failed/uncertain private publication keeps live
+state and blocks further private writes until reload. Ordinary notes, undo and
+recovery stay under VS Code ownership. See
+[the persistence boundary](vscode/README.md#investigation-persistence-boundary).
 An actual Extension Development Host run was unavailable during the earlier
 review. The subsequent Windows VS Code/WSL run passed the scoped command suite
 with injected responses and a separate normal-host close/reopen persistence
 check. Visible captures at both review sizes were inspected with the layout
 limits recorded in the review report. Scripted dialogs, deterministic responses,
 and restored selections establish mechanics; mathematical usefulness remains
-pending. R3/R3.1 is the next bounded migration increment, with an explicit
-host-state design still required.
+pending. Subsequent normal WSL hosts exercised R3 restart, exact identity
+checks, terminal outcomes, ending failures and sequential slot reuse. A visible
+view-placement defect was corrected by reusing the existing research editor
+group. The full results and remaining runtime limits are recorded in the
+[R3 validation report](docs/VS_CODE_ASSISTANCE_REVIEW.md#r3r31-extension-migration).
 The proof-outline increment still requires actual exporter/viewer output for
 one selected proof before graph navigation is implemented. See
 [vscode/README.md](vscode/README.md) for the delivered boundary and host check.

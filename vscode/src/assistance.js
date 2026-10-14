@@ -3,6 +3,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { digest, protectedText } = require('./navigation');
+const { registerInvestigation } = require('./investigation');
 
 function capture(editor) {
   const doc = editor && editor.document;
@@ -33,7 +34,7 @@ function capture(editor) {
     state: 'captured visible editor text; disk revision not checked' });
 }
 
-function registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review }) {
+function registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review, ordinaryEditor, choosePath, getReview }) {
   let draft, prepared, previewUri, busy = false;
   const idle = () => { if (busy) throw new Error('Wait for the current assistance action to finish.'); };
   const invalidate = () => { prepared = undefined; previewUri = undefined; changed.fire(); };
@@ -47,10 +48,19 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
   }
   // Lock before the first await, including dialogs; old previews cannot be sent
   // while a replacement is being prepared or after preparation fails.
-  async function change(action) {
-    idle(); busy = true; invalidate();
-    try { await action(); } finally { busy = false; changed.fire(); }
+  async function change(action, invalidatePreview = true) {
+    idle(); busy = true;
+    vscode.commands.executeCommand?.('setContext', 'mrw.assistanceBusy', true);
+    if (invalidatePreview) invalidate();
+    try { await action(); } finally {
+      busy = false;
+      vscode.commands.executeCommand?.('setContext', 'mrw.assistanceBusy', false);
+      changed.fire();
+    }
   }
+  const investigation = registerInvestigation({ vscode, context, register, bridge, show, projectRoot, changed,
+    review, ordinaryEditor, choosePath, getReview, change, prepare,
+    getDraft: () => draft, setDraft: value => { draft = value; }, isBusy: () => busy });
   register('mrw.ask', () => change(async () => {
     const target = capture(vscode.window.activeTextEditor);
     const root = await projectRoot(vscode.window.activeTextEditor);
@@ -83,7 +93,7 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     await prepare();
   }));
   register('mrw.editQuestion', () => change(async () => {
-    if (!draft) throw new Error('Start with Ask About Selected Work.');
+    if (!draft) return investigation.editQuestion();
     const question = await vscode.window.showInputBox({ prompt: 'Mathematical question', value: draft.question });
     if (question !== undefined) draft.question = question;
     await prepare();
@@ -97,6 +107,7 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
   });
   register('mrw.sendRequest', async () => {
     idle();
+    investigation.writable();
     const active = vscode.window.activeTextEditor?.document;
     const displayText = text => text.replace(/\r\n|\r/g, '\n');
     if (!prepared || active?.uri.toString() !== previewUri ||
@@ -105,12 +116,14 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     }
     const sending = prepared;
     busy = true; draft = undefined; invalidate();
+    vscode.commands.executeCommand?.('setContext', 'mrw.assistanceBusy', true);
     const status = vscode.window.setStatusBarMessage('MRW: sending one request…');
     try {
       let result;
       try {
         result = await bridge({ method: 'send_assistance', ...sending, confirmation: 'SEND' }, { timeout: 90000 });
       } catch (error) {
+        if (sending.draft.parent) investigation.uncertain();
         await show(`The assistance outcome is uncertain.\nRecord destination: ${sending.draft.output}\n` +
           'Inspect that destination before preparing another request. No automatic retry was made.', 'Assistance-outcome');
         throw error;
@@ -120,17 +133,25 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
         // never began. Keep the work, but require a newly displayed preview.
         draft = sending.draft;
       }
+      if (result.investigation) investigation.sent(result.investigation);
       await show(result.body, 'Assistance-outcome');
+      if (result.investigation?.blocked) await vscode.window.showErrorMessage(
+        (result.retained ? 'The terminal outcome is retained. ' : 'The request was not sent. ') +
+        'Private investigation publication failed. Reload before further private writes.');
       if (result.status === 'completed' && result.retained) {
         if (typeof result.revision !== 'string' || !/^[0-9a-f]{64}$/.test(result.revision)) {
           throw new Error('The completed record has no valid revision. Inspect the recorded destination.');
         }
         await review({ method: 'review', path: result.path, revision: result.revision, mode: 'index', number: 1 });
       }
-    } finally { busy = false; status?.dispose(); changed.fire(); }
+    } finally {
+      busy = false; status?.dispose();
+      vscode.commands.executeCommand?.('setContext', 'mrw.assistanceBusy', false);
+      changed.fire();
+    }
   });
   return () => {
-    const rows = [['Ask about selected work…', 'mrw.ask']];
+    const rows = [['Ask about selected work…', 'mrw.ask'], ...investigation.rows()];
     if (draft) rows.push(['Add selected context', 'mrw.addContext'], ['Remove context…', 'mrw.removeContext'],
       ['Edit question…', 'mrw.editQuestion'], ['Show exact request preview', 'mrw.previewRequest'],
       ['Discard unsent request', 'mrw.discardRequest']);

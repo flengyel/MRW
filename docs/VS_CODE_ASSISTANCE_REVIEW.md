@@ -123,6 +123,82 @@ and reports. Generated artifacts and temporary profile data are not committed.
 No live provider call, external-browser handoff, VSIX installation,
 native Windows Send, manual-dialog campaign or mathematical-use trial was
 performed. The isolated test hosts were closed normally; the user's main
-editor and its extension settings were left alone. R3/R3.1 still needs its
-bounded host-state design and port; proof-outline vertex elimination remains
-separate. Mathematical usefulness remains pending.
+editor and its extension settings were left alone. At the end of that earlier
+campaign, R3/R3.1 still needed its bounded host-state design and port;
+proof-outline vertex elimination remained separate. Mathematical usefulness
+remains pending.
+
+## R3/R3.1 extension migration
+
+Implemented and checked on 2026-10-13–14, following the explicit persistence
+design in [vscode/README.md](../vscode/README.md#investigation-persistence-boundary).
+The earlier host harness/report was committed as `e4e65ba` and synced before
+this increment. The extension package is now version 0.3.0.
+
+`investigation_actions.py` extracts the existing controller's parent/passage
+selection, independent child preparation, restoration and human handoff. Qt's
+controller delegates to it while retaining its existing workspace/checkpoint
+protocol. `editor_investigation.py` adds an independent, bounded private pointer
+using the existing mutable publisher. It reserves the sole slot before child
+transmission and pins terminal records without changing the provider adapter,
+immutable publisher, ModelCall schema, Lean sources or warrant semantics.
+
+VS Code supplies editing, undo, Save and document recovery. MRW supplies
+explicit continuation, exact previews, separate Send, human task-field commands,
+explicit summary saving, Resume, handoff insertion and three-choice ending.
+The investigation question is separate from an unrelated R2 draft. Ending
+revalidates the active identity and note target and uses the latest matching
+human fields. It clears only the private pointer; records are retained. Failed
+or uncertain publication preserves live state and any inserted handoff and
+blocks later private writes until reload. Pending transmission recovery is
+explicit and checks the full recorded request fingerprint; it never retries.
+
+The normal Windows VS Code 1.141.1/WSL Debian host checks use deterministic
+injected responses and synthetic credentials, with Python socket connections
+blocked. They use actual host commands, documents, undo and private storage;
+dialogs are scripted. Separate host sessions check these boundaries:
+
+| Check | Result |
+|---|---|
+| Initial parent and one child | Exact selected multibyte parent passage, independent body and human correction; obsolete preview cannot Send; no unselected parent text or provider conversation state |
+| Active slot and task text | Branch rejected; human conclusion saved separately from immutable calls |
+| Failed ending | Injected publication failure retains live pointer, latest inserted human handoff and records; later writes blocked; ordinary undo restores the test note |
+| Restart | Exact parent/child hashes and saved human fields restored without transmission; unsaved private task edits are not presented as checkpointed |
+| Changed child / delayed restoration | Original pin and human summary retained; End rejected during foreground restore |
+| Cancel and successful ending | Cancel preserves exact pointer bytes; latest unsaved issue enters one note edit; one real undo restores the note; successful ending leaves record bytes intact |
+| Sequential reuse | Released slot survives restart; fresh independent failed, refused and incomplete children are retained, resumed and explicitly ended without note insertion |
+| Views | Repeated previews/comparisons reuse one research editor group; ordinary source bytes remain unchanged |
+
+The visible exercise exposed additional editor groups accumulating during
+repeated research views. `show()` now reuses an existing MRW group while
+leaving the host's ordinary layout controls intact. The new regression covers
+that behavior. Normal-host captures at 1280×820 and 960×680 retain the ordinary
+work beside the plain-text comparison. The compact capture hides the host
+sidebar. Long lines still use host horizontal
+scrolling; these checks do not establish reading comfort or mathematical benefit.
+
+The test driver was corrected to avoid awaiting its own activation while
+waiting for visible inspection. Windows cached-editor focus notifications also
+stalled when the window was in the background. The completed sequential checks
+use one outcome per normal host launch, fresh saved ordinary work documents and
+foreground inspection. Combined-driver attempts did not complete and are
+retained separately from completed reports. No aborted report counts as a pass.
+
+The final broader regression pass reports **26 Node tests passed** and **297
+Python tests: 238 passed, 59 skipped**. The latter includes toolkit-independent
+tests for both callers and the five conditional regressions using the existing
+pinned Lean executable. No Lake build was run. PySide6 is unavailable in this
+Python environment, so the 58 opt-in Qt widget checks were not run; the other
+skip is the unavailable authorized `/mnt/c` project parent. Python compilation,
+JavaScript syntax and diff checks pass. No Qt widget acceptance is inferred.
+
+Evidence remains local under `.codex-work/vscode-host-r3-20261013/`:
+`r3-seed.json`, `r3-resume_end.json`, `r3-sequential-failed.json`,
+`r3-sequential-refused.json`, `r3-sequential-incomplete.json`,
+`r3-comparison-1280.png`, `r3-comparison-960.png`, transport-body traces,
+staged production-source digests and broader test logs. Production source bytes
+in the staged host match the checkout; only the staged manifest/bootstrap differ.
+No real corpus, live provider call, VSIX installation, native Windows Send,
+browser handoff or mathematical-use trial was performed. Proof-outline vertex
+elimination and notebook-cell assistance remain planned. Mathematical
+usefulness is unobserved.

@@ -57,7 +57,8 @@ and incomplete outcomes remain distinct. A timeout or host interruption can
 leave the outcome uncertain: inspect the shown record destination before a new
 request. The extension cannot prevent closing the host while transmission is
 in progress. Unsent drafts are memory-only and are discarded on host restart;
-terminal records survive independently. R3 task resumption is not yet ported.
+terminal records survive independently. R3's explicit linked continuation and
+private task resumption are described below.
 
 The preview includes captured source identities, hashes, scalar positions,
 selected text, instructions, exact request JSON, limits, disclosure, and output
@@ -66,6 +67,76 @@ frozen UTF-8 body whose digest is shown. Opening, previewing, removing context,
 and discarding a request make no provider call. Preparation may create an empty
 private record directory; it creates no ModelCall or project file. Host state
 is separate from Qt's recovery and investigation state.
+
+**Continue one answer.** From a reviewed initial completed response, choose
+**Continue an Initial Answer Once**. With no reviewed response, select its
+retained ModelCall explicitly. Choose one to eight passage numbers, write the
+follow-up question and a separate human correction or changed assumption, and
+select the model. **Select Prior Response Passages**, **Add Selection to
+Request**, the context-removal command, and the human-field commands can revise
+the draft. Every change invalidates the old preview. The complete independent
+child body includes only those exact prior spans, explicit current selections,
+and displayed human fields. It records `in_reply_to` without provider
+conversation state. **Send Exact Preview** remains separate and single-attempt.
+A linked child cannot become another parent; an active investigation cannot
+be overwritten with a branch.
+
+**Resume and end.** **Resume Saved Investigation** explicitly validates the
+private pointer and exact retained records after restart, without sending.
+The read-only comparison keeps selected parent evidence, human task text and
+child outcome separate. Missing or changed records are reported while the
+human text and original pins remain. Use **Review Investigation Parent** or
+**Review Investigation Completed Child** for normal passage review and retention.
+Failed, refused and incomplete children remain terminal and inspectable.
+
+Human task fields are edited through the current-question, correction,
+conclusion and unresolved-issue commands. Accepted edits are visible in the
+comparison and remain in memory until **Save Human Task Summary**. The
+investigation-current-question command is separate from an unrelated R2 draft.
+**Insert Investigation Handoff into Active Note** copies the latest matching
+human fields and record identities, without model prose or automatic saving.
+
+**End Investigation…** offers **Insert handoff and end**, **End without
+insertion**, and **Cancel**. Focus the intended ordinary note before choosing
+insertion. The handler rechecks that note/version/selection after confirmation
+and preparation. Ending clears only the active private pointer after successful
+publication; records and ordinary files remain. Insertion is one unsaved host
+edit with undo. If ending fails after insertion, the note edit and live pointer
+remain, with no automatic retry, duplication or undo. Ending without insertion
+explicitly discards the private human task text. After ending and restart,
+another independent one-parent/one-child investigation can use the slot.
+
+### Investigation persistence boundary
+
+The core stores a version-1 `theorem-terminal.editor-investigation` envelope
+under the extension's private workspace storage, in
+`investigation-SHA256(canonical-project-root)/active.json`. It is limited to
+128 KiB and contains bounded human task fields, exact parent identity/spans,
+and the child's destination and exact request fingerprint. Each human field is
+limited to 16 KiB. Terminal state additionally pins the child's record hash,
+identity and response digest. It contains no editor buffer, recovery snapshot,
+full selected current context, or provider conversation state. It reuses the
+shared investigation value validator without loading or migrating Qt session
+data. Activation launches nothing; Resume is explicit.
+
+The core reserves the sole slot durably before child transmission. A host
+interruption therefore leaves a pending destination rather than permitting an
+automatic second child. Explicit Resume may reconcile the first terminal record
+at that destination only if all recorded request-side fields match the reserved
+fingerprint and parent link. A missing or nonmatching record stays unresolved;
+there is no retry. A known terminal record is subsequently checked against its
+exact retained-file and response digests without replacement guesses.
+
+Private pointer writes reuse the existing mutable-file service: exact previous
+bytes, kernel publication lock, synchronized file, atomic replacement and parent
+directory sync. Immutable publication is unchanged. Failed or uncertain private
+publication keeps the live state and blocks further private writes/Send until
+host reload. A post-replacement sync failure may leave the complete replacement
+on disk; no rollback occurs. Preserve unsaved human edits with an ordinary-note
+handoff before reload when needed. VS Code owns note saving and recovery; no Qt
+checkpoint or close-blocking guarantee is claimed. Concurrent hosts for the same
+project remain unsupported. Linux/WSL is the validated persistence platform;
+native Windows Send remains unavailable.
 
 **Read and inspect a proof.** Keep a saved UTF-8 source or note active, then
 choose **Open Lean Proof and Keep Return Location**. Select a `.lean` file and
@@ -115,6 +186,7 @@ premise.
 | Record validation and presentation | Existing `record_views.py` and `response_review.py` through `editor_bridge.py` |
 | Immutable passage publication | Existing `private_persistence.py`; unchanged no-overwrite boundary |
 | Request preparation and transmission | Shared `assistance_actions.py`; existing adapter and immutable publication unchanged |
+| Bounded R3/R3.1 | Shared `investigation_actions.py`; independent `editor_investigation.py` private pointer; host commands and undo |
 | Return location | One saved revision-pinned selection per canonical project in private VS Code workspace state |
 | Proof inspection | Explicit opening of local Lean source or configured HTTPS viewer |
 
@@ -139,8 +211,8 @@ Read-only inspection and preview remain available. Other persistence failures
 may still occur on supported hosts and are reported without automatic retries. Native macOS has not
 been exercised. Linux bridge checks do not establish cross-platform GUI support.
 
-R3 investigation continuation, PDF position tracking,
-Qt state migration, internal Lean graphs, vertex elimination, and AI outline
+PDF position tracking,
+internal Lean graphs, vertex elimination, and AI outline
 proposals remain to be transferred or implemented. PDF, LaTeX, Lean and notebook
 editing can use installed host extensions under their own settings and execution
 behavior. MRW does not configure or attest to those tools.
@@ -274,3 +346,36 @@ normally, prepare `--persistence-phase restart`, and relaunch the same staged
 extension. Check `persistence-restart.json` for `complete: true` and no `failure`.
 Do not count a launch or an incomplete report as a pass. Keep generated host
 artifacts outside version control.
+
+### R3/R3.1 validation and reproduction
+
+The bounded lifecycle is implemented and technically checked in normal WSL
+Development Hosts, including restart, changed-record handling, failed/cancelled/
+successful ending, latest-summary insertion with undo, and sequential reuse for
+all terminal outcomes. A visible view-placement defect was fixed by reusing an
+existing research editor group. See [the R3 report](../docs/VS_CODE_ASSISTANCE_REVIEW.md#r3r31-extension-migration).
+The final regression pass has 26 Node tests passing and 297 Python tests
+reported (238 passed, 59 skipped). PySide6/widget acceptance and mathematical
+usefulness remain unobserved in this run.
+
+Prepare the deterministic normal-host bootstrap with:
+
+```sh
+python3 vscode/scripts/bundle-core.py
+python3 vscode/scripts/prepare-host-tests.py --artifacts .codex-work/vscode-host-r3-run --investigation-phase seed
+```
+
+Launch the printed staged extension and project through Windows `Code.exe`
+and WSL remote URIs, with a separate temporary user-data directory and
+`--disable-extensions`, without `--extensionTestsPath`. Keep that test window
+in the foreground for reliable editor-focus events. Check `r3-seed.json` for
+`complete: true` and no `failure`, then close normally. Prepare and relaunch
+the same staged extension/project with `--investigation-phase resume_end`,
+then `--investigation-phase sequential --investigation-outcome failed`,
+repeating the latter for `refused` and `incomplete`, closing between launches.
+Check `r3-resume_end.json` and each `r3-sequential-OUTCOME.json` for completion
+without failure. Omitting the outcome runs all three in one host; that combined
+driver hit background-window focus delays in this environment. The bootstrap
+injects all responses and blocks Python network connections; it makes no live
+provider request. It authors only disposable ordinary test work. Reports from
+aborted focus/setup attempts do not establish acceptance.

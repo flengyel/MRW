@@ -16,7 +16,7 @@ from .openai_response import (ADAPTER_VERSION, PROVIDER, PreparedOperation,
 from .workspace import WorkspaceError
 
 if TYPE_CHECKING:
-    from .workstation import InvestigationParent, InvestigationDraft
+    from .investigation_actions import InvestigationParent, InvestigationDraft
 
 MAX_ASSISTANCE_CONTEXTS = 8
 MAX_ASSISTANCE_QUESTION_BYTES = 16 * 1024

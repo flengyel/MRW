@@ -37,12 +37,12 @@ when maintaining the standalone application; shared record and evidence
 invariants apply to both frontends. PDF, Lean, LaTeX, and notebook capabilities
 provided by other VS Code extensions are not implemented MRW capabilities.
 
-The extension currently implements record actions, return markers, explicit
-Lean/browser handoffs, and R2 exact preview/Send. R3 continuation, restart
-resumption, and R3.1 ending are delivered in Qt but remain to be ported to the
-extension. Proof-outline vertex elimination remains planned. First validate
-the existing extension in a real Extension Development Host with deterministic
-responses, then follow the bounded migration handoff. Use Windows VS Code
+The extension implements record actions, return markers, explicit Lean/browser
+handoffs, R2 exact preview/Send, and bounded R3 continuation, restart resumption
+and R3.1 ending. The extension's independent private investigation pointer is
+specified in `vscode/README.md`; it does not import Qt workspace/recovery state.
+Scoped actual-host checks use deterministic responses. Proof-outline vertex
+elimination remains planned. Follow the bounded migration handoff. Use Windows VS Code
 connected to a WSL2 checkout for Windows development; run Python and the
 workspace extension in WSL. Native Windows Send is currently unsupported.
 
