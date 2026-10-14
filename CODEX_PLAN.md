@@ -18,7 +18,7 @@ checkpoint protocol, widgets, and layout are not extension requirements.
 |---|---|---|
 | Ordinary editing and recovery | Provided by VS Code; do not duplicate | Application-owned implementation |
 | Existing PDF and TeX/notebook tools | Other host integrations; MRW does not claim parity | PDF reading, staged TeX build, and external Jupyter handoff delivered |
-| Retained records and R2 exact preview/Send | Implemented through shared services; host acceptance pending | Delivered |
+| Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Pending explicit host-state design and port | Delivered |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
@@ -26,7 +26,10 @@ Immediate order: validate the existing extension in a real Extension Development
 Host with deterministic responses, address observed defects, then port bounded
 R3/R3.1. Use `vscode/README.md` and `docs/CODEX_CONTINUATION.md`. Proof-outline
 reconnaissance remains a separately authorized increment, not a competing
-instruction to begin multiple implementations. The Qt delivery and observation
+instruction to begin multiple implementations. The 2026-10-13 host validation
+completed the scoped command checks and a normal-host persistence check;
+see [evidence and limits](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
+Mathematical usefulness remains unobserved. The Qt delivery and observation
 reports below are historical evidence, not extension acceptance evidence.
 
 Documentation clarification, 2026-09-27: justification may exceed present
@@ -320,10 +323,14 @@ expose all terminal records, and preserve known-unsent drafts after preflight
 rejection. Native Windows Send is blocked before transport. No live request
 was made during implementation or review.
 R3 investigation state remains in Qt pending an explicit host-state design.
-An actual Extension Development Host run was unavailable in the review environment;
-command simulation and the real Python bridge were tested separately. A local
-VS Code/WSL session can now perform the pending host checks; a successful editor
-launch alone does not establish extension acceptance.
+An actual Extension Development Host run was unavailable during the earlier
+review. The subsequent Windows VS Code/WSL run passed the scoped command suite
+with injected responses and a separate normal-host close/reopen persistence
+check. Visible captures at both review sizes were inspected with the layout
+limits recorded in the review report. Scripted dialogs, deterministic responses,
+and restored selections establish mechanics; mathematical usefulness remains
+pending. R3/R3.1 is the next bounded migration increment, with an explicit
+host-state design still required.
 The proof-outline increment still requires actual exporter/viewer output for
 one selected proof before graph navigation is implemented. See
 [vscode/README.md](vscode/README.md) for the delivered boundary and host check.

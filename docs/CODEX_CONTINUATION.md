@@ -22,13 +22,21 @@ is rejected before transport; a known-unsent draft needs a new preview. See
 [the review report](VS_CODE_ASSISTANCE_REVIEW.md) for findings and validation.
 These repairs were published in PR #3 on `codex/vscode-assistance` at
 `d82dfb311db5a020173054e87085c2f2f2de5588`, followed by documentation alignment
-at `1fdb6f1a737bc0c82131da62ea786b66b5565495`. The user authorized merging PR #3
-and removing obsolete branches. After the merge, continue from updated `main`,
-which preserves those commits; do not resume from an old review branch.
+at `1fdb6f1a737bc0c82131da62ea786b66b5565495`. PR #3 is merged on `main` at
+`f8812ea`; the obsolete branches were removed. Continue from `main`, which
+preserves those commits; do not resume from an old review branch.
 No live request is authorized by this migration or its tests.
 
-Next validate these workflows in an actual Extension Development Host using
-`vscode/README.md`, then port bounded R3 investigation continuation and restart
+The scoped actual-host validation is now complete on Windows VS Code 1.141.1
+connected to WSL Debian. The command suite used deterministic injected responses;
+a separate normal-host close/reopen checked persisted Return and stale virtual
+tabs. See [results, harness, and limits](VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation)
+and `vscode/README.md`. No production defect was found in the covered paths.
+The smaller visible check used ordinary host layout adjustments. Manual dialogs,
+VSIX installation, external-browser handoff and mathematical usefulness were
+not established. Do not repeat this campaign merely to begin the next increment.
+
+Next port bounded R3 investigation continuation and restart
 resumption with an explicit host-state design. Preserve one parent/one child,
 per-request previews, exact record identities, human task notes, and explicit
 ending. Do not silently migrate Qt buffer, recovery, or investigation state.
@@ -38,10 +46,9 @@ replacement of the standalone application has been delivered.
 The Python/Node checks use synthetic data and make no provider request. The
 review environment had no installed VS Code executable or PySide6; command API
 doubles and service checks do not establish visible UI acceptance. The user has
-now opened Windows VS Code against the WSL2 checkout. That resolves editor
-setup, not extension-host acceptance: run the pending workflows and record
-their actual results. Keep the validation limit explicit until those checks
-are complete. The existing Qt study observation below remains independent, and
+now opened Windows VS Code against the WSL2 checkout; the subsequent actual-host
+checks are recorded above, separately from that setup and the earlier API doubles.
+Keep their limits explicit. The existing Qt study observation below remains independent, and
 its instruction to make no code change during observation does not revoke the
 new migration request.
 

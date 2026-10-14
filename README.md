@@ -90,8 +90,10 @@ repairs preserve exact response identity and distinguish preflight rejection
 from uncertain transmission; see [the review report](docs/VS_CODE_ASSISTANCE_REVIEW.md). R3
 investigations and proof-outline vertex elimination remain to be ported or
 implemented. Automated bridge and command checks establish
-mechanics; an actual Extension Development Host run and mathematical-use
-observation remain pending in this environment.
+mechanics. Scoped real-host command and restart checks now pass in Windows
+VS Code connected to WSL with deterministic responses; see
+[host results and limits](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
+Mathematical-use observation remains pending.
 
 ## Motivation
 

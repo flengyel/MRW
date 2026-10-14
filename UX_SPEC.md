@@ -71,6 +71,16 @@ workspace storage; unsent drafts are transient. Host interruption can leave a
 request outcome uncertain and never triggers an automatic retry. R3 resumption
 and vertex elimination remain unimplemented in the extension. See [extension instructions](vscode/README.md).
 
+The 2026-10-13 Windows/WSL Development Host checks exercised these command,
+document, undo and record workflows with scripted dialogs and deterministic
+responses. A normal-host close/reopen separately confirmed Return persistence
+and rejection of stale virtual-tab identity; VS Code's extension-test mode uses
+in-memory workspace storage and cannot establish that result. Visible captures
+at both review sizes were inspected, using ordinary host layout controls for
+the smaller window. No production UX change or mathematical-use claim follows
+from this validation. Details and remaining limits are in the
+[host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
+
 ## 1. Design principle
 
 The interface supports doing and studying mathematics. It does not require a

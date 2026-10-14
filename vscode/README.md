@@ -159,10 +159,9 @@ python3 -m compileall -q src tests
 
 The Node tests exercise the actual bundled Python bridge and command workflows
 using a VS Code API double. They are not visible UI or Extension Development
-Host acceptance. No provider request occurs. The next host check is: open a
-saved note, hand off to Lean, return, review the synthetic fixture, insert a
-passage, undo it, retain a projection, then restart and return again. Test at
-1280×820 and 960×680. Mathematical usefulness needs a separate real task.
+Host acceptance. No provider request occurs. The real-host checks below now
+cover those workflows on Windows VS Code connected to WSL Debian.
+Mathematical usefulness needs a separate real task.
 
 API references: [tree views](https://code.visualstudio.com/api/extension-guides/tree-view),
 [workspace trust](https://code.visualstudio.com/api/extension-guides/workspace-trust),
@@ -214,3 +213,64 @@ The complete Python suite ran 289 tests: 224 passed, 64 skipped, and the same
 existing TeX descendant-reaping error. Installed-package terminal inspection,
 Python compilation, JavaScript syntax, and diff checks pass. Actual VS Code
 host acceptance remains pending.
+
+### Actual host validation, 2026-10-13
+
+The scoped command workflows now pass in Windows VS Code 1.141.1 connected to
+WSL Debian, with Python 3.13.5 on the Linux workspace extension host. All
+responses use an injected deterministic transport; the test launcher removes
+the inherited credential and rejects socket connections. The host workflows
+made no live provider call and invoked no Lean. See [results and limits](../docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
+
+The real host exercised Unicode/CRLF and untitled selection, frozen preview,
+context removal/addition, question editing, separate Send and duplicate
+rejection, concurrent note edits, all terminal statuses, known-unsent recovery,
+inert passage review, insertion/undo, private no-overwrite projection,
+language changes, and saved-source handoff/Return. A separate normal
+development-host close/reopen confirmed persisted Return and stale virtual-tab
+rejection. Windows captures were inspected at 1280×820 and 960×680; the smaller
+capture uses a hidden sidebar and two host zoom-out steps at this display
+scaling. These checks script dialogs; they do not establish manual-dialog,
+VSIX-installation, external-browser, cross-platform, or mathematical-use acceptance.
+
+All 20 existing Node checks passed. The Python suite reported 289 tests: 230
+passed and 59 skipped. No production defect was found in the covered paths.
+The skipped checks include 58 opt-in Qt widget tests and one unavailable
+authorized `/mnt/c` project parent. Production services and transport are unchanged.
+The broader Python suite also exercised the already-built pinned Lean checker
+through its five conditional documentary regressions; no Lake build was run.
+
+To repeat the host checks, first bundle the core, then prepare a disposable
+project and artifacts directory:
+
+```sh
+python3 vscode/scripts/bundle-core.py
+python3 vscode/scripts/prepare-host-tests.py --artifacts .codex-work/vscode-host-run
+```
+
+Launch an Extension Development Host with this extension as
+`--extensionDevelopmentPath`, `vscode/test/host` as `--extensionTestsPath`, and
+the printed project as the workspace. Use a separate temporary `--user-data-dir`
+and `--disable-extensions`; the development extension itself still loads.
+On Windows/WSL invoke Windows `Code.exe` with `--remote wsl+DISTRO` and
+`vscode-remote://wsl+DISTRO/absolute/path` URIs for those three locations. The WSL
+remote CLI ignores development/test flags. The runner scripts prompts and
+transport while using real host documents, commands and undo. It writes
+`initial.json`, transport bodies, and a `ready` file under the artifacts directory,
+then exits after up to 60 seconds (or when a `finish` file is created there).
+
+VS Code uses in-memory workspace storage with `--extensionTestsPath`, so that
+mode cannot test restart persistence. Prepare the normal-host bootstrap:
+
+```sh
+python3 vscode/scripts/prepare-host-tests.py --artifacts .codex-work/vscode-host-run --persistence-phase seed
+```
+
+Launch the printed staged extension with the same user-data directory and
+project, **without** `--extensionTestsPath`. Its production JS/Python bytes match
+the checkout; only its manifest entry/activation and test configuration differ.
+The bootstrap forbids Send and writes `persistence-seed.json`. Close that host
+normally, prepare `--persistence-phase restart`, and relaunch the same staged
+extension. Check `persistence-restart.json` for `complete: true` and no `failure`.
+Do not count a launch or an incomplete report as a pass. Keep generated host
+artifacts outside version control.
