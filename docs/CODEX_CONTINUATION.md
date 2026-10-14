@@ -6,34 +6,63 @@ The user explicitly requested beginning the VS Code extension and transferring
 existing code. The first increment is now in `vscode/`; read its README.
 `record_actions.py` supplies the shared projection and attributed-copy functions
 used by Qt and the extension. `editor_bridge.py` exposes bounded explicit
-record actions without owning text buffers, importing Qt, or invoking Lean or
-a model. The host owns documents and undo. Return markers and local Lean/HTTPS
+record and explicitly previewed assistance actions without owning text
+buffers, importing Qt, or invoking Lean. Only Send invokes the model adapter. The host owns documents and undo. Return markers and local Lean/HTTPS
 handoffs are present; proof graph extraction and vertex elimination are absent.
 
-Next validate the extension in an actual Extension Development Host using the
-workflow in `vscode/README.md`, then transfer the existing R2 preview/Send
-workflow by extracting independent request preparation and lifecycle services.
-Keep the adapter's transport and publication boundary intact. Do not migrate
-Qt buffer, recovery, or investigation state by silently reinterpreting it.
-R3 needs an explicit later host-state design. A complete replacement of the
-standalone application has not been delivered.
+PR #2 was merged into main at `f6fcc66ae4d9e9ed27a6ef49d13c8a138d96b43e`.
+The follow-on increment implements R2 preview/Send: `assistance_actions.py` supplies
+shared preparation, preview, transmission and terminal matching. Qt delegates;
+VS Code captures ordinary selections and owns the transient draft. A separate
+Send requires the active current preview and consumes it before transmission.
+The review repairs additionally pin received records by digest, preserve
+virtual-tab record identity, inspect all terminal statuses, and distinguish
+known preflight rejection from uncertain transmission. Native Windows Send
+is rejected before transport; a known-unsent draft needs a new preview. See
+[the review report](VS_CODE_ASSISTANCE_REVIEW.md) for findings and validation.
+These repairs were published in PR #3 on `codex/vscode-assistance` at
+`d82dfb311db5a020173054e87085c2f2f2de5588`, followed by documentation alignment
+at `1fdb6f1a737bc0c82131da62ea786b66b5565495`. The user authorized merging PR #3
+and removing obsolete branches. After the merge, continue from updated `main`,
+which preserves those commits; do not resume from an old review branch.
+No live request is authorized by this migration or its tests.
 
-The Python/Node checks use synthetic data and make no provider request. This
-environment has no installed VS Code executable or PySide6; command API doubles
-and service checks do not establish visible UI acceptance. Keep that validation
-limit explicit. The existing study observation below remains independent, and
+Next validate these workflows in an actual Extension Development Host using
+`vscode/README.md`, then port bounded R3 investigation continuation and restart
+resumption with an explicit host-state design. Preserve one parent/one child,
+per-request previews, exact record identities, human task notes, and explicit
+ending. Do not silently migrate Qt buffer, recovery, or investigation state.
+Vertex elimination remains a separate requested increment; no complete
+replacement of the standalone application has been delivered.
+
+The Python/Node checks use synthetic data and make no provider request. The
+review environment had no installed VS Code executable or PySide6; command API
+doubles and service checks do not establish visible UI acceptance. The user has
+now opened Windows VS Code against the WSL2 checkout. That resolves editor
+setup, not extension-host acceptance: run the pending workflows and record
+their actual results. Keep the validation limit explicit until those checks
+are complete. The existing Qt study observation below remains independent, and
 its instruction to make no code change during observation does not revoke the
 new migration request.
 
-Use this document as the next bounded handoff. The active roadmap is
+VS Code owns text documents, saving, undo, and document recovery. Keep shared
+record validation and immutable publication in Python. Port only the bounded
+research-state behavior that the host does not supply. Do not reproduce Qt
+buffers, checkpoint machinery, widgets, or splitter constraints in the extension.
+R3/R3.1 and proof-outline vertex elimination are not implemented in VS Code.
+
+## Separate Qt study observation and historical evidence
+
+The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
-R1's PDF-plus-note workflow, R2's single task-local assistance exchange and
+In the standalone Qt application, R1's PDF-plus-note workflow, R2's single
+task-local assistance exchange and
 R3's one linked, resumable continuation are implemented and technically
 verified. R3.1 can explicitly end that sole active investigation without
 deleting its records, preserves latest visible handoff edits, rejects stale
 restore completion and then permits a new bounded investigation after restart.
 Reviewed repair `d91e35bc56d5e66778c115e1c8ffea4d6937cd28` is integrated
-on live `main` and remains on its review branch. The focused controller/widget
+in `main` as a historical checkpoint. The focused controller/widget
 gate passed 21 deterministic tests; the installed module matches the integrated
 source and its GUI entry point launched against a durable study project. A
 private ordinary note has been prepared outside this repository. The selected
@@ -46,7 +75,7 @@ The Marcus study-and-explanation observation remains pending. The explicit
 below; its implementation and evaluation must not be reported as completed by
 this documentation update.
 
-## Objective
+## Qt observation objective
 
 With a mathematical source and problem chosen by the user, observe whether the
 delivered workstation helps produce and later resume worthwhile mathematical
@@ -89,8 +118,10 @@ exact source revisions, and the existing evidence boundaries.
 The preferred frontend trial is one VS Code extension over the independent
 Python services, reusing the established Lean and mathematical-tool ecosystem.
 Let the host own text documents and undo; retain research records in the core.
-Choosing an open-source editor distribution is deferred. Do not represent this
-direction as an already delivered extension or silently replace the Qt GUI.
+Choosing an open-source editor distribution is deferred. The extension's record
+actions and R2 preview/Send are implemented; its proof-outline viewer and vertex
+elimination are not. Do not claim those planned capabilities or silently replace
+the Qt GUI.
 
 The outline service performs no model request or compiler invocation merely to
 open or expand an existing outline; separately identify processing initiated by

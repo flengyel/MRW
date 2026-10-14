@@ -1,9 +1,33 @@
 # CODEX_PLAN.md
 
-Active product roadmap, reviewed 2026-09-20 against the integrated R1–R3.1
+Active product roadmap. VS Code migration status updated 2026-10-13;
+the product assessment was reviewed 2026-09-20 against the integrated Qt R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
 purpose in `VISION.md`.
+
+## Frontend scope and immediate delivery
+
+VS Code is the active frontend target. The extension owns explicit research
+commands and views; VS Code owns ordinary editing, saving, undo, and document
+recovery. Shared Python services own record validation, exact request preparation,
+and immutable publication. Qt remains a separate supported frontend. Its buffers,
+checkpoint protocol, widgets, and layout are not extension requirements.
+
+| Capability | VS Code extension status | Standalone Qt status |
+|---|---|---|
+| Ordinary editing and recovery | Provided by VS Code; do not duplicate | Application-owned implementation |
+| Existing PDF and TeX/notebook tools | Other host integrations; MRW does not claim parity | PDF reading, staged TeX build, and external Jupyter handoff delivered |
+| Retained records and R2 exact preview/Send | Implemented through shared services; host acceptance pending | Delivered |
+| R3 continuation, restart resumption, and R3.1 ending | Pending explicit host-state design and port | Delivered |
+| Proof-outline vertex elimination | Planned separate increment | Not implemented |
+
+Immediate order: validate the existing extension in a real Extension Development
+Host with deterministic responses, address observed defects, then port bounded
+R3/R3.1. Use `vscode/README.md` and `docs/CODEX_CONTINUATION.md`. Proof-outline
+reconnaissance remains a separately authorized increment, not a competing
+instruction to begin multiple implementations. The Qt delivery and observation
+reports below are historical evidence, not extension acceptance evidence.
 
 Documentation clarification, 2026-09-27: justification may exceed present
 understanding; the four benefit categories below refine evaluation without
@@ -59,7 +83,8 @@ the four benefits on its own evidence.
 ### Current assessment
 
 **Assessment: the project has reached the interaction needed to test its intended
-user outcomes, but has not yet demonstrated them.** It has a reusable editor,
+user outcomes in Qt, but has not yet demonstrated them.** The Qt application
+has a reusable editor,
 independent local-PDF and build/render paths, durable recovery, navigation
 anchors, exact retained-record services, one bounded task-local assistance
 exchange, one explicitly linked resumable continuation, and an explicit way to
@@ -69,8 +94,9 @@ continued in-application research collaboration has been observed. Continue
 from this foundation; do not restart the architecture.
 
 **Integration status, 2026-09-20:** reviewed repair
-`d91e35bc56d5e66778c115e1c8ffea4d6937cd28` is now the live `main` commit as
-well as the preserved review-branch tip. The combined focused investigation
+`d91e35bc56d5e66778c115e1c8ffea4d6937cd28` was integrated into `main` at that
+review. This is a historical checkpoint, not the current branch tip. The
+combined focused investigation
 suite passed 21 deterministic controller/widget tests, the installed module
 matches the integrated source bytes, and the GUI entry point launched against a
 durable study project. An ordinary note has been prepared outside this
@@ -121,7 +147,7 @@ The following are design inputs, not proof that this application works.
 
 ### Delivery order
 
-One product increment is active at a time. R1–R3.1 are delivered implementation
+One product increment is active at a time. R1–R3.1 are delivered Qt implementation
 boundaries; their usefulness columns remain prospective observations, not claims
 from automated checks.
 
@@ -134,10 +160,12 @@ from automated checks.
 | Requested notebook/SageMath workflow — planned | Standard study notebooks through JupyterLab with an installed SageMath kernel, building on the existing handoff | A saved explanation and computation can be continued later; kernel state and reproducibility are assessed separately |
 | Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3.1 justifies each addition; evaluate each on its own terms |
 
-**Active implementation priority, 2026-10-13: begin the explicitly requested
-VS Code migration over the existing core.** The R1–R3.1 mathematical-use
+**Active implementation priority, 2026-10-13: continue the explicitly requested
+VS Code migration over the existing core in the order above.** The Qt R1–R3.1
+mathematical-use
 observation remains independent and pending.
-R1 is delivered: ordinary Open and navigator actions route an existing PDF to
+In the standalone Qt application, R1 is delivered: ordinary Open and navigator
+actions route an existing PDF to
 the read-only QtPdf pane without a build; its canonical path, exact digest and
 page/zoom are distinct from generated-build provenance and text state. Failed,
 missing, invalid or changed loads retain the note and last valid reading state.
@@ -281,13 +309,21 @@ editing, save, undo and recovery. Saved revision-pinned return locations and
 explicit Lean/browser handoffs are implemented. Source changes block return;
 no outline graph or correspondence is inferred.
 
-The extension is the active frontend migration target. R2 preview/Send and R3
-investigation state remain in Qt pending their transfer. An actual Extension
-Development Host run is unavailable in this execution environment; command
-simulation and the real Python bridge are tested separately. The next port
-should extract request preparation and lifecycle services from `Workstation`
-without importing its buffer/recovery ownership into VS Code. Preserve exact
-preview, separate Send, one-attempt transport and immutable terminal records.
+The extension is the active frontend migration target. R2 preview/Send is now
+transferred through `assistance_actions.py`; Qt delegates to the same functions.
+The extension captures ordinary and untitled editor selections, allows explicit
+context changes, displays the exact request, and consumes the preview on its
+separate Send action. The existing adapter and immutable publication boundary
+are unchanged. Review repairs pin automatic response display to exact retained
+bytes, preserve response identity across virtual-document lifecycle events,
+expose all terminal records, and preserve known-unsent drafts after preflight
+rejection. Native Windows Send is blocked before transport. No live request
+was made during implementation or review.
+R3 investigation state remains in Qt pending an explicit host-state design.
+An actual Extension Development Host run was unavailable in the review environment;
+command simulation and the real Python bridge were tested separately. A local
+VS Code/WSL session can now perform the pending host checks; a successful editor
+launch alone does not establish extension acceptance.
 The proof-outline increment still requires actual exporter/viewer output for
 one selected proof before graph navigation is implemented. See
 [vscode/README.md](vscode/README.md) for the delivered boundary and host check.
@@ -298,7 +334,8 @@ established mathematical tools. Choice of an open-source editor
 distribution is deferred. The existing Qt application and R1–R3.1 retain their
 delivery status; their mathematical-use observation remains independent.
 
-Begin with Task 4.0 reconnaissance for one selected proof and consume existing
+When the proof-outline increment becomes active, begin with Task 4.0
+reconnaissance for one selected proof and consume existing
 graph/export output. Identify its granularity before selecting regions. Add
 only missing information needed for retained claims, explanations, and
 reversible expansion; do not parse Lean source in Python or infer proof steps
@@ -309,12 +346,12 @@ that proof. A smaller graph alone supplies no evidence of mathematical benefit.
 
 ### Observation handoff and status
 
-[docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) is the copyable
-mathematical-use observation handoff. This roadmap controls priority; the
-handoff defines the current bounded observation and must be advanced when that
-evidence changes.
+[docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) contains the active
+extension handoff followed by the separate Qt mathematical-use observation.
+This roadmap controls priority; advance the handoff when implementation or
+observation evidence changes.
 
-| Milestone | Implementation status at 2026-09-20 | Product evidence |
+| Qt milestone | Qt implementation status at 2026-09-20 | Product evidence |
 |---|---|---|
 | R1 | Implemented and technically verified: independent exact-identity PDF opening, separate imported/generated positions, durable note restoration, standard shortcuts and visible marker/focus status | A natural PDF-plus-note study and later continuation remain to be observed; usefulness is pending |
 | R2 | Implemented and technically verified: exact selected ordinary-text context, natural-language question, removable context, exact request preview, separate Send, off-thread single-attempt transport, terminal-status inspection, inert attributed answer, exact projection and attributed editable note insertion | No live provider request or genuine mathematical use was performed; usefulness remains pending |
@@ -331,7 +368,7 @@ implementation check establishes all four. Explicit user requests,
 including the notebook/SageMath workflow above, can define a bounded next
 increment without a prescribed preliminary study test.
 
-The delivered R1 boundary is:
+The delivered Qt R1 boundary is:
 
 - Route a PDF selected through ordinary Open or the project navigator to the
   existing QtPdf view, read-only, beside an editable ordinary work note. Preserve
@@ -360,7 +397,7 @@ review sizes, and updated status and handoff documents. PDF search, outline,
 SyncTeX, text extraction and broader reader redesign remain deferred. Add a
 deferred reader capability only if a demonstrated obstruction makes it necessary.
 
-The delivered R2 boundary is:
+The delivered Qt R2 boundary is:
 
 - Begin from a nonempty visible selection in an ordinary editable buffer or an
   explicitly opened read-only text reference. Freeze exact Unicode text,
@@ -386,7 +423,7 @@ R2 ended with deterministic injected transports, controller and actual-widget
 coverage, visible checks at the two review sizes, and no live provider call.
 Those results establish technical behavior only.
 
-The delivered R3 boundary is:
+The delivered Qt R3 boundary is:
 
 - Continue only an initial completed retained `ModelCall`, with one child and no
   branch or child-of-child continuation in this bounded workflow.
@@ -411,7 +448,7 @@ exercises at both review sizes. No live provider call or genuine mathematical
 investigation was performed. Automatic conversation state, branching, retries,
 source retrieval, provider tools and a second provider remain outside R1–R3.1.
 
-The delivered R3.1 boundary is:
+The delivered Qt R3.1 boundary is:
 
 - Offer an explicit **End investigation…** GUI action for the sole active
   parent/child pointer.
@@ -488,6 +525,11 @@ machinery. Keep the existing warrant semantics and provenance distinctions;
 their preservation does not require putting them in front of ordinary study.
 
 ## Retained implementation contracts
+
+The sections below retain shared domain contracts, standalone Qt implementation
+details, and task-dependent CLI/Lean experiments. They do not prescribe a new
+VS Code editor, PDF renderer, or recovery system, and their historical sequence
+does not override the active migration order above.
 
 ## Governing constraint
 

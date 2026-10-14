@@ -14,7 +14,8 @@ from .documentary_warrant import (
 )
 from .justification import MAX_BUNDLE_BYTES, bundle_expectation_from_verification, validate_bundle
 from .local_files import read_bounded
-from .model_projection import MAX_MODEL_CALL_BYTES, parse_finalized_model_call
+from .model_projection import (MAX_MODEL_CALL_BYTES, parse_finalized_model_call,
+                               parse_terminal_model_call)
 from .response_review import bounded_safe_field, render_response_review, safe_terminal_text
 from .source import SourceDocument
 from .workspace import WorkspaceError, strict_json
@@ -92,6 +93,25 @@ def projection_view(projection: DocumentaryProjection, revision: str) -> RecordV
 
 
 def inspect_record(path: Path, format: str, companion: Path | None = None) -> RecordView:
+    if format == "terminal_call":
+        raw = read_bounded(path, MAX_MODEL_CALL_BYTES, "terminal ModelCall")
+        call = parse_terminal_model_call(raw)
+        revision = SourceDocument.from_bytes(path, raw).revision
+        metadata = {key: call.document[key] for key in (
+            "id", "status", "provider", "requested_model", "resolved_model",
+            "requested_at", "completed_at", "finalized_at", "raw_response_digest",
+        )}
+        sections = (
+            ("Terminal status and identity", display_record(metadata)),
+            ("Record SHA-256", revision),
+            ("Evidence", "A terminal ModelCall records an operation's outcome. "
+             "Inspection creates no mathematical verification or premise admission."),
+            ("Complete retained record (JSON-escaped)", display_record(call.document)),
+        )
+        body = "Terminal ModelCall\n\n" + "\n\n".join(
+            f"{heading}\n{content}" for heading, content in sections
+        )
+        return RecordView(body, sections, revision)
     if format == "documentary_package":
         snapshot = SourceDocument.from_bytes(path / "verification.json", read_bounded(path / "verification.json", MAX_VERIFICATION_BYTES, "Verification"))
         package = load_documentary_warrant_package(path)

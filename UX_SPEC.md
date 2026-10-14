@@ -3,7 +3,7 @@
 The mathematician's workflow the interface must support. Companion to
 `VISION.md` (why the system exists) and `DOMAIN_MODEL.md` (entities and
 invariants). Present implementation and limitations are documented in README.
-The current GUI provides ordinary-file editing, existing local PDF reading,
+The standalone Qt GUI provides ordinary-file editing, existing local PDF reading,
 external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
 rendering, checkpoint recovery, one explicit task-local OpenAI exchange, one
 bounded linked continuation with restart restoration, an explicit end-and-
@@ -17,6 +17,15 @@ focused question need not repeat it. Qt/runtime and TeX prerequisites remain
 platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
+
+VS Code is the active frontend target. The mathematical workflow principles in
+this document apply to both frontends; implementation details concerning QtPdf,
+split panes, widgets, application-owned buffers, checkpoints, and close/quit
+apply only to Qt. Preserve their source-integrity and evidence invariants when
+designing host integrations, without duplicating VS Code's document lifecycle.
+Statements that R1–R3.1 are delivered below refer to Qt unless the extension is
+explicitly named. Other extensions' PDF, Lean, LaTeX, and notebook support is
+integration context, not a claim of MRW implementation or validation.
 
 The initial extension supplies an Explorer research view and MRW commands for
 record inspection, response review, exact retention, attributed note insertion,
@@ -37,14 +46,30 @@ passage selects its exact reviewed record revision. Retention creates a new
 projection with no overwrite. Insertion adds an attributed editable copy at the
 active note cursor, preserving selected work and one undo boundary; it does
 not save the note. Concurrent note/selection changes cancel insertion.
-Opening an earlier review tab reselects its record and passage.
+Opening an earlier review tab reselects its record and passage. This association
+survives document language changes. Each activation uses a distinct virtual
+document namespace so restored tabs cannot acquire a new record identity.
 
 Lean-source handoff opens a user-selected file and line beside the work. An
 installed Lean extension may process that file. HTTPS viewer handoff sends no
 source or appended local path. Neither action extracts a graph or supplies a
 Verification. PDF/Lean/LaTeX/notebook behavior supplied by other extensions
-remains their responsibility. R2/R3 and vertex elimination are not transferred
-by this initial increment. See [extension instructions](vscode/README.md).
+remains their responsibility. R2 preview/Send is transferred: **Ask About
+Selected Work** captures exact visible ordinary text, including unsaved and
+untitled documents. Up to eight contexts can be added or removed; changing
+context or the question invalidates the previous preview. The read-only current
+preview must be active for the separate **Send Exact Preview** command. Send
+consumes that preview before launching the asynchronous Python adapter, so
+duplicate actions cannot resend it. An explicit preflight rejection reports
+**not sent** and preserves the draft for a newly displayed preview. A known
+terminal outcome remains distinct from a later display failure; automatic
+response review checks the exact retained-record digest. All four terminal
+statuses can be inspected, while passage extraction remains completed-only.
+Native Windows Send is blocked before transport because immutable publication
+is unsupported there. Terminal records live in private VS Code
+workspace storage; unsent drafts are transient. Host interruption can leave a
+request outcome uncertain and never triggers an automatic retry. R3 resumption
+and vertex elimination remain unimplemented in the extension. See [extension instructions](vscode/README.md).
 
 ## 1. Design principle
 

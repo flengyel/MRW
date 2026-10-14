@@ -68,6 +68,49 @@ class EditorBridgeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 self.request(mode='index', number=1)
 
+    def test_terminal_inspection_preserves_all_statuses_without_enabling_projection(self):
+        original = json.loads(self.path.read_bytes())
+        for status in ('completed', 'failed', 'refused', 'incomplete'):
+            with self.subTest(status=status):
+                document = dict(original, status=status)
+                if status != 'completed':
+                    document.update(raw_response=None, raw_response_digest=None)
+                self.path.write_text(json.dumps(document))
+                before = self.path.read_bytes()
+                revision = sha256(before).hexdigest()
+                with patch('socket.socket', side_effect=AssertionError('network')), patch('subprocess.Popen', side_effect=AssertionError('process')):
+                    inspected = self.request('inspect', format='terminal_call', revision=revision)
+                self.assertIn(f'"status": "{status}"', inspected['body'])
+                self.assertIn('Complete retained record', inspected['body'])
+                self.assertEqual(inspected['revision'], revision)
+                self.assertEqual(self.path.read_bytes(), before)
+                if status != 'completed':
+                    with self.assertRaisesRegex(ValueError, 'must be completed'):
+                        self.request(mode='index', number=1)
+                    with self.assertRaisesRegex(ValueError, 'must be completed'):
+                        self.request('project', number=1, revision=revision,
+                                     destination=str(self.root / 'not-created.json'))
+                self.path.write_bytes(before + b' ')
+                with self.assertRaisesRegex(ValueError, 'changed'):
+                    self.request('inspect', format='terminal_call', revision=revision)
+        self.assertFalse((self.root / 'not-created.json').exists())
+
+    def test_terminal_inspection_escapes_controls_and_rejects_tampered_records(self):
+        document = json.loads(self.path.read_bytes())
+        text = '\x1b[31mproposal\x00\u202e\nhttps://example.invalid/'
+        document.update(status='refused', raw_response=text,
+                        raw_response_digest=sha256(text.encode()).hexdigest())
+        self.path.write_text(json.dumps(document))
+        result = self.request('inspect', format='terminal_call')
+        self.assertNotIn('\x1b', result['body'])
+        self.assertNotIn('\x00', result['body'])
+        self.assertNotIn('\u202e', result['body'])
+        self.assertIn('\\u001b', result['body'])
+        document['raw_response'] = 'changed'
+        self.path.write_text(json.dumps(document))
+        with self.assertRaises(ValueError):
+            self.request('inspect', format='terminal_call')
+
     def test_qt_and_extension_share_the_same_contribution(self):
         result = self.request('contribution', number=1, revision=self.revision)
         self.assertEqual(result['body'], Workstation.attributed_assistance_contribution(self.path, 1))

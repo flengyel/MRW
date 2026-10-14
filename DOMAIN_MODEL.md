@@ -6,6 +6,14 @@ mathematician does with it), and `CODEX_PLAN.md` (staged implementation).
 Fixes entities and invariants. Does not fix storage technology, schema syntax,
 or GUI framework.
 
+VS Code is the active frontend target; the standalone Qt application is another
+client of the same independent services. Host text documents, undo stacks, and
+document recovery are editor responsibilities, not new domain records. Research
+records retain their identities and evidence boundaries across frontends.
+This model describes intended entities and contracts, not a claim that every
+entity has an implemented VS Code command; consult README and CODEX_PLAN for
+frontend-specific delivery status.
+
 Changes from v8: the requested proof-outline view uses vertex elimination with
 visible claims and explanations. Source boundaries, local assumptions,
 reversible expansion, and explanation provenance remain separate from proof

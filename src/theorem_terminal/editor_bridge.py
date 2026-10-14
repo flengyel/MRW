@@ -1,7 +1,8 @@
 """One explicit editor action per bounded JSON request on standard input.
 
 Run through the extension's isolated launcher. No daemon, executable project
-configuration, model transport, Qt controller, or Lean process is involved.
+configuration, Qt controller, or Lean process is involved. Only the explicit
+Send action can invoke the existing model adapter.
 """
 
 from dataclasses import asdict
@@ -10,13 +11,14 @@ from pathlib import Path
 import re
 import sys
 
+from .editor_assistance import assistance_action
 from .record_actions import call_passage, persist_call_passage, attributed_contribution
 from .record_views import inspect_record, read_call_snapshot
 from .response_review import render_response_review
 from .workspace import strict_json
 
 PROTOCOL = 1
-MAX_REQUEST_BYTES = 64 * 1024
+MAX_REQUEST_BYTES = 4 * 1024 * 1024
 MAX_REPLY_BYTES = 64 * 1024 * 1024
 
 
@@ -46,7 +48,9 @@ def dispatch(request):
         raise ValueError('Unsupported editor bridge protocol')
     method = request.get('method')
     fields = {
-        'inspect': ({'path', 'format'}, {'companion'}),
+        'prepare_assistance': ({'draft'}, set()),
+        'send_assistance': ({'draft', 'preview', 'confirmation'}, set()),
+        'inspect': ({'path', 'format'}, {'companion', 'revision'}),
         'review': ({'path', 'mode', 'number'}, {'revision'}),
         'contribution': ({'path', 'number', 'revision'}, set()),
         'project': ({'path', 'number', 'revision', 'destination'}, set()),
@@ -57,13 +61,18 @@ def dispatch(request):
     required = required | {'protocol', 'method'}
     if not required <= request.keys() or request.keys() - required - optional:
         raise ValueError('Invalid editor action fields')
+    if method in ('prepare_assistance', 'send_assistance'):
+        return assistance_action(request)
     path = _path(request['path'])
     if method == 'inspect':
         format = request['format']
-        if format not in ('model_call', 'projection', 'verification', 'documentary_package'):
+        if format not in ('model_call', 'terminal_call', 'projection', 'verification', 'documentary_package'):
             raise ValueError('Unsupported retained record format')
         companion = _path(request['companion']) if 'companion' in request else None
-        return asdict(inspect_record(path, format, companion))
+        result = inspect_record(path, format, companion)
+        if 'revision' in request and result.revision != _revision(request['revision']):
+            raise ValueError('Retained record changed since inspection; open it again')
+        return asdict(result)
     number = _number(request['number'])
     if method == 'review':
         mode = request['mode']

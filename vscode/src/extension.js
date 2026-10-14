@@ -1,15 +1,20 @@
 'use strict';
 
 const vscode = require('vscode');
+const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { runBridge } = require('./bridge');
+const { registerAssistance } = require('./assistance');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
 function activate(context) {
   const documents = new Map();
   const reviewDocuments = new Map();
   const changed = new vscode.EventEmitter();
+  // Restored virtual tabs can outlive an extension host. Never reuse their URI
+  // for a new preview or a different retained-record review.
+  const session = randomUUID();
   let serial = 0, reviewGeneration = 0, currentReview;
   const register = (name, action) => context.subscriptions.push(
     vscode.commands.registerCommand(name, async () => {
@@ -18,30 +23,40 @@ function activate(context) {
         return await action();
       } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));
-  const bridge = request => {
+  const bridge = (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
     return runBridge(context.extensionPath,
-      vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request);
+      vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options);
   };
   const provider = {
-    provideTextDocumentContent: uri => documents.get(uri.toString()) || '',
+    provideTextDocumentContent: uri => documents.get(uri.toString()) ??
+      'This research view is no longer available. Open the retained record again, or prepare a new request preview.',
   };
   context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mrw-record', provider));
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
+    // VS Code also emits this event when only the language changes; the live
+    // document remains open. Its content and exact review identity still apply.
+    if (!document.isClosed) return;
     if (document.uri.scheme === 'mrw-record') documents.delete(document.uri.toString());
     reviewDocuments.delete(document.uri.toString());
   }));
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
     const record = editor && reviewDocuments.get(editor.document.uri.toString());
     if (record) { currentReview = record; changed.fire(); }
+    else if (editor?.document.uri.scheme === 'mrw-record' && !documents.has(editor.document.uri.toString())) {
+      currentReview = undefined; changed.fire();
+    }
   }));
   async function show(body, title, record) {
-    const uri = vscode.Uri.from({ scheme: 'mrw-record', path: `/${++serial}/${title}.txt` });
+    const uri = vscode.Uri.from({ scheme: 'mrw-record', path: `/${session}/${++serial}/${title}.txt` });
     documents.set(uri.toString(), body);
     if (record) reviewDocuments.set(uri.toString(), record);
-    const document = await vscode.workspace.openTextDocument(uri);
-    await vscode.languages.setTextDocumentLanguage(document, 'plaintext');
+    let document = await vscode.workspace.openTextDocument(uri);
+    document = await vscode.languages.setTextDocumentLanguage(document, 'plaintext');
+    documents.set(uri.toString(), body);
+    if (record) reviewDocuments.set(uri.toString(), record);
     await vscode.window.showTextDocument(document, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    return uri;
   }
   async function choosePath(title, directory = false) {
     const choices = await vscode.window.showOpenDialog({ title, canSelectMany: false,
@@ -168,7 +183,7 @@ function activate(context) {
   });
   register('mrw.inspect', async () => {
     const options = [
-      { label: 'Completed ModelCall', format: 'model_call' },
+      { label: 'ModelCall (any terminal outcome)', format: 'terminal_call' },
       { label: 'Response projection', format: 'projection' },
       { label: 'Verification and matching bundle', format: 'verification' },
       { label: 'Documentary warrant package', format: 'documentary_package' },
@@ -183,8 +198,9 @@ function activate(context) {
       if (!request.companion) return;
     }
     const result = await bridge(request);
-    const sections = result.sections.map(([heading, content]) => `${heading}\n${content}`).join('\n\n');
-    await show(`${result.body}\n\n${sections}`, 'Retained-record');
+    const sections = choice.format === 'terminal_call' ? '' :
+      result.sections.map(([heading, content]) => `${heading}\n${content}`).join('\n\n');
+    await show(sections ? `${result.body}\n\n${sections}` : result.body, 'Retained-record');
   });
   register('mrw.review', async () => {
     const file = await choosePath('Review a completed ModelCall');
@@ -222,10 +238,12 @@ function activate(context) {
     const applied = await editor.edit(edit => edit.insert(selection.active, result.body), { undoStopBefore: true, undoStopAfter: true });
     if (!applied) throw new Error('The editor declined the insertion. The note was not saved.');
   });
+  const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review });
   const tree = {
     onDidChangeTreeData: changed.event,
     getChildren: () => {
       const rows = [
+        ...assistanceRows(),
         ...savedMarkers().map(({ marker }) => [`Return: ${path.basename(marker.path)}:${marker.start[0] + 1} ${marker.preview}`, 'mrw.return']),
         ['Open Lean proof…', 'mrw.openProof'],
         ['Open external proof viewer', 'mrw.openViewer'], ['Inspect retained record…', 'mrw.inspect'],

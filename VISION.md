@@ -4,6 +4,13 @@ Why Theorem Terminal exists. Companion to `DOMAIN_MODEL.md` (entities and
 invariants), `UX_SPEC.md` (the human workflow), and `CODEX_PLAN.md` (staged
 implementation).
 
+The active frontend is a VS Code extension over independent research services;
+the standalone Qt application remains available. The purpose and evidence
+distinctions here are independent of that choice. VS Code supplies ordinary
+editing and document lifecycle; the extension contributes research continuity
+and explicit record operations. This vision states intended benefits, not
+feature parity between frontends or observed mathematical usefulness.
+
 ## Thesis
 
 Mathematical Research Workstation should help people work with mathematics whose
