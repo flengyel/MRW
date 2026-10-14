@@ -21,9 +21,11 @@ known preflight rejection from uncertain transmission. Native Windows Send
 is rejected before transport; a known-unsent draft needs a new preview. See
 [the review report](VS_CODE_ASSISTANCE_REVIEW.md) for findings and validation.
 These repairs were published in PR #3 on `codex/vscode-assistance` at
-`d82dfb311db5a020173054e87085c2f2f2de5588`. Continue on that branch, including
-subsequent documentation commits; the R2 port is not yet on `main` at this
-handoff. No live request is authorized by this migration or its tests.
+`d82dfb311db5a020173054e87085c2f2f2de5588`, followed by documentation alignment
+at `1fdb6f1a737bc0c82131da62ea786b66b5565495`. The user authorized merging PR #3
+and removing obsolete branches. After the merge, continue from updated `main`,
+which preserves those commits; do not resume from an old review branch.
+No live request is authorized by this migration or its tests.
 
 Next validate these workflows in an actual Extension Development Host using
 `vscode/README.md`, then port bounded R3 investigation continuation and restart

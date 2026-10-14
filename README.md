@@ -775,16 +775,17 @@ git diff --check
 Keep the extension checkout under the WSL2 Linux home directory, such as
 `~/src/theorem_terminal`, rather than under `/mnt/c/`. Run Git, Python, Node,
 and Codex in WSL2; Windows VS Code supplies the UI through its WSL connection.
-For the current PR #3 handoff, use `codex/vscode-assistance`, which contains the
-R2 implementation and review repairs. First inspect `git status` and preserve
-any local work before switching branches:
+PR #3 integrates the R2 implementation, review repairs, and documentation into
+`main`. After that merge, continue from `main`; the former review branches are
+obsolete. First inspect `git status` and preserve any local work before switching
+branches:
 
 ```bash
 cd ~/src/theorem_terminal
 git status
-git fetch origin
-git switch codex/vscode-assistance
-git pull --ff-only origin codex/vscode-assistance
+git fetch --prune origin
+git switch main
+git pull --ff-only origin main
 code .
 codex
 ```
