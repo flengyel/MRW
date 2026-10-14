@@ -336,6 +336,16 @@ machine-checked proof without an account of its role or governing idea is also a
 legitimate but different representation. The system records explicit proposed
 relationships among representations rather than identifying them.
 
+Mathematical reading includes textbooks, monographs, articles and AI-generated
+or AI-assisted manuscripts. The first offline source-region reader supports
+manual deconstruction of their arguments without requiring formal evidence.
+Orientation, central concepts and results, governing ideas, argument structure
+and optional technical detail are navigable at the reader's discretion. Using
+a cited theorem need not wait for reconstructing its proof. Source quotations,
+reader explanations and proposed repairs, and supporting checking evidence
+remain separately attributed. This bounded delivery does not establish proof
+correctness or observed explanatory benefit.
+
 Machine assistance can propose an outline of a formal proof, suggest a
 formalization target for an informal argument, compare definitions, or identify
 possible source correspondences. When Theorem Terminal requests such assistance,

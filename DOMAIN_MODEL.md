@@ -616,6 +616,21 @@ prevents study, problem solving, review, or reconstruction.
 
 ### Proof outlines by vertex elimination
 
+The delivered first source-region reader is private mutable navigation and
+attributed reader work over retained immutable source/artifact bytes. It uses
+Source/SourceOccurrence/VersionedSpan semantics with separate source-statement
+selections, reader Representation provenance, and optional supplied Trace or
+other artifact references. Its versioned storage envelope is not a new global
+proof schema or warrant. It requires no Lean declaration, compiler output or
+Verification. Textbook, monograph, article and AI-generated/assisted manuscript
+arguments use the same boundary. Unknown bibliography/authorship stays unknown.
+Manual source/snapshot associations and dependency notes are not checked
+Correspondences or verified inference edges. Recorded context lists available
+assumptions; it does not identify necessary or jointly required premises.
+Added justifications and proposed repairs remain attributed reader material,
+never silent amendments to the retained argument. The full graph contract below
+remains planned; the reader only partially implements it.
+
 **Planned requirement, 2026-10-12.** A proof outline may retain selected claims
 and hide intervening graph vertices, with explanations and expansion to the
 original steps. Use existing statement, explanation, outline, and diagram

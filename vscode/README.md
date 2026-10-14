@@ -5,6 +5,107 @@ review, exact passage retention and attributed note insertion onto the existing
 Python core. It adds saved return locations and explicit Lean/browser handoffs.
 It also supports selected-context request preview and a separate explicit Send.
 VS Code owns ordinary files, editing, undo, saving, and document recovery.
+The offline source-region reader supports informal mathematical arguments as
+well as optional captured Lean evidence; see its independent boundary below.
+
+## Offline source-region reader
+
+Open a saved UTF-8 mathematical text, select a passage, and run **MRW: Create
+Outline from Saved Source**. An empty selection creates an outline without
+regions. **Add Selected Source Region** adds more passages; select a card in
+the reader and use **Replace Selected Outline Region Range** to revise its
+range. The original or **Open retained source** text view supplies positions.
+The source stays unchanged; ordinary source edits, saving and undo belong to
+VS Code. Save or undo source edits before capturing original-file selections.
+
+Each card offers **Hide argument detail**, **Expand exact source**, and source
+navigation. **Use Selection as Exact Statement** records a separate exact
+statement, labeled either reader-selected source text or a reader-labeled
+declaration statement. **Keep Selected Hypothesis / Cited Result** retains
+source quotations of hypotheses, definitions, local assumptions, citations or
+references. These remain accessible while details are hidden. They describe
+available context, not necessary or jointly used premises.
+
+Use the editable overview and region annotations for governing ideas,
+intermediate claims, reconstructions, intended inferences, cited dependencies,
+reusable lemmas, questions, suspected gaps and proposed repairs. Choose a
+purpose, supplied origin and optional author, then **Save annotation**.
+Reader text has its own attribution and never inherits a source's checking
+status. Imported AI material can be labeled as such; this command makes no
+model request and does not fabricate a ModelCall. Retain an existing response
+or other provenance artifact explicitly when available. Unknown authorship,
+edition/revision, translator or other provenance stays unknown.
+
+Orientation, central concepts/results, governing ideas, argument structure and
+technical detail can be visited through the reading-level filter in any order.
+A reader can record reliance on a cited result while deferring its proof.
+This is manual navigation, not automatic Kallenberg guidance or prerequisite
+analysis. Textbooks, monographs, articles and AI-generated or AI-assisted
+manuscripts use the same reader. Lean is optional.
+
+**Attach Recorded Outline Evidence…** retains an existing UTF-8 artifact without
+alteration or rechecking. Label supplied declaration statements separately from
+intermediate tactic goals. For the captured native Lean JSON array format
+(`label`, `result.goals`), choose a supplied snapshot explicitly; its local
+context is available assumptions. Region associations are manual, not verified
+correspondences or inference graphs. Other UTF-8 artifacts are available in a
+read-only plain-text view. No tool is run to create missing evidence.
+
+**Open Saved Source Outline…** restores saved selections, descriptions,
+annotations, evidence and hide/expand settings after restart. A changed,
+redirected or missing original is reported and source navigation refuses to
+guess. Expansion and further selections can use the exact retained revision.
+Refresh checks original-file status explicitly. Each action also validates its
+private state revision; concurrent edits are rejected. A retained blob that is
+missing or changed produces an error, while saved annotations remain readable.
+
+Selections are 1-based lines and Unicode scalar columns pinned to a raw-byte
+SHA-256 revision; host UTF-16 positions are checked at capture/navigation.
+Expansion sets `pre.textContent` from retained text, preserving selected Unicode
+and line endings. Native text views may normalize displayed line endings; they
+are navigation surfaces, not the expansion-fidelity test. A retained BOM remains
+in the blob and is excluded from host coordinates. No OCR/PDF transcription
+fidelity is implied by retention.
+
+### Outline persistence boundary
+
+The independent Python `source_outlines.py` service reuses `SourceDocument`,
+bounded file reads, immutable private publication and synchronized exact-previous-
+byte mutable publication. It does not import Qt or duplicate editor buffers.
+Under `context.storageUri/outlines-SHA256(canonical-project)/UUID/`, exact source
+and supporting-artifact bytes are immutable `0600` blobs; `outline.json` is
+versioned private mutable navigation and reader work. It writes nothing into
+the source project and imports no Qt workspace/recovery data. The format uses
+the existing Source/SourceOccurrence/VersionedSpan and attributed Representation
+boundaries; it is not a universal proof schema or an immutable warrant record.
+
+Annotation forms keep unsaved drafts in the live panel across re-rendering and
+failed publication. Save explicitly before closing/reloading; unsaved form
+drafts have no crash/restart recovery. Failed or uncertain private publication
+keeps the view and drafts, blocks further private writes for that project until
+host reload, and leaves retained blobs unchanged. State published before a
+directory-sync failure may be present on reopen; failure is never called a
+successful save. Same-project concurrent host processes remain unsupported.
+
+Supported sources: saved UTF-8 `.txt`, `.md`, `.markdown`, `.tex`, `.rst`, `.org`,
+`.lean`, at most 2 MiB. PDF regions/pages, OCR, notebook cells, rendered TeX,
+binary and non-UTF-8 formats are unsupported. Bibliographic locators are free
+text (section/theorem/page/reference); actual selection locators are text ranges.
+At most 64 regions (256 KiB each), 32 contexts (64 KiB each), 2 MiB aggregate
+selected text, 16 supporting artifacts (2 MiB each), 32 annotations per overview
+or region (16 KiB each), 512 KiB private state, and 100 listed outlines per project.
+The list does not silently page or discard work beyond that bound. There is no
+outline deletion/garbage collection, cross-machine synchronization, range undo,
+or dedicated artifact/context removal UI in this increment.
+
+Opening, editing annotations, hiding, expanding, navigating retained text and
+restoring make no compiler/provider calls. Navigating an original Lean source
+may independently activate an installed Lean extension; that is not an MRW
+check. No Verification, premise admission or inferred human judgment is created.
+Automatic extraction, AI proposals, automatic gap detection, verified joint-
+premise graphs and elimination witnesses remain pending. This reader partially
+implements the accepted proof-outline requirement; faithful expansion does not
+establish correctness. See [focused validation](../docs/VS_CODE_OUTLINE_VALIDATION.md).
 
 ## Run from this checkout
 
@@ -30,6 +131,31 @@ in this directory. Its prepublish step stages the current repository Python
 sources. Install the result using **Extensions: Install from VSIX…**. The
 publisher field identifies the package; no Marketplace publication is implied.
 The generated Python directory is ignored by Git and is rebuilt from `src/`.
+
+### Reproduce the bounded outline host checks
+
+The [outline report](../docs/VS_CODE_OUTLINE_VALIDATION.md) records the two examples,
+repairs and limitations. Keep the pinned full Subgraph source from reconnaissance
+at the path expected by `scripts/prepare-host-tests.py`; preparation checks its
+exact digest and never downloads it or invokes Lean. Then run from the repo root:
+
+```sh
+python3 vscode/scripts/bundle-core.py
+python3 vscode/scripts/prepare-host-tests.py --artifacts .codex-work/vscode-host-outline-run --outline-phase seed
+```
+
+Open the printed staged extension/project in a normal Windows VS Code/WSL
+development host with remote URIs and without `--extensionTestsPath`. Keep the
+window in the foreground. The bootstrap guards the one-shot Python bridge
+against network connections and child tool processes, scripts dialog choices,
+and exercises the actual webview DOM. Wait for `outline-seed.json` to contain
+`complete: true` with no `failure`, then close normally. Prepare the same staged
+extension/project using `--outline-phase restart`, relaunch, and require the
+same completion criteria for `outline-restart.json`. That phase changes/deletes
+only disposable source copies. An optional `--outline-phase refine` after closing
+checks precise statement labels and restored editor-group reuse. Test artifacts
+are private generated files; only the reviewed reports/digests are committed.
+Production logic contains no theorem names, corpus paths or source line numbers.
 
 ## Workflows
 

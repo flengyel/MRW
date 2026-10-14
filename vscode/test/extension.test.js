@@ -23,7 +23,7 @@ function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file,
 
 async function harness(root, state = new Map()) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map();
-  const opens = [], inputs = [], picks = [], endings = [];
+  const opens = [], inputs = [], picks = [], endings = [], panels = [];
   let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
   const disposable = { dispose() {} };
@@ -57,7 +57,7 @@ async function harness(root, state = new Map()) {
       getWorkspaceFolder: () => ({ uri: uri(root) }),
       getConfiguration: () => ({ get: (name, fallback) => name === 'pythonExecutable' ? 'python3' : name === 'proofViewerUrl' ? 'https://example.org/proofs/' : fallback }),
       registerTextDocumentContentProvider(scheme, provider) { providers.set(scheme, provider); return disposable; },
-      onDidCloseTextDocument(fn) { closeListener = fn; return disposable; },
+      onDidCloseTextDocument(fn) { const previous = closeListener; closeListener = doc => { previous(doc); fn(doc); }; return disposable; },
       onDidOpenTextDocument(fn) { openListener = fn; return disposable; },
       async openTextDocument(location) {
         reads.push(location.toString());
@@ -68,6 +68,16 @@ async function harness(root, state = new Map()) {
     },
     window: {
       activeTextEditor: undefined,
+      createWebviewPanel(type, title, column) {
+        let receive;
+        const panel = { title, viewColumn: column === -2 ? (api.window.activeTextEditor?.viewColumn || 1) + 1 : column, dispose() {}, reveal() {},
+          onDidDispose() { return disposable; }, onDidChangeViewState() { return disposable; },
+          webview: { html: '', messages: [], cspSource: 'vscode-webview:', asWebviewUri: uri => uri.toString(),
+            onDidReceiveMessage(callback) { receive = callback; return disposable; },
+            async postMessage(value) { this.messages.push(value); return true; } },
+          receive: value => receive(value) };
+        panels.push(panel); return panel;
+      },
       onDidChangeActiveTextEditor(callback) { activeListener = callback; return disposable; },
       registerTreeDataProvider() { return disposable; },
       async showErrorMessage(message) { errors.push(message); },
@@ -102,12 +112,13 @@ async function harness(root, state = new Map()) {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
+    if (name === './outlines') return require('../src/outlines');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };
     return require(name);
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
-  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, state, document, editor, providers,
+  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, panels, state, document, editor, providers,
     closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
     setService: fn => { service = fn; }, focus: ed => { api.window.activeTextEditor = ed; activeListener(ed); } };
 }
@@ -118,6 +129,60 @@ async function temporary(t) {
   t.after(() => fs.rm(directory, { recursive: true, force: true }));
   return root;
 }
+
+test('source outline retains Unicode selections, edits annotations, and restores changed originals without remapping', async t => {
+  const root = await temporary(t), source = path.join(root, 'argument.md');
+  const original = 'α😀 → β\nClaim one.\nArgument.\n'; await fs.writeFile(source, original);
+  const h = await harness(root), doc = h.document(source, original), ed = h.editor(doc); h.focus(ed);
+  ed.viewColumn = 2; // Opening from a research group must not create group three.
+  ed.selection = new Selection(new Position(0, 1), new Position(1, 5));
+  const created = await h.commands.get('mrw.createOutline')();
+  assert.equal(created.outline.regions[0].argument_text, '😀 → β\nClaim');
+  const panel = h.panels[0], region = created.outline.regions[0];
+  assert.equal(panel.viewColumn, 2);
+  await panel.receive({ type: 'edit', draft: 'annotation-draft', change: { kind: 'annotation', region: region.id,
+    id: null, purpose: 'suspected_gap', text: '<script>inert</script> Reader question.', origin: 'human_work', author: null } });
+  assert.equal(panel.webview.messages.at(-2).clearDraft, 'annotation-draft');
+  await panel.receive({ type: 'toggle', region: region.id });
+  assert.equal(panel.webview.messages.at(-2).model.outline.regions[0].argument_text, null);
+  await fs.writeFile(source, 'Replacement argument.');
+  const restored = await harness(root); await restored.commands.get('mrw.openOutline')();
+  const loaded = restored.panels[0].webview.messages.at(-1).model;
+  assert.equal(loaded.outline.source_status, 'changed or unavailable');
+  assert.deepEqual(loaded.outline.regions[0].span, region.span);
+  await restored.panels[0].receive({ type: 'toggle', region: region.id });
+  assert.equal(restored.panels[0].webview.messages.at(-2).model.outline.regions[0].argument_text, '😀 → β\nClaim');
+  await restored.panels[0].receive({ type: 'source' });
+  assert.equal(restored.api.window.activeTextEditor.document.getText(), original);
+  restored.api.window.activeTextEditor.selection = new Selection(new Position(2, 0), new Position(2, 9));
+  await restored.commands.get('mrw.replaceOutlineRegion')();
+  assert.equal(restored.panels[0].webview.messages.at(-1).model.outline.regions[0].argument_text, 'Argument.');
+  const retainedDoc = restored.api.window.activeTextEditor.document, before = restored.requests.length;
+  retainedDoc.text = 'A different virtual view.'; retainedDoc.version++;
+  await restored.commands.get('mrw.replaceOutlineRegion')();
+  assert.equal(restored.requests.length, before); assert.match(restored.errors.pop(), /exact retained text/);
+  restored.closeDocument(retainedDoc);
+  const stale = await restored.api.workspace.openTextDocument(retainedDoc.uri);
+  restored.focus(restored.editor(stale));
+  await restored.commands.get('mrw.replaceOutlineRegion')();
+  assert.equal(restored.requests.length, before);
+  assert.match(restored.errors.pop(), /ordinary text|exact retained text/);
+  assert.ok([...h.requests, ...restored.requests].every(r => r.method.startsWith('outline_')));
+  assert.equal(await fs.readFile(source, 'utf8'), 'Replacement argument.'); assert.deepEqual(restored.errors, []);
+});
+
+test('failed outline publication preserves the view and draft, blocks later writes, and permits retained reading', async t => {
+  const root = await temporary(t), source = path.join(root, 'article.txt'); await fs.writeFile(source, 'Claim.\nProof.');
+  const h = await harness(root); h.focus(h.editor(h.document(source, 'Claim.\nProof.')));
+  const created = await h.commands.get('mrw.createOutline')(), panel = h.panels[0];
+  h.setService(async (...args) => args[2].method === 'outline_mutate' ? { blocked: true, write_error: 'Injected sync failure' } : runBridge(...args));
+  await panel.receive({ type: 'toggle', region: created.outline.regions[0].id });
+  const failure = panel.webview.messages.at(-2); assert.equal(failure.type, 'error'); assert.equal(failure.writesBlocked, true);
+  assert.equal(failure.clearDraft, undefined);
+  const before = h.requests.length; await panel.receive({ type: 'toggle', region: created.outline.regions[0].id });
+  assert.equal(h.requests.length, before); assert.match(h.errors.at(-1), /blocked/);
+  await panel.receive({ type: 'source' }); assert.equal(h.shown.at(-1).getText(), 'Claim.\nProof.');
+});
 
 test('activation does no file loading or process work; every command checks trust', async t => {
   const h = await harness(await temporary(t));

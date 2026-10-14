@@ -6,6 +6,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { runBridge } = require('./bridge');
 const { registerAssistance } = require('./assistance');
+const { registerOutlines } = require('./outlines');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
 function activate(context) {
@@ -47,7 +48,7 @@ function activate(context) {
       currentReview = undefined; changed.fire();
     }
   }));
-  async function show(body, title, record) {
+  async function show(body, title, record, presentation = {}) {
     const uri = vscode.Uri.from({ scheme: 'mrw-record', path: `/${session}/${++serial}/${title}.txt` });
     documents.set(uri.toString(), body);
     if (record) reviewDocuments.set(uri.toString(), record);
@@ -61,7 +62,7 @@ function activate(context) {
     const existing = activeEditor?.document.uri.scheme === 'mrw-record' ? activeEditor :
       vscode.window.visibleTextEditors?.find(editor => editor.document.uri.scheme === 'mrw-record');
     await vscode.window.showTextDocument(document, { preview: false,
-      viewColumn: existing?.viewColumn ?? vscode.ViewColumn.Beside });
+      viewColumn: presentation.viewColumn ?? existing?.viewColumn ?? vscode.ViewColumn.Beside });
     return uri;
   }
   async function choosePath(title, directory = false) {
@@ -246,11 +247,13 @@ function activate(context) {
   });
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview } });
+  const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath });
   const tree = {
     onDidChangeTreeData: changed.event,
     getChildren: () => {
       const rows = [
         ...assistanceRows(),
+        ...outlineRows(),
         ...savedMarkers().map(({ marker }) => [`Return: ${path.basename(marker.path)}:${marker.start[0] + 1} ${marker.preview}`, 'mrw.return']),
         ['Open Lean proof…', 'mrw.openProof'],
         ['Open external proof viewer', 'mrw.openViewer'], ['Inspect retained record…', 'mrw.inspect'],

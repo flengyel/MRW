@@ -1,0 +1,81 @@
+{
+  "phase": "restart",
+  "version": "1.141.1",
+  "platform": "linux",
+  "remote": "wsl",
+  "checks": [
+    {
+      "name": "inert activation in the actual WSL extension host",
+      "passed": true
+    },
+    {
+      "name": "equation: normal-host restart restores exact identities, annotations and collapsed state",
+      "passed": true
+    },
+    {
+      "name": "euclid: normal-host restart restores exact identities, annotations and collapsed state",
+      "passed": true
+    },
+    {
+      "name": "only explicit offline reader bridge actions; no unexpected errors",
+      "passed": true
+    }
+  ],
+  "complete": true,
+  "bridgeActions": [
+    "outline_list",
+    "outline_load",
+    "outline_mutate",
+    "outline_load",
+    "outline_navigation",
+    "outline_document",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_list",
+    "outline_load",
+    "outline_mutate",
+    "outline_load",
+    "outline_navigation",
+    "outline_document",
+    "outline_mutate",
+    "outline_mutate"
+  ],
+  "examples": [
+    {
+      "name": "equation",
+      "file": "/tmp/mrw-vscode-host-outline-20261014/Subgraph.lean",
+      "id": "b640030f-b900-4624-ae9d-b0960d214042",
+      "sourceRevision": "63fd9ade107c888ca9b04d57f0a1ee8f0b0fb324fb4646cdac7404f8741301cd",
+      "region": "12283f16-82b6-4eb7-8049-393aebf23876",
+      "expected": "  have idem (x : G) : (x ◇ x) ◇ (x ◇ x) = (x ◇ x) := by repeat rw [← h]\n",
+      "span": {
+        "end_col": 0,
+        "end_line": 240,
+        "source_revision": "63fd9ade107c888ca9b04d57f0a1ee8f0b0fb324fb4646cdac7404f8741301cd",
+        "start_col": 0,
+        "start_line": 239
+      },
+      "statement": "  have idem (x : G) : (x ◇ x) ◇ (x ◇ x) = (x ◇ x)",
+      "note": "4272db95-a68c-446f-878e-ae69a423c335",
+      "stateRevision": "09c9556f5b60f393a01bb23b22a0c9ba8e1304fee6b79ae7a3bcd895e97462e4"
+    },
+    {
+      "name": "euclid",
+      "file": "/tmp/mrw-vscode-host-outline-20261014/euclid-ix20.txt",
+      "id": "4b31330a-cd9e-48b6-b19f-cb194da6d586",
+      "sourceRevision": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205",
+      "region": "60cd2ade-c702-4221-a239-b6638b0396ff",
+      "expected": "Let A, B, C be the assigned prime numbers; I say that there are more prime numbers than A, B, C.\r\nFor let the least number measured by A, B, C be taken, and let it be DE; let the unit DF be added to DE.\r\nThen EF is either prime or not.\r\nFirst, let it be prime; then the prime numbers A, B, C, EF have been found which are more than A, B, C.\r\n",
+      "span": {
+        "end_col": 0,
+        "end_line": 8,
+        "source_revision": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205",
+        "start_col": 0,
+        "start_line": 4
+      },
+      "statement": "Prime numbers are more than any assigned multitude of prime numbers.",
+      "note": "0e4c5dfc-b355-4bee-84e2-a648e9007966",
+      "stateRevision": "9fd05df100e04f55c1c8234530b659348956ea92f651504260d95c978a0b9238"
+    }
+  ]
+}

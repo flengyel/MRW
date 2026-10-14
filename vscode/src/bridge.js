@@ -42,7 +42,11 @@ function runBridge(extensionPath, executable, request, options = {}) {
       try {
         const reply = JSON.parse(Buffer.concat(chunks).toString('utf8'));
         if (reply.protocol !== 1 || typeof reply.ok !== 'boolean') throw new Error('Invalid bridge response');
-        if (!reply.ok) return finish(new Error(reply.error || 'Record action failed.'));
+        if (!reply.ok) {
+          const error = new Error(reply.error || 'Record action failed.');
+          error.code = 'ACTION_REJECTED';
+          return finish(error);
+        }
         if (code !== 0 || !reply.result || typeof reply.result !== 'object') throw new Error('Invalid bridge result');
         finish(null, reply.result);
       } catch (error) {

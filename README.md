@@ -15,8 +15,8 @@ exchange, R3's one linked resumable continuation and R3.1's explicit end-and-
 begin-again lifecycle are delivered in the standalone Qt application. The
 extension supplies record actions, R2 preview/Send and the bounded R3/R3.1
 continuation, private resumption and explicit ending. Their genuine mathematical-use observation
-remains pending. The separately requested proof-outline increment below is
-planned; it does not add broader automatic conversation.
+remains pending. The first offline source-region reader is delivered in VS Code;
+proof-outline vertex elimination remains planned. This adds no broader model conversation.
 
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
@@ -101,8 +101,14 @@ keep ordinary documents and recovery under VS Code ownership.
 
 The bounded [proof-outline reconnaissance](docs/PROOF_OUTLINE_RECONNAISSANCE.md)
 records actual output for the pinned Equation 387 proof and recommends a
-consumer of source regions and recorded Lean states. No outline GUI or vertex
-elimination is implemented.
+consumer of source regions and recorded Lean states. The first
+[offline reader](vscode/README.md#offline-source-region-reader) now provides
+manual selections, exact retained-source expansion, separate attributed editable
+explanations, optional supplied goal/context snapshots, navigation and restart
+restoration. It supports mathematical text from books, articles and AI-generated
+or AI-assisted manuscripts without requiring Lean. PDF/OCR/notebook regions,
+automatic extraction/proposals and graph elimination remain pending; see
+[validation and limitations](docs/VS_CODE_OUTLINE_VALIDATION.md).
 
 ## Motivation
 

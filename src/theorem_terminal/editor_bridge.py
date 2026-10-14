@@ -13,6 +13,7 @@ import sys
 
 from .editor_assistance import assistance_action
 from .editor_investigation import editor_investigation_action
+from .source_outlines import outline_action
 from .record_actions import call_passage, persist_call_passage, attributed_contribution
 from .record_views import inspect_record, read_call_snapshot
 from .response_review import render_response_review
@@ -62,6 +63,15 @@ def dispatch(request):
         'investigation_view': ({'store', 'project_root', 'revision', 'summary'}, set()),
         'investigation_handoff': ({'store', 'project_root', 'revision', 'summary'}, set()),
         'end_investigation': ({'store', 'project_root', 'revision'}, set()),
+        'outline_list': ({'store', 'project_root'}, set()),
+        'outline_create': ({'store', 'project_root', 'path', 'source_revision'}, set()),
+        'outline_load': ({'store', 'project_root', 'id'}, set()),
+        'outline_mutate': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
+        'outline_inspect_artifact': ({'path'}, set()),
+        'outline_attach': ({'store', 'project_root', 'id', 'revision', 'path', 'artifact_revision',
+                            'kind', 'label', 'region', 'selector'}, set()),
+        'outline_document': ({'store', 'project_root', 'id', 'revision', 'artifact'}, set()),
+        'outline_navigation': ({'store', 'project_root', 'id', 'revision', 'region', 'context', 'statement'}, set()),
     }
     if not isinstance(method, str) or method not in fields:
         raise ValueError('Unknown editor action')
@@ -71,6 +81,8 @@ def dispatch(request):
         raise ValueError('Invalid editor action fields')
     if method in ('prepare_assistance', 'send_assistance'):
         return assistance_action(request)
+    if method.startswith('outline_'):
+        return outline_action(request)
     if method in ('investigation_parent', 'investigation_state', 'resume_investigation',
                   'update_investigation', 'investigation_view', 'investigation_handoff',
                   'end_investigation'):

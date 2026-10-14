@@ -1,31 +1,66 @@
 # Codex continuation: VS Code migration and proof outlines
 
-## Active handoff — proof-outline reconnaissance, 2026-10-14
+## Active handoff — offline source-region reader, 2026-10-14
 
-The requested bounded Task 4.0 reconnaissance is complete for the pinned
-`Subgraph.Equation387_implies_Equation43` example. Read
-[the findings](PROOF_OUTLINE_RECONNAISSANCE.md) and its retained raw outputs and
-provenance before proposing implementation. The exact source compiled under
-Lean 4.29.1 and its pinned Mathlib revision. lean4export retained three typed
-local `letE` bindings; native Lean goal responses supplied their statements,
-local assumptions and a local-definition source jump. Published doc-gen4 output
-supplied the theorem statement and pinned source link. LeanArchitect emitted
-an empty array for the unannotated module. ntp-toolkit was inspected but not
-ported from its 4.24.0 environment; local doc-gen4 generation was unavailable.
+The first offline reader is implemented in the existing VS Code extension.
+Read [its workflow and persistence boundary](../vscode/README.md#offline-source-region-reader),
+[the governing outline requirement](PROOF_OUTLINES.md), and
+[the validation report](VS_CODE_OUTLINE_VALIDATION.md). The bounded reconnaissance
+at `2c6019f` remains the source of the optional Equation 387 evidence; its original
+source/export/server bytes have not been changed and no exporter was rerun.
 
-The smallest recommended implementation is an offline, manually selected
-source-region consumer using those existing outputs: exact claims with full
-boundary contexts, separately attributed explanations, source navigation and
-verbatim expansion. Keep the original source and output bytes pinned. This
-partial trial is not full vertex elimination. No captured output provides
-ready-made joint-premise region boundaries or hidden-path witnesses. Do not
-infer those from declaration dependencies, local-context membership or tactic
-order. No new extractor or outline GUI was implemented during reconnaissance.
+`source_outlines.py` reuses SourceDocument, bounded reads and existing immutable
+and mutable private publication services. Exact source and supplied artifact
+blobs are separate from mutable source ranges, visibility, bibliography and
+attributed reader annotations. This is private reading state, not a new proof
+calculus/schema or a Verification. VS Code owns ordinary documents and undo.
+The reader supports informal mathematical books, monographs, articles and
+AI-generated/assisted manuscripts without requiring Lean. Orientation, central
+concepts/results, governing ideas, argument structure and optional detail are
+freely navigable. A cited result may be used while its proof is deferred.
 
-R3/R3.1 at `c69a9c2` is synced; its completed host acceptance need not be
-repeated. This request ends with findings and the handoff, not an outline
-implementation. Mathematical usefulness and full outline acceptance remain
-pending. No live provider request is authorized.
+Manual ranges can be added/replaced; exact statements and selected context stay
+accessible while argument details are hidden. Explanations, intended inferences,
+manual dependency descriptions, questions, gaps and proposed repairs are reader
+material. Supplied declaration statements differ from tactic goals. Context lists
+available assumptions, not necessary or joint premises; snapshot associations
+are explicitly manual. Unknown provenance stays unknown. Saved state is reopened
+explicitly after restart. Changed/missing originals never cause remapping;
+retained source and evidence remain accessible. Unsaved form drafts have no
+restart recovery: save explicitly. Failed/uncertain private publication keeps
+live text and blocks project-private writes until reload.
+
+The two acceptance examples are the captured Equation 387 proof and a non-Lean
+Euclid IX.20 HTML-to-text validation transcription (CRLF, original HTML retained;
+translator/edition unknown). See the report for actual host checks, source/tool
+pins, corrected defects, regression results and remaining runtime limits.
+Scripted mechanics do not establish mathematical correctness, comprehension or
+usefulness. No live provider call was made or authorized. No compiler/provider
+call is part of opening, editing, hiding, expanding or restoring this reader.
+An installed Lean extension may independently process an original source jump.
+
+Windows VS Code 1.141.1/WSL seed, restart and statement/placement refinement
+reports pass. The final regression results are 30 Node tests and 308 Python
+tests (249 passed, 59 skipped; PySide6 unavailable), plus compilation/syntax and
+document checks. The report distinguishes scripted mechanics from visible
+inspection and unobserved mathematical usefulness. A stale retained-tab guard
+and restored editor-group reuse were fixed and checked.
+
+Supported sources are bounded saved UTF-8 text; PDF/OCR regions, notebook cells,
+rendered formats and non-UTF-8 sources are unsupported. Automatic extraction,
+AI outline proposals, automatic gap detection, verified joint-premise graphs,
+elimination witnesses and full vertex elimination remain pending. This partial
+increment does not replace the full accepted contract. The separately deferred
+mathematical-outline capability at multiple scales does not enlarge this task.
+
+Next proposed bounded implementation step: edit/remove shared context and
+manual evidence associations, with retained originals still explicitly
+accessible and no inferred proof edges. There is no deletion/garbage-collection
+or cross-machine state synchronization yet. The full graph increment still
+requires a representation that actually supplies scoped joint-premise inferences
+and witnesses; declaration maps and tactic context membership do not supply them.
+Do not repeat reconnaissance, R3 acceptance or add another extractor merely to
+continue. Mathematical usefulness remains pending without gating this delivery.
 
 ## Delivered VS Code migration — 2026-10-13–14
 
@@ -169,8 +204,8 @@ The preferred frontend trial is one VS Code extension over the independent
 Python services, reusing the established Lean and mathematical-tool ecosystem.
 Let the host own text documents and undo; retain research records in the core.
 Choosing an open-source editor distribution is deferred. The extension's record
-actions and R2 preview/Send are implemented; its proof-outline viewer and vertex
-elimination are not. Do not claim those planned capabilities or silently replace
+actions, R2 preview/Send and its manual source-region reader are implemented.
+Vertex elimination remains planned. Do not claim planned capabilities or silently replace
 the Qt GUI.
 
 The outline service performs no model request or compiler invocation merely to

@@ -6,6 +6,19 @@ These terms apply to the shared mathematical domain, independently of the
 frontend. Mathematical Research Workstation is the user-facing name; Theorem
 Terminal remains the repository, package, and CLI identity.
 
+**Source-region outline:** a reader-selected view over exact retained source
+ranges, with reversible hiding of argument detail, separate exact statements
+and context, and attributed editable explanations. It can describe informal
+mathematics without Lean. The delivered manual reader is not a verified
+inference graph or the planned vertex-elimination operation.
+
+**Reader reconstruction:** separately attributed reader material describing
+ideas, intermediate claims, intended inferences, dependencies, questions, gaps
+or repairs. It is not silently added to the source argument and does not inherit
+the checking status of source material or supplied evidence. A manual snapshot
+association describes a selection; recorded local context lists available
+assumptions, not necessarily required or jointly used premises.
+
 ## Frontend and editor host
 
 The VS Code extension is the active frontend target. VS Code is its editor

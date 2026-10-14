@@ -41,6 +41,10 @@ The extension implements record actions, return markers, explicit Lean/browser
 handoffs, R2 exact preview/Send, and bounded R3 continuation, restart resumption
 and R3.1 ending. The extension's independent private investigation pointer is
 specified in `vscode/README.md`; it does not import Qt workspace/recovery state.
+The offline source-region reader retains exact UTF-8 sources and optional
+supplied evidence separately from editable attributed reader annotations. It
+supports informal books/articles and AI-generated or AI-assisted manuscripts
+without Lean. Read its persistence and format bounds in `vscode/README.md`.
 Scoped actual-host checks use deterministic responses. Proof-outline vertex
 elimination remains planned. Follow the bounded migration handoff. Use Windows VS Code
 connected to a WSL2 checkout for Windows development; run Python and the
@@ -83,8 +87,9 @@ do not expose internal proof structure. The preferred frontend trial is one
 VS Code extension over the independent services; the editor owns its documents
 and undo. Choice of an open-source distribution is deferred. Vertex elimination
 remains planned. The extension provides shared record actions, R2 exact preview/Send, and
-explicit proof-source and browser handoffs; it does not implement an internal proof
-viewer. Follow the bounded roadmap and handoff without making ordinary work
+explicit proof-source and browser handoffs, plus the first manual offline
+source-region reader. It supplies no verified inference graph or elimination.
+Follow the bounded roadmap and handoff without making ordinary work
 depend on Lean or a new warrant.
 
 The shared Qt plain-text document has one layout width. When two visible panes

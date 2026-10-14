@@ -1,12 +1,23 @@
-# Proof outlines by vertex elimination
+# Mathematical source outlines and proof-outline vertex elimination
 
-**Status, 2026-10-14:** the bounded Task 4.0 reconnaissance is complete; see
+**Scope:** understanding and logical deconstruction of arguments in textbooks,
+monographs, articles, and AI-generated or AI-assisted manuscripts, including
+sources with no Lean formalization. Lean evidence is optional. Orientation,
+central concepts/results, governing ideas, argument structure and technical
+detail are freely navigable, not a compulsory sequence. A reader may use a
+cited theorem while deferring inspection of its proof.
+
+**Status, 2026-10-14:** the first offline source-region reader is implemented in
+VS Code; see [its contract](../vscode/README.md#offline-source-region-reader) and
+[validation evidence and limits](VS_CODE_OUTLINE_VALIDATION.md). This partially
+implements the accepted requirement. A faithful outline does not establish
+proof correctness. The bounded Task 4.0 reconnaissance is complete; see
 [actual outputs, source/tool revisions and the recommended first consumer](PROOF_OUTLINE_RECONNAISSANCE.md).
 Vertex elimination remains an accepted product requirement, not implemented.
-The VS Code extension supplies shared record actions
+The VS Code extension supplies manual source regions, shared record actions
 and explicit Lean-source/browser handoffs; see [its README](../vscode/README.md). The
 workstation should help a reader obtain and inspect a mathematical outline of
-a selected Lean proof. AI may propose which details to hide and explain the
+a selected argument. AI may eventually propose which details to hide and explain the
 retained claims. The original proof and its evidence remain available.
 
 ## Visible claims and explanations
@@ -86,14 +97,34 @@ premises into the warrant layer.
 
 ## First bounded increment
 
+The delivered reader retains exact UTF-8 source and supplied artifact bytes,
+manual revision-pinned ranges, separately selected statements and context,
+editable attributed annotations, source navigation, hide/expand state, and
+explicit reopening after restart. Selected hypotheses, definitions, local
+assumptions and cited results remain accessible when details are hidden.
+Supplied declaration statements are distinct from manually associated recorded
+tactic goals. Context means available assumptions, not necessary or jointly
+used premises. Manual dependency descriptions remain reader annotations.
+Changed or absent sources never remap selections; retained text remains accessible.
+
+Bibliographic fields, source authorship and artifact references preserve unknowns.
+Saved text formats are supported; PDF regions, OCR, notebook cells, binary and
+non-UTF-8 sources are explicitly unsupported. Exact expansion refers to retained
+text ranges; an externally transcribed source is not thereby certified faithful
+to a page image. No compiler, provider, extraction or formalization is required.
+
+Automatic extraction, AI proposals, automatic gap detection, verified joint-premise
+graphs and elimination witnesses remain pending. The graph demonstrations below
+describe the full accepted contract, not completed reader acceptance.
+
 The pinned example's existing export/server output has been inspected in the
 reconnaissance linked above. Consume it before writing another extractor. Keep
 the input kind visible and expose only claims actually
 supplied by that representation. Use the existing Lean editor/viewer ecosystem;
 the preferred frontend trial is one VS Code extension over the independent
 core. Choice of an open-source editor distribution is deferred. The initial
-extension implements those handoffs and record actions, not graph extraction
-or elimination; ordinary files remain the work artifacts.
+extension implements those handoffs, record actions and the manual reader,
+without graph extraction or elimination; ordinary files remain the work artifacts.
 
 Demonstrate:
 

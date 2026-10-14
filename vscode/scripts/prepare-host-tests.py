@@ -12,6 +12,7 @@ parser.add_argument('--project', type=Path)
 parser.add_argument('--persistence-phase', choices=('seed', 'restart'))
 parser.add_argument('--investigation-phase', choices=('seed', 'resume_end', 'sequential'))
 parser.add_argument('--investigation-outcome', choices=('failed', 'refused', 'incomplete'))
+parser.add_argument('--outline-phase', choices=('seed', 'restart', 'refine'))
 args = parser.parse_args()
 if args.investigation_outcome and args.investigation_phase != 'sequential':
     parser.error('--investigation-outcome requires --investigation-phase sequential')
@@ -20,6 +21,17 @@ artifacts = args.artifacts.resolve()
 artifacts.mkdir(parents=True, exist_ok=True)
 config_path = extension.parent / '.codex-work/vscode-host/config.json'
 config_path.parent.mkdir(parents=True, exist_ok=True)
+if args.outline_phase in ('restart', 'refine'):
+    staged_config = artifacts / 'persistence-extension/host-test.json'
+    value = json.loads(staged_config.read_text())
+    prior = 'seed' if args.outline_phase == 'restart' else 'restart'
+    report = json.loads((artifacts / f'outline-{prior}.json').read_text())
+    if not report.get('complete') or report.get('failure'):
+        raise SystemExit('Complete and close the outline seed host first')
+    value['phase'] = args.outline_phase
+    staged_config.write_text(json.dumps(value, indent=2))
+    print(staged_config.parent)
+    raise SystemExit(0)
 if args.investigation_phase and args.investigation_phase != 'seed':
     staged_config = artifacts / 'persistence-extension/host-test.json'
     value = json.loads(staged_config.read_text())
@@ -45,6 +57,17 @@ if args.persistence_phase:
     raise SystemExit(0)
 project = args.project.resolve() if args.project else Path(tempfile.mkdtemp(prefix='mrw-vscode-host-'))
 project.mkdir(parents=True, exist_ok=True)
+if args.outline_phase:
+    repo = extension.parent
+    pinned_source = repo / '.codex-work/proof-outline-recon-20261014/external-tools/equational_theories/equational_theories/Subgraph.lean'
+    if hashlib.sha256(pinned_source.read_bytes()).hexdigest() != '63fd9ade107c888ca9b04d57f0a1ee8f0b0fb324fb4646cdac7404f8741301cd':
+        raise SystemExit('Pinned reconnaissance source unavailable or changed; do not fetch or compile automatically')
+    for source, name in [(pinned_source, 'Subgraph.lean'),
+                         (repo / 'docs/evidence/source-outline-20261014/euclid-ix20.txt', 'euclid-ix20.txt')]:
+        target = project / name
+        if target.exists() and target.read_bytes() != source.read_bytes():
+            raise SystemExit(f'Refusing to replace existing source: {target}')
+        target.write_bytes(source.read_bytes())
 for name, text in [('note.md', 'α😀 → β\nNext question.\n'),
                    ('example.lean', '-- Local source handoff only\nexample : True := True.intro\n')]:
     target = project / name
@@ -60,9 +83,17 @@ staged = artifacts / 'persistence-extension'
 shutil.copytree(extension, staged, ignore=shutil.ignore_patterns('.vscode', '*.vsix', '__pycache__'), dirs_exist_ok=True)
 manifest = json.loads((staged / 'package.json').read_text())
 manifest['main'] = './test/host/investigation.js' if args.investigation_phase else './test/host/persistence.js'
+if args.outline_phase:
+    manifest['main'] = './test/host/outlines.js'
 manifest['activationEvents'] = ['*']
 (staged / 'package.json').write_text(json.dumps(manifest, indent=2))
-(staged / 'host-test.json').write_text(json.dumps(dict(config, phase='seed'), indent=2))
+host_config = dict(config, phase='seed')
+if args.outline_phase:
+    host_config.update(goals=str(extension.parent / 'docs/evidence/proof-outline-20261014/lean-goals.json'),
+                       provenance=str(extension.parent / 'docs/evidence/proof-outline-20261014/provenance.json'),
+                       sourceCommit='1aec8a7acf223b7c56e4830977b6e90d4ef1924b',
+                       euclidUrl='https://www.claymath.org/library/historical/euclid/files/elem.9.20.html')
+(staged / 'host-test.json').write_text(json.dumps(host_config, indent=2))
 hashes = {str(p.relative_to(extension)): hashlib.sha256(p.read_bytes()).hexdigest()
           for directory in ('src', 'python') for p in (extension / directory).rglob('*')
           if p.is_file() and '__pycache__' not in p.parts}

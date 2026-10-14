@@ -385,6 +385,28 @@ is required.
 
 ### Proof outlines by vertex elimination
 
+**Delivered partial reader, 2026-10-14:** VS Code offers explicit manual
+source-region selection and revision, exact retained-source hide/expand,
+separate exact statement and context selections, editable attributed reader
+explanations, optional supplied evidence and explicit source navigation. Opening
+saved outlines restores persisted selections, annotations and visibility across
+restart; changed or missing originals are reported without remapping. Retained
+sources and artifacts stay accessible. Save annotation forms explicitly;
+unsaved drafts survive live re-rendering, not host closure/reload.
+
+The reading-level filter exposes orientation, central concepts/results,
+governing ideas, argument structure and optional detail without imposing an
+order. A cited result may be used while its proof is deferred. General informal
+mathematics, including AI-generated/assisted articles, requires no Lean evidence.
+Source statements, reader reconstruction and supplied evidence remain labeled
+separately. Tactic goals are not declaration statements; local context is
+available assumptions and snapshot associations are manual. Gap/repair and
+dependency notes create no checked inference or source amendment. Text formats
+and limits are in [the reader contract](vscode/README.md#offline-source-region-reader);
+PDF/OCR and notebook regions are unsupported. Automatic extraction, AI proposals,
+automatic gap detection and graph elimination remain pending. A faithful
+outline does not establish proof correctness. See [validation](docs/VS_CODE_OUTLINE_VALIDATION.md).
+
 **Accepted requirement, 2026-10-12; not implemented.** For a selected proof,
 retain mathematical milestones and hide intervening vertices while preserving
 dependency paths. Every summarized region shows a claim with its necessary

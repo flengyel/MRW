@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -199,6 +199,48 @@
         "title": "Edit Investigation Current Question",
         "category": "MRW",
         "enablement": "!mrw.assistanceBusy"
+      },
+      {
+        "command": "mrw.createOutline",
+        "title": "Create Outline from Saved Source",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.openOutline",
+        "title": "Open Saved Source Outline\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.addOutlineRegion",
+        "title": "Add Selected Source Region",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.replaceOutlineRegion",
+        "title": "Replace Selected Outline Region Range",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.setOutlineStatement",
+        "title": "Use Selection as Exact Statement",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.addOutlineContext",
+        "title": "Keep Selected Hypothesis / Cited Result",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.attachOutlineEvidence",
+        "title": "Attach Recorded Outline Evidence\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
       }
     ],
     "views": {
@@ -237,6 +279,31 @@
           "command": "mrw.ask",
           "when": "editorHasSelection && (resourceScheme == file || resourceScheme == untitled)",
           "group": "mrw"
+        },
+        {
+          "command": "mrw.createOutline",
+          "when": "editorHasSelection && (resourceScheme == file || resourceScheme == mrw-record)",
+          "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.addOutlineRegion",
+          "when": "editorHasSelection && (resourceScheme == file || resourceScheme == mrw-record)",
+          "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.replaceOutlineRegion",
+          "when": "editorHasSelection && (resourceScheme == file || resourceScheme == mrw-record)",
+          "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.setOutlineStatement",
+          "when": "editorHasSelection && (resourceScheme == file || resourceScheme == mrw-record)",
+          "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.addOutlineContext",
+          "when": "editorHasSelection && (resourceScheme == file || resourceScheme == mrw-record)",
+          "group": "mrw-outline"
         }
       ]
     },
@@ -268,6 +335,6 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js"
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js"
   }
 }

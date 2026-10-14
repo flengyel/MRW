@@ -1,0 +1,16 @@
+{
+  "url": "https://www.claymath.org/library/historical/euclid/files/elem.9.20.html",
+  "retrieved_at": "2026-10-14",
+  "author": "Euclid",
+  "translator": null,
+  "edition": null,
+  "revision": null,
+  "locator": "Book IX, Proposition 20",
+  "authorship": "human",
+  "medium": "HTML text transcribed into a plain UTF-8 validation source; not PDF/OCR",
+  "transcription": "English table cell, whitespace reduced and sentences separated by CRLF; editorial title added. Expansion fidelity is to this retained text file, not the original page layout.",
+  "digests": {
+    "euclid-page.html": "7b502731855b142c042e23fa3675676ccaa06ce84d665c202181a6833e61ca47",
+    "euclid-ix20.txt": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205"
+  }
+}
