@@ -3,7 +3,7 @@
 The mathematician's workflow the interface must support. Companion to
 `VISION.md` (why the system exists) and `DOMAIN_MODEL.md` (entities and
 invariants). Present implementation and limitations are documented in README.
-The current GUI provides ordinary-file editing, existing local PDF reading,
+The standalone Qt GUI provides ordinary-file editing, existing local PDF reading,
 external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
 rendering, checkpoint recovery, one explicit task-local OpenAI exchange, one
 bounded linked continuation with restart restoration, an explicit end-and-
@@ -17,6 +17,15 @@ focused question need not repeat it. Qt/runtime and TeX prerequisites remain
 platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
+
+VS Code is the active frontend target. The mathematical workflow principles in
+this document apply to both frontends; implementation details concerning QtPdf,
+split panes, widgets, application-owned buffers, checkpoints, and close/quit
+apply only to Qt. Preserve their source-integrity and evidence invariants when
+designing host integrations, without duplicating VS Code's document lifecycle.
+Statements that R1–R3.1 are delivered below refer to Qt unless the extension is
+explicitly named. Other extensions' PDF, Lean, LaTeX, and notebook support is
+integration context, not a claim of MRW implementation or validation.
 
 The initial extension supplies an Explorer research view and MRW commands for
 record inspection, response review, exact retention, attributed note insertion,

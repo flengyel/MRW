@@ -2,6 +2,20 @@
 
 Terminology used throughout Theorem Terminal.
 
+These terms apply to the shared mathematical domain, independently of the
+frontend. Mathematical Research Workstation is the user-facing name; Theorem
+Terminal remains the repository, package, and CLI identity.
+
+## Frontend and editor host
+
+The VS Code extension is the active frontend target. VS Code is its editor
+host and owns ordinary documents, editing, saving, undo, and document recovery.
+The standalone Qt application is a separate frontend over shared Python
+services. An editor buffer is not an immutable research record; explicitly
+retaining a passage creates a separate record with source identity and
+provenance. A VS Code workspace supplies host configuration and storage context;
+it is not a JustificationContext and creates no mathematical warrant.
+
 ## Context
 
 The persistent mathematical environment maintained by Theorem Terminal.

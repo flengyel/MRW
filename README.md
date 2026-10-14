@@ -12,7 +12,9 @@ For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-ma
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
 R1's PDF-plus-note workflow, R2's bounded direct mathematical-assistance
 exchange, R3's one linked resumable continuation and R3.1's explicit end-and-
-begin-again lifecycle are delivered. Their genuine mathematical-use observation
+begin-again lifecycle are delivered in the standalone Qt application. The
+extension currently supplies record actions and R2 preview/Send; R3/R3.1 are
+not yet ported. Their genuine mathematical-use observation
 remains pending. The separately requested proof-outline increment below is
 planned; it does not add broader automatic conversation.
 
@@ -152,7 +154,12 @@ The design rests on six principles:
   formal statement expresses the intended mathematics, or whether the argument
   can be reconstructed and used.
 
-## Status
+## Standalone Qt status and shared product history
+
+The implementation and visible-widget evidence in this section describe the
+standalone Qt application. They do not establish VS Code feature parity or
+extension-host validation. The extension's current status is in
+[VS Code migration](#vs-code-migration--2026-10-13).
 
 **Roadmap review, 2026-09-19:** the project has useful preservation and editing
 foundations, but is not yet delivering its intended study and human/AI research
@@ -193,7 +200,7 @@ restoration; the handler revalidates identity and target after confirmation, and
 an obsolete restore completion cannot repopulate an ended investigation.
 
 
-The current desktop increment uses PySide6 Qt Widgets and QtPdf. **Open Project
+The standalone desktop application uses PySide6 Qt Widgets and QtPdf. **Open Project
 Directory** displays the actual directory tree lazily. Ordinary mathematical
 files open in editable buffers; external references and PDFs are read-only. The
 implemented workflow covers an existing PDF beside an ordinary note, LaTeX
@@ -339,12 +346,18 @@ what a mathematician believes is understood.
 
 ## Install and run
 
-Python 3.11 or later is required. PySide6 supplies Qt Widgets and QtPdf through
+For the active VS Code extension, follow [vscode/README.md](vscode/README.md).
+Use Python 3.11+ and Node.js for extension development; the bundled core does
+not require PySide6. On Windows, keep the checkout in WSL2 and run the workspace
+extension and Python there through Windows VS Code's WSL connection.
+
+The standalone Qt application and CLI instructions follow. Python 3.11 or later
+is required. PySide6 supplies Qt Widgets and QtPdf through
 the package dependency; it provides native desktop controls and local PDF
 rendering without a web server. The controller and record-validation services
 remain independent of the widget toolkit.
 
-### Desktop installation and launch
+### Standalone Qt installation and launch
 
 From the repository root on Linux, WSL2 or macOS:
 
@@ -759,17 +772,31 @@ git diff --check
 
 ### WSL2 and Codex
 
-For the authorized WSL2 checkout, update `main`, enter the repository, and start
-Codex there so it discovers the root `AGENTS.md`:
+Keep the extension checkout under the WSL2 Linux home directory, such as
+`~/src/theorem_terminal`, rather than under `/mnt/c/`. Run Git, Python, Node,
+and Codex in WSL2; Windows VS Code supplies the UI through its WSL connection.
+For the current PR #3 handoff, use `codex/vscode-assistance`, which contains the
+R2 implementation and review repairs. First inspect `git status` and preserve
+any local work before switching branches:
 
 ```bash
-cd /home/flengyel/src/theorem_terminal
-git pull --ff-only origin main
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -e .
+cd ~/src/theorem_terminal
+git status
+git fetch origin
+git switch codex/vscode-assistance
+git pull --ff-only origin codex/vscode-assistance
+code .
 codex
 ```
+
+Confirm VS Code is connected to WSL. Follow `vscode/README.md` for the extension
+development-folder launch and deterministic checks. Opening the repository
+alone does not activate the development extension. Codex should read the root
+`AGENTS.md` and `docs/CODEX_CONTINUATION.md`. No Qt installation or Lean build is
+required for ordinary extension record actions or the migration checks.
+
+For a separately requested documentary-checker task, the following Lean setup
+applies; it is not extension startup or an R2 test prerequisite.
 
 The Lean and Lake installation already used by `/home/flengyel/src/PCats` can
 supply Elan's toolchain and download cache. Theorem Terminal does not import or

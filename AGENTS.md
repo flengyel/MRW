@@ -25,8 +25,28 @@ and does not authorize general corpus ingestion or automatic source retrieval.
 
 The VS Code extension is the active frontend migration target, explicitly
 authorized on 2026-10-13. Its first increment lives in `vscode/`; read
-`vscode/README.md` for its boundaries and development launch. The existing
-editor-centered Qt GUI remains available as
+`vscode/README.md` for its boundaries and development launch.
+
+Frontend ownership is explicit: VS Code owns ordinary text documents, editing,
+saving, undo, and document recovery. The extension owns its commands, read-only
+record views, and explicitly designed private research state. The independent
+Python core owns research-record validation, exact request preparation, and
+immutable publication. Do not port Qt buffers, widgets, recovery checkpoints,
+menu implementations, or layout rules into the extension. Qt-specific instructions below apply
+when maintaining the standalone application; shared record and evidence
+invariants apply to both frontends. PDF, Lean, LaTeX, and notebook capabilities
+provided by other VS Code extensions are not implemented MRW capabilities.
+
+The extension currently implements record actions, return markers, explicit
+Lean/browser handoffs, and R2 exact preview/Send. R3 continuation, restart
+resumption, and R3.1 ending are delivered in Qt but remain to be ported to the
+extension. Proof-outline vertex elimination remains planned. First validate
+the existing extension in a real Extension Development Host with deterministic
+responses, then follow the bounded migration handoff. Use Windows VS Code
+connected to a WSL2 checkout for Windows development; run Python and the
+workspace extension in WSL. Native Windows Send is currently unsupported.
+
+The existing editor-centered Qt GUI remains available as
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
 identities unchanged. Open Project Directory is the principal entry: show the
 actual directory tree lazily and open ordinary mathematical files as buffers.
@@ -48,8 +68,8 @@ changed content. Opening or restoring a PDF never invokes TeX or creates a
 Verification. Use the focus and restoration semantics in UX_SPEC.md; no imported
 PDF may be represented as a fabricated successful build.
 
-The current GUI uses PySide6 Qt Widgets and QtPdf. Keep widgets separate from the
-controller, record validation and persistence services. Neither toolkit, schema
+The standalone Qt GUI uses PySide6 Qt Widgets and QtPdf. Keep widgets separate
+from the controller, record validation and persistence services. Neither toolkit, schema
 version nor pane arrangement is a permanent domain invariant. Format-aware
 behavior must preserve source integrity and the distinction between editable
 text, rendered output and retained records.
@@ -136,7 +156,14 @@ provenance separately. Inspection creates no admission and infers no human
 decision. Ordinary work requires neither Lean nor existing warrant records.
 Do not redesign the calculus, add JAM semantics or invoke Lean automatically.
 
-Exercise toolkit-independent controllers and actual Qt widgets with
+For extension changes, run the applicable Node command/bridge tests and shared
+Python service tests. Validate affected host workflows in an actual Extension
+Development Host when available; API doubles do not establish host acceptance.
+Follow `vscode/README.md` for setup and checks. Do not require Qt installation
+for extension-only changes. Shared-service changes retain regression coverage
+for both callers, with unavailable Qt checks reported explicitly.
+
+For Qt changes, exercise toolkit-independent controllers and actual Qt widgets with
 `THEOREM_TERMINAL_GUI_TESTS=1` (an offscreen Qt platform can run widget tests).
 Use ordinary test documents; no test-only controller subclass may stand in for
 the GUI. When changing widgets, exercise the affected user workflow visibly at
@@ -158,7 +185,7 @@ checks accurately; never substitute offscreen checks for claimed visible use.
 Open a real integration corpus only when the task authorizes access, and do not
 modify its authoritative files during a visual check.
 
-The current GUI directly provides ordinary-file editing, existing local PDF
+The standalone Qt GUI directly provides ordinary-file editing, existing local PDF
 reading, one explicitly previewed task-local model exchange, one bounded linked
 continuation with private restart restoration, external-editor and
 Jupyter handoff, staged LaTeX building, generated-PDF rendering, recovery and
@@ -180,7 +207,8 @@ turns that priority into a handoff, not a competing roadmap.
 
 The active delivery order was R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,
-as specified in `CODEX_PLAN.md`. R1–R3 are delivered; observe them in genuine
+as specified in `CODEX_PLAN.md`. R1–R3.1 are delivered in Qt; the extension's
+separate migration status is listed above. Observe delivered workflows in genuine
 mathematical work and implement demonstrated blockers. The explicit
 2026-10-12 proof-outline request separately defines the bounded increment in
 `docs/PROOF_OUTLINES.md`; it does not wait for a preliminary study ceremony.
