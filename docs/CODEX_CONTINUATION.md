@@ -62,6 +62,18 @@ and witnesses; declaration maps and tactic context membership do not supply them
 Do not repeat reconnaissance, R3 acceptance or add another extractor merely to
 continue. Mathematical usefulness remains pending without gating this delivery.
 
+## Deferred requirement — mathematical outlines at multiple scales
+
+The user clarified on 2026-10-14 that outlining must eventually cover subjects,
+bodies of literature, books, monographs, articles, sections, and arguments.
+Outlines may cross source boundaries and need not form a strict hierarchy;
+Lean formalization is optional. The accepted requirement is recorded in
+[the roadmap](../CODEX_PLAN.md#deferred-mathematical-outlines-at-multiple-scales).
+
+Implementation is deferred to future bounded increments. This entry does not
+expand the current offline source-region reader or claim delivered capability.
+Preserve this roadmap reference when updating the active handoff.
+
 ## Delivered VS Code migration — 2026-10-13–14
 
 The user explicitly requested beginning the VS Code extension and transferring

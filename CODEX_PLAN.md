@@ -386,6 +386,29 @@ AI proposals. Test graph behavior, assumption preservation, source-change
 detection, and restoration, then evaluate reconstruction or continued work on
 that proof. A smaller graph alone supplies no evidence of mathematical benefit.
 
+### Deferred mathematical outlines at multiple scales
+
+**Status, 2026-10-14:** accepted product requirement; implementation deferred.
+
+Support mathematical outlines of subjects, bodies of literature, books,
+monographs, articles, sections, and individual arguments, including
+AI-generated and AI-assisted sources. Outlines may connect several sources;
+they need not follow a table of contents or form a strict hierarchy.
+
+Support the adopted Kallenberg progression from purpose and organization,
+through central concepts and results and governing ideas, to optional argument
+structure and technical detail. Readers may enter at the level relevant to
+their question. Preserve source locations and distinguish source assertions,
+proposed connections, reader synthesis, and any checking evidence.
+Formalization is optional.
+
+This is a requirement for future bounded increments. It does not expand the
+current offline source-region reader, authorize automatic corpus ingestion,
+or claim an implemented outlining capability. The proof-outline requirement
+and its joint-premise, source-fidelity, and expansion obligations remain in
+force. Keep this requirement in the roadmap and reference it from subsequent
+continuation handoffs.
+
 ### Observation handoff and status
 
 [docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) contains the active
