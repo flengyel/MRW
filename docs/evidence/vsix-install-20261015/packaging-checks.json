@@ -1,0 +1,20 @@
+{
+  "lockfile_clean_install": true,
+  "packager": "@vscode/vsce 4.0.0",
+  "node": "24.21.0",
+  "npm": "11.13.0",
+  "repeat_payload_equal": true,
+  "negative_checks": {
+    "extra-test-harness": "Unexpected/missing package files: extra=['extension/test/host/bootstrap.js'], missing=[]",
+    "missing-data": "Unexpected/missing package files: extra=[], missing=['extension/python/theorem_terminal/data/appendix_a_justification.json']",
+    "changed-python": "Packaged runtime bytes differ: extension/python/bridge.py",
+    "duplicate-entry": "Unexpected/missing package files: extra=[], missing=[]"
+  },
+  "source_date_epoch": 1792079077,
+  "timezone": "UTC",
+  "repeat_archive_hashes": [
+    "721e9ec6fa011807508947c4fe3a132702ce705b5d30b6c80cf5f2ea4fbc1f29",
+    "721e9ec6fa011807508947c4fe3a132702ce705b5d30b6c80cf5f2ea4fbc1f29"
+  ],
+  "repeat_archive_bytes_equal": true
+}

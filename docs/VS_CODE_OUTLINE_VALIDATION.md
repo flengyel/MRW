@@ -5,7 +5,8 @@ UTF-8 mathematical text without Lean, preserves exact retained source and
 supplied artifacts, and keeps editable reader explanations separate. It is a
 partial delivery of [the outline requirement](PROOF_OUTLINES.md), not vertex
 elimination or evidence of proof correctness or mathematical usefulness.
-The association-editing follow-on in 0.4.1 is recorded separately below.
+The association-editing follow-on and subsequent installed-VSIX delivery in
+0.4.1 are recorded separately below.
 
 ## Actual host and two examples
 
@@ -201,6 +202,113 @@ see [the reader instructions](../vscode/README.md#reproduce-the-bounded-outline-
 VSIX installation, Qt widget execution, other platforms and mathematical
 usefulness remain unassessed. Unsaved forms still have no crash/restart recovery.
 
+## Installed VSIX — 2026-10-15
+
+The completed association-editing runtime at `db3665a` is delivered without a
+runtime rewrite as **flengyel.theorem-terminal 0.4.1**. The package is
+`vscode/theorem-terminal-0.4.1.vsix`; its final SHA-256 and file digests are in
+the committed [archive verification](evidence/vsix-install-20261015/package-verification.json).
+Use [the build/install instructions](../vscode/README.md#package-and-install-a-vsix).
+No Marketplace publication or live MRW provider call occurred.
+
+Packaging uses **@vscode/vsce 4.0.0**, pinned with its dependency lockfile,
+Linux Node **24.21.0**, npm **11.13.0** and Python **3.13.5**. A clean `npm ci
+--ignore-scripts` succeeded from the package cache. The existing prepublish
+hook then bundled the current Python core and license. With `TZ=UTC` and
+`SOURCE_DATE_EPOCH=1792079077` (the `db3665a` timestamp), two complete package
+builds produced identical VSIX bytes. The
+[packaging checks](evidence/vsix-install-20261015/packaging-checks.json) record
+the versions, repeat hashes and negative checks. Reproduction of those bytes
+uses the recorded toolchain; this is not a cross-version compression guarantee.
+
+The archive has **43 files**: the production manifest, VSIX metadata, README,
+Apache 2.0 license, seven production JavaScript modules including the reader's
+webview script, the isolated Python bridge, and all 30 Python-core/data files,
+including `data/appendix_a_justification.json`. Runtime JS, Python, data and
+license bytes match the checkout. Tests, host bootstraps, staged configuration,
+development scripts, npm dependencies and bytecode caches are excluded. The
+verifier rejects unexpected/missing files, duplicate entries, a substituted
+manifest or modified runtime bytes. Disposable malformed archives demonstrated
+rejection of an added host harness, missing JSON data, changed bridge and
+duplicate manifest. README links now resolve relative to the repository's
+`vscode/` directory; the packager's default root-relative base was incorrect.
+
+The VSIX installed successfully into the **WSL Debian workspace extension
+host**. The ordinary Windows **VS Code 1.141.2** window (commit
+`16507d91be0dc1ce4f94c04d4d0430210b8685d9`) opened the disposable workspace
+`/tmp/mrw-vsix-install-20261015`. There was no development-host flag, test entry
+point, bridge guard or substituted manifest. Native Command Palette commands,
+file/kind pickers and installed webview controls were driven by Windows UI
+automation and DevTools DOM input. This establishes scripted use of real
+dialogs and an installed extension, not an independently performed human
+usability trial.
+
+The [host report](evidence/vsix-install-20261015/host-checks.json) records:
+
+- Created one saved-source outline, edited/saved an attributed overview
+  annotation, replaced a context's exact range, and edited/saved its role and
+  label. The small UTF-8 fixture is explicitly synthetic installation evidence;
+  it makes no mathematical or checking claim.
+- Attached the supplied text fixture as a supporting artifact with a manual
+  region association, then detached it into a retained outline-level reference.
+  Its **Open retained artifact** action remained available.
+- Closed the ordinary workspace window normally; its WSL extension host exited
+  with code 0. Reopened the same workspace and explicitly opened the saved
+  outline. Annotation/context values, identifiers, spans and detached evidence
+  restored; the persisted outline bytes were identical before/after restart.
+- Opened both retained artifact and retained source through the restored
+  reader. Their exact retained bytes matched the unchanged original files;
+  the restored reader reported no warnings. Visible captures were inspected.
+- Compared all 41 installed extension files with the final archive (ignoring
+  only VS Code's installation metadata in `package.json`). Observed real host
+  requests running `python3 -I` with the installed extension's `python/bridge.py`
+  and installed directory as cwd. Its explicit import path, equal bundled
+  source bytes and imported `source_outlines` code filename establish that it
+  uses the installed bundled core, not the checkout/global Python installation.
+- All **82 pre-existing MRW private files** retained their prior digests.
+  Installation preserved identity, storage paths and user state; no reset or
+  migration occurred.
+
+Console diagnostics were inspected, including the restarted window's renderer
+and remote extension-host logs. The latter recorded MRW activation without an
+error. Existing errors identify Copilot API-proposal declarations,
+GitHub-authentication/Remote WSL `navigator` migration warnings and unrelated
+Python-snippet language declarations; Node deprecations and standard webview
+iframe/feature warnings also remain. They are not evidence of an MRW packaging
+failure. Automation mistakes separately produced console errors: selecting a
+worker rather than the reader frame, incomplete/concatenated console input and
+reading a collapsed card through `innerText`. Corrected frame/input and
+`textContent` checks passed against the saved state. None established a runtime
+defect, so production JS/Python was unchanged. An isolated-profile launch was
+blocked by the VS Code updater mutex; the running editor's ordinary CLI was
+used without stopping its updater or closing unrelated windows.
+
+The [evidence manifest](evidence/vsix-install-20261015/validation-manifest.json)
+pins the successful DOM reports, saved state, fixtures, package/installation
+checks, scoped logs and inspected captures. Full local logs and automation
+artifacts remain under `.codex-work/vscode-host-vsix-20261015/`. This task's
+regressions passed: **33 Node tests**, **313 Python tests (254 passed, 59
+skipped)**, JavaScript syntax, Python compilation and document/diff checks.
+PySide6 is unavailable; skips remain the 58 opt-in Qt checks and one unavailable
+authorized `/mnt/c` project-parent check. The existing broader campaigns were
+not repeated. The installed workflow used only offline MRW reader actions;
+other installed extensions may independently use network services.
+
+Architectural intent now explicitly retains one extension over the existing
+Python core in the workspace environment, using standard local Linux, WSL2
+and Remote SSH to Linux. **Python 3.11+ on that host is required**. Lean,
+SageMath, containers and providers are optional for ordinary reading/outlining.
+Windows UI plus Linux backend is the supported architecture exercised here;
+native Windows backend portability remains deferred. **Remote SSH Linux is
+the next actual interoperability check**; compatible **Raspberry Pi OS/ARM is
+a separate validation target**. Neither, nor ordinary local Linux desktop use,
+has been established by this WSL check. No new remote service, TypeScript
+rewrite, Windows persistence port or data migration was introduced.
+
+Mathematical usefulness, proof correctness and human comprehension remain
+unassessed. This was a focused installation workflow, not a repeat of outline
+acceptance, R3 acceptance or source reconnaissance.
+
 ## Current boundaries
 
 See [the reader contract](../vscode/README.md#offline-source-region-reader) for
@@ -208,8 +316,9 @@ supported UTF-8 formats, private-state durability and size limits. PDF/OCR
 regions, notebook cells, rendered documents and non-UTF-8 sources are
 unsupported. Forms require explicit saving and have no restart recovery for
 unsaved drafts. Outline/artifact deletion, garbage collection and cross-machine
-synchronization are not implemented. VSIX
-installation, manual dialog use and mathematical usefulness were not assessed.
+synchronization are not implemented. Ordinary installed-VSIX use is established
+only for the scoped Windows/WSL configuration above. Independent human dialog
+use and mathematical usefulness remain unassessed.
 
 The requested context/evidence association-editing increment is complete.
 Automatic extraction, AI outline proposals, automatic gap detection, verified

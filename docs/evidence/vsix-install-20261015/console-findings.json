@@ -1,0 +1,24 @@
+{
+  "renderer_error_lines": [
+    "2026-10-15 13:58:09.613 [error] Extension 'github.copilot-chat' appears in product.json but enables LESS API proposals than the extension wants.",
+    "2026-10-15 13:58:09.953 [error] PendingMigrationError: navigator is now a global in nodejs, please see https://aka.ms/vscode-extensions/navigator for additional info on this error.",
+    "2026-10-15 13:58:10.030 [error] PendingMigrationError: navigator is now a global in nodejs, please see https://aka.ms/vscode-extensions/navigator for additional info on this error.",
+    "2026-10-15 13:58:10.037 [error] [Extension Host] (node:7436) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.",
+    "2026-10-15 13:58:13.020 [error] Extension 'github.copilot-chat' appears in product.json but enables LESS API proposals than the extension wants.",
+    "2026-10-15 13:58:13.127 [error] [EricSia.pythonsnippets3]: Unknown language in `contributes.pythonsnippets3.language`. Provided value: django-html",
+    "2026-10-15 13:58:13.128 [error] [EricSia.pythonsnippets3]: Unknown language in `contributes.pythonsnippets3.language`. Provided value: django-txt",
+    "2026-10-15 13:58:20.275 [error] [Extension Host] (node:353316) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead."
+  ],
+  "remote_mrw_activation_logs_have_no_errors": true,
+  "script_errors": [
+    "document is not defined when a VS Code worker context was selected",
+    "incomplete/concatenated console expression",
+    "Detachment absent: innerText excluded text in a collapsed card"
+  ],
+  "remaining_warnings": [
+    "Node url.parse/punycode deprecations; originating dependency not traced",
+    "Copilot FileSystemService large-file warning",
+    "VS Code webview local-network-access and iframe sandbox warnings"
+  ],
+  "product_runtime_defect_established": false
+}

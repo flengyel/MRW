@@ -1,6 +1,51 @@
 # Codex continuation: VS Code migration and proof outlines
 
-## Active handoff — offline reader with editable associations, 2026-10-15
+## Active handoff — installed VSIX and Linux workspace hosts, 2026-10-15
+
+The association-editing increment is complete at `db3665a`. The completed delivery
+packages that existing extension as an installable VSIX, preserving identity
+`flengyel.theorem-terminal` 0.4.1 and all existing private-state conventions.
+Use [the reproducible packaging and installation procedure](../vscode/README.md#package-and-install-a-vsix)
+and [the installed-package report](VS_CODE_OUTLINE_VALIDATION.md#installed-vsix--2026-10-15)
+for the artifact digest, archive contents, ordinary-window workflow and limits.
+The committed lockfile pins **@vscode/vsce 4.0.0**. Packaging uses the existing
+Python bundler/prepublish hook; it adds no second core implementation.
+The documented UTC/fixed-epoch builds produced identical archive bytes. The
+final VSIX installed successfully into WSL Debian, and an ordinary Windows
+VS Code 1.141.2 window restored saved reader edits and detached evidence after
+normal close/reopen. Retained source and artifact access passed. Observed
+isolated bridge processes used the installed bundled core; all 82 pre-existing
+MRW private files stayed unchanged. These were scripted native-dialog/webview
+checks with inspected captures, not independent manual human acceptance.
+The report distinguishes remaining VS Code/other-extension diagnostics and
+corrected automation errors from MRW runtime defects; none was established.
+
+The architectural direction prioritizes simplicity and interoperability: one
+VS Code extension and the existing Python core run in the workspace environment
+through standard local Linux, WSL2 and Remote SSH to Linux. Windows VS Code can
+supply the UI while the workspace extension and Python run on Linux. Python
+3.11+ is an explicit workspace-host requirement; ordinary reading and outlining
+require no Lean, SageMath, containers or provider. Preserve source identity,
+provenance and publication protections. Do not start a TypeScript rewrite,
+remote-access service or native Windows persistence port. Native Windows
+backend portability remains a separate deferred task.
+
+Distinguish intended arrangements from actual host results. Windows VS Code
+with WSL Debian is the scoped installed-package configuration. **Remote SSH to
+Linux is the next interoperability check**, requiring a real SSH host; it has
+not passed. Compatible **Raspberry Pi OS/ARM validation is separate** and has
+not passed. Local Linux desktop-host validation is also distinct from Linux
+service regressions and WSL UI checks. These next checks authorize no new
+backend/service or state migration.
+
+Keep saved user state. Do not reset storage to install or upgrade. Save reader
+forms explicitly before normal close/reopen, then use **MRW: Open Saved Source
+Outline…**. Retained originals remain separate from editable reader state.
+This packaging task authorizes no provider calls or Marketplace publication.
+Do not repeat reconnaissance, R3 or the full reader acceptance campaigns.
+Mathematical usefulness remains unassessed by scripted installation checks.
+
+## Delivered offline reader with editable associations
 
 The first offline reader is implemented in the existing VS Code extension.
 Read [its workflow and persistence boundary](../vscode/README.md#offline-source-region-reader),

@@ -8,6 +8,19 @@ The existing Qt GUI remains available. The `theorem-terminal` CLI remains availa
 operations. Repository, executable, Python package, Lean namespaces, and
 serialized record identities retain their existing technical names.
 
+The deployment direction keeps one VS Code extension over the existing Python
+core, running in the workspace environment through standard local Linux, WSL2
+or Remote SSH to Linux. Python 3.11+ is required on that host. Windows VS Code
+may supply the UI while Linux runs the backend. Reading and outlining do not
+require Lean, SageMath, containers or a provider. Native Windows backend
+portability remains deferred. Remote SSH Linux is the next interoperability
+check; Raspberry Pi OS/ARM requires separate validation. See
+[workspace-host dependencies and evidence](vscode/README.md#workspace-hosts-and-dependencies)
+and [VSIX packaging/installation](vscode/README.md#package-and-install-a-vsix).
+The 0.4.1 VSIX has a scoped ordinary Windows VS Code/WSL Debian installation
+and offline reader restart check; see the [delivery evidence](docs/VS_CODE_OUTLINE_VALIDATION.md#installed-vsix--2026-10-15).
+This is scripted functional evidence; mathematical usefulness remains unassessed.
+
 For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 and [the current Codex continuation prompt](docs/CODEX_CONTINUATION.md).
 R1's PDF-plus-note workflow, R2's bounded direct mathematical-assistance

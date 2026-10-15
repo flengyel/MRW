@@ -14,6 +14,22 @@ recovery. Shared Python services own record validation, exact request preparatio
 and immutable publication. Qt remains a separate supported frontend. Its buffers,
 checkpoint protocol, widgets, and layout are not extension requirements.
 
+The deployment direction prioritizes simplicity and interoperability: retain
+one extension and the existing Python core in the workspace environment, using
+standard local Linux, WSL2 and Remote SSH to Linux. Python 3.11+ is required on
+that host. Windows VS Code may supply the UI while Linux runs the backend.
+Native Windows backend portability is a separate deferred task; no TypeScript
+rewrite, new remote-access service or Windows persistence port is authorized.
+Lean, SageMath, containers and providers remain optional for reading/outlining.
+
+| Workspace-host arrangement | Validation status and next action |
+|---|---|
+| Windows VS Code with WSL2 Debian | Scoped development-host checks and ordinary installed-VSIX offline workflow/close/reopen pass; see the latest reader validation report |
+| Local Linux VS Code | Intended standard host; Linux Python/bridge regressions pass, ordinary local-desktop host use is not established by WSL checks |
+| Remote SSH to Linux | Next interoperability host check; not yet validated |
+| Compatible Raspberry Pi OS / ARM | Separate host/architecture validation target; not yet validated |
+| Native Windows backend | Separate deferred portability task |
+
 | Capability | VS Code extension status | Standalone Qt status |
 |---|---|---|
 | Ordinary editing and recovery | Provided by VS Code; do not duplicate | Application-owned implementation |

@@ -11,6 +11,18 @@ editing and document lifecycle; the extension contributes research continuity
 and explicit record operations. This vision states intended benefits, not
 feature parity between frontends or observed mathematical usefulness.
 
+Simplicity and interoperability guide deployment: keep one VS Code extension
+and the existing Python core, running the backend in the workspace environment.
+Use the host's standard local Linux, WSL2 and Remote SSH mechanisms. Windows
+VS Code connected to Linux is an intended arrangement. Python 3.11+ is an
+explicit workspace-host requirement; ordinary reading and outlining need no
+Lean, SageMath, container or model provider. These remain optional integrations.
+Native Windows backend portability is deferred. Remote SSH Linux is the next
+interoperability check, with Raspberry Pi OS/ARM validation a separate target.
+Deployment intent is distinct from the actual configurations recorded in the
+[validation report](docs/VS_CODE_OUTLINE_VALIDATION.md); this direction adds no
+new runtime, remote service or record semantics.
+
 ## Thesis
 
 Mathematical Research Workstation should help people work with mathematics whose

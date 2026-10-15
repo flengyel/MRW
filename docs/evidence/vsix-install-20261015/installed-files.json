@@ -1,0 +1,11 @@
+{
+  "installed_directory": "/home/flengyel/.vscode-server/extensions/flengyel.theorem-terminal-0.4.1",
+  "compared_archive_files": 41,
+  "manifest_matches_except_vscode_install_metadata": true,
+  "runtime_and_license_bytes_equal": true,
+  "test_harnesses_absent": true,
+  "source_outlines_code_origins": [
+    "/home/flengyel/.vscode-server/extensions/flengyel.theorem-terminal-0.4.1/python/theorem_terminal/source_outlines.py"
+  ],
+  "vsix_sha256": "721e9ec6fa011807508947c4fe3a132702ce705b5d30b6c80cf5f2ea4fbc1f29"
+}

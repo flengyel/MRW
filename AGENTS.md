@@ -27,6 +27,16 @@ The VS Code extension is the active frontend migration target, explicitly
 authorized on 2026-10-13. Its first increment lives in `vscode/`; read
 `vscode/README.md` for its boundaries and development launch.
 
+Prioritize simplicity and interoperability: retain one VS Code extension and
+the existing Python core in the workspace environment. Use standard local Linux,
+WSL2 and Remote SSH to Linux extension hosts. Windows VS Code connected to Linux
+is an intended arrangement; native Windows backend portability remains deferred.
+Remote SSH Linux is the next interoperability check; compatible Raspberry Pi OS
+hosts require separate ARM validation. Distinguish actual host results from
+intended support. Do not introduce a TypeScript rewrite, a remote-access service
+or a Windows persistence port. Ordinary reading/outlining requires Python 3.11+
+on the workspace host, without Lean, SageMath, containers or a provider.
+
 Frontend ownership is explicit: VS Code owns ordinary text documents, editing,
 saving, undo, and document recovery. The extension owns its commands, read-only
 record views, and explicitly designed private research state. The independent

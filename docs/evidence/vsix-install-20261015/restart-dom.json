@@ -1,0 +1,9 @@
+{
+  "savedAnnotation": "Edited scripted installation fixture: inspect the number plus one.",
+  "contextRole": "cited_result",
+  "contextLabel": "Edited installed-package context",
+  "exactContext": "Form N = p₁ ⋯ pₙ + 1.",
+  "evidenceDetached": true,
+  "retainedArtifactAction": true,
+  "warnings": []
+}

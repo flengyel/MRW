@@ -8,6 +8,30 @@ VS Code owns ordinary files, editing, undo, saving, and document recovery.
 The offline source-region reader supports informal mathematical arguments as
 well as optional captured Lean evidence; see its independent boundary below.
 
+## Workspace hosts and dependencies
+
+Keep one extension and the existing Python core in the workspace environment.
+Use VS Code's standard local Linux, WSL2 or Remote SSH to Linux host. Windows
+VS Code can supply the UI while the workspace extension and Python run on Linux.
+**Python 3.11+ is required on the workspace host**, normally as `python3`.
+Configure a different interpreter through `mrw.pythonExecutable` in User or
+Remote settings. This is one executable path, without shell arguments.
+Ordinary reading and outlining require no Lean, SageMath, containers or model
+provider. No npm installation is needed to run an installed VSIX.
+
+| Arrangement | Evidence and intended support |
+|---|---|
+| Windows VS Code with WSL2 Debian | Scoped actual-host reader checks; installed-package results are in the validation report |
+| Local Linux VS Code | Intended standard deployment; Linux bridge/service regressions pass, ordinary desktop-host validation remains separate |
+| Remote SSH to Linux | Next interoperability check; no actual SSH host validation yet |
+| Compatible Raspberry Pi OS / ARM | Separate architecture/host validation target; no actual ARM validation yet |
+| Native Windows backend | Separate deferred portability task |
+
+These choices preserve existing source identity, provenance and private
+publication protections. They introduce no TypeScript rewrite, custom remote
+service or Windows persistence port. The configuration under test is recorded
+separately from this architectural direction.
+
 ## Offline source-region reader
 
 Open a saved UTF-8 mathematical text, select a passage, and run **MRW: Create
@@ -144,11 +168,63 @@ settings. It is one executable path, without arguments or a shell template.
 The development bundling task separately uses `python3`; run the bundling
 script with the available Python executable if necessary.
 
-For a VSIX using an installed `@vscode/vsce` development tool, run `vsce package`
-in this directory. Its prepublish step stages the current repository Python
-sources. Install the result using **Extensions: Install from VSIX…**. The
-publisher field identifies the package; no Marketplace publication is implied.
-The generated Python directory is ignored by Git and is rebuilt from `src/`.
+## Package and install a VSIX
+
+Build in the Linux workspace checkout with Python 3.11+, Node.js 22+ and npm. The committed
+lockfile pins the development packager, **@vscode/vsce 4.0.0**. From the repository
+root:
+
+```sh
+npm ci --prefix vscode --ignore-scripts
+TZ=UTC SOURCE_DATE_EPOCH=1792079077 npm run package --prefix vscode
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.4.1.vsix
+sha256sum vscode/theorem-terminal-0.4.1.vsix
+```
+
+In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
+run the Linux prepublish chain. Node/npm are development packaging requirements,
+separate from the installed extension's Python dependency.
+
+Packaging runs the existing `vscode:prepublish`/`bundle-core` hook, copying the
+current repository Python core, JSON data and Apache license. The verifier
+compares every runtime JS/Python/data/license byte to this checkout, checks the
+production manifest and rejects missing or unexpected archive files. The
+package excludes development tests, scripts, staging configuration, caches and
+packaging dependencies. Generated Python copies, dependencies and VSIX files
+are ignored by Git. The recorded epoch is the timestamp of the completed
+association-editing baseline `db3665a`; vsce uses it for stable ZIP timestamps
+and entry ordering. UTC avoids host-timezone differences. Two builds with the
+recorded Node/npm/packager versions produced identical archive bytes; use those
+versions when reproducing the delivered SHA-256. Record the hash of the actual
+file. This procedure packages locally and does not publish to the Marketplace.
+
+Open an ordinary window for the intended Linux workspace: local Linux, the
+chosen WSL distribution, or an SSH-connected Linux host. Choose **Extensions:
+Install from VSIX…** and select the package. In a remote window, check that MRW
+appears under that workspace host's **Installed** extensions, rather than only
+under the local UI's extensions. Alternatively, in that connected window's
+integrated terminal on the workspace host:
+
+```sh
+code --install-extension /absolute/path/to/theorem-terminal-0.4.1.vsix
+code --list-extensions --show-versions
+```
+
+The extension identity is **flengyel.theorem-terminal**, version **0.4.1**.
+Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
+and run an **MRW:** command from the Command Palette; F5 or a development manifest
+is unnecessary. Python 3.11+ must be available on that host (normally
+`python3`); no Qt or Lean installation is required for the offline reader.
+The bridge runs `python3 -I` with `python/bridge.py` under the installed
+extension and loads that directory's bundled core. It does not import the
+checkout or an independently installed `theorem_terminal` package.
+
+Installation keeps the existing extension identity and private-state paths.
+Do not delete workspace storage to install or upgrade. Saved outlines are
+reopened explicitly with **MRW: Open Saved Source Outline…**; save reader forms
+before closing. Native Windows backend portability remains deferred; run the
+workspace extension and Python on Linux. See the [installed-package validation](../docs/VS_CODE_OUTLINE_VALIDATION.md)
+for the tested workflow and remaining limits.
 
 ### Reproduce the bounded outline host checks
 

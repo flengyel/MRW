@@ -14,6 +14,17 @@ This model describes intended entities and contracts, not a claim that every
 entity has an implemented VS Code command; consult README and CODEX_PLAN for
 frontend-specific delivery status.
 
+The deployment direction retains one extension over the existing Python core
+in the workspace environment, through standard local Linux, WSL2 or Remote SSH
+to Linux hosts. The backend requires Python 3.11+. Windows may supply the editor
+UI while Linux owns backend execution and filesystem operations; native Windows
+backend portability is deferred. Remote SSH Linux and compatible Raspberry Pi
+OS/ARM require actual host validation before support is claimed. Lean, SageMath,
+containers and providers are optional integrations, not prerequisites for
+ordinary reading or outlining. These deployment choices preserve source
+identity, provenance and publication protections; they add no remote-access
+service, TypeScript rewrite, data migration or new domain entity.
+
 Changes from v8: the requested proof-outline view uses vertex elimination with
 visible claims and explanations. Source boundaries, local assumptions,
 reversible expansion, and explanation provenance remain separate from proof

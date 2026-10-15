@@ -1,0 +1,83 @@
+{
+  "artifacts": {
+    "close.ps1": {
+      "bytes": 1046,
+      "sha256": "f0a9629df908f4d1f75cf29c5eaa8c3e17ab9301f0bf1dac68f70b761f461310"
+    },
+    "installed-before-close.png": {
+      "bytes": 116795,
+      "sha256": "262979bf185af6c3b53a5a801518a1d65c6749ac929979e730da24b608a3d1ba"
+    },
+    "installed-final-reopened.png": {
+      "bytes": 272375,
+      "sha256": "60a87f8892ab5ade29fb79d5efec7d838f06667118154750233f10fa64881dbd"
+    },
+    "installed-restored-artifact.png": {
+      "bytes": 285477,
+      "sha256": "856fb929c1bfcad1d81f161a5f2088db386a7cd4b0575d48a65cb5c7c4193be4"
+    },
+    "installed-restored-source-context.png": {
+      "bytes": 284172,
+      "sha256": "4a612134a26c792c910f991ae380eb38a631611a8de86aae19cce17a07cad2c8"
+    },
+    "launch.ps1": {
+      "bytes": 439,
+      "sha256": "99d0daef333829f5b281e694f4c427b1c55be169c859601f227750313dc9a77a"
+    },
+    "node-tests.log": {
+      "bytes": 3425,
+      "sha256": "8e879f4c97216e9119879570e5a421a2c59a5c9d0276185a95eddc2d33ce5bdd"
+    },
+    "ordinary-exthost-1.log": {
+      "bytes": 1958,
+      "sha256": "d9fb41546c3e624cb3234f76beaf3e5ec81702ecde878283a6b37223c6d7548f"
+    },
+    "ordinary-exthost-2.log": {
+      "bytes": 1937,
+      "sha256": "326b94babd4ce8f0d7aef9d341959e649202b4322487317fb67f5f7965f6cd43"
+    },
+    "ordinary-exthost-3.log": {
+      "bytes": 1553,
+      "sha256": "84f35e3257ca5c8827950fa993352a5deaff79a8dfba2508aaad32a7e8ecb782"
+    },
+    "ordinary-restart-renderer.log": {
+      "bytes": 19083,
+      "sha256": "cd4f144da7ba2841e0023c6eb0704be7cf07c9604767080868f28f6d972702a0"
+    },
+    "package-reproducible-1.log": {
+      "bytes": 1160,
+      "sha256": "8fb3e8fdefc553a01091ad83bda14692806e1f2ef81e547ebeec1d0d64212204"
+    },
+    "package-reproducible-2.log": {
+      "bytes": 1160,
+      "sha256": "8fb3e8fdefc553a01091ad83bda14692806e1f2ef81e547ebeec1d0d64212204"
+    },
+    "python-tests.log": {
+      "bytes": 59272,
+      "sha256": "d1f657c5eeec31d85465db582164faaeacc9d23e604a5d9237ec72dce66c6b53"
+    },
+    "restart-check.js": {
+      "bytes": 1505,
+      "sha256": "82966f88b55151750372d375e3f5b2353a9f8121d11c772167bb0aaa46bb618e"
+    },
+    "ui.ps1": {
+      "bytes": 5524,
+      "sha256": "d9eb001690442b246267b8a29b91d9b5260d2b5bf62cd9781f6f8a30b6e629e0"
+    }
+  },
+  "committed_evidence": {
+    "console-findings.json": "3fe5dd1a6cc9c521497618a430f359d2047b874c69a14a10a3beabb9bd18b7a5",
+    "host-checks.json": "32e55f8744348a171dd748f991bfb2add1334f29862491d15b4c24e6abe3989b",
+    "installed-bridge-processes.jsonl": "34b9db9b28245aafc45140d9dc095c5505fb68387ffe4f1344dc82fca8bbc70b",
+    "installed-files.json": "bb6c1af31a6dea34ca171ef9203d7f971f31b25c19dea71a4450cd4e148f53b5",
+    "outline-after-restart.json": "eb43499b21a06bc369e619b92936dc627d1a959601b5ffb5a148df942060e886",
+    "outline-before-close.json": "eb43499b21a06bc369e619b92936dc627d1a959601b5ffb5a148df942060e886",
+    "package-verification.json": "a15f29b3420a39b0a4c4fb98b323468cd3eeddd4afe05b9b2f99911c77107ed2",
+    "packaging-checks.json": "2df3bb4724ce820d08246d06537bb2fd263076516b8dfb2a6e44170663b92037",
+    "restart-dom.json": "9ee2a232542753be92dbc568e0486def0915c6008d8702febef245c47ca1f4b3",
+    "restart-source-dom.json": "381c8e74d7cc7616aa2958343db02f122674127042ae619fcdd35fbbb7f1d694",
+    "source.txt": "ee6216fc52943007d98a2629cc2e093b69916cd6e3e164d05a72082fd1f710f9",
+    "supplied-evidence.txt": "26b2cbfcb151d8566fe0b4e4a58b1ef38957c74cf7ddd1a43981da4012241f13"
+  },
+  "local_artifact_directory": ".codex-work/vscode-host-vsix-20261015"
+}

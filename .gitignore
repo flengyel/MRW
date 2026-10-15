@@ -8,5 +8,6 @@ __pycache__/
 /vscode/python/theorem_terminal/
 /vscode/LICENSE
 /vscode/*.vsix
+/vscode/node_modules/
 /.codex-work/vscode-host*/
 /.codex-work/proof-outline-recon*/

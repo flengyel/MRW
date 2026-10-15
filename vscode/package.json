@@ -341,6 +341,11 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js"
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js",
+    "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/theorem_terminal/blob/main/vscode",
+    "verify-vsix": "python3 scripts/verify-vsix.py"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "4.0.0"
   }
 }

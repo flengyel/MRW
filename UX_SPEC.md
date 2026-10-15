@@ -18,6 +18,14 @@ platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
 
+The backend runs in the workspace environment with Python 3.11+, using standard
+local Linux, WSL2 or Remote SSH to Linux hosts. Windows may supply the editor
+while Linux runs the core. One extension and the existing Python services
+remain the architecture; native Windows backend portability is deferred.
+Reading and outlining need no Lean, SageMath, container or provider. Remote SSH
+Linux is the next host validation, and Raspberry Pi OS/ARM is a separate target;
+neither is established by the Windows/WSL results.
+
 VS Code is the active frontend target. The mathematical workflow principles in
 this document apply to both frontends; implementation details concerning QtPdf,
 split panes, widgets, application-owned buffers, checkpoints, and close/quit
