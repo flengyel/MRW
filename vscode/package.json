@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -233,6 +233,12 @@
       {
         "command": "mrw.addOutlineContext",
         "title": "Keep Selected Hypothesis / Cited Result",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.replaceOutlineContext",
+        "title": "Replace Shared Context with Selection\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },

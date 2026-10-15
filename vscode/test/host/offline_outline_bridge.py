@@ -17,4 +17,9 @@ socket.create_connection = forbidden
 socket.socket.connect = forbidden
 socket.socket.connect_ex = forbidden
 subprocess.Popen = forbidden
+if '--fail-publication' in sys.argv:
+    from theorem_terminal import source_outlines
+    def fail_publication(*args, **kwargs):
+        raise OSError('Injected pre-replacement publication failure in actual host check')
+    source_outlines.save_mutable = fail_publication
 raise SystemExit(editor_bridge.main())

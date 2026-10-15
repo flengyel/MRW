@@ -1,6 +1,6 @@
 # CODEX_PLAN.md
 
-Active product roadmap. VS Code migration and source-reader status updated 2026-10-14;
+Active product roadmap. VS Code migration and source-reader status updated 2026-10-15;
 the product assessment was reviewed 2026-09-20 against the integrated Qt R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
@@ -20,7 +20,7 @@ checkpoint protocol, widgets, and layout are not extension requirements.
 | Existing PDF and TeX/notebook tools | Other host integrations; MRW does not claim parity | PDF reading, staged TeX build, and external Jupyter handoff delivered |
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
-| Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, optional supplied evidence and restart restoration | Not implemented |
+| Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -364,6 +364,16 @@ monographs, articles and AI-generated/assisted manuscripts without requiring
 Lean. Reading levels follow the adopted Kallenberg order without enforcing it;
 cited results may be used while their proofs are deferred. Changed or missing
 originals do not remap selections. Unknown provenance remains unknown.
+
+The bounded association-editing follow-on is delivered in extension 0.4.1
+(2026-10-15): shared context labels, roles and exact ranges can be revised or
+removed; manual evidence links and supplied snapshot choices can be revised,
+and detached evidence remains readable as an outline-level reference. Source
+statements, hypotheses and supplied checking evidence stay unchanged. Explicit
+saves persist these edits; live form refresh and pending-save completion
+preserve newer typing. Scoped Windows/WSL host checks cover these actions,
+publication failure and normal close/reopen. See the validation report for
+results and limits; mathematical usefulness remains unobserved.
 
 This partially implements the proof-outline requirement; it does not complete
 or replace the vertex-elimination contract or the deferred broader capability

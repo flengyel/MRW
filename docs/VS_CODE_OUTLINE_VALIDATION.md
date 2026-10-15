@@ -1,10 +1,11 @@
 # Offline source-region reader validation — 2026-10-14
 
-The first manual reader is implemented in extension 0.4.0. It supports saved
+The first manual reader was implemented in extension 0.4.0. It supports saved
 UTF-8 mathematical text without Lean, preserves exact retained source and
 supplied artifacts, and keeps editable reader explanations separate. It is a
 partial delivery of [the outline requirement](PROOF_OUTLINES.md), not vertex
 elimination or evidence of proof correctness or mathematical usefulness.
+The association-editing follow-on in 0.4.1 is recorded separately below.
 
 ## Actual host and two examples
 
@@ -120,18 +121,97 @@ workflows. Original-source navigation can independently activate installed
 extensions; this is not an OS-wide audit of VS Code or a new MRW check. R3
 acceptance and exporter reconnaissance were not repeated.
 
-## Boundaries and next increment
+## Association-editing follow-on — 2026-10-15
+
+Extension **0.4.1** adds explicitly saved shared-context labels/roles, exact
+range replacement, and context removal; manual evidence can move between
+regions, select another supplied snapshot, or detach into an outline-level
+reference. Retained source/artifact bytes and original statements, hypotheses
+and checking evidence stay unchanged. Detached artifacts retain their
+**Open retained artifact** action. These are manual reading associations, not
+checked correspondences or proof edges. No storage migration or artifact
+deletion was added.
+
+The live panel also preserves text entered after an older form version was
+submitted for save. Only the submitted draft clears on success; newer typing
+still needs an explicit save. Failed publication retains live drafts and the
+last saved state; an uncertain post-replacement sync failure can leave the
+complete replacement on disk and is still reported as failure. The existing
+blocked-write policy remains in force until host reload.
+
+The scoped normal development-host runs used **Windows VS Code 1.141.2 with
+WSL Debian**, Linux Node 24.21.0 and Python 3.13.5. They used an ordinary
+disposable Unicode note, the existing captured goal JSON and a reader-labeled
+declaration-artifact fixture. The latter tests presentation controls only; it
+is not a new formal declaration or mathematical check. No authoritative source
+was modified and no exporter was rerun. Production JS and bundled Python bytes
+match the checkout; the staged manifest and test bootstrap remain separate.
+
+The committed [editing report](evidence/source-outline-associations-20261015/outline-associations.json)
+has six passing checks. The [normal close/reopen report](evidence/source-outline-associations-20261015/outline-associations_restart.json)
+has three. Both report `complete: true` without failure. The actual host exercised:
+
+- context role/label editing, source-derived replacement and removal while
+  unrelated context and unsaved explanation/label drafts survived refresh;
+- typing into the same form while its publication was deliberately held,
+  retention of that newer draft on completion, and its later explicit save;
+- moving a manual region association, changing the selected supplied snapshot,
+  detaching it, retaining goal/local-context display and opening exact retained
+  source/artifact text;
+- an injected pre-replacement publication failure through the real Python
+  mutable-save path: unchanged saved bytes, unchanged live saved association,
+  visible blocked-write state, preserved drafts and continued retained reading;
+- normal process close/reopen: persisted edits/removals and unrelated evidence,
+  retained-original access, cleared transient drafts and cleared session block.
+
+The offline bridge guard removes the provider credential and forbids Python
+socket connections and child tool processes. The bootstrap allows only
+`outline_*` requests. These reader actions invoked no compiler, checker or
+provider and created no Verification or premise admission. Dialog choices and
+webview input were scripted, using actual host documents, DOM, commands and
+private storage. The restored context controls were visibly inspected in a
+**1280×820** Windows capture; scrolling is required at the inherited large host
+zoom. This does not establish manual-dialog use, smaller-window usability or
+mathematical benefit. Captures and logs remain in
+`.codex-work/vscode-host-associations-20261015/`; the committed
+[manifest](evidence/source-outline-associations-20261015/validation-manifest.json)
+records their digests and the production-byte comparison. The original reader
+and R3 host campaigns were not repeated.
+
+Validation:
+
+- **16 focused Python source-reader tests pass**, including five new tests for
+  association replacement/removal, unrelated work and originals, invalid/stale
+  selections, restart, pre-replacement failure, uncertain sync and offline use.
+- **33 Node tests pass** (27 command, four bridge, two browser/CSP checks),
+  including three new command tests for context editing, selection/source
+  validation, evidence detachment/retained access and failed-publication blocking.
+- Shared Python regression: **313 tests, 254 passed, 59 skipped**. PySide6 is
+  unavailable; 58 opt-in Qt widget checks and the unavailable authorized `/mnt/c`
+  project-parent check were skipped. Existing shared controller/TeX checks and
+  the five conditional documentary regressions against the already-built pinned
+  Lean executable passed. No Lake build was needed for the reader change.
+- `npm run check --prefix vscode`, Python `compileall`, and document/diff checks
+  pass. The Node suite used the installed Linux VS Code-server Node executable
+  with `--test --test-isolation=none` to report individual tests.
+
+Reproduction uses `--outline-phase associations`, normal close, and
+`--outline-phase associations_restart` with the same staged extension/project;
+see [the reader instructions](../vscode/README.md#reproduce-the-bounded-outline-host-checks).
+VSIX installation, Qt widget execution, other platforms and mathematical
+usefulness remain unassessed. Unsaved forms still have no crash/restart recovery.
+
+## Current boundaries
 
 See [the reader contract](../vscode/README.md#offline-source-region-reader) for
 supported UTF-8 formats, private-state durability and size limits. PDF/OCR
 regions, notebook cells, rendered documents and non-UTF-8 sources are
 unsupported. Forms require explicit saving and have no restart recovery for
-unsaved drafts. Context/evidence association removal, outline deletion/garbage
-collection and cross-machine synchronization are not implemented. VSIX
+unsaved drafts. Outline/artifact deletion, garbage collection and cross-machine
+synchronization are not implemented. VSIX
 installation, manual dialog use and mathematical usefulness were not assessed.
 
-The next proposed bounded implementation is editing/removing shared context
-and manual evidence associations while retaining explicit access to originals.
+The requested context/evidence association-editing increment is complete.
 Automatic extraction, AI outline proposals, automatic gap detection, verified
 joint-premise graphs, elimination witnesses and the full vertex-elimination
 contract remain pending. The separately deferred mathematical-outline

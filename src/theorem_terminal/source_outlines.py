@@ -370,11 +370,13 @@ class OutlineStore:
         for c in value['contexts']:
             c['text'] = span_text(source, c['span'], 65536) if source else None
         for a in value['artifacts']:
-            a['goals'], a['error'] = None, None
+            a['goals'], a['error'], a['entries'] = None, None, []
             try:
                 raw = self.artifact(a)
+                entries = goal_entries(raw)
+                a['entries'] = [{k: e[k] for k in ('index', 'label')} for e in entries]
                 if a['kind'] == 'goal_context':
-                    entry = next((e for e in goal_entries(raw) if e['index'] == a['selector']), None)
+                    entry = next((e for e in entries if e['index'] == a['selector']), None)
                     if entry is None:
                         raise ValueError('Selected recorded goal/context is unavailable')
                     a['goals'] = entry['goals']
@@ -400,6 +402,11 @@ def mutate(store, change):
         if item is None:
             raise ValueError('Select an existing source region')
         return item
+    def existing(collection, key):
+        item = item_by_id(value[collection], change[key])
+        if item is None:
+            raise ValueError('Selected association changed; reopen the outline')
+        return item
     if kind == 'add_region':
         fields(change, {'kind', 'start', 'end'}, 'region selection')
         span = selection()
@@ -414,6 +421,32 @@ def mutate(store, change):
     elif kind == 'context':
         fields(change, {'kind', 'context_kind', 'label', 'start', 'end'}, 'context selection')
         value['contexts'].append(dict(id=str(uuid4()), kind=change['context_kind'], label=change['label'], span=selection()))
+    elif kind == 'replace_context':
+        fields(change, {'kind', 'context', 'start', 'end'}, 'context replacement selection')
+        existing('contexts', 'context')['span'] = selection()
+    elif kind == 'edit_context':
+        fields(change, {'kind', 'context', 'context_kind', 'label'}, 'context description')
+        existing('contexts', 'context').update(kind=change['context_kind'], label=change['label'])
+    elif kind == 'remove_context':
+        fields(change, {'kind', 'context'}, 'context removal')
+        value['contexts'].remove(existing('contexts', 'context'))
+    elif kind == 'evidence_association':
+        fields(change, {'kind', 'artifact', 'region', 'selector'}, 'manual evidence association')
+        artifact = existing('artifacts', 'artifact')
+        # Revise only the manual region/snapshot choice, never the supplied
+        # artifact's identity, kind, label, capture time or retained bytes.
+        if artifact['kind'] == 'goal_context':
+            entries = goal_entries(store.artifact(artifact))
+            if type(change['selector']) is not int or not any(e['index'] == change['selector'] for e in entries):
+                raise ValueError('Choose an available recorded tactic goal/context')
+        elif change['selector'] is not None:
+            raise ValueError('Only a recorded tactic goal/context has a snapshot selector')
+        artifact.update(region=change['region'], selector=change['selector'])
+    elif kind == 'remove_evidence_association':
+        fields(change, {'kind', 'artifact'}, 'manual evidence association removal')
+        # Keep the artifact and its supplied statement/goal/context explicitly
+        # readable as an outline-level reference. This is not artifact deletion.
+        existing('artifacts', 'artifact')['region'] = None
     elif kind == 'region':
         fields(change, {'kind', 'region', 'title', 'level', 'collapsed'}, 'region presentation')
         region().update(title=change['title'], level=change['level'], collapsed=change['collapsed'])

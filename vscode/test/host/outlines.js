@@ -61,7 +61,7 @@ async function activate(context) {
   };
   vscode.window.showOpenDialog = async () => { assert.ok(opens.length); return [vscode.Uri.file(opens.shift())]; };
   vscode.window.showErrorMessage = async message => { errors.push(message); };
-  let serial = 0;
+  let serial = 0, failPublication = false, publicationGate, publicationWaiting = false;
   vscode.window.createWebviewPanel = (...args) => {
     const panel = originals.createWebviewPanel(...args), webview = panel.webview;
     const c = { panel, pending: new Map(), model: null, idle: 0 }; controllers.push(c);
@@ -102,8 +102,15 @@ async function activate(context) {
   const realBridge = bridge.runBridge;
   bridge.runBridge = async (extension, executable, request, options = {}) => {
     assert.ok(request.method.startsWith('outline_'), `Unexpected action ${request.method}`); requests.push(request);
+    if (publicationGate && request.method === 'outline_mutate') {
+      publicationWaiting = true;
+      await publicationGate;
+      publicationGate = undefined; publicationWaiting = false;
+    }
+    const fail = failPublication && request.method === 'outline_mutate';
+    if (fail) failPublication = false;
     return realBridge(extension, executable, request, { ...options,
-      spawn: (exe, args, settings) => spawn(exe, ['-I', path.join(__dirname, 'offline_outline_bridge.py')], settings) });
+      spawn: (exe, args, settings) => spawn(exe, ['-I', path.join(__dirname, 'offline_outline_bridge.py'), ...(fail ? ['--fail-publication'] : [])], settings) });
   };
   async function command(name) { const value = await vscode.commands.executeCommand(`mrw.${name}`); await pause(180); return value; }
   async function focus(file, start, end) {
@@ -142,7 +149,110 @@ async function activate(context) {
     await check('inert activation in the actual WSL extension host', async () => {
       assert.equal(process.platform, 'linux'); assert.equal(vscode.env.remoteName, 'wsl'); assert.equal(requests.length, 0);
     });
-    if (config.phase === 'seed') {
+    if (config.phase === 'associations') {
+      const file = path.join(config.project, 'note.md'), raw = await fs.readFile(file);
+      await check('shared context descriptions, source-derived replacement and removal preserve unrelated selections and drafts', async () => {
+        await focus(file, [0, 0], [0, 7]); await command('createOutline');
+        const c = controllers.at(-1); await pause(800); await c.rpc('query', '#reader');
+        await focus(file, [1, 0], [1, 14]); await command('addOutlineRegion');
+        await focus(file, [0, 0], [0, 7]); picks.push(o => o.kind === 'hypothesis'); await command('addOutlineContext');
+        await focus(file, [1, 0], [1, 14]); picks.push(o => o.kind === 'cited_result'); await command('addOutlineContext');
+        const [first, unrelated] = c.model.outline.contexts;
+        await edited(c, `[data-draft="context:${first.id}"]`, { context_kind: 'definition', label: 'Reader revised role' }, 'save-context');
+        await focus(file, [1, 0], [1, 14]); picks.push(o => o.id === first.id); await command('replaceOutlineContext');
+        assert.equal(c.model.outline.contexts[0].text, 'Next question.');
+        assert.deepEqual(c.model.outline.contexts[1], unrelated);
+        await c.rpc('form', '[data-draft="note:overview:new"]', { text: 'Unsaved reader explanation survives association changes.' });
+        await c.rpc('form', `[data-draft="context:${unrelated.id}"]`, { label: 'Unsaved context label survives refresh.' });
+        await c.action('[data-action="refresh"]');
+        let dom = await c.rpc('query', '#reader');
+        assert.equal(dom.forms.find(f => f.key === `context:${unrelated.id}`).values.label, 'Unsaved context label survives refresh.');
+        await clickSave(c, `[data-context-item="${first.id}"] [data-action="remove-context"]`);
+        assert.deepEqual(c.model.outline.contexts, [unrelated]);
+        dom = await c.rpc('query', '#reader');
+        assert.equal(dom.forms.find(f => f.key === 'note:overview:new').values.text, 'Unsaved reader explanation survives association changes.');
+        assert.equal(dom.forms.find(f => f.key === `context:${unrelated.id}`).values.label, 'Unsaved context label survives refresh.');
+        await c.action('[data-action="source"]');
+        assert.equal(vscode.window.activeTextEditor.document.getText(), raw.toString());
+        config.associations = { id: c.model.outline.id, context: unrelated, removedContext: first.id, file, sourceRevision: digest(raw) };
+      });
+      const c = controllers.at(-1), [firstRegion, secondRegion] = c.model.outline.regions;
+      await check('newer typing in a submitted context form survives completion and saves explicitly for restart', async () => {
+        const contextItem = c.model.outline.contexts[0], key = `context:${contextItem.id}`;
+        const selector = `[data-draft="${key}"]`;
+        await c.rpc('form', selector, { label: 'Submitted context description' });
+        let release;
+        publicationGate = new Promise(resolve => { release = resolve; });
+        const before = c.model.revision, idle = c.idle;
+        try {
+          await c.rpc('click', `${selector} [data-action="save-context"]`);
+          for (let i = 0; i < 100 && !publicationWaiting; i++) await pause(100);
+          assert.ok(publicationWaiting, 'Publication is held while the text remains editable');
+          await c.rpc('form', selector, { label: 'Newer context description typed during save' });
+        } finally { release(); }
+        for (let i = 0; i < 100 && (c.model.revision === before || c.idle === idle); i++) await pause(100);
+        assert.notEqual(c.model.revision, before);
+        assert.equal(c.model.outline.contexts[0].label, 'Submitted context description');
+        const dom = await c.rpc('query', '#reader');
+        assert.equal(dom.forms.find(f => f.key === key).values.label, 'Newer context description typed during save');
+        assert.equal(dom.forms.find(f => f.key === 'note:overview:new').values.text, 'Unsaved reader explanation survives association changes.');
+        await clickSave(c, `${selector} [data-action="save-context"]`);
+        config.associations.context = c.model.outline.contexts[0];
+        assert.equal(config.associations.context.label, 'Newer context description typed during save');
+      });
+      await check('manual evidence snapshot and region revision, detachment and explicit retained-original access', async () => {
+        opens.push(config.goals); picks.push(o => o.kind === 'goal_context', o => o.index === 0); await command('attachOutlineEvidence');
+        opens.push(file); picks.push(o => o.kind === 'declaration_statement'); await command('attachOutlineEvidence');
+        const [artifact, unrelated] = c.model.outline.artifacts;
+        const regionBefore = JSON.stringify(c.model.outline.regions);
+        await edited(c, `[data-draft="evidence:${artifact.id}"]`, { region: firstRegion.id, selector: '1' }, 'save-evidence');
+        assert.equal(c.model.outline.artifacts[0].region, firstRegion.id); assert.equal(c.model.outline.artifacts[0].selector, 1);
+        assert.deepEqual(c.model.outline.artifacts[1], unrelated);
+        await clickSave(c, `[data-artifact="${artifact.id}"] [data-action="remove-evidence"]`);
+        const kept = c.model.outline.artifacts[0]; assert.equal(kept.region, null); assert.equal(kept.selector, 1);
+        const dom = await c.rpc('query', `[data-artifact="${artifact.id}"]`);
+        assert.ok(dom.text.includes('no region association')); assert.ok(dom.text.includes('available assumptions'));
+        assert.deepEqual(dom.goals, kept.goals);
+        await c.action(`[data-artifact="${artifact.id}"] [data-action="artifact"]`);
+        assert.equal(vscode.window.activeTextEditor.document.getText(), await fs.readFile(config.goals, 'utf8'));
+        assert.equal(JSON.stringify(c.model.outline.regions), regionBefore);
+        config.associations.artifacts = c.model.outline.artifacts;
+        config.associations.secondRegion = secondRegion.id;
+      });
+      await check('failed publication preserves saved state and live reader drafts while blocking subsequent private writes', async () => {
+        const a = c.model.outline.artifacts[0], key = `evidence:${a.id}`;
+        const request = requests.findLast(r => r.method === 'outline_mutate');
+        const savedPath = path.join(request.store, request.id, 'outline.json'), before = await fs.readFile(savedPath);
+        await c.rpc('form', `[data-draft="${key}"]`, { region: secondRegion.id, selector: '0' });
+        failPublication = true;
+        await c.action(`[data-draft="${key}"] [data-action="save-evidence"]`);
+        assert.match(errors.pop(), /publication failed/);
+        assert.deepEqual(await fs.readFile(savedPath), before); assert.equal(c.model.outline.artifacts[0].region, null);
+        await c.action('[data-action="refresh"]');
+        const dom = await c.rpc('query', '#reader');
+        assert.ok(dom.text.includes('Private writes are blocked'));
+        assert.equal(dom.forms.find(f => f.key === key).values.region, secondRegion.id);
+        assert.equal(dom.forms.find(f => f.key === 'note:overview:new').values.text, 'Unsaved reader explanation survives association changes.');
+        await c.action(`[data-artifact="${a.id}"] [data-action="artifact"]`);
+        assert.equal(vscode.window.activeTextEditor.document.getText(), await fs.readFile(config.goals, 'utf8'));
+        assert.equal(digest(await fs.readFile(file)), digest(raw));
+        config.associations.revision = c.model.revision;
+      });
+    } else if (config.phase === 'associations_restart') {
+      const example = config.associations;
+      await check('normal-host close/reopen restores removals, unrelated associations and retained originals', async () => {
+        picks.push(o => o.id === example.id); await command('openOutline'); const c = controllers.at(-1); await pause(800);
+        assert.equal(c.model.revision, example.revision); assert.deepEqual(c.model.outline.contexts, [example.context]);
+        assert.deepEqual(c.model.outline.artifacts, example.artifacts);
+        const dom = await c.rpc('query', '#reader');
+        assert.equal(dom.forms.find(f => f.key === 'note:overview:new').values.text, '');
+        assert.equal(dom.forms.find(f => f.key === `context:${example.context.id}`).values.label, example.context.label);
+        assert.ok(!dom.text.includes('Private writes are blocked'));
+        await c.action('[data-action="source"]'); assert.equal(digest(vscode.window.activeTextEditor.document.getText()), example.sourceRevision);
+        await c.action(`[data-artifact="${example.artifacts[0].id}"] [data-action="artifact"]`);
+        assert.equal(vscode.window.activeTextEditor.document.getText(), await fs.readFile(config.goals, 'utf8'));
+      });
+    } else if (config.phase === 'seed') {
       config.examples = [];
       for (const name of ['equation', 'euclid']) await check(`${name}: native selection, exact statements, context, editable explanations and collapse/expansion`, async () => {
         const file = path.join(config.project, name === 'equation' ? 'Subgraph.lean' : 'euclid-ix20.txt');
@@ -273,14 +383,16 @@ async function activate(context) {
     } else throw new Error('Unknown outline phase');
     await check('only explicit offline reader bridge actions; no unexpected errors', async () => {
       assert.deepEqual(errors, []); assert.ok(requests.every(r => r.method.startsWith('outline_')));
+      if (config.phase.startsWith('associations')) assert.equal((await controllers.at(-1).rpc('query', '#reader')).overflow, false);
     });
     await fs.writeFile(configPath, JSON.stringify(config, null, 2));
     report.complete = true; report.bridgeActions = requests.map(r => r.method); report.examples = config.examples;
+    if (config.associations) report.associations = config.associations;
     await save();
     await vscode.commands.executeCommand('workbench.action.closeAuxiliaryBar');
     await vscode.commands.executeCommand('notifications.hideToasts');
     const last = controllers.at(-1); last.panel.reveal(last.panel.viewColumn);
-    await last.rpc('scroll', '[data-region] h3');
+    await last.rpc('scroll', config.phase.startsWith('associations') ? '[data-context-item]' : '[data-region] h3');
     await fs.writeFile(path.join(config.artifacts, 'outline-ready'), config.phase);
   } catch (error) {
     report.failure = error.stack; report.errors = errors;

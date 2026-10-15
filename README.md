@@ -105,8 +105,12 @@ consumer of source regions and recorded Lean states. The first
 [offline reader](vscode/README.md#offline-source-region-reader) now provides
 manual selections, exact retained-source expansion, separate attributed editable
 explanations, optional supplied goal/context snapshots, navigation and restart
-restoration. It supports mathematical text from books, articles and AI-generated
-or AI-assisted manuscripts without requiring Lean. PDF/OCR/notebook regions,
+restoration. Shared context descriptions and ranges can be revised or removed;
+manual evidence links can be revised or detached while retained originals stay
+explicitly accessible. Reader form drafts survive live refresh and pending-save
+completion; save explicitly before closing. It supports mathematical text from
+books, articles and AI-generated or AI-assisted manuscripts without requiring
+Lean. PDF/OCR/notebook regions,
 automatic extraction/proposals and graph elimination remain pending; see
 [validation and limitations](docs/VS_CODE_OUTLINE_VALIDATION.md).
 

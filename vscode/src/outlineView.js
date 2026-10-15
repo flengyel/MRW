@@ -8,6 +8,7 @@ const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, filter = '', busy = false, blocked = false, error = '';
 const drafts = new Map();
+const submittedDrafts = new Map();
 const label = value => value.replace(/_/g, ' ');
 function el(tag, text, parent = root, className) {
   const node = document.createElement(tag);
@@ -15,7 +16,10 @@ function el(tag, text, parent = root, className) {
   if (className) node.className = className;
   parent.append(node); return node;
 }
-function post(value) { busy = true; controls(); api.postMessage(value); }
+function post(value) {
+  if (value.draft) submittedDrafts.set(value.draft, drafts.get(value.draft));
+  busy = true; controls(); api.postMessage(value);
+}
 function controls() {
   for (const button of root.querySelectorAll('button')) button.disabled = busy || (blocked && button.dataset.write === 'true');
 }
@@ -64,8 +68,9 @@ function spanLocation(span) { return `Lines ${span.start_line}:${span.start_col}
 function evidence(parent, artifacts) {
   for (const a of artifacts) {
     const box = el('details', undefined, parent, 'evidence'); box.open = a.kind === 'goal_context';
+    box.dataset.artifact = a.id;
     el('summary', `${label(a.kind)}: ${a.label}`, box);
-    el('p', `Supplied artifact, unchanged; ${a.region ? 'manual association with this region' : 'outline-level reference'}. Not rechecked.`, box, 'muted');
+    el('p', `Supplied artifact, unchanged; ${a.region ? 'manual association with this region' : 'retained outline-level reference; no region association'}. Not rechecked.`, box, 'muted');
     el('p', `${a.path} · SHA-256 ${a.revision}`, box, 'muted');
     if (a.kind === 'goal_context') {
       el('p', 'Intermediate tactic goal and recorded local context. Context lists available assumptions and definitions; it does not identify necessary or joint premises.', box);
@@ -73,6 +78,25 @@ function evidence(parent, artifacts) {
     }
     if (a.error) el('p', a.error, box, 'warning');
     button(box, 'Open retained artifact', { type: 'artifact', artifact: a.id }, 'artifact');
+    const key = `evidence:${a.id}`, f = form(box, key, { region: a.region || '', selector: a.selector ?? '' });
+    const regions = field(f, 'region', 'Manual region association', []);
+    for (const [value, title] of [['', 'No region association (retain reference)'],
+      ...model.outline.regions.map(r => [r.id, r.title])]) {
+      const option = el('option', title, regions); option.value = value;
+    }
+    regions.value = f.current.region;
+    if (a.kind === 'goal_context') {
+      const snapshots = field(f, 'selector', 'Supplied tactic snapshot (goal and available local context)', []);
+      for (const e of a.entries || []) { const option = el('option', e.label, snapshots); option.value = String(e.index); }
+      snapshots.value = String(f.current.selector);
+    }
+    el('p', 'Saving or removing this manual association changes only the reading view. Original statements, hypotheses and supplied checking evidence stay unchanged; no correspondence or proof edge is verified.', f.node, 'muted');
+    button(f.node, 'Save manual association', () => {
+      const v = f.read(); return { type: 'edit', draft: key, change: { kind: 'evidence_association', artifact: a.id,
+        region: v.region || null, selector: a.kind === 'goal_context' && v.selector !== '' ? Number(v.selector) : null } };
+    }, 'save-evidence', true);
+    if (a.region) button(f.node, 'Remove region association', { type: 'edit', draft: key,
+      change: { kind: 'remove_evidence_association', artifact: a.id } }, 'remove-evidence', true);
   }
 }
 function render() {
@@ -108,9 +132,19 @@ function render() {
     el('p', 'Reader-selected quotations remain accessible when argument details are hidden. These are available context, not an analysis of required premises.', root, 'muted');
     for (const c of o.contexts) {
       const box = el('details', undefined, root, 'context'); box.open = true;
+      box.dataset.contextItem = c.id;
       el('summary', `${label(c.kind)}: ${c.label}`, box); el('p', spanLocation(c.span), box, 'muted');
       if (c.text !== null) el('pre', c.text, box).dataset.context = c.id;
       button(box, 'Go to source context', { type: 'navigate_context', context: c.id }, 'navigate-context');
+      const key = `context:${c.id}`, cf = form(box, key, { context_kind: c.kind, label: c.label });
+      field(cf, 'context_kind', 'Reading role', ['hypothesis', 'definition', 'local_assumption', 'cited_result', 'source_reference']);
+      field(cf, 'label', 'Reader label (quotation above stays source-derived)');
+      button(cf.node, 'Save context description', () => ({ type: 'edit', draft: key, change: {
+        kind: 'edit_context', context: c.id, context_kind: cf.read().context_kind, label: cf.read().label
+      } }), 'save-context', true);
+      el('p', 'To replace its quoted range, select original or retained source text and run MRW: Replace Shared Context with Selection…. Removing shared context changes only this reading association; the original statement and hypotheses remain in Open retained source.', box, 'muted');
+      button(box, 'Remove shared context', { type: 'edit', draft: key,
+        change: { kind: 'remove_context', context: c.id } }, 'remove-context', true);
     }
   }
   evidence(root, o.artifacts.filter(a => !a.region));
@@ -152,7 +186,12 @@ window.addEventListener('message', event => {
   const value = event.data;
   if (value.type === 'outline') {
     model = value.model; selected = value.selected; blocked = !!value.writesBlocked; busy = false; error = '';
-    if (value.clearDraft) drafts.delete(value.clearDraft);
+    if (value.clearDraft) {
+      // Text fields stay editable while publication is in flight. A reply may
+      // clear only the submitted draft, not newer typing in the same form.
+      if (drafts.get(value.clearDraft) === submittedDrafts.get(value.clearDraft)) drafts.delete(value.clearDraft);
+      submittedDrafts.delete(value.clearDraft);
+    }
     api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();
   } else if (value.type === 'error') { error = value.message; blocked = !!value.writesBlocked; busy = false; render(); }
   else if (value.type === 'idle') { busy = false; controls(); }

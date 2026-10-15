@@ -184,6 +184,84 @@ test('failed outline publication preserves the view and draft, blocks later writ
   await panel.receive({ type: 'source' }); assert.equal(h.shown.at(-1).getText(), 'Claim.\nProof.');
 });
 
+test('shared context replacement, description and removal keep unrelated work and survive restart', async t => {
+  const root = await temporary(t), source = path.join(root, 'article.md'), original = 'α😀 → β\nClaim one.\nArgument.';
+  await fs.writeFile(source, original);
+  const h = await harness(root), ed = h.editor(h.document(source, original)); h.focus(ed);
+  await h.commands.get('mrw.createOutline')();
+  ed.selection = new Selection(new Position(0, 0), new Position(0, 7));
+  await h.commands.get('mrw.addOutlineContext')(); await h.commands.get('mrw.addOutlineContext')();
+  const panel = h.panels[0], model = () => panel.webview.messages.filter(m => m.type === 'outline').at(-1).model;
+  const [context, unrelated] = model().outline.contexts;
+  await panel.receive({ type: 'edit', draft: `context:${context.id}`, change: {
+    kind: 'edit_context', context: context.id, context_kind: 'cited_result', label: 'Reader citation'
+  } });
+  ed.selection = new Selection(new Position(1, 0), new Position(1, 10));
+  await h.commands.get('mrw.replaceOutlineContext')();
+  assert.equal(model().outline.contexts[0].text, 'Claim one.');
+  assert.equal(model().outline.contexts[0].label, 'Reader citation');
+  assert.deepEqual(model().outline.contexts[1], unrelated);
+  const restored = await harness(root); await restored.commands.get('mrw.openOutline')();
+  const rp = restored.panels[0]; assert.deepEqual(rp.webview.messages.at(-1).model.outline.contexts, model().outline.contexts);
+  await rp.receive({ type: 'edit', change: { kind: 'remove_context', context: context.id } });
+  const again = await harness(root); await again.commands.get('mrw.openOutline')();
+  assert.deepEqual(again.panels[0].webview.messages.at(-1).model.outline.contexts, [unrelated]);
+  await again.panels[0].receive({ type: 'source' }); assert.equal(again.shown.at(-1).getText(), original);
+  assert.equal(await fs.readFile(source, 'utf8'), original); assert.deepEqual([...h.errors, ...restored.errors, ...again.errors], []);
+});
+
+test('shared context replacement rejects changed selections and stale source identity before publication', async t => {
+  const root = await temporary(t), source = path.join(root, 'article.md'), original = 'Claim.\nProof.';
+  await fs.writeFile(source, original);
+  const h = await harness(root), doc = h.document(source, original), ed = h.editor(doc); h.focus(ed);
+  await h.commands.get('mrw.createOutline')(); await h.commands.get('mrw.addOutlineContext')();
+  const panel = h.panels[0], context = panel.webview.messages.at(-1).model.outline.contexts[0];
+  const before = h.requests.length;
+  h.api.window.showQuickPick = async () => { ed.selection = new Selection(new Position(1, 0), new Position(1, 2)); return context; };
+  await h.commands.get('mrw.replaceOutlineContext')();
+  assert.match(h.errors.pop(), /selection changed/); assert.equal(h.requests.length, before);
+  await fs.writeFile(source, 'Changed.');
+  await h.commands.get('mrw.replaceOutlineContext')(); assert.match(h.errors.pop(), /exact original or retained source/);
+  assert.equal(h.requests.length, before);
+  await panel.receive({ type: 'source' }); const retained = h.api.window.activeTextEditor;
+  retained.document.text = 'Substituted retained tab'; retained.document.version++;
+  await h.commands.get('mrw.replaceOutlineContext')(); assert.match(h.errors.pop(), /exact retained text/);
+  assert.equal(h.requests.length, before + 1);
+});
+
+test('manual evidence can move, detach, reopen retained originals and reject failed publication', async t => {
+  const root = await temporary(t), source = path.join(root, 'article.txt'); await fs.writeFile(source, 'Claim.\nProof.');
+  const artifact = path.join(root, 'goals.json'), raw = JSON.stringify([{ label: 'one', result: { goals: ['h : P\n⊢ Q'] } },
+    { label: 'two', result: { goals: ['h : R\n⊢ S'] } }]); await fs.writeFile(artifact, raw);
+  const h = await harness(root); h.focus(h.editor(h.document(source, 'Claim.\nProof.')));
+  await h.commands.get('mrw.createOutline')(); await h.commands.get('mrw.addOutlineRegion')();
+  h.opens.push([uri(artifact)]); await h.commands.get('mrw.attachOutlineEvidence')();
+  const panel = h.panels[0], model = () => panel.webview.messages.filter(m => m.type === 'outline').at(-1).model;
+  const a = model().outline.artifacts[0], first = model().outline.regions[0];
+  await fs.unlink(artifact);
+  await panel.receive({ type: 'edit', draft: `evidence:${a.id}`, change: {
+    kind: 'evidence_association', artifact: a.id, region: first.id, selector: 1
+  } });
+  assert.deepEqual(model().outline.artifacts[0].goals, ['h : R\n⊢ S']);
+  await panel.receive({ type: 'edit', change: { kind: 'remove_evidence_association', artifact: a.id } });
+  assert.equal(model().outline.artifacts[0].region, null);
+  const restored = await harness(root); await restored.commands.get('mrw.openOutline')();
+  const rp = restored.panels[0]; assert.equal(rp.webview.messages.at(-1).model.outline.artifacts[0].region, null);
+  await rp.receive({ type: 'artifact', artifact: a.id }); assert.equal(restored.shown.at(-1).getText(), raw);
+  h.setService(async (...args) => args[2].method === 'outline_mutate' ? { blocked: true, write_error: 'Injected failure' } : runBridge(...args));
+  const saved = model();
+  await panel.receive({ type: 'edit', draft: `evidence:${a.id}`, change: {
+    kind: 'evidence_association', artifact: a.id, region: first.id, selector: 0
+  } });
+  assert.deepEqual(model(), saved); assert.equal(panel.webview.messages.at(-2).writesBlocked, true);
+  assert.equal(panel.webview.messages.at(-2).clearDraft, undefined);
+  const before = h.requests.length;
+  await panel.receive({ type: 'edit', change: { kind: 'remove_evidence_association', artifact: a.id } });
+  assert.equal(h.requests.length, before);
+  await panel.receive({ type: 'artifact', artifact: a.id }); assert.equal(h.shown.at(-1).getText(), raw);
+  assert.ok([...h.requests, ...restored.requests].every(r => r.method.startsWith('outline_')));
+});
+
 test('activation does no file loading or process work; every command checks trust', async t => {
   const h = await harness(await temporary(t));
   assert.equal(h.reads.length, 0); assert.equal(h.requests.length, 0); assert.equal(h.state.size, 0);

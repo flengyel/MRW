@@ -226,6 +226,21 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       .map(kind => ({ label: kind.replace(/_/g, ' '), kind })), { placeHolder: 'Keep this source quotation available with collapsed details' });
     if (choice) { await mutate(c, { kind: 'context', context_kind: choice.kind, label: choice.label, ...selected }); c.panel.reveal(c.panel.viewColumn); }
   }));
+  register('mrw.replaceOutlineContext', () => locked(async () => {
+    const c = current(), editor = vscode.window.activeTextEditor;
+    const version = editor?.document.version, range = editor?.selection;
+    const selected = await selection(c);
+    if (!c.result.outline.contexts.length) throw new Error('This outline has no shared context to replace.');
+    const choice = await vscode.window.showQuickPick(c.result.outline.contexts.map(item => ({
+      label: item.label, description: item.kind.replace(/_/g, ' '), id: item.id
+    })), { placeHolder: 'Replace the range of this shared context with the source selection' });
+    if (!choice) return;
+    if (vscode.window.activeTextEditor !== editor || editor.document.version !== version || !editor.selection.isEqual(range)) {
+      throw new Error('Source selection changed during capture; select it again.');
+    }
+    await selection(c); // Recheck exact source identity after the chooser.
+    await mutate(c, { kind: 'replace_context', context: choice.id, ...selected }); c.panel.reveal(c.panel.viewColumn);
+  }));
   register('mrw.attachOutlineEvidence', () => locked(async () => {
     const c = current(); writable(c);
     const file = await choosePath('Attach existing UTF-8 evidence or supporting artifact (no tool invocation)');
@@ -250,7 +265,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   }));
   return () => [['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
     ...(panels.has(active) ? [['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
-      ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
+      ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
+      ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
 }
 
 module.exports = { registerOutlines, outlineHtml, normalize };

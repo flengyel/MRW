@@ -385,7 +385,7 @@ is required.
 
 ### Proof outlines by vertex elimination
 
-**Delivered partial reader, 2026-10-14:** VS Code offers explicit manual
+**Delivered partial reader, updated 2026-10-15:** VS Code offers explicit manual
 source-region selection and revision, exact retained-source hide/expand,
 separate exact statement and context selections, editable attributed reader
 explanations, optional supplied evidence and explicit source navigation. Opening
@@ -393,6 +393,18 @@ saved outlines restores persisted selections, annotations and visibility across
 restart; changed or missing originals are reported without remapping. Retained
 sources and artifacts stay accessible. Save annotation forms explicitly;
 unsaved drafts survive live re-rendering, not host closure/reload.
+
+Shared context has explicitly saved reader labels and roles, an exact-source
+range-replacement command, and removal of the reading selection. Evidence cards
+allow an explicitly saved manual region/snapshot choice and removal of the
+region link. Detached evidence stays visible as an outline-level reference with
+its supplied goal/context and retained-artifact action. Original statements,
+hypotheses, checking evidence and unrelated reading work remain unchanged.
+Text typed while a save is pending survives completion and needs its own save.
+Failed or uncertain publication keeps live drafts, reports the failure and
+blocks further project-private writes until host reload; retained reading
+remains available. No association operation invokes a compiler, checker or
+provider, or establishes a correspondence or proof edge.
 
 The reading-level filter exposes orientation, central concepts/results,
 governing ideas, argument structure and optional detail without imposing an

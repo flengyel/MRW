@@ -1,6 +1,6 @@
 # Codex continuation: VS Code migration and proof outlines
 
-## Active handoff — offline source-region reader, 2026-10-14
+## Active handoff — offline reader with editable associations, 2026-10-15
 
 The first offline reader is implemented in the existing VS Code extension.
 Read [its workflow and persistence boundary](../vscode/README.md#offline-source-region-reader),
@@ -53,9 +53,26 @@ elimination witnesses and full vertex elimination remain pending. This partial
 increment does not replace the full accepted contract. The separately deferred
 mathematical-outline capability at multiple scales does not enlarge this task.
 
-Next proposed bounded implementation step: edit/remove shared context and
-manual evidence associations, with retained originals still explicitly
-accessible and no inferred proof edges. There is no deletion/garbage-collection
+The requested bounded follow-on is now delivered in extension 0.4.1. Shared
+context labels/roles and exact ranges can be revised, and a context selection
+can be removed. Evidence cards allow revision of the manual region/snapshot
+choice and detachment to a retained outline-level reference. Original source,
+statements, hypotheses and supplied checking evidence remain unchanged and
+explicitly readable. No artifact is deleted and no proof edge is inferred.
+Live form drafts survive refresh, failed publication and completion of an older
+save while newer typing is present. Save explicitly before closing/reloading;
+unsaved forms still have no restart recovery.
+
+The scoped Windows VS Code 1.141.2/WSL host checks pass for editing/removal,
+retained access, publication failure, pending-save typing and normal close/reopen.
+Final regressions: 33 Node tests pass; 313 Python tests (254 passed, 59 skipped;
+PySide6 unavailable), plus syntax/compilation and document checks. See the
+[follow-on evidence](VS_CODE_OUTLINE_VALIDATION.md#association-editing-follow-on--2026-10-15)
+for the commands, reports and limits. No live provider request was made;
+mathematical usefulness remains pending.
+
+This completes the authorized association-editing increment; no further bounded
+implementation is activated by this handoff. There is no deletion/garbage-collection
 or cross-machine state synchronization yet. The full graph increment still
 requires a representation that actually supplies scoped joint-premise inferences
 and witnesses; declaration maps and tactic context membership do not supply them.

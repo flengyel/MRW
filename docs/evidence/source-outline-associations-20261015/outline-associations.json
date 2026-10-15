@@ -1,0 +1,134 @@
+{
+  "phase": "associations",
+  "version": "1.141.2",
+  "platform": "linux",
+  "remote": "wsl",
+  "checks": [
+    {
+      "name": "inert activation in the actual WSL extension host",
+      "passed": true
+    },
+    {
+      "name": "shared context descriptions, source-derived replacement and removal preserve unrelated selections and drafts",
+      "passed": true
+    },
+    {
+      "name": "newer typing in a submitted context form survives completion and saves explicitly for restart",
+      "passed": true
+    },
+    {
+      "name": "manual evidence snapshot and region revision, detachment and explicit retained-original access",
+      "passed": true
+    },
+    {
+      "name": "failed publication preserves saved state and live reader drafts while blocking subsequent private writes",
+      "passed": true
+    },
+    {
+      "name": "only explicit offline reader bridge actions; no unexpected errors",
+      "passed": true
+    }
+  ],
+  "complete": true,
+  "bridgeActions": [
+    "outline_create",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_load",
+    "outline_mutate",
+    "outline_document",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_inspect_artifact",
+    "outline_attach",
+    "outline_inspect_artifact",
+    "outline_attach",
+    "outline_mutate",
+    "outline_mutate",
+    "outline_document",
+    "outline_mutate",
+    "outline_load",
+    "outline_document"
+  ],
+  "associations": {
+    "id": "870bc325-7adb-4579-a797-34ffcbde1c3b",
+    "context": {
+      "id": "b1aa64bc-014b-455f-bbfe-f0b6839883fd",
+      "kind": "cited_result",
+      "label": "Newer context description typed during save",
+      "span": {
+        "end_col": 14,
+        "end_line": 2,
+        "source_revision": "078218244df3565f853ec968c14d420ff486ccf53a9cf913bbde933164d22757",
+        "start_col": 0,
+        "start_line": 2
+      },
+      "text": "Next question."
+    },
+    "removedContext": "6361fe4b-656a-4ed2-9da0-9ff68c5189ea",
+    "file": "/tmp/mrw-vscode-host-associations-20261015/note.md",
+    "sourceRevision": "078218244df3565f853ec968c14d420ff486ccf53a9cf913bbde933164d22757",
+    "artifacts": [
+      {
+        "captured_at": "2026-10-15T15:36:17.534559+00:00",
+        "id": "8831a927-f577-48c7-9bc7-a731f1fe8721",
+        "kind": "goal_context",
+        "label": "before_idem",
+        "path": "/home/flengyel/src/theorem_terminal/docs/evidence/proof-outline-20261014/lean-goals.json",
+        "region": null,
+        "revision": "4883b64731e2a0879e6e773955aeeb9d0c04bc3ca3eb1b026e9bc25ae56f09a7",
+        "selector": 1,
+        "goals": [
+          "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nx : G\n⊢ (x ◇ x) ◇ (x ◇ x) = x ◇ x",
+          "G : Type u_1\ninst✝ : Magma G\nh : Equation387 G\nx : G\n⊢ (x ◇ x) ◇ x = x ◇ x"
+        ],
+        "error": null,
+        "entries": [
+          {
+            "index": 0,
+            "label": "before_idem"
+          },
+          {
+            "index": 1,
+            "label": "idem_proof"
+          },
+          {
+            "index": 2,
+            "label": "comm_proof"
+          },
+          {
+            "index": 3,
+            "label": "op_idem_proof"
+          },
+          {
+            "index": 4,
+            "label": "final_context"
+          },
+          {
+            "index": 5,
+            "label": "final_rewrite"
+          }
+        ]
+      },
+      {
+        "captured_at": "2026-10-15T15:36:18.222258+00:00",
+        "id": "eac94f06-810e-4cf7-9db2-73ddd11dda4b",
+        "kind": "declaration_statement",
+        "label": "note.md",
+        "path": "/tmp/mrw-vscode-host-associations-20261015/note.md",
+        "region": "d671f517-d1c0-4858-ac05-0cabe43835bb",
+        "revision": "078218244df3565f853ec968c14d420ff486ccf53a9cf913bbde933164d22757",
+        "selector": null,
+        "goals": null,
+        "error": null,
+        "entries": []
+      }
+    ],
+    "secondRegion": "d671f517-d1c0-4858-ac05-0cabe43835bb",
+    "revision": "b4c7cadd61b478e3c1df74dea4cbc45121d11d869405726a70b05a0792d9bd20"
+  }
+}

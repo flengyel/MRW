@@ -1,0 +1,29 @@
+{
+  "checks": {
+    "host_editing": 6,
+    "host_restart": 3,
+    "node": {
+      "passed": 33
+    },
+    "python": {
+      "passed": 254,
+      "skipped": 59,
+      "total": 313
+    }
+  },
+  "date": "2026-10-15",
+  "extension_version": "0.4.1",
+  "files": {
+    ".codex-work/vscode-host-associations-20261015/associations-1280.png": "41bee8205027479e30ebae584cd33c5ae9650f2251470e9cd0810854aa09bbdb",
+    ".codex-work/vscode-host-associations-20261015/associations-initial-1280.png": "7826e4fc6106af4e7afa8123691b87a8ba891c2c2ddf8544f4a8b5d8c2f17dc0",
+    ".codex-work/vscode-host-associations-20261015/node-tests.log": "9ecef970fdb84270fb86c82d65587cb6654a9f2f9fae4d132c085f435a054397",
+    ".codex-work/vscode-host-associations-20261015/outline-associations.json": "995657590be4ef9920b137b82c11137a4f8fb7c03d8a7faa49873b66d47b9554",
+    ".codex-work/vscode-host-associations-20261015/outline-associations_restart.json": "9db1a51273ff1ff5be4dd492a7d63664e64258a1f090ddb8e0996810e4ac40a7",
+    ".codex-work/vscode-host-associations-20261015/python-tests.log": "746217101ea9f00d7daabfa0e5793fc35157e43884ee10d44f00bfaea8aa7d5b",
+    "vscode/test/host/offline_outline_bridge.py": "d5ebed3c3e2f96482f3ef4f061019e06e7bc75beb68a48030e333a809271ebc6",
+    "vscode/test/host/outlines.js": "884cd62c34f13f8ccaeca80430888be384c5be5d5f39c6545e66f33384ad6db1"
+  },
+  "host": "Windows VS Code 1.141.2 / WSL Debian",
+  "production_bytes_match": true,
+  "visible_inspection": "Restored context controls at 1280x820, inherited large host zoom; scrolling required."
+}

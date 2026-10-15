@@ -26,6 +26,14 @@ source quotations of hypotheses, definitions, local assumptions, citations or
 references. These remain accessible while details are hidden. They describe
 available context, not necessary or jointly used premises.
 
+Each shared-context quotation has an editable reading role and reader label;
+choose **Save context description** to persist them. To replace its quoted
+range, select exact original or retained source text, run **Replace Shared
+Context with Selection…**, and choose the context item. **Remove shared
+context** removes that reading selection. These actions leave source bytes,
+statements, other context and reader annotations intact; **Open retained
+source** still exposes the original hypotheses and argument.
+
 Use the editable overview and region annotations for governing ideas,
 intermediate claims, reconstructions, intended inferences, cited dependencies,
 reusable lemmas, questions, suspected gaps and proposed repairs. Choose a
@@ -50,6 +58,13 @@ intermediate tactic goals. For the captured native Lean JSON array format
 context is available assumptions. Region associations are manual, not verified
 correspondences or inference graphs. Other UTF-8 artifacts are available in a
 read-only plain-text view. No tool is run to create missing evidence.
+
+In an evidence card, choose a region and, for recorded goals, a supplied
+snapshot, then **Save manual association**. **Remove region association**
+keeps the artifact as an outline-level reference, including its selected
+goal/context and **Open retained artifact** action. It can be associated with a
+region again later. Removing a reading association changes no original
+statement, hypotheses or checking evidence and deletes no retained bytes.
 
 **Open Saved Source Outline…** restores saved selections, descriptions,
 annotations, evidence and hide/expand settings after restart. A changed,
@@ -79,9 +94,11 @@ the source project and imports no Qt workspace/recovery data. The format uses
 the existing Source/SourceOccurrence/VersionedSpan and attributed Representation
 boundaries; it is not a universal proof schema or an immutable warrant record.
 
-Annotation forms keep unsaved drafts in the live panel across re-rendering and
-failed publication. Save explicitly before closing/reloading; unsaved form
-drafts have no crash/restart recovery. Failed or uncertain private publication
+Reader forms keep unsaved drafts in the live panel across re-rendering and
+failed publication. Text entered while a save is pending survives its reply;
+only the submitted version is saved until another explicit save. Save explicitly
+before closing/reloading; unsaved form drafts have no crash/restart recovery.
+Failed or uncertain private publication
 keeps the view and drafts, blocks further private writes for that project until
 host reload, and leaves retained blobs unchanged. State published before a
 directory-sync failure may be present on reopen; failure is never called a
@@ -95,8 +112,9 @@ At most 64 regions (256 KiB each), 32 contexts (64 KiB each), 2 MiB aggregate
 selected text, 16 supporting artifacts (2 MiB each), 32 annotations per overview
 or region (16 KiB each), 512 KiB private state, and 100 listed outlines per project.
 The list does not silently page or discard work beyond that bound. There is no
-outline deletion/garbage collection, cross-machine synchronization, range undo,
-or dedicated artifact/context removal UI in this increment.
+outline or artifact deletion/garbage collection, cross-machine synchronization,
+or range undo. Context removal and evidence detachment affect only reading
+associations.
 
 Opening, editing annotations, hiding, expanding, navigating retained text and
 restoring make no compiler/provider calls. Navigating an original Lean source
@@ -156,6 +174,22 @@ only disposable source copies. An optional `--outline-phase refine` after closin
 checks precise statement labels and restored editor-group reuse. Test artifacts
 are private generated files; only the reviewed reports/digests are committed.
 Production logic contains no theorem names, corpus paths or source line numbers.
+
+For the bounded context/evidence editing follow-on, use an ordinary disposable
+project; the full pinned source and previous seed campaign are unnecessary:
+
+```sh
+python3 vscode/scripts/bundle-core.py
+python3 vscode/scripts/prepare-host-tests.py --artifacts .codex-work/vscode-host-associations-run --outline-phase associations
+```
+
+Launch the printed staged extension/project as above. Require
+`outline-associations.json` to complete without failure, close that host normally,
+then prepare the same artifacts directory with `--outline-phase associations_restart`
+and relaunch. Require `outline-associations_restart.json` to complete without
+failure. These phases test association edits/removal, newer typing during a
+pending save, retained access, failed publication and restart persistence with
+guarded offline bridge calls. They do not repeat the previous two-source campaign.
 
 ## Workflows
 

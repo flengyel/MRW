@@ -44,6 +44,118 @@ class SourceOutlineTests(unittest.TestCase):
         return self.edit(kind='annotation', region=region, id=None, purpose='question', text=content,
                          origin=origin, author=None)
 
+    def context(self, label='Available hypothesis'):
+        self.edit(kind='context', context_kind='hypothesis', label=label, start=[0, 0], end=[0, 7])
+        return self.saved['outline']['contexts'][-1]
+
+    def evidence(self, region, kind='goal_context'):
+        artifact = self.home / 'capture.json'
+        raw = json.dumps([dict(label=f'Snapshot {i}', result=dict(goals=[f'h : P {i}\n⊢ Q {i}'])) for i in range(2)]).encode()
+        artifact.write_bytes(raw)
+        self.action('outline_attach', path=str(artifact), artifact_revision=sha256(raw).hexdigest(), kind=kind,
+                    label='Supplied evidence', region=region, selector=0 if kind == 'goal_context' else None)
+        return self.saved['outline']['artifacts'][-1], raw
+
+    def test_context_description_range_and_removal_preserve_unrelated_work_and_original(self):
+        region = self.add(); self.note(region['id']); context = self.context(); self.context('Unrelated')
+        unrelated = deepcopy(self.saved['outline']['contexts'][1])
+        regions = deepcopy(self.saved['outline']['regions'])
+        self.edit(kind='edit_context', context=context['id'], context_kind='cited_result', label='Reader label')
+        self.assertEqual(self.saved['outline']['contexts'][0]['text'], context['text'])
+        self.edit(kind='replace_context', context=context['id'], start=[1, 0], end=[1, 10])
+        revised = self.saved['outline']['contexts'][0]
+        self.assertEqual((revised['id'], revised['label'], revised['kind'], revised['text']),
+                         (context['id'], 'Reader label', 'cited_result', 'Claim one.'))
+        self.saved = self.call('outline_load', id=self.saved['outline']['id'])
+        self.assertEqual(self.saved['outline']['contexts'][0], revised)
+        self.edit(kind='remove_context', context=context['id'])
+        self.saved = self.call('outline_load', id=self.saved['outline']['id'])
+        self.assertEqual(self.saved['outline']['contexts'], [unrelated])
+        self.assertEqual(self.saved['outline']['regions'], regions)
+        self.assertEqual(self.action('outline_document', artifact=None)['text'].encode(), self.raw)
+        self.assertEqual(self.source.read_bytes(), self.raw)
+
+    def test_manual_evidence_reassociation_snapshot_replacement_and_removal_keep_originals(self):
+        first = self.add(); second = self.add([1, 0], [1, 10]); self.note(first['id'])
+        artifact, raw = self.evidence(first['id'])
+        declaration, _ = self.evidence(first['id'], 'declaration_statement')
+        unrelated = deepcopy(declaration)
+        regions = deepcopy(self.saved['outline']['regions'])
+        (self.home / 'capture.json').unlink()  # All revision uses the retained artifact.
+        self.edit(kind='evidence_association', artifact=artifact['id'], region=second['id'], selector=1)
+        updated = self.saved['outline']['artifacts'][0]
+        self.assertEqual(updated['goals'], ['h : P 1\n⊢ Q 1'])
+        for key in ('id', 'path', 'revision', 'kind', 'label', 'captured_at'):
+            self.assertEqual(updated[key], artifact[key])
+        self.assertEqual(updated['region'], second['id'])
+        self.saved = self.call('outline_load', id=self.saved['outline']['id'])
+        self.assertEqual(self.saved['outline']['artifacts'][0], updated)
+        self.edit(kind='remove_evidence_association', artifact=artifact['id'])
+        self.saved = self.call('outline_load', id=self.saved['outline']['id'])
+        retained = self.saved['outline']['artifacts'][0]
+        self.assertIsNone(retained['region']); self.assertEqual(retained['selector'], 1)
+        self.assertEqual(retained['goals'], updated['goals'])
+        self.assertEqual(self.saved['outline']['artifacts'][1], unrelated)
+        self.assertEqual(self.saved['outline']['regions'], regions)
+        self.assertEqual(self.action('outline_document', artifact=artifact['id'])['text'].encode(), raw)
+        self.edit(kind='remove_evidence_association', artifact=declaration['id'])
+        self.assertEqual(self.saved['outline']['artifacts'][1]['kind'], 'declaration_statement')
+        self.assertEqual(self.action('outline_document', artifact=declaration['id'])['text'].encode(), raw)
+        self.edit(kind='evidence_association', artifact=artifact['id'], region=first['id'], selector=0)
+        self.assertEqual(self.saved['outline']['artifacts'][0]['region'], first['id'])
+
+    def test_invalid_association_edits_and_stale_state_never_publish(self):
+        region = self.add(); context = self.context(); artifact, _ = self.evidence(region['id'])
+        before = deepcopy(self.saved)
+        for change in [dict(kind='replace_context', context=context['id'], start=[0, 2], end=[0, 3]),
+                       dict(kind='replace_context', context=context['id'], start=[9, 0], end=[9, 1]),
+                       dict(kind='replace_context', context=context['id'], start=[1, 1], end=[1, 0]),
+                       dict(kind='edit_context', context=context['id'], context_kind='checked', label='Wrong'),
+                       dict(kind='remove_context', context=region['id']),
+                       dict(kind='evidence_association', artifact=artifact['id'], region=region['id'], selector=2),
+                       dict(kind='evidence_association', artifact=artifact['id'], region=region['id'], selector=True),
+                       dict(kind='evidence_association', artifact=artifact['id'], region=context['id'], selector=0),
+                       dict(kind='remove_evidence_association', artifact=context['id'])]:
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                self.edit(**change)
+        self.assertEqual(self.call('outline_load', id=self.saved['outline']['id']), before)
+        self.note()
+        for change in [dict(kind='remove_context', context=context['id']),
+                       dict(kind='replace_context', context=context['id'], start=[1, 0], end=[1, 5]),
+                       dict(kind='remove_evidence_association', artifact=artifact['id'])]:
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'changed'):
+                self.call('outline_mutate', id=self.saved['outline']['id'], revision=before['revision'], change=change)
+
+    def test_association_publication_failure_preserves_last_saved_state_and_retained_blobs(self):
+        region = self.add(); context = self.context(); artifact, raw = self.evidence(region['id'])
+        before = deepcopy(self.saved)
+        for change in [dict(kind='replace_context', context=context['id'], start=[1, 0], end=[1, 10]),
+                       dict(kind='remove_context', context=context['id']),
+                       dict(kind='evidence_association', artifact=artifact['id'], region=None, selector=1),
+                       dict(kind='remove_evidence_association', artifact=artifact['id'])]:
+            with self.subTest(change=change), patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+                result = self.edit(**change)
+            self.assertTrue(result['blocked'])
+            self.assertEqual(self.call('outline_load', id=before['outline']['id']), before)
+        self.assertEqual(self.action('outline_document', artifact=artifact['id'])['text'].encode(), raw)
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
+            result = self.edit(kind='remove_evidence_association', artifact=artifact['id'])
+        self.assertTrue(result['blocked']); self.assertEqual(self.saved, before)
+        self.saved = self.call('outline_load', id=before['outline']['id'])
+        self.assertIsNone(self.saved['outline']['artifacts'][0]['region'])
+        self.assertEqual(self.action('outline_document', artifact=artifact['id'])['text'].encode(), raw)
+
+    def test_context_and_evidence_edits_are_offline_without_lean(self):
+        with patch('subprocess.Popen', side_effect=AssertionError('unexpected child process')), \
+             patch('socket.socket.connect', side_effect=AssertionError('unexpected network')):
+            region = self.add(); context = self.context(); artifact, _ = self.evidence(region['id'])
+            self.edit(kind='edit_context', context=context['id'], context_kind='definition', label='Available definition')
+            self.edit(kind='replace_context', context=context['id'], start=[1, 0], end=[1, 10])
+            self.edit(kind='evidence_association', artifact=artifact['id'], region=None, selector=1)
+            self.edit(kind='remove_evidence_association', artifact=artifact['id'])
+            self.edit(kind='remove_context', context=context['id'])
+            self.action('outline_document', artifact=artifact['id'])
+
     def test_private_snapshot_unknown_provenance_and_no_project_writes(self):
         self.assertEqual(list(self.project.iterdir()), [self.source])
         self.assertEqual(self.source.read_bytes(), self.raw)
