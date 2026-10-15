@@ -1,0 +1,17 @@
+2026-10-15 15:45:23.170 [info] Extension host with pid 1958140 started
+2026-10-15 15:45:23.180 [info] Lock '/home/flengyel/.vscode-server/data/User/workspaceStorage/88d234ee67909967d881511582315555/vscode.lock': Lock acquired.
+2026-10-15 15:45:24.469 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2026-10-15 15:45:24.470 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: false, activationEvent: '*', root cause: vscode.git
+2026-10-15 15:45:24.470 [info] ExtensionService#_doActivateExtension vscode.configuration-editing, startup: false, activationEvent: 'onLanguage:json'
+2026-10-15 15:45:24.471 [info] ExtensionService#_doActivateExtension vscode.extension-editing, startup: false, activationEvent: 'onLanguage:json'
+2026-10-15 15:45:24.471 [info] ExtensionService#_doActivateExtension vscode.json-language-features, startup: false, activationEvent: 'onLanguage:json'
+2026-10-15 15:45:24.471 [info] ExtensionService#_doActivateExtension vscode.npm, startup: false, activationEvent: 'onLanguage:json'
+2026-10-15 15:45:24.472 [info] ExtensionService#_doActivateExtension GitHub.copilot-chat, startup: false, activationEvent: 'onChatSession:copilotcli'
+2026-10-15 15:45:26.541 [info] ExtensionService#_doActivateExtension vscode.git, startup: false, activationEvent: '*'
+2026-10-15 15:45:26.541 [info] ExtensionService#_doActivateExtension vscode.github, startup: false, activationEvent: '*'
+2026-10-15 15:45:27.532 [info] ExtensionService#_doActivateExtension vscode.terminal-suggest, startup: false, activationEvent: 'onTerminalShellIntegration:*'
+2026-10-15 15:45:27.702 [info] Eager extensions activated
+2026-10-15 15:45:27.703 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2026-10-15 15:45:27.703 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2026-10-15 15:45:28.045 [info] ExtensionService#_doActivateExtension GitHub.vscode-pull-request-github, startup: false, activationEvent: 'onStartupFinished'
+2026-10-15 15:45:50.603 [info] ExtensionService#_doActivateExtension flengyel.theorem-terminal, startup: false, activationEvent: 'onCommand:mrw.openOutline'

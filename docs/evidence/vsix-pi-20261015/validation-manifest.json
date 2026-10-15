@@ -1,0 +1,65 @@
+{
+  "local_artifact_directory": ".codex-work/vscode-host-pi-20261015",
+  "local_artifacts": {
+    "pi-install-complete.png": {
+      "bytes": 554624,
+      "sha256": "e52507aa9799e79705d9dd9ef5699e7db7522948662889bec980170efb6b10d1"
+    },
+    "retained-artifact-open.png": {
+      "bytes": 219819,
+      "sha256": "47f8ccb41e17d633e3dd61c8522efd9b98b79bb777207eb829d60984666bf724"
+    },
+    "retained-source-open.png": {
+      "bytes": 220545,
+      "sha256": "eb566c152022a7d046035460ceded43ad48a6888034579c71bf0129381d97904"
+    },
+    "restored-reader-visible.png": {
+      "bytes": 706174,
+      "sha256": "730261010ba881d9cfcde8354de3c49521342da5eec931005da07d7e945f9d53"
+    },
+    "ui.ps1": {
+      "bytes": 7650,
+      "sha256": "c2f4b36ef9f0a5760ab007635e6080b9c5747835cde92f0619ee126972ba3fc7"
+    },
+    "pi-audit.py": {
+      "bytes": 2349,
+      "sha256": "ba86fe0c8a95c85beed58eb259ff2f8314656851eaebccb280f525e59a5dfec9"
+    },
+    "close.ps1": {
+      "bytes": 887,
+      "sha256": "a01f46a1721ce8b1ace308c1d7a33cc2e45381c7684d52bedea66d28624d236c"
+    },
+    "reopen.ps1": {
+      "bytes": 357,
+      "sha256": "3ec4e06478f9c265509773e25ffa1cd23670a1d6b2a73b43ece2784d17b39951"
+    },
+    "window8-renderer.log": {
+      "bytes": 233352,
+      "sha256": "343f745a83fae84bc166872de4fe6c7f88da63e37e1a0444662911f2d795d507"
+    },
+    "window9-renderer.log": {
+      "bytes": 25506,
+      "sha256": "1ee8f6dee9078f09b28dfed78068276bcf981ab32b531feefdad5d8bbd0a81fb"
+    }
+  },
+  "committed_evidence": {
+    "console-findings.json": "0a6d6808fcee7e9d2a34037241c4f1090fbe3e1f9422e55cf43e52752dd55a09",
+    "evidence-attached.json": "d290d76f5bc23685dd16ef857118113b56bf655c1bd20563d72993eeef79e56e",
+    "evidence-detached.json": "295689676742d0c2ccc0bf8f8da5c9011b03bcef9d3919d872b9a93242175605",
+    "host-checks.json": "c1726d396ed0be48fa369b9a7a354a08ab95343890280f6b0af9413cdd5865cc",
+    "installed-bridge-processes.jsonl": "b9575719833353b8f23e35bd28ea8f52d2bf091f03076f59e30dd9f698dd7e44",
+    "installed-core-origins.json": "0cf38cfaceee9edab3be641260c515cea91d293cce217c78c7c8560393b6dd0a",
+    "installed-files.json": "84d1592f3d66c2efe99f5fab52b50e53a40f21fa839c0e2f975ec245f3166bf8",
+    "outline-after-restart.json": "2b3e045161832c8d3e1e8153a2a1b0b77c593da0b3ac6e781c8e11c7767be335",
+    "outline-before-close.json": "2b3e045161832c8d3e1e8153a2a1b0b77c593da0b3ac6e781c8e11c7767be335",
+    "pi-exthost2.txt": "77c57eff596e28ce58f936c4c0d321d26b342a868ef5e56c7607e15d34a17210",
+    "pi-exthost3.txt": "6ee608afa14faffc54320f6e500126de7342fcf08a915157409ae44425fe4690",
+    "restart-artifact-editor.json": "855c6ae22fa8d52468cd42105c9d21efbc3cf8393d4fcc606e5f4467f4d771ed",
+    "restart-dom.json": "f277cd7bfe954d7dd08b8cf8b0972041ef0b5e1c4d19ac8ca81b860d1d550427",
+    "restart-source-editor.json": "3685dd90d3b6ce3552283bd56ef7d689187bc2994d621f2800acf445cb4e1681",
+    "retained-artifact-editor.json": "855c6ae22fa8d52468cd42105c9d21efbc3cf8393d4fcc606e5f4467f4d771ed",
+    "retained-source-editor.json": "3685dd90d3b6ce3552283bd56ef7d689187bc2994d621f2800acf445cb4e1681",
+    "source.txt": "ee6216fc52943007d98a2629cc2e093b69916cd6e3e164d05a72082fd1f710f9",
+    "supplied-evidence.txt": "26b2cbfcb151d8566fe0b4e4a58b1ef38957c74cf7ddd1a43981da4012241f13"
+  }
+}

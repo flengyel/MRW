@@ -31,9 +31,11 @@ Prioritize simplicity and interoperability: retain one VS Code extension and
 the existing Python core in the workspace environment. Use standard local Linux,
 WSL2 and Remote SSH to Linux extension hosts. Windows VS Code connected to Linux
 is an intended arrangement; native Windows backend portability remains deferred.
-Remote SSH Linux is the next interoperability check; compatible Raspberry Pi OS
-hosts require separate ARM validation. Distinguish actual host results from
-intended support. Do not introduce a TypeScript rewrite, a remote-access service
+Scoped installed-VSIX checks pass on Windows VS Code with WSL Debian and with
+Remote SSH to a Raspberry Pi 5 running Debian 12 ARM64. Other Linux SSH hosts,
+local Linux desktop use and other Raspberry Pi OS/ARM configurations require
+separate validation. Distinguish actual host results from intended support.
+Do not introduce a TypeScript rewrite, a remote-access service
 or a Windows persistence port. Ordinary reading/outlining requires Python 3.11+
 on the workspace host, without Lean, SageMath, containers or a provider.
 

@@ -18,8 +18,9 @@ The deployment direction retains one extension over the existing Python core
 in the workspace environment, through standard local Linux, WSL2 or Remote SSH
 to Linux hosts. The backend requires Python 3.11+. Windows may supply the editor
 UI while Linux owns backend execution and filesystem operations; native Windows
-backend portability is deferred. Remote SSH Linux and compatible Raspberry Pi
-OS/ARM require actual host validation before support is claimed. Lean, SageMath,
+backend portability is deferred. Scoped installed-VSIX validation covers WSL
+Debian and Remote SSH to a Raspberry Pi 5 running Debian 12 ARM64; it does not
+establish every Linux SSH host or Raspberry Pi OS/ARM configuration. Lean, SageMath,
 containers and providers are optional integrations, not prerequisites for
 ordinary reading or outlining. These deployment choices preserve source
 identity, provenance and publication protections; they add no remote-access

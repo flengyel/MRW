@@ -26,8 +26,9 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 |---|---|
 | Windows VS Code with WSL2 Debian | Scoped development-host checks and ordinary installed-VSIX offline workflow/close/reopen pass; see the latest reader validation report |
 | Local Linux VS Code | Intended standard host; Linux Python/bridge regressions pass, ordinary local-desktop host use is not established by WSL checks |
-| Remote SSH to Linux | Next interoperability host check; not yet validated |
-| Compatible Raspberry Pi OS / ARM | Separate host/architecture validation target; not yet validated |
+| Windows VS Code with Remote SSH to Linux ARM64 | Installed VSIX and focused offline reader/save/normal-close/reopen pass on Raspberry Pi 5, Debian 12, Python 3.11.2; see the latest reader validation report |
+| Other Linux SSH hosts | Separate interoperability checks; a non-ARM Linux SSH host is the next configuration check when available |
+| Other compatible Raspberry Pi OS / ARM configurations | Separate validation targets; the Debian 12 Pi 5 result does not establish other OS images, 32-bit ARM or a local Pi desktop host |
 | Native Windows backend | Separate deferred portability task |
 
 | Capability | VS Code extension status | Standalone Qt status |

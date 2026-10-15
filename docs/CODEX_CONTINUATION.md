@@ -30,13 +30,37 @@ provenance and publication protections. Do not start a TypeScript rewrite,
 remote-access service or native Windows persistence port. Native Windows
 backend portability remains a separate deferred task.
 
-Distinguish intended arrangements from actual host results. Windows VS Code
-with WSL Debian is the scoped installed-package configuration. **Remote SSH to
-Linux is the next interoperability check**, requiring a real SSH host; it has
-not passed. Compatible **Raspberry Pi OS/ARM validation is separate** and has
-not passed. Local Linux desktop-host validation is also distinct from Linux
-service regressions and WSL UI checks. These next checks authorize no new
-backend/service or state migration.
+The same archive now also passes a scoped **Windows VS Code / Remote SSH /
+Raspberry Pi 5, Debian 12 ARM64, Python 3.11.2** check. See the
+[Pi report](VS_CODE_OUTLINE_VALIDATION.md#remote-ssh-on-raspberry-pi-5--2026-10-15)
+and [committed host evidence](evidence/vsix-pi-20261015/host-checks.json).
+Installation used ordinary SCP and `code --install-extension` in the remote
+terminal. All 41 installed files match the archive; observed isolated bridge
+processes and 19 imported module code origins point to the installed bundle.
+Create/edit/save, context-range replacement, evidence attachment/detachment,
+normal window close/reopen and explicit restoration passed. The outline and
+both retained blobs stayed byte-identical; both retained documents opened after
+restart. The old remote extension host exited with code 0; the new one activated
+MRW without a logged error. No MRW packaging/runtime defect was established.
+User actions supplied SSH authentication, workspace/file trust and an audit-file
+save; the reader checks were scripted, not an independent human usability trial.
+No private state was reset or migrated, and no Python package installation or
+source checkout was needed on the Pi. Existing console diagnostics and corrected
+automation errors are recorded separately in the report.
+
+Distinguish these actual arrangements from broader intended support. A non-ARM
+Linux SSH host is the next interoperability configuration check when available;
+it does not require a new remote service. Other Raspberry Pi OS images, 32-bit
+ARM and local Pi/Linux desktop extension hosts remain separately unvalidated.
+R2/R3, optional integrations and the pinned x86-64 Lean checker were not tested
+on ARM. This completed packaging/host increment activates no further runtime
+implementation or broad acceptance campaign. Observe ordinary mathematical use
+when chosen; mathematical usefulness remains unassessed.
+
+The delivered VSIX remains the archive recorded with packaging commit
+`15ba6cd`; this documentation/evidence follow-on does not rebuild it. Reproduce
+its recorded digest from that revision in a separate checkout using the pinned
+tools and epoch. Preserve the existing artifact and unrelated working state.
 
 Keep saved user state. Do not reset storage to install or upgrade. Save reader
 forms explicitly before normal close/reopen, then use **MRW: Open Saved Source

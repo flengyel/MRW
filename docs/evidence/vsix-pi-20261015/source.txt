@@ -1,0 +1,3 @@
+A finite list of primes.
+Form N = p₁ ⋯ pₙ + 1.
+A divisor of N cannot divide that product.

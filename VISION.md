@@ -17,8 +17,10 @@ Use the host's standard local Linux, WSL2 and Remote SSH mechanisms. Windows
 VS Code connected to Linux is an intended arrangement. Python 3.11+ is an
 explicit workspace-host requirement; ordinary reading and outlining need no
 Lean, SageMath, container or model provider. These remain optional integrations.
-Native Windows backend portability is deferred. Remote SSH Linux is the next
-interoperability check, with Raspberry Pi OS/ARM validation a separate target.
+Native Windows backend portability is deferred. Scoped installed-VSIX checks
+pass with WSL Debian and Remote SSH to a Raspberry Pi 5 on Debian 12 ARM64;
+other Linux SSH hosts, local Linux desktop use and other Pi OS/ARM configurations
+remain separate validation targets.
 Deployment intent is distinct from the actual configurations recorded in the
 [validation report](docs/VS_CODE_OUTLINE_VALIDATION.md); this direction adds no
 new runtime, remote service or record semantics.

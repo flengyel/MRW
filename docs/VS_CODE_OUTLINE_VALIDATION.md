@@ -299,15 +299,110 @@ Python core in the workspace environment, using standard local Linux, WSL2
 and Remote SSH to Linux. **Python 3.11+ on that host is required**. Lean,
 SageMath, containers and providers are optional for ordinary reading/outlining.
 Windows UI plus Linux backend is the supported architecture exercised here;
-native Windows backend portability remains deferred. **Remote SSH Linux is
-the next actual interoperability check**; compatible **Raspberry Pi OS/ARM is
-a separate validation target**. Neither, nor ordinary local Linux desktop use,
-has been established by this WSL check. No new remote service, TypeScript
+native Windows backend portability remains deferred. This WSL check does not
+establish Remote SSH, ARM or ordinary local Linux desktop use; the subsequent
+Pi/SSH result is recorded separately below. No new remote service, TypeScript
 rewrite, Windows persistence port or data migration was introduced.
 
 Mathematical usefulness, proof correctness and human comprehension remain
 unassessed. This was a focused installation workflow, not a repeat of outline
 acceptance, R3 acceptance or source reconnaissance.
+
+## Remote SSH on Raspberry Pi 5 — 2026-10-15
+
+The **same VSIX**, SHA-256
+`721e9ec6fa011807508947c4fe3a132702ce705b5d30b6c80cf5f2ea4fbc1f29`,
+installed and passed the focused offline reader/restart check through ordinary
+**Windows VS Code 1.141.2 / Remote - SSH 0.128.0**. The workspace host was the
+user's **Raspberry Pi 5**, reporting **Debian GNU/Linux 12 (bookworm), aarch64,
+64-bit, Python 3.11.2**. Client/server commit:
+`16507d91be0dc1ce4f94c04d4d0430210b8685d9`. This is an actual Linux SSH and
+ARM64 host result, not a claim about all Raspberry Pi OS images or architectures.
+The package was built in the prior packaging increment `15ba6cd` with
+**@vscode/vsce 4.0.0**; it was not rebuilt for this documentation follow-on.
+
+The user supplied authentication and workspace/file trust decisions in VS Code.
+The reader commands, file/kind pickers, real webview form input/button clicks,
+retained-document checks and disk/process comparisons were scripted, with
+captures inspected. This is installed-host validation, not independent manual
+mathematical use or a human usability acceptance trial. No development-host
+launch, API double, bridge substitution, staging manifest or MRW provider call
+was used. Other installed extensions may independently access network services.
+
+The VSIX was copied with Windows OpenSSH SCP and installed with ordinary
+`code --install-extension` in the **remote Linux integrated terminal**. VS Code
+reported successful installation on the SSH host. All **41 installed files**
+matched the archive, ignoring only VS Code's `package.json` installation
+metadata. The Python core/data, interface resources and license were present;
+the test directory and host-test manifest were absent. No source checkout,
+Python package install, Qt, Lean, SageMath or container was needed on the Pi.
+
+The [host checks](evidence/vsix-pi-20261015/host-checks.json),
+[installed-file checks](evidence/vsix-pi-20261015/installed-files.json) and
+[restored controls](evidence/vsix-pi-20261015/restart-dom.json) record:
+
+- Created one outline in `/tmp/mrw-vsix-pi-20261015-90c812c7`, using the same
+  synthetic UTF-8 source/evidence fixtures as the WSL installation check.
+  Created, then edited and explicitly saved an attributed overview annotation.
+- Kept context from line 1, replaced its exact range with Unicode line 2, then
+  edited/saved its role as cited result and its label as `Edited Pi ARM64 context`.
+- Attached the supplied supporting artifact to the selected region, then
+  detached it to an outline-level retained reference. Both steps reported no
+  reader warning. No compiler or checking attestation was claimed.
+- Closed only the disposable workspace window normally. An extra automation
+  Enter had dirtied its disposable audit JSON; the user saved that report to
+  complete close. The outline forms were already saved. Remote extension host
+  PID 1952653 exited with **code 0**. Reopened the same workspace, authenticated
+  again, and ran **MRW: Open Saved Source Outline…**.
+- Annotation, attribution, context role/label/exact quotation, identifiers and
+  detached evidence restored without a reader warning. The persisted outline's
+  SHA-256 stayed `2b3e045161832c8d3e1e8153a2a1b0b77c593da0b3ac6e781c8e11c7767be335`.
+  Both retained blobs stayed byte-identical and matched the unchanged originals.
+  **Open retained source** and **Open retained artifact** opened their expected
+  text before and after restart; Unicode comparisons used the UTF-8 capture,
+  not PowerShell's lossy display encoding.
+- Observed **16 actual isolated bridge processes** using `python3 -I` and the
+  installed extension's `python/bridge.py`, with the installed directory as cwd.
+  The [19 imported module code origins](evidence/vsix-pi-20261015/installed-core-origins.json),
+  including `source_outlines`, point inside that installed bundle. The restarted
+  host ran the ordinary ARM64 VS Code server extension-host entry point.
+- The initial Pi inventory contained **zero existing MRW private files**.
+  Identity and standard private storage paths were preserved; no reset or
+  migration occurred. The previous WSL result independently preserves its
+  existing 82-file inventory; this Pi run is not an upgrade-state test.
+
+The [console findings](evidence/vsix-pi-20261015/console-findings.json) separate
+installation friction and corrected automation from product defects. Remote -
+SSH initially selected an unusable MobaXterm `ssh.exe`; configuring the working
+Windows OpenSSH client fixed connection setup. Its initial dependency download
+failed certificate-chain verification; VS Code's Node `--use-system-ca` retry
+succeeded with certificate verification enabled. No extra terminal suite was
+required. Local VSIX-picker automation did not establish installation; the
+subsequent remote CLI installation and file comparison did. An initial local
+terminal selection and a too-fast save were corrected; failed attempts were not
+counted as passes. An unrelated clipboard capture during a focus change was
+removed and excluded, and foreground/expected-content checks were added.
+
+Before/after remote host logs record MRW activation without errors. Renderer
+diagnostics still include Copilot API-proposal mismatches, authentication-extension
+`navigator` migration errors, Python-snippet language declarations and Node
+deprecations; standard webview warnings remain.
+VS Code also canceled a local-history `entries.json` write during shutdown.
+The saved audit JSON stayed parseable, and the MRW outline/retained bytes were
+unchanged. No MRW packaging or installation defect was established, so no
+production runtime was changed. This documentation/evidence increment uses
+document, evidence-consistency and diff checks; it reuses the earlier **33 Node
+and 313 Python** packaging regressions rather than repeating the campaigns.
+
+The [evidence manifest](evidence/vsix-pi-20261015/validation-manifest.json) pins
+the committed reports and local inspected captures under
+`.codex-work/vscode-host-pi-20261015/`. This completes the scoped Pi/SSH offline
+installation check. A non-ARM Linux SSH host is the next interoperability
+configuration check when available. Other Pi OS images, 32-bit ARM, local
+Pi/Linux desktop use, ARM R2/R3 and optional tools remain unvalidated. The pinned
+Lean checker is still Linux x86-64/WSL only. Unsaved forms still require explicit
+saving, and private state does not synchronize between hosts. Mathematical
+usefulness, proof correctness and human comprehension remain unassessed.
 
 ## Current boundaries
 
@@ -317,8 +412,8 @@ regions, notebook cells, rendered documents and non-UTF-8 sources are
 unsupported. Forms require explicit saving and have no restart recovery for
 unsaved drafts. Outline/artifact deletion, garbage collection and cross-machine
 synchronization are not implemented. Ordinary installed-VSIX use is established
-only for the scoped Windows/WSL configuration above. Independent human dialog
-use and mathematical usefulness remain unassessed.
+only for the scoped Windows/WSL and Windows/SSH/Pi configurations above.
+Independent human dialog use and mathematical usefulness remain unassessed.
 
 The requested context/evidence association-editing increment is complete.
 Automatic extraction, AI outline proposals, automatic gap detection, verified

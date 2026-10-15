@@ -23,8 +23,9 @@ provider. No npm installation is needed to run an installed VSIX.
 |---|---|
 | Windows VS Code with WSL2 Debian | Scoped actual-host reader checks; installed-package results are in the validation report |
 | Local Linux VS Code | Intended standard deployment; Linux bridge/service regressions pass, ordinary desktop-host validation remains separate |
-| Remote SSH to Linux | Next interoperability check; no actual SSH host validation yet |
-| Compatible Raspberry Pi OS / ARM | Separate architecture/host validation target; no actual ARM validation yet |
+| Windows VS Code with Remote SSH to Linux ARM64 | Scoped installed-VSIX reader/save/normal-close/reopen checks pass on Raspberry Pi 5, Debian 12, Python 3.11.2; see the validation report |
+| Other Linux SSH hosts | Separate host validation; non-ARM Linux SSH is the next configuration check when available |
+| Other compatible Raspberry Pi OS / ARM configurations | Separate validation targets; other OS images, 32-bit ARM and local Pi desktop use have not been checked |
 | Native Windows backend | Separate deferred portability task |
 
 These choices preserve existing source identity, provenance and private
@@ -152,7 +153,8 @@ establish correctness. See [focused validation](../docs/VS_CODE_OUTLINE_VALIDATI
 ## Run from this checkout
 
 Prerequisites: VS Code 1.85 or later and Python 3.11 or later on the extension
-host. Linux/WSL is the initial tested service platform. There are no npm runtime
+host. Scoped installed-reader checks cover WSL Debian and Remote SSH to Debian
+ARM64; see the host table above for limits. There are no npm runtime
 dependencies and no Qt dependency for extension actions.
 
 1. Open this `vscode/` directory in VS Code.
@@ -197,6 +199,9 @@ and entry ordering. UTC avoids host-timezone differences. Two builds with the
 recorded Node/npm/packager versions produced identical archive bytes; use those
 versions when reproducing the delivered SHA-256. Record the hash of the actual
 file. This procedure packages locally and does not publish to the Marketplace.
+The validated archive was built from packaging revision `15ba6cd`. Later
+documentation/evidence updates keep that artifact; reproduce its recorded hash
+from that revision in a separate checkout with the recorded tool versions.
 
 Open an ordinary window for the intended Linux workspace: local Linux, the
 chosen WSL distribution, or an SSH-connected Linux host. Choose **Extensions:
@@ -225,6 +230,29 @@ reopened explicitly with **MRW: Open Saved Source Outline…**; save reader form
 before closing. Native Windows backend portability remains deferred; run the
 workspace extension and Python on Linux. See the [installed-package validation](../docs/VS_CODE_OUTLINE_VALIDATION.md)
 for the tested workflow and remaining limits.
+
+### Windows UI with a Linux SSH workspace
+
+Install Microsoft's **Remote - SSH** extension in Windows VS Code. Confirm that
+the Windows SSH client can log in to the chosen Linux host, then use **Remote-SSH:
+Connect to Host…** and open a folder on that host. If Remote - SSH selects an
+unusable SSH executable from PATH, set `remote.SSH.path` in Windows User settings
+to the working SSH client. An extra terminal suite is unnecessary.
+
+Check `python3 --version` in the connected window's **remote** integrated
+terminal. Copy the VSIX to that host using an ordinary file-transfer tool, then
+run the `code --install-extension` command above there. A terminal explicitly
+labeled **Local** runs on the UI computer and does not install into the Linux
+workspace host. Confirm MRW is installed under the SSH host's extensions.
+Authenticate and trust only the intended workspace through VS Code's prompts;
+no global trust choice or MRW state reset is needed. Save reader forms before
+normal close/reopen and explicitly reopen the saved outline.
+
+The [Pi host check](../docs/VS_CODE_OUTLINE_VALIDATION.md#remote-ssh-on-raspberry-pi-5--2026-10-15)
+used Remote - SSH 0.128.0, the Windows OpenSSH client and the unchanged 0.4.1
+VSIX. It required no source checkout, Python package installation, Qt, Lean or
+SageMath on the Pi. This checks the offline reader; optional integrations and
+other host configurations need their own evidence.
 
 ### Reproduce the bounded outline host checks
 
@@ -371,8 +399,9 @@ host reload. A post-replacement sync failure may leave the complete replacement
 on disk; no rollback occurs. Preserve unsaved human edits with an ordinary-note
 handoff before reload when needed. VS Code owns note saving and recovery; no Qt
 checkpoint or close-blocking guarantee is claimed. Concurrent hosts for the same
-project remain unsupported. Linux/WSL is the validated persistence platform;
-native Windows Send remains unavailable.
+project remain unsupported. This R3 pointer lifecycle was checked on WSL Debian;
+the separate Pi/SSH check covers offline outline persistence. Native Windows
+Send remains unavailable.
 
 **Read and inspect a proof.** Keep a saved UTF-8 source or note active, then
 choose **Open Lean Proof and Keep Return Location**. Select a `.lean` file and
@@ -442,7 +471,8 @@ body retains its independent 256 KiB limit. Only `send_assistance` can transmit.
 is not loaded. Untrusted and virtual workspaces are unsupported in this increment.
 
 Native Windows Send is blocked before transmission because immutable retention
-requires the core's POSIX directory and hard-link operations; use Remote WSL.
+requires the core's POSIX directory and hard-link operations; use a Linux
+workspace host (for example Remote WSL).
 Read-only inspection and preview remain available. Other persistence failures
 may still occur on supported hosts and are reported without automatic retries. Native macOS has not
 been exercised. Linux bridge checks do not establish cross-platform GUI support.

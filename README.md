@@ -13,12 +13,15 @@ core, running in the workspace environment through standard local Linux, WSL2
 or Remote SSH to Linux. Python 3.11+ is required on that host. Windows VS Code
 may supply the UI while Linux runs the backend. Reading and outlining do not
 require Lean, SageMath, containers or a provider. Native Windows backend
-portability remains deferred. Remote SSH Linux is the next interoperability
-check; Raspberry Pi OS/ARM requires separate validation. See
+portability remains deferred. Scoped Remote SSH validation now covers a Raspberry
+Pi 5 running Debian 12 ARM64; other Linux SSH hosts and Pi OS/ARM configurations
+remain separate validation targets. See
 [workspace-host dependencies and evidence](vscode/README.md#workspace-hosts-and-dependencies)
 and [VSIX packaging/installation](vscode/README.md#package-and-install-a-vsix).
-The 0.4.1 VSIX has a scoped ordinary Windows VS Code/WSL Debian installation
-and offline reader restart check; see the [delivery evidence](docs/VS_CODE_OUTLINE_VALIDATION.md#installed-vsix--2026-10-15).
+The 0.4.1 VSIX has scoped ordinary Windows VS Code installation and offline
+reader restart checks with WSL Debian and Remote SSH to that Pi; see the
+[delivery evidence](docs/VS_CODE_OUTLINE_VALIDATION.md#installed-vsix--2026-10-15)
+and [Pi results](docs/VS_CODE_OUTLINE_VALIDATION.md#remote-ssh-on-raspberry-pi-5--2026-10-15).
 This is scripted functional evidence; mathematical usefulness remains unassessed.
 
 For development, start with [the active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
