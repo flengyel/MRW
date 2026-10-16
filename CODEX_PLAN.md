@@ -180,7 +180,7 @@ from automated checks.
 | R2 — Ask about the work | From selected source/work passages, ask one natural-language mathematical question, preview exact outbound context, explicitly send through the existing adapter, inspect an attributed answer, and retain/edit/reject a contribution | One actual obstruction is helped through an in-application exchange, with inspectable sources and a useful resulting work artifact |
 | R3 — Continue an investigation | Support an explicit linked follow-up, correction or alternative approach; preserve the current question, conclusions, unresolved issue and selected evidence; resume later | A continued proof, counterexample, hypothesis comparison or exposition survives interruption, and the assistant's contribution and corrections remain distinguishable |
 | R3.1 — End and begin again | Explicitly release the sole active investigation pointer while preserving immutable records, note choice and unrelated state, then permit another bounded investigation after restart | Two independent investigations can be completed sequentially in one real project without losing either one's mathematical record |
-| Requested notebook/SageMath workflow — planned | Standard study notebooks through JupyterLab with an installed SageMath kernel, building on the existing handoff | A saved explanation and computation can be continued later; kernel state and reproducibility are assessed separately |
+| Requested notebook/SageMath workflow — first companion workflow delivered | Standard study notebooks through VS Code Jupyter and the existing SagePod server; MRW supplies source/overview navigation | Scoped WSL notebook/save/reopen/fresh-kernel checks pass; mathematical usefulness remains unassessed |
 | Later, task-dependent | Deeper PDF/source correspondence, formal tools, generic warrant inspection and larger corpora | A demonstrated obstruction in R1–R3.1 justifies each addition; evaluate each on its own terms |
 
 **Active implementation priority, 2026-10-13: continue the explicitly requested
@@ -273,41 +273,40 @@ file, not a required format. Notebook support serves explanations with rendered
 mathematics, examples, calculations and plots kept together. It is an explicit
 study requirement; no unsuccessful Markdown-only session is needed to record it.
 
-**Current boundary:** the GUI recognizes an existing `.ipynb`, shows a read-only
-summary and can launch a configured Jupyter/JupyterLab command. It does not edit
-or render notebook cells, execute kernels, or connect notebook cells directly to
-R2/R3 selection and response insertion. The title already uses Mathematical
-Research Workstation; the `theorem-terminal` command and package identity remain.
+**Bounded companion workflow, 2026-10-16:** use the existing VS Code Jupyter
+extension with SagePod's existing authenticated server. MRW keeps its Python
+backend on the workspace host and supplies source outlines, retained passages,
+annotations and Markdown overviews. VS Code/Jupyter owns notebook editing,
+rendering, save/recovery, execution controls and the server connection. SagePod
+supplies the actual `sagemath` kernel and computation in its existing container.
+The [user workflow](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) records required extensions,
+explicit server/kernel selection, persistent paths and re-entry. The
+[validation report](docs/SAGEPOD_NOTEBOOK_VALIDATION.md) distinguishes actual
+visible notebook results from scripted/API checks and mathematical usefulness.
+The ordinary Windows VS Code / WSL workflow passes rendered prose/math, explicit
+Sage execution, save, normal editor close/reopen, a confirmed fresh-kernel rerun
+and relative notebook/overview/source navigation. These are scripted host checks,
+not independent human study. No MRW runtime change or new VSIX was needed.
 
-**Planned first increment:** make the existing external Jupyter handoff usable
-for a durable study notebook and an installed SageMath kernel.
+Use one standard `.ipynb` in the existing persistent mount. Preserve other
+notebooks, mounts, kernels and MRW private storage. No image rebuild, permission
+repair or unrelated-session shutdown is part of this increment. Select Sage by
+its actual name; a missing kernel must not cause a fallback to ordinary Python.
+Keep tokens out of ordinary files and reports. Opening/restoring MRW starts no
+container and executes no cells. Saved outputs and live kernel variables remain
+distinct; reproduction requires a deliberately requested fresh-kernel rerun.
 
-- Provide a clear New/Open study notebook path, saving a standard `.ipynb` in
-  the chosen study project. Preserve existing Markdown/TeX notes; require no
-  duplicate account of the mathematics.
-- Configure or discover the intended JupyterLab installation and its available
-  kernels. Select an installed SageMath kernelspec by its actual name. Report an
-  unavailable kernel; do not silently run Sage code as ordinary Python.
-- Let JupyterLab provide notebook editing, rendered mathematical prose, code
-  execution and output display. Opening/restoring the MRW project must not run
-  cells. Execution remains an explicit notebook action.
-- Keep the notebook path and source reference available for later continuation.
-  Detect externally saved changes without waiting for a long-running Jupyter
-  server to exit; never overwrite the notebook with a stale MRW snapshot.
-- Distinguish saved cells and outputs from live kernel state. Reopening a file
-  does not establish that its computation can be reproduced. Where the task
-  requires reproduction, explicitly rerun the relevant computation in a fresh
-  kernel and record its dependencies.
+Ordinary relative links join the notebook, source text and Markdown overview.
+Follow MRW links explicitly in the Markdown editor within their existing private
+scope. Copying ordinary files does not transfer private targets. No direct
+notebook-cell selection into R2/R3, response insertion or restored kernel memory
+is supplied. There is no new MRW notebook editor, kernel controller, queue or
+orchestrator. Broader work must address a demonstrated limitation. Mathematical
+usefulness remains unassessed without actual study evidence.
 
-Status: requested and planned; no new notebook capability is delivered by this
-roadmap change. Use the existing handoff for study when suitable. A real example
-should combine an explanation with a Sage calculation or plot, save the work,
-and continue it later. Report setup checks separately from mathematical benefit.
-
-Embedded notebook editing, kernel orchestration and a direct notebook-cell AI
-bridge are later increments. The first handoff must not be described as
-integrated cell selection, automatic response insertion or restored kernel
-memory. Broader work must address a concrete limitation of this workflow.
+The standalone Qt application's older boundary is unchanged: it recognizes an
+existing `.ipynb`, shows a read-only summary and can launch a configured
+Jupyter/JupyterLab command. It does not edit/render cells or execute kernels.
 
 Implementation references: [JupyterLab notebooks](https://jupyterlab.readthedocs.io/en/stable/user/notebook.html),
 [SageMath's Jupyter kernel setup](https://doc.sagemath.org/html/en/installation/launching.html),

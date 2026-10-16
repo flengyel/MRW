@@ -1,0 +1,48 @@
+Visual Studio Code (1.141.2, wsl, desktop)
+Jupyter Extension Version: 2025.9.1.
+Python Extension not installed.
+Python Environment Extension not installed.
+Pylance Extension not installed.
+Platform: linux (x64).
+Home = /home/flengyel
+Temp Storage folder ~/.vscode-server/data/User/globalStorage/ms-toolsai.jupyter/version-2025.9.1
+Workspace folder ~/Jupyter/mrw-sagepod-study
+01:43:16.006 [warn] Password for http://127.0.0.1:8889/ was invalid.
+01:43:17.169 [error] Widget Error: Failed to access CDN https://unpkg.com/ after 0 attempt(s), TypeError: Failed to fetch
+01:43:36.217 [info] Starting Kernel (SageMath 10.10) for '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb' (disableUI=false)
+01:43:36.338 [warn] Password for http://127.0.0.1:8889/ was invalid.
+01:43:36.963 [info] http://127.0.0.1:8889/: Kernel started: a231358e-8777-4959-b95d-8d15b4aae2dd
+01:43:51.011 [info] Started session for kernel startUsingRemoteKernelSpec:055c6b0ca8891d937f3cc29bad257ca8d85fcd108b45e0745f270e7e1d4b4a6c..sagemath./python3./.python3#-m#sage.repl.ipython_kernel#-f#{connection_file}
+01:43:51.021 [warn] Kernel completions not enabled for 'SageMath 10.10'.
+To enable Kernel completion for this language please add the following setting
+jupyter.completionTriggerCharacters = {sage: [<List of characters that will trigger completions>]}.
+For more information please see https://aka.ms/vscodeJupyterCompletion
+01:43:51.025 [info] Kernel successfully started
+01:50:46.183 [info] Disposing request as the cell (2) was deleted ~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb
+01:50:46.190 [info] Dispose Kernel '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb' associated with '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb'
+01:57:44.199 [info] Dispose Kernel '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb' associated with '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb'
+01:57:44.283 [info] Starting Kernel () for '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb' (disableUI=true)
+01:57:44.502 [warn] Password for http://127.0.0.1:8889/ was invalid.
+01:57:45.148 [info] Started session for kernel connectToLiveRemoteKernel:a231358e-8777-4959-b95d-8d15b4aae2dd
+01:57:45.468 [warn] Kernel completions not enabled for 'SageMath 10.10 (sagepod-study.ipynb)'.
+To enable Kernel completion for this language please add the following setting
+jupyter.completionTriggerCharacters = {sage: [<List of characters that will trigger completions>]}.
+For more information please see https://aka.ms/vscodeJupyterCompletion
+01:57:45.470 [info] Kernel successfully started
+01:57:47.686 [error] Widget Error: Failed to access CDN https://unpkg.com/ after 0 attempt(s), TypeError: Failed to fetch
+02:01:22.589 [info] Restart requested ~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb
+02:01:23.914 [info] Restarted a231358e-8777-4959-b95d-8d15b4aae2dd
+02:03:43.159 [info] Disposing request as the cell (2) was deleted ~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb
+02:03:43.161 [info] Dispose Kernel '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb' associated with '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb'
+02:03:54.521 [info] Starting Kernel () for '~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb' (disableUI=true)
+02:03:54.824 [warn] Password for http://127.0.0.1:8889/ was invalid.
+02:03:55.319 [info] Started session for kernel connectToLiveRemoteKernel:a231358e-8777-4959-b95d-8d15b4aae2dd
+02:03:55.322 [warn] Kernel completions not enabled for 'SageMath 10.10 (sagepod-study.ipynb)'.
+To enable Kernel completion for this language please add the following setting
+jupyter.completionTriggerCharacters = {sage: [<List of characters that will trigger completions>]}.
+For more information please see https://aka.ms/vscodeJupyterCompletion
+02:03:55.323 [info] Kernel successfully started
+02:03:57.122 [error] Widget Error: Failed to access CDN https://unpkg.com/ after 0 attempt(s), TypeError: Failed to fetch
+02:04:33.579 [info] Restart requested ~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb
+02:04:34.990 [info] Restarted a231358e-8777-4959-b95d-8d15b4aae2dd
+02:07:24.171 [error] Widget Error: Failed to access CDN https://unpkg.com/ after 0 attempt(s), TypeError: Failed to fetch

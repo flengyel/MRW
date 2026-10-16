@@ -273,14 +273,19 @@ notebook must not execute it or expose editable raw JSON by default.
 The requested notebook/SageMath workflow permits a standard `.ipynb` as the
 primary study document or alongside Markdown/TeX. Narrative, mathematical
 notation, executable examples and outputs should remain together without a
-duplicate note requirement. The planned first increment uses external
-JupyterLab and an installed SageMath kernel; it does not embed a notebook
-editor. Current MRW provides only a read-only notebook summary and configured
-handoff. Keep the notebook's location available on re-entry, protect externally
-saved edits, and distinguish saved outputs from live kernel state. Notebook
-cell selection into assistance and response insertion require a later explicit
-bridge; the handoff alone does not supply them. See the notebook section of
-`CODEX_PLAN.md` for the bounded implementation target.
+duplicate note requirement. The first VS Code companion workflow uses its
+existing Jupyter extension and SagePod's authenticated server with the actual
+`sagemath` kernel. VS Code/Jupyter owns the notebook editor, rendering, saving
+and explicit kernel actions; SagePod supplies computation. MRW keeps its core
+on the workspace host and supplies source/overview navigation. Ordinary relative
+links join these files; MRW private references are followed explicitly in a
+Markdown editor and remain scoped to that workspace/storage. Keep the
+notebook's location available on re-entry and distinguish saved outputs from
+live kernel state. Opening/restoring MRW must not start containers or run cells.
+The standalone Qt summary/handoff is unchanged. Notebook-cell selection into
+assistance and response insertion require a later explicit bridge; the companion
+workflow supplies neither. See the notebook section of `CODEX_PLAN.md` and
+`docs/SAGEPOD_NOTEBOOK_WORKFLOW.md`.
 
 Re-entry restores the open work, selected passage and rendering position. Two
 panes comparing the same file retain independent cursor, selection and scroll

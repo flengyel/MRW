@@ -1,0 +1,40 @@
+{
+  "base_url": "http://127.0.0.1:8889",
+  "authenticated": true,
+  "server_root": "/home/sage/notebooks",
+  "status": {
+    "connections": 0,
+    "kernels": 0,
+    "last_activity": "2026-10-15T21:09:43.909211Z",
+    "started": "2026-10-15T21:09:15.378136Z"
+  },
+  "kernelspecs": {
+    "default": "python3",
+    "kernelspecs": {
+      "python3": {
+        "display_name": "Python 3 (ipykernel)",
+        "language": "python",
+        "argv": [
+          "python",
+          "-m",
+          "ipykernel_launcher",
+          "-f",
+          "{connection_file}"
+        ]
+      },
+      "sagemath": {
+        "display_name": "SageMath 10.10",
+        "language": "sage",
+        "argv": [
+          "python3",
+          "-m",
+          "sage.repl.ipython_kernel",
+          "-f",
+          "{connection_file}"
+        ]
+      }
+    }
+  },
+  "sessions": [],
+  "kernels": []
+}

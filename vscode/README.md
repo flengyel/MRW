@@ -33,6 +33,26 @@ publication protections. They introduce no TypeScript rewrite, custom remote
 service or Windows persistence port. The configuration under test is recorded
 separately from this architectural direction.
 
+## Study notebooks with SagePod
+
+Use [the SagePod notebook workflow](../docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) to
+connect Microsoft's Jupyter extension explicitly to an existing authenticated
+SagePod server and select its actual `sagemath` kernel. VS Code/Jupyter supplies
+ordinary `.ipynb` editing, mathematical rendering, saving and kernel controls;
+SagePod supplies computation. MRW 0.5.0 supplies the source reader and Markdown
+overview references, with its Python core still on the workspace host.
+
+Keep the notebook in the existing persistent notebook mount. Host `~/Jupyter`
+and container `/home/sage/notebooks` are distinct paths to that mount. Use
+relative ordinary-file links for notebook/overview/source movement and follow
+MRW references explicitly in the Markdown editor. Copying those files does not
+transfer private outline targets. Saved outputs do not restore live variables;
+rerun deliberately in a fresh kernel when reproduction is required.
+
+This companion workflow adds no MRW runtime or VSIX. Opening/restoring MRW starts
+no container and executes no notebook cells. Notebook-cell assistance remains
+pending. See [actual checks and limits](../docs/SAGEPOD_NOTEBOOK_VALIDATION.md).
+
 ## Manual Markdown overviews across sources
 
 Version 0.5.0 provides the first manual overview spanning several sources. Write

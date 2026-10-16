@@ -712,12 +712,16 @@ replaced. A notebook (`.ipynb`) opens as a read-only notebook summary; configure
 and invoke its Jupyter/JupyterLab handoff deliberately. No kernel runs inside
 this GUI.
 
-Notebook study with a SageMath kernel is now a requested, planned increment:
-a standard `.ipynb` may replace or accompany a Markdown note, using JupyterLab
-for rendered mathematics, code and outputs. The current handoff is the starting
-point; embedded notebook editing, kernel execution inside MRW and direct
-notebook-cell assistance are not delivered. See
-[the notebook/SageMath roadmap](CODEX_PLAN.md#requested-notebook-and-sagemath-workflow).
+For the VS Code frontend, use the [SagePod companion notebook
+workflow](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md): Microsoft's Jupyter extension owns
+standard `.ipynb` editing, rendered mathematics, saving and explicit execution;
+SagePod supplies its existing SageMath kernel. MRW supplies source outlines and
+Markdown overviews linked through ordinary files. The backend stays on the
+workspace host. A notebook may replace or accompany a Markdown note. Saved
+outputs and live kernel memory remain distinct. No MRW runtime or new VSIX is
+needed; direct notebook-cell assistance remains pending. See
+[the roadmap](CODEX_PLAN.md#requested-notebook-and-sagemath-workflow) and
+[the separate validation record](docs/SAGEPOD_NOTEBOOK_VALIDATION.md).
 
 Open the root `.tex` file and choose **LaTeX → Set as TeX root**, then **Build
 LaTeX**. Building executes **trusted project TeX only**, using trusted installed

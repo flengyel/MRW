@@ -1,0 +1,94 @@
+{
+  "sagepod": {
+    "Id": "60785e8665bffbd8dc2e513a0a294a6fc4bd8984632a545379e7e02fe3f6597f",
+    "Image": "5268b48bd5b27df1c415b5578da10884f588894c3982f0bd7c02873c48ce7caf",
+    "pid": 579082,
+    "started": "2026-10-15T17:09:04.970292727-04:00",
+    "ports": {
+      "8888/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8889"
+        }
+      ]
+    },
+    "mounts": [
+      {
+        "host": "/home/flengyel/Jupyter",
+        "container": "/home/sage/notebooks",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.jupyter",
+        "container": "/home/sage/.jupyter",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagepod-dot_sage",
+        "container": "/home/sage/.sage",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagepod-local",
+        "container": "/home/sage/.local",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagepod-config",
+        "container": "/home/sage/.config",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagepod-cache",
+        "container": "/home/sage/.cache",
+        "rw": true
+      }
+    ]
+  },
+  "sagemath": {
+    "Id": "f31828516c427c8c7db9a3937c3edcb08c9e4c08cec761587c7a771128dabc01",
+    "Image": "e10ecad61f8fe381eeb9d68d7003247b48d13da0903cdd75b7888f94e917393d",
+    "pid": 353,
+    "started": "2026-10-15T07:37:59.9629682-04:00",
+    "ports": {
+      "8888/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8888"
+        }
+      ]
+    },
+    "mounts": [
+      {
+        "host": "/home/flengyel/.sagequeue-config",
+        "container": "/home/sage/.config",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagequeue-cache",
+        "container": "/home/sage/.cache",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/Jupyter",
+        "container": "/home/sage/notebooks",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.jupyter",
+        "container": "/home/sage/.jupyter",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagequeue-dot_sage",
+        "container": "/home/sage/.sage",
+        "rw": true
+      },
+      {
+        "host": "/home/flengyel/.sagequeue-local",
+        "container": "/home/sage/.local/share",
+        "rw": true
+      }
+    ]
+  }
+}

@@ -1,6 +1,85 @@
-# Codex continuation: VS Code migration and proof outlines
+# Codex continuation: MRW source work and companion notebooks
 
-## Active handoff — first manual overview across sources, 2026-10-16
+## Completed handoff — SagePod companion study notebook, 2026-10-16
+
+The current request activates a usable standard notebook workflow alongside
+MRW 0.5.0, delivered at `2fe6b4e`. Use VS Code/Jupyter for editing, rendering,
+save/recovery and explicit kernel interaction; use SagePod's existing container
+for Sage computation. MRW's Python backend remains on the workspace host.
+Read [the user steps](SAGEPOD_NOTEBOOK_WORKFLOW.md) and
+[the current validation report](SAGEPOD_NOTEBOOK_VALIDATION.md).
+
+The existing SagePod checkout is `/home/flengyel/src/sagepod` at `462273c`;
+its untracked `txt` is unrelated and preserved. The production `sagepod`
+container was already running Sage 10.10 on host 8889, mapped to container 8888.
+Its existing six mounts are unchanged. `~/Jupyter` is the host notebook root;
+`/home/sage/notebooks` is the container root. The unrelated SageQueue container
+on 8888 stays running. Do not rebuild images, rerun setup/permission repair,
+change mounts, stop unrelated sessions or repeat Pi/deployment campaigns.
+
+The WSL extension host was upgraded from installed MRW 0.4.1 using the existing
+0.5.0 VSIX; all 98 pre-existing private files matched afterward. Jupyter
+2025.9.1 and its declared companion extensions are installed there. A concrete
+Jupyter interoperability blocker required the existing SageMath Enhanced 2.0.8
+extension (`Lov3.sagemath-enhanced`) to register `sage` as a VS Code language.
+Before that registration, Run All could not execute Sage cells; after reload
+and explicit selection of SagePod's actual `sagemath` kernel, execution passed.
+No kernelspec was modified and no Python kernel was substituted. No MRW runtime
+code or new VSIX is needed. Keep server credentials in Jupyter's connection
+storage and out of repository files/reports.
+
+One durable notebook is `~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb`, with
+`overview.md` and the existing validation Euclid IX.20 transcription beside it.
+The kernel reported Sage 10.10, Python 3.13.5 and module
+`sage.repl.ipython_kernel.kernel`. It factored 1023 as `3 * 11 * 31` with exact
+product/factor assertions. Counts 1 and 2 and outputs were saved by VS Code.
+This is scripted UI/API evidence, with rendered prose/math captured separately;
+mathematical usefulness is unassessed. Normal notebook-editor close/reopen
+preserved prose and saved outputs without executing cells. The notebook's
+**source overview** link opened ordinary Markdown and its preview; the Euclid
+link opened the text and **study notebook** returned to the notebook. A new
+outline/reference was prepared and followed through the installed bundled bridge
+in this new workspace; no unrelated private outline was changed.
+
+An explicit **Restart Kernel** and confirmed **Restart**, followed by **Run All**
+and Save, reproduced the result. The final kernel PID is 1186 (prior run 1014),
+with counts reset to 1 and 2 and no prior integer calculation in kernel memory.
+Notebook SHA-256:
+`738c3bae47f94c09b2354afdec871718518319e064056034b4b8a79e803e5bcf`.
+The final saved bytes are readable from host and container and pass notebook
+format validation. All 98 inventoried pre-existing MRW private files and all 11
+pre-existing notebook-mount files remain unchanged. Both existing containers
+retain their identities, images, PIDs and start times. SagePod remains running.
+
+Focus guards stopped keyboard automation when another application took focus.
+Stray text in only the new example was preserved locally and corrected while
+its editor was closed. Later checks used accessibility/menu controls, a native
+restart confirmation and inspected window-render captures, with no development
+host or manifest substitution. Direct cell typing/save was observed; corrections
+and environment diagnostics were scripted file edits with the editor closed.
+This is not independent human workflow acceptance. A draft memory probe was
+corrected because Sage already defines `n`; the final probe checks whether its
+value is an integer calculation. Do not treat automation corrections as MRW
+runtime defects. Jupyter's widget-CDN failure and missing Sage kernel-completion
+triggers remain recorded limitations; plain prose and arithmetic passed.
+
+Documentation/evidence changes require document and artifact checks; MRW runtime
+and package bytes are unchanged, so no Node/Python regression campaign or VSIX
+rebuild is required. The existing 0.5.0/0.4.1 packages are preserved. No broader
+implementation is activated by completing this companion workflow. Observe
+actual study when chosen, without making it a delivery gate.
+
+Use ordinary relative links to join notebook, source and overview. MRW references
+are followed explicitly in the Markdown editor, within their existing private
+scope. Copying ordinary files transfers no private outline targets. Opening or
+restoring MRW starts no containers and executes no cells; outputs do not restore
+live variables. Direct notebook-cell R2/R3 selection/insertion, automatic
+execution, synchronization and kernel-memory restoration remain pending.
+
+The broader source-outline requirement remains pending below; this notebook
+companion increment supplies no inference graph, elimination or new proof status.
+
+## Completed — first manual overview across sources, 2026-10-16
 
 The user activated one bounded part of the broader outlining requirement:
 ordinary Markdown with explicit references to existing saved source outlines
@@ -419,11 +498,11 @@ files must not be modified during a visual check.
 ## Notebook option requested September 22
 
 A standard `.ipynb` may replace or accompany the Markdown study note. The
-notebook/SageMath increment in `CODEX_PLAN.md` is planned, not implemented.
-Current MRW can summarize an existing project notebook and explicitly launch
-the configured Jupyter/JupyterLab tool. Use that handoff when suitable, with
-JupyterLab providing the editable notebook and an installed SageMath kernel.
-Do not present the summary as an embedded notebook editor.
+SagePod/VS Code Jupyter companion workflow and its focused evidence are now
+tracked in the active handoff above and `CODEX_PLAN.md`. The standalone Qt
+application still summarizes an existing project notebook and explicitly
+launches its configured Jupyter/JupyterLab tool. Use that older handoff when
+suitable; do not present the summary as an embedded notebook editor.
 
 Keep explanation, code, saved outputs and the next question in the notebook
 when that serves the task; no duplicate Markdown report is required. Record the

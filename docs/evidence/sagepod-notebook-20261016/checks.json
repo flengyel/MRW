@@ -1,0 +1,33 @@
+{
+  "baseline_preservation": {
+    "private-before": {
+      "files": 98,
+      "unchanged": true
+    },
+    "notebooks-before": {
+      "files": 11,
+      "unchanged": true
+    }
+  },
+  "notebook_sha256": "738c3bae47f94c09b2354afdec871718518319e064056034b4b8a79e803e5bcf",
+  "study_files": {
+    "/home/flengyel/Jupyter/mrw-sagepod-study/overview.md": "67890beb30ce42b7e5308612f964fbf9c7bb829ae238cca53ccd395a5cc2b043",
+    "/home/flengyel/Jupyter/mrw-sagepod-study/sagepod-study.ipynb": "738c3bae47f94c09b2354afdec871718518319e064056034b4b8a79e803e5bcf",
+    "/home/flengyel/Jupyter/mrw-sagepod-study/euclid-ix20.txt": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205"
+  },
+  "kernel": "sagemath",
+  "sage_version": "10.10",
+  "python_version": "3.13.5",
+  "prior_kernel_pid": 1014,
+  "fresh_kernel_pid": 1186,
+  "execution_counts": [
+    1,
+    2
+  ],
+  "prior_integer_calculation_in_fresh_memory": false,
+  "factorization": "3 * 11 * 31",
+  "source_overview_links": "scripted native UI navigation",
+  "mathematical_usefulness": "unassessed",
+  "new_mrw_runtime": false,
+  "new_vsix": false
+}

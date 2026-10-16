@@ -1,0 +1,126 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "explanation",
+   "metadata": {},
+   "source": [
+    "# Prime factors with SagePod\n",
+    "\n",
+    "This notebook checks a finite factorization alongside a reading of Euclid's\n",
+    "argument that there are infinitely many primes. Open the [source overview](overview.md)\n",
+    "for the source passage and its MRW retained-outline reference. The transcription's\n",
+    "translator and edition are unknown.\n",
+    "\n",
+    "The independently known product $3 \\cdot 11 \\cdot 31 = 1023$ gives the check\n",
+    "$$2^{10}-1 = 1023 = 3 \\cdot 11 \\cdot 31.$$\n",
+    "The factors are prime: trial division by primes at most their square roots suffices.\n",
+    "This example does not prove the general result in Euclid IX.20.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "environment",
+   "metadata": {
+    "vscode": {
+     "languageId": "sage"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "SageMath: 10.10\n",
+      "Kernel: sage.repl.ipython_kernel.kernel\n",
+      "Python: 3.13.5\n",
+      "Container working directory: /home/sage/notebooks\n",
+      "Kernel PID: 1186\n",
+      "Prior calculation in live memory: False\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sage.env import SAGE_VERSION\n",
+    "import sys, os\n",
+    "from pathlib import Path\n",
+    "from IPython import get_ipython\n",
+    "print(\"SageMath:\", SAGE_VERSION)\n",
+    "print(\"Kernel:\", type(get_ipython()).__module__)\n",
+    "print(\"Python:\", sys.version.split()[0])\n",
+    "print(\"Container working directory:\", Path.cwd())\n",
+    "print(\"Kernel PID:\", os.getpid())\n",
+    "print(\"Prior calculation in live memory:\", isinstance(globals().get(\"n\"), Integer))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "factorization",
+   "metadata": {
+    "vscode": {
+     "languageId": "sage"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2^10 - 1 = 1023\n",
+      "Prime factorization: 3 * 11 * 31\n",
+      "Independent product: 1023\n"
+     ]
+    }
+   ],
+   "source": [
+    "n = 2^10 - 1\n",
+    "factors = factor(n)\n",
+    "assert n == 1023\n",
+    "assert factors.prod() == 3 * 11 * 31 == n\n",
+    "assert list(factors) == [(3, 1), (11, 1), (31, 1)]\n",
+    "print(\"2^10 - 1 =\", n)\n",
+    "print(\"Prime factorization:\", factors)\n",
+    "print(\"Independent product:\", 3 * 11 * 31)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "continuation",
+   "metadata": {},
+   "source": [
+    "## Continuing later\n",
+    "\n",
+    "Save this file with VS Code. The cells and displayed outputs are stored in the\n",
+    "notebook; variables such as `n` belong to the live Sage kernel. Reopening the file\n",
+    "does not recreate those variables. To check reproduction, deliberately restart\n",
+    "this notebook's kernel and run all cells again. No MRW action executes cells.\n",
+    "\n",
+    "Return to the [overview](overview.md) or [source text](euclid-ix20.txt).\n",
+    "Copying a Markdown MRW reference does not copy private outlines or retained sources.\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "SageMath 10.10",
+   "language": "sage",
+   "name": "sagemath"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

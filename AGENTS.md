@@ -286,10 +286,16 @@ score, subject inventory, or formal declaration before mathematical work.
 Ordinary TeX, Sage, code, diagram, and note files remain the primary work
 artifacts. A standard Jupyter notebook may replace or accompany a Markdown
 study note; do not require duplicate prose or treat `study_notes.md` as a
-mandatory format. The notebook/SageMath workflow in `CODEX_PLAN.md` is requested
-and planned. Build from the existing external Jupyter handoff when implementing
-that increment; do not claim that its current summary view supplies notebook
-editing, a SageMath kernel, or a notebook-cell bridge to R2/R3.
+mandatory format. The notebook/SageMath companion workflow in `CODEX_PLAN.md`
+uses VS Code's Jupyter extension with SagePod's authenticated server and actual
+Sage kernel; read `docs/SAGEPOD_NOTEBOOK_WORKFLOW.md`. VS Code/Jupyter owns
+notebook editing, rendering, save/recovery and explicit kernel actions. MRW keeps
+its Python backend on the workspace host and supplies source/overview navigation.
+Opening/restoring MRW starts no container and executes no cells. Saved outputs
+are separate from live variables; reproduction requires an explicit fresh-kernel
+rerun. Copying ordinary notebook/Markdown files transfers no MRW private targets.
+The Qt summary/handoff remains unchanged; no notebook-cell bridge to R2/R3 is
+implemented. Record actual UI results separately from API checks and usefulness.
 
 The justification-logic warrant subsystem is architecturally integral to
 Theorem Terminal. Its object language, profiles, derivations, constant
