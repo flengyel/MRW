@@ -34,6 +34,16 @@ continuation, private resumption and explicit ending. Their genuine mathematical
 remains pending. The first offline source-region reader is delivered in VS Code;
 proof-outline vertex elimination remains planned. This adds no broader model conversation.
 
+The first manual overview spanning several sources is implemented in extension
+0.5.0: write ordinary Markdown and explicitly insert/follow readable references
+to existing saved source outlines or exact retained regions. References survive
+annotation edits and report changed region associations without redirecting
+earlier prose. Copying Markdown alone does not transfer private outlines or
+retained sources. See [the workflow](vscode/README.md#manual-markdown-overviews-across-sources)
+and [focused validation](docs/VS_CODE_OVERVIEW_VALIDATION.md). This is reader
+synthesis and navigation; remaining broader outline capabilities and
+mathematical usefulness remain pending.
+
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an

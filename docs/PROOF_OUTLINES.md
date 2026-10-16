@@ -7,6 +7,12 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Update, 2026-10-16:** the first manual overview spanning several sources is
+implemented in VS Code 0.5.0 as ordinary Markdown with scoped saved-outline and
+exact-region references. See the reference contract below and
+[focused validation](VS_CODE_OVERVIEW_VALIDATION.md). Remaining broader outline
+tooling and the graph contract remain pending.
+
 **Status, 2026-10-14:** the first offline source-region reader is implemented in
 VS Code; see [its contract](../vscode/README.md#offline-source-region-reader) and
 [validation evidence and limits](VS_CODE_OUTLINE_VALIDATION.md). This partially
@@ -143,6 +149,63 @@ Deterministic checks establish graph and retention behavior. Mathematical use
 must separately establish whether the outline helps reconstruct or continue
 the argument. R1–R3.1 and the Marcus observation retain their separate evidence;
 they are not preliminary ceremonies for this increment.
+
+## First manual overview across sources — reference contract, 2026-10-16
+
+This increment activates ordinary Markdown overviews referring to existing
+saved source outlines, including informal sources. An overview may concern a
+subject, book, monograph, article, section or argument and connect sources
+without imposing a hierarchy. VS Code owns editing, undo, saving, recovery and
+preview. No template, questionnaire or reading sequence is required. Overview
+prose is reader synthesis; its references supply navigation, not checked
+dependencies, proof status or source assertions.
+
+Reference identity is defined before implementation:
+
+```text
+mrw-outline:v1/SCOPE/OUTLINE/SOURCE
+mrw-outline:v1/SCOPE/OUTLINE/SOURCE/REGION/SL.SC-EL.EC
+```
+
+`SCOPE` is the lowercase SHA-256 of the canonical project path, NUL and the
+canonical private outline-store path (UTF-8). `OUTLINE` and optional `REGION`
+are existing UUIDs; `SOURCE` is the retained source's exact-byte SHA-256.
+Region endpoints are half-open, 1-based lines and 0-based Unicode scalar
+columns, with canonical decimal spelling. The URI contains no filesystem path,
+command, query, fragment, encoded argument or executable payload. It is bounded
+and strictly parsed. Only the current Markdown document's workspace-derived
+store is eligible; document text cannot choose another store or project.
+
+Insertion explicitly chooses an existing outline, then its whole retained
+source or a saved region. A normal inline Markdown link includes the supplied
+title (otherwise source filename), known bibliography, useful range/source
+locator and retained revision. Missing metadata stays unknown. The visible
+label is a citation snapshot; later metadata/annotation changes do not rewrite
+the Markdown or invalidate its target.
+
+An explicit **Follow Outline Reference at Cursor** action accepts only this
+reference grammar. It opens the existing reader; a region reference also opens
+and selects its exact retained passage. Annotation edits do not change reference
+identity. If a region is removed or its range changes, navigation reports the
+changed association and opens the originally pinned retained passage, selecting
+no replacement reader region. It does not silently follow the region's new
+range. Whole-outline references address the retained source and its current
+reader annotations, not a frozen copy of mutable annotations.
+
+Changed or missing original files do not prevent retained navigation. Missing
+outlines, unavailable/corrupt retained storage, source-identity mismatch or a
+different workspace/storage scope cause a clear failure, without rewriting
+Markdown, creating storage, searching other projects or guessing a replacement.
+Following is read-only, including when a reader region is collapsed. It invokes
+no provider, compiler, external command or arbitrary URI handler. The Command
+Palette action works in the Markdown editor; preview-click handling is outside
+this first increment.
+
+Copying Markdown alone does not transfer private outlines or retained sources.
+References are scoped navigation data, not a synchronization/export format,
+authority credential or universal identity for mathematical occurrences.
+Automatic generation, source discovery, cross-host synchronization, general
+overview tooling, inference graphs and vertex elimination remain pending.
 
 ## Source-based illustration
 

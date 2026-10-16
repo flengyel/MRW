@@ -57,6 +57,12 @@ The offline source-region reader retains exact UTF-8 sources and optional
 supplied evidence separately from editable attributed reader annotations. It
 supports informal books/articles and AI-generated or AI-assisted manuscripts
 without Lean. Read its persistence and format bounds in `vscode/README.md`.
+The first manual overview across sources uses ordinary Markdown with explicit
+insertion/following of scoped saved-outline references. Region links pin the
+retained revision and exact range; changed associations never redirect earlier
+prose. VS Code owns overview editing, undo, recovery and preview. References
+create no checked dependency or proof status. Copying Markdown alone does not
+transfer private outlines or retained sources.
 Scoped actual-host checks use deterministic responses. Proof-outline vertex
 elimination remains planned. Follow the bounded migration handoff. Use Windows VS Code
 connected to a WSL2 checkout for Windows development; run Python and the

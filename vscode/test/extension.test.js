@@ -655,3 +655,64 @@ test('repeated request views reuse the host research group', async t => {
   }
   assert.deepEqual(h.errors, []);
 });
+
+test('Markdown overview references two saved sources, follows retained regions after edits and reload, and never writes on follow', async t => {
+  const root = await temporary(t), h = await harness(root), created = [];
+  for (const [name, text] of [['book.md', 'α😀 → β\r\nClaim.\r\n'], ['article.txt', 'Second source.\nArgument.\n']]) {
+    const file = path.join(root, name); await fs.writeFile(file, text);
+    const ed = h.editor(h.document(file, text)); ed.selection = new Selection(new Position(0, 1), new Position(1, 5)); h.focus(ed);
+    created.push(await h.commands.get('mrw.createOutline')());
+  }
+  const file = path.join(root, 'overview.md'); await fs.writeFile(file, '');
+  const doc = h.document(file, ''); doc.languageId = 'markdown'; const ed = h.editor(doc);
+  ed.selection = new Selection(new Position(0, 0), new Position(0, 0)); h.focus(ed);
+  h.picks.push({ id: created[0].outline.id }, { region: created[0].outline.regions[0].id });
+  const first = await h.commands.get('mrw.insertOutlineReference')();
+  assert.ok(doc.text.includes(first.reference)); assert.equal(doc.isDirty, true);
+  ed.selection = new Selection(new Position(0, doc.text.length), new Position(0, doc.text.length));
+  h.picks.push({ id: created[1].outline.id }, { region: null });
+  const second = await h.commands.get('mrw.insertOutlineReference')();
+  assert.notEqual(second.reference, first.reference); assert.ok(doc.text.includes('article'));
+  const before = doc.text;
+  ed.selection = new Selection(new Position(0, 3), new Position(0, 3));
+  assert.equal((await h.commands.get('mrw.followOutlineReference')()).status, 'unchanged');
+  assert.equal(h.api.window.activeTextEditor.document.uri.scheme, 'mrw-record');
+  assert.equal(h.api.window.activeTextEditor.document.languageId, 'plaintext');
+  assert.equal(h.api.window.activeTextEditor.selection.start.character, 1);
+  assert.equal(doc.text, before);
+  // Navigation after a fresh extension activation uses the persisted source,
+  // even when its original is missing and the region was moved in the reader.
+  const panel = h.panels[0], region = created[0].outline.regions[0];
+  await panel.receive({ type: 'edit', change: { kind: 'replace_region', region: region.id, start: [1, 0], end: [1, 6] } });
+  await fs.unlink(path.join(root, 'book.md'));
+  const restarted = await harness(root), md = restarted.document(file, before); md.languageId = 'markdown';
+  const re = restarted.editor(md); re.selection = ed.selection; restarted.focus(re);
+  const followed = await restarted.commands.get('mrw.followOutlineReference')();
+  assert.equal(followed.status, 'changed or removed'); assert.equal(followed.region, null);
+  assert.equal(restarted.panels[0].webview.messages.at(-1).selected, null);
+  assert.equal(restarted.api.window.activeTextEditor.document.getText(), 'α😀 → β\r\nClaim.\r\n');
+  assert.equal(md.text, before); assert.deepEqual(restarted.errors, []); assert.deepEqual(h.errors, []);
+});
+
+test('Markdown reference insertion respects cancellation, editor changes, workspace and document boundaries', async t => {
+  const root = await temporary(t), h = await harness(root), src = path.join(root, 'source.txt');
+  await fs.writeFile(src, 'Source.'); h.focus(h.editor(h.document(src, 'Source.')));
+  const created = await h.commands.get('mrw.createOutline')();
+  const file = path.join(root, 'overview.md'); await fs.writeFile(file, 'Reader synthesis.');
+  const doc = h.document(file, 'Reader synthesis.'); doc.languageId = 'markdown'; const ed = h.editor(doc); h.focus(ed);
+  h.picks.push(undefined); await h.commands.get('mrw.insertOutlineReference')(); assert.equal(doc.text, 'Reader synthesis.');
+  h.picks.push({ id: created.outline.id }, { region: null });
+  h.setService(async (...args) => {
+    const result = await runBridge(...args);
+    if (args[2].method === 'outline_reference') doc.version++;
+    return result;
+  });
+  await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /changed during selection/);
+  assert.equal(doc.text, 'Reader synthesis.');
+  doc.text = '[bad](mrw-outline:v1/../../command:evil)'; ed.selection = new Selection(new Position(0, 2), new Position(0, 2));
+  await h.commands.get('mrw.followOutlineReference')(); assert.match(h.errors.pop(), /Malformed/); assert.equal(h.panels.length, 1);
+  doc.languageId = 'plaintext'; const calls = h.requests.length;
+  await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /Markdown/); assert.equal(h.requests.length, calls);
+  doc.languageId = 'markdown'; h.api.workspace.getWorkspaceFolder = () => undefined;
+  await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /current workspace/);
+});

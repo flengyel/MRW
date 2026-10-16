@@ -428,6 +428,22 @@ PDF/OCR and notebook regions are unsupported. Automatic extraction, AI proposals
 automatic gap detection and graph elimination remain pending. A faithful
 outline does not establish proof correctness. See [validation](docs/VS_CODE_OUTLINE_VALIDATION.md).
 
+**First manual overview across sources, 2026-10-16:** write ordinary Markdown
+about a subject, book, monograph, article, section or argument. No template,
+questionnaire, hierarchy or reading sequence is required. The extension inserts
+a readable reference to an existing saved outline or exact region on explicit
+request. VS Code owns editing, save, undo, recovery and preview. Place the cursor
+in the link in the Markdown editor and explicitly follow it to the existing
+reader; region references also select the pinned retained passage in plain text.
+Changing annotations does not invalidate references. Changed/removed region
+associations are reported without redirecting earlier prose to a new passage.
+Changed or missing originals still permit exact retained navigation. Missing
+targets/storage and different workspace scope fail clearly without rewriting
+the document or guessing replacements. Overview prose is reader synthesis;
+links confer no checking status or verified dependency. Copying Markdown alone
+does not transfer private outline/source storage. Preview-click navigation and
+remaining broader outline tooling stay pending.
+
 **Accepted requirement, 2026-10-12; not implemented.** For a selected proof,
 retain mathematical milestones and hide intervening vertices while preserving
 dependency paths. Every summarized region shows a claim with its necessary

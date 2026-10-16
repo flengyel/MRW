@@ -33,6 +33,56 @@ publication protections. They introduce no TypeScript rewrite, custom remote
 service or Windows persistence port. The configuration under test is recorded
 separately from this architectural direction.
 
+## Manual Markdown overviews across sources
+
+Version 0.5.0 provides the first manual overview spanning several sources. Write
+ordinary Markdown about a subject, book, monograph, article, section or argument.
+Describe purpose, concepts/results, governing ideas, connections, questions and
+optional details in your own order. No template, questionnaire, hierarchy or
+compulsory reading sequence is required. VS Code owns editing, saving, undo,
+document recovery and Markdown preview. This prose is reader synthesis.
+
+In a Markdown document belonging to the current workspace, run **MRW: Insert
+Outline Reference…**, choose an existing saved source outline, then the whole
+outline or a saved region. An untitled Markdown document can use a chosen
+workspace folder and later be saved normally. The action inserts one inline
+reference at the cursor; it does not replace selected prose or save the file.
+Undo/redo and ordinary edits use VS Code. The readable label includes supplied
+title/known bibliography (otherwise the source filename), source locator,
+region range when selected and a retained-revision identifier. Missing metadata
+is not invented. Labels snapshot citation text; later reader edits do not
+silently rewrite the Markdown.
+
+Place the cursor in a reference's label or URI in the Markdown editor and run
+**MRW: Follow Outline Reference at Cursor**. It opens the existing reader; a
+region reference also opens the retained source in a read-only plain-text view
+with the exact passage selected. Preview-click integration is not implemented;
+use the explicit command in the Markdown editor. Generic links and document
+content are never interpreted as executable MRW commands.
+
+The [reference contract](../docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16)
+binds a versioned `mrw-outline:v1/…` URI to the canonical project/private-store
+scope, outline UUID and exact retained source revision. Region references also
+pin the region UUID and half-open range (1-based lines, 0-based Unicode scalar
+columns). Annotation edits do not invalidate them. If a region is changed or
+removed, the reader reports the changed association and opens the earlier pinned
+retained passage, selecting no replacement region. It does not follow the new
+range. Whole-outline references expose the current reader annotations over the
+pinned source, not a snapshot of mutable annotations.
+
+Changed or missing original files do not prevent exact retained access. Missing
+outlines, unavailable/corrupt retained storage, malformed references and a
+different workspace/storage scope produce clear failures without changing the
+Markdown, creating replacement storage or searching other projects. Following
+only reads/navigates; it neither changes outline visibility nor publishes state.
+References confer no proof-checking status or verified dependency relation.
+
+**Copying Markdown alone does not transfer private outlines or retained sources.**
+References work only in their current workspace/private-storage scope. This
+increment supplies no cross-machine transfer, synchronization, automatic
+overview generation, source discovery, inference graph or elimination witness.
+See [focused host checks and limits](../docs/VS_CODE_OVERVIEW_VALIDATION.md).
+
 ## Offline source-region reader
 
 Open a saved UTF-8 mathematical text, select a passage, and run **MRW: Create
@@ -178,9 +228,9 @@ root:
 
 ```sh
 npm ci --prefix vscode --ignore-scripts
-TZ=UTC SOURCE_DATE_EPOCH=1792079077 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.4.1.vsix
-sha256sum vscode/theorem-terminal-0.4.1.vsix
+TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.5.0.vsix
+sha256sum vscode/theorem-terminal-0.5.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -194,14 +244,15 @@ production manifest and rejects missing or unexpected archive files. The
 package excludes development tests, scripts, staging configuration, caches and
 packaging dependencies. Generated Python copies, dependencies and VSIX files
 are ignored by Git. The recorded epoch is the timestamp of the completed
-association-editing baseline `db3665a`; vsce uses it for stable ZIP timestamps
+prior delivery baseline `b776368`; vsce uses it for stable ZIP timestamps
 and entry ordering. UTC avoids host-timezone differences. Two builds with the
 recorded Node/npm/packager versions produced identical archive bytes; use those
 versions when reproducing the delivered SHA-256. Record the hash of the actual
 file. This procedure packages locally and does not publish to the Marketplace.
-The validated archive was built from packaging revision `15ba6cd`. Later
-documentation/evidence updates keep that artifact; reproduce its recorded hash
-from that revision in a separate checkout with the recorded tool versions.
+The earlier 0.4.1 archive is preserved separately. Reproduce its recorded hash
+from packaging revision `15ba6cd`, with its prior epoch `1792079077` and recorded
+tool versions, in a separate checkout. The new overview artifact and its focused
+checks are recorded in the overview validation report.
 
 Open an ordinary window for the intended Linux workspace: local Linux, the
 chosen WSL distribution, or an SSH-connected Linux host. Choose **Extensions:
@@ -211,11 +262,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.4.1.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.5.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.4.1**.
+The extension identity is **flengyel.theorem-terminal**, version **0.5.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

@@ -1,6 +1,70 @@
 # Codex continuation: VS Code migration and proof outlines
 
-## Active handoff — installed VSIX and Linux workspace hosts, 2026-10-15
+## Active handoff — first manual overview across sources, 2026-10-16
+
+The user activated one bounded part of the broader outlining requirement:
+ordinary Markdown with explicit references to existing saved source outlines
+and selected retained regions. It is implemented in extension **0.5.0** using
+the existing Python core, reader, storage and navigation services. Read
+[the workflow](../vscode/README.md#manual-markdown-overviews-across-sources),
+[the reference contract](PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16)
+and [the focused validation report](VS_CODE_OVERVIEW_VALIDATION.md).
+
+Delivery: `vscode/theorem-terminal-0.5.0.vsix`, SHA-256
+`1580ff1ff022662028a1c302abe190698919663fb1bf40fc74742696baa1ebe8`.
+Two UTC/fixed-epoch builds were byte-identical. All 45 archive files were
+verified against the production manifest/runtime/license allowlist; test
+harnesses are excluded. The 0.4.1 VSIX remains unchanged.
+
+The focused WSL Development Host seed and normal close/reopen checks pass for
+two source outlines, insertion, ordinary editing/undo/redo, reader navigation,
+changed region association and retained access with a missing original.
+All 86 inventoried pre-existing unrelated MRW private files are unchanged.
+Final checks: 36 Node tests pass; 319 Python tests (248 passed, 71 skipped:
+58 Qt, one unavailable `/mnt/c` parent, 12 compiler/checker integrations excluded
+by task scope), plus compilation/syntax, archive, document and evidence checks.
+Scripted host use is distinct from manual use; mathematical usefulness remains
+unassessed. Installation and Pi validation were not repeated.
+
+Insert chooses an existing outline and either its whole retained source or a
+saved region. A readable ordinary Markdown link snapshots known bibliography
+and a useful locator. It adds no overview form or private overview store;
+VS Code owns editing, undo, save, recovery and preview. Follow works explicitly
+at the cursor in the Markdown editor; preview-click handling is pending.
+
+Reference identity binds the current canonical project/private-store scope,
+outline UUID and retained source SHA-256, plus region UUID and exact scalar
+range when applicable. Annotation edits do not invalidate it. Changed/removed
+region associations are reported while the originally pinned retained passage
+opens in plain text; no replacement region is selected. Missing originals
+still permit retained access. Missing targets/storage, invalid references and
+scope mismatches fail clearly without editing Markdown or searching elsewhere.
+No reference confers proof status or a verified dependency relation.
+
+The source/outline format and private-state paths are unchanged. Preserve saved
+user state and the previous 0.4.1 VSIX. Copying Markdown alone transfers neither
+private outlines nor retained sources; there is no automatic cross-host sync.
+Ordinary overview prose remains reader synthesis, with no hierarchy, template,
+questionnaire or compulsory reading sequence. Automatic generation, discovery,
+general overview tooling, inference graphs and elimination witnesses remain
+pending. The remaining broader outline requirement stays below and in the roadmap.
+
+The user's validation supplement reuses the completed deployment evidence at
+`b776368`: test the new behavior in a WSL Development Host, repeat no installation
+validation, and repeat Pi only for an SSH/ARM-specific change or a concrete
+regression. This increment changes neither remote transport nor architecture
+dependencies; no Pi rerun was needed. The report distinguishes new scripted
+host behavior from prior installed-0.4.1 WSL/Pi evidence. Do not turn either into
+human usability or mathematical-use acceptance. No compiler/provider call or
+Marketplace publication is authorized by this handoff.
+
+Package using the existing bundler/prepublish hook and pinned vsce 4.0.0, with
+the recorded tool versions and fixed UTC epoch. Preserve the old VSIX and use
+the new versioned filename. The validation report records the delivered digest,
+focused checks and limitations. No broader implementation is activated merely
+by completion; mathematical usefulness remains unassessed.
+
+## Completed deployment baseline — installed VSIX and Linux workspace hosts, 2026-10-15
 
 The association-editing increment is complete at `db3665a`. The completed delivery
 packages that existing extension as an installable VSIX, preserving identity
@@ -140,8 +204,8 @@ PySide6 unavailable), plus syntax/compilation and document checks. See the
 for the commands, reports and limits. No live provider request was made;
 mathematical usefulness remains pending.
 
-This completes the authorized association-editing increment; no further bounded
-implementation is activated by this handoff. There is no deletion/garbage-collection
+This completed the association-editing increment. The later manual Markdown
+overview increment is documented in the active handoff above. There is no deletion/garbage-collection
 or cross-machine state synchronization yet. The full graph increment still
 requires a representation that actually supplies scoped joint-premise inferences
 and witnesses; declaration maps and tactic context membership do not supply them.
@@ -156,9 +220,10 @@ Outlines may cross source boundaries and need not form a strict hierarchy;
 Lean formalization is optional. The accepted requirement is recorded in
 [the roadmap](../CODEX_PLAN.md#deferred-mathematical-outlines-at-multiple-scales).
 
-Implementation is deferred to future bounded increments. This entry does not
-expand the current offline source-region reader or claim delivered capability.
-Preserve this roadmap reference when updating the active handoff.
+Only the first manual Markdown overview/reference increment is now implemented;
+the active handoff above defines its bounds. Remaining broader capability is
+deferred to future increments. Preserve this roadmap reference when updating
+the active handoff.
 
 ## Delivered VS Code migration — 2026-10-13–14
 

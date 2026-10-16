@@ -406,6 +406,13 @@ usefulness, proof correctness and human comprehension remain unassessed.
 
 ## Current boundaries
 
+The subsequent **0.5.0 first manual Markdown overview across sources** adds
+explicit references to these saved outlines and exact retained regions. Its
+[separate focused report](VS_CODE_OVERVIEW_VALIDATION.md) records new WSL
+Development Host behavior and reuses this completed 0.4.1 WSL/Pi deployment
+evidence. Installation/Pi checks were not repeated. This adds no inference graph
+or elimination witness and leaves mathematical usefulness unassessed.
+
 See [the reader contract](../vscode/README.md#offline-source-region-reader) for
 supported UTF-8 formats, private-state durability and size limits. PDF/OCR
 regions, notebook cells, rendered documents and non-UTF-8 sources are

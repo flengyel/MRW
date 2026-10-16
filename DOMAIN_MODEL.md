@@ -643,6 +643,18 @@ Added justifications and proposed repairs remain attributed reader material,
 never silent amendments to the retained argument. The full graph contract below
 remains planned; the reader only partially implements it.
 
+The first manual overview spanning several sources is an ordinary Markdown
+work artifact containing reader synthesis and explicit saved-outline references.
+It may concern a subject, book, monograph, article, section or argument without
+a strict hierarchy. These reader-authored references are navigation data, not
+source-published `SourceReference` records or verified dependencies. Identity
+binds workspace/private-store scope, outline UUID and retained source revision;
+region references additionally bind region UUID and an exact `VersionedSpan`.
+Annotation edits leave that identity valid. A changed region association is
+reported while its originally referenced retained passage stays accessible.
+No global mathematical-occurrence identity, new persistence schema or automatic
+synchronization is introduced. See [the reference contract](docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
+
 **Planned requirement, 2026-10-12.** A proof outline may retain selected claims
 and hide intervening graph vertices, with explanations and expansion to the
 original steps. Use existing statement, explanation, outline, and diagram

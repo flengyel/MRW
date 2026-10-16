@@ -11,3 +11,5 @@ __pycache__/
 /vscode/node_modules/
 /.codex-work/vscode-host*/
 /.codex-work/proof-outline-recon*/
+/.codex-work/overview-*/
+/.codex-work/overview-*.log

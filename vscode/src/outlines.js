@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 const { sourceSnapshot, digest } = require('./navigation');
+const { referenceAt } = require('./outlineReferences');
 
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
@@ -53,10 +54,10 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         + 'The live view and unsaved annotation text are kept; reload before further private writes.');
     }
     c.result = result;
-    if (!c.selected) c.selected = result.outline.regions.at(-1)?.id;
+    if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft,
-      writesBlocked: blockedStores.has(c.store) });
+      reference: c.reference, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
   }
@@ -67,12 +68,20 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     return send(c, result, clearDraft);
   }
-  async function openDocument(c, artifact = null) {
-    const result = await bridge(request(c, 'outline_document', { artifact }));
+  async function openDocument(c, artifact = null, pinned) {
+    const result = pinned || await bridge(request(c, 'outline_document', { artifact }));
     const uri = await show(artifact ? result.text : result.text.replace(/^\uFEFF/u, ''), artifact ? 'Retained-outline-artifact' : 'Retained-outline-source', undefined,
       { viewColumn: vscode.ViewColumn.One });
     if (!artifact) retainedViews.set(uri.toString(), { id: c.result.outline.id, revision: result.source_revision,
       textRevision: digest(normalize(result.text)) });
+    if (pinned) {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || editor.document.uri.toString() !== uri.toString()) throw new Error('The retained view lost focus; follow the reference again.');
+      const range = new vscode.Range(...pinned.start, ...pinned.end);
+      if (!editor.document.validateRange(range).isEqual(range)) throw new Error('Referenced retained range is unavailable.');
+      editor.selection = new vscode.Selection(range.start, range.end);
+      editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    }
   }
   async function navigate(c, extra) {
     const result = await bridge(request(c, 'outline_navigation', { region: null, context: null, statement: false, ...extra }));
@@ -118,10 +127,11 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       await vscode.window.showErrorMessage(`MRW: ${error.message}`);
     } finally { await c.panel.webview.postMessage({ type: 'idle' }); }
   }
-  async function display(result, store, root) {
+  async function display(result, store, root, reference = null) {
     if (result.blocked) { blockedStores.add(store); throw new Error(`Outline publication failed: ${result.write_error}. Reload before further private writes.`); }
     const id = result.outline.id;
     let c = panels.get(id);
+    if (c && (c.store !== store || c.root !== root)) throw new Error('This outline identity is already open in a different private-storage scope. Close that reader before opening this reference.');
     if (!c) {
       // Restart can leave a stale webview tab focused in the research group.
       // Beside would then keep creating additional empty editor groups.
@@ -138,6 +148,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       // Inline the nonce script so offline WSL use needs no resource fetch.
       panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'));
     } else c.panel.reveal(c.panel.viewColumn);
+    c.reference = reference;
+    if (reference) c.selected = reference.region;
     active = id;
     await send(c, result);
     return c;
@@ -147,6 +159,60 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for private outlines.');
     return { root, store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`) };
   }
+  async function markdown() {
+    const editor = vscode.window.activeTextEditor, document = editor?.document;
+    if (!document || document.languageId !== 'markdown' || !['file', 'untitled'].includes(document.uri.scheme)) {
+      throw new Error('Focus an ordinary Markdown document in this workspace.');
+    }
+    if (document.uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(document.uri)) {
+      throw new Error('The Markdown document must belong to the current workspace.');
+    }
+    const location = await storage(editor);
+    if (document.uri.scheme === 'file') {
+      const relative = path.relative(location.root, await fs.realpath(document.uri.fsPath));
+      if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+        throw new Error('The Markdown document resolves outside this workspace.');
+      }
+    }
+    return { editor, ...location };
+  }
+  register('mrw.insertOutlineReference', () => locked(async () => {
+    const { editor, store, root } = await markdown();
+    const document = editor.document, version = document.version, selection = editor.selection;
+    const listed = await bridge({ method: 'outline_list', store, project_root: root });
+    if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
+    const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path),
+      description: `${o.path} · ${o.revision.slice(0, 12)}`, id: o.id })), { placeHolder: 'Insert reference to this saved source outline' });
+    if (!outline) return;
+    const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
+    const target = await vscode.window.showQuickPick([{ label: 'Whole retained source outline', region: null },
+      ...loaded.outline.regions.map(r => ({ label: r.title,
+        description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col} (scalar columns)`, region: r.id }))],
+    { placeHolder: 'Choose the whole outline or an exact saved region' });
+    if (!target) return;
+    const result = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id,
+      revision: loaded.revision, region: target.region });
+    if (vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
+      throw new Error('Markdown or cursor changed during selection; no reference was inserted.');
+    }
+    if (!await editor.edit(edit => edit.insert(selection.active, result.markdown), { undoStopBefore: true, undoStopAfter: true })) {
+      throw new Error('VS Code could not insert the outline reference.');
+    }
+    return result;
+  }));
+  register('mrw.followOutlineReference', () => locked(async () => {
+    const { editor, store, root } = await markdown();
+    const document = editor.document, version = document.version, selection = editor.selection;
+    const line = document.getText().split(/\r\n|\r|\n/)[selection.active.line] || '';
+    const reference = referenceAt(line, selection.active.character);
+    const result = await bridge({ method: 'outline_follow_reference', store, project_root: root, reference });
+    if (vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
+      throw new Error('Markdown or cursor changed during navigation; follow the reference again.');
+    }
+    const c = await display(result, store, root, result.reference);
+    if (result.document) await openDocument(c, null, result.document);
+    return result.reference;
+  }));
   async function selection(c) {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.selection.isEmpty) throw new Error('Select a nonempty source region in the original or retained text.');
@@ -264,6 +330,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
   return () => [['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
+    ['Insert outline reference…', 'mrw.insertOutlineReference'], ['Follow outline reference at cursor', 'mrw.followOutlineReference'],
     ...(panels.has(active) ? [['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
       ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];

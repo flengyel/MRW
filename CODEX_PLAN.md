@@ -38,6 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
+| Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -415,7 +416,13 @@ that proof. A smaller graph alone supplies no evidence of mathematical benefit.
 
 ### Deferred mathematical outlines at multiple scales
 
-**Status, 2026-10-14:** accepted product requirement; implementation deferred.
+**Status, 2026-10-16:** the first manual overview increment is activated and
+implemented in VS Code 0.5.0: ordinary Markdown with readable references to
+existing saved outlines and exact retained source regions. The reference
+identity/behavior contract is in
+[PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
+See [the scoped validation report](docs/VS_CODE_OVERVIEW_VALIDATION.md) for results
+and limits. Other broader outline capabilities remain pending.
 
 Support mathematical outlines of subjects, bodies of literature, books,
 monographs, articles, sections, and individual arguments, including
@@ -429,9 +436,10 @@ their question. Preserve source locations and distinguish source assertions,
 proposed connections, reader synthesis, and any checking evidence.
 Formalization is optional.
 
-This is a requirement for future bounded increments. It does not expand the
-current offline source-region reader, authorize automatic corpus ingestion,
-or claim an implemented outlining capability. The proof-outline requirement
+Only the manual Markdown reference increment is delivered here. Automatic
+overview generation, discovery, cross-host transfer/synchronization and broader
+overview tooling require future bounded increments. No automatic corpus
+ingestion is authorized. The proof-outline requirement
 and its joint-premise, source-fidelity, and expansion obligations remain in
 force. Keep this requirement in the roadmap and reference it from subsequent
 continuation handoffs.

@@ -1,0 +1,34 @@
+{
+  "node": {
+    "tests": 36,
+    "passed": 36
+  },
+  "python": {
+    "tests": 319,
+    "passed": 248,
+    "skipped": 71,
+    "skip_reasons": {
+      "Qt opt-in unavailable": 58,
+      "Task prohibits compiler/checker calls": 12,
+      "Unavailable authorized /mnt/c project parent": 1
+    }
+  },
+  "syntax_and_compilation": true,
+  "live_provider_calls": 0,
+  "compiler_checker_calls": 0,
+  "installation_validation_repeated": false,
+  "pi_repeated": false,
+  "pi_rationale": "No SSH/ARM-specific implementation changes or observed regression; user explicitly requested reuse of deployment evidence",
+  "prior_deployment_commit": "b776368",
+  "new_behavior_host": "Windows VS Code 1.141.2 / WSL Debian Development Host",
+  "manual_use": "Not independently assessed; user supplied workspace trust, test actions scripted",
+  "development_host_scope": "Staged development manifest activates a test bootstrap; production JS and bundled Python bytes match checkout. Real commands, editor undo/redo, reader panels, bridge and persisted storage; chooser responses scripted. No installed-0.5.0 acceptance claim.",
+  "setup_corrections": [
+    "Initial workspace-trust gate stopped before outline creation; user trusted the folder; focused host launch used transient --disable-workspace-trust test flag without editing user settings",
+    "An initial focused test expected changed-or-unavailable instead of the correct missing status for a deleted source; assertion corrected and focused workflow rerun successfully",
+    "Initial broad Python runner did not propagate PYTHONPATH to subprocesses; corrected runner and all eligible regressions passed",
+    "Sandboxed Node/npm tasks stalled; approved outside-sandbox runs completed"
+  ],
+  "focus": "After user cautioned about focus, no more keyboard automation was used. Normal close/reopen was announced. Passive capture skipped because the test window was not foreground; no successful visible-capture acceptance is claimed.",
+  "mathematical_usefulness": "Unassessed"
+}

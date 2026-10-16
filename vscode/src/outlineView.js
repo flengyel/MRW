@@ -6,7 +6,7 @@ const root = document.getElementById('reader');
 const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail'];
 const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
-let model, selected, filter = '', busy = false, blocked = false, error = '';
+let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 const drafts = new Map();
 const submittedDrafts = new Map();
 const label = value => value.replace(/_/g, ' ');
@@ -107,6 +107,7 @@ function render() {
   el('p', `${o.source.path} · SHA-256 ${o.source.revision}`, root, 'muted');
   el('p', `Original source: ${o.source_status}. Selections refer to the retained revision.`, root,
     o.source_status === 'unchanged' ? 'muted' : 'warning');
+  if (reference) el('p', reference.notice, root, reference.status === 'changed or removed' ? 'warning' : 'muted').dataset.reference = 'true';
   if (o.retained_error) el('p', `Retained source unavailable: ${o.retained_error}. No source text was guessed.`, root, 'warning');
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
   if (blocked) el('p', 'Private writes are blocked. Keep unsaved annotation text and reload the host before further writes.', root, 'warning');
@@ -185,7 +186,7 @@ function render() {
 window.addEventListener('message', event => {
   const value = event.data;
   if (value.type === 'outline') {
-    model = value.model; selected = value.selected; blocked = !!value.writesBlocked; busy = false; error = '';
+    model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
       // clear only the submitted draft, not newer typing in the same form.
@@ -193,6 +194,7 @@ window.addEventListener('message', event => {
       submittedDrafts.delete(value.clearDraft);
     }
     api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();
+    if (reference) root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
   } else if (value.type === 'error') { error = value.message; blocked = !!value.writesBlocked; busy = false; render(); }
   else if (value.type === 'idle') { busy = false; controls(); }
 });
