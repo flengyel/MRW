@@ -39,6 +39,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
 | Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
+| Obsidian companion navigation | 0.6.0: copy external outline/passage links; explicitly associate, open, replace and remove existing-note URLs; independent workspace routing and private pinned associations | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -57,6 +58,22 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Obsidian companion increment — 2026-10-17
+
+The explicitly requested bounded navigation bridge is implemented in extension
+0.6.0 over the existing reader and Python reference resolver. Read
+[the workflow](docs/OBSIDIAN_WORKFLOW.md) and
+[actual checks and limits](docs/OBSIDIAN_VALIDATION.md).
+Obsidian supplies existing mathematical notes, rendering, links and attachments,
+including references to handwritten work; MRW supplies source outlines and exact
+retained passages. Neither note conversion nor LaTeX transcription is required.
+Private associations are navigation records, not proof evidence. Keep stable
+reference identity separate from workspace/remote routing. There is no custom
+Obsidian plugin, server, synchronization, indexing or automatic note rewriting.
+The Euclid material is only a navigation fixture. No further exercise or study
+session gates delivery. Interoperability and mathematical usefulness remain
+separate evaluations; the latter is unassessed by this increment's checks.
 
 ### Justification and distinct benefits
 

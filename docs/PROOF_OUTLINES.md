@@ -207,6 +207,24 @@ authority credential or universal identity for mathematical occurrences.
 Automatic generation, source discovery, cross-host synchronization, general
 overview tooling, inference graphs and vertex elimination remain pending.
 
+## Obsidian companion navigation — 2026-10-17
+
+Version 0.6.0 wraps the existing `mrw-outline:v1` reference in a standard VS Code
+extension URI. The permanent payload contains the unchanged reference plus
+separate project/workspace routing, never a transient window ID or cached
+external callback. The original parser, scope validation, resolver and reader
+remain authoritative. Changed/removed region associations still open their
+original pinned range. Ordinary Markdown labels use a bounded source title and
+locator rather than diagnostic identities.
+
+Explicit Obsidian note associations are stored separately in a bounded private
+mutable sidecar using existing publication rules. They bind the exact reference,
+so a changed range does not redirect an earlier note association. Notes, sources,
+evidence and explanations are not copied or rewritten by navigation. Wrong
+workspace routing is rejected before resolution; a recovery action uses normal
+VS Code workspace opening and explicit clipboard navigation. No outline or
+proof status follows from a link. See [the guide](OBSIDIAN_WORKFLOW.md).
+
 ## Source-based illustration
 
 The pinned proof

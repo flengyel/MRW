@@ -80,6 +80,7 @@ async function harness(root, state = new Map()) {
       },
       onDidChangeActiveTextEditor(callback) { activeListener = callback; return disposable; },
       registerTreeDataProvider() { return disposable; },
+      registerUriHandler(handler) { api.uriHandler = handler; return disposable; },
       async showErrorMessage(message) { errors.push(message); },
       async showInformationMessage() {}, setStatusBarMessage() {},
       async showOpenDialog() { return opens.shift(); },
@@ -99,7 +100,7 @@ async function harness(root, state = new Map()) {
         closeListener(doc); doc.languageId = languageId; openListener(doc);
       }
       return doc;
-    } }, env: { async openExternal() { return true; } },
+    } }, env: { uriScheme: 'vscode', clipboard: { value: '', async writeText(value) { this.value = value; }, async readText() { return this.value; } }, async openExternal(value) { api.external = value; return true; } },
   };
   const extension = path.resolve(__dirname, '..');
   const context = { extensionPath: extension, storageUri: uri(path.join(root, '..', 'private-state')), subscriptions: [], workspaceState: {
@@ -715,4 +716,64 @@ test('Markdown reference insertion respects cancellation, editor changes, worksp
   await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /Markdown/); assert.equal(h.requests.length, calls);
   doc.languageId = 'markdown'; h.api.workspace.getWorkspaceFolder = () => undefined;
   await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /current workspace/);
+});
+
+
+test('companion commands work without an editor, preserve pins, and keep associations across reopen', async t => {
+  const root = await temporary(t), source = path.join(root, 'book α.txt'), raw = 'α😀 → β\nClaim.\nProof.';
+  await fs.writeFile(source, raw);
+  const h = await harness(root); h.focus(h.editor(h.document(source, raw)));
+  const created = await h.commands.get('mrw.createOutline')();
+  h.focus(undefined);
+  const markdown = await h.commands.get('mrw.copyOutlineLink')();
+  assert.match(markdown, /vscode:\/\/flengyel.theorem-terminal\/outline/);
+  assert.ok(!markdown.includes('SHA')); assert.ok(!markdown.includes('source\\:'));
+  h.inputs.push('obsidian://open?vault=Notes%20α&file=Math202610170001', 'Existing mathematical note');
+  await h.commands.get('mrw.associateObsidianNote')();
+  const restarted = await harness(root);
+  await restarted.commands.get('mrw.openObsidianNote')();
+  assert.equal(restarted.api.external.scheme, 'obsidian');
+  assert.equal(restarted.api.external.path, '/Notes α/Math202610170001');
+  assert.equal(await fs.readFile(source, 'utf8'), raw);
+  // The handler and clipboard command share the Python reference resolver.
+  restarted.api.env.clipboard.value = markdown;
+  await restarted.commands.get('mrw.openLinkFromClipboard')();
+  assert.ok(restarted.requests.some(r => r.method === 'outline_follow_reference'));
+  const rawUri = /\]\((.*)\)$/u.exec(markdown)[1];
+  let minimalSerialization;
+  await restarted.api.uriHandler.handleUri({ toString(skipEncoding) {
+    minimalSerialization = skipEncoding;
+    return skipEncoding ? rawUri : rawUri.replace('?v=1&target=', '?v%3D1%26target%3D');
+  } });
+  assert.equal(minimalSerialization, true);
+  const panel = restarted.panels[0];
+  await panel.receive({type:'manage_notes', region:null}); // cancelled replace prompt
+  assert.equal(created.outline.source.revision, navigation.digest(raw));
+  assert.deepEqual([...h.errors, ...restarted.errors], []);
+});
+
+test('external links refuse unrelated workspaces before private resolution and offer explicit recovery', async t => {
+  const root = await temporary(t), source = path.join(root, 'book.txt'); await fs.writeFile(source, 'Claim.');
+  const h = await harness(root); h.focus(h.editor(h.document(source, 'Claim.'))); await h.commands.get('mrw.createOutline')();
+  const markdown = await h.commands.get('mrw.copyOutlineLink')();
+  const other = await temporary(t), wrong = await harness(other);
+  wrong.api.env.clipboard.value = markdown;
+  await wrong.commands.get('mrw.openLinkFromClipboard')();
+  assert.ok(!wrong.requests.some(r => r.method === 'outline_follow_reference'));
+  const recovery = [];
+  wrong.api.commands.executeCommand = async (...args) => recovery.push(args);
+  wrong.endings.push('Copy Link and Open Workspace');
+  await wrong.commands.get('mrw.openLinkFromClipboard')();
+  const opened = recovery.find(r => r[0] === 'vscode.openFolder'); assert.ok(opened); assert.equal(opened[2], undefined);
+  assert.match(wrong.api.env.clipboard.value, /^vscode:/);
+  assert.deepEqual(wrong.errors, []);
+  let finishWarning, announceWarning;
+  const displayed = new Promise(resolve => { announceWarning = resolve; });
+  wrong.api.window.showWarningMessage = () => { announceWarning(); return new Promise(resolve => { finishWarning = resolve; }); };
+  const pending = wrong.commands.get('mrw.openLinkFromClipboard')();
+  await displayed;
+  await wrong.commands.get('mrw.copyOutlineLink')();
+  assert.match(wrong.errors.pop(), /No saved source outlines/);
+  finishWarning(undefined); await pending;
+  assert.deepEqual(wrong.errors, []);
 });

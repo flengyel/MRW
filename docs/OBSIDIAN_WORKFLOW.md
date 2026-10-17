@@ -1,0 +1,97 @@
+# Obsidian notes and MRW retained passages
+
+MRW 0.6.0 connects the existing Obsidian Zettelkasten to saved source outlines
+and exact retained passages. Obsidian owns note editing, mathematical rendering,
+links and attachments. MRW owns its source reader and retained material.
+Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
+references from the Obsidian note. No LaTeX transcription is required.
+
+## Link a note to an outline or passage
+
+1. In **Obsidian**, open the existing note you want to return to. Press **Ctrl+P**
+   and run **Copy Obsidian URL for current file**. Here “current file” means the
+   note open in Obsidian. Its URL is an address such as
+   `obsidian://open?vault=Zettelkasten&file=NOTE_ID`; it contains no note prose.
+2. In **MRW's source reader**, click **Associate Obsidian note…** in the outline
+   toolbar or in the desired passage's card. Paste that URL and enter a short
+   note title or ID. This associates that Obsidian note with that MRW target.
+3. Click **Open Obsidian note** in the same toolbar/card to return to the note.
+   Several associated notes produce a readable chooser. **Replace / remove
+   note link…** changes only the association. The **Associated Obsidian notes**
+   section also exposes links to earlier pinned passages after a range changes.
+
+An Obsidian URL is not copied note text. Existing notes keep their immutable IDs
+matching filenames, separate editable titles, YAML front matter, `[[ID]]`
+links, `SEE ALSO` and `References`. No MRW note format or conversion is needed.
+The [Zettel specification](https://github.com/flengyel/Zettel) and
+[templates](https://github.com/flengyel/Zettel/tree/main/templates) remain the
+companion conventions, not a location from which MRW discovers a private vault.
+
+## Put a return link in the Obsidian note
+
+1. In MRW, click **Copy link for Obsidian** on the whole outline or passage.
+   Alternatively run **MRW: Copy Outline or Passage Link…** from the Command
+   Palette and choose an existing saved outline and target. No Markdown editor
+   or cursor position is required.
+2. Paste the ordinary Markdown link into your Obsidian note, for example under
+   **References**, using Obsidian's normal editing and saving.
+3. Click the link in Obsidian's reading view, or Ctrl+click while editing. Permit
+   Windows to open VS Code if prompted. MRW opens the saved reader; a passage
+   link also selects the pinned passage in a read-only retained-source view.
+
+## Workspace routing and recovery
+
+The link contains a stable `mrw-outline:v1` reference and a separate workspace
+address. WSL normally uses the distribution name and saved folder/workspace
+path. For SSH, set **MRW: Navigation Workspace URI** in Remote settings to that
+folder or saved `.code-workspace` file's `vscode-remote://ssh-remote+HOST/…`
+address. Save an untitled multi-folder workspace before copying a link.
+These addresses contain no transient window ID or callback token.
+
+VS Code can deliver a link to the topmost window. If that window has a different
+workspace, MRW does not resolve the private target there. Choose **Copy Link and
+Open Workspace**, then run **MRW: Open Link from Clipboard** in the intended
+workspace. If that window has no MRW handler, open the intended WSL workspace
+yourself, copy the Markdown link or its complete URL from Obsidian, and use the
+same command. Standard VS Code trust and remote-connection prompts still apply.
+Opening the intended workspace uses VS Code's normal window selection.
+If the warning disappears, open VS Code's **Notifications** to find its recovery
+action. A hidden routing warning does not block other MRW commands.
+
+Unavailable private storage or a different private-store scope produces an
+error: reopen the original workspace/profile with its original private state.
+Do not recreate targets or reset workspace storage. Missing/changed original
+sources do not prevent access to retained bytes. Region links keep their old
+range when the reading association changes; MRW reports the change explicitly.
+
+Only supplied `obsidian://open` URLs with exactly `vault` and `file` are supported.
+The vault must be a name or ID, and the target a whole note; path-form vaults,
+heading/block selectors and names containing `?` or `#` are outside this increment.
+Dispatch uses Obsidian's documented equivalent `obsidian://vault/…` path form,
+so encoded punctuation in a name cannot become a writing query parameter.
+Writing, callback, search and other actions/parameters are rejected. Windows/Obsidian
+handles note existence and application availability; successful URL dispatch
+does not acknowledge that a note opened. If Obsidian reports a missing note or
+vault, open the intended existing note there, copy its current Obsidian URL,
+and replace the association. MRW does not search for a replacement.
+
+## Persistence and limits
+
+Associations survive normal close/reopen in private
+`outlines-…/OUTLINE_ID/obsidian-links.json` beside the existing outline state.
+Only bounded labels, Obsidian URLs and exact MRW references are stored: at most
+64 associations and 128 KiB per outline. Writes use exact-previous-byte checking,
+the existing publication lock, atomic replacement and directory synchronization.
+Failed/uncertain publication blocks further outline/association writes until
+host reload. Removing an association retains an empty state file; it deletes
+neither note nor retained material. Same-project concurrent hosts remain unsupported.
+
+**Copying or synchronizing a Markdown note does not transfer its MRW private
+targets.** There is no vault indexing, automatic rewriting, content
+synchronization, Obsidian plugin or background server. The existing extension
+identity/storage and legacy `mrw-outline:v1` links remain compatible. Native
+Windows backend portability remains deferred. Navigation initiates no model,
+compiler, notebook, container or mathematical analysis.
+
+See [validation and the tested configuration](OBSIDIAN_VALIDATION.md).
+Interoperability does not establish mathematical usefulness.

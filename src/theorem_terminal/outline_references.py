@@ -42,6 +42,15 @@ def markdown_label(value):
     return ''.join('\\' + c if c in string.punctuation else c for c in value)
 
 
+def short_label(store, source, span):
+    bib = store.state['source']['bibliography']
+    parts = [(bib['title'] or source.path.name)[:100]]
+    if bib['locator']:
+        parts.append(bib['locator'][:60])
+    parts.append(locator(span) if span else 'source outline')
+    return markdown_label(' · '.join(parts))
+
+
 def reference_action(request):
     store = OutlineStore(request['store'], request['project_root'])
     following = request['method'] == 'outline_follow_reference'
@@ -76,7 +85,7 @@ def reference_action(request):
                   f"Overview reference: {locator(ref['span'])}. " +
                   ('Region association unchanged; exact retained passage opened.' if status == 'unchanged' else
                    'Region association changed or removed; the originally referenced retained passage is opened, not the current region range.'))
-        result['reference'] = dict(status=status, notice=notice,
+        result['reference'] = dict(uri=request['reference'], label=short_label(store, source, ref['span']), status=status, notice=notice,
                                    region=ref['region'] if status == 'unchanged' else None)
         result['document'] = document
         return result
@@ -93,4 +102,5 @@ def reference_action(request):
     parts.append('source: ' + str(source.path))
     parts.append(f"{region['title']}; {locator(region['span'])}" if region else 'whole retained source outline')
     parts.append('retained SHA-256 ' + source.revision[:12])
-    return dict(reference=uri, markdown=f"[{markdown_label(' · '.join(parts))}]({uri})")
+    label = short_label(store, source, region['span'] if region else None)
+    return dict(reference=uri, label=label, markdown=f"[{markdown_label(' · '.join(parts))}]({uri})")

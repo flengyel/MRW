@@ -63,6 +63,17 @@ result of task evidence; formal material made explicitly optional.
 
 ## Scope
 
+The implemented Obsidian companion uses small private mutable navigation
+associations, separate from source outlines, retained quotations, attributed
+annotations and all warrant records. Each association names an exact existing
+scoped outline/region reference, an explicit Obsidian open URL and a short label.
+It stores no note prose or vault copy. Replacing/removing the association does
+not alter either endpoint. A note's immutable Zettel ID and editable title keep
+their existing roles; no MRW conversion is required. Workspace/remote routing
+is separate from stable target identity. A navigation link establishes no
+dependency, verification or human judgment. See
+[the companion contract](docs/OBSIDIAN_WORKFLOW.md).
+
 For a body of mathematics under study, the model must represent:
 
 - the structure of the subject, as sources present it;

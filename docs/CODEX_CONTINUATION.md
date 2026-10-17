@@ -1,4 +1,65 @@
-# Codex continuation: MRW source work and companion notebooks
+# Codex continuation: MRW source work and companion notes
+
+## Obsidian companion navigation — 2026-10-17
+
+The user-requested bounded bridge is implemented in extension **0.6.0**, over
+one extension and the existing Python reader/reference/private-state services.
+Read [the command/click guide](OBSIDIAN_WORKFLOW.md) and
+[the validation record](OBSIDIAN_VALIDATION.md) for actual desktop outcomes,
+package identity, regressions and remaining checks. Keep interoperability
+separate from mathematical usefulness, which this increment does not establish.
+
+Obsidian supplies existing notes, mathematical rendering, links and attachments,
+including references to handwritten work. No derivation transcription or note
+conversion is required. Zettel is the specification/tooling repository for the
+private vault; its checkout is not the vault. Its current README and three
+supplied templates were inspected at `fdce8d7`. Preserve immutable note IDs,
+editable titles, YAML, `[[ID]]`, `SEE ALSO` and `References`.
+The user's local Windows vault is copied through Synctrayzor/Syncthing to a
+Raspberry Pi 5. Slow Obsidian startup is expected in this environment; allow
+time rather than classifying a loading screen as a failed MRW navigation.
+This does not change the private-target transfer limitation or authorize a
+new synchronization service or Pi acceptance campaign.
+
+Copy supports existing whole outlines and pinned retained regions without an
+active Markdown editor. Explicit note association/open/replacement/removal uses
+only validated Obsidian open URLs. Each association keeps its exact reference
+in a separate private mutable sidecar. Earlier pinned associations remain
+accessible after region edits. Existing outlines, annotations, retained sources,
+evidence and legacy `mrw-outline:v1` links remain compatible. Workspace/host
+routing is separate from target identity; wrong windows offer a recovery action
+and never resolve against an unrelated project. No transient window/callback
+identity, vault indexing, sync, plugin or background server is added.
+
+The user has added authoritative commentary to
+`/home/flengyel/Jupyter/mrw-sagepod-study/overview.md`; preserve the actual saved
+bytes, its notebook/source and private outlines. They remained in active use
+while this increment was checked, so do not restore an earlier snapshot or
+reconstruct them from chat text. The Euclid material serves only as a navigation
+fixture. Do not add exposition, exercises or a preliminary study ceremony.
+The separate temporary test note is explicitly identified in the validation
+record. Do not modify unrelated vault contents or relocate/copy the vault.
+
+The user's first desktop return-link click exposed a VS Code URI serialization
+defect: default `Uri.toString()` escapes query delimiters. The handler now uses
+minimal serialization for its strictly bounded base64url payload, with regression
+coverage. Association prompts now explicitly identify the note open in Obsidian
+and explain its URL. Record later checks accurately rather than treating the
+initial failed click as acceptance. Existing R3, Pi and SagePod acceptance
+campaigns need no repetition. No live provider call or Marketplace publication
+is authorized by this handoff.
+
+Final regressions: 42 Node tests passed; 326 Python tests ran with 59 documented
+skips. The installed Windows/WSL check observed an actual Obsidian click opening
+the exact retained selection and an unrelated foreground workspace refusing
+resolution with a recovery message. Final restart restored the same saved URI
+in VS Code; Obsidian loaded the correct note after its expected slow startup,
+and the final installed reader's note action was exercised again. A repeat
+Obsidian pointer click after restart did not establish a new confirmed selection.
+Actual invocation of the recovery button sequence also remains unobserved.
+Do not describe these remaining desktop checks as passed, and do
+not make delivery depend on another mathematical session. The final package
+and precise evidence/limitations are in the validation record linked above.
 
 ## Completed handoff — SagePod companion study notebook, 2026-10-16
 

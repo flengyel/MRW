@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -259,6 +259,36 @@
         "title": "Follow Outline Reference at Cursor",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.copyOutlineLink",
+        "title": "Copy Outline or Passage Link\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.openLinkFromClipboard",
+        "title": "Open Link from Clipboard",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.associateObsidianNote",
+        "title": "Associate Obsidian Note\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.openObsidianNote",
+        "title": "Open Associated Obsidian Note\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.manageObsidianNotes",
+        "title": "Replace or Remove Obsidian Association\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
       }
     ],
     "views": {
@@ -355,6 +385,12 @@
           "default": "",
           "scope": "machine",
           "description": "OpenAI model identifier. If empty, Ask prompts for this request. Credentials come only from OPENAI_API_KEY on the extension host."
+        },
+        "mrw.navigationWorkspaceUri": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Optional stable workspace routing URI for companion links. File URI on Linux or vscode-remote://ssh-remote+HOST/path. WSL uses WSL_DISTRO_NAME automatically. This must name the current folder or saved workspace file; target identity remains independently scoped."
         }
       }
     }
@@ -363,11 +399,14 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/theorem_terminal/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0"
-  }
+  },
+  "activationEvents": [
+    "onUri"
+  ]
 }

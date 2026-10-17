@@ -129,6 +129,36 @@ the smaller window. No production UX change or mathematical-use claim follows
 from this validation. Details and remaining limits are in the
 [host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 
+### Obsidian companion navigation — 2026-10-17
+
+The source reader offers **Copy link for Obsidian** at outline and region scope.
+**MRW: Copy Outline or Passage Link…** also works without an active Markdown
+editor. Ordinary Markdown labels use the source title and locator; target
+identifiers and routing remain in the URI. Clicking in Obsidian opens the saved
+reader and, for a region, selects the original pinned retained passage.
+
+To associate a note, open the intended note in Obsidian and use its **Copy
+Obsidian URL for current file** command. “Current file” refers to the note open
+in Obsidian. In the MRW outline toolbar or desired region card, **Associate
+Obsidian note…** stores that URL and a short label. **Open Obsidian note** uses
+a readable chooser for multiple notes. Replacement/removal changes only the
+navigation record; earlier pinned passage associations remain accessible.
+Obsidian owns notes, rendering and ordinary attachments, including handwritten
+work. Existing Zettel notes need no conversion or derivation transcription.
+
+An external link carries separate workspace routing and existing scoped
+`mrw-outline:v1` identity. A receiving window must match the routing and project
+before the Python resolver checks its private scope. A wrong window offers
+**Copy Link and Open Workspace**, followed by **MRW: Open Link from Clipboard**;
+it never interprets the reference against an unrelated project. Missing private
+state and malformed links fail without replacement guesses. Obsidian handles
+missing notes; MRW explains how to replace their association. Dispatch success
+does not confirm note existence. Existing retained access survives changed or
+missing original sources. Navigation performs no mathematical analysis or tool
+execution. Copying a note transfers no private targets. See
+[the workflow and persistence limits](docs/OBSIDIAN_WORKFLOW.md) and
+[validation](docs/OBSIDIAN_VALIDATION.md).
+
 ## 1. Design principle
 
 The interface supports doing and studying mathematics. It does not require a

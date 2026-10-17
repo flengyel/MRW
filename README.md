@@ -44,6 +44,17 @@ and [focused validation](docs/VS_CODE_OVERVIEW_VALIDATION.md). This is reader
 synthesis and navigation; remaining broader outline capabilities and
 mathematical usefulness remain pending.
 
+Extension **0.6.0** adds navigation between MRW and the existing Obsidian
+Zettelkasten: copy an ordinary Markdown link to a saved outline or exact
+retained passage, and explicitly associate/open existing notes using their
+Obsidian URLs. Associations live in private mutable navigation records;
+Obsidian owns note editing, mathematical rendering, links and attachments.
+Handwritten work can remain in scans or ordinary references without LaTeX
+transcription. Existing Zettel notes need no conversion. See
+[the command and click guide](docs/OBSIDIAN_WORKFLOW.md) and
+[validation/limits](docs/OBSIDIAN_VALIDATION.md). Copying notes transfers no MRW
+private targets. Interoperability establishes no mathematical usefulness.
+
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an

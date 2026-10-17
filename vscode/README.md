@@ -53,6 +53,46 @@ This companion workflow adds no MRW runtime or VSIX. Opening/restoring MRW start
 no container and executes no notebook cells. Notebook-cell assistance remains
 pending. See [actual checks and limits](../docs/SAGEPOD_NOTEBOOK_VALIDATION.md).
 
+## Obsidian companion notes
+
+Version **0.6.0** connects the existing Obsidian Zettelkasten with saved source
+outlines and exact retained passages. Click **Copy link for Obsidian** in the
+reader, or run **MRW: Copy Outline or Passage Link…**, then paste the ordinary
+Markdown link into the Obsidian note. Following it opens the reader without
+requiring an active Markdown editor or cursor inside a reference.
+
+For the reverse direction, open the desired note **in Obsidian** and run its
+**Copy Obsidian URL for current file** command. In MRW, use **Associate Obsidian
+note…** on the desired outline/region and paste that note's URL and short label.
+**Open Obsidian note** returns there. Multiple notes offer a readable choice;
+**Replace / remove note link…** changes only the association. Note URLs refer to
+notes rather than containing their prose. Existing IDs, titles, YAML, `[[ID]]`,
+`SEE ALSO` and `References` remain unchanged. Handwritten derivations and their
+scans/references can remain in the ordinary Obsidian attachment workflow.
+
+The Command Palette also offers **MRW: Associate Obsidian Note…**, **MRW: Open
+Associated Obsidian Note…**, **MRW: Replace or Remove Obsidian Association…** and
+**MRW: Open Link from Clipboard**. These choose an existing saved outline/region
+without requiring a text editor. The latter also accepts a whole copied Markdown
+link and provides explicit recovery after a wrong window receives an extension URI.
+
+Workspace/host routing is separate from the existing private-store scope and
+revision/range-pinned `mrw-outline:v1` identity. WSL routing uses the distribution
+name; SSH requires **MRW: Navigation Workspace URI** in Remote settings. Wrong
+windows offer **Copy Link and Open Workspace**, then explicit clipboard opening
+in the intended workspace. No transient window ID/cached callback identifies a
+target. Note associations use a separate bounded `obsidian-links.json` sidecar
+with the existing mutable-file lock, previous-byte checks and durability rules.
+Changed region ranges do not redirect earlier note associations.
+
+**Copying or synchronizing notes does not transfer MRW private targets.** There
+is no Obsidian plugin, server, indexing, note rewriting or content sync. Native
+Windows backend portability remains deferred. URL dispatch cannot confirm a
+note exists; Obsidian reports missing notes and the reader explains association
+replacement. See [the short click guide](../docs/OBSIDIAN_WORKFLOW.md) and
+[configuration, desktop evidence and limits](../docs/OBSIDIAN_VALIDATION.md).
+Interoperability establishes no mathematical usefulness.
+
 ## Manual Markdown overviews across sources
 
 Version 0.5.0 provides the first manual overview spanning several sources. Write
@@ -249,8 +289,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.5.0.vsix
-sha256sum vscode/theorem-terminal-0.5.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.6.0.vsix
+sha256sum vscode/theorem-terminal-0.6.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -269,10 +309,10 @@ and entry ordering. UTC avoids host-timezone differences. Two builds with the
 recorded Node/npm/packager versions produced identical archive bytes; use those
 versions when reproducing the delivered SHA-256. Record the hash of the actual
 file. This procedure packages locally and does not publish to the Marketplace.
-The earlier 0.4.1 archive is preserved separately. Reproduce its recorded hash
+The earlier 0.5.0 and 0.4.1 archives are preserved separately. Reproduce its recorded hash
 from packaging revision `15ba6cd`, with its prior epoch `1792079077` and recorded
-tool versions, in a separate checkout. The new overview artifact and its focused
-checks are recorded in the overview validation report.
+tool versions, in a separate checkout. The companion artifact and its focused
+checks are recorded in [the Obsidian validation report](../docs/OBSIDIAN_VALIDATION.md).
 
 Open an ordinary window for the intended Linux workspace: local Linux, the
 chosen WSL distribution, or an SSH-connected Linux host. Choose **Extensions:
@@ -282,11 +322,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.5.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.6.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.5.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.6.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

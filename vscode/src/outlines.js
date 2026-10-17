@@ -4,6 +4,7 @@ const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 const { sourceSnapshot, digest } = require('./navigation');
 const { referenceAt } = require('./outlineReferences');
+const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require('./companionLinks');
 
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
@@ -54,10 +55,14 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         + 'The live view and unsaved annotation text are kept; reload before further private writes.');
     }
     c.result = result;
+    try {
+      c.notes = await bridge({ method: 'outline_notes', store: c.store, project_root: c.root, id: result.outline.id });
+      c.noteError = null;
+    } catch (error) { c.notes = null; c.noteError = error.message; }
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft,
-      reference: c.reference, writesBlocked: blockedStores.has(c.store) });
+      reference: c.reference, notes: c.notes?.links || [], noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
   }
@@ -120,6 +125,10 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
         else if (value.type === 'refresh') await send(c, await bridge({ method: 'outline_load', store: c.store, project_root: c.root, id: c.result.outline.id }));
+        else if (['copy_link', 'associate_note', 'open_note', 'manage_notes'].includes(value.type)) {
+          const target = await readerTarget(c, value);
+          await companionAction(value.type, c, target);
+        }
         else throw new Error('Unknown reader action.');
       });
     } catch (error) {
@@ -159,6 +168,129 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for private outlines.');
     return { root, store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`) };
   }
+  async function readerTarget(c, value) {
+    if (value.note) {
+      const note = c.notes?.links.find(n => n.id === value.note);
+      if (!note) throw new Error('Note association missing. Refresh the reader.');
+      return { reference: note.reference, label: note.label };
+    }
+    if (value.pinned) {
+      if (!c.reference?.uri) throw new Error('No originally linked passage is open.');
+      return { reference: c.reference.uri, label: c.reference.label };
+    }
+    return bridge(request(c, 'outline_reference', { region: value.region ?? null }));
+  }
+  async function chooseTarget() {
+    const { root, store } = await storage();
+    const listed = await bridge({ method: 'outline_list', store, project_root: root });
+    if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
+    const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path), description: o.path, id: o.id })),
+      { placeHolder: 'Choose an existing saved outline' });
+    if (!outline) return;
+    const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
+    const choice = await vscode.window.showQuickPick([{ label: 'Whole retained source outline', region: null },
+      ...loaded.outline.regions.map(r => ({ label: r.title, description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col}`, region: r.id }))],
+    { placeHolder: 'Choose outline or exact retained passage' });
+    if (!choice) return;
+    const target = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id, revision: loaded.revision, region: choice.region });
+    const c = await display(loaded, store, root);
+    return { c, target };
+  }
+  async function companionAction(action, c, target) {
+    if (action === 'copy_link') {
+      const uri = makeExternal({ workspace: workspaceRoute(vscode, c.root), project: c.root, reference: target.reference }, vscode.env.uriScheme);
+      const markdown = `[${target.label}](${uri})`;
+      await vscode.env.clipboard.writeText(markdown);
+      vscode.window.setStatusBarMessage('MRW link copied. Paste it into the Obsidian note.', 6000);
+      return markdown;
+    }
+    if (c.noteError) throw new Error(`Obsidian associations unavailable: ${c.noteError}. Refresh the reader; retained material remains accessible.`);
+    const previousNotes = c.notes;
+    const links = previousNotes.links.filter(n => n.reference === target.reference);
+    let existing;
+    if (action === 'open_note' || action === 'manage_notes') {
+      if (!links.length) throw new Error('No Obsidian note is associated with this exact target. Choose Associate Obsidian note… in the reader.');
+      existing = links.length === 1 ? links[0] : await vscode.window.showQuickPick(links.map(n => ({ ...n, description: n.url })), { placeHolder: 'Choose an associated Obsidian note' });
+      if (!existing) return;
+      if (action === 'open_note') {
+        // Revalidate stored URL through the core immediately before dispatch.
+        const fresh = await bridge({ method: 'outline_notes', store: c.store, project_root: c.root, id: c.result.outline.id });
+        const selected = fresh.links.find(n => n.id === existing.id && n.reference === target.reference && n.url === existing.url);
+        if (!selected) throw new Error('Note association changed or is missing. Refresh the reader and choose it again.');
+        if (!await vscode.env.openExternal(obsidianTarget(vscode, selected.url))) throw new Error('Obsidian could not open the URL. Start Windows Obsidian, then try Open Obsidian note again.');
+        vscode.window.setStatusBarMessage('Sent to Obsidian. If it reports a missing note/vault, replace this association using that note’s current Obsidian URL.', 12000);
+        return;
+      }
+    }
+    writable(c);
+    let choice = 'Replace association';
+    if (existing) choice = await vscode.window.showQuickPick(['Replace association', 'Remove association'], { placeHolder: existing.label });
+    if (!choice) return;
+    let url = null, label = null;
+    if (choice !== 'Remove association') {
+      url = await vscode.window.showInputBox({ prompt: 'In Obsidian, open the note to link and run “Copy Obsidian URL for current file”. Paste that URL here to link this MRW target.', value: existing?.url || '', ignoreFocusOut: true });
+      if (url === undefined) return;
+      label = await vscode.window.showInputBox({ prompt: 'Short title or ID of that Obsidian note (navigation label)', value: existing?.label || '', ignoreFocusOut: true });
+      if (label === undefined) return;
+    }
+    let result;
+    try {
+      result = await bridge({ method: 'outline_update_note', store: c.store, project_root: c.root, id: c.result.outline.id,
+        revision: previousNotes.revision, change: { id: existing?.id || null, reference: target.reference, url, label } });
+    } catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
+    if (result.blocked) { blockedStores.add(c.store); throw new Error(`Obsidian association publication failed: ${result.write_error}. Reload before further private writes.`); }
+    await send(c, c.result);
+  }
+  for (const [command, action] of [['mrw.copyOutlineLink', 'copy_link'], ['mrw.associateObsidianNote', 'associate_note'],
+    ['mrw.openObsidianNote', 'open_note'], ['mrw.manageObsidianNotes', 'manage_notes']]) {
+    register(command, () => locked(async () => { const picked = await chooseTarget(); if (picked) return companionAction(action, picked.c, picked.target); }));
+  }
+  async function openExternalLink(value) {
+    const target = parseExternal(value, vscode.env.uriScheme);
+    await bridge({ method: 'outline_parse_reference', reference: target.reference });
+    let location;
+    for (const folder of vscode.workspace.workspaceFolders || []) {
+      if (folder.uri.scheme === 'file' && await fs.realpath(folder.uri.fsPath) === target.project) {
+        location = await storage({ document: { uri: folder.uri } }); break;
+      }
+    }
+    if (!location || workspaceRoute(vscode, location.root) !== target.workspace) {
+      return { recovery: target.workspace, link: value };
+    }
+    const result = await bridge({ method: 'outline_follow_reference', ...{ store: location.store, project_root: location.root }, reference: target.reference });
+    const c = await display(result, location.store, location.root, result.reference);
+    if (result.document) await openDocument(c, null, result.document);
+    return result.reference;
+  }
+  async function followExternalLink(value) {
+    const result = await locked(() => openExternalLink(value));
+    if (result?.recovery) {
+      // A notification can hide without resolving its promise. Release the
+      // reader-action guard before waiting for the user's routing decision.
+      const choice = await vscode.window.showWarningMessage(`This MRW link belongs to ${result.recovery}. This window has not resolved its private target. `
+        + 'Choose Copy Link and Open Workspace, then run MRW: Open Link from Clipboard. Hidden warnings remain in Notifications.', 'Copy Link and Open Workspace');
+      if (choice === 'Copy Link and Open Workspace') {
+        await vscode.env.clipboard.writeText(result.link);
+        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(result.recovery));
+      }
+      return;
+    }
+    return result;
+  }
+  register('mrw.openLinkFromClipboard', async () => {
+    const value = (await vscode.env.clipboard.readText()).trim();
+    const match = /^\[(?:\\.|[^\\\]])*\]\(([^\s)]+)\)$/u.exec(value);
+    return followExternalLink(match ? match[1] : value);
+  });
+  context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: async uri => {
+    try {
+      if (!vscode.workspace.isTrusted) throw new Error('Open and trust the intended workspace before following the MRW link.');
+      // VS Code's default serializer escapes the whole query, including its
+      // '=' and '&' delimiters. Our payload is already restricted to base64url;
+      // preserve those delimiters when passing it to the strict URL parser.
+      await followExternalLink(uri.toString(true));
+    } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
+  } }));
   async function markdown() {
     const editor = vscode.window.activeTextEditor, document = editor?.document;
     if (!document || document.languageId !== 'markdown' || !['file', 'untitled'].includes(document.uri.scheme)) {
@@ -330,6 +462,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
   return () => [['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
+    ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
+    ['Associate Obsidian note…', 'mrw.associateObsidianNote'],
     ['Insert outline reference…', 'mrw.insertOutlineReference'], ['Follow outline reference at cursor', 'mrw.followOutlineReference'],
     ...(panels.has(active) ? [['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],

@@ -63,6 +63,16 @@ retained revision and exact range; changed associations never redirect earlier
 prose. VS Code owns overview editing, undo, recovery and preview. References
 create no checked dependency or proof status. Copying Markdown alone does not
 transfer private outlines or retained sources.
+The 0.6.0 Obsidian companion adds explicit external outline/passage links and
+private pinned note associations; read `docs/OBSIDIAN_WORKFLOW.md`. Obsidian owns
+its existing Zettel notes and attachments, including handwritten work. Store
+only URLs, labels and exact references, using existing mutable publication rules.
+Keep workspace routing separate from target identity; wrong windows must not
+resolve against unrelated private storage. Preserve legacy `mrw-outline:v1`
+links. No note conversion, vault indexing, automatic rewriting or synchronization
+is implemented. Treat the Euclid material only as a navigation fixture; no new
+exercise or study session gates this delivery. See `docs/OBSIDIAN_VALIDATION.md`
+for desktop results and limitations, separate from mathematical usefulness.
 Scoped actual-host checks use deterministic responses. Proof-outline vertex
 elimination remains planned. Follow the bounded migration handoff. Use Windows VS Code
 connected to a WSL2 checkout for Windows development; run Python and the
