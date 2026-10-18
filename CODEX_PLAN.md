@@ -39,7 +39,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
 | Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
-| Obsidian companion navigation | 0.6.0: copy external outline/passage links; explicitly associate, open, replace and remove existing-note URLs; independent workspace routing and private pinned associations | Not implemented |
+| Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -58,6 +58,18 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Reader usability patch — 2026-10-18
+
+Version 0.6.1 addresses the user's report that the helpful Zettelkasten bridge
+has unintuitive reader buttons. It clarifies copy/link/open/manage wording,
+groups whole-outline and passage actions, shows stored labels and empty states,
+and explains the two directions without automatic reverse links. Earlier pinned
+targets remain separate. Navigation, identifiers, source retention and private
+storage are unchanged. Read the workflow/validation links below for delivery
+and desktop checks. The user's report is evidence of practical benefit as
+reported; broader mathematical usefulness and quantitative savings remain
+unassessed. No new mathematical exercise or acceptance campaign is required.
 
 ### Obsidian companion increment — 2026-10-17
 

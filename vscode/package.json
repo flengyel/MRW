@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -274,19 +274,19 @@
       },
       {
         "command": "mrw.associateObsidianNote",
-        "title": "Associate Obsidian Note\u2026",
+        "title": "Link an Obsidian Note\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.openObsidianNote",
-        "title": "Open Associated Obsidian Note\u2026",
+        "title": "Open Linked Note in Obsidian\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.manageObsidianNotes",
-        "title": "Replace or Remove Obsidian Association\u2026",
+        "title": "Manage Linked Notes\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       }

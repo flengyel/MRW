@@ -53,6 +53,7 @@ def note_action(request):
             or not isinstance(value['links'], list) or len(value['links']) > 64):
         raise ValueError('Private Obsidian association identity, version or limit differs')
     seen = set()
+    targets = {}
     for item in value['links']:
         fields(item, {'id', 'reference', 'url', 'label'}, 'Obsidian association')
         identity(item['id'])
@@ -61,13 +62,16 @@ def note_action(request):
                 or ref['source'] != store.state['source']['revision']):
             raise ValueError('Private Obsidian association target differs')
         seen.add(item['id'])
+        # Read-only presentation metadata from the existing reference parser.
+        # This is not persisted and never supplies a navigation target.
+        targets[item['reference']] = dict(region=ref['region'], span=ref['span'])
         obsidian_url(item['url'])
         text(item['label'], 'note label', 640)
         if not item['label'].strip() or len(item['label']) > 160 or any(not c.isprintable() for c in item['label']):
             raise ValueError('Use a readable note label of at most 160 characters')
     result = dict(links=value['links'], revision=sha256(raw).hexdigest() if raw is not None else None)
     if request['method'] == 'outline_notes':
-        return result
+        return dict(**result, targets=targets)
     expected = request['revision']
     if expected is not None:
         revision(expected)

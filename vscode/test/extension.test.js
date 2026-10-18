@@ -734,6 +734,18 @@ test('companion commands work without an editor, preserve pins, and keep associa
   await restarted.commands.get('mrw.openObsidianNote')();
   assert.equal(restarted.api.external.scheme, 'obsidian');
   assert.equal(restarted.api.external.path, '/Notes α/Math202610170001');
+  restarted.inputs.push('obsidian://open?vault=Notes%20α&file=Math202610170002', 'Second saved label');
+  await restarted.commands.get('mrw.associateObsidianNote')();
+  const originalPick = restarted.api.window.showQuickPick;
+  let noteChoices;
+  restarted.api.window.showQuickPick = async options => {
+    if (options.some(o => o.url)) { noteChoices = options; return options.find(o => o.label === 'Second saved label'); }
+    return options[0];
+  };
+  await restarted.commands.get('mrw.openObsidianNote')();
+  assert.deepEqual(noteChoices.map(o => o.label), ['Existing mathematical note', 'Second saved label']);
+  assert.equal(restarted.api.external.path, '/Notes α/Math202610170002');
+  restarted.api.window.showQuickPick = originalPick;
   assert.equal(await fs.readFile(source, 'utf8'), raw);
   // The handler and clipboard command share the Python reference resolver.
   restarted.api.env.clipboard.value = markdown;

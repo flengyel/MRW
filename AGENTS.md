@@ -73,6 +73,11 @@ links. No note conversion, vault indexing, automatic rewriting or synchronizatio
 is implemented. Treat the Euclid material only as a navigation fixture; no new
 exercise or study session gates this delivery. See `docs/OBSIDIAN_VALIDATION.md`
 for desktop results and limitations, separate from mathematical usefulness.
+Patch 0.6.1 clarifies reader labels, link directions and exact target scopes.
+Show the stored note label without inspecting the vault for titles. Preserve
+current versus earlier pinned ranges. The user reports practical benefit from
+the Zettelkasten integration; record that report separately from broader
+mathematical-usefulness claims.
 Scoped actual-host checks use deterministic responses. Proof-outline vertex
 elimination remains planned. Follow the bounded migration handoff. Use Windows VS Code
 connected to a WSL2 checkout for Windows development; run Python and the

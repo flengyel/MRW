@@ -1,0 +1,13 @@
+{
+  "check": "actual wrong-workspace recovery",
+  "stages": [
+    "Same saved fixture URI dispatched with wrong test workspace foregrounded",
+    "Recovery button invoked through actual Windows accessibility action",
+    "Intended workspace window observed",
+    "Exact saved URI observed in clipboard",
+    "MRW: Open Link from Clipboard invoked through the actual Command Palette"
+  ],
+  "completed": false,
+  "failure": "You cannot call a method on a null-valued expression.",
+  "observed_gate": "Intended workspace entered Restricted Mode. Trust controls were attempted but no trust change was observed. Final clipboard-follow selection remains unconfirmed. No recovery sequence repeated."
+}

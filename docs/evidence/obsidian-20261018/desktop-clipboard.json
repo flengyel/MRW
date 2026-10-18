@@ -1,0 +1,9 @@
+{
+  "check": "clipboard-follow after fixture trust",
+  "stages": [
+    "Same saved URI restored to clipboard after the previously observed recovery copy",
+    "MRW: Open Link from Clipboard invoked in the intended trusted workspace"
+  ],
+  "completed": false,
+  "failure": "Retained-source editor not exposed within bounded observation period"
+}

@@ -1,5 +1,47 @@
 # Codex continuation: MRW source work and companion notes
 
+## Reader usability patch — 2026-10-18
+
+The bounded 0.6.1 patch builds on clean `a83cea3` without changing command IDs,
+reference formats, project/private-store identity, publication, source retention
+or note contents. Reader controls say **Copy link to this outline/passage**,
+**Link an Obsidian note…**, **Open linked note in Obsidian** and **Manage linked
+notes…**. Whole outline, current passage and earlier pinned range have separate
+labeled groups. A single note shows its stored label; multiple notes keep a
+chooser; empty states explain how to add the return destination. Tooltips
+explain the two directions and that copying creates no reverse association.
+Read-only target metadata comes from the existing Python reference parser;
+it is never persisted and supplies no new navigation identity. Do not inspect
+the vault for display titles.
+
+The user reports the Zettelkasten integration is helpful in practice. Record
+that practical-benefit report separately from broader mathematical usefulness,
+proof comprehension or quantitative productivity claims. Do not require another
+study session or extend the Euclid exercise. Use the existing temporary fixture
+for the two outstanding desktop checks, preserving working windows and drafts;
+record any unperformed step without an extended retry campaign. See
+[the workflow](OBSIDIAN_WORKFLOW.md) and the 0.6.1 section of
+[the validation report](OBSIDIAN_VALIDATION.md) for final checks and limitations.
+
+Final patch checks: 44 Node tests passed; 326 Python tests ran with 59 skips;
+syntax/compilation passed. The Development Host reproduced the existing copied
+links and associations. Actual installed 0.6.1 controls, stored captions and
+tooltips were inspected. The unchanged saved URI opened its retained passage
+after isolated VS Code close/reopen through the Windows protocol handler.
+
+The Obsidian restart/click remains unperformed because its working window was
+preserved. Wrong-workspace recovery's actual button, workspace opening and exact
+clipboard copy were observed, but Restricted Mode prevented completion of the
+normal clipboard-follow sequence. Scoped trust UI automation was inconclusive;
+a separate clipboard trial after the standard isolated-test reopen also failed
+to expose a verifiable editor selection. No full recovery pass is claimed and
+no extended retry campaign followed. Do not substitute the successful URI or
+API tests for these remaining desktop steps. All 13 inventoried fixture, saved
+study and earlier-package files were unchanged. The delivered package is
+`vscode/theorem-terminal-0.6.1.vsix`; exact digests and observations are in the
+validation report. Save reader annotations before reloading working windows to
+pick up the installed patch; do not close or rewrite them automatically.
+
 ## Obsidian companion navigation — 2026-10-17
 
 The user-requested bounded bridge is implemented in extension **0.6.0**, over

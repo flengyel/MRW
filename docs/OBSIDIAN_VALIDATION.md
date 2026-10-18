@@ -1,4 +1,114 @@
-# Obsidian companion navigation validation — 2026-10-17
+# Obsidian companion navigation validation
+
+## Patch 0.6.1 — 2026-10-18
+
+The actual baseline was clean `main` at `a83cea3`, matching `origin/main`.
+This is a bounded reader presentation patch. Command IDs, references, project/
+private-store identity, navigation, retention and publication are unchanged.
+No note contents or stored labels were rewritten and the vault was not inspected
+for display titles. The existing reference parser now supplies read-only target
+metadata alongside linked notes; that metadata is never persisted.
+
+The user reports the Zettelkasten integration is helpful in practice and that
+some reader buttons were unintuitive. This is a report of practical benefit,
+separate from broader mathematical usefulness, proof comprehension or measured
+productivity. No further mathematical exercise or study session was requested.
+
+### Controls and regression checks
+
+- **Copy link to this outline** appears under **Whole outline**; **Copy link to
+  this passage** appears in a passage's **This passage** group.
+- **Link an Obsidian note…**, **Open linked note in Obsidian**, and **Manage
+  linked notes…** replace the earlier reader wording. Command Palette titles
+  change consistently while their command identifiers remain stable.
+- A single link shows its stored note label beside the opening action; multiple
+  links retain the readable chooser. Empty groups explain how to add a return
+  destination and disable open/manage until a note exists.
+- Tooltips explain the two directions and that copying an MRW link creates no
+  reverse association. **Earlier linked passage** actions remain separate from
+  a current passage range; the all-notes list labels current/earlier scopes.
+- **44 Node tests passed** and **326 Python tests ran: 267 passed, 59 skipped**
+  (58 opt-in Qt checks, one unavailable external project-parent check).
+  JavaScript syntax and Python compilation pass. Coverage includes changed
+  versus pinned ranges, stored labels as inert text, empty/multiple-note states,
+  unchanged copy/link action payloads, chooser behavior and no automatic reverse
+  link, alongside the existing navigation/publication regressions.
+
+### Actual host observations
+
+The same Windows VS Code 1.141.2 / WSL Debian environment was used. A normal
+Extension Development Host ran the real copy commands without a Markdown editor,
+reproduced the same saved whole/region links, and read both existing associations
+without changing the fixture. The staged test entry point scripts chooser
+answers; it is distinct from the installed extension.
+
+The installed **0.6.1** reader was then opened through the **same saved fixture
+URI** using the Windows protocol handler after normal test-window close/reopen.
+The retained-source view showed the pinned line-5 selection and the reader's
+unchanged-range notice. This is a VS Code/Windows URI check, not an Obsidian click.
+Actual installed accessibility controls confirmed the outline/passage copy labels,
+link/open/manage labels, both direction tooltips and the stored labels
+**Temporary navigation note (outline)** / **Temporary navigation note (region)**.
+The whole-outline controls were visible; passage controls were present below the
+viewport. The [installed capture](evidence/obsidian-20261018/installed-controls.png)
+was inspected. Earlier-range and empty/multiple-note presentations were checked
+automatically; they were not manufactured by changing the existing fixture.
+
+The two previously outstanding desktop checks have these precise results:
+
+1. **Click the saved Obsidian link after normal application restart: unperformed.**
+   Obsidian was open on a working note, and the user later opened a Euclid note
+   independently. That working window was preserved: it was not closed,
+   redirected or reloaded for this test. No full Obsidian restart or subsequent
+   Obsidian pointer click is claimed. The isolated VS Code restart/URI check
+   above does not substitute for it. Obsidian's expected slowness was not treated
+   as a product failure.
+2. **Wrong-workspace recovery: partially observed, not a completed round trip.**
+   With only the empty test workspace open, the same saved URI reached its MRW
+   handler. The actual **Copy Link and Open Workspace** button was invoked through
+   Windows accessibility; the intended workspace opened and the clipboard held
+   the exact saved URI. A Command Palette invocation of **MRW: Open Link from
+   Clipboard** was sent, but the target workspace entered Restricted Mode.
+   The observer also failed on a null accessibility name; a read-only follow-up
+   identified the trust gate. Attempts to open its scoped trust controls did not
+   establish a trust change. No global trust setting was modified.
+   The untrusted test window was closed normally and the fixture reopened with
+   the established isolated-test `--disable-workspace-trust` flag. One separate
+   clipboard-command trial then ran, but its observer could not expose the
+   retained-source editor within its bounded observation period. Thus exact
+   selection **from clipboard following** and the uninterrupted complete
+   recovery sequence remain unconfirmed. The recovery sequence was not repeated.
+
+The initial observer failures, partial trust interaction and separate follow
+trial are test limitations, not claimed navigation failures or passes. No
+extended retry campaign followed. The remaining desktop work is exactly the
+Obsidian restart/click and confirmation of clipboard-follow completing recovery
+in a normally trusted intended workspace.
+
+Thirteen existing files matched their starting digests after the checks:
+seven fixture/source/private-state/note files, three saved study files and three
+previous VSIX packages. The user's working windows, ordinary notes, notebook
+and unsaved annotations were not edited or closed. No vault title lookup, source
+rewrite, model request, mathematical analysis or new Pi/R3/SagePod campaign ran.
+
+### Patch package
+
+Built using the established UTC packaging workflow and pinned dependencies:
+
+- `vscode/theorem-terminal-0.6.1.vsix`
+- SHA-256: `ad723f631fbf47c4e626b62fd823f090b576988ca275600d93dfea28f6e0277f`
+- Installed as the existing `flengyel.theorem-terminal` in WSL Debian. All 44
+  non-manifest extension files match the archive; the manifest differs only by
+  VS Code installation metadata. Development entry points remain excluded.
+- Previous **0.6.0, 0.5.0 and 0.4.1** packages are preserved. Private storage is
+  reused without migration. No Marketplace publication occurred.
+
+[Machine-readable patch evidence](evidence/obsidian-20261018/validation.json),
+[actual installed controls](evidence/obsidian-20261018/installed-controls.json)
+and [archive verification](evidence/obsidian-20261018/package-verification.json)
+keep automated results, actual host observations and the user's report separate.
+
+## Original 0.6.0 increment — 2026-10-17
 
 Baseline: clean `main` at `03d5f89`. Extension identity remains
 `flengyel.theorem-terminal`, version **0.6.0**. See

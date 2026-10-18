@@ -55,6 +55,13 @@ transcription. Existing Zettel notes need no conversion. See
 [validation/limits](docs/OBSIDIAN_VALIDATION.md). Copying notes transfers no MRW
 private targets. Interoperability establishes no mathematical usefulness.
 
+Patch **0.6.1** clarifies the reader's outline/passage controls and both link
+directions, shows saved note labels, and separates earlier pinned ranges from
+current passage actions. Command identifiers and storage remain unchanged.
+The user reports that the Zettelkasten integration is helpful in practice;
+this is reported practical benefit, separate from broader mathematical
+usefulness or measured productivity claims.
+
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an

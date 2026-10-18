@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Whole outline",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": ""
+  },
+  {
+    "name": "From your note to MRW",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": ""
+  },
+  {
+    "name": "Copy link to this outline",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": "Copy an MRW destination to paste into an Obsidian note. This does not set a return note."
+  },
+  {
+    "name": "From MRW to your note",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": ""
+  },
+  {
+    "name": "Temporary navigation note (outline)",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": ""
+  },
+  {
+    "name": "Open linked note in Obsidian",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": ""
+  },
+  {
+    "name": "Link an Obsidian note…",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": "Set the return destination from MRW by pasting an existing note’s Obsidian URL. Copying an MRW link does not set this destination."
+  },
+  {
+    "name": "Manage linked notes…",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": false,
+    "tooltip": ""
+  },
+  {
+    "name": "This passage",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": ""
+  },
+  {
+    "name": "From your note to MRW",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": ""
+  },
+  {
+    "name": "Copy link to this passage",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": "Copy an MRW destination to paste into an Obsidian note. This does not set a return note."
+  },
+  {
+    "name": "From MRW to your note",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": ""
+  },
+  {
+    "name": "Temporary navigation note (region)",
+    "type": "ControlType.Text",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": ""
+  },
+  {
+    "name": "Open linked note in Obsidian",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": ""
+  },
+  {
+    "name": "Link an Obsidian note…",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": "Set the return destination from MRW by pasting an existing note’s Obsidian URL. Copying an MRW link does not set this destination."
+  },
+  {
+    "name": "Manage linked notes…",
+    "type": "ControlType.Button",
+    "enabled": true,
+    "offscreen": true,
+    "tooltip": ""
+  }
+]

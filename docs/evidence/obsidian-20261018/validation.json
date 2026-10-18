@@ -1,0 +1,92 @@
+{
+  "baseline": "a83cea3",
+  "version": "0.6.1",
+  "extension_id": "flengyel.theorem-terminal",
+  "date": "2026-10-18",
+  "user_report": {
+    "zettelkasten_integration": "helpful in practice",
+    "reader_buttons": "some unintuitive",
+    "interpretation": "Reported practical benefit, separate from broader mathematical usefulness or quantitative productivity."
+  },
+  "automated": {
+    "node": {
+      "tests": 44,
+      "passed": 44,
+      "failed": 0
+    },
+    "python": {
+      "tests": 326,
+      "passed": 267,
+      "skipped": 59,
+      "failed": 0
+    },
+    "syntax": "passed",
+    "compileall": "passed"
+  },
+  "development_host": {
+    "phase": "restart",
+    "vscode": "1.141.2",
+    "remote": "wsl",
+    "checks": [
+      {
+        "name": "outline copied with no Markdown editor",
+        "passed": true
+      },
+      {
+        "name": "region copied with no Markdown editor",
+        "passed": true
+      },
+      {
+        "name": "two explicit pinned note associations retained",
+        "passed": true
+      }
+    ],
+    "complete": true
+  },
+  "installed": {
+    "version": "0.6.1",
+    "runtime_files_matching_archive": 44,
+    "manifest_matches_except_install_metadata": true,
+    "controls_and_tooltips_observed": true,
+    "whole_outline_controls_visible": true,
+    "passage_controls_present_below_viewport": true,
+    "same_saved_uri_opened_retained_source_after_normal_test_window_reopen": true
+  },
+  "requested_desktop_checks": [
+    {
+      "name": "same saved Obsidian link after normal application restart",
+      "result": "unperformed",
+      "reason": "Preserved active working Obsidian window; neither restarted it nor redirected it to the fixture. Windows protocol and isolated VS Code reopen observation is separate."
+    },
+    {
+      "name": "complete wrong-workspace recovery",
+      "result": "partial, not completed",
+      "observed": [
+        "actual recovery button invoked",
+        "intended workspace opened",
+        "exact saved URI copied",
+        "Command Palette invocation sent"
+      ],
+      "remaining": "Exact retained selection from clipboard-follow in normally trusted intended workspace.",
+      "gate": "Workspace entered Restricted Mode; scoped trust UI automation was inconclusive. Observer also encountered a null accessibility name.",
+      "separate_trial": "One clipboard-follow trial after normal isolated reopen with established --disable-workspace-trust test flag could not expose a verifiable editor selection. This is not a completed uninterrupted recovery sequence."
+    }
+  ],
+  "preservation": {
+    "files_checked": 13,
+    "fixture_files": 7,
+    "saved_study_files": 3,
+    "previous_packages": 3,
+    "changed": [],
+    "note_title_lookup_in_vault": false,
+    "navigation_storage_or_reference_migration": false
+  },
+  "previous_packages_sha256": {
+    "vscode/theorem-terminal-0.6.0.vsix": "edb05010ea859e9b3f71c5479936a5a06ab26dcd5263eff5898c1d4922e41a25",
+    "vscode/theorem-terminal-0.4.1.vsix": "721e9ec6fa011807508947c4fe3a132702ce705b5d30b6c80cf5f2ea4fbc1f29",
+    "vscode/theorem-terminal-0.5.0.vsix": "1580ff1ff022662028a1c302abe190698919663fb1bf40fc74742696baa1ebe8"
+  },
+  "package_sha256": "ad723f631fbf47c4e626b62fd823f090b576988ca275600d93dfea28f6e0277f",
+  "capture_sha256": "99d666cc716ecca8d2abafa727810fc0cf9832f1f447124655d100e44bf8440b",
+  "limits": "No new Pi, R3 or SagePod acceptance campaign; no model request, notebook execution, mathematical analysis or extra Euclid exposition. Earlier-range and empty/multiple-note presentations have automated coverage, not newly manufactured fixture states."
+}

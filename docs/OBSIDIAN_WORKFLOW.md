@@ -1,6 +1,6 @@
 # Obsidian notes and MRW retained passages
 
-MRW 0.6.0 connects the existing Obsidian Zettelkasten to saved source outlines
+MRW 0.6.1 connects the existing Obsidian Zettelkasten to saved source outlines
 and exact retained passages. Obsidian owns note editing, mathematical rendering,
 links and attachments. MRW owns its source reader and retained material.
 Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
@@ -12,13 +12,18 @@ references from the Obsidian note. No LaTeX transcription is required.
    and run **Copy Obsidian URL for current file**. Here “current file” means the
    note open in Obsidian. Its URL is an address such as
    `obsidian://open?vault=Zettelkasten&file=NOTE_ID`; it contains no note prose.
-2. In **MRW's source reader**, click **Associate Obsidian note…** in the outline
-   toolbar or in the desired passage's card. Paste that URL and enter a short
-   note title or ID. This associates that Obsidian note with that MRW target.
-3. Click **Open Obsidian note** in the same toolbar/card to return to the note.
-   Several associated notes produce a readable chooser. **Replace / remove
-   note link…** changes only the association. The **Associated Obsidian notes**
-   section also exposes links to earlier pinned passages after a range changes.
+2. In **MRW's source reader**, click **Link an Obsidian note…** under **Whole
+   outline**, or in the desired passage card’s **This passage** group. Paste that
+   URL and enter a short
+   note title or ID. This sets that note as the return destination from the
+   selected MRW target.
+3. Click **Open linked note in Obsidian** in the same group to return to the note.
+   **Manage linked notes…** offers **Replace linked note** or **Remove note
+   link**. The **All linked notes and earlier passage ranges** section also
+   exposes earlier pinned targets after a range changes.
+   One linked note shows its saved label beside its open button. Several notes
+   offer a chooser. An empty group says no note is linked yet; use **Link an
+   Obsidian note…** to add the return destination.
 
 An Obsidian URL is not copied note text. Existing notes keep their immutable IDs
 matching filenames, separate editable titles, YAML front matter, `[[ID]]`
@@ -27,9 +32,10 @@ The [Zettel specification](https://github.com/flengyel/Zettel) and
 [templates](https://github.com/flengyel/Zettel/tree/main/templates) remain the
 companion conventions, not a location from which MRW discovers a private vault.
 
-## Put a return link in the Obsidian note
+## Put an MRW link in the Obsidian note
 
-1. In MRW, click **Copy link for Obsidian** on the whole outline or passage.
+1. In MRW, click **Copy link to this outline** under **Whole outline**, or
+   **Copy link to this passage** in the desired passage’s **This passage** group.
    Alternatively run **MRW: Copy Outline or Passage Link…** from the Command
    Palette and choose an existing saved outline and target. No Markdown editor
    or cursor position is required.
@@ -38,6 +44,17 @@ companion conventions, not a location from which MRW discovers a private vault.
 3. Click the link in Obsidian's reading view, or Ctrl+click while editing. Permit
    Windows to open VS Code if prompted. MRW opens the saved reader; a passage
    link also selects the pinned passage in a read-only retained-source view.
+
+**Copying** supplies the MRW destination for your note. **Linking an Obsidian
+note** supplies the return destination from MRW. These are separate explicit
+actions; copying a link does not automatically link a note back. Both buttons
+have brief tooltips explaining this.
+
+**Whole outline** actions affect the whole source outline. A passage card’s
+**This passage** actions use its current range. If a saved link points to an
+earlier range, **Earlier linked passage** keeps that original pinned target;
+the current passage’s actions stay separate. **All linked notes and earlier
+passage ranges** labels each stored target and preserves access after range edits.
 
 ## Workspace routing and recovery
 
@@ -54,7 +71,9 @@ Open Workspace**, then run **MRW: Open Link from Clipboard** in the intended
 workspace. If that window has no MRW handler, open the intended WSL workspace
 yourself, copy the Markdown link or its complete URL from Obsidian, and use the
 same command. Standard VS Code trust and remote-connection prompts still apply.
-Opening the intended workspace uses VS Code's normal window selection.
+Opening the intended workspace uses VS Code's normal window selection. Wait for
+the connection and any folder-specific trust prompt before running the clipboard
+command; MRW commands remain unavailable in Restricted Mode.
 If the warning disappears, open VS Code's **Notifications** to find its recovery
 action. A hidden routing warning does not block other MRW commands.
 

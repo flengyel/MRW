@@ -21,6 +21,7 @@ button{color:var(--vscode-button-foreground);background:var(--vscode-button-back
 button:disabled{opacity:.55;cursor:default}input,textarea,select{color:var(--vscode-input-foreground);background:var(--vscode-input-background);border:1px solid var(--vscode-input-border);padding:5px;max-width:100%;box-sizing:border-box}
 textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:100%}label{display:block;margin:6px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;tab-size:4;font-family:var(--vscode-editor-font-family);font-size:var(--vscode-editor-font-size)}
 .region,.context,.evidence,.note{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.statement{border-left:3px solid var(--vscode-focusBorder);padding-left:9px}.note{border-left:3px solid var(--vscode-editorWarning-foreground)}.muted{opacity:.8;font-size:.9em}.warning{color:var(--vscode-editorWarning-foreground)}.toolbar{display:flex;flex-wrap:wrap;gap:3px}.selected{outline:2px solid var(--vscode-focusBorder)}.metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:8px}
+.companion{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.companion h3{margin:0 0 6px}.companion p{margin:6px 0}.companion-directions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.linked-note{font-weight:600;unicode-bidi:plaintext}.linked-note-row{padding:8px 0;border-bottom:1px solid var(--vscode-panel-border)}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
@@ -62,7 +63,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft,
-      reference: c.reference, notes: c.notes?.links || [], noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
+      reference: c.reference, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
   }
@@ -209,25 +210,25 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const links = previousNotes.links.filter(n => n.reference === target.reference);
     let existing;
     if (action === 'open_note' || action === 'manage_notes') {
-      if (!links.length) throw new Error('No Obsidian note is associated with this exact target. Choose Associate Obsidian note… in the reader.');
-      existing = links.length === 1 ? links[0] : await vscode.window.showQuickPick(links.map(n => ({ ...n, description: n.url })), { placeHolder: 'Choose an associated Obsidian note' });
+      if (!links.length) throw new Error('No Obsidian note is linked to this exact target. Choose Link an Obsidian note… in the reader.');
+      existing = links.length === 1 ? links[0] : await vscode.window.showQuickPick(links.map(n => ({ ...n, description: n.url })), { placeHolder: 'Choose a linked Obsidian note' });
       if (!existing) return;
       if (action === 'open_note') {
         // Revalidate stored URL through the core immediately before dispatch.
         const fresh = await bridge({ method: 'outline_notes', store: c.store, project_root: c.root, id: c.result.outline.id });
         const selected = fresh.links.find(n => n.id === existing.id && n.reference === target.reference && n.url === existing.url);
         if (!selected) throw new Error('Note association changed or is missing. Refresh the reader and choose it again.');
-        if (!await vscode.env.openExternal(obsidianTarget(vscode, selected.url))) throw new Error('Obsidian could not open the URL. Start Windows Obsidian, then try Open Obsidian note again.');
+        if (!await vscode.env.openExternal(obsidianTarget(vscode, selected.url))) throw new Error('Obsidian could not open the URL. Start Windows Obsidian, then try Open linked note in Obsidian again.');
         vscode.window.setStatusBarMessage('Sent to Obsidian. If it reports a missing note/vault, replace this association using that note’s current Obsidian URL.', 12000);
         return;
       }
     }
     writable(c);
-    let choice = 'Replace association';
-    if (existing) choice = await vscode.window.showQuickPick(['Replace association', 'Remove association'], { placeHolder: existing.label });
+    let choice = 'Replace linked note';
+    if (existing) choice = await vscode.window.showQuickPick(['Replace linked note', 'Remove note link'], { placeHolder: existing.label });
     if (!choice) return;
     let url = null, label = null;
-    if (choice !== 'Remove association') {
+    if (choice !== 'Remove note link') {
       url = await vscode.window.showInputBox({ prompt: 'In Obsidian, open the note to link and run “Copy Obsidian URL for current file”. Paste that URL here to link this MRW target.', value: existing?.url || '', ignoreFocusOut: true });
       if (url === undefined) return;
       label = await vscode.window.showInputBox({ prompt: 'Short title or ID of that Obsidian note (navigation label)', value: existing?.label || '', ignoreFocusOut: true });
@@ -463,7 +464,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   }));
   return () => [['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
     ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
-    ['Associate Obsidian note…', 'mrw.associateObsidianNote'],
+    ['Link an Obsidian note…', 'mrw.associateObsidianNote'],
     ['Insert outline reference…', 'mrw.insertOutlineReference'], ['Follow outline reference at cursor', 'mrw.followOutlineReference'],
     ...(panels.has(active) ? [['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],

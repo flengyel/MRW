@@ -131,7 +131,8 @@ from this validation. Details and remaining limits are in the
 
 ### Obsidian companion navigation — 2026-10-17
 
-The source reader offers **Copy link for Obsidian** at outline and region scope.
+The source reader offers **Copy link to this outline** under **Whole outline**
+and **Copy link to this passage** in each **This passage** group.
 **MRW: Copy Outline or Passage Link…** also works without an active Markdown
 editor. Ordinary Markdown labels use the source title and locator; target
 identifiers and routing remain in the URI. Clicking in Obsidian opens the saved
@@ -139,10 +140,18 @@ reader and, for a region, selects the original pinned retained passage.
 
 To associate a note, open the intended note in Obsidian and use its **Copy
 Obsidian URL for current file** command. “Current file” refers to the note open
-in Obsidian. In the MRW outline toolbar or desired region card, **Associate
-Obsidian note…** stores that URL and a short label. **Open Obsidian note** uses
-a readable chooser for multiple notes. Replacement/removal changes only the
+in Obsidian. Under **Whole outline** or a passage card's **This passage** group,
+**Link an Obsidian note…** stores that URL and a short label.
+**Open linked note in Obsidian** uses a readable chooser for multiple notes.
+Replacement/removal changes only the
 navigation record; earlier pinned passage associations remain accessible.
+A single linked note displays its stored label beside the opening action;
+multiple notes retain the chooser. An empty group explains how to link a return
+destination. Tooltips distinguish copying an MRW destination from linking an
+Obsidian return destination; copying creates no reverse association. A changed
+range exposes a separate **Earlier linked passage** group, while current
+passage actions keep their current range. The all-notes list labels those scopes.
+These 0.6.1 presentation changes preserve IDs, references, retention and storage.
 Obsidian owns notes, rendering and ordinary attachments, including handwritten
 work. Existing Zettel notes need no conversion or derivation transcription.
 

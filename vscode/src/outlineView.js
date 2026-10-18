@@ -7,7 +7,7 @@ const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument',
 const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
-let notes = [], noteError;
+let notes = [], noteTargets = {}, noteError;
 const drafts = new Map();
 const submittedDrafts = new Map();
 const label = value => value.replace(/_/g, ' ');
@@ -22,7 +22,7 @@ function post(value) {
   busy = true; controls(); api.postMessage(value);
 }
 function controls() {
-  for (const button of root.querySelectorAll('button')) button.disabled = busy || (blocked && button.dataset.write === 'true');
+  for (const button of root.querySelectorAll('button')) button.disabled = busy || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
 }
 function button(parent, title, value, action, write = false) {
   const node = el('button', title, parent); node.type = 'button';
@@ -66,12 +66,47 @@ function noteForm(parent, region, note) {
   }, 'save-note', true);
 }
 function spanLocation(span) { return `Lines ${span.start_line}:${span.start_col}–${span.end_line}:${span.end_col} (scalar columns)`; }
+const sameSpan = (a, b) => a && b && ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col'].every(k => a[k] === b[k]);
+function targetNotes(region, pinned) {
+  if (pinned) return notes.filter(n => n.reference === reference.uri);
+  const current = model.outline.regions.find(r => r.id === region);
+  return notes.filter(n => {
+    const target = noteTargets[n.reference];
+    return target && target.region === region && (!region || sameSpan(target.span, current?.span));
+  });
+}
 function companionActions(parent, region = null, pinned = false) {
   const data = { region, pinned };
-  button(parent, 'Copy link for Obsidian', { type: 'copy_link', ...data }, 'copy-link');
-  button(parent, 'Associate Obsidian note…', { type: 'associate_note', ...data }, 'associate-note', true);
-  button(parent, 'Open Obsidian note', { type: 'open_note', ...data }, 'open-note');
-  button(parent, 'Replace / remove note link…', { type: 'manage_notes', ...data }, 'manage-notes', true);
+  const passage = pinned || region !== null;
+  const box = el('section', undefined, parent, 'companion');
+  box.dataset.linkScope = pinned ? 'pinned' : passage ? 'passage' : 'outline';
+  el('h3', pinned ? 'Earlier linked passage' : passage ? 'This passage' : 'Whole outline', box);
+  if (pinned) el('p', 'These actions keep the earlier range from the saved link. Passage actions below use the current range.', box, 'muted');
+  else el('p', passage ? 'Links here apply to this passage’s current range.' : 'Links here apply to the whole outline.', box, 'muted');
+  const directions = el('div', undefined, box, 'companion-directions');
+  const into = el('div', undefined, directions);
+  el('p', 'From your note to MRW', into);
+  button(into, passage ? 'Copy link to this passage' : 'Copy link to this outline', { type: 'copy_link', ...data }, 'copy-link').title =
+    'Copy an MRW destination to paste into an Obsidian note. This does not set a return note.';
+  const back = el('div', undefined, directions);
+  el('p', 'From MRW to your note', back);
+  const linked = targetNotes(region, pinned);
+  if (noteError) el('p', 'Linked notes unavailable. Refresh source status to retry.', back, 'muted');
+  else if (!linked.length) el('p', `No Obsidian note linked to ${pinned ? 'this earlier range' : passage ? 'this passage' : 'this outline'} yet. Link a note to add the return destination.`, back, 'muted');
+  else el('p', linked.length === 1 ? linked[0].label : `${linked.length} linked notes — choose when opening`, back, linked.length === 1 ? 'linked-note' : 'muted');
+  const open = button(back, 'Open linked note in Obsidian', { type: 'open_note', ...data }, 'open-note');
+  open.dataset.empty = String(!linked.length || !!noteError);
+  button(back, 'Link an Obsidian note…', { type: 'associate_note', ...data }, 'associate-note', true).title =
+    'Set the return destination from MRW by pasting an existing note’s Obsidian URL. Copying an MRW link does not set this destination.';
+  const manage = button(back, 'Manage linked notes…', { type: 'manage_notes', ...data }, 'manage-notes', true);
+  manage.dataset.empty = String(!linked.length || !!noteError);
+}
+function noteScope(note) {
+  const target = noteTargets[note.reference];
+  if (!target) return 'Retained target';
+  if (!target.region) return 'Whole outline';
+  const current = model.outline.regions.find(r => r.id === target.region);
+  return `${sameSpan(target.span, current?.span) ? 'Current passage range' : 'Earlier passage range'} · ${spanLocation(target.span)}`;
 }
 function evidence(parent, artifacts) {
   for (const a of artifacts) {
@@ -122,19 +157,18 @@ function render() {
   const toolbar = el('div', undefined, root, 'toolbar');
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
   button(toolbar, 'Refresh source status', { type: 'refresh' }, 'refresh');
-  companionActions(toolbar);
-  el('p', 'To associate a note: open the desired note in Obsidian, copy its Obsidian URL, then paste that URL using Associate Obsidian note. This connects the note to this outline or the passage whose button you use.', root, 'muted');
-  if (reference?.uri) {
-    const pinned = el('details'); el('summary', 'Actions for the originally linked retained target', pinned);
-    companionActions(pinned, null, true);
+  companionActions(root);
+  if (reference?.status === 'changed or removed') {
+    companionActions(root, null, true);
   }
   if (noteError) el('p', `Obsidian associations unavailable: ${noteError}. Refresh the reader to retry.`, root, 'warning');
   if (notes.length) {
-    const linked = el('details'); el('summary', 'Associated Obsidian notes (including earlier pinned passages)', linked);
+    const linked = el('details'); el('summary', 'All linked notes and earlier passage ranges', linked);
     for (const note of notes) {
-      const row = el('div', undefined, linked); el('span', note.label, row);
-      button(row, 'Open note', { type: 'open_note', note: note.id }, 'open-note');
-      button(row, 'Replace / remove…', { type: 'manage_notes', note: note.id }, 'manage-notes', true);
+      const row = el('div', undefined, linked, 'linked-note-row'); el('p', note.label, row, 'linked-note');
+      el('p', noteScope(note), row, 'muted');
+      button(row, 'Open linked note in Obsidian', { type: 'open_note', note: note.id }, 'open-note');
+      button(row, 'Manage linked notes…', { type: 'manage_notes', note: note.id }, 'manage-notes', true);
     }
   }
   el('p', 'Select text in the saved original or retained source, then use MRW: Add Selected Source Region, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', root, 'muted');
@@ -187,7 +221,7 @@ function render() {
     choose.addEventListener('click', () => { selected = r.id; busy = false; render(); });
     button(actions, r.collapsed ? 'Expand exact source' : 'Hide argument detail', { type: 'toggle', region: r.id }, 'toggle', true);
     button(actions, 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
-    companionActions(actions, r.id);
+    companionActions(box, r.id);
     if (r.statement) {
       const statement = el('div', undefined, box, 'statement');
       el('p', r.statement.kind === 'declaration_statement' ? 'Exact declaration statement (reader-labeled source selection)' : 'Exact source statement (reader-selected)', statement);
@@ -211,7 +245,7 @@ window.addEventListener('message', event => {
   const value = event.data;
   if (value.type === 'outline') {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
-    notes = value.notes || []; noteError = value.noteError;
+    notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
       // clear only the submitted draft, not newer typing in the same form.

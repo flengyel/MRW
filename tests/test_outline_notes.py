@@ -38,11 +38,13 @@ class OutlineNoteTests(unittest.TestCase):
 
     def test_empty_view_is_read_only_and_create_replace_remove_preserves_all_source_work(self):
         before = self.inventory(); empty = self.notes()
-        self.assertEqual(empty, dict(links=[], revision=None)); self.assertEqual(before, self.inventory())
+        self.assertEqual(empty, dict(links=[], revision=None, targets={})); self.assertEqual(before, self.inventory())
         one = self.update(empty); link = one['links'][0]
         two = self.update(one, link['id'], url='obsidian://open?vault=Existing%20α&file=Other', label='Other')
         self.assertEqual(two['links'][0]['id'], link['id'])
-        self.assertEqual(self.notes(), two)
+        loaded = self.notes()
+        self.assertEqual({k: loaded[k] for k in two}, two)
+        self.assertEqual(loaded['targets'][self.ref], dict(region=self.region, span=self.saved['outline']['regions'][0]['span']))
         removed = self.update(two, link['id'], url=None, label=None)
         self.assertEqual(removed['links'], [])
         for name, raw in before.items(): self.assertEqual(Path(name).read_bytes(), raw)
@@ -65,7 +67,10 @@ class OutlineNoteTests(unittest.TestCase):
         followed = self.call('outline_follow_reference', reference=self.ref)
         self.assertEqual(followed['reference']['status'], 'changed or removed')
         self.assertEqual(followed['document']['start'], [0,0]); self.assertEqual(followed['document']['end'], [1,5])
-        self.assertEqual(self.notes(), linked); self.assertEqual(before, self.inventory())
+        loaded = self.notes()
+        self.assertEqual({k: loaded[k] for k in linked}, linked)
+        self.assertEqual(loaded['targets'][self.ref]['span'], self.saved['outline']['regions'][0]['span'])
+        self.assertEqual(before, self.inventory())
 
     def test_wrong_scope_invalid_range_and_other_outline_never_publish(self):
         previous = self.notes(); before = self.inventory()
