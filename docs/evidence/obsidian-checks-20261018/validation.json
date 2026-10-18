@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-18",
+  "baseline": "c1508bce0a1094493ec6f4bcf8a0df5572ed72c9",
+  "extension": "flengyel.theorem-terminal",
+  "version": "0.6.1",
+  "configuration": {
+    "vscode": "1.141.2",
+    "remote": "WSL Debian",
+    "obsidian": "1.14.4",
+    "trust": "Standard folder-specific trust; no disable-workspace-trust flag or global trust change"
+  },
+  "fixture": {
+    "project": "/tmp/mrw-obsidian-nav-20261017",
+    "wrong_workspace": "/tmp/mrw-obsidian-other-20261017",
+    "note_id": "MRWNav202610171235",
+    "outline_id": "c38b57a0-b34e-4170-8f33-e4dca495b86e",
+    "region_id": "f7dff6b9-fc81-4a3f-9d28-f1ced1047991",
+    "source_sha256": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205",
+    "range": {
+      "start": [
+        5,
+        0
+      ],
+      "end": [
+        5,
+        30
+      ],
+      "lines": "one-based",
+      "columns": "zero-based Unicode scalars"
+    },
+    "selected_text": "For let the least number measu"
+  },
+  "desktop_checks": [
+    {
+      "name": "same saved Obsidian link after normal application restart",
+      "result": "passed",
+      "method": [
+        "User closed Obsidian; absence of its window was observed before reopening the existing temporary note through its stored open URI.",
+        "Only the isolated fixture VS Code window was closed normally and reopened; the user trusted that exact fixture folder.",
+        "After Obsidian loaded, a physical pointer click hit the same saved passage hyperlink; accessibility identified its exact saved URI.",
+        "A new retained-source view opened in the intended WSL workspace; Ctrl+C returned exactly the expected 30 characters, and the reader reported the unchanged pinned range."
+      ],
+      "selection_verification": "Exact clipboard equality and visible line-5, 30-character selection; original clipboard restored",
+      "capture": "restart-retained-passage.png"
+    },
+    {
+      "name": "complete wrong-workspace recovery",
+      "result": "passed",
+      "method": [
+        "Only the intended test window was closed; the empty other workspace was opened and trusted with Trust Folder & Continue.",
+        "The same saved Obsidian passage hyperlink was physically clicked with the empty workspace as the last active VS Code window.",
+        "That workspace showed the wrong-workspace warning and did not resolve the target.",
+        "The actual Copy Link and Open Workspace button was invoked with Windows accessibility; its clipboard contents equalled the complete saved URI.",
+        "VS Code reused the isolated window for the intended workspace; after its MRW view was ready, MRW: Open Link from Clipboard was entered through the Command Palette while the saved URI stayed on the clipboard.",
+        "A new retained-source editor was observed. Focus then moved to another Code window, so the foreground guard stopped further input; a read-only TextPattern selection check confirmed the exact 30 characters without changing foreground."
+      ],
+      "selection_verification": "Exact accessibility TextPattern equality and visible line-5, 30-character selection; original clipboard restored",
+      "capture": "recovery-retained-passage.png"
+    }
+  ],
+  "observation_limits": [
+    "Agent-operated actual desktop checks with user help for scoped trust; not independent human use.",
+    "A prior note layout shifted during loading; initial pointer input selected rendered text before a fresh position check identified the actual saved hyperlink. No note bytes changed.",
+    "An unrelated active Copilot session was observed in the empty test window and cancelled; the user confirmed it should have been terminated. Its provider activity was not audited. No MRW assistance or model action was invoked.",
+    "User working VS Code window and setup window were preserved. No vault title lookup or unrelated note inspection was performed.",
+    "Existing automated regression results belong to the delivered patch; documentation-only follow-up did not rerun those suites."
+  ],
+  "preserved_files": [
+    {
+      "label": "fixture outline",
+      "sha256": "f135e155ce62e1036205c01f1002088332b298443e51dfb45396f8b9dbb8c985",
+      "unchanged": true
+    },
+    {
+      "label": "retained fixture source",
+      "sha256": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205",
+      "unchanged": true
+    },
+    {
+      "label": "fixture note associations",
+      "sha256": "866ed048e1d5a75c85054215fea6dceba00df33953686c054fbaa6fa5da011ad",
+      "unchanged": true
+    },
+    {
+      "label": "outline publication lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "label": "association publication lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "label": "fixture original source",
+      "sha256": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205",
+      "unchanged": true
+    },
+    {
+      "label": "temporary Obsidian note",
+      "sha256": "3db86fda5ea450782f58d1d43870992eca0bcace5d651ffc86e5f3345d6b7054",
+      "unchanged": true
+    },
+    {
+      "label": "VSIX 0.6.0",
+      "sha256": "edb05010ea859e9b3f71c5479936a5a06ab26dcd5263eff5898c1d4922e41a25",
+      "unchanged": true
+    },
+    {
+      "label": "VSIX 0.4.1",
+      "sha256": "721e9ec6fa011807508947c4fe3a132702ce705b5d30b6c80cf5f2ea4fbc1f29",
+      "unchanged": true
+    },
+    {
+      "label": "VSIX 0.5.0",
+      "sha256": "1580ff1ff022662028a1c302abe190698919663fb1bf40fc74742696baa1ebe8",
+      "unchanged": true
+    },
+    {
+      "label": "saved study overview",
+      "sha256": "3413b4e55ac85b677eb4a9c29d9030dde15adcc47a949765a0c064767c2c9ae2",
+      "unchanged": true
+    },
+    {
+      "label": "saved study notebook",
+      "sha256": "ebbdea1b2f2e7c08fd29a7fc1dda81db91d341ed7e5cc868dea267a6c405e9da",
+      "unchanged": true
+    },
+    {
+      "label": "saved study source",
+      "sha256": "b61e101306a7faec8c9cf7f3626ed9a165c9081bd8cc10af348971e6f0927205",
+      "unchanged": true
+    },
+    {
+      "label": "VSIX 0.6.1",
+      "sha256": "ad723f631fbf47c4e626b62fd823f090b576988ca275600d93dfea28f6e0277f",
+      "unchanged": true
+    }
+  ],
+  "private_target_transfer": "Copying or synchronizing Markdown does not transfer MRW private targets.",
+  "package_rebuilt": false,
+  "automated_tests_rerun": false,
+  "remaining_requested_desktop_checks": []
+}

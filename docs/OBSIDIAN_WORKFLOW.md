@@ -73,7 +73,9 @@ yourself, copy the Markdown link or its complete URL from Obsidian, and use the
 same command. Standard VS Code trust and remote-connection prompts still apply.
 Opening the intended workspace uses VS Code's normal window selection. Wait for
 the connection and any folder-specific trust prompt before running the clipboard
-command; MRW commands remain unavailable in Restricted Mode.
+command; MRW commands remain unavailable in Restricted Mode. If no trust prompt
+appears, run **Workspaces: Manage Workspace Trust** and trust only the intended
+folder; leave any option to trust its parent unchecked.
 If the warning disappears, open VS Code's **Notifications** to find its recovery
 action. A hidden routing warning does not block other MRW commands.
 
@@ -112,5 +114,9 @@ identity/storage and legacy `mrw-outline:v1` links remain compatible. Native
 Windows backend portability remains deferred. Navigation initiates no model,
 compiler, notebook, container or mathematical analysis.
 
-See [validation and the tested configuration](OBSIDIAN_VALIDATION.md).
+On Windows VS Code 1.141.2 / WSL Debian with Windows Obsidian 1.14.4, the same
+saved passage link was followed after normal application restart, and the complete
+wrong-workspace recovery sequence was observed with the exact retained selection.
+These scoped desktop checks used the existing temporary navigation fixture.
+See [validation and the tested configuration](OBSIDIAN_VALIDATION.md#desktop-follow-up--2026-10-18).
 Interoperability does not establish mathematical usefulness.

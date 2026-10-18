@@ -18,8 +18,8 @@ The user reports the Zettelkasten integration is helpful in practice. Record
 that practical-benefit report separately from broader mathematical usefulness,
 proof comprehension or quantitative productivity claims. Do not require another
 study session or extend the Euclid exercise. Use the existing temporary fixture
-for the two outstanding desktop checks, preserving working windows and drafts;
-record any unperformed step without an extended retry campaign. See
+for navigation checks, preserving working windows and drafts. The two previously
+outstanding checks are now complete; see
 [the workflow](OBSIDIAN_WORKFLOW.md) and the 0.6.1 section of
 [the validation report](OBSIDIAN_VALIDATION.md) for final checks and limitations.
 
@@ -29,18 +29,27 @@ links and associations. Actual installed 0.6.1 controls, stored captions and
 tooltips were inspected. The unchanged saved URI opened its retained passage
 after isolated VS Code close/reopen through the Windows protocol handler.
 
-The Obsidian restart/click remains unperformed because its working window was
-preserved. Wrong-workspace recovery's actual button, workspace opening and exact
-clipboard copy were observed, but Restricted Mode prevented completion of the
-normal clipboard-follow sequence. Scoped trust UI automation was inconclusive;
-a separate clipboard trial after the standard isolated-test reopen also failed
-to expose a verifiable editor selection. No full recovery pass is claimed and
-no extended retry campaign followed. Do not substitute the successful URI or
-API tests for these remaining desktop steps. All 13 inventoried fixture, saved
-study and earlier-package files were unchanged. The delivered package is
-`vscode/theorem-terminal-0.6.1.vsix`; exact digests and observations are in the
-validation report. Save reader annotations before reloading working windows to
-pick up the installed patch; do not close or rewrite them automatically.
+The authorized desktop follow-up on clean `c1508bc` completed both outstanding
+checks with installed 0.6.1. After normal Obsidian and isolated VS Code restart,
+a physical click on the same saved temporary-note passage link opened the intended
+WSL retained source with exactly 30 characters selected at 5:0–5:30. The complete
+wrong-workspace sequence also passed: the actual recovery button copied the exact
+URI, opened the intended workspace by reusing the isolated window, and **MRW:
+Open Link from Clipboard** opened a new retained-source view with the exact same
+selection. Folder-specific trust was used, with user help for the intended folder;
+no global trust change or trust-disable flag was needed. A focus change stopped
+further automated input; read-only accessibility then confirmed the final selection.
+These are actual agent-operated desktop observations, not independent human use.
+
+All 14 inventoried fixture, note, saved study and VSIX files were unchanged. The
+user's working window and drafts were preserved. An unrelated active Copilot
+session in the empty test window was cancelled; the user confirmed that was
+wanted. No MRW assistance action ran. The delivered package remains
+`vscode/theorem-terminal-0.6.1.vsix`; no rebuild was needed for this evidence-only
+follow-up. Exact observations, captures and limits are in the validation report.
+No requested navigation check remains outstanding. Save reader annotations before
+reloading working windows to pick up the installed patch; do not close or rewrite
+them automatically.
 
 ## Obsidian companion navigation — 2026-10-17
 

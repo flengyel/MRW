@@ -54,7 +54,9 @@ viewport. The [installed capture](evidence/obsidian-20261018/installed-controls.
 was inspected. Earlier-range and empty/multiple-note presentations were checked
 automatically; they were not manufactured by changing the existing fixture.
 
-The two previously outstanding desktop checks have these precise results:
+At patch packaging time, the two desktop checks had the results below. The
+[authorized follow-up](#desktop-follow-up--2026-10-18) subsequently completed both;
+these earlier observations are retained as history:
 
 1. **Click the saved Obsidian link after normal application restart: unperformed.**
    Obsidian was open on a working note, and the user later opened a Euclid note
@@ -107,6 +109,65 @@ Built using the established UTC packaging workflow and pinned dependencies:
 [actual installed controls](evidence/obsidian-20261018/installed-controls.json)
 and [archive verification](evidence/obsidian-20261018/package-verification.json)
 keep automated results, actual host observations and the user's report separate.
+
+## Desktop follow-up — 2026-10-18
+
+Both outstanding checks **passed** against the unchanged installed **0.6.1**,
+on clean `main` at `c1508bc`, using Windows VS Code **1.141.2**, WSL Debian and
+Windows Obsidian **1.14.4**. The user explicitly closed Obsidian and authorized
+these checks. No product code or package changed.
+
+1. **Saved Obsidian passage link after normal restart:** Obsidian's absence was
+   observed, then the existing temporary note was reopened through its stored
+   open URL. The isolated fixture VS Code window was closed normally and reopened
+   without a trust override. The user trusted that exact fixture folder. After
+   Obsidian loaded, a physical pointer click on the same saved passage hyperlink
+   opened a new retained-source view in the intended WSL workspace. Accessibility
+   identified the hyperlink's exact saved URI. The editor showed line 5 with
+   **30 characters selected**, and copying the selection returned exactly
+   `For let the least number measu`. The reader reported the pinned range
+   **5:0–5:30 (scalar columns)** unchanged. See the
+   [restart capture](evidence/obsidian-checks-20261018/restart-retained-passage.png).
+2. **Complete wrong-workspace recovery:** the intended test window was closed
+   normally, then the empty other workspace was opened with standard scoped
+   trust. With it as the last active VS Code window, a physical click on the same
+   saved Obsidian link produced the wrong-workspace warning. The actual **Copy
+   Link and Open Workspace** button was invoked through Windows accessibility;
+   its clipboard contents equalled the complete saved URI. VS Code reused the
+   isolated window for the intended workspace. After its MRW view was ready,
+   **MRW: Open Link from Clipboard** was entered through the Command Palette,
+   preserving the URI on the clipboard until the command completed. A new
+   retained-source editor appeared. Focus then moved to another Code window;
+   the observer stopped further input. A read-only accessibility TextPattern
+   check confirmed the exact same 30-character selection without moving focus.
+   The [recovery capture](evidence/obsidian-checks-20261018/recovery-retained-passage.png)
+   also shows line 5, 30 selected and the unchanged-range notice.
+
+Normal folder-specific trust was used for both disposable workspaces; no global
+trust setting or `--disable-workspace-trust` launch flag was used. Initial note
+layout movement during loading caused pointer input to select rendered text;
+only the later click whose accessibility target was the exact saved hyperlink
+counts as following the link. An unrelated active Copilot session in the empty
+test window was cancelled; the user confirmed it should have been terminated.
+Its provider activity was not audited. No MRW model/assistance action was invoked.
+
+All **14** inventoried files matched their starting SHA-256 digests: the fixture
+outline, retained/original source, note-association sidecar and two locks; the
+temporary Obsidian note; three saved study files; and four VSIX packages. The
+user's working VS Code window, unsaved work and setup window were preserved.
+No note prose, source bytes, annotation or association was changed. No vault
+lookup for display titles, new mathematical exercise, Pi/R3/SagePod campaign or
+product change was needed. The clipboard was restored after each observation.
+Raw Obsidian captures containing unrelated sidebar material remain private.
+
+These are agent-operated actual desktop checks, with user help for scoped trust,
+not independent human use. Both requested desktop checks are now complete;
+other hosts/configurations and broader mathematical usefulness are not established.
+The user's practical-benefit report remains separate. Existing automated patch
+results above remain applicable; this documentation-only follow-up used document,
+evidence and diff validation rather than repeating regression suites or rebuilding
+the unchanged VSIX. See the
+[machine-readable follow-up evidence](evidence/obsidian-checks-20261018/validation.json).
 
 ## Original 0.6.0 increment — 2026-10-17
 

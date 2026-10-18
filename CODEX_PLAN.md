@@ -70,6 +70,10 @@ storage are unchanged. Read the workflow/validation links below for delivery
 and desktop checks. The user's report is evidence of practical benefit as
 reported; broader mathematical usefulness and quantitative savings remain
 unassessed. No new mathematical exercise or acceptance campaign is required.
+The authorized desktop follow-up completed saved Obsidian-link navigation after
+normal restart and the full wrong-workspace recovery sequence with installed
+0.6.1 on Windows/WSL; exact retained selections and unchanged files were verified.
+See the [observations and limits](docs/OBSIDIAN_VALIDATION.md#desktop-follow-up--2026-10-18).
 
 ### Obsidian companion increment — 2026-10-17
 

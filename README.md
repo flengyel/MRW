@@ -58,6 +58,9 @@ private targets. Interoperability establishes no mathematical usefulness.
 Patch **0.6.1** clarifies the reader's outline/passage controls and both link
 directions, shows saved note labels, and separates earlier pinned ranges from
 current passage actions. Command identifiers and storage remain unchanged.
+Scoped Windows/WSL desktop checks now cover the saved Obsidian passage link
+after normal restart and complete wrong-workspace recovery; see the
+[follow-up evidence](docs/OBSIDIAN_VALIDATION.md#desktop-follow-up--2026-10-18).
 The user reports that the Zettelkasten integration is helpful in practice;
 this is reported practical benefit, separate from broader mathematical
 usefulness or measured productivity claims.
