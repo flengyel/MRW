@@ -41,8 +41,11 @@ temporarily paused its vault folder: 3/4 probes passed before, 4/4 paused and
 3/4 resumed. The flag was restored and independently verified false. The original
 mount and existing vault ACLs remain unchanged; no lasting Syncthing setting
 change was made. This difference does not qualify paused use or identify the
-cause of the denials. Another mount must pass its own capability
-checks; enabling a setting alone does not establish support.
+cause of the denials. The subsequent approved paused transaction check also
+failed at its first preflight atomic replacement, before commit. Pausing is not
+a qualified remedy; synchronization/configuration were restored and independently
+verified. This bounded attempt ended without retries. Another mount must pass
+its own capability checks; enabling a setting alone does not establish support.
 See [actual filesystem results](ARTIFACT_STORAGE_VALIDATION.md).
 
 ## What moves

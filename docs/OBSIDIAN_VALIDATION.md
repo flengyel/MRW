@@ -22,8 +22,11 @@ denials, so this temporary setup is not qualified for the real store. Read
 and [the completed controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
 That later approved comparison passed 3/4 probes before, 4/4 paused and 3/4
 resumed; the Windows folder was independently verified unpaused afterward.
-It edited no note and performed no new desktop operation. The real store
-remains unmoved; no runtime/package change or broader usefulness claim was made.
+The subsequent approved paused transaction test also failed before commit at
+its first preflight replacement; synchronization/configuration were restored
+and independently verified. Neither operation edited a note or performed new
+desktop navigation. The real store remains unmoved; no runtime/package change
+or broader usefulness claim was made.
 
 ## Post-move desktop follow-up — 2026-10-20
 

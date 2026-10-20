@@ -166,8 +166,12 @@ or synchronization cause was established. The separately approved comparison
 then temporarily paused only the Windows client's vault folder: 3/4 probes
 passed before, 4/4 paused, 3/4 resumed. The original unpaused state was restored
 and independently verified. That difference does not establish causality or
-qualify paused use. One paused transaction-test operation is prepared for
-separate authorization; no repeated probe campaign or Pi reconfiguration ran.
+qualify paused use. The subsequent separately approved paused transaction check
+failed at the first test's preflight `os.replace` with EACCES, before commit.
+The original folder configuration was restored and independently verified
+unpaused. Pausing is not a qualified remedy. The other eight selected tests
+and additional mode/retained-source checks did not run. No retry or Pi
+reconfiguration followed; see [the exact failure](ARTIFACT_STORAGE_VALIDATION.md#approved-paused-transaction-check--2026-10-20).
 
 Only after qualification can a permanent scoped mount and any necessary
 receiving operation be proposed. A future permanent configuration must preserve

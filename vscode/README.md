@@ -141,8 +141,10 @@ receiving-copy checks pass, but nested probe replacement denials remain unresolv
 The real store remains unmoved; this setup is not yet qualified for real work.
 The approved [controlled comparison](../docs/WSL_ARTIFACT_STORAGE_COMPARISON.md)
 passed 3/4 probes before, 4/4 paused and 3/4 resumed, with the Windows client's
-folder independently verified unpaused afterward. Paused transaction tests are
-prepared, not authorized or run; the difference alone is not a supported remedy.
+folder independently verified unpaused afterward. The subsequent approved
+paused transaction check stopped at the first test's preflight replacement
+denial, before commit. Synchronization/configuration were restored; pausing is
+not a qualified remedy. No further retry campaign ran.
 Other mounts need their own checks; do not weaken publication or mode checks.
 Only the new test directory's private ACL and separate mount were changed;
 existing mount/ACL/synchronization settings remain intact.

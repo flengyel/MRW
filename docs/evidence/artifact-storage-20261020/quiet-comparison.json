@@ -117,14 +117,16 @@
   },
   "next_operation": {
     "name": "Single paused transaction qualification",
-    "authorized": false,
-    "executed": false,
+    "authorized": true,
+    "executed": true,
     "python_syntax_checked": true,
     "powershell_syntax_errors": 0,
     "read_only_preflight_passed": true,
     "timeout_seconds": 180,
     "termination_grace_seconds": 5,
     "existing_test_cases": 9,
-    "automatic_retries": 0
+    "automatic_retries": 0,
+    "qualification_passed": false,
+    "subsequent_result": "paused-qualification.json; first test errored at preflight replacement before commit; original configuration restored"
   }
 }

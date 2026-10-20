@@ -128,8 +128,10 @@ claimed from the current rejection.
 The separately approved comparison paused only the Windows client's vault
 folder, left note bytes unchanged and verified resumption afterward. Four
 paused probes passed, while one probe in each active phase was denied. That
-bounded result does not yet qualify a pause/write/handover procedure; see
-[the result and prepared next operation](WSL_ARTIFACT_STORAGE_COMPARISON.md).
+bounded result did not qualify a pause/write/handover procedure. The subsequent
+approved paused transaction test failed at its first preflight replacement;
+synchronization/configuration were restored and independently verified. See
+[both results](WSL_ARTIFACT_STORAGE_COMPARISON.md). No new desktop attempt ran.
 
 The existing moved ext4 navigation fixture completed the physical Obsidian
 hyperlink click, fresh exact retained selection and reader return to the linked

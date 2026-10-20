@@ -11,11 +11,13 @@ needed files, with scanning in progress. Scanning is not completed handover.
 [Sanitized evidence](evidence/artifact-storage-20261020/quiet-comparison.json)
 records the result. No real store or note was edited.
 
-The difference supports testing paused operation, but twelve probes do not
+The difference supported testing paused operation, but twelve probes did not
 establish causality, identify a blocking process, or qualify the filesystem.
-Do not repeat this comparison automatically or call pausing a supported remedy.
-The proposed next operation is [one paused qualification](#prepared-next-operation-one-paused-qualification),
-which has **not** been authorized or executed.
+The subsequent separately approved [paused transaction qualification](#paused-transaction-qualification)
+failed at the first test's preflight `os.replace` with EACCES, before commit.
+The original folder configuration was restored and independently verified
+unpaused. **Pausing is not a qualified remedy.** Both bounded operations are
+finished; do not repeat them or infer support from the earlier four successes.
 
 The approved metadata/ACL setup was completed. It solved the private-mode
 mismatch and allowed an actual fixture move/save/reopen, but nested filesystem
@@ -132,20 +134,33 @@ retain the unsupported/unqualified status and report the precise filesystem
 condition; do not bypass it. Full cross-machine permission/access acceptance
 still requires an accessible second host, independently of this comparison.
 
-## Prepared next operation: one paused qualification
+## Paused transaction qualification
 
-**Proposed; not executed or separately authorized.** No runtime code or private
-permission checks change. The candidate workaround is to pause the Windows
-client's vault synchronization while MRW writes, then close MRW and resume for
-handover. This operation tests only its local storage prerequisite; it cannot
-qualify actual Pi creation/edit-back permissions or establish power-loss safety.
-It is not yet a user storage procedure.
+**Separately approved and executed once; failed before commit.** Starting at
+clean `2b91a51`, the guarded operation verified the Windows folder paused and
+ran the first selected test. It errored at the production filesystem probe's
+`os.replace` with `PermissionError`, errno 13; fail-fast stopped the pass. One
+test ran, zero passed, one errored. The remaining eight selected tests and extra
+mode/source-absent checks did not run. The runner deliberately exited 1 rather
+than timing out. The operator's `finally` restored `paused=false` and verified
+the complete folder configuration unchanged (2.29 s elapsed). An independent
+API read confirmed unpaused/scanning with no errors or needed files. The owned
+Windows test tree was removed. [Exact results](ARTIFACT_STORAGE_VALIDATION.md#approved-paused-transaction-check--2026-10-20)
+and [sanitized evidence](evidence/artifact-storage-20261020/paused-qualification.json)
+retain this failure separately from the earlier comparison.
 
-The prepared operator files are local, ignored validation helpers in
+The candidate pause/write/resume workaround is **not qualified**. No runtime
+code or private permission checks changed. No real store was opened/moved and
+no Pi or desktop action ran. The cause remains unidentified, and actual
+receiving access/synchronization and power-loss durability remain untested.
+The bounded attempt stops here; no further environmental operation is proposed.
+
+The executed operator files are local, ignored validation helpers in
 `.codex-work/artifact-storage-20261020/`: `paused-qualification.ps1` and
 `paused-qualification.py`. They are available for review on this installation;
 they are not extension entry points or portable commands shipped with MRW.
-The exact invocation from the repository is:
+The invocation below is an execution record, **not a request to rerun it**.
+Its result-file guard now refuses another execution:
 
 ```sh
 /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe \
@@ -153,7 +168,8 @@ The exact invocation from the repository is:
   -File '\\wsl.localhost\Debian\home\flengyel\src\theorem_terminal\.codex-work\artifact-storage-20261020\paused-qualification.ps1'
 ```
 
-The operation:
+The authorized operation selected these steps; failure stopped step 3 and
+skipped step 4. Restoration in step 6 completed:
 
 1. Refuses a previous result, an already-paused or differently located vault,
    or a trial directory without the previously approved protected Windows ACL.
@@ -186,10 +202,10 @@ The operation:
 Rollback is the same **Resume Zettelkasten** operation above if the operator is
 terminated before `finally` or the local API becomes unavailable. No persistent
 mount, ACL, synchronization policy, actual artifact binding or Pi setting changes.
-Successful local tests would support this candidate for further handover work;
-they would not erase the active-sync denials, the unconfirmed Windows-backed
-desktop return, or the unavailable second-host check. Failure ends this bounded
-attempt with its precise result. Both prepared helpers pass syntax validation;
-the PowerShell helper's read-only `-ValidateOnly` preflight also passed its
-folder/ACL guards. These preparation checks changed no setting and executed no
-transaction test.
+The failed check does not erase the earlier successful fixture move or ext4
+desktop round trip, and those earlier successes do not qualify this setup.
+Complete Windows-backed desktop return and actual receiving-host checks remain
+unconfirmed. Syntax/read-only preflight checks passed before execution; they
+are separate from this actual transaction-test failure. The original folder
+configuration is restored. Do not repeat this bounded attempt or add retries
+to turn the result into a pass.

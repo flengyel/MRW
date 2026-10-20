@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-20",
+  "baseline": "2b91a51bba761513ba492684182a8565d3bca2b3",
+  "runtime_version": "0.7.0",
+  "runtime_changed": false,
+  "authorization": "User separately approved the exact single paused transaction check",
+  "actual_host_check": true,
+  "runner_result": {
+    "executed": true,
+    "runtime_version": "0.7.0",
+    "windows_folder_paused_verified_by_operator": true,
+    "actual_destination": "scoped NTFS-backed metadata mount",
+    "real_store_opened_or_moved": false,
+    "actual_inter_computer_sync": false,
+    "power_loss_tested": false,
+    "desktop_actions": false,
+    "automatic_retries": 0,
+    "run": 1,
+    "failures": 0,
+    "errors": 1,
+    "tests_passed": false,
+    "completed": false,
+    "error_type": "SystemExit"
+  },
+  "qualification_passed": false,
+  "selected_tests": 9,
+  "tests_run": 1,
+  "passed": 0,
+  "errors": 1,
+  "selected_tests_not_reached": 8,
+  "additional_rejected_mode_and_source_absent_checks_reached": false,
+  "fail_fast": true,
+  "automatic_retries": 0,
+  "failure": {
+    "test": "test_move_pinned_links_notes_mutation_restart_and_old_payload_removal",
+    "stage": "artifact_plan -> destination -> filesystem probe -> save_mutable -> os.replace",
+    "exception": "PermissionError",
+    "errno": 13,
+    "target": "disposable nested filesystem probe record",
+    "authority_switch_reached": false,
+    "test_elapsed_seconds": 0.312,
+    "runner_exit_code": 1,
+    "timeout": false,
+    "paused_configuration_flag_verified": true,
+    "native_handle_quiescence_measured": false,
+    "responsible_process_or_definitive_cause_identified": false
+  },
+  "restoration": {
+    "paused": false,
+    "folder_configuration_unchanged": true,
+    "elapsed_seconds": 2.29
+  },
+  "independent_read_only_final_status": {
+    "version": "v2.1.6",
+    "os": "windows",
+    "arch": "amd64",
+    "folder": {
+      "id": "Zettelkasten",
+      "path": "C:\\Users\\fleng\\Zettelkasten",
+      "type": "sendreceive",
+      "paused": false,
+      "ignorePerms": false,
+      "sendOwnership": false,
+      "syncOwnership": false,
+      "sendXattrs": false,
+      "syncXattrs": false,
+      "disableFsync": false,
+      "copyOwnershipFromParent": false
+    },
+    "state": "scanning",
+    "errors": 0,
+    "neededFiles": 0,
+    "connectedPeers": [
+      {
+        "clientVersion": "v1.19.2-ds1",
+        "type": "tcp-client"
+      }
+    ]
+  },
+  "preservation": {
+    "owned_windows_test_tree_removed": true,
+    "prior_inventoried_work_and_packages_unchanged": 14,
+    "original_navigation_fixture_source_unchanged": true,
+    "temporary_navigation_note_unchanged": true,
+    "wsl_conf_and_fstab_unchanged": true,
+    "real_store_opened_or_moved": false,
+    "pi_command_or_ssh_attempt": false,
+    "lasting_configuration_mount_or_acl_change": false,
+    "new_desktop_attempt": false
+  },
+  "limits": {
+    "paused_writing_qualified": false,
+    "zettelkasten_storage_goal_complete": false,
+    "actual_receiving_host_permissions_or_sync_tested": false,
+    "power_loss_tested": false,
+    "complete_windows_backed_desktop_return_confirmed": false,
+    "further_environmental_operation_proposed": false,
+    "new_vsix_required": false
+  }
+}

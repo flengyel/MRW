@@ -1,5 +1,57 @@
 # Artifact storage validation — 2026-10-19
 
+## Approved paused transaction check — 2026-10-20
+
+Started at clean `2b91a51bba761513ba492684182a8565d3bca2b3`, installed MRW
+0.7.0 unchanged. The user separately approved the exact prepared operation.
+It ran once, with **fail-fast** enabled and no automatic retry. The Windows
+client's vault folder was verified paused before the Python fixture runner.
+This verifies its API configuration flag; native file-handle quiescence was not
+measured.
+
+The first selected test,
+`test_move_pinned_links_notes_mutation_restart_and_old_payload_removal`, errored
+during `artifact_plan → destination → probe → save_mutable → os.replace`.
+The exception was **`PermissionError: [Errno 13] Permission denied`**, replacing
+a disposable probe temporary file with its `record` target under the actual
+scoped NTFS-backed metadata mount. The test ran for 0.312 seconds. It did not
+reach the move or authority switch. **One test ran, zero passed, one errored;
+the other eight selected tests did not run.** The extra rejected-mode and
+original-source-unavailable checks were also not reached. These are not passing
+or skipped tests, and the earlier nine-case active-sync run remains separate.
+
+The helper deliberately exited 1 after the first error; this was not a timeout
+or interrupted operator. `finally` restored `paused=false` and verified that
+the whole folder configuration equalled its initial in-memory value. Operator
+elapsed time was 2.29 seconds, including its one-second settling delay. An
+independent read-only API query confirmed the Windows folder unpaused, scanning,
+with zero errors and needed files. These counters do not prove completed network
+handover. The owned Windows temporary test tree was removed. No Pi command,
+application/WSL restart, lasting configuration/ACL/mount change, provider request,
+compiler, notebook action, desktop input or real-store move occurred.
+
+**Pausing the Windows client's folder is not a qualified workaround.** The
+four passing paused probes in the earlier comparison did not establish reliable
+transaction prerequisites. No blocking process or definitive cause has been
+identified; do not assert that Syncthing caused the denial or that all DrvFS
+configurations are impossible. The original mount still lacks private modes;
+the metadata trial fixes that mismatch but cannot reliably complete preflight
+atomic replacement in this tested environment. Retain all publication/mode
+checks and leave the real store at its original location. The bounded attempt
+ends here without retries, a proposed permanent configuration, or another pause
+request. No new environmental operation is prepared or required of the user.
+
+Actual receiving-host creation/edit-back/access and the complete Windows-backed
+desktop return remain unconfirmed. The earlier ext4 physical round trip remains
+valid separate evidence. The synchronized Zettelkasten storage goal is **not
+complete**. [Sanitized failure and restoration evidence](evidence/artifact-storage-20261020/paused-qualification.json)
+records this actual host result. No runtime or package change is delivered.
+
+All 14 previously inventoried work/package files, the original navigation source,
+the temporary note, `/etc/wsl.conf` and `/etc/fstab` retained their bytes. The
+fixture cleanup and final configuration checks are actual observations, not
+claims that the transaction suite passed.
+
 ## Approved Windows-client pause comparison — 2026-10-20
 
 Started at clean `4a286d873e5821f77683dda886f96c3f5d016206`, with unchanged
@@ -30,11 +82,11 @@ handover or actual receiving-side validation. Ownership/xattr/fsync settings
 still match the earlier inspected values; no lasting configuration change was
 made. No WSL/application restart or desktop input was performed in this step.
 
-This bounded difference warrants testing paused writing; it does not establish
-Syncthing causality or filesystem qualification. The [prepared next operation](WSL_ARTIFACT_STORAGE_COMPARISON.md#prepared-next-operation-one-paused-qualification)
-runs the existing nine transaction cases once under a separately authorized
-pause, with a 180-second timeout and verified resume. It has not run and does
-not yet supply a user procedure. The real store remains unmoved; actual Pi
+This bounded difference warranted testing paused writing; it did not establish
+Syncthing causality or filesystem qualification. The [paused transaction check](WSL_ARTIFACT_STORAGE_COMPARISON.md#paused-transaction-qualification)
+was subsequently separately approved and stopped at its first preflight error,
+as recorded above, with configuration restored. It supplies no supported
+pause/write procedure. The real store remains unmoved; actual Pi
 creation/edit-back/access tests and the complete Windows-backed desktop return
 remain unconfirmed. There is no runtime change or new VSIX. Document/helper
 syntax and preservation checks are separate from the historical 0.7.0 regression

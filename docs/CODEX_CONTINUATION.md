@@ -1,5 +1,39 @@
 # Codex continuation: MRW source work and companion notes
 
+## Paused transaction qualification failed — 2026-10-20
+
+Started clean at `2b91a51bba761513ba492684182a8565d3bca2b3`. The user's
+**Yes** approved the exact prepared paused transaction check. It ran once on
+fresh disposable fixtures through the existing Windows metadata mount, with
+fail-fast enabled. The first test errored in `artifact_plan`'s filesystem probe
+at `save_mutable → os.replace`: `PermissionError`, errno 13. No move committed.
+One selected test ran and errored; the other eight and extra mode/source-absent
+checks were not reached. The helper deliberately exited 1, not by timeout.
+Read [the exact result](ARTIFACT_STORAGE_VALIDATION.md#approved-paused-transaction-check--2026-10-20)
+and [sanitized evidence](evidence/artifact-storage-20261020/paused-qualification.json).
+
+The operator's finally block restored `paused=false` and confirmed the complete
+folder configuration unchanged. Its elapsed time was 2.29 seconds. An independent
+read-only API query confirmed the Windows folder unpaused, scanning, with no
+errors/needed files; these are not completed handover evidence. The owned Windows
+fixture tree was removed. No Pi command, credential change, new desktop attempt,
+application/WSL restart, lasting mount/ACL/configuration change or real-store
+move occurred. The navigation fixture's binding and temporary mount remain as
+previously recorded; no existing fixture writer was started.
+
+Pausing is **not a qualified remedy**, despite the earlier four passing paused
+probes. The exact blocking process/cause remains unknown. The bounded attempt
+is over: do not rerun the guarded helpers, add blind retries, weaken checks,
+propose a permanent configuration from these results or ask for another generic
+pause approval. No concrete further environmental operation is prepared. The
+original nonmetadata mount fails private modes; the scoped metadata trial solves
+those modes but does not reliably pass atomic replacement in this environment.
+Usable synchronized Zettelkasten placement remains **unfinished**, as do actual
+second-host creation/edit-back/access and the full Windows-backed desktop return.
+Preserve the separate earlier ext4 desktop pass. Runtime/package remains 0.7.0;
+this result changes documentation/evidence only and needs no artificial VSIX.
+The real store and authoritative study files remain in place.
+
 ## Approved pause comparison completed — 2026-10-20
 
 Started clean at `4a286d873e5821f77683dda886f96c3f5d016206`. The user said
@@ -21,16 +55,13 @@ or alter credentials. No network addresses or keys need publication.
 No runtime change: installed/packaged MRW remains 0.7.0. The real store and note/
 source bytes remain unchanged. Windows-backed storage is still **unqualified**;
 the comparison does not identify a blocking process or establish a remedy.
-One concrete next operation is prepared in the comparison guide: pause only the
-same Windows folder, run nine existing transaction tests on fresh disposable
-fixtures once (180-second timeout, five-second termination grace), check rejected
-modes/retained access, and restore/verify the original folder configuration.
-Local helpers `paused-qualification.ps1` / `.py` are under the ignored
-`.codex-work/artifact-storage-20261020/` directory. They refuse a previous result
-and unsafe initial state. **This further operation is not authorized or run**;
-AGENTS.md requires separate approval. Do not silently expand the prior twelve-
-probe approval, add retries, make permanent configuration changes or move real
-work. Its success would be local evidence only, not second-host acceptance.
+The prepared further paused transaction check was subsequently separately
+approved and failed at its first preflight error, as recorded above. Local
+helpers `paused-qualification.ps1` / `.py` remain under the ignored
+`.codex-work/artifact-storage-20261020/` directory and refuse a previous result.
+They have run once; do not rerun them. The prior twelve-probe approval alone did
+not authorize this operation; the subsequent explicit approval did. Neither
+approval authorizes permanent configuration changes or moving real work.
 
 No new desktop attempt ran: preserve the earlier separate ext4 pass and partial
 Windows result below. Complete Windows-backed return and actual synchronized

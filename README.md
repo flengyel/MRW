@@ -81,8 +81,10 @@ completed a disposable Windows-backed move, save and reopen. Repeated nested
 probe replacement denials still prevent qualification for real work; synchronized
 placement is not declared complete. A separately approved
 [controlled comparison](docs/WSL_ARTIFACT_STORAGE_COMPARISON.md) passed 3/4 probes
-before, 4/4 paused and 3/4 resumed; synchronization was restored. This does not
-yet qualify paused operation. The user's actual location remains unchanged.
+before, 4/4 paused and 3/4 resumed. The subsequent approved transaction test
+also encountered a preflight replacement denial while paused; pausing is not a
+qualified remedy. Synchronization was restored and independently verified.
+The user's actual location remains unchanged.
 This adds no synchronization service or distributed locking. Notes alone still do
 not carry the separately saved MRW material.
 

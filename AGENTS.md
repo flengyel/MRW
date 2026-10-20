@@ -101,9 +101,13 @@ it is not real-store qualification or cross-machine synchronization acceptance.
 The separately approved comparison in `docs/WSL_ARTIFACT_STORAGE_COMPARISON.md`
 ran once: 3/4 probes passed before, 4/4 paused, 3/4 resumed; the Windows folder
 was independently verified unpaused afterward. This does not prove causality
-or qualify paused writing. The next bounded paused qualification is prepared,
-not authorized. Do not change permissions/mount/sync configuration
-without separate authorization. The standalone Qt storage/recovery is unchanged.
+or qualify paused writing. The subsequently approved paused transaction check
+stopped at its first test: the same preflight `os.replace` EACCES occurred before
+commit. Synchronization/configuration were restored and independently verified.
+Pausing is not a qualified remedy; do not repeat this bounded attempt, weaken
+checks or move real work into this setup. Do not change permissions/mount/sync
+configuration without separate authorization. The standalone Qt storage/recovery
+is unchanged.
 
 The existing editor-centered Qt GUI remains available as
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical

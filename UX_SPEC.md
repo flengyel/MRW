@@ -193,7 +193,9 @@ save/reopen, but unresolved probe replacement denials prevent real-store
 qualification; see [the configuration results](docs/WSL_ARTIFACT_STORAGE_SETUP.md).
 One approved comparison found no denials in four paused probes and one denial
 in each four-probe active phase. The Windows folder was resumed and independently
-verified. This does not establish a supported pause/write/handover procedure.
+verified. The subsequent approved paused transaction check failed at its first
+preflight replacement before commit. No pause/write/handover procedure is
+qualified; retain the rejection and original real-store location.
 Keep bindings/journals/locks and runtime state outside the selected directory.
 The [storage guide](docs/ARTIFACT_STORAGE.md) defines scope, recovery and the
 one-writing-computer workflow. Qt storage is unchanged. Navigation initiates no

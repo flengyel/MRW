@@ -81,8 +81,10 @@ checks are weakened, the real store remains unmoved, and usable synchronized
 Zettelkasten artifact storage remains unfinished. A separately approved bounded
 comparison passed 3/4 probes before, 4/4 paused and 3/4 resumed; the Windows
 client folder was restored and independently verified unpaused. That difference
-is not a cause determination or qualification. One paused transaction-test
-operation is prepared for separate authorization in the comparison guide.
+is not a cause determination or qualification. The subsequently approved paused
+transaction check failed at the first test's preflight `os.replace`, before
+commit, and restored synchronization/configuration. Pausing is not a qualified
+remedy; the bounded attempt ended without retries or a runtime change.
 Second-host synchronization acceptance is unavailable. This increment creates no mathematical-use claim and
 does not reopen the Pi, R3, SagePod or Euclid campaigns.
 
