@@ -98,8 +98,11 @@ effective Windows access. Read `docs/WSL_ARTIFACT_STORAGE_SETUP.md` for the scop
 metadata/ACL trial separately authorized and configured on 2026-10-20. A local
 fixture move/save/reopen passed, but nested probe replacement denials remain;
 it is not real-store qualification or cross-machine synchronization acceptance.
-The bounded comparison in `docs/WSL_ARTIFACT_STORAGE_COMPARISON.md` is prepared
-but has not been separately authorized. Do not change permissions/mount/sync configuration
+The separately approved comparison in `docs/WSL_ARTIFACT_STORAGE_COMPARISON.md`
+ran once: 3/4 probes passed before, 4/4 paused, 3/4 resumed; the Windows folder
+was independently verified unpaused afterward. This does not prove causality
+or qualify paused writing. The next bounded paused qualification is prepared,
+not authorized. Do not change permissions/mount/sync configuration
 without separate authorization. The standalone Qt storage/recovery is unchanged.
 
 The existing editor-centered Qt GUI remains available as

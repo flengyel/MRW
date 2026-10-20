@@ -125,6 +125,11 @@ metadata alone does not establish Windows access by every account. Receiving
 permissions must be verified after both
 synchronized creation and replacement. No supported vault-storage handover is
 claimed from the current rejection.
+The separately approved comparison paused only the Windows client's vault
+folder, left note bytes unchanged and verified resumption afterward. Four
+paused probes passed, while one probe in each active phase was denied. That
+bounded result does not yet qualify a pause/write/handover procedure; see
+[the result and prepared next operation](WSL_ARTIFACT_STORAGE_COMPARISON.md).
 
 The existing moved ext4 navigation fixture completed the physical Obsidian
 hyperlink click, fresh exact retained selection and reader return to the linked

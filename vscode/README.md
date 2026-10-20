@@ -139,6 +139,10 @@ user's access; they do not prove access by all Windows accounts. A
 authorized and configured. A disposable move/save/reopen and local Windows-created
 receiving-copy checks pass, but nested probe replacement denials remain unresolved.
 The real store remains unmoved; this setup is not yet qualified for real work.
+The approved [controlled comparison](../docs/WSL_ARTIFACT_STORAGE_COMPARISON.md)
+passed 3/4 probes before, 4/4 paused and 3/4 resumed, with the Windows client's
+folder independently verified unpaused afterward. Paused transaction tests are
+prepared, not authorized or run; the difference alone is not a supported remedy.
 Other mounts need their own checks; do not weaken publication or mode checks.
 Only the new test directory's private ACL and separate mount were changed;
 existing mount/ACL/synchronization settings remain intact.

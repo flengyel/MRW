@@ -79,7 +79,10 @@ not evidence of universal Windows access or of every DrvFS mount being unusable.
 A separately authorized [scoped metadata/ACL trial](docs/WSL_ARTIFACT_STORAGE_SETUP.md)
 completed a disposable Windows-backed move, save and reopen. Repeated nested
 probe replacement denials still prevent qualification for real work; synchronized
-placement is not declared complete. The user's actual location remains unchanged.
+placement is not declared complete. A separately approved
+[controlled comparison](docs/WSL_ARTIFACT_STORAGE_COMPARISON.md) passed 3/4 probes
+before, 4/4 paused and 3/4 resumed; synchronization was restored. This does not
+yet qualify paused operation. The user's actual location remains unchanged.
 This adds no synchronization service or distributed locking. Notes alone still do
 not carry the separately saved MRW material.
 

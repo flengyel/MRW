@@ -1,5 +1,43 @@
 # Codex continuation: MRW source work and companion notes
 
+## Approved pause comparison completed — 2026-10-20
+
+Started clean at `4a286d873e5821f77683dda886f96c3f5d016206`. The user said
+**Yes** to the prepared Windows-client comparison. It ran once: 3/4 before,
+4/4 paused and 3/4 resumed probes passed; each denial was `PermissionError`,
+errno 13. The operator completed normally and an independent local API read
+confirmed `paused=false`, no folder errors/needed files and scanning in progress.
+The Windows folder is resumed; no Pi command, lasting configuration, mount or
+ACL change occurred in this step. Scanning/needed counters do not prove actual
+receiving access or completed handover. Read [the exact result](WSL_ARTIFACT_STORAGE_COMPARISON.md)
+and its sanitized evidence. Do not rerun the comparison automatically.
+
+The user clarified that a Raspberry Pi 5 is the Syncthing peer and Windows
+machines run SyncTrayzor clients. The inspected local engine is Windows
+Syncthing v2.1.6; it does not displace that topology. The peer's local account/
+filesystem/permissions remain unverified. Do not repeat failed SSH authentication
+or alter credentials. No network addresses or keys need publication.
+
+No runtime change: installed/packaged MRW remains 0.7.0. The real store and note/
+source bytes remain unchanged. Windows-backed storage is still **unqualified**;
+the comparison does not identify a blocking process or establish a remedy.
+One concrete next operation is prepared in the comparison guide: pause only the
+same Windows folder, run nine existing transaction tests on fresh disposable
+fixtures once (180-second timeout, five-second termination grace), check rejected
+modes/retained access, and restore/verify the original folder configuration.
+Local helpers `paused-qualification.ps1` / `.py` are under the ignored
+`.codex-work/artifact-storage-20261020/` directory. They refuse a previous result
+and unsafe initial state. **This further operation is not authorized or run**;
+AGENTS.md requires separate approval. Do not silently expand the prior twelve-
+probe approval, add retries, make permanent configuration changes or move real
+work. Its success would be local evidence only, not second-host acceptance.
+
+No new desktop attempt ran: preserve the earlier separate ext4 pass and partial
+Windows result below. Complete Windows-backed return and actual synchronized
+creation/edit-back/access remain unconfirmed. No mathematical exercise or broad
+acceptance campaign is needed. Documentation-only checks do not require a new
+extension release or another complete regression pass.
+
 ## Authorized Windows metadata trial — 2026-10-20
 
 User approval after `2cc1590` authorized only the isolated new directory's private
@@ -7,7 +45,8 @@ Windows ACL and separate metadata mount. Both are now configured; read
 [the setup/result guide](WSL_ARTIFACT_STORAGE_SETUP.md) and
 [actual trial evidence](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20).
 No runtime code changed; installed/package version remains 0.7.0. The real store
-and authoritative study files remain unchanged. No Syncthing setting changed.
+and authoritative study files remain unchanged. The later approved temporary
+Syncthing pause and restoration are recorded above.
 
 Actual production-command fixture move from ext4 to the scoped Windows mount
 committed and removed all five old owned files. A later scripted reader annotation
@@ -28,14 +67,12 @@ other bounded probes passed. No responsible process was established. Keep the
 checks and report the failures. Do not assume Syncthing caused them or add blind
 retries to make qualification pass.
 
-All independent bounded checks are recorded. The next prepared operation is
-[one controlled Syncthing pause/resume comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
-It requires separate authorization under AGENTS.md: pause only the existing
-Zettelkasten folder for four disposable probes (30-second process timeout),
-restore/verify its original false flag in finally, and compare four before/four
-after probes. Notes stay local/editable while sync waits. No WSL/application
-restart, ACL or other configuration change. The exact PATCH, rollback and
-interruption recovery are prepared; **do not execute without approval**.
+All independent bounded checks are recorded. The
+[controlled Syncthing pause/resume comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md)
+was subsequently separately approved and completed as recorded above. Its
+approval covered only those twelve probes, not a permanent setting or the
+further paused transaction qualification. Notes stayed local/editable while
+sync waited; the original false flag was restored and independently verified.
 
 The normal installed restart verified the old link through the clipboard-follow
 command, exact selection and saved annotation. A final physical Obsidian click

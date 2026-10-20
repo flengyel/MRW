@@ -19,7 +19,10 @@ verification, adoption and editing; they are not inter-computer synchronization
 evidence. Nested filesystem probes also encountered unresolved replacement
 denials, so this temporary setup is not qualified for the real store. Read
 [the precise results](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20)
-and [prepared next comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md). The real store
+and [the completed controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
+That later approved comparison passed 3/4 probes before, 4/4 paused and 3/4
+resumed; the Windows folder was independently verified unpaused afterward.
+It edited no note and performed no new desktop operation. The real store
 remains unmoved; no runtime/package change or broader usefulness claim was made.
 
 ## Post-move desktop follow-up — 2026-10-20
@@ -38,9 +41,9 @@ See [the exact observations](ARTIFACT_STORAGE_VALIDATION.md#windows-backed-follo
 This is actual agent-operated desktop evidence after an ext4 move and restart,
 not Windows-backed storage acceptance or independent human mathematical use.
 The user's earlier report of practical benefit remains separate. The
-[scoped Windows-backed setup](WSL_ARTIFACT_STORAGE_SETUP.md) awaits separate
-authorization; the real store remains unmoved. No runtime/package change was
-needed for this follow-up.
+[scoped Windows-backed setup](WSL_ARTIFACT_STORAGE_SETUP.md) was subsequently
+authorized and tested as recorded above; the real store remains unmoved. No
+runtime/package change was needed for this follow-up.
 
 ## Artifact placement 0.7.0 — 2026-10-19
 

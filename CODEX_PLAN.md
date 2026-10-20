@@ -78,8 +78,11 @@ diagnoses Windows ACLs and actual Windows Syncthing versions/settings and
 The actual Windows-backed move/save/reopen and local receiving-copy checks pass;
 nested probe replacement denials prevent qualification for real work. No runtime
 checks are weakened, the real store remains unmoved, and usable synchronized
-Zettelkasten artifact storage remains unfinished. A bounded Syncthing-pause
-comparison is prepared but requires its own authorization.
+Zettelkasten artifact storage remains unfinished. A separately approved bounded
+comparison passed 3/4 probes before, 4/4 paused and 3/4 resumed; the Windows
+client folder was restored and independently verified unpaused. That difference
+is not a cause determination or qualification. One paused transaction-test
+operation is prepared for separate authorization in the comparison guide.
 Second-host synchronization acceptance is unavailable. This increment creates no mathematical-use claim and
 does not reopen the Pi, R3, SagePod or Euclid campaigns.
 

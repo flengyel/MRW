@@ -1,12 +1,61 @@
 # Artifact storage validation — 2026-10-19
 
+## Approved Windows-client pause comparison — 2026-10-20
+
+Started at clean `4a286d873e5821f77683dda886f96c3f5d016206`, with unchanged
+installed MRW 0.7.0. The user separately approved the prepared comparison and
+clarified the topology: a Raspberry Pi 5 is the Syncthing peer, and Windows
+machines are SyncTrayzor clients. The local API observes the Windows client's
+Syncthing v2.1.6 engine, not a WSL service. No command or SSH attempt was sent to
+the Pi; the connected peer's version does not establish its filesystem access.
+
+The exact prepared operation ran once on disposable nested directories through
+the existing metadata mount. It changed only the Windows Zettelkasten folder's
+`paused` flag, `false → true → false`, with restoration in `finally`:
+
+| Phase | Passed | Denied | Probe-phase elapsed |
+|---|---:|---:|---:|
+| Before pause | 3 | 1 | 0.834 s |
+| Paused | 4 | 0 | 0.570 s |
+| Resumed | 3 | 1 | 0.826 s |
+
+Both denials were `PermissionError`, errno 13 (`EACCES`); the helper records the
+exception class/errno, not a new native-handle trace or responsible process.
+Earlier regression traces locate that condition at preflight `os.replace`.
+No failed probe was retried or forced. The phase timings do not measure the
+complete pause interval. The operator exited successfully, and an independent
+read-only API inspection confirmed `paused=false`, `errors=0`, `neededFiles=0`
+and state `scanning`. This is resumed operation, not proof of completed network
+handover or actual receiving-side validation. Ownership/xattr/fsync settings
+still match the earlier inspected values; no lasting configuration change was
+made. No WSL/application restart or desktop input was performed in this step.
+
+This bounded difference warrants testing paused writing; it does not establish
+Syncthing causality or filesystem qualification. The [prepared next operation](WSL_ARTIFACT_STORAGE_COMPARISON.md#prepared-next-operation-one-paused-qualification)
+runs the existing nine transaction cases once under a separately authorized
+pause, with a 180-second timeout and verified resume. It has not run and does
+not yet supply a user procedure. The real store remains unmoved; actual Pi
+creation/edit-back/access tests and the complete Windows-backed desktop return
+remain unconfirmed. There is no runtime change or new VSIX. Document/helper
+syntax and preservation checks are separate from the historical 0.7.0 regression
+suite. [Sanitized comparison evidence](evidence/artifact-storage-20261020/quiet-comparison.json)
+retains the exact per-probe results and independent final API status.
+
+All 14 previously inventoried work/package files, the original navigation source,
+the temporary note, `/etc/wsl.conf` and `/etc/fstab` retained their bytes. The new
+Python helper parses, PowerShell reports zero syntax errors, and its read-only
+`-ValidateOnly` preflight confirms the unpaused folder/private trial ACL without
+running tests or changing settings. These are preparation checks, not paused
+transaction-test results.
+
 ## Authorized metadata trial — 2026-10-20
 
 The user approved the exact scoped operation prepared in `2cc1590`. The checkout
 was clean at that commit. MRW runtime/package remains **0.7.0**; no runtime checks
 were changed. Only the new disposable Windows directory's ACL and its separate
-mount were configured. The real artifact store, existing vault ACLs, `/mnt/c`,
-WSL configuration and Syncthing settings remain unchanged.
+mount were configured. The real artifact store, existing vault ACLs, `/mnt/c`
+and WSL configuration remain unchanged. The later approved temporary Syncthing
+pause and verified restoration are recorded above.
 
 The new directory is `C:\Users\fleng\Zettelkasten\MRW-storage-test-20261020`.
 Its protected Windows ACL has three inheritable FullControl grants: current
@@ -81,8 +130,8 @@ passed without exposing a failure for native Windows access inspection. **No
 responsible process or Syncthing cause was established.** Do not describe the
 failed regression runs as passing, add blind retries, or declare this setup
 qualified for real work. The [single controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md)
-is prepared with exact pause/resume scope and rollback, but is not authorized or
-executed. No permanent configuration is recommended yet.
+was subsequently separately approved and executed as recorded above. No
+permanent configuration is recommended yet.
 
 The real store remains unmoved. The disposable fixture is now bound to the
 temporary Windows mount; restore that exact mount after WSL restart before using

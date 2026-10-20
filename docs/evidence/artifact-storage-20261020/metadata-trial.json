@@ -75,7 +75,7 @@
   "remaining": {
     "qualified_for_real_store": false,
     "zettelkasten_storage_goal_complete": false,
-    "quiet_syncthing_pause_comparison": "Prepared, not separately authorized or executed",
+    "quiet_syncthing_pause_comparison": "Subsequently separately approved and completed; see quiet-comparison.json. Paused transaction qualification is prepared, not authorized or run.",
     "second_host_permissions_and_creation_edit_back_sync": "Unavailable",
     "new_vsix_required": false
   }

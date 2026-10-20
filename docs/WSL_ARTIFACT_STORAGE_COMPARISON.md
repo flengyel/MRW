@@ -1,13 +1,29 @@
-# Prepared comparison for Windows replacement denials
+# Controlled comparison for Windows replacement denials
 
-Status: **not executed; separate synchronization-setting authorization required**.
+Status, 2026-10-20: **separately approved and executed; Windows folder resumed**.
+The checkout started clean at `4a286d8`. The four before/paused/resumed probes
+respectively produced **3/4, 4/4 and 3/4 successes**. Each failed probe reported
+`PermissionError`, errno 13 (`EACCES`). No probe was retried. Probe-phase elapsed
+times were 0.834, 0.570 and 0.826 seconds; these are not measurements of the
+whole pause interval. The operator completed normally, and an independent
+read-only API query confirmed `paused=false`, zero folder errors and zero
+needed files, with scanning in progress. Scanning is not completed handover.
+[Sanitized evidence](evidence/artifact-storage-20261020/quiet-comparison.json)
+records the result. No real store or note was edited.
+
+The difference supports testing paused operation, but twelve probes do not
+establish causality, identify a blocking process, or qualify the filesystem.
+Do not repeat this comparison automatically or call pausing a supported remedy.
+The proposed next operation is [one paused qualification](#prepared-next-operation-one-paused-qualification),
+which has **not** been authorized or executed.
+
 The approved metadata/ACL setup was completed. It solved the private-mode
 mismatch and allowed an actual fixture move/save/reopen, but nested filesystem
 probes also encountered repeated `EACCES` on `os.replace`. The process causing
 those denials has not been identified. Do not assume Syncthing caused them, add
 blind retries, clear permissions, or recommend moving real work on that evidence.
 
-The next proposed operation is one bounded comparison with the **existing
+The executed operation was one bounded comparison with the **existing
 Zettelkasten Syncthing folder temporarily paused**, then resumed. It changes
 only that folder's `paused` flag. It leaves all other settings, devices, mounts,
 ACLs and MRW bindings unchanged. No application or WSL restart is required.
@@ -16,12 +32,18 @@ the comparison to finish. No notes are edited by this operation.
 
 AGENTS.md says: “Do not change permissions/mount/sync configuration without
 separate authorization.” The previous approval covered only the new private test
-directory and its mount, expressly leaving Syncthing unchanged. This is why the
-comparison requires its own authorization.
+directory and its mount, expressly leaving Syncthing unchanged. The user then
+separately approved this comparison. That approval does not authorize permanent
+configuration changes or repeated pause/probe campaigns.
 
 ## Exact scope and configuration diff
 
-Windows Syncthing v2.1.6, existing folder ID `Zettelkasten`:
+The user identifies a Raspberry Pi 5 as the network's Syncthing peer and Windows
+machines as SyncTrayzor clients. The observed local engine is Windows Syncthing
+v2.1.6 under SyncTrayzor; this operation changed only that client's existing
+folder ID `Zettelkasten`. It sent no command to the Pi. The local API reports a
+connected peer version 1.19.2-ds1; its filesystem, account and permissions were
+not inspected.
 
 ```diff
 - "paused": false
@@ -36,7 +58,7 @@ replacement configuration. The API is documented since 1.12.0 and in the
 [versioned 2.0 manual](https://docs.syncthing.net/v2.0.0/rest/config.html), preceding
 the installed 2.1.6. No device/authentication settings change.
 
-The comparison uses only disposable probe files under
+The comparison used only disposable probe files under
 `C:\Users\fleng\Zettelkasten\MRW-storage-test-20261020`, through its existing
 metadata mount. No actual artifact store is moved or modified. Four nested
 probes before pausing, four while paused, then four after resuming constitute
@@ -89,8 +111,9 @@ Probe-Phase 'resumed'
 The prepared local `quiet-probes.py` verifies the exact mount and private modes,
 runs four unchanged production filesystem probes in a newly owned nested
 directory, and reports only phase, successes, errors and elapsed time. It makes
-no model/tool/record request. The script above and Python helper are syntax
-checked; **syntax checking is not execution or acceptance**.
+no model/tool/record request. The script above and Python helper were syntax
+checked before their one approved execution. Their actual outcomes are recorded
+above, separately from syntax validation.
 
 ## Rollback, interruption and interpretation
 
@@ -108,3 +131,65 @@ whole synchronization arrangement. If pausing does not resolve the issue,
 retain the unsupported/unqualified status and report the precise filesystem
 condition; do not bypass it. Full cross-machine permission/access acceptance
 still requires an accessible second host, independently of this comparison.
+
+## Prepared next operation: one paused qualification
+
+**Proposed; not executed or separately authorized.** No runtime code or private
+permission checks change. The candidate workaround is to pause the Windows
+client's vault synchronization while MRW writes, then close MRW and resume for
+handover. This operation tests only its local storage prerequisite; it cannot
+qualify actual Pi creation/edit-back permissions or establish power-loss safety.
+It is not yet a user storage procedure.
+
+The prepared operator files are local, ignored validation helpers in
+`.codex-work/artifact-storage-20261020/`: `paused-qualification.ps1` and
+`paused-qualification.py`. They are available for review on this installation;
+they are not extension entry points or portable commands shipped with MRW.
+The exact invocation from the repository is:
+
+```sh
+/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe \
+  -NoProfile -NonInteractive -ExecutionPolicy Bypass \
+  -File '\\wsl.localhost\Debian\home\flengyel\src\theorem_terminal\.codex-work\artifact-storage-20261020\paused-qualification.ps1'
+```
+
+The operation:
+
+1. Refuses a previous result, an already-paused or differently located vault,
+   or a trial directory without the previously approved protected Windows ACL.
+2. Retains the current folder configuration in memory, sends only
+   `PATCH {"paused":true}`, verifies it and waits one second. No API key or
+   complete configuration is printed or saved.
+3. Selects the existing nine `ArtifactStorageTests` for one pass, stopping at the
+   first failed test, using fresh Linux fixture homes and Windows-mounted
+   destinations. These cover move/save/
+   reopen and exact references/associations, nine process-interruption points,
+   uncertain binding durability, cleanup recovery, source changes, injected
+   permission/disk/sync failures, later relocation, different-path adoption/
+   incomplete/conflict refusal, and required research dependencies. Some existing
+   branches explicitly select later Linux destinations; the report must retain
+   that distinction. No model request, notebook or compiler action is included.
+4. If those pass, uses one further owned fixture to reject `0640` payload and
+   `0755` root modes, restore its modes and check exact retained access after
+   making its disposable original source unavailable. It deletes only the
+   temporary test trees it created; no real or existing navigation store opens.
+5. Gives the Python process **180 seconds**, with a five-second forced-termination
+   grace period. It stops after a failure or timeout, with no retry. Notes remain
+   local/editable; synchronization waits during the pause. No application,
+   service, mount or WSL restart is needed.
+6. In `finally`, sends only `PATCH {"paused":false}`, verifies restoration and
+   compares the folder configuration with its initial in-memory value. It
+   reports independent changes instead of overwriting them. The result/log and
+   restoration summary remain outside the vault. The operator then independently
+   reads the folder's state, as for the completed comparison.
+
+Rollback is the same **Resume Zettelkasten** operation above if the operator is
+terminated before `finally` or the local API becomes unavailable. No persistent
+mount, ACL, synchronization policy, actual artifact binding or Pi setting changes.
+Successful local tests would support this candidate for further handover work;
+they would not erase the active-sync denials, the unconfirmed Windows-backed
+desktop return, or the unavailable second-host check. Failure ends this bounded
+attempt with its precise result. Both prepared helpers pass syntax validation;
+the PowerShell helper's read-only `-ValidateOnly` preflight also passed its
+folder/ACL guards. These preparation checks changed no setting and executed no
+transaction test.

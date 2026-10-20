@@ -191,6 +191,9 @@ commit; the current `/mnt/c` mount is one observed unsupported configuration.
 The separately authorized scoped metadata trial passes a disposable move and
 save/reopen, but unresolved probe replacement denials prevent real-store
 qualification; see [the configuration results](docs/WSL_ARTIFACT_STORAGE_SETUP.md).
+One approved comparison found no denials in four paused probes and one denial
+in each four-probe active phase. The Windows folder was resumed and independently
+verified. This does not establish a supported pause/write/handover procedure.
 Keep bindings/journals/locks and runtime state outside the selected directory.
 The [storage guide](docs/ARTIFACT_STORAGE.md) defines scope, recovery and the
 one-writing-computer workflow. Qt storage is unchanged. Navigation initiates no

@@ -35,8 +35,13 @@ commit. A separately authorized [scoped metadata/ACL fixture trial](WSL_ARTIFACT
 has now moved a disposable fixture successfully and verified Windows-created
 receiving copies. Nested probe replacement denials remain unresolved, so this
 configuration is not yet qualified for real work. Only that new directory's ACL
-and separate mount changed; the original mount, existing vault ACLs and Syncthing
-settings remain unchanged. Another mount must pass its own capability
+and separate mount changed. A later separately approved
+[controlled Windows-client comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md)
+temporarily paused its vault folder: 3/4 probes passed before, 4/4 paused and
+3/4 resumed. The flag was restored and independently verified false. The original
+mount and existing vault ACLs remain unchanged; no lasting Syncthing setting
+change was made. This difference does not qualify paused use or identify the
+cause of the denials. Another mount must pass its own capability
 checks; enabling a setting alone does not establish support.
 See [actual filesystem results](ARTIFACT_STORAGE_VALIDATION.md).
 
@@ -111,6 +116,12 @@ arbitrary filesystem edits. Use one active writing installation per store.
 Relocation and network synchronization are separate. Use your existing
 synchronization arrangement only with a filesystem that preserves MRW's required
 publication and private permissions. MRW installs no synchronization service.
+
+The user identifies a Raspberry Pi 5 as the Syncthing peer and Windows machines
+as SyncTrayzor clients. The inspected Windows client includes a local Syncthing
+engine. A pause on that client does not pause or change the Pi. No remote
+filesystem access, permissions or completed network handover were established
+by local API status or copied-store tests.
 
 1. Stop writing on the first computer. Finish recovery and close MRW windows
    using the store. Wait for your synchronization tool to finish copying the

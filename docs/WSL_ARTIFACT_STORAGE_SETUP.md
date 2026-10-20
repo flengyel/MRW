@@ -8,7 +8,7 @@ nevertheless encountered `EACCES` during atomic replacement. **The configuration
 is not yet qualified for the real store.** MRW 0.7.0 remains installed; the real
 store has not moved. The original `/mnt/c` mount remains unchanged and still
 fails the private-mode contract. See [actual results](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20)
-and the [prepared controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
+and the [completed controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
 
 ## Diagnosis
 
@@ -31,15 +31,18 @@ Users read grant appears on the vault itself. Enabling Linux metadata would
 not remove that Windows grant. The trial below isolates only a new empty test
 directory with an explicit Windows ACL; existing vault ACLs remain unchanged.
 
-Syncthing actually runs on **Windows**, under the user's account, via
-**SyncTrayzor 2.2.0 / Syncthing v2.1.6 windows-amd64**. Active local configuration
+The user identifies a **Raspberry Pi 5** as the Syncthing peer and Windows
+machines as **SyncTrayzor clients**. Read-only inspection confirms a local engine
+under the Windows user's account, **SyncTrayzor 2.2.0 / Syncthing v2.1.6
+windows-amd64**; this is not a WSL service. Active local configuration
 identifies the existing Zettelkasten folder as send/receive, not paused, with
 `ignorePerms=false`, `disableFsync=false`, `copyOwnershipFromParent=false`, and
 all four ownership/extended-attribute send/sync flags false. The local API
 reported idle, zero errors and zero needed files at inspection. Those values
 are a snapshot, not a verified handover. Its connected peer reported
-**v1.19.2-ds1**; that does not establish the peer's OS, user or local access rules.
-No credentials, device IDs, addresses or API keys are included here.
+**v1.19.2-ds1**; its local user, permissions and receiving behavior were not
+inspected. The user-supplied Pi topology is distinct from those API observations.
+No credentials, device IDs, network addresses or API keys are included here.
 
 The [configuration manual shipped at the v2.1.6 tag](https://github.com/syncthing/syncthing/blob/v2.1.6/man/syncthing-config.5)
 and the peer's [v1.19.2 configuration](https://docs.syncthing.net/v1.19.2/users/config.html)
@@ -67,8 +70,10 @@ Scope:
   by this test directory's children. No existing ACL is edited.
 - Linux mount: `metadata,uid=1000,gid=1000,umask=077,fmask=111` on that Windows
   directory only. No active drive is unmounted or remounted.
-- No `/etc/wsl.conf`, `/etc/fstab`, Syncthing setting or global configuration
-  change. **No restart or WSL shutdown**; existing work stays running.
+- No `/etc/wsl.conf`, `/etc/fstab` or global configuration change. The metadata
+  setup changed no Syncthing setting; a later separately approved temporary
+  pause was restored and verified. **No restart or WSL shutdown**; existing
+  work stays running.
 
 The following guarded Windows creation commands are retained as an execution
 record. The directory now exists; **do not rerun them on an existing directory**.
@@ -157,9 +162,12 @@ Seven of nine cross-filesystem regression cases passed in the initial run;
 preflight replacement denials blocked two, and a targeted repeat also encountered
 denials. Checks were not weakened. A nested diagnostic reproduced the denial
 even after a single 200 ms delayed attempt; other short probes passed. No process
-or synchronization cause was established. The prepared comparison temporarily
-pauses only the existing vault folder, runs bounded disposable probes, and
-restores the original state. **It has not been authorized or executed.**
+or synchronization cause was established. The separately approved comparison
+then temporarily paused only the Windows client's vault folder: 3/4 probes
+passed before, 4/4 paused, 3/4 resumed. The original unpaused state was restored
+and independently verified. That difference does not establish causality or
+qualify paused use. One paused transaction-test operation is prepared for
+separate authorization; no repeated probe campaign or Pi reconfiguration ran.
 
 Only after qualification can a permanent scoped mount and any necessary
 receiving operation be proposed. A future permanent configuration must preserve
