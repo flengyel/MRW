@@ -1,5 +1,50 @@
 # Codex continuation: MRW source work and companion notes
 
+## Windows-backed storage diagnosis — 2026-10-20
+
+Started at clean `8ae554394943961248991704f9ef24dd85eddb04`, installed 0.7.0.
+Read [the prepared scoped trial](WSL_ARTIFACT_STORAGE_SETUP.md). The real store
+remains unchanged. No runtime or permission-policy changes are delivered in this
+follow-up; no artificial VSIX release is needed. Zettelkasten artifact placement
+is **not complete** pending a verified Windows-backed setup and synchronized
+creation/replacement/access checks.
+
+Host inspection confirms read/write NTFS through 9p/DrvFS without metadata,
+WSL 2.6.3.0 / Debian / uid/gid 1000. Displayed `0777` is derived from Windows
+access, not proof of universal Windows access. The vault has current-user,
+SYSTEM and Administrators FullControl plus a CodexSandboxUsers read grant.
+Linux metadata alone does not remove Windows grants. Syncthing is Windows
+SyncTrayzor 2.2.0 / Syncthing 2.1.6, with ownership/xattr send/sync disabled;
+the connected peer reports 1.19.2-ds1. Its OS/ownership/access are unverified.
+Do not retry the prior failed SSH authentication or change credentials.
+
+The exact proposed operation creates one new disposable vault directory with
+a private Windows ACL and mounts only it at an isolated Linux path with
+metadata/private masks. No existing configuration entry changes, no C: remount,
+no WSL shutdown or working-window interruption. It is prepared, **not executed**.
+AGENTS.md requires separate authorization for that permission/mount operation.
+The guide includes rollback and success checks. Do not silently enable metadata
+globally, reconfigure Syncthing, repair unrelated permissions, or assume metadata
+survives receiving replacements. A scoped receiving-permission operation would
+require complete verified content and separate implementation/validation if
+mount defaults prove insufficient. Existing rejection stays in force.
+
+Nineteen focused storage regressions passed again. This documentation/setup-plan
+follow-up does not change runtime code, so the required 0.7.0 final regression
+evidence remains historical: 48 Node cases; **345 Python tests run = 286 passed
+and 59 skipped**. No packaging/bridge race or broad acceptance campaign is needed.
+
+The independent physical post-move Obsidian round trip now passed on the existing
+ext4 fixture: after normal restart, physical click on the same saved note link
+opened a fresh retained source with exactly `α😀 retained` selected; accessibility
+invocation of the enabled passage return control visibly foregrounded the correct
+temporary note. Seven fixture files stayed byte-identical. The user's working
+windows/drafts were preserved. This closes that specific desktop gap, not
+Windows-backed or second-host acceptance. Read the new validation sections;
+do not repeat the earlier blocked desktop attempts or count protocol dispatch
+alone as success. The user warned of slow startup and reported when loading
+finished. Practical-benefit reports remain distinct from broader usefulness.
+
 ## Explicit artifact placement — 2026-10-19
 
 The authorized storage increment builds on actual clean `9f1c4c7` (implementation
@@ -51,7 +96,7 @@ success in a disposable probe, but private permissions fail. Keep that rejection
 do not weaken checks or silently change mounts, ACLs or synchronization settings.
 No new Obsidian vault or user action is required for development.
 
-All 48 Node tests pass; 345 Python tests pass with 59 optional skips; compilation
+All 48 Node tests pass; 345 Python tests ran: 286 passed and 59 optional skips; compilation
 and syntax checks pass. Focused tests include real process interruptions at nine
 move boundaries, uncertain postreplacement durability, cleanup recovery, stale
 panels, required research dependencies, copied-store adoption/conflicts and

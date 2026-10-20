@@ -117,6 +117,17 @@ Directory…** verifies a complete synchronized copy on another installation.
 See [storage scope, commands and recovery](ARTIFACT_STORAGE.md). The current
 `/mnt/c` mount cannot preserve MRW's private modes and is rejected. This feature
 does not automatically add anything to Syncthing or copy a vault.
+The [scoped Windows-backed setup trial](WSL_ARTIFACT_STORAGE_SETUP.md) awaits
+separate authorization; displayed `0777` alone does not establish Windows
+access by every account. Receiving permissions must be verified after both
+synchronized creation and replacement. No supported vault-storage handover is
+claimed from the current rejection.
+
+The existing moved ext4 navigation fixture completed the physical Obsidian
+hyperlink click, fresh exact retained selection and reader return to the linked
+note after normal application restart on 2026-10-20. See
+[the observed round trip](OBSIDIAN_VALIDATION.md#post-move-desktop-follow-up--2026-10-20).
+That result is independent of the still-pending Windows-backed setup.
 
 After verified adoption at a different local workspace address, open that mapped
 workspace and use **MRW: Open Link from Clipboard** with the existing saved link.

@@ -1,5 +1,90 @@
 # Artifact storage validation — 2026-10-19
 
+## Windows-backed follow-up — 2026-10-20
+
+Started at clean `8ae554394943961248991704f9ef24dd85eddb04`; installed MRW
+remains 0.7.0. All 47 installed non-manifest files match the existing VSIX.
+This follow-up changes documentation and prepares a configuration trial; it
+does not change runtime code or relax persistence checks. No new VSIX is needed.
+
+Read-only host inspection distinguished the sandbox's read-only mount view
+from the actual read/write NTFS 9p/DrvFS host mount, still without metadata.
+WSL is 2.6.3.0, Debian kernel 6.6.87.2, uid/gid 1000. The vault's Windows ACL
+grants the current account, SYSTEM and Administrators FullControl and a local
+CodexSandboxUsers group ReadAndExecute. The `0777` presentation alone is not
+evidence of access by all Windows accounts. The prior failure is a concrete
+Unix-mode policy incompatibility; it does not prove every DrvFS configuration
+incapable of preserving MRW artifacts.
+
+The active local Syncthing API confirms Windows-amd64 v2.1.6, launched by
+SyncTrayzor 2.2.0 under the Windows user's account. The vault is send/receive,
+not paused, `ignorePerms=false`, `disableFsync=false`, and ownership/xattr send
+and sync flags are false. At inspection it was idle with zero errors/needed
+files. Its connected peer reports v1.19.2-ds1. These are local observations of
+configuration/status, **not receiving-host filesystem or synchronization
+acceptance**. No key, device identifier or credential was exposed. No SSH retry
+or configuration change was attempted.
+
+[The exact scoped metadata/ACL trial](WSL_ARTIFACT_STORAGE_SETUP.md) is prepared
+with scope, commands, rollback, restart impact and success checks. It creates
+one disposable Windows directory with a private ACL and mounts only that
+directory, preserving `/mnt/c`, existing configuration and working sessions.
+It awaits AGENTS.md's separate permission/mount authorization. No metadata mount
+has been tried, no Linux→Windows fixture move has committed, and synchronized
+creation, later replacement/edit-back, receiving ownership and access checks
+remain unperformed. Metadata portability is not assumed; the peer predates
+Syncthing's xattr feature. The Zettelkasten storage goal remains unfinished.
+
+The independent outstanding Obsidian check **passed on the existing moved ext4
+fixture**, with installed 0.7.0, Windows VS Code 1.141.2 and Obsidian 1.14.4:
+
+1. Opened the existing persistent fixture as an isolated ordinary installed
+   workspace after its previous normal close. Accessibility showed no retained
+   source editor before the click. The user's two working VS Code windows stayed
+   open and untouched.
+2. Normally closed the temporary-note Obsidian window with Alt+F4 and reopened
+   it through its existing note URL. A new application window/process appeared.
+   Startup was slow; no repeated launch/input campaign ran. The user reported
+   that loading had finished before the guarded link action.
+3. Inspected the existing temporary note's saved hyperlink. Foregrounded the
+   isolated intended workspace, allowed it to settle, then foregrounded Obsidian.
+   A **physical pointer click**, guarded by the actual hyperlink identity at
+   that point, followed the same saved pre-move URI.
+4. A fresh native retained-source view, instance
+   `0e81c559-b240-4760-96e4-819a0aebb025`, appeared in the intended WSL workspace.
+   Read-only accessibility selected exactly `α😀 retained`; the saved UTF-8 bytes
+   independently matched `ceb1f09f98802072657461696e6564` (11 Unicode scalars,
+   12 UTF-16 code units). This is a fresh retained selection, not dispatch alone.
+5. Invoked the enabled passage **Open linked note in Obsidian** reader control
+   through accessibility (the passage card was below the visible viewport).
+   The correct **Temporary MRW artifact move navigation check** Obsidian window
+   was observed returning to the foreground. The whole-outline return button
+   remained disabled because the association belongs to the passage.
+
+This closes the physical post-move desktop round-trip gap for the ext4 fixture;
+it establishes no Windows-backed or cross-machine acceptance. These are
+agent-operated desktop observations, separate from independent human use and
+the user's earlier report of practical benefit. No mathematical exercise or
+broader usefulness claim was added.
+
+All seven inventoried fixture source/note/identity/manifest/payload files retained
+their hashes. No real artifact binding was changed. A clipboard-restoration
+wrapper reported an error during initial note launch; that action neither set
+the clipboard nor edited a note, and is not counted as hyperlink acceptance.
+The later guarded physical click and read-only UTF-8 comparison completed.
+Nineteen existing focused Python storage tests passed again. Required 0.7.0
+final regressions below remain historical (345 run = 286 passed + 59 skipped);
+no runtime change requires a repeated full-suite or package build.
+Both proposed shell blocks passed syntax checking. Windows PowerShell parsed the
+proposed ACL commands without errors and constructed the three-rule protected
+ACL in memory; no ACL was applied. All 14 prior inventoried work/package files
+also retained their hashes. The isolated fixture VS Code window was normally
+closed after observation, leaving the user's working windows and Obsidian open.
+[Sanitized observations](evidence/artifact-storage-20261020/validation.json)
+record these results separately from the unperformed setup/synchronization tests.
+
+## Original 0.7.0 increment
+
 This increment starts at clean `9f1c4c7` / MRW 0.6.1. No subsequent/unrelated
 changes were present. Version 0.7.0 keeps the extension identity
 `flengyel.theorem-terminal` and the existing Python core. The user's actual

@@ -1,5 +1,25 @@
 # Obsidian companion navigation validation
 
+## Post-move desktop follow-up — 2026-10-20
+
+The outstanding physical round trip passed using the existing ext4 fixture and
+unchanged installed 0.7.0. After normal application close/reopen and slow
+Obsidian startup, the same saved temporary-note hyperlink was physically clicked.
+A fresh retained-source view in the intended WSL workspace selected exactly
+`α😀 retained`; read-only accessibility and saved UTF-8 comparison agreed.
+The enabled passage reader's **Open linked note in Obsidian** control was then
+invoked through accessibility, and the correct temporary note was observed in
+the foreground. All seven inventoried fixture files remained unchanged. No new
+note or math exercise was created. Working VS Code windows/drafts were preserved.
+See [the exact observations](ARTIFACT_STORAGE_VALIDATION.md#windows-backed-follow-up--2026-10-20).
+
+This is actual agent-operated desktop evidence after an ext4 move and restart,
+not Windows-backed storage acceptance or independent human mathematical use.
+The user's earlier report of practical benefit remains separate. The
+[scoped Windows-backed setup](WSL_ARTIFACT_STORAGE_SETUP.md) awaits separate
+authorization; the real store remains unmoved. No runtime/package change was
+needed for this follow-up.
+
 ## Artifact placement 0.7.0 — 2026-10-19
 
 The new [storage workflow](ARTIFACT_STORAGE.md) explicitly moves this workspace's
@@ -29,7 +49,7 @@ study/note/package files remained unchanged through navigation. No second-host
 synchronization acceptance was available. The earlier completed 0.6.1 desktop
 checks below remain historical evidence, not post-relocation acceptance.
 
-Final checks: 48 Node tests and 345 Python tests (59 optional skips), syntax,
+Final checks: 48 Node cases; 345 Python tests ran: 286 passed and 59 skipped; syntax,
 compilation, archive and installed-file verification. The user's report of
 practical benefit remains separate from broader mathematical usefulness.
 No mathematical exercise, Pi/R3/SagePod campaign, provider call, notebook run,

@@ -72,8 +72,12 @@ notes, notebooks, original documents and Qt storage are unchanged. Read
 [scope/commands/recovery](docs/ARTIFACT_STORAGE.md) and
 [actual checks and limits](docs/ARTIFACT_STORAGE_VALIDATION.md). The intended
 Windows-backed mount currently fails private-mode requirements and is rejected
-before commit; no actual user store was relocated. Second-host synchronization
-acceptance is unavailable. This increment creates no mathematical-use claim and
+before commit; no actual user store was relocated. The 2026-10-20 follow-up
+diagnoses Windows ACLs and actual Windows Syncthing versions/settings and
+[prepares a scoped metadata/ACL fixture trial](docs/WSL_ARTIFACT_STORAGE_SETUP.md)
+for separate authorization. No runtime checks are weakened, no environment
+change has run, and usable Zettelkasten artifact storage remains unfinished.
+Second-host synchronization acceptance is unavailable. This increment creates no mathematical-use claim and
 does not reopen the Pi, R3, SagePod or Euclid campaigns.
 
 ### Reader usability patch — 2026-10-18

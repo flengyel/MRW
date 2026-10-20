@@ -27,10 +27,15 @@ and destinations overlapping host-local VS Code storage are rejected.
 
 A possible synchronized location is
 `/mnt/c/Users/fleng/Zettelkasten/MRW-artifacts`. **The current Windows-backed
-mount does not support this move:** it reports directories/files as `0777`
-despite requests for `0700`/`0600`. MRW rejects it before commit. No mount options,
-Windows permissions or Syncthing settings were changed. Another mount must pass
-its own capability checks; enabling a setting alone does not establish support.
+mount does not satisfy MRW's current private-mode policy:** it reports
+directories/files as `0777` despite requests for `0700`/`0600`. These displayed
+bits do not establish access by every Windows account; DrvFS derives them from
+the Windows user's access when metadata is absent. MRW still rejects before
+commit. A scoped metadata/ACL fixture trial is [prepared for separate
+authorization](WSL_ARTIFACT_STORAGE_SETUP.md), with exact commands, rollback and
+receiving-copy checks. It has not been run. No mount options, Windows permissions
+or Syncthing settings were changed. Another mount must pass its own capability
+checks; enabling a setting alone does not establish support.
 See [actual filesystem results](ARTIFACT_STORAGE_VALIDATION.md).
 
 ## What moves
@@ -108,7 +113,12 @@ publication and private permissions. MRW installs no synchronization service.
 1. Stop writing on the first computer. Finish recovery and close MRW windows
    using the store. Wait for your synchronization tool to finish copying the
    entire selected artifact directory, including its identity, manifest and
-   generation files. Preserve permission metadata.
+   generation files. Verify receiving-side ownership and permissions after both
+   initial creation and later replacement; do not assume permission metadata
+   travels with the bytes. The inspected Windows Syncthing 2.1.6 configuration
+   does not send/sync ownership or extended attributes, and its connected peer
+   reports 1.19.2. The [prepared Windows-backed trial](WSL_ARTIFACT_STORAGE_SETUP.md)
+   is not yet a supported synchronized handover procedure.
 2. On the receiving computer, open a workspace with one local folder for each
    project in the store. This workspace must have no existing MRW saved artifacts
    or store binding. There is no replace/merge operation in this release.

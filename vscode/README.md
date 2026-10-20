@@ -133,8 +133,11 @@ persistence is unchanged. Required external investigation records are retained
 without deleting their originals.
 
 The current `/mnt/c` DrvFS mount reports `0777` for private files/directories
-and is rejected before commit. Other mounts need their own checks; do not weaken
-publication or mode checks. No mount/ACL/synchronization settings were changed.
+and is rejected before commit. Without metadata those bits reflect the Windows
+user's access; they do not prove access by all Windows accounts. A
+[scoped metadata/ACL trial](../docs/WSL_ARTIFACT_STORAGE_SETUP.md) is prepared,
+not run, for separate authorization. Other mounts need their own checks; do not
+weaken publication or mode checks. No mount/ACL/synchronization settings were changed.
 Local locks do not coordinate computers; stop writing and complete synchronization
 before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)

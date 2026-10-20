@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-20",
+  "baseline": "8ae554394943961248991704f9ef24dd85eddb04",
+  "installed_version": "0.7.0",
+  "runtime_changed": false,
+  "installed_non_manifest_files_matching_vsix": 47,
+  "host": {
+    "vscode": "1.141.2",
+    "obsidian": "1.14.4",
+    "wsl": "2.6.3.0",
+    "distribution": "Debian",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "artifact_candidate_filesystem": "NTFS via read/write 9p/DrvFS without metadata",
+    "uid": 1000,
+    "gid": 1000
+  },
+  "synchronization_inspection": {
+    "location": "Windows, current user",
+    "trayzor_version": "2.2.0.0",
+    "syncthing_version": "v2.1.6",
+    "peer_reported_version": "v1.19.2-ds1",
+    "ownership_and_xattr_flags": false,
+    "folder_type": "sendreceive",
+    "ignore_permissions": false,
+    "disable_fsync": false,
+    "snapshot_state": "idle",
+    "snapshot_errors": 0,
+    "snapshot_needed_files": 0,
+    "receiving_filesystem_or_access_verified": false,
+    "actual_cross_machine_creation_and_replacement_tested": false
+  },
+  "desktop": {
+    "fixture_filesystem": "ext4",
+    "ordinary_installed_workspace_reopened": true,
+    "obsidian_normal_close_and_restart": true,
+    "no_retained_editor_before_click": true,
+    "physical_saved_hyperlink_click": true,
+    "fresh_retained_view": "0e81c559-b240-4760-96e4-819a0aebb025",
+    "selected_utf8_hex": "ceb1f09f98802072657461696e6564",
+    "selection_independently_compared": true,
+    "reader_return_accessibility_invocation": true,
+    "correct_temporary_note_foreground_observed": true,
+    "isolated_fixture_window_normally_closed": true,
+    "working_windows_preserved": true,
+    "independent_human_use": false
+  },
+  "checks": {
+    "focused_python_storage_tests_passed": 19,
+    "fixture_files_hash_unchanged": 7,
+    "prior_inventoried_files_hash_unchanged": 14,
+    "wsl_configuration_unchanged": true,
+    "proposed_shell_blocks_syntax_passed": 2,
+    "proposed_powershell_syntax_errors": 0,
+    "in_memory_private_acl_rule_count": 3,
+    "acl_applied_to_filesystem": false
+  },
+  "remaining": {
+    "scoped_metadata_and_acl_trial": "Prepared, awaiting separate authorization",
+    "linux_to_windows_production_fixture_move": "Unperformed",
+    "receiving_creation_later_replacement_and_edit_back_access": "Unperformed",
+    "real_store_moved": false,
+    "new_vsix": false,
+    "zettelkasten_artifact_storage_goal_complete": false
+  }
+}

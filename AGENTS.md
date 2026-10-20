@@ -93,7 +93,10 @@ must not bypass migration. Missing/incomplete/conflicted stores block access;
 never initialize replacements or merge stores. Local writer exclusion does not
 coordinate computers. Require one writing installation and complete verified
 synchronization before handover. The current `/mnt/c` mount fails private-mode
-checks and is unsupported; do not change permissions/mount/sync configuration
+checks and is unsupported; displayed modes without metadata do not establish
+effective Windows access. Read `docs/WSL_ARTIFACT_STORAGE_SETUP.md` for the scoped
+metadata/ACL trial prepared on 2026-10-20; it is not an executed remedy or
+synchronization acceptance. Do not change permissions/mount/sync configuration
 without separate authorization. The standalone Qt storage/recovery is unchanged.
 
 The existing editor-centered Qt GUI remains available as
