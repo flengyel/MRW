@@ -1,5 +1,40 @@
 # Obsidian companion navigation validation
 
+## Artifact placement 0.7.0 — 2026-10-19
+
+The new [storage workflow](ARTIFACT_STORAGE.md) explicitly moves this workspace's
+saved sources, outlines, annotations, evidence and associated navigation records.
+Existing notes are not moved or rewritten. Copying a note alone still does not
+copy that saved material. A complete synchronized store needs explicit local
+adoption and verification; local locks do not coordinate computers.
+
+The [storage validation report](ARTIFACT_STORAGE_VALIDATION.md) separates actual
+filesystem probes, process interruption tests, host/API results and desktop
+observations. Existing pinned links and Obsidian associations survive relocation
+and copied-store adoption in tests. An actual ext4 fixture move/rebind/cleanup
+passed, and the unchanged saved URI restored its exact passage after normal
+installed-workspace restart through the Windows protocol handler. The intended
+Windows-backed filesystem, including a user-authorized disposable probe inside
+Zettelkasten, reports `0777` for private modes and is rejected before commit.
+The user's real artifact directory remains unchanged. No new vault is needed.
+
+A new clearly labeled ordinary temporary note, `MRWStoreNav20261019de166d.md`,
+contains the fixture links and follows Zettel conventions. It was opened through
+Obsidian's standard URI. After correcting a literal legacy/logical reference comparison, a fresh actual
+host successfully dispatched the pre-move associated note through the production
+command. The physical hyperlink click still did not confirm a fresh exact
+retained selection; the complete post-move desktop round trip remains **unconfirmed**. Automated association preservation does not
+substitute for it. Seven new fixture files and all 14 inventoried pre-existing
+study/note/package files remained unchanged through navigation. No second-host
+synchronization acceptance was available. The earlier completed 0.6.1 desktop
+checks below remain historical evidence, not post-relocation acceptance.
+
+Final checks: 48 Node tests and 345 Python tests (59 optional skips), syntax,
+compilation, archive and installed-file verification. The user's report of
+practical benefit remains separate from broader mathematical usefulness.
+No mathematical exercise, Pi/R3/SagePod campaign, provider call, notebook run,
+Marketplace publication or vault synchronization change was introduced.
+
 ## Patch 0.6.1 — 2026-10-18
 
 The actual baseline was clean `main` at `a83cea3`, matching `origin/main`.

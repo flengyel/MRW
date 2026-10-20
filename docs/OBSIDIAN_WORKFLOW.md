@@ -1,6 +1,6 @@
 # Obsidian notes and MRW retained passages
 
-MRW 0.6.1 connects the existing Obsidian Zettelkasten to saved source outlines
+MRW 0.7.0 retains navigation that connects the existing Obsidian Zettelkasten to saved source outlines
 and exact retained passages. Obsidian owns note editing, mathematical rendering,
 links and attachments. MRW owns its source reader and retained material.
 Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
@@ -80,7 +80,8 @@ If the warning disappears, open VS Code's **Notifications** to find its recovery
 action. A hidden routing warning does not block other MRW commands.
 
 Unavailable private storage or a different private-store scope produces an
-error: reopen the original workspace/profile with its original private state.
+error: reopen the original workspace/profile with its saved state, or explicitly
+open a complete synchronized artifact store using the storage guide.
 Do not recreate targets or reset workspace storage. Missing/changed original
 sources do not prevent access to retained bytes. Region links keep their old
 range when the reading association changes; MRW reports the change explicitly.
@@ -105,10 +106,25 @@ Only bounded labels, Obsidian URLs and exact MRW references are stored: at most
 the existing publication lock, atomic replacement and directory synchronization.
 Failed/uncertain publication blocks further outline/association writes until
 host reload. Removing an association retains an empty state file; it deletes
-neither note nor retained material. Same-project concurrent hosts remain unsupported.
+neither note nor retained material. Concurrent writing installations remain unsupported; local locks are not distributed.
 
-**Copying or synchronizing a Markdown note does not transfer its MRW private
-targets.** There is no vault indexing, automatic rewriting, content
+**Copying or synchronizing a Markdown note does not copy its MRW saved material.**
+Here that material means retained sources, saved outlines, annotations and note
+associations. The note contains an address, not those separately saved files.
+No new Obsidian vault is required. **MRW: Move Artifact Directory…** separately
+moves this workspace's complete saved material; **MRW: Open Existing Artifact
+Directory…** verifies a complete synchronized copy on another installation.
+See [storage scope, commands and recovery](ARTIFACT_STORAGE.md). The current
+`/mnt/c` mount cannot preserve MRW's private modes and is rejected. This feature
+does not automatically add anything to Syncthing or copy a vault.
+
+After verified adoption at a different local workspace address, open that mapped
+workspace and use **MRW: Open Link from Clipboard** with the existing saved link.
+The normal recovery button retains the original saved workspace address; it
+cannot guess another computer's corresponding path. Exact stored identity and
+scope checks still apply.
+
+ There is no vault indexing, automatic rewriting, content
 synchronization, Obsidian plugin or background server. The existing extension
 identity/storage and legacy `mrw-outline:v1` links remain compatible. Native
 Windows backend portability remains deferred. Navigation initiates no model,

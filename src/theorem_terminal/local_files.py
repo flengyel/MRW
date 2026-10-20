@@ -5,6 +5,8 @@ import stat
 
 
 def read_bounded(path: Path, limit: int, description: str) -> bytes:
+    from .artifact_context import read_location
+    path = read_location(path)
     metadata = path.lstat()
     if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
         raise ValueError(f"{description} must be a regular non-symlink file")

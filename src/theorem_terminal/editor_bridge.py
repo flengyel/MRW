@@ -48,6 +48,20 @@ def _number(value):
 
 
 def dispatch(request):
+    if isinstance(request, dict) and 'artifact_home' in request:
+        from .artifact_storage import ArtifactStorage, storage_action
+        if type(request.get('protocol')) is not int or request.get('protocol') != PROTOCOL:
+            raise ValueError('Unsupported editor bridge protocol')
+        if str(request.get('method', '')).startswith('artifact_'):
+            return storage_action(request)
+        request = dict(request)
+        manager = ArtifactStorage(str(_path(request.pop('artifact_home'))))
+        with manager.exclusive():
+            return manager.run(request, _dispatch)
+    return _dispatch(request)
+
+
+def _dispatch(request):
     if not isinstance(request, dict) or type(request.get('protocol')) is not int or request['protocol'] != PROTOCOL:
         raise ValueError('Unsupported editor bridge protocol')
     method = request.get('method')
@@ -71,7 +85,7 @@ def dispatch(request):
         'outline_reference': ({'store', 'project_root', 'id', 'revision', 'region'}, set()),
         'outline_parse_reference': ({'reference'}, set()),
         'outline_follow_reference': ({'store', 'project_root', 'reference'}, set()),
-        'outline_notes': ({'store', 'project_root', 'id'}, set()),
+        'outline_notes': ({'store', 'project_root', 'id'}, {'reference'}),
         'outline_update_note': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
         'outline_mutate': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
         'outline_inspect_artifact': ({'path'}, set()),

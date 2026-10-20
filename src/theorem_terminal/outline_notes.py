@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from .local_files import read_bounded
 from .mutable_files import save_mutable
-from .outline_references import parse_reference, reference_action, scope
+from .outline_references import parse_reference, reference_action, matches_scope
 from .source_outlines import OutlineStore, encoded, fields, identity, revision, text
 from .workspace import strict_json
 
@@ -58,7 +58,7 @@ def note_action(request):
         fields(item, {'id', 'reference', 'url', 'label'}, 'Obsidian association')
         identity(item['id'])
         ref = parse_reference(item['reference'])
-        if (item['id'] in seen or ref['scope'] != scope(store) or ref['outline'] != store.id
+        if (item['id'] in seen or not matches_scope(store, ref['scope']) or ref['outline'] != store.id
                 or ref['source'] != store.state['source']['revision']):
             raise ValueError('Private Obsidian association target differs')
         seen.add(item['id'])
@@ -71,7 +71,19 @@ def note_action(request):
             raise ValueError('Use a readable note label of at most 160 characters')
     result = dict(links=value['links'], revision=sha256(raw).hexdigest() if raw is not None else None)
     if request['method'] == 'outline_notes':
-        return dict(**result, targets=targets)
+        result = dict(**result, targets=targets)
+        if 'reference' in request:
+            # Resolve both legacy and logical scopes through the existing core
+            # contract before comparing their exact retained target. Never
+            # rewrite stored links or equate different pinned region ranges.
+            reference_action(dict(method='outline_follow_reference',store=str(store.base),
+                                  project_root=str(store.root),reference=request['reference']))
+            selected=parse_reference(request['reference'])
+            if selected['outline']!=store.id:
+                raise ValueError('Selected note target belongs to another outline')
+            result['selected_links']=[item for item in value['links']
+                if targets[item['reference']]==dict(region=selected['region'],span=selected['span'])]
+        return result
     expected = request['revision']
     if expected is not None:
         revision(expected)

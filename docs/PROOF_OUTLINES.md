@@ -167,8 +167,15 @@ mrw-outline:v1/SCOPE/OUTLINE/SOURCE
 mrw-outline:v1/SCOPE/OUTLINE/SOURCE/REGION/SL.SC-EL.EC
 ```
 
-`SCOPE` is the lowercase SHA-256 of the canonical project path, NUL and the
-canonical private outline-store path (UTF-8). `OUTLINE` and optional `REGION`
+For legacy stores, `SCOPE` is the lowercase SHA-256 of the canonical project
+path, NUL and canonical private outline-store path (UTF-8). For explicitly moved
+0.7.0 stores it is SHA-256 of `mrw-store-v1`, NUL, persistent store UUID, NUL and
+persistent project UUID. The immutable store identity retains a recomputed,
+verified compatibility mapping for its legacy scope. Explicit local adoption
+maps each project to a local folder; matching path names alone cannot establish
+identity. The grammar is unchanged, and unrelated scope checks remain enforced.
+See [the relocation/adoption contract](ARTIFACT_STORAGE.md).
+`OUTLINE` and optional `REGION`
 are existing UUIDs; `SOURCE` is the retained source's exact-byte SHA-256.
 Region endpoints are half-open, 1-based lines and 0-based Unicode scalar
 columns, with canonical decimal spelling. The URI contains no filesystem path,

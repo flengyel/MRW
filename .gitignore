@@ -14,3 +14,4 @@ __pycache__/
 /.codex-work/overview-*/
 /.codex-work/overview-*.log
 /.codex-work/obsidian-*/
+/.codex-work/artifact-storage-*/

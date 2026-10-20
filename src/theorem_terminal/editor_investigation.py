@@ -90,7 +90,9 @@ class InvestigationStore:
         self.directory, self.root = local_path(directory), local_path(project_root)
         if self.root.resolve() != self.root:
             raise ValueError('Use the canonical project directory')
-        if self.directory.resolve() != self.directory or self.directory.is_relative_to(self.root):
+        from .artifact_context import CURRENT
+        managed=CURRENT.get() is not None and CURRENT.get().identity is not None
+        if self.directory.resolve() != self.directory or (self.directory.is_relative_to(self.root) and not managed):
             raise ValueError('Investigation state requires private storage outside the project')
         self.path, self.raw = self.directory / 'active.json', None
         try:
@@ -115,6 +117,8 @@ class InvestigationStore:
             raise ValueError('Private investigation changed; resume it before making another change')
 
     def publish(self, active):
+        from .artifact_context import stable_paths
+        active = stable_paths(active)
         validate_active(active)
         raw = encode_canonical(dict(schema=SCHEMA, version=1, project_root=str(self.root), active=active))
         if len(raw) > MAX_STATE_BYTES:

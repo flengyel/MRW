@@ -168,6 +168,31 @@ execution. Copying a note transfers no private targets. See
 [the workflow and persistence limits](docs/OBSIDIAN_WORKFLOW.md) and
 [validation](docs/OBSIDIAN_VALIDATION.md).
 
+### Saved artifact location — 2026-10-19
+
+**MRW: Show Artifact Location** reports the effective directory for this
+workspace. **MRW: Move Artifact Directory…** names the current location,
+proposed new directory and all affected project folders before confirmation.
+It protects unsaved reader/assistance edits, verifies a complete staged copy,
+commits one host-local binding, rebinds readers and removes only exact old owned
+payloads. **MRW: Recover Artifact Move** resolves interrupted/uncertain operations
+from the persisted binding and manifests; postcommit cleanup never rolls back
+authority. **MRW: Refresh Artifact Location** retains drafts when another updated
+local window has moved the store. Editing `mrw.artifactMoveDestination` merely
+changes the suggested input.
+
+**MRW: Open Existing Artifact Directory…** is distinct: an empty/unbound
+workspace explicitly maps projects and verifies every required byte before using
+a complete synchronized copy. It does not merge stores or move ordinary notes,
+source documents or notebooks. Missing mounts, partial synchronization and
+conflicts produce actionable errors without empty replacements or guessed
+locations. Unsupported private permissions/publication boundaries reject before
+commit; the current `/mnt/c` mount is one observed unsupported configuration.
+Keep bindings/journals/locks and runtime state outside the selected directory.
+The [storage guide](docs/ARTIFACT_STORAGE.md) defines scope, recovery and the
+one-writing-computer workflow. Qt storage is unchanged. Navigation initiates no
+provider, compiler, notebook or container execution.
+
 ## 1. Design principle
 
 The interface supports doing and studying mathematics. It does not require a

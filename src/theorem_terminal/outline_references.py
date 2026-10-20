@@ -28,7 +28,13 @@ def parse_reference(value):
 
 
 def scope(store):
-    return sha256((str(store.root) + '\0' + str(store.base)).encode('utf-8')).hexdigest()
+    from .artifact_context import reference_scopes
+    return reference_scopes(store)[0]
+
+
+def matches_scope(store, value):
+    from .artifact_context import reference_scopes
+    return value in reference_scopes(store)[1]
 
 
 def locator(span):
@@ -55,7 +61,7 @@ def reference_action(request):
     store = OutlineStore(request['store'], request['project_root'])
     following = request['method'] == 'outline_follow_reference'
     ref = parse_reference(request['reference']) if following else None
-    if following and ref['scope'] != scope(store):
+    if following and not matches_scope(store, ref['scope']):
         raise ValueError('This reference belongs to a different workspace or private-storage scope. '
                          'Copying Markdown alone does not transfer its outlines or retained sources')
     try:

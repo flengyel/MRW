@@ -65,6 +65,19 @@ The user reports that the Zettelkasten integration is helpful in practice;
 this is reported practical benefit, separate from broader mathematical
 usefulness or measured productivity claims.
 
+Extension **0.7.0** adds **MRW: Move Artifact Directory…** for this workspace's
+saved sources, outlines, annotations, evidence, note links and required
+investigation records. A verified copy is committed through one host-local
+binding, then old owned payloads are removed. Settings alone never switch stores.
+**MRW: Open Existing Artifact Directory…** separately verifies a complete copied
+store and maps its projects to this computer. Existing links retain their exact
+targets. See [storage workflow and recovery](docs/ARTIFACT_STORAGE.md) and
+[validation/unsupported filesystems](docs/ARTIFACT_STORAGE_VALIDATION.md).
+The current `/mnt/c` DrvFS mount rejects private permission modes, so migration
+there is safely rejected; the user's actual location remains unchanged. This
+adds no synchronization service or distributed locking. Notes alone still do
+not carry the separately saved MRW material.
+
 The workstation is a mathematical context system for learning, reconstructing,
 integrating, and retaining mathematics. It is intended both for entering and
 absorbing a large body of mathematics and for re-entering one’s own research, an

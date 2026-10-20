@@ -7,6 +7,7 @@ const path = require('node:path');
 const { runBridge } = require('./bridge');
 const { registerAssistance } = require('./assistance');
 const { registerOutlines } = require('./outlines');
+const { createArtifactStorage } = require('./artifactStorage');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
 function activate(context) {
@@ -24,11 +25,14 @@ function activate(context) {
         return await action();
       } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));
-  const bridge = (request, options) => {
+  const rawBridge = (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
     return runBridge(context.extensionPath,
       vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options);
   };
+  const artifactClients = [];
+  const artifactStorage = createArtifactStorage({ vscode, context, rawBridge });
+  const bridge = artifactStorage.bridge;
   const provider = {
     provideTextDocumentContent: uri => documents.get(uri.toString()) ??
       'This research view is no longer available. Open the retained record again, or prepare a new request preview.',
@@ -246,14 +250,18 @@ function activate(context) {
     if (!applied) throw new Error('The editor declined the insertion. The note was not saved.');
   });
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
-    ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview } });
-  const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath });
+    ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
+  const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients });
+  artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   const tree = {
     onDidChangeTreeData: changed.event,
     getChildren: () => {
       const rows = [
         ...assistanceRows(),
         ...outlineRows(),
+        ['Show saved artifact location', 'mrw.artifactLocation'],
+        ['Move artifact directory…', 'mrw.moveArtifactDirectory'],
+        ['Open existing artifact directory…', 'mrw.openArtifactDirectory'],
         ...savedMarkers().map(({ marker }) => [`Return: ${path.basename(marker.path)}:${marker.start[0] + 1} ${marker.preview}`, 'mrw.return']),
         ['Open Lean proof…', 'mrw.openProof'],
         ['Open external proof viewer', 'mrw.openViewer'], ['Inspect retained record…', 'mrw.inspect'],

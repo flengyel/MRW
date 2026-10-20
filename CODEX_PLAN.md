@@ -40,6 +40,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
 | Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
+| Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; current DrvFS private modes unsupported | Existing storage unchanged |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -58,6 +59,22 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Explicit artifact placement — 2026-10-19
+
+Version 0.7.0 implements the authorized bounded store move/adoption workflow over
+the existing extension and Python core. It moves this workspace's durable saved
+research artifacts through staged verification, a host-local binding commit and
+exact cleanup. Persistent store/project identity preserves old pinned links and
+Obsidian associations. Runtime coordination remains local; synchronization stays
+with the user's existing tools and requires one writing installation. Ordinary
+notes, notebooks, original documents and Qt storage are unchanged. Read
+[scope/commands/recovery](docs/ARTIFACT_STORAGE.md) and
+[actual checks and limits](docs/ARTIFACT_STORAGE_VALIDATION.md). The intended
+Windows-backed mount currently fails private-mode requirements and is rejected
+before commit; no actual user store was relocated. Second-host synchronization
+acceptance is unavailable. This increment creates no mathematical-use claim and
+does not reopen the Pi, R3, SagePod or Euclid campaigns.
 
 ### Reader usability patch — 2026-10-18
 

@@ -83,6 +83,19 @@ elimination remains planned. Follow the bounded migration handoff. Use Windows V
 connected to a WSL2 checkout for Windows development; run Python and the
 workspace extension in WSL. Native Windows Send is currently unsupported.
 
+Extension 0.7.0 permits an explicit transactional move of this workspace's saved
+sources, outlines, annotations, retained evidence, note associations and required
+investigation records. Read `docs/ARTIFACT_STORAGE.md` and its validation report.
+Keep authority in one host-local binding, with journals, locks, reservations and
+runtime state outside user-selected artifact storage. Preserve logical store
+identity, verified legacy reference mappings and exact immutable bytes. Settings
+must not bypass migration. Missing/incomplete/conflicted stores block access;
+never initialize replacements or merge stores. Local writer exclusion does not
+coordinate computers. Require one writing installation and complete verified
+synchronization before handover. The current `/mnt/c` mount fails private-mode
+checks and is unsupported; do not change permissions/mount/sync configuration
+without separate authorization. The standalone Qt storage/recovery is unchanged.
+
 The existing editor-centered Qt GUI remains available as
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
 identities unchanged. Open Project Directory is the principal entry: show the

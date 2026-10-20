@@ -34,7 +34,7 @@ function capture(editor) {
     state: 'captured visible editor text; disk revision not checked' });
 }
 
-function registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review, ordinaryEditor, choosePath, getReview }) {
+function registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review, ordinaryEditor, choosePath, getReview, artifactClients }) {
   let draft, prepared, previewUri, busy = false;
   const idle = () => { if (busy) throw new Error('Wait for the current assistance action to finish.'); };
   const invalidate = () => { prepared = undefined; previewUri = undefined; changed.fire(); };
@@ -61,6 +61,14 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
   const investigation = registerInvestigation({ vscode, context, register, bridge, show, projectRoot, changed,
     review, ordinaryEditor, choosePath, getReview, change, prepare,
     getDraft: () => draft, setDraft: value => { draft = value; }, isBusy: () => busy });
+  artifactClients?.push({
+    async freeze(allowDirty = false) {
+      idle();
+      if (draft && !allowDirty) throw new Error('Discard or finish the unsent request before moving saved artifacts.');
+      investigation.checkStorageChange(allowDirty);
+    },
+    async release() { investigation.storageChanged(); invalidate(); },
+  });
   register('mrw.ask', () => change(async () => {
     const target = capture(vscode.window.activeTextEditor);
     const root = await projectRoot(vscode.window.activeTextEditor);
@@ -72,7 +80,6 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     if (model === undefined) return;
     if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for assistance records.');
     const directory = path.join(context.storageUri.fsPath, 'model-calls');
-    await fs.mkdir(directory, { recursive: true, mode: 0o700 });
     const id = `assistance-${crypto.randomUUID()}`;
     draft = { project_root: root, target, contexts: [target], question, model,
       output: path.join(directory, `${id}.json`), exchange_id: id };

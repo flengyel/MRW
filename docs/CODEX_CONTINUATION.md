@@ -1,5 +1,84 @@
 # Codex continuation: MRW source work and companion notes
 
+## Explicit artifact placement — 2026-10-19
+
+The authorized storage increment builds on actual clean `9f1c4c7` (implementation
+`c1508bc`, installed 0.6.1), with no intervening or unrelated changes. Version
+**0.7.0** adds explicit workspace-scoped **Move Artifact Directory…**, **Open
+Existing Artifact Directory…**, **Show Artifact Location**, **Refresh Artifact
+Location** and **Recover Artifact Move** commands. Read [the storage guide](ARTIFACT_STORAGE.md)
+and [validation report](ARTIFACT_STORAGE_VALIDATION.md) before changing its protocol.
+
+Settings only suggest a destination. Migration inventories owned durable sources,
+outlines, annotations, evidence, Obsidian associations, ModelCalls, saved
+investigation state and required record dependencies. Staged verified publication
+precedes one host-local active-binding commit; exact inode/hash cleanup follows.
+Before commit the original remains authoritative; afterward only the destination
+does. Uncertain binding durability retains both copies and blocks access until
+explicit recovery. Journals never override observed binding bytes. Incomplete
+uncommitted destinations without a complete deletion inventory are retained for
+inspection, with their path reported. Do not recursively delete workspace storage.
+
+Note opening/management resolves both verified legacy and logical references
+through the existing Python resolver before matching an association's exact
+retained target. Replacing/removing an existing association preserves its stored
+reference bytes; a current region's changed range never selects an earlier pin.
+
+Persistent store/project UUIDs and recomputed verified legacy mappings preserve
+existing `mrw-outline:v1` IDs, exact source hashes/ranges and stored note links.
+Historical source paths/record bytes remain immutable. Explicit aliases resolve
+retained dependencies. Another local path needs full manifest verification and
+explicit project mapping into an empty/unbound workspace, with no merging.
+Use the mapped workspace and **Open Link from Clipboard** for links whose saved
+workspace address belongs to the first computer. Wrong-workspace checks remain.
+
+Host-local bindings, journals, locks, reservations, credentials, caches, UI state,
+return markers and ordinary editor recovery are outside the selected store.
+Updated writers serialize through local exclusion and reject stale epochs/retired
+locators. Close older MRW executables before moving; they cannot acquire locks
+introduced in 0.7.0. Local exclusion does not coordinate different computers or
+VS Code user-data installations. One writing installation at a time and complete
+synchronization are required. Missing bytes and conflict copies block access;
+a manifest arriving first never proves completeness. New project mappings are
+fixed at creation/adoption in this bounded increment. Qt storage is unchanged.
+
+The actual user store remains unmoved. A disposable Development Host fixture
+completed a Linux ext4 move and verified its earlier pinned link and note label.
+The actual move command targeting Windows Temp on `/mnt/c` rejected before
+commit: this 9p/DrvFS mount lacks metadata and reports private modes as `0777`.
+File/directory fsync, hard-link publication and atomic replacement returned
+success in a disposable probe, but private permissions fail. Keep that rejection;
+do not weaken checks or silently change mounts, ACLs or synchronization settings.
+No new Obsidian vault or user action is required for development.
+
+All 48 Node tests pass; 345 Python tests pass with 59 optional skips; compilation
+and syntax checks pass. Focused tests include real process interruptions at nine
+move boundaries, uncertain postreplacement durability, cleanup recovery, stale
+panels, required research dependencies, copied-store adoption/conflicts and
+unchanged exact links. Managed Send tests are deterministic: durable pending
+state precedes transport, and interrupted retained outcomes recover without
+retry. Migration/navigation and the actual host fixtures initiated no provider,
+compiler, notebook or container. The full Python regression suite exercised its
+existing available tool integrations; no separate acceptance campaign or new
+Lean build ran. Cross-device ext4→tmpfs protocol testing uses a test-only bypass of the volatile-storage rejection and
+makes no persistence/power-loss claim. A bounded second-host SSH check failed
+authentication; no second-host synchronization acceptance is claimed.
+
+The package is `vscode/theorem-terminal-0.7.0.vsix`; earlier packages are preserved.
+Normal installed-workspace restart followed the same pre-move URI through the
+Windows protocol handler and independently confirmed the exact Unicode selection.
+After the validated legacy/logical note-target correction, a fresh actual host
+also dispatched its existing associated note through the production command.
+The physical post-move Obsidian hyperlink click still did not establish a fresh
+exact retained selection, so the complete desktop round trip remains unconfirmed.
+Direct standard-URI opening of the temporary note was observed.
+Do not describe those partial desktop attempts as passing. The validation report
+records the precise outstanding check. Preserve the user's working windows, unsaved annotations, authoritative
+study files and vault contents. The one new temporary navigation note is clearly
+labeled. The user's reported practical benefit from the Zettelkasten bridge
+remains separate from broader mathematical usefulness. Do not repeat Pi/R3/SagePod
+campaigns, extend the Euclid exercise, or require another study session.
+
 ## Reader usability patch — 2026-10-18
 
 The bounded 0.6.1 patch builds on clean `a83cea3` without changing command IDs,

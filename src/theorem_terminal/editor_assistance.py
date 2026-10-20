@@ -98,6 +98,15 @@ def assistance_action(request, *, transport=None):
             return dict(status='not_sent', retained=False, path=str(prepared.operation.output),
                 revision=None, body='Request not sent: investigation reservation failed.',
                 investigation=reservation)
+    from .artifact_context import CURRENT
+    context=CURRENT.get()
+    if context is not None and context.identity is not None:
+        try:
+            prepared, investigation_store=context.manager.before_transmission(context,prepared,investigation_store)
+        except (ValueError,OSError) as exc:
+            result=_not_sent(exc,request,key)
+            if investigation_store is not None: result['investigation']=investigation_store.result()
+            return result
     sent = transmit_assistance(prepared, key, **kwargs)
     terminal = parse_terminal_model_call(sent.raw_record) if sent.raw_record else None
     if terminal and not terminal_matches(prepared, terminal):

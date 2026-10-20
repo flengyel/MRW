@@ -8,6 +8,7 @@ const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 let notes = [], noteTargets = {}, noteError;
+let storageFrozen = false;
 const drafts = new Map();
 const submittedDrafts = new Map();
 const label = value => value.replace(/_/g, ' ');
@@ -22,7 +23,8 @@ function post(value) {
   busy = true; controls(); api.postMessage(value);
 }
 function controls() {
-  for (const button of root.querySelectorAll('button')) button.disabled = busy || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
+  for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
+  for (const input of root.querySelectorAll('input,textarea,select')) input.disabled = storageFrozen;
 }
 function button(parent, title, value, action, write = false) {
   const node = el('button', title, parent); node.type = 'button';
@@ -243,6 +245,10 @@ function render() {
 }
 window.addEventListener('message', event => {
   const value = event.data;
+  if (value.type === 'storageCheck') {
+    storageFrozen = true; controls(); api.postMessage({ type: 'storageStatus', dirty: drafts.size > 0 }); return;
+  }
+  if (value.type === 'storageRelease') { storageFrozen = false; controls(); return; }
   if (value.type === 'outline') {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;

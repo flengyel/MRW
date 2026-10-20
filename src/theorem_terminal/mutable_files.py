@@ -28,6 +28,8 @@ def private_directory(path: Path):
 
 @contextmanager
 def file_lock(path: Path, lock_root: Path, *, wait=False):
+    from .artifact_context import lock_location
+    lock_root = lock_location(lock_root)
     private_directory(lock_root)
     identity = sha256(os.path.normcase(str(path.resolve())).encode('utf-8')).hexdigest()
     lock = lock_root / (identity + '.lock')
@@ -75,7 +77,8 @@ def save_mutable(path: Path, raw: bytes, *, previous: bytes | None,
     retaining the complete destination. No immutable record calls this service.
     """
     path = path.absolute()
-    with file_lock(path, lock_root):
+    from .artifact_context import publication_guard
+    with publication_guard(path), file_lock(path, lock_root):
         _replace_locked(path, raw, previous, mode)
 
 
@@ -87,7 +90,8 @@ def verify_mutable(path: Path, previous: bytes, *, limit: int, lock_root: Path):
     check as publication, including parent synchronization on a true no-op.
     """
     path = path.absolute()
-    with file_lock(path, lock_root):
+    from .artifact_context import publication_guard
+    with publication_guard(path), file_lock(path, lock_root):
         observed = read_bounded(path, limit, 'cached mutable destination')
         if observed != previous:
             raise MutableFileError('File changed on disk; cached bytes are no longer current')
@@ -102,7 +106,8 @@ def delete_mutable(path: Path, *, previous: bytes | None, limit: int, lock_root:
     rewriting the deleted file or report it as a completed deletion.
     """
     path = path.absolute()
-    with file_lock(path, lock_root):
+    from .artifact_context import publication_guard
+    with publication_guard(path), file_lock(path, lock_root):
         try:
             observed = read_bounded(path, limit, 'mutable deletion destination')
         except FileNotFoundError:
@@ -116,7 +121,8 @@ def delete_mutable(path: Path, *, previous: bytes | None, limit: int, lock_root:
 
 def update_mutable(path, transform, *, limit, lock_root, mode=0o600):
     """Read/merge/replace bounded mutable state under the same kernel lock."""
-    with file_lock(path, lock_root, wait=True):
+    from .artifact_context import publication_guard
+    with publication_guard(path), file_lock(path, lock_root, wait=True):
         previous = read_bounded(path, limit, "mutable settings") if path.exists() else None
         raw = transform(previous)
         if len(raw) > limit:

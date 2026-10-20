@@ -55,7 +55,7 @@ pending. See [actual checks and limits](../docs/SAGEPOD_NOTEBOOK_VALIDATION.md).
 
 ## Obsidian companion notes
 
-Version **0.6.1** connects the existing Obsidian Zettelkasten with saved source
+Version **0.7.0** retains the bridge that connects the existing Obsidian Zettelkasten with saved source
 outlines and exact retained passages. Use **Copy link to this outline** or **Copy link to this passage** in the
 reader, or run **MRW: Copy Outline or Passage Link…**, then paste the ordinary
 Markdown link into the Obsidian note. Following it opens the reader without
@@ -103,6 +103,43 @@ replacement. See [the short click guide](../docs/OBSIDIAN_WORKFLOW.md) and
 [configuration, desktop evidence and limits](../docs/OBSIDIAN_VALIDATION.md).
 Interoperability establishes no mathematical usefulness.
 
+## Saved artifact location (0.7.0)
+
+Run **MRW: Show Artifact Location**, then **MRW: Move Artifact Directory…**
+to move this workspace's saved sources, outlines, annotations, evidence, linked
+notes' addresses and required investigation records. The command shows source,
+destination and project scope before confirmation, verifies the staged bytes,
+commits one host-local active binding and cleans exact old owned payloads.
+Save reader drafts first; stale clients cannot write to the retired location.
+**MRW: Recover Artifact Move** handles interruption/uncertain durability and
+retries committed cleanup. **MRW: Refresh Artifact Location** rebinds updated
+windows while keeping drafts. `mrw.artifactMoveDestination` is a suggestion only.
+
+**MRW: Open Existing Artifact Directory…** verifies a complete synchronized copy
+and explicitly maps its projects into an empty/unbound workspace. It never
+merges stores or invents missing records. Logical store/project IDs and verified
+legacy mappings preserve `mrw-outline:v1` references and exact pinned ranges.
+On a different host, open the adopted mapped workspace and use **MRW: Open Link
+from Clipboard**; old saved routing is not a guessed local workspace address.
+
+The default remains existing workspace storage. Managed stores keep immutable
+`store.json`, a complete hash-verified `HEAD.json` and payload generations under
+`versions/UUID/payload`. Bindings, journals, locks and reservations stay under
+host-local `artifact-runtime`; same-installation UUID exclusion is in host-local
+global storage. Each ordinary write publishes a complete generation. Runtime,
+credentials, caches, return markers and ordinary document recovery stay local;
+notes, notebooks, original sources and unrelated files are not moved. Qt's
+persistence is unchanged. Required external investigation records are retained
+without deleting their originals.
+
+The current `/mnt/c` DrvFS mount reports `0777` for private files/directories
+and is rejected before commit. Other mounts need their own checks; do not weaken
+publication or mode checks. No mount/ACL/synchronization settings were changed.
+Local locks do not coordinate computers; stop writing and complete synchronization
+before handover. No second-host synchronization acceptance is claimed.
+See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
+and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
+
 ## Manual Markdown overviews across sources
 
 Version 0.5.0 provides the first manual overview spanning several sources. Write
@@ -148,7 +185,8 @@ only reads/navigates; it neither changes outline visibility nor publishes state.
 References confer no proof-checking status or verified dependency relation.
 
 **Copying Markdown alone does not transfer private outlines or retained sources.**
-References work only in their current workspace/private-storage scope. This
+References require their original scope or an explicitly verified moved/adopted
+store mapping. This
 increment supplies no cross-machine transfer, synchronization, automatic
 overview generation, source discovery, inference graph or elimination witness.
 See [focused host checks and limits](../docs/VS_CODE_OVERVIEW_VALIDATION.md).
@@ -232,7 +270,7 @@ fidelity is implied by retention.
 The independent Python `source_outlines.py` service reuses `SourceDocument`,
 bounded file reads, immutable private publication and synchronized exact-previous-
 byte mutable publication. It does not import Qt or duplicate editor buffers.
-Under `context.storageUri/outlines-SHA256(canonical-project)/UUID/`, exact source
+By default, under `context.storageUri/outlines-SHA256(canonical-project)/UUID/`, exact source
 and supporting-artifact bytes are immutable `0600` blobs; `outline.json` is
 versioned private mutable navigation and reader work. It writes nothing into
 the source project and imports no Qt workspace/recovery data. The format uses
@@ -257,7 +295,7 @@ At most 64 regions (256 KiB each), 32 contexts (64 KiB each), 2 MiB aggregate
 selected text, 16 supporting artifacts (2 MiB each), 32 annotations per overview
 or region (16 KiB each), 512 KiB private state, and 100 listed outlines per project.
 The list does not silently page or discard work beyond that bound. There is no
-outline or artifact deletion/garbage collection, cross-machine synchronization,
+user-facing outline/artifact deletion or history browsing, automatic cross-machine synchronization,
 or range undo. Context removal and evidence detachment affect only reading
 associations.
 
@@ -299,8 +337,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.6.1.vsix
-sha256sum vscode/theorem-terminal-0.6.1.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.7.0.vsix
+sha256sum vscode/theorem-terminal-0.7.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -332,11 +370,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.6.1.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.7.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.6.1**.
+The extension identity is **flengyel.theorem-terminal**, version **0.7.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally
@@ -345,7 +383,8 @@ The bridge runs `python3 -I` with `python/bridge.py` under the installed
 extension and loads that directory's bundled core. It does not import the
 checkout or an independently installed `theorem_terminal` package.
 
-Installation keeps the existing extension identity and private-state paths.
+Installation keeps the existing extension identity and default private-state paths.
+Only the explicit artifact move/adopt commands change the active binding.
 Do not delete workspace storage to install or upgrade. Saved outlines are
 reopened explicitly with **MRW: Open Saved Source Outline…**; save reader forms
 before closing. Native Windows backend portability remains deferred; run the
@@ -494,7 +533,7 @@ another independent one-parent/one-child investigation can use the slot.
 ### Investigation persistence boundary
 
 The core stores a version-1 `theorem-terminal.editor-investigation` envelope
-under the extension's private workspace storage, in
+by default under the extension's private workspace storage, in
 `investigation-SHA256(canonical-project-root)/active.json`. It is limited to
 128 KiB and contains bounded human task fields, exact parent identity/spans,
 and the child's destination and exact request fingerprint. Each human field is

@@ -453,6 +453,7 @@ def render_preview(
         "Type SEND to transmit exactly the displayed request-body bytes: "
     ),
 ) -> str:
+    from .artifact_context import stable_paths
     request = operation.request
     return "\n".join(
         (
@@ -470,7 +471,7 @@ def render_preview(
             json.dumps(_plain_json(request["effective_input"]), ensure_ascii=False, sort_keys=True),
             "Enforced limits:",
             json.dumps(_plain_json(request["limits"]), ensure_ascii=False, sort_keys=True),
-            f"Output destination: {operation.output}",
+            f"Output destination: {stable_paths(str(operation.output))}",
             "OpenAI data handling remains governed by its policies; store:false does not claim to disable every form of processing or retention.",
             confirmation_prompt,
         )
@@ -536,7 +537,15 @@ def install_atomic_no_overwrite(destination: Path, raw: bytes) -> None:
 def reserve_output(destination: Path):
     """Exclusively reserve one output name without exposing a ModelCall."""
 
-    reservation = destination.parent / f".{destination.name}.request-assistance.reserve"
+    from .artifact_context import CURRENT, stable_paths
+    context=CURRENT.get()
+    if context:
+        from .source_outlines import directory
+        reservation_root=context.runtime/'reservations'
+        directory(reservation_root)
+        reservation=reservation_root/(sha256(str(stable_paths(str(destination))).encode()).hexdigest()+'.reserve')
+    else:
+        reservation = destination.parent / f".{destination.name}.request-assistance.reserve"
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW

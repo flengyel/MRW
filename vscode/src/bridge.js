@@ -21,12 +21,16 @@ function runBridge(extensionPath, executable, request, options = {}) {
       if (done) return;
       done = true;
       clearTimeout(timer);
+      options.signal?.removeEventListener('abort', abort);
       if (error) reject(error); else resolve(result);
     };
     const timer = setTimeout(() => {
       child.kill();
       finish(new Error('Action timed out. The outcome may be uncertain; inspect the destination before any new action.'));
     }, options.timeout || 30000);
+    const abort = () => { child.kill(); finish(new Error('Artifact operation interrupted. Run MRW: Recover Artifact Move to verify the committed location before continuing.')); };
+    options.signal?.addEventListener('abort', abort, { once: true });
+    if (options.signal?.aborted) abort();
     child.on('error', error => finish(new Error(`Cannot start Python service: ${error.message}`)));
     child.stdin.on('error', error => finish(new Error(`Python input failed: ${error.message}`)));
     child.stdout.on('data', chunk => {

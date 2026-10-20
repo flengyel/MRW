@@ -74,6 +74,18 @@ is separate from stable target identity. A navigation link establishes no
 dependency, verification or human judgment. See
 [the companion contract](docs/OBSIDIAN_WORKFLOW.md).
 
+Saved artifact placement is separate from mathematical identity. The extension's
+0.7.0 store has persistent store/project UUIDs, a complete content-hash manifest
+and verified compatibility mappings for earlier path-derived reference scopes.
+A host-local binding maps that identity to one local directory and project
+folders. Relocation preserves immutable record bytes, source provenance, spans
+and evidence distinctions. Mutable aliases resolve required absolute record
+locators; they do not amend historical evidence. A copied store becomes writable
+only after complete validation and explicit local adoption. Journals, locks and
+runtime/UI state remain host-local. This is a bounded navigation/persistence
+protocol, not a mathematical status, distributed transaction or synchronization
+service. See [the storage contract](docs/ARTIFACT_STORAGE.md).
+
 For a body of mathematics under study, the model must represent:
 
 - the structure of the subject, as sources present it;
@@ -663,8 +675,9 @@ binds workspace/private-store scope, outline UUID and retained source revision;
 region references additionally bind region UUID and an exact `VersionedSpan`.
 Annotation edits leave that identity valid. A changed region association is
 reported while its originally referenced retained passage stays accessible.
-No global mathematical-occurrence identity, new persistence schema or automatic
-synchronization is introduced. See [the reference contract](docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
+No global mathematical-occurrence identity or automatic synchronization is
+introduced. The separately versioned artifact-store envelope preserves these
+reference identities during explicit relocation/adoption. See [the reference contract](docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
 
 **Planned requirement, 2026-10-12.** A proof outline may retain selected claims
 and hide intervening graph vertices, with explanations and expansion to the

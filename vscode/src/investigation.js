@@ -107,7 +107,6 @@ function registerInvestigation({ vscode, context, register, bridge, show, projec
       await vscode.window.showInputBox({ prompt: 'OpenAI model identifier for this request' });
     if (model === undefined) return;
     const directory = path.join(context.storageUri.fsPath, 'model-calls');
-    await fs.mkdir(directory, { recursive: true, mode: 0o700 });
     const exchange_id = `continuation-${crypto.randomUUID()}`;
     setDraft({ project_root: state.project_root, store: state.store, state_revision: state.revision,
       parent: parent.parent, passage_numbers: passageNumbers(answer), contexts: [], question,
@@ -174,6 +173,12 @@ function registerInvestigation({ vscode, context, register, bridge, show, projec
     await vscode.window.showInformationMessage('Investigation ended. Its immutable records were retained.');
   }, false));
   return {
+    checkStorageChange: (allowDirty = false) => {
+      if (!allowDirty && state?.active && human && JSON.stringify(human) !== JSON.stringify(state.active.summary)) {
+        throw new Error('Save the unsaved human investigation summary before moving saved artifacts.');
+      }
+    },
+    storageChanged: () => { /* Stable logical locators remain valid; the next action reads the committed binding. */ },
     editQuestion: () => editField('question'), writable,
     sent: result => { if (result) adopt(result, false); },
     uncertain: () => { blocked = true; },

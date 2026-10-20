@@ -26,12 +26,32 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed }) {
+function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
   }));
   let active, busy = false;
+  artifactClients?.push({
+    async freeze(allowDirty = false) {
+      if (busy) throw new Error('Wait for the current reader action before moving artifacts.');
+      for (const c of panels.values()) {
+        const dirty = await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => { c.storageCheck = undefined; reject(new Error('Reader did not confirm its draft state. Keep its text and try again.')); }, 5000);
+          c.storageCheck = value => { clearTimeout(timer); c.storageCheck = undefined; resolve(value); };
+          c.panel.webview.postMessage({ type: 'storageCheck' });
+        });
+        if (dirty && !allowDirty) throw new Error('Save the unsaved reader annotations before moving or opening an artifact directory. Your text is retained.');
+      }
+    },
+    async release() {
+      for (const c of panels.values()) {
+        await c.panel.webview.postMessage({ type: 'storageRelease' });
+        try { await send(c, await bridge({ method: 'outline_load', store: c.store, project_root: c.root, id: c.result.outline.id })); }
+        catch (error) { await c.panel.webview.postMessage({ type: 'error', message: error.message, writesBlocked: true }); }
+      }
+    },
+  });
   const current = () => {
     const controller = panels.get(active);
     if (!controller) throw new Error('Create or open a source outline first.');
@@ -107,6 +127,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   }
   async function message(c, value) {
     if (!value || typeof value.type !== 'string') return;
+    if (value.type === 'storageStatus') { c.storageCheck?.(!!value.dirty); return; }
     if (value.type === 'ready') return send(c, c.result);
     if (value.type === 'select') {
       if (c.result.outline.regions.some(r => r.id === value.region)) c.selected = value.region;
@@ -207,7 +228,10 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
     if (c.noteError) throw new Error(`Obsidian associations unavailable: ${c.noteError}. Refresh the reader; retained material remains accessible.`);
     const previousNotes = c.notes;
-    const links = previousNotes.links.filter(n => n.reference === target.reference);
+    const selectedNotes = await bridge({ method: 'outline_notes', store: c.store, project_root: c.root,
+      id: c.result.outline.id, reference: target.reference });
+    if (selectedNotes.revision !== previousNotes.revision) throw new Error('Obsidian associations changed. Refresh the reader before choosing a linked note.');
+    const links = selectedNotes.selected_links;
     let existing;
     if (action === 'open_note' || action === 'manage_notes') {
       if (!links.length) throw new Error('No Obsidian note is linked to this exact target. Choose Link an Obsidian note… in the reader.');
@@ -216,7 +240,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       if (action === 'open_note') {
         // Revalidate stored URL through the core immediately before dispatch.
         const fresh = await bridge({ method: 'outline_notes', store: c.store, project_root: c.root, id: c.result.outline.id });
-        const selected = fresh.links.find(n => n.id === existing.id && n.reference === target.reference && n.url === existing.url);
+        const selected = fresh.links.find(n => n.id === existing.id && n.reference === existing.reference && n.url === existing.url);
         if (!selected) throw new Error('Note association changed or is missing. Refresh the reader and choose it again.');
         if (!await vscode.env.openExternal(obsidianTarget(vscode, selected.url))) throw new Error('Obsidian could not open the URL. Start Windows Obsidian, then try Open linked note in Obsidian again.');
         vscode.window.setStatusBarMessage('Sent to Obsidian. If it reports a missing note/vault, replace this association using that note’s current Obsidian URL.', 12000);
@@ -237,7 +261,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     let result;
     try {
       result = await bridge({ method: 'outline_update_note', store: c.store, project_root: c.root, id: c.result.outline.id,
-        revision: previousNotes.revision, change: { id: existing?.id || null, reference: target.reference, url, label } });
+        revision: previousNotes.revision, change: { id: existing?.id || null, reference: existing?.reference || target.reference, url, label } });
     } catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     if (result.blocked) { blockedStores.add(c.store); throw new Error(`Obsidian association publication failed: ${result.write_error}. Reload before further private writes.`); }
     await send(c, c.result);
@@ -256,7 +280,17 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       }
     }
     if (!location || workspaceRoute(vscode, location.root) !== target.workspace) {
-      return { recovery: target.workspace, link: value };
+      // Only an explicitly adopted, verified store can translate old routing
+      // to this computer. Matching folder names alone never establishes identity.
+      location = undefined;
+      for (const folder of vscode.workspace.workspaceFolders || []) {
+        if (folder.uri.scheme !== 'file') continue;
+        const local = await storage({ document: { uri: folder.uri } });
+        const match = await bridge({ method: 'artifact_match_reference', reference: target.reference,
+          project: target.project, local_root: local.root });
+        if (match.matches) { location = local; break; }
+      }
+      if (!location) return { recovery: target.workspace, link: value };
     }
     const result = await bridge({ method: 'outline_follow_reference', ...{ store: location.store, project_root: location.root }, reference: target.reference });
     const c = await display(result, location.store, location.root, result.reference);

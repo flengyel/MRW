@@ -31,7 +31,13 @@ def _add_cleanup_note(primary: BaseException, message: str) -> None:
         primary.add_note(message)
 
 
-def persist_private_new(
+def persist_private_new(destination: Path, raw: bytes, *, error_type=PrivatePersistenceError):
+    from .artifact_context import publication_guard
+    with publication_guard(destination):
+        return _persist_private_new(destination, raw, error_type=error_type)
+
+
+def _persist_private_new(
     destination: Path,
     raw: bytes,
     *,

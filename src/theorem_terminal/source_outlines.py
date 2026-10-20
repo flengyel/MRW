@@ -274,8 +274,10 @@ def goal_entries(raw):
 class OutlineStore:
     def __init__(self, directory_path, project_root, identifier=None):
         self.base, self.root = local_path(directory_path), local_path(project_root)
+        from .artifact_context import CURRENT
+        managed=CURRENT.get() is not None and CURRENT.get().identity is not None
         if (self.root.resolve() != self.root or self.base.resolve() != self.base
-                or self.base.is_relative_to(self.root)):
+                or (self.base.is_relative_to(self.root) and not managed)):
             raise ValueError('Outline storage requires a canonical private directory outside the project')
         self.id = identity(identifier) if identifier is not None else None
         self.directory = self.base / self.id if self.id else None

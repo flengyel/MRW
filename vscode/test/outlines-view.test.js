@@ -36,7 +36,7 @@ function reader() {
     replaceChildren() { this.children = []; }
     addEventListener(type, callback) { this.listeners[type] = callback; }
     all() { return this.children.flatMap(n => [n, ...n.all()]); }
-    querySelectorAll(tag) { return this.all().filter(n => n.tag === tag); }
+    querySelectorAll(tag) { return this.all().filter(n => tag.split(',').includes(n.tag)); }
     querySelector() { return this.all().find(n => n.dataset.reference); }
     scrollIntoView() {}
     text() { return this.textContent + this.children.map(n => n.text()).join(' '); }
@@ -44,6 +44,7 @@ function reader() {
   const root = new Node('main'), messages = [];
   let receive;
   const globals = { document: { getElementById: () => root, createElement: tag => new Node(tag) },
+    FormData: class { constructor(node) { this.values = node.all().filter(n => n.name).map(n => [n.name,n.value]); } *[Symbol.iterator]() { yield* this.values; } },
     acquireVsCodeApi: () => ({ postMessage: value => messages.push(value) }),
     addEventListener: (type, callback) => { receive = callback; } };
   globals.window = globals;
@@ -97,4 +98,17 @@ test('copy and return-note actions explain opposite directions and preserve expl
   h.send({type:'idle'});
   h.button(changed,'associate-note').listeners.click();
   assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'associate_note',region:'changed',pinned:false}));
+});
+
+test('storage handshake freezes controls and preserves unsaved annotation text across rebind', () => {
+  const h = reader(); h.send(readingModel());
+  const form = h.root.all().find(n => n.tag === 'form' && n.dataset.draft.startsWith('note:'));
+  const text = form.all().find(n => n.tag === 'textarea'); text.value = 'Unsaved human α annotation';
+  form.listeners.input();
+  h.send({type:'storageCheck'});
+  assert.equal(h.messages.at(-1).type, 'storageStatus'); assert.equal(h.messages.at(-1).dirty, true);
+  assert.ok(h.root.all().filter(n => ['button','input','textarea','select'].includes(n.tag)).every(n => n.disabled));
+  h.send({type:'storageRelease'}); h.send(readingModel());
+  assert.ok(h.root.all().some(n => n.tag === 'textarea' && n.value === 'Unsaved human α annotation'));
+  assert.equal(h.root.all().find(n => n.tag === 'textarea').disabled, false);
 });

@@ -49,6 +49,7 @@ async function harness(root, state = new Map()) {
   }
   const api = {
     Position, Range, Selection, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => uri(x, 'https') },
+    ProgressLocation: { Notification: 15 },
     ViewColumn: { One: 1, Two: 2, Beside: -2 }, TextEditorRevealType: { InCenter: 1, InCenterIfOutsideViewport: 2 },
     EventEmitter: class { event() {} fire() {} dispose() {} }, TreeItem: class { constructor(label) { this.label = label; } },
     commands: { registerCommand(name, action) { commands.set(name, action); return disposable; } },
@@ -74,7 +75,7 @@ async function harness(root, state = new Map()) {
           onDidDispose() { return disposable; }, onDidChangeViewState() { return disposable; },
           webview: { html: '', messages: [], cspSource: 'vscode-webview:', asWebviewUri: uri => uri.toString(),
             onDidReceiveMessage(callback) { receive = callback; return disposable; },
-            async postMessage(value) { this.messages.push(value); return true; } },
+            async postMessage(value) { this.messages.push(value); if (value.type === 'storageCheck') await receive({ type: 'storageStatus', dirty: !!this.dirty }); return true; } },
           receive: value => receive(value) };
         panels.push(panel); return panel;
       },
@@ -83,6 +84,7 @@ async function harness(root, state = new Map()) {
       registerUriHandler(handler) { api.uriHandler = handler; return disposable; },
       async showErrorMessage(message) { errors.push(message); },
       async showInformationMessage() {}, setStatusBarMessage() {},
+      async withProgress(_settings, action) { return action({}, { onCancellationRequested() { return disposable; } }); },
       async showOpenDialog() { return opens.shift(); },
       async showInputBox() { return inputs.shift(); },
       async showQuickPick(options) { return picks.length ? picks.shift() : options[0]; },
@@ -114,6 +116,7 @@ async function harness(root, state = new Map()) {
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
     if (name === './outlines') return require('../src/outlines');
+    if (name === './artifactStorage') return require('../src/artifactStorage');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };
     return require(name);
   };
@@ -124,8 +127,10 @@ async function harness(root, state = new Map()) {
     setService: fn => { service = fn; }, focus: ed => { api.window.activeTextEditor = ed; activeListener(ed); } };
 }
 
-async function temporary(t) {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'mrw-command-'));
+async function temporary(t, persistent = false) {
+  const parent = persistent ? path.resolve(__dirname, '../../.codex-work/artifact-storage-node-tests') : os.tmpdir();
+  await fs.mkdir(parent, {recursive:true});
+  const directory = await fs.mkdtemp(path.join(parent, 'mrw-command-'));
   const root = path.join(directory, 'project'); await fs.mkdir(root);
   t.after(() => fs.rm(directory, { recursive: true, force: true }));
   return root;
@@ -168,7 +173,7 @@ test('source outline retains Unicode selections, edits annotations, and restores
   await restored.commands.get('mrw.replaceOutlineRegion')();
   assert.equal(restored.requests.length, before);
   assert.match(restored.errors.pop(), /ordinary text|exact retained text/);
-  assert.ok([...h.requests, ...restored.requests].every(r => r.method.startsWith('outline_')));
+  assert.ok([...h.requests, ...restored.requests].every(r => r.method.startsWith('outline_') || r.method === 'artifact_status'));
   assert.equal(await fs.readFile(source, 'utf8'), 'Replacement argument.'); assert.deepEqual(restored.errors, []);
 });
 
@@ -260,7 +265,7 @@ test('manual evidence can move, detach, reopen retained originals and reject fai
   await panel.receive({ type: 'edit', change: { kind: 'remove_evidence_association', artifact: a.id } });
   assert.equal(h.requests.length, before);
   await panel.receive({ type: 'artifact', artifact: a.id }); assert.equal(h.shown.at(-1).getText(), raw);
-  assert.ok([...h.requests, ...restored.requests].every(r => r.method.startsWith('outline_')));
+  assert.ok([...h.requests, ...restored.requests].every(r => r.method.startsWith('outline_') || r.method === 'artifact_status'));
 });
 
 test('activation does no file loading or process work; every command checks trust', async t => {
@@ -350,8 +355,8 @@ test('unsaved Unicode preview contains only selection; remove and discard send n
   const root = await temporary(t), h = await harness(root);
   const doc = await ask(h, root);
   assert.equal(h.errors.length, 0);
-  assert.equal(h.requests[0].draft.target.end, '1.2');
-  assert.equal(h.requests[0].draft.contexts[0].text, 'α😀');
+  assert.equal(h.requests.find(r => r.method === 'prepare_assistance').draft.target.end, '1.2');
+  assert.equal(h.requests.find(r => r.method === 'prepare_assistance').draft.contexts[0].text, 'α😀');
   assert.ok(!h.shown.at(-1).text.includes('PRIVATE UNSELECTED'));
   const frozen = h.shown.at(-1).text;
   doc.text = 'later edits'; doc.version++;
@@ -361,7 +366,7 @@ test('unsaved Unicode preview contains only selection; remove and discard send n
   await h.commands.get('mrw.discardRequest')();
   await h.commands.get('mrw.sendRequest')();
   assert.match(h.errors.at(-1), /current exact request preview/);
-  assert.ok(h.requests.every(r => r.method === 'prepare_assistance'));
+  assert.ok(h.requests.every(r => r.method === 'prepare_assistance' || r.method === 'artifact_status'));
 });
 
 test('send consumes one preview, blocks duplicates, and presents terminal failure', async t => {
@@ -393,7 +398,7 @@ test('old preview cannot authorize replacement; preparation error invalidates Se
   h.setService(async () => { throw new Error('synthetic preparation failure'); });
   await h.commands.get('mrw.previewRequest')();
   await h.commands.get('mrw.sendRequest')();
-  assert.ok(h.requests.every(r => r.method === 'prepare_assistance'));
+  assert.ok(h.requests.every(r => r.method === 'prepare_assistance' || r.method === 'artifact_status'));
 });
 
 test('cancelled question and malformed Unicode never prepare or send', async t => {
@@ -440,7 +445,7 @@ test('additional context uses captured text and scalar locations from untitled C
 test('known unsent request keeps its question but requires a new preview before Send', async t => {
   const root = await temporary(t), h = await harness(root);
   await ask(h, root);
-  const original = h.requests[0].draft;
+  const original = h.requests.find(r => r.method === 'prepare_assistance').draft;
   h.setService(async (...args) => args[2].method === 'send_assistance'
     ? { status: 'not_sent', retained: false, revision: null, body: 'Request not sent: missing credential.' }
     : runBridge(...args));
@@ -541,7 +546,7 @@ async function continuation(h) {
   h.inputs.push('1', 'Follow-up question', 'Human correction α😀', 'fake-model');
   await h.commands.get('mrw.continueAnswer')();
   assert.deepEqual(h.errors, []);
-  return h.requests.findLast(r => r.method === 'prepare_assistance').draft;
+  return h.requests.findLast(r => r.method === 'prepare_assistance' || r.method === 'artifact_status').draft;
 }
 async function deterministicSend(h, draft, status = 'completed') {
   const cp = require('node:child_process');
@@ -676,7 +681,9 @@ test('Markdown overview references two saved sources, follows retained regions a
   assert.notEqual(second.reference, first.reference); assert.ok(doc.text.includes('article'));
   const before = doc.text;
   ed.selection = new Selection(new Position(0, 3), new Position(0, 3));
-  assert.equal((await h.commands.get('mrw.followOutlineReference')()).status, 'unchanged');
+  const firstFollow = await h.commands.get('mrw.followOutlineReference')();
+  assert.ok(firstFollow, h.errors.join('\n'));
+  assert.equal(firstFollow.status, 'unchanged');
   assert.equal(h.api.window.activeTextEditor.document.uri.scheme, 'mrw-record');
   assert.equal(h.api.window.activeTextEditor.document.languageId, 'plaintext');
   assert.equal(h.api.window.activeTextEditor.selection.start.character, 1);
@@ -788,4 +795,65 @@ test('external links refuse unrelated workspaces before private resolution and o
   assert.match(wrong.errors.pop(), /No saved source outlines/);
   finishWarning(undefined); await pending;
   assert.deepEqual(wrong.errors, []);
+});
+
+test('artifact move confirms scope, rebinds an open reader, keeps old links and rejects a stale window', async t => {
+  const root = await temporary(t, true), source = path.join(root, 'move α.txt');
+  await fs.writeFile(source, 'α😀 retained passage\n');
+  const h = await harness(root); const doc=h.document(source, 'α😀 retained passage\n'); h.focus(h.editor(doc));
+  const created=await h.commands.get('mrw.createOutline')();
+  const link=await h.commands.get('mrw.copyOutlineLink')();
+  h.inputs.push('obsidian://open?vault=Zettelkasten&file=Move20261019','Saved move note');
+  await h.commands.get('mrw.associateObsidianNote')();
+  const savedNoteReference=h.panels[0].webview.messages.at(-1).notes[0].reference;
+  const stale=await harness(root); await stale.commands.get('mrw.openOutline')();
+  const destination=path.join(root,'..','moved α');h.inputs.push(destination);h.endings.push('Move artifacts');
+  const moved=await h.commands.get('mrw.moveArtifactDirectory')();
+  assert.equal(h.errors.length,0);assert.equal(moved.committed,true);assert.equal(moved.location,destination);
+  assert.ok(h.panels[0].webview.messages.some(m=>m.type==='storageCheck'));
+  assert.ok(h.panels[0].webview.messages.some(m=>m.type==='storageRelease'));
+  assert.equal(h.panels[0].webview.messages.at(-1).model.outline.id,created.outline.id);
+  h.api.env.clipboard.value=link;await h.commands.get('mrw.openLinkFromClipboard')();
+  assert.equal(h.errors.length,0);assert.equal(h.panels[0].webview.messages.at(-1).model.outline.id,created.outline.id);
+  await h.panels[0].receive({type:'open_note',region:null});
+  assert.deepEqual(h.errors,[]);assert.equal(h.api.external.path,'/Zettelkasten/Move20261019');
+  h.picks.push('Replace linked note');h.inputs.push('obsidian://open?vault=Zettelkasten&file=MoveReplacement','Replacement note');
+  await h.panels[0].receive({type:'manage_notes',region:null});
+  assert.deepEqual(h.errors,[]);assert.equal(h.panels[0].webview.messages.findLast(m=>m.type==='outline').notes[0].reference,savedNoteReference);
+  h.picks.push('Remove note link');await h.panels[0].receive({type:'manage_notes',region:null});
+  assert.deepEqual(h.errors,[]);assert.equal(h.panels[0].webview.messages.findLast(m=>m.type==='outline').notes.length,0);
+  await stale.panels[0].receive({type:'toggle',region:created.outline.regions[0].id});
+  assert.match(stale.errors.at(-1),/stale client/);
+  const status=await h.commands.get('mrw.artifactLocation')();assert.equal(status.location,destination);
+});
+
+test('artifact move cancellation and dirty reader drafts preserve the original store', async t => {
+  const root=await temporary(t, true),source=path.join(root,'draft.txt');await fs.writeFile(source,'retained\n');
+  const h=await harness(root);h.focus(h.editor(h.document(source,'retained\n')));await h.commands.get('mrw.createOutline')();
+  const before=await h.commands.get('mrw.artifactLocation')();
+  h.panels[0].webview.dirty=true;
+  await h.commands.get('mrw.moveArtifactDirectory')();assert.match(h.errors.at(-1),/unsaved reader annotations/);
+  assert.equal(h.panels[0].webview.dirty,true);
+  assert.ok(h.panels[0].webview.messages.some(m=>m.type==='storageRelease'));
+  h.panels[0].webview.dirty=false;h.inputs.push(path.join(root,'..','cancelled move'));
+  await h.commands.get('mrw.moveArtifactDirectory')();
+  assert.equal((await h.commands.get('mrw.artifactLocation')()).location,before.location);
+  assert.ok(!h.requests.some(r=>r.method==='artifact_move'));
+});
+
+test('adopted synchronized identity permits an old external route only in the explicitly mapped local workspace', async t => {
+  const root=await temporary(t,true),source=path.join(root,'portable α.txt');await fs.writeFile(source,'exact retained α\n');
+  const h=await harness(root);h.focus(h.editor(h.document(source,'exact retained α\n')));
+  const created=await h.commands.get('mrw.createOutline')();const markdown=await h.commands.get('mrw.copyOutlineLink')();
+  const moved=path.join(root,'..','portable artifacts');h.inputs.push(moved);h.endings.push('Move artifacts');
+  await h.commands.get('mrw.moveArtifactDirectory')();assert.deepEqual(h.errors,[]);
+  const local=await temporary(t,true),copy=path.join(local,'..','synchronized artifacts');await fs.cp(moved,copy,{recursive:true});
+  const receiver=await harness(local);receiver.inputs.push(copy);receiver.endings.push('Open existing store');
+  await receiver.commands.get('mrw.openArtifactDirectory')();assert.deepEqual(receiver.errors,[]);
+  receiver.api.env.clipboard.value=markdown;await receiver.commands.get('mrw.openLinkFromClipboard')();
+  assert.deepEqual(receiver.errors,[]);assert.ok(receiver.requests.some(r=>r.method==='artifact_match_reference'));
+  assert.equal(receiver.panels[0].webview.messages.at(-1).model.outline.id,created.outline.id);
+  const returnLink=await receiver.commands.get('mrw.copyOutlineLink')();
+  h.api.env.clipboard.value=returnLink;await h.commands.get('mrw.openLinkFromClipboard')();
+  assert.deepEqual(h.errors,[]);assert.equal(h.panels[0].webview.messages.at(-1).model.outline.id,created.outline.id);
 });
