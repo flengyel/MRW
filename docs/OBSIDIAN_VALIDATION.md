@@ -1,5 +1,27 @@
 # Obsidian companion navigation validation
 
+## Scoped Windows storage trial — 2026-10-20
+
+After the separately approved metadata/ACL setup, the production command moved
+the existing fixture onto the actual Windows-backed mount and removed its old
+payloads. The normally restarted installed reader followed the old link from
+the clipboard, selected exactly `α😀 retained`, and displayed a subsequent
+saved annotation. One final physical Obsidian click after explicit command
+activation opened a distinct fresh `/2` retained view, with independent exact
+UTF-8 comparison. The first cold click did not establish a new view. The reader
+return-control invocation did not confirm foreground within five seconds;
+**complete Windows-backed desktop return remains unconfirmed**. No further UI
+retry campaign ran. The earlier passed ext4 round trip below remains separate.
+
+Existing note/source bytes and identities remained unchanged. Windows-created
+local receiving copies preserve the association and old reference through full
+verification, adoption and editing; they are not inter-computer synchronization
+evidence. Nested filesystem probes also encountered unresolved replacement
+denials, so this temporary setup is not qualified for the real store. Read
+[the precise results](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20)
+and [prepared next comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md). The real store
+remains unmoved; no runtime/package change or broader usefulness claim was made.
+
 ## Post-move desktop follow-up — 2026-10-20
 
 The outstanding physical round trip passed using the existing ext4 fixture and

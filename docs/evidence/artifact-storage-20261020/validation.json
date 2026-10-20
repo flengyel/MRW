@@ -1,5 +1,6 @@
 {
   "date": "2026-10-20",
+  "later_authorized_trial": "metadata-trial.json",
   "baseline": "8ae554394943961248991704f9ef24dd85eddb04",
   "installed_version": "0.7.0",
   "runtime_changed": false,

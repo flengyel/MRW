@@ -95,8 +95,11 @@ coordinate computers. Require one writing installation and complete verified
 synchronization before handover. The current `/mnt/c` mount fails private-mode
 checks and is unsupported; displayed modes without metadata do not establish
 effective Windows access. Read `docs/WSL_ARTIFACT_STORAGE_SETUP.md` for the scoped
-metadata/ACL trial prepared on 2026-10-20; it is not an executed remedy or
-synchronization acceptance. Do not change permissions/mount/sync configuration
+metadata/ACL trial separately authorized and configured on 2026-10-20. A local
+fixture move/save/reopen passed, but nested probe replacement denials remain;
+it is not real-store qualification or cross-machine synchronization acceptance.
+The bounded comparison in `docs/WSL_ARTIFACT_STORAGE_COMPARISON.md` is prepared
+but has not been separately authorized. Do not change permissions/mount/sync configuration
 without separate authorization. The standalone Qt storage/recovery is unchanged.
 
 The existing editor-centered Qt GUI remains available as

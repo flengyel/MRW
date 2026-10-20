@@ -40,7 +40,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
 | Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
-| Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; current DrvFS private modes unsupported | Existing storage unchanged |
+| Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -74,9 +74,12 @@ notes, notebooks, original documents and Qt storage are unchanged. Read
 Windows-backed mount currently fails private-mode requirements and is rejected
 before commit; no actual user store was relocated. The 2026-10-20 follow-up
 diagnoses Windows ACLs and actual Windows Syncthing versions/settings and
-[prepares a scoped metadata/ACL fixture trial](docs/WSL_ARTIFACT_STORAGE_SETUP.md)
-for separate authorization. No runtime checks are weakened, no environment
-change has run, and usable Zettelkasten artifact storage remains unfinished.
+[records a separately authorized scoped metadata/ACL fixture trial](docs/WSL_ARTIFACT_STORAGE_SETUP.md).
+The actual Windows-backed move/save/reopen and local receiving-copy checks pass;
+nested probe replacement denials prevent qualification for real work. No runtime
+checks are weakened, the real store remains unmoved, and usable synchronized
+Zettelkasten artifact storage remains unfinished. A bounded Syncthing-pause
+comparison is prepared but requires its own authorization.
 Second-host synchronization acceptance is unavailable. This increment creates no mathematical-use claim and
 does not reopen the Pi, R3, SagePod or Euclid campaigns.
 

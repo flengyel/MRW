@@ -76,9 +76,11 @@ targets. See [storage workflow and recovery](docs/ARTIFACT_STORAGE.md) and
 The current `/mnt/c` DrvFS mount does not preserve the required Unix private
 modes, so migration there is rejected; this is a permission-policy mismatch,
 not evidence of universal Windows access or of every DrvFS mount being unusable.
-A [scoped metadata/ACL trial](docs/WSL_ARTIFACT_STORAGE_SETUP.md) is prepared for
-separate authorization and remains untested. The user's actual location remains
-unchanged. This adds no synchronization service or distributed locking. Notes alone still do
+A separately authorized [scoped metadata/ACL trial](docs/WSL_ARTIFACT_STORAGE_SETUP.md)
+completed a disposable Windows-backed move, save and reopen. Repeated nested
+probe replacement denials still prevent qualification for real work; synchronized
+placement is not declared complete. The user's actual location remains unchanged.
+This adds no synchronization service or distributed locking. Notes alone still do
 not carry the separately saved MRW material.
 
 The workstation is a mathematical context system for learning, reconstructing,

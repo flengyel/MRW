@@ -1,9 +1,14 @@
-# Windows-backed artifact storage: prepared metadata trial
+# Windows-backed artifact storage: scoped metadata trial
 
-Status, 2026-10-20: **prepared, awaiting separate authorization; not run**.
-MRW 0.7.0 remains installed. The real artifact store has not moved. The existing
-`/mnt/c` configuration still fails MRW's private-mode contract. This document
-does not declare synchronized Zettelkasten storage supported.
+Status, 2026-10-20: **authorized and configured for disposable testing**.
+The production command moved the fixture onto the scoped mount, removed old
+payloads, and saved a subsequent annotation. Windows-created receiving files
+also preserve private modes through the mount's masks. Repeated nested probes
+nevertheless encountered `EACCES` during atomic replacement. **The configuration
+is not yet qualified for the real store.** MRW 0.7.0 remains installed; the real
+store has not moved. The original `/mnt/c` mount remains unchanged and still
+fails the private-mode contract. See [actual results](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20)
+and the [prepared controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
 
 ## Diagnosis
 
@@ -45,12 +50,12 @@ NTFS metadata through this pair. Do not enable it across the vault as a remedy.
 Syncthing replaces files through temporary copies: an existing receiving file's
 metadata alone is insufficient evidence for later replacements.
 
-## Exact proposed operation
+## Executed operation and scope
 
-AGENTS.md requires separate authorization for mount, permission and
-synchronization-configuration changes. The single proposed operation is a
-**temporary, isolated metadata fixture setup**, comprising the new directory's
-private ACL and its separate mount. It is not a move of real saved work.
+The user explicitly approved the prepared temporary metadata/ACL trial. Only
+the new test directory's permissions and separate mount were changed. AGENTS.md
+continues to require separate authorization for other mount, permission or
+synchronization-configuration changes. No real work was relocated.
 
 Scope:
 
@@ -65,7 +70,8 @@ Scope:
 - No `/etc/wsl.conf`, `/etc/fstab`, Syncthing setting or global configuration
   change. **No restart or WSL shutdown**; existing work stays running.
 
-In Windows PowerShell, after authorization:
+The following guarded Windows creation commands are retained as an execution
+record. The directory now exists; **do not rerun them on an existing directory**.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
@@ -91,11 +97,16 @@ Set-Acl -LiteralPath $trial -AclObject $acl
 Get-Acl -LiteralPath $trial | Format-List Owner,AreAccessRulesProtected,Access
 ```
 
-In the actual Debian host, not the sandbox, after confirming that ACL:
+After verifying that ACL, the isolated mountpoint was created. Passwordless sudo
+was unavailable. The actual successful mount used WSL's direct root command
+facility, without stopping any distribution. `--exec` preserves the Windows
+backslashes; an initial invocation without it lost those separators and failed
+without installing a mount.
 
 ```sh
 mkdir -m 700 /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-20261020/windows-metadata
-sudo mount -t drvfs 'C:\Users\fleng\Zettelkasten\MRW-storage-test-20261020' \
+/mnt/c/Windows/System32/wsl.exe -d Debian -u root --exec /bin/mount -t drvfs \
+  'C:\Users\fleng\Zettelkasten\MRW-storage-test-20261020' \
   /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-20261020/windows-metadata \
   -o metadata,uid=1000,gid=1000,umask=077,fmask=111
 findmnt -T /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-20261020/windows-metadata \
@@ -103,12 +114,13 @@ findmnt -T /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-2026
 ```
 
 Stop on an error or an unexpected mount source/options. This exact scoped
-mount has not yet been attempted; a successful command is not itself acceptance.
+mount was observed as read/write 9p with the requested source, metadata and masks.
+A successful mount command is not itself acceptance.
 Do not fall back to remounting C: or applying global options. Existing
 configuration files require no restoration because this proposal does not edit
 them. Their inspected contents and hashes are retained with the local diagnostics.
 
-## Check that will establish success
+## Acceptance checks and remaining qualification
 
 1. Inspect the new directory and both WSL-created and Windows-created children:
    private Windows ACL, actual WSL uid/gid and `0700` directories / `0600` files.
@@ -136,7 +148,20 @@ and be repeated after later receiving replacements. No such repair operation
 is implemented or authorized by this document. Do not use a blanket recursive
 chmod/chown, or initialize missing content to make adoption pass.
 
-Only after those results can a permanent scoped mount and any necessary
+The local trial passed the move/save/reopen/retained-source checks and a full
+Windows-created byte-only receiving-copy test, including adoption, editing and
+later manifest replacement. It needed no receiving chmod/chown: the verified
+mount masks and private Windows parent ACL supplied local permissions. This
+does not establish another host's ownership, access or actual synchronization.
+Seven of nine cross-filesystem regression cases passed in the initial run;
+preflight replacement denials blocked two, and a targeted repeat also encountered
+denials. Checks were not weakened. A nested diagnostic reproduced the denial
+even after a single 200 ms delayed attempt; other short probes passed. No process
+or synchronization cause was established. The prepared comparison temporarily
+pauses only the existing vault folder, runs bounded disposable probes, and
+restores the original state. **It has not been authorized or executed.**
+
+Only after qualification can a permanent scoped mount and any necessary
 receiving operation be proposed. A future permanent configuration must preserve
 existing entries and be separately authorized; this trial adds no fstab entry.
 The ordinary procedure remains **Show Artifact Location → Move Artifact
@@ -151,7 +176,8 @@ Close only fixture clients. Unmount just the new mountpoint, without force or
 lazy unmount:
 
 ```sh
-sudo umount /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-20261020/windows-metadata
+/mnt/c/Windows/System32/wsl.exe -d Debian -u root --exec /bin/umount \
+  /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-20261020/windows-metadata
 rmdir /home/flengyel/src/theorem_terminal/.codex-work/artifact-storage-20261020/windows-metadata
 ```
 
@@ -161,6 +187,12 @@ for inventoried cleanup; do not recursively delete the vault or enclosing
 storage. Syncthing may have copied those deliberately temporary files, so its
 completed deletion must also be checked before declaring cleanup complete.
 No real store binding has changed merely by setting up or rolling back a mount.
+The moved navigation fixture is currently bound to this test mount. Before
+unmounting it, stop its clients and either move that fixture back through MRW's
+explicit command or accept that its saved links need this exact mount restored.
+No permanent fstab entry was added. Normal application close/reopen leaves the
+mount available; after a WSL restart, restore the same verified mount before
+opening the fixture. Never initialize an empty replacement.
 
 ## Handover remains explicit
 

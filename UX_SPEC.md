@@ -188,6 +188,9 @@ source documents or notebooks. Missing mounts, partial synchronization and
 conflicts produce actionable errors without empty replacements or guessed
 locations. Unsupported private permissions/publication boundaries reject before
 commit; the current `/mnt/c` mount is one observed unsupported configuration.
+The separately authorized scoped metadata trial passes a disposable move and
+save/reopen, but unresolved probe replacement denials prevent real-store
+qualification; see [the configuration results](docs/WSL_ARTIFACT_STORAGE_SETUP.md).
 Keep bindings/journals/locks and runtime state outside the selected directory.
 The [storage guide](docs/ARTIFACT_STORAGE.md) defines scope, recovery and the
 one-writing-computer workflow. Qt storage is unchanged. Navigation initiates no

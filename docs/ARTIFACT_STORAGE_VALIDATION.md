@@ -1,5 +1,100 @@
 # Artifact storage validation — 2026-10-19
 
+## Authorized metadata trial — 2026-10-20
+
+The user approved the exact scoped operation prepared in `2cc1590`. The checkout
+was clean at that commit. MRW runtime/package remains **0.7.0**; no runtime checks
+were changed. Only the new disposable Windows directory's ACL and its separate
+mount were configured. The real artifact store, existing vault ACLs, `/mnt/c`,
+WSL configuration and Syncthing settings remain unchanged.
+
+The new directory is `C:\Users\fleng\Zettelkasten\MRW-storage-test-20261020`.
+Its protected Windows ACL has three inheritable FullControl grants: current
+account, SYSTEM and Administrators; its owner is the current Windows account.
+WSL-created and Windows-created children inherit those grants, without the
+vault parent's sandbox-group read grant. No unrelated ACL was edited.
+
+The actual separate mount is the repository's ignored
+`.codex-work/artifact-storage-20261020/windows-metadata`, source exactly that
+Windows directory, read/write **9p/DrvFS with metadata, uid/gid 1000, umask 077,
+fmask 111**. Passwordless sudo was unavailable; the successful command used
+`wsl.exe -d Debian -u root --exec /bin/mount …`. No session stopped. An earlier
+invocation without `--exec` lost Windows path separators and installed no mount.
+No fstab/wsl.conf entry was changed; this mount is temporary across WSL restarts.
+
+Observed results:
+
+| Check | Actual result |
+|---|---|
+| Unchanged production filesystem probe | Passed private modes, hard-link publication, replacement, file/directory fsync |
+| WSL-created directory/file | `0700` / `0600`, uid/gid 1000 |
+| Windows-created directory/file | `0700` / `0600`, local uid/gid 1000 through verified mount defaults |
+| Windows replacement of WSL-created file | Exact new bytes, `0600`, local ownership and private inherited Windows ACL |
+| Production VS Code command, ext4 → scoped Windows mount | Committed; five old owned files removed, old source directory empty, same store UUID |
+| Subsequent reader annotation | Saved through actual production edit handler; reopened with exact text |
+| Original source temporarily absent | Old link still selected the exact retained passage; original restored byte-identically |
+| Windows-created identity/HEAD before payload | Rejected as incomplete before adoption |
+| Complete Windows-created byte-only copy | Full manifest/dependency/identity and local ownership/private-mode validation passed |
+| Different-path adoption and later MRW edit | Passed using production core; old reference and stored Obsidian association preserved |
+| Later Windows replacement of edited receiving HEAD | Complete store and annotation remained available, `0600`, without copied Linux metadata |
+| Unsafe `0755` root / `0640` metadata and conflict file | Rejected; exact fixture contents/modes restored |
+
+The actual Development Host used copied installed production JS/core, real
+commands, reader and workspace storage; only its entry point/dialog answers and
+test guard differed. It blocked provider/network/tool subprocess execution in
+the Python bridge. The annotation was a scripted reader-message action, **not
+manual typing or independent human use**, with unknown origin and explicit
+fixture attribution. Windows receiving-copy preparation wrote bytes through
+native Windows file handles; it did not copy Linux metadata. These are **local
+copied-store tests, not actual inter-computer synchronization**. No second-host
+authentication retry or credentials/configuration change occurred. Successful
+fsync return values are not power-loss durability evidence.
+
+The normally restarted installed window followed the saved link with **Open Link
+from Clipboard**, selected exactly `α😀 retained`, and displayed the later
+annotation. A first physical Obsidian click did not confirm a new retained view.
+After explicit command activation, one final bounded physical click produced
+fresh native view `361c324d-67da-4353-b4c5-73e5fe61ad0d/2`, distinct from the
+clipboard-follow view `/1`. Read-only selection bytes independently equalled
+`ceb1f09f98802072657461696e6564`; the saved annotation was also observed. The
+reader's linked-note accessibility invocation did **not** produce a foreground
+confirmation within its five-second observation window. Therefore the full
+Windows-backed desktop return is **unconfirmed**. The earlier completed ext4
+round trip remains separate evidence. One clipboard wrapper initially replaced
+the URI while entering the command name; that setup error was corrected and is
+not a production-navigation result. No further desktop retry campaign ran.
+
+Publication qualification remains open. The first nine existing regression cases
+with Windows-backed destinations produced **seven passes and two errors**;
+the targeted repeat of two cases produced **three errors**, including subcases.
+All those errors were `PermissionError(EACCES)` at the disposable probe's
+`os.replace`, before authority switched. The reached cleanup/uncertain-binding,
+changed-source, adoption and required-research-record cases passed. Some test
+branches explicitly choose a later Linux destination; this run does not prove
+every injected branch on Windows. These are injected failures/process exits,
+not actual disk exhaustion or power loss.
+
+Eight short root-level diagnostic probes passed. A nested diagnostic reproduced
+the denial, retaining exact previous/pending bytes; one 200 ms delayed attempt
+with the same temporary inode also failed. Four later bounded nested probes
+passed without exposing a failure for native Windows access inspection. **No
+responsible process or Syncthing cause was established.** Do not describe the
+failed regression runs as passing, add blind retries, or declare this setup
+qualified for real work. The [single controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md)
+is prepared with exact pause/resume scope and rollback, but is not authorized or
+executed. No permanent configuration is recommended yet.
+
+The real store remains unmoved. The disposable fixture is now bound to the
+temporary Windows mount; restore that exact mount after WSL restart before using
+its links, or explicitly move the fixture back before unmounting. Host-local
+bindings/journals/locks remain outside the store. All prior 14 inventoried
+work/package files, the original fixture source and temporary note retained
+their hashes; intentional disposable annotation changes are separate. No new
+VSIX is appropriate for this configuration/evidence-only result. The full 0.7.0
+regressions are historical below; the new Windows runs and their errors are
+reported separately. [Sanitized trial evidence](evidence/artifact-storage-20261020/metadata-trial.json)
+records the distinctions.
+
 ## Windows-backed follow-up — 2026-10-20
 
 Started at clean `8ae554394943961248991704f9ef24dd85eddb04`; installed MRW

@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-20",
+  "baseline": "2cc1590d744e15cae83c84e08dc09a1a4a6c9191",
+  "runtime_version": "0.7.0",
+  "runtime_changed": false,
+  "authorization": "User explicitly approved the isolated new-directory ACL and metadata mount",
+  "setup": {
+    "new_directory_only": true,
+    "private_windows_acl_allow_roles": ["current user", "SYSTEM", "Administrators"],
+    "windows_acl_protected": true,
+    "filesystem": "9p/DrvFS backed by NTFS",
+    "metadata": true,
+    "uid": 1000,
+    "gid": 1000,
+    "umask": "077",
+    "fmask": "111",
+    "existing_mounts_acls_or_configuration_changed": false,
+    "syncthing_settings_changed": false,
+    "wsl_sessions_stopped": false,
+    "permanent_mount_entry_added": false
+  },
+  "positive_checks": {
+    "unchanged_production_probe_passed": true,
+    "windows_created_and_replaced_files_private": true,
+    "production_command_ext4_to_windows_move_committed": true,
+    "old_owned_files_removed": 5,
+    "old_fixture_directory_empty": true,
+    "persistent_store_id_unchanged": true,
+    "scripted_production_reader_annotation_saved": true,
+    "old_exact_reference_with_original_source_absent": true,
+    "normal_installed_restart_exact_selection_and_annotation": true,
+    "local_windows_byte_only_receiving_manifest_first_rejected": true,
+    "local_receiving_complete_validation_and_ownership": true,
+    "local_receiving_unsafe_modes_and_conflicts_rejected": true,
+    "local_receiving_different_path_adoption_and_edit": true,
+    "local_receiving_later_windows_head_replacement": true,
+    "linux_metadata_copied_by_receiving_fixture": false,
+    "actual_inter_computer_sync_or_access_tested": false
+  },
+  "desktop": {
+    "initial_cold_physical_click_confirmed": false,
+    "clipboard_command_after_restart_confirmed": true,
+    "physical_click_after_explicit_activation_fresh_view": "361c324d-67da-4353-b4c5-73e5fe61ad0d/2",
+    "previous_clipboard_view": "361c324d-67da-4353-b4c5-73e5fe61ad0d/1",
+    "selection_utf8_hex": "ceb1f09f98802072657461696e6564",
+    "selection_independently_compared": true,
+    "saved_annotation_observed": true,
+    "reader_return_foreground_confirmed_within_five_seconds": false,
+    "complete_windows_backed_round_trip_confirmed": false,
+    "earlier_ext4_round_trip_passed_separately": true,
+    "independent_human_use": false
+  },
+  "regressions": {
+    "initial_windows_destination_cases_run": 9,
+    "initial_passed": 7,
+    "initial_errors": 2,
+    "targeted_cases_repeated": 2,
+    "targeted_errors_including_subcases": 3,
+    "error": "PermissionError EACCES at disposable preflight os.replace before authority switch",
+    "root_level_bounded_diagnostic_probes_passed": 8,
+    "nested_diagnostic_reproduced_denial": true,
+    "single_delayed_same_inode_attempt_ms": 200,
+    "single_delayed_attempt_also_denied": true,
+    "later_bounded_native_inspection_probes_passed_without_denial": 4,
+    "responsible_process_or_syncthing_cause_established": false,
+    "power_loss_tested": false
+  },
+  "preservation": {
+    "real_store_moved": false,
+    "source_bytes_sha256": "6cbd8065a05fc1a186c25177f082aab9af5a921fec8e64cee1372baade42791c",
+    "temporary_note_sha256": "a28598b38546e5eb9cb4af4ded7f1193a808525ec8ab87d5aae937e2de42e53d",
+    "intentional_fixture_annotation_changes": true,
+    "working_windows_preserved": true
+  },
+  "remaining": {
+    "qualified_for_real_store": false,
+    "zettelkasten_storage_goal_complete": false,
+    "quiet_syncthing_pause_comparison": "Prepared, not separately authorized or executed",
+    "second_host_permissions_and_creation_edit_back_sync": "Unavailable",
+    "new_vsix_required": false
+  }
+}

@@ -1,5 +1,62 @@
 # Codex continuation: MRW source work and companion notes
 
+## Authorized Windows metadata trial — 2026-10-20
+
+User approval after `2cc1590` authorized only the isolated new directory's private
+Windows ACL and separate metadata mount. Both are now configured; read
+[the setup/result guide](WSL_ARTIFACT_STORAGE_SETUP.md) and
+[actual trial evidence](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20).
+No runtime code changed; installed/package version remains 0.7.0. The real store
+and authoritative study files remain unchanged. No Syncthing setting changed.
+
+Actual production-command fixture move from ext4 to the scoped Windows mount
+committed and removed all five old owned files. A later scripted reader annotation
+saved and reopened; the exact old passage remained accessible without its original
+source. Full Windows-created byte-only receiving copies pass manifest/dependency,
+private-mode and local ownership checks, explicit different-path adoption, note
+association preservation, editing and later Windows manifest replacement. Bad
+modes, partial copies and conflicts reject. These local copies are not actual
+cross-machine synchronization. Second-host access remains unavailable; no SSH
+retry or credential change was made.
+
+The Windows-backed setup is **not yet qualified for real work**: nine actual
+Windows-destination regression cases produced seven passes/two preflight probe
+errors; a targeted two-case repeat produced three errors including subcases.
+`os.replace` returned EACCES before authority switched. A nested diagnostic also
+denied a single 200 ms delayed replacement after exact-content/inode checks;
+other bounded probes passed. No responsible process was established. Keep the
+checks and report the failures. Do not assume Syncthing caused them or add blind
+retries to make qualification pass.
+
+All independent bounded checks are recorded. The next prepared operation is
+[one controlled Syncthing pause/resume comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
+It requires separate authorization under AGENTS.md: pause only the existing
+Zettelkasten folder for four disposable probes (30-second process timeout),
+restore/verify its original false flag in finally, and compare four before/four
+after probes. Notes stay local/editable while sync waits. No WSL/application
+restart, ACL or other configuration change. The exact PATCH, rollback and
+interruption recovery are prepared; **do not execute without approval**.
+
+The normal installed restart verified the old link through the clipboard-follow
+command, exact selection and saved annotation. A final physical Obsidian click
+after explicit command activation produced a fresh `/2` view and exact UTF-8
+selection; the initial cold click did not confirm a new view. The return-control
+invocation did not confirm foreground within five seconds, so the complete
+Windows-backed desktop return remains unconfirmed. Stop desktop retries here.
+The earlier physical ext4 round trip passed independently. The isolated fixture
+window was normally closed; working windows/drafts and Obsidian were preserved.
+
+The moved fixture is at `.codex-work/artifact-storage-20261020/windows-metadata/store`,
+physically inside `C:\Users\fleng\Zettelkasten\MRW-storage-test-20261020`.
+Store UUID and links are unchanged. This mount survives ordinary application
+restart but has no fstab entry; after WSL restart restore the exact documented
+mount before opening it. Do not unmount it while its fixture binding is needed,
+initialize a replacement, move the real store, or infer another host's uid/gid.
+The original ext4 fixture directory is empty after successful cleanup. The
+separate receiving-copy home/project under the same ignored work directory is
+test-only; no fixture writer remains running. No broader acceptance campaign or
+mathematical exercise was repeated.
+
 ## Windows-backed storage diagnosis — 2026-10-20
 
 Started at clean `8ae554394943961248991704f9ef24dd85eddb04`, installed 0.7.0.

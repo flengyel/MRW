@@ -31,10 +31,12 @@ mount does not satisfy MRW's current private-mode policy:** it reports
 directories/files as `0777` despite requests for `0700`/`0600`. These displayed
 bits do not establish access by every Windows account; DrvFS derives them from
 the Windows user's access when metadata is absent. MRW still rejects before
-commit. A scoped metadata/ACL fixture trial is [prepared for separate
-authorization](WSL_ARTIFACT_STORAGE_SETUP.md), with exact commands, rollback and
-receiving-copy checks. It has not been run. No mount options, Windows permissions
-or Syncthing settings were changed. Another mount must pass its own capability
+commit. A separately authorized [scoped metadata/ACL fixture trial](WSL_ARTIFACT_STORAGE_SETUP.md)
+has now moved a disposable fixture successfully and verified Windows-created
+receiving copies. Nested probe replacement denials remain unresolved, so this
+configuration is not yet qualified for real work. Only that new directory's ACL
+and separate mount changed; the original mount, existing vault ACLs and Syncthing
+settings remain unchanged. Another mount must pass its own capability
 checks; enabling a setting alone does not establish support.
 See [actual filesystem results](ARTIFACT_STORAGE_VALIDATION.md).
 
@@ -117,7 +119,7 @@ publication and private permissions. MRW installs no synchronization service.
    initial creation and later replacement; do not assume permission metadata
    travels with the bytes. The inspected Windows Syncthing 2.1.6 configuration
    does not send/sync ownership or extended attributes, and its connected peer
-   reports 1.19.2. The [prepared Windows-backed trial](WSL_ARTIFACT_STORAGE_SETUP.md)
+   reports 1.19.2. The [Windows-backed trial](WSL_ARTIFACT_STORAGE_SETUP.md)
    is not yet a supported synchronized handover procedure.
 2. On the receiving computer, open a workspace with one local folder for each
    project in the store. This workspace must have no existing MRW saved artifacts
