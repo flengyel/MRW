@@ -1,5 +1,37 @@
 # Codex continuation: MRW source work and companion notes
 
+## One Obsidian-closed fixture case passed — 2026-10-20
+
+Started clean at `2101421395f1ac43799efbb5f6217f835f85d6d2`. The user
+explicitly proposed testing Obsidian, normally closed it and confirmed **Closed**.
+This authorized one new condition, not repetition of the earlier paused run.
+The operator verified zero Obsidian processes before/after, with Syncthing's
+vault folder unpaused and complete configuration unchanged. No API/configuration
+write, Pi command, mount/ACL change or user-window action occurred.
+
+One existing core case passed on a fresh disposable Linux→Windows metadata
+fixture: move/old-payload cleanup, exact old references and stored note label,
+subsequent annotation, logical reference and fresh storage-client UUID. One test
+ran in 11.158 s, operator 11.848 s, with no retries. The fresh client is in-process;
+there was no normal application restart, installed-command or physical hyperlink
+acceptance in this check. Read [the precise result](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20)
+and [sanitized evidence](evidence/artifact-storage-20261020/obsidian-closed.json).
+
+The test trees were cleaned; the real store, authoritative work, original fixture
+source, temporary note, configuration and prior/current packages stayed unchanged.
+Runtime/installed package remains 0.7.0. The user was told the check is finished
+and Obsidian can reopen. Do not relaunch or close it automatically. Local helpers
+`obsidian-closed-check.ps1` / `.py` in the ignored work directory have a result-file
+guard against repetition. No further run is authorized or proposed here.
+
+One pass supports the user's hypothesis but does not prove a blocking process,
+causality or a requirement to close Obsidian; earlier attempts sometimes passed
+too. Windows-backed real-store use remains **unqualified**. The remaining
+transaction suite/normal restart under this condition, complete Windows-backed
+desktop return and actual second-host permissions/edit-back are unperformed.
+Preserve both this pass and the earlier failures; no real move, permanent setup,
+runtime change or broader usefulness claim follows from it.
+
 ## Paused transaction qualification failed — 2026-10-20
 
 Started clean at `2b91a51bba761513ba492684182a8565d3bca2b3`. The user's

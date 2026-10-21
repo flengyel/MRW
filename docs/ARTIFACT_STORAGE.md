@@ -48,6 +48,14 @@ verified. This bounded attempt ended without retries. Another mount must pass
 its own capability checks; enabling a setting alone does not establish support.
 See [actual filesystem results](ARTIFACT_STORAGE_VALIDATION.md).
 
+The user subsequently closed Obsidian for one disposable test. With zero
+Obsidian processes and Syncthing unpaused/unchanged, that relocation/save/
+reference case passed. One success does not prove the cause of intermittent
+denials or establish a requirement to close Obsidian. It is not yet a supported
+real-store procedure. Obsidian notes themselves stay in place during a move;
+MRW moves only its separately saved material. Read
+[the test and its limits](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
+
 ## What moves
 
 One move covers all MRW-owned durable artifacts in this workspace's extension

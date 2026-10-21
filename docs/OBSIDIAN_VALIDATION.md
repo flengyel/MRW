@@ -1,5 +1,20 @@
 # Obsidian companion navigation validation
 
+## User-requested closed-application storage check — 2026-10-20
+
+The user normally exited Obsidian and authorized one disposable check. Zero
+Obsidian processes were observed before/after, with Syncthing unpaused and its
+complete folder configuration unchanged. One existing production-core fixture
+case passed relocation, cleanup, later annotation save and exact reference/
+stored note association checks. It opened no note, dispatched no URI and tested
+no physical hyperlink/return action or normal application restart. Source/note
+bytes stayed unchanged. This supports investigation of the user's hypothesis;
+it does not prove that Obsidian caused earlier intermittent denials or needs to
+remain closed. The test finished and the user may reopen it. Read
+[the exact result](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
+Windows-backed real-store and complete desktop acceptance remain unconfirmed;
+the earlier ext4 desktop pass below remains separate evidence.
+
 ## Scoped Windows storage trial — 2026-10-20
 
 After the separately approved metadata/ACL setup, the production command moved

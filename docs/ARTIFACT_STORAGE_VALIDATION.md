@@ -1,5 +1,43 @@
 # Artifact storage validation — 2026-10-19
 
+## User-requested Obsidian-closed check — 2026-10-20
+
+Started at clean `2101421395f1ac43799efbb5f6217f835f85d6d2`. The user
+proposed Obsidian interference, agreed to a single disposable check and confirmed
+normal application closure. The Windows operator verified **zero Obsidian
+processes both before and after**. The Zettelkasten Syncthing folder was
+**unpaused before and after**, with its complete configuration unchanged. No
+configuration write, application restart, Pi command, mount or ACL change ran.
+
+The same existing case that errored in the preceding paused attempt,
+`test_move_pinned_links_notes_mutation_restart_and_old_payload_removal`, now
+**passed: one run, one pass, zero failures/errors**, in 11.158 seconds (operator
+11.848 seconds). It used a fresh Linux fixture and destination under the actual
+scoped Windows metadata mount. Only the test's destination setup was redirected;
+production core/probe/publication checks were unchanged. No failed operation was
+retried. This is a core fixture check, not an installed-command or desktop test.
+
+The case verifies committed relocation and removal of old owned payloads,
+unchanged ordinary source/unrelated host state, whole-outline and exact pinned
+references, stored Obsidian association/label, a later annotation save and logical
+reference, plus a fresh `ArtifactStorage` client seeing the same store UUID.
+That client is constructed in the same Python process; **normal application
+close/reopen was not tested here**. No Obsidian URL was dispatched or note moved.
+The owned test trees were cleaned. All 14 prior inventoried work/package files,
+the original navigation source, temporary note, WSL configuration and existing
+0.7.0 VSIX retained their bytes. No real store was moved.
+
+This supports investigating the user's hypothesis; it does **not** prove that
+Obsidian caused the earlier intermittent denials or that closing it is necessary.
+Earlier probes and a fixture move also passed, so a single new success cannot
+identify the blocking process. The remaining transaction cases, normal restart,
+full Windows-backed desktop return, receiving-host permissions and actual
+creation/edit-back synchronization remain outside this one check. The real-store
+procedure is still unqualified and the storage goal unfinished. Obsidian may be
+reopened; no further test or shutdown is requested. No runtime/new VSIX change.
+[Sanitized observations](evidence/artifact-storage-20261020/obsidian-closed.json)
+record this pass separately from the earlier failed paused test below.
+
 ## Approved paused transaction check — 2026-10-20
 
 Started at clean `2b91a51bba761513ba492684182a8565d3bca2b3`, installed MRW

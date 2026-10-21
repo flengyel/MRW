@@ -85,6 +85,10 @@ is not a cause determination or qualification. The subsequently approved paused
 transaction check failed at the first test's preflight `os.replace`, before
 commit, and restored synchronization/configuration. Pausing is not a qualified
 remedy; the bounded attempt ended without retries or a runtime change.
+The user then requested one Obsidian-closed check. With no Obsidian processes and
+Syncthing unpaused/unchanged, one disposable move/save/reference case passed.
+This is separate evidence, not causality or real-store qualification. Remaining
+transaction/restart/receiving-host checks were not performed under that condition.
 Second-host synchronization acceptance is unavailable. This increment creates no mathematical-use claim and
 does not reopen the Pi, R3, SagePod or Euclid campaigns.
 

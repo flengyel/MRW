@@ -9,6 +9,11 @@ is not yet qualified for the real store.** MRW 0.7.0 remains installed; the real
 store has not moved. The original `/mnt/c` mount remains unchanged and still
 fails the private-mode contract. See [actual results](ARTIFACT_STORAGE_VALIDATION.md#authorized-metadata-trial--2026-10-20)
 and the [completed controlled comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md).
+A subsequent user-requested check passed one disposable relocation case with
+Obsidian fully exited and Syncthing unpaused, its configuration unchanged.
+That success does not establish that closing Obsidian is necessary or qualify
+the remaining transaction/restart/synchronization workflow; see
+[the separate result](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
 
 ## Diagnosis
 

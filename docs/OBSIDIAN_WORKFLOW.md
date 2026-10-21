@@ -133,6 +133,14 @@ approved paused transaction test failed at its first preflight replacement;
 synchronization/configuration were restored and independently verified. See
 [both results](WSL_ARTIFACT_STORAGE_COMPARISON.md). No new desktop attempt ran.
 
+The user later normally closed Obsidian for one additional disposable core check.
+With its processes absent and Syncthing unpaused/unchanged, move/cleanup,
+annotation save and existing reference/association checks passed. No hyperlink
+or return action ran in that check, and one pass does not establish that closing
+Obsidian is necessary. Obsidian notes stay in place during an MRW artifact move.
+The real-store procedure remains unqualified; see
+[the separate observations](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
+
 The existing moved ext4 navigation fixture completed the physical Obsidian
 hyperlink click, fresh exact retained selection and reader return to the linked
 note after normal application restart on 2026-10-20. See

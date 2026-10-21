@@ -145,6 +145,10 @@ folder independently verified unpaused afterward. The subsequent approved
 paused transaction check stopped at the first test's preflight replacement
 denial, before commit. Synchronization/configuration were restored; pausing is
 not a qualified remedy. No further retry campaign ran.
+A later user-requested case passed with Obsidian fully exited and Syncthing
+unpaused/unchanged. It verifies one disposable core move/save/reference case,
+not a normal application restart or desktop navigation under that condition.
+No causality, necessary-closure or real-store support claim follows from it.
 Other mounts need their own checks; do not weaken publication or mode checks.
 Only the new test directory's private ACL and separate mount were changed;
 existing mount/ACL/synchronization settings remain intact.

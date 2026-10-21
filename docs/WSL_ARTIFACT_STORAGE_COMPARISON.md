@@ -1,5 +1,11 @@
 # Controlled comparison for Windows replacement denials
 
+Later user-requested follow-up: **one case passed with Obsidian fully exited and
+Syncthing unpaused**. The complete folder configuration stayed unchanged and no
+retry ran. This is a new user-authorized condition, not a repetition of the paused
+qualification below. It does not establish causality or a real-store procedure.
+See [the exact result and limits](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
+
 Status, 2026-10-20: **separately approved and executed; Windows folder resumed**.
 The checkout started clean at `4a286d8`. The four before/paused/resumed probes
 respectively produced **3/4, 4/4 and 3/4 successes**. Each failed probe reported

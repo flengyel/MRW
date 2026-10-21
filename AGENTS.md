@@ -108,6 +108,11 @@ Pausing is not a qualified remedy; do not repeat this bounded attempt, weaken
 checks or move real work into this setup. Do not change permissions/mount/sync
 configuration without separate authorization. The standalone Qt storage/recovery
 is unchanged.
+The user subsequently requested one test with Obsidian closed: zero Obsidian
+processes were verified before/after, Syncthing stayed unpaused/unchanged, and one
+disposable move/save/reference case passed. This does not prove causality,
+necessary closure or real-store qualification. Read the latest validation and
+handoff; do not turn the single success into a supported procedure.
 
 The existing editor-centered Qt GUI remains available as
 `theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical

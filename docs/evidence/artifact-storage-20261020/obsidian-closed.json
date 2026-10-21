@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-20",
+  "baseline": "2101421395f1ac43799efbb5f6217f835f85d6d2",
+  "runtime_version": "0.7.0",
+  "runtime_changed": false,
+  "authorization": "User requested testing the Obsidian hypothesis, quit it normally and confirmed Closed",
+  "actual_host_check": true,
+  "automatic_retries": 0,
+  "test": "test_move_pinned_links_notes_mutation_restart_and_old_payload_removal",
+  "tests_run": 1,
+  "passed": 1,
+  "errors": 0,
+  "failures": 0,
+  "test_elapsed_seconds": 11.158,
+  "operator": {
+    "obsidian_processes_before": 0,
+    "obsidian_processes_after": 0,
+    "folder_paused_before": false,
+    "folder_paused_after": false,
+    "folder_configuration_unchanged": true,
+    "configuration_writes_performed": false,
+    "test_exit_code": 0,
+    "elapsed_seconds": 11.848
+  },
+  "actual_destination": "Scoped 9p/DrvFS NTFS-backed metadata mount with private modes",
+  "checks_in_existing_case": [
+    "Production core relocation committed and old owned payloads removed",
+    "Unrelated host-local state and original source bytes preserved",
+    "Old whole-outline and exact pinned-region references preserved",
+    "Stored Obsidian URL association/reference/label preserved without dispatch",
+    "Subsequent annotation saved; logical reference and association still match",
+    "Fresh ArtifactStorage client sees the same store UUID",
+    "Local locks remain outside the artifact store"
+  ],
+  "preservation": {
+    "owned_windows_fixture_cleanup_completed": true,
+    "prior_inventoried_work_and_packages_unchanged": 14,
+    "original_navigation_fixture_source_unchanged": true,
+    "temporary_navigation_note_unchanged": true,
+    "wsl_conf_and_fstab_unchanged": true,
+    "current_0_7_0_vsix_unchanged": true,
+    "real_store_opened_or_moved": false,
+    "syncthing_configuration_changed": false,
+    "pi_command_or_ssh_attempt": false,
+    "mount_or_acl_changes": false
+  },
+  "limits": {
+    "obsidian_caused_previous_failures_proved": false,
+    "obsidian_closure_proved_necessary": false,
+    "other_windows_destination_cases_run": false,
+    "normal_application_restart_in_this_check": false,
+    "desktop_hyperlink_or_return_action_in_this_check": false,
+    "actual_inter_computer_sync_or_receiving_access_tested": false,
+    "power_loss_tested": false,
+    "qualified_real_store_procedure": false,
+    "zettelkasten_storage_goal_complete": false,
+    "new_vsix_required": false
+  }
+}

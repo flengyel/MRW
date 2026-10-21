@@ -85,6 +85,10 @@ before, 4/4 paused and 3/4 resumed. The subsequent approved transaction test
 also encountered a preflight replacement denial while paused; pausing is not a
 qualified remedy. Synchronization was restored and independently verified.
 The user's actual location remains unchanged.
+One later user-requested disposable case passed with Obsidian fully exited and
+Syncthing unpaused/unchanged. This does not establish the cause of earlier
+intermittent failures or a requirement to close Obsidian; the full Windows-backed
+procedure remains unqualified.
 This adds no synchronization service or distributed locking. Notes alone still do
 not carry the separately saved MRW material.
 
