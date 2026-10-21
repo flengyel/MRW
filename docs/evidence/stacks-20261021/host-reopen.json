@@ -1,0 +1,37 @@
+{
+  "phase": "reopen",
+  "vscode": "1.141.2",
+  "remote": "wsl",
+  "platform": "linux",
+  "checks": [
+    "Normal fresh host reopened retained outline without acquisition",
+    "Nine actual DOM passages, four complete statements/proofs, native MathML and three local citations",
+    "Actual source citation button selected exact retained 08ZE statement",
+    "Previously saved annotation and exact source survived normal close/reopen"
+  ],
+  "requests": [
+    "artifact_status",
+    "outline_list",
+    "outline_load",
+    "outline_notes",
+    "outline_notes",
+    "outline_stacks_reference",
+    "outline_notes"
+  ],
+  "errors": [],
+  "outline": "22f61967-81f4-5c76-9a27-2325845e773e",
+  "commit": "a04446e57ec1fbc252a871afcec7752fb2807b14",
+  "sourceHash": "c6bac8dcf8ad96dc47416bf34cb45ba4a10b894e40d67d3e1fa68d8ef0d9f872",
+  "complete": true,
+  "renderer": {
+    "parts": 9,
+    "math_expressions": 46,
+    "all_math_boxes_nonzero": true,
+    "warnings": [],
+    "errors": [],
+    "retained_citations": 3
+  },
+  "exact_selection": "\\begin{lemma}\n\\label{lemma-Hausdorff}\nLet $X$ be a topological space. The following are equivalent:\n\\begin{enumerate}\n\\item $X$ is Hausdorff,\n\\item the diagonal $\\Delta(X) \\subset X \\times X$ is closed.\n\\end{enumerate}\n\\end{lemma}",
+  "scripted_dialogs_and_dom": true,
+  "production_runtime_matches_checkout": true
+}

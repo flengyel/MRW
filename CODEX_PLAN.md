@@ -41,6 +41,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
+| Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -59,6 +60,21 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Bounded Stacks section import — 2026-10-21
+
+The explicit user request advances one bounded part of Stage 6 without requiring
+another Stage 5, Marcus, Appendix A, Euclid or storage exercise. Extension 0.8.0
+imports a selected Stacks section through one Git-revision-pinned official source
+route. Published statement/proof spans and explicit citations become ordinary
+retained source regions, with bundled mathematical rendering, exact TeX,
+attributed annotations and existing pinned links. The initial source is 08ZD,
+Topology, Hausdorff spaces. See [usage](docs/STACKS_WORKFLOW.md) and
+[validation](docs/STACKS_VALIDATION.md). This is access to published mathematics;
+mathematical usefulness and full proof dependency analysis are not established.
+Whole-corpus ingestion, automatic prerequisites/updates and vertex elimination
+remain deferred. Storage qualification is set aside; keep the existing valid
+local artifact store and preserve its unresolved Windows/synchronization limits.
 
 ### Explicit artifact placement — 2026-10-19
 
@@ -1431,8 +1447,9 @@ is introduced.
 **Acceptance.** Each component receives a decision supported by session
 evidence: retain, revise, or remove. Model assistance is retained only if at
 least one call improves subsequent mathematical work enough to justify its
-correction, provenance, disclosure, and record-keeping costs. Stage 6 may begin
-only after the problem-centered and Appendix A experiments have each been
+correction, provenance, disclosure, and record-keeping costs. Except for the
+separately authorized bounded section importer above, Stage 6 may begin only
+after the problem-centered and Appendix A experiments have each been
 evaluated on their own terms and the large-corpus experiment has been authorized
 separately.
 
@@ -1459,9 +1476,10 @@ session establishes a general theory of mathematical understanding.
 
 ## Stage 6 — Large-corpus ingestion and study
 
-**Authorization boundary.** This stage is not part of the first experimental
-implementation. It may begin only after Stage 5 has been completed and the
-large-corpus experiment has been authorized separately.
+**Authorization boundary.** The 2026-10-21 request separately authorizes the
+selected-section importer described above; earlier evaluation prerequisites do
+not gate it. The broader large-corpus study experiment remains deferred and
+requires separate authorization after Stage 5.
 
 **Goal.** Test whether Theorem Terminal supports beginning and progressively
 studying one large structured mathematical corpus, initially either the Stacks

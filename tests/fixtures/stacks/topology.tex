@@ -1,0 +1,192 @@
+\input{preamble}
+
+% OK, start here.
+%
+\begin{document}
+
+\title{Topology}
+
+
+\maketitle
+
+\phantomsection
+\label{section-phantom}
+
+\tableofcontents
+
+\section{Introduction}
+\label{section-introduction}
+
+\noindent
+Basic topology will be explained in this document.
+A reference is \cite{Engelking}.
+
+\section{Basic notions}
+\label{section-topology-basic}
+
+\noindent
+The following is a list of basic notions in topology. Some of these notions
+are discussed in more detail in the text that follows and some
+are defined in the list, but others are considered basic and will not
+be defined. If you are not familiar with most of the italicized concepts,
+then we suggest looking at an introductory text on topology before
+continuing.
+
+\begin{enumerate}
+\item
+\label{item-space}
+$X$ is a {\it topological space},
+\item
+\label{item-point}
+$x\in X$ is a {\it point},
+\item
+\label{item-locally-closed}
+$E \subset X$ is a {\it locally closed} subset,
+\item
+\label{item-closed-point}
+$x\in X$ is a {\it closed point},
+\item
+\label{item-dense}
+$E \subset X$ is a {\it dense} subset,
+\item
+\label{item-continuous}
+$f : X_1 \to X_2$ is {\it continuous},
+\item
+\label{item-upper-semi-continuous}
+an extended real function $f : X \to \mathbf{R} \cup \{\infty, -\infty\}$
+is {\it upper semi-continuous} if $\{x \in X \mid f(x) < a\}$ is open for
+all $a \in \mathbf{R}$,
+\item
+\label{item-lower-semi-continuous}
+an extended real function $f : X \to \mathbf{R} \cup \{\infty, -\infty\}$
+is {\it lower semi-continuous} if $\{x \in X \mid f(x) > a\}$ is open for
+all $a \in \mathbf{R}$,
+\item a continuous map of spaces $f : X \to Y$ is
+{\it open} if $f(U)$ is open in $Y$ for $U \subset X$ open,
+\item a continuous map of spaces $f : X \to Y$ is
+{\it closed} if $f(Z)$ is closed in $Y$ for $Z \subset X$ closed,
+\item
+\label{item-neighbourhood}
+a {\it neighbourhood of $x \in X$} is any subset
+$E \subset X$ which contains an open subset that
+contains $x$,
+\item
+\label{item-induced-topology}
+the {\it induced topology} on a subset $E \subset X$,
+\item
+\label{item-covering}
+$\mathcal{U} : U = \bigcup_{i \in I} U_i$ is an
+{\it open covering of} $U$ (note: we allow any $U_i$ to be empty
+and we even allow, in case $U$ is empty, the empty set for $I$),
+\item
+\label{item-subcover}
+a {\it subcover} of a covering as in (\ref{item-covering})
+is an open covering $\mathcal{U}' : U = \bigcup_{i \in I'} U_i$
+where $I' \subset I$,
+\item
+\label{item-refinement}
+the open covering $\mathcal{V}$ is a {\it refinement}
+of the open covering $\mathcal{U}$ (if
+$\mathcal{V} : U = \bigcup_{j \in J} V_j$ and
+$\mathcal{U} : U = \bigcup_{i \in I} U_i$
+this means each $V_j$ is completely contained in one of the $U_i$),
+\item
+\label{item-fundamental-system}
+{\it $\{ E_i \}_{i \in I}$ is a fundamental system of neighbourhoods
+of $x$ in $X$},
+\item
+\label{item-Hausdorff}
+a topological space $X$ is called {\it Hausdorff} or {\it separated}
+if and only if for every distinct pair of points $x, y \in X$ there exist
+disjoint opens $U, V \subset X$ such that $x \in U$, $y \in V$,
+\item the {\it product} of two topological spaces,
+\label{item-product}
+\item
+\label{item-fibre-product}
+the {\it fibre product $X \times_Y Z$} of a pair of continuous maps
+$f : X \to Y$ and $g : Z \to Y$,
+\item
+\label{item-discrete-indiscrete}
+the {\it discrete topology} and the {\it indiscrete topology} on a set,
+\item etc.
+\end{enumerate}
+
+
+
+\section{Hausdorff spaces}
+\label{section-Hausdorff}
+
+\noindent
+The category of topological spaces has finite products.
+
+\begin{lemma}
+\label{lemma-Hausdorff}
+Let $X$ be a topological space. The following are equivalent:
+\begin{enumerate}
+\item $X$ is Hausdorff,
+\item the diagonal $\Delta(X) \subset X \times X$ is closed.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+We suppose that $X$ is Hausdorff. Let $(x, y) \not \in \Delta(X)$, i.e.,
+$x \neq y$. There are $U$ and $V$ disjoint open sets of $X$
+such that $x \in U$ and $y \in V$. This implies that $U \times V \subset
+(X \times X) \setminus \Delta(X) $. This shows that $ (X \times X) \setminus
+\Delta(X)$ is an open set of $ X \times X$ which is equivalent to saying that
+the diagonal $\Delta(X) \subset X \times X$ is closed in $X \times X$.
+The converse is similar:
+The complement $(X \times X) \setminus \Delta(X)$ consists
+precisely of $(x, y) \in X\times X$ with $ x \neq y$. Thus, if $ \Delta(X)
+\subset X \times X$ is closed, then, by the definition of the product topology,
+for every such $ (x, y)$, there are opens $U, V \subset X$ with $(x, y) \in
+U \times V$ and $(U \times V)\cap \Delta(X) = \emptyset$. In other words, with
+$x \in U$ and $y \in V$ such that $U \cap V = \emptyset$.
+\end{proof}
+
+\begin{lemma}
+\label{lemma-graph-closed}
+\begin{slogan}
+Graphs of maps to Hausdorff spaces are closed.
+\end{slogan}
+Let $f : X \to Y$ be a continuous map of topological spaces.
+If $Y$ is Hausdorff, then the graph of $f$ is closed in $X \times Y$.
+\end{lemma}
+
+\begin{proof}
+The graph is the inverse image of the diagonal under the map
+$X \times Y \to Y \times Y$. Thus the lemma follows from
+Lemma \ref{lemma-Hausdorff}.
+\end{proof}
+
+\begin{lemma}
+\label{lemma-section-closed}
+Let $f : X \to Y$ be a continuous map of topological spaces.
+Let $s : Y \to X$ be a continuous map such that $f \circ s = \text{id}_Y$.
+If $X$ is Hausdorff, then $s(Y)$ is closed.
+\end{lemma}
+
+\begin{proof}
+This follows from Lemma \ref{lemma-Hausdorff} as
+$s(Y) = \{x \in X \mid x = s(f(x))\}$.
+\end{proof}
+
+\begin{lemma}
+\label{lemma-fibre-product-closed}
+Let $X \to Z$ and $Y \to Z$ be continuous maps of topological spaces.
+If $Z$ is Hausdorff, then $X \times_Z Y$ is closed in $X \times Y$.
+\end{lemma}
+
+\begin{proof}
+This follows from Lemma \ref{lemma-Hausdorff} as
+$X \times_Z Y$ is the inverse image of $\Delta(Z)$
+under $X \times Y \to Z \times Z$.
+\end{proof}
+
+
+
+
+\section{Separated maps}
+\label{section-separated}
+
+\end{document}

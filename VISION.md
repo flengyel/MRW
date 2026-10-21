@@ -521,6 +521,12 @@ examples, corrections, and assistance used. A formal counterpart is included
 only when one already exists or is deliberately produced during the
 mathematical work.
 
+The separately authorized 2026-10-21 Stacks section importer supplies bounded
+access to one selected published section in extension 0.8.0, with retained
+source, explicit citations and annotations. It does not complete the broader
+experiment below or establish mathematical usefulness; earlier study/evaluation
+prerequisites do not gate this implementation.
+
 A separately authorized large-corpus ingestion experiment will use either the
 Stacks Project
 [@stacksprojectauthorsStacksProject2021] or Kerodon. It will import the source's

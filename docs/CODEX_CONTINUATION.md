@@ -1,5 +1,58 @@
 # Codex continuation: MRW source work and companion notes
 
+## Stacks section import delivered — 2026-10-21
+
+The saved user prompt `MRW_Codex_Stacks_Import_Prompt_2026-10-21.txt` advances
+this bounded part of ingestion and sets aside Windows-backed storage diagnosis.
+Started from clean main/origin `d50dfbff8e7b7e58ebcab4f8cd9f203bf6e9dc67`,
+installed 0.7.0. Extension 0.8.0 adds **MRW: Import Stacks Section…** (`08ZD`),
+using the official GitHub ref then chapter/tag-map/license/preamble at one commit.
+[Usage/format contract](STACKS_WORKFLOW.md), [actual evidence](STACKS_VALIDATION.md).
+The actual imported commit is `a04446e57ec1fbc252a871afcec7752fb2807b14`.
+
+The bounded extractor retains full source, opening context and all four complete
+statement/proof spans with stable tags. Restricted bundled KaTeX 0.19.0 emits
+native MathML; source prose stays inert, exact TeX remains available. Explicit
+08ZE citations resolve through the existing pinned parser/resolver. Existing
+annotations, overviews and Obsidian controls are reused. Same revision reopens
+its saved outline; changed revision creates a separate outline. Unsupported
+structure is explicit source-only retention, never a falsely complete outline.
+All required metadata are retained artifact blobs; source-outline v2 adds only
+an acquisition-manifest pointer. Ordinary v1 states/reference syntax/storage
+identity remain unchanged. Preparation tickets are host-local digests.
+
+Actual Windows VS Code 1.141.2 / WSL Debian / Python 3.13.5 checks imported online,
+rendered nine parts/46 mathematical expressions without warnings, followed the
+actual DOM 08ZE citation to its exact statement, saved a labeled synthetic
+annotation via the reader form, and normally closed/reopened the isolated window.
+Reopen restored exact hash/range/annotation with no acquisition bridge call.
+The host driver scripts dialogs and DOM input but uses actual production code,
+webview and persistence; it is not independent human study evidence. Full test,
+package and installation results are recorded in the focused validation report.
+The verified 0.8.0 VSIX is installed; all 51 runtime files and its production
+entry/command match. Ordinary installed-window reader opening remains
+unobserved: the bounded UI attempt reached Command Palette but did not observe
+the expected outline chooser, and stopped. Do not claim that ordinary-window
+step passed or restart an extended UI campaign.
+
+The retained example remains in
+`.codex-work/stacks-import-20261021/reading-workspace`; open that workspace and
+**Open Saved Source Outline… → Hausdorff spaces**. The `Automated host validation`
+annotation is synthetic, not attributed to the user. Import in any intended
+workspace explicitly to create that workspace's own copy. Preserve the useful
+retained source; do not automatically remove it with disposable test fixtures.
+User work, ordinary notes/notebook, earlier VSIX packages and other windows stay
+in place. No vault scan, Obsidian launch, mount/ACL/sync operation, real-store
+move, live provider, Lean, notebook or container action belongs to this task.
+
+Do not restart the storage experiments below. Their prior pass/fail evidence
+and unqualified Windows/synchronization status remain unchanged. No new Marcus,
+Appendix A, Euclid, Pi, R3 or SagePod campaign is required. Whole-corpus ingestion,
+automatic prerequisites/updates/diffs, complete proof graphs and vertex
+elimination remain deferred. The user's earlier report that the Zettelkasten
+integration helps remains practical benefit evidence; this import is a functional
+reading result, not an independent claim of mathematical usefulness.
+
 ## One Obsidian-closed fixture case passed — 2026-10-20
 
 Started clean at `2101421395f1ac43799efbb5f6217f835f85d6d2`. The user

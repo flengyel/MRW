@@ -9,7 +9,8 @@ const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require(
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
 
-function outlineHtml(script) {
+function outlineHtml(script, support = []) {
+  script = [...support, script].join('\n;\n');
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -22,6 +23,7 @@ button:disabled{opacity:.55;cursor:default}input,textarea,select{color:var(--vsc
 textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:100%}label{display:block;margin:6px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;tab-size:4;font-family:var(--vscode-editor-font-family);font-size:var(--vscode-editor-font-size)}
 .region,.context,.evidence,.note{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.statement{border-left:3px solid var(--vscode-focusBorder);padding-left:9px}.note{border-left:3px solid var(--vscode-editorWarning-foreground)}.muted{opacity:.8;font-size:.9em}.warning{color:var(--vscode-editorWarning-foreground)}.toolbar{display:flex;flex-wrap:wrap;gap:3px}.selected{outline:2px solid var(--vscode-focusBorder)}.metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:8px}
 .companion{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.companion h3{margin:0 0 6px}.companion p{margin:6px 0}.companion-directions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.linked-note{font-weight:600;unicode-bidi:plaintext}.linked-note-row{padding:8px 0;border-bottom:1px solid var(--vscode-panel-border)}
+.published-content{line-height:1.65;font-size:1.05em;margin:12px 0}.published-math math{font-size:1.15em}.source-reference{display:inline;padding:1px 4px;margin:0 2px}.published-toc{display:flex;flex-wrap:wrap;margin:12px 0}.source-slogan{border-left:2px solid var(--vscode-panel-border);padding:8px;margin:10px 0}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
@@ -111,6 +113,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   }
   async function navigate(c, extra) {
     const result = await bridge(request(c, 'outline_navigation', { region: null, context: null, statement: false, ...extra }));
+    if (result.retained) return openDocument(c, null, result);
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(result.path));
     const version = document.version;
     const observed = await sourceSnapshot(result.path);
@@ -146,6 +149,23 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
+        else if (value.type === 'stacks_reference') {
+          const result = await bridge(request(c, 'outline_stacks_reference', { tag: value.tag }));
+          c.reference = result.reference; c.selected = result.reference.region;
+          await send(c, result);
+          await openDocument(c, null, result.document);
+          await c.panel.webview.postMessage({ type: 'publishedFocus', region: c.selected });
+        } else if (value.type === 'stacks_citation') {
+          const source = c.result.outline.published;
+          const allowed = new Set([source?.tag, source?.chapter_tag, source?.previous?.tag,
+            source?.next?.tag, ...(source?.reference_tags || [])]);
+          if (typeof value.tag !== 'string' || !/^[A-Z0-9]{4}$/.test(value.tag) || !allowed.has(value.tag)) {
+            throw new Error('This is not an identified citation in the retained section.');
+          }
+          if (!await vscode.env.openExternal(vscode.Uri.parse('https://stacks.math.columbia.edu/tag/' + value.tag))) {
+            throw new Error('The canonical Stacks citation could not be opened.');
+          }
+        }
         else if (value.type === 'refresh') await send(c, await bridge({ method: 'outline_load', store: c.store, project_root: c.root, id: c.result.outline.id }));
         else if (['copy_link', 'associate_note', 'open_note', 'manage_notes'].includes(value.type)) {
           const target = await readerTarget(c, value);
@@ -177,7 +197,13 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         panel.onDidDispose(() => { panels.delete(id); if (active === id) active = undefined; changed.fire(); }));
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
-      panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'));
+      const support = [];
+      if (result.outline.acquisition?.kind === 'stacks-section') {
+        for (const name of ['media/katex/katex.min.js', 'src/stacksView.js']) {
+          support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
+        }
+      }
+      panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support);
     } else c.panel.reveal(c.panel.viewColumn);
     c.reference = reference;
     if (reference) c.selected = reference.region;
@@ -206,7 +232,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const { root, store } = await storage();
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
     if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
-    const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path), description: o.path, id: o.id })),
+    const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path), description: o.locator || o.path, detail: o.upstream_revision || undefined, id: o.id })),
       { placeHolder: 'Choose an existing saved outline' });
     if (!outline) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
@@ -349,7 +375,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
     if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
     const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path),
-      description: `${o.path} · ${o.revision.slice(0, 12)}`, id: o.id })), { placeHolder: 'Insert reference to this saved source outline' });
+      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a retained source outline' });
     if (!outline) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
     const target = await vscode.window.showQuickPick([{ label: 'Whole retained source outline', region: null },
@@ -409,6 +435,50 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!region) throw new Error('Select a source region first.');
     c.selected = region.id; return region.id;
   }
+  register('mrw.importStacksSection', () => locked(async () => {
+    const input = await vscode.window.showInputBox({ title: 'Import a Stacks Project section',
+      prompt: 'Official section URL or four-character tag. This explicit action downloads one pinned source revision.',
+      value: '08ZD', ignoreFocusOut: true,
+      validateInput: value => /^(?:[A-Za-z0-9]{4}|https:\/\/stacks\.math\.columbia\.edu\/tag\/[A-Za-z0-9]{4}\/?)$/.test(value.trim())
+        ? undefined : 'Enter a section tag or its official HTTPS URL, without query or fragment.' });
+    if (input === undefined) return;
+    const { store, root } = await storage(); writable({ store });
+    const download = () => bridge({ method: 'outline_stacks_prepare', store, project_root: root, input }, { timeout: 120000 });
+    const prepared = vscode.window.withProgress
+      ? await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification,
+        title: 'MRW: obtaining one Stacks section and its matching source metadata', cancellable: false }, download)
+      : await download();
+    const destination = await bridge({ method: 'artifact_status' });
+    const section = prepared.section;
+    const choice = section.limitation ? 'Retain source only' : 'Import section';
+    const statements = section.parts.filter(p => p.role === 'statement').length;
+    const proofs = section.parts.filter(p => p.role === 'proof').length;
+    const confirm = await vscode.window.showWarningMessage(
+      'Import The Stacks Project Authors — ' + section.title.slice(0, 200) + ' (' + section.tag + ')?\n'
+      + section.chapter.slice(0, 200) + ' · section ' + section.section_number + '\n'
+      + 'Git revision: ' + prepared.packet.commit + '\n'
+      + 'Destination: ' + destination.location + '\nProject: ' + root + '\n'
+      + (section.limitation ? 'Source retained only: ' + section.limitation
+        : statements + ' statements and ' + proofs + ' proofs, with exact retained source and explicit citations.')
+      + '\nEarlier revisions, annotations and ordinary notes are preserved. No TeX or remote script is executed.',
+      { modal: true }, choice);
+    if (confirm !== choice) return;
+    let result;
+    try {
+      result = await bridge({ method: 'outline_stacks_import', store, project_root: root,
+        ticket: prepared.ticket, packet: prepared.packet });
+    } catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(store); throw error; }
+    if (result.blocked) {
+      blockedStores.add(store);
+      throw new Error('Stacks import publication failed: ' + result.write_error
+        + '. Existing work is preserved. Reload the host before retrying.');
+    }
+    const controller = await display(result, store, root);
+    await vscode.window.showInformationMessage(result.reused
+      ? 'This section at this Git revision was already imported. Its saved annotations and links were kept.'
+      : 'Stacks section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source Outline…');
+    return controller.result;
+  }));
   register('mrw.createOutline', () => locked(async () => {
     const editor = ordinaryEditor(), document = editor.document, version = document.version, range = editor.selection;
     if (document.isDirty) throw new Error('Save the source before creating an exact retained outline.');
@@ -433,7 +503,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const result = await bridge({ method: 'outline_list', store, project_root: root });
     if (!result.outlines.length) throw new Error('No saved source outlines exist for this project.');
     const picked = await vscode.window.showQuickPick(result.outlines.map(o => ({ label: o.title || path.basename(o.path),
-      description: `${o.path} · ${o.revision.slice(0, 12)}`, id: o.id })), { placeHolder: 'Open a retained source outline' });
+      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a retained source outline' });
     if (!picked) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: picked.id });
     return (await display(loaded, store, root)).result;
@@ -496,7 +566,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
-  return () => [['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
+  return () => [['Import Stacks section…', 'mrw.importStacksSection'],
+    ['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
     ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
     ['Link an Obsidian note…', 'mrw.associateObsidianNote'],
     ['Insert outline reference…', 'mrw.insertOutlineReference'], ['Follow outline reference at cursor', 'mrw.followOutlineReference'],

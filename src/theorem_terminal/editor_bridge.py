@@ -93,6 +93,9 @@ def _dispatch(request):
                             'kind', 'label', 'region', 'selector'}, set()),
         'outline_document': ({'store', 'project_root', 'id', 'revision', 'artifact'}, set()),
         'outline_navigation': ({'store', 'project_root', 'id', 'revision', 'region', 'context', 'statement'}, set()),
+        'outline_stacks_prepare': ({'store', 'project_root', 'input'}, set()),
+        'outline_stacks_import': ({'store', 'project_root', 'ticket', 'packet'}, set()),
+        'outline_stacks_reference': ({'store', 'project_root', 'id', 'revision', 'tag'}, set()),
     }
     if not isinstance(method, str) or method not in fields:
         raise ValueError('Unknown editor action')
@@ -108,6 +111,9 @@ def _dispatch(request):
         return reference_action(request)
     if method in ('outline_notes', 'outline_update_note'):
         return note_action(request)
+    if method.startswith('outline_stacks_'):
+        from .stacks_import import stacks_action
+        return stacks_action(request)
     if method.startswith('outline_'):
         return outline_action(request)
     if method in ('investigation_parent', 'investigation_state', 'resume_investigation',

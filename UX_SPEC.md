@@ -1088,7 +1088,23 @@ warrant experiment, not entry into mathematical study.
 
 ## 10. Later large-corpus experiment
 
-This experiment is outside the first implementation. It may begin only after
+**Delivered bounded exception, 2026-10-21 (VS Code 0.8.0).** **Import Stacks
+Section…** accepts an official section URL/tag, downloads source and its tag map
+at one Git commit, and shows identity, revision and effective destination before
+publication. The source reader offers direct statement/proof navigation,
+restricted bundled MathML, exact retained TeX and explicit local citation
+following. Source context, authors, canonical citations and license remain
+available; editable annotations retain their separate attribution. Reimport at
+the same revision reopens the saved outline; a new revision creates a separate
+one. Unsupported structural syntax offers explicit source-only retention;
+display limitations show the complete raw fragment. Retained reading, citation
+following and annotation do not download or execute anything. Existing links and
+Obsidian controls apply unchanged. No earlier study ceremony gates this
+separately authorized importer. [Usage and limits](docs/STACKS_WORKFLOW.md).
+
+
+The broader experiment below remains deferred. Apart from the bounded exception
+above, it may begin only after
 the two initial sessions have been evaluated and it has been authorized
 separately. Use either the Stacks Project
 [@stacksprojectauthorsStacksProject2021] or Kerodon.

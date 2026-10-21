@@ -57,6 +57,14 @@ The offline source-region reader retains exact UTF-8 sources and optional
 supplied evidence separately from editable attributed reader annotations. It
 supports informal books/articles and AI-generated or AI-assisted manuscripts
 without Lean. Read its persistence and format bounds in `vscode/README.md`.
+The explicitly authorized 0.8.0 Stacks section importer uses one official
+Git-revision-pinned source/tag-map acquisition route. It adds published
+statement/proof regions, restricted bundled MathML and local explicit citations
+to the same source reader; exact TeX, license and provenance remain retained.
+Only explicit import acquires the network. Offline reading, annotation and
+retained citation navigation execute no downloaded TeX or other tools.
+See `docs/STACKS_WORKFLOW.md` and `docs/STACKS_VALIDATION.md`. Whole-corpus
+ingestion, complete proof graphs and vertex elimination remain deferred.
 The first manual overview across sources uses ordinary Markdown with explicit
 insertion/following of scoped saved-outline references. Region links pin the
 retained revision and exact range; changed associations never redirect earlier

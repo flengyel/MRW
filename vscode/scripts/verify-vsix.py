@@ -16,6 +16,15 @@ def verify(archive):
              'extension/python/bridge.py': extension / 'python/bridge.py'}
     for path in (extension / 'src').glob('*.js'):
         exact['extension/' + str(path.relative_to(extension))] = path
+    for path in (extension / 'media').rglob('*'):
+        if path.is_file():
+            exact['extension/' + str(path.relative_to(extension))] = path
+    notice = json.loads((extension / 'media/katex/NOTICE.json').read_text())
+    if notice['version'] != manifest['devDependencies']['katex']:
+        raise ValueError('Bundled math renderer differs from its pinned build dependency')
+    for name, expected_digest in notice['files'].items():
+        if sha256((extension / 'media/katex' / name).read_bytes()).hexdigest() != expected_digest:
+            raise ValueError('Bundled math renderer or license bytes changed')
     for path in (repository / 'src/theorem_terminal').rglob('*'):
         if path.is_file() and path.suffix in ('.py', '.json') and '__pycache__' not in path.parts:
             exact['extension/python/theorem_terminal/' + str(path.relative_to(repository / 'src/theorem_terminal'))] = path

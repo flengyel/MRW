@@ -26,7 +26,7 @@ MAX_FILES = 20000
 JSON_LIMIT = 32 * 1024 * 1024
 FAMILY = re.compile(r'(outlines|investigation)-[a-f0-9]{64}')
 HEX = re.compile(r'[a-f0-9]{64}')
-WRITE = {'outline_create', 'outline_mutate', 'outline_attach', 'outline_update_note',
+WRITE = {'outline_create', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import',
          'update_investigation', 'end_investigation', 'resume_investigation', 'send_assistance'}
 
 

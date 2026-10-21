@@ -7,6 +7,13 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Update, 2026-10-21:** 0.8.0 imports one explicitly selected Stacks section
+from pinned upstream source and tag-map bytes into this reader. Published
+statement/proof regions and explicit citations are source structure, not a
+complete dependency graph or verified inference. Rendering is derived; exact
+TeX and earlier pinned spans remain authoritative. The adapter does not implement
+vertex elimination. See [the bounded workflow](STACKS_WORKFLOW.md).
+
 **Update, 2026-10-16:** the first manual overview spanning several sources is
 implemented in VS Code 0.5.0 as ordinary Markdown with scoped saved-outline and
 exact-region references. See the reference contract below and
@@ -119,7 +126,8 @@ non-UTF-8 sources are explicitly unsupported. Exact expansion refers to retained
 text ranges; an externally transcribed source is not thereby certified faithful
 to a page image. No compiler, provider, extraction or formalization is required.
 
-Automatic extraction, AI proposals, automatic gap detection, verified joint-premise
+Beyond the bounded published Stacks structure adapter, automatic extraction,
+AI proposals, automatic gap detection, verified joint-premise
 graphs and elimination witnesses remain pending. The graph demonstrations below
 describe the full accepted contract, not completed reader acceptance.
 
@@ -211,7 +219,8 @@ this first increment.
 Copying Markdown alone does not transfer private outlines or retained sources.
 References are scoped navigation data, not a synchronization/export format,
 authority credential or universal identity for mathematical occurrences.
-Automatic generation, source discovery, cross-host synchronization, general
+Beyond explicit Stacks section acquisition, automatic generation/source
+discovery, cross-host synchronization, general
 overview tooling, inference graphs and vertex elimination remain pending.
 
 ## Obsidian companion navigation — 2026-10-17

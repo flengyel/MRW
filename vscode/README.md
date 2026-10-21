@@ -208,6 +208,36 @@ increment supplies no cross-machine transfer, synchronization, automatic
 overview generation, source discovery, inference graph or elimination witness.
 See [focused host checks and limits](../docs/VS_CODE_OVERVIEW_VALIDATION.md).
 
+## Import a Stacks Project section (0.8.0)
+
+Run **MRW: Import Stacks Section…** and enter `08ZD` or its official section
+URL. After acquisition, confirm the displayed section identity, Git revision
+and destination. The source reader shows opening context and direct buttons for
+each statement/proof. Mathematical notation uses bundled KaTeX 0.19.0 generating
+native MathML only; no downloaded TeX/scripts execute and no rendering network
+request is made. **Exact retained TeX for this passage** and **Open retained
+source** preserve the original text. Local citation buttons select the original
+statement span; canonical citation buttons explicitly open the browser.
+
+Use existing attributed **Save annotation**, copy-link and Obsidian actions.
+**Open Saved Source Outline…** reopens offline. Same-revision import preserves
+annotations; changed revisions are separate outlines. No automatic updating,
+whole-corpus ingestion or complete proof graph is claimed. See
+[workflow, source/format limits](../docs/STACKS_WORKFLOW.md) and
+[focused validation](../docs/STACKS_VALIDATION.md).
+
+Imported outlines use source-outline schema v2, adding only an acquisition-kind
+and retained manifest artifact ID; ordinary v1 outlines remain unchanged. The
+full exact chapter is the existing immutable source blob. Matching `tags/tags`,
+`preamble.tex`, `COPYING` and the import manifest are ordinary retained supporting
+artifacts. The manifest records file hashes, upstream commit/time, source
+structure and original pinned spans. Rendering is rebuilt offline from these
+bytes. Imported source paths name capture-time private blobs, never a fabricated
+original user document. Navigation uses the retained view even after a move;
+historical paths remain provenance. No storage inventory/reference-format or
+logical store identity changes are introduced. Host-local preparation tickets
+contain only workspace/scope/packet digest, never source prose or credentials.
+
 ## Offline source-region reader
 
 Open a saved UTF-8 mathematical text, select a passage, and run **MRW: Create
@@ -306,7 +336,9 @@ successful save. Same-project concurrent host processes remain unsupported.
 
 Supported sources: saved UTF-8 `.txt`, `.md`, `.markdown`, `.tex`, `.rst`, `.org`,
 `.lean`, at most 2 MiB. PDF regions/pages, OCR, notebook cells, rendered TeX,
-binary and non-UTF-8 formats are unsupported. Bibliographic locators are free
+binary and non-UTF-8 formats are unsupported by manual capture. The bounded
+Stacks adapter above separately supplies derived mathematical rendering from
+retained TeX; it does not import arbitrary rendered documents. Bibliographic locators are free
 text (section/theorem/page/reference); actual selection locators are text ranges.
 At most 64 regions (256 KiB each), 32 contexts (64 KiB each), 2 MiB aggregate
 selected text, 16 supporting artifacts (2 MiB each), 32 annotations per overview
@@ -320,7 +352,7 @@ Opening, editing annotations, hiding, expanding, navigating retained text and
 restoring make no compiler/provider calls. Navigating an original Lean source
 may independently activate an installed Lean extension; that is not an MRW
 check. No Verification, premise admission or inferred human judgment is created.
-Automatic extraction, AI proposals, automatic gap detection, verified joint-
+General automatic extraction, AI proposals, automatic gap detection, verified joint-
 premise graphs and elimination witnesses remain pending. This reader partially
 implements the accepted proof-outline requirement; faithful expansion does not
 establish correctness. See [focused validation](../docs/VS_CODE_OUTLINE_VALIDATION.md).
@@ -354,8 +386,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.7.0.vsix
-sha256sum vscode/theorem-terminal-0.7.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.8.0.vsix
+sha256sum vscode/theorem-terminal-0.8.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -370,11 +402,11 @@ package excludes development tests, scripts, staging configuration, caches and
 packaging dependencies. Generated Python copies, dependencies and VSIX files
 are ignored by Git. The recorded epoch is the timestamp of the completed
 prior delivery baseline `b776368`; vsce uses it for stable ZIP timestamps
-and entry ordering. UTC avoids host-timezone differences. Two builds with the
-recorded Node/npm/packager versions produced identical archive bytes; use those
+and entry ordering. UTC avoids host-timezone differences. The earlier delivery produced identical archive bytes from two builds with its
+recorded Node/npm/packager versions; use those
 versions when reproducing the delivered SHA-256. Record the hash of the actual
 file. This procedure packages locally and does not publish to the Marketplace.
-The earlier 0.6.0, 0.5.0 and 0.4.1 archives are preserved separately. Reproduce its recorded hash
+The earlier 0.7.0, 0.6.1, 0.6.0, 0.5.0 and 0.4.1 archives are preserved separately. Reproduce its recorded hash
 from packaging revision `15ba6cd`, with its prior epoch `1792079077` and recorded
 tool versions, in a separate checkout. The companion artifact and its focused
 checks are recorded in [the Obsidian validation report](../docs/OBSIDIAN_VALIDATION.md).
@@ -387,11 +419,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.7.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.8.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.7.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.8.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

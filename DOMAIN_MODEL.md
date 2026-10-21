@@ -651,6 +651,14 @@ prevents study, problem solving, review, or reconstruction.
 
 ### Proof outlines by vertex elimination
 
+Extension 0.8.0 adds a bounded Stacks section acquisition descriptor to this
+private reader state. Its immutable supporting manifest identifies a single Git
+commit, exact retained chapter/tag-map/license/preamble bytes and original
+published statement/proof spans. Mutable annotations and bibliographic labels
+remain separate. Derived MathML creates no new claim identity, checked edge,
+premise or evidence status. Explicit citations use the existing revision/range
+reference contract; stable upstream tags alone never identify immutable text.
+
 The delivered first source-region reader is private mutable navigation and
 attributed reader work over retained immutable source/artifact bytes. It uses
 Source/SourceOccurrence/VersionedSpan semantics with separate source-statement

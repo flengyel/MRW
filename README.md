@@ -34,6 +34,15 @@ continuation, private resumption and explicit ending. Their genuine mathematical
 remains pending. The first offline source-region reader is delivered in VS Code;
 proof-outline vertex elimination remains planned. This adds no broader model conversation.
 
+Extension **0.8.0** adds **MRW: Import Stacks Section…**. Enter `08ZD` to
+retain Hausdorff spaces from a single pinned official Git revision, read the
+four statements and proofs with mathematical rendering, follow their local
+citations, annotate and reopen offline. Exact TeX, authorship, license and
+revision metadata are retained separately from the display. See
+[the workflow](docs/STACKS_WORKFLOW.md) and [checks/limits](docs/STACKS_VALIDATION.md).
+This bounded section adapter adds no whole-corpus ingestion or mathematical
+verification; existing storage and Obsidian navigation remain in use.
+
 The first manual overview spanning several sources is implemented in extension
 0.5.0: write ordinary Markdown and explicitly insert/follow readable references
 to existing saved source outlines or exact retained regions. References survive
@@ -1354,7 +1363,9 @@ counterpart have been inspected. It tests whether a checked reason term makes
 the formal-proof-policy and formal--manuscript bridges recoverable without
 placing formal logic before study.
 
-The first implementation does not ingest a large reference. After its two
+The 0.8.0 selected-section importer is separately authorized and delivered as
+a bounded exception to this later experiment. It does not ingest a whole
+reference. For the broader experiment, after the two
 initial experiments have been evaluated, a separately authorized experiment
 will ingest and study either the Stacks Project
 [@stacksprojectauthorsStacksProject2021] or Kerodon. It will import the published
@@ -1366,4 +1377,6 @@ active mathematical work requires them.
 
 Copyright 2026 F. Lengyel.
 
-Licensed under the Apache License, Version 2.0. See `LICENSE`.
+Licensed under the Apache License, Version 2.0. See `LICENSE`. Bundled KaTeX
+retains its MIT license; the attributed Stacks source fixtures retain their
+upstream GNU Free Documentation License (see `tests/fixtures/stacks/README.md`).

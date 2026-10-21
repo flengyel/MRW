@@ -57,6 +57,18 @@ def short_label(store, source, span):
     return markdown_label(' · '.join(parts))
 
 
+def pinned_reference(store, source, region=None, span=None):
+    """One formatter for manual selections and retained published references."""
+    uri = f'mrw-outline:v1/{scope(store)}/{store.id}/{source.revision}'
+    if region is not None:
+        from .source_outlines import identity
+        identity(region)
+        span_text(source, span)
+        uri += f"/{region}/{span['start_line']}.{span['start_col']}-{span['end_line']}.{span['end_col']}"
+    parse_reference(uri)
+    return uri
+
+
 def reference_action(request):
     store = OutlineStore(request['store'], request['project_root'])
     following = request['method'] == 'outline_follow_reference'
@@ -98,10 +110,7 @@ def reference_action(request):
     region = item_by_id(store.state['regions'], request['region']) if request['region'] is not None else None
     if request['region'] is not None and region is None:
         raise ValueError('The selected source region is unavailable; choose it again')
-    uri = f'mrw-outline:v1/{scope(store)}/{store.id}/{source.revision}'
-    if region:
-        s = region['span']; span_text(source, s)
-        uri += f"/{region['id']}/{s['start_line']}.{s['start_col']}-{s['end_line']}.{s['end_col']}"
+    uri = pinned_reference(store, source, region['id'] if region else None, region['span'] if region else None)
     bib = store.state['source']['bibliography']
     parts = [bib['title'] or source.path.name]
     parts.extend(f'{key}: {bib[key]}' for key in ('authors', 'edition', 'revision', 'locator', 'reference') if bib[key])

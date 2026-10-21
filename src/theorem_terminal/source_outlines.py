@@ -181,9 +181,11 @@ def note(value):
 
 
 def validate_state(value, root, identifier):
-    fields(value, {'schema', 'version', 'id', 'project_root', 'created_at', 'source',
-                   'regions', 'contexts', 'annotations', 'artifacts'}, 'source outline')
-    if (value['schema'] != SCHEMA or type(value['version']) is not int or value['version'] != 1
+    names = {'schema', 'version', 'id', 'project_root', 'created_at', 'source',
+             'regions', 'contexts', 'annotations', 'artifacts'}
+    imported = isinstance(value, dict) and value.get('version') == 2
+    fields(value, names | ({'acquisition'} if imported else set()), 'source outline')
+    if (value['schema'] != SCHEMA or type(value['version']) is not int or value['version'] not in (1, 2)
             or value['id'] != identifier or value['project_root'] != str(root)):
         raise ValueError('Outline schema, project or identity differs')
     identity(identifier)
@@ -247,6 +249,15 @@ def validate_state(value, root, identifier):
             raise ValueError('Artifact refers to an unknown region')
         if item['selector'] is not None and (type(item['selector']) is not int or not 0 <= item['selector'] < 256):
             raise ValueError('Invalid recorded snapshot selector')
+    if imported:
+        acquisition = value['acquisition']
+        fields(acquisition, {'kind', 'artifact'}, 'source acquisition')
+        if acquisition['kind'] != 'stacks-section':
+            raise ValueError('Unsupported source acquisition')
+        identity(acquisition['artifact'])
+        if not any(a['id'] == acquisition['artifact'] and a['kind'] == 'supporting_artifact'
+                   and a['region'] is None for a in value['artifacts']):
+            raise ValueError('Retained source acquisition metadata is missing')
     return value
 
 
@@ -384,6 +395,9 @@ class OutlineStore:
                     a['goals'] = entry['goals']
             except (OSError, ValueError) as exc:
                 a['error'] = str(exc)
+        if value.get('acquisition', {}).get('kind') == 'stacks-section':
+            from .stacks_import import enrich
+            enrich(self, value)
         return {'outline': value, 'revision': self.revision, 'blocked': False}
 
 
@@ -499,7 +513,9 @@ def outline_action(request):
                 # its view pointer. It is not an existing editable outline.
                 continue
             result.append(dict(id=entry.name, title=saved.state['source']['bibliography']['title'],
-                               path=saved.state['source']['path'], revision=saved.state['source']['revision']))
+                               path=saved.state['source']['path'], revision=saved.state['source']['revision'],
+                               locator=saved.state['source']['bibliography']['locator'],
+                               upstream_revision=saved.state['source']['bibliography']['revision']))
         return {'outlines': result}
     if method == 'outline_create':
         source = ordinary_source(request['path'], request['source_revision'])
@@ -558,6 +574,9 @@ def outline_action(request):
                 raise ValueError('Unknown source region')
             span = region['statement']['span'] if request['statement'] and region['statement'] else region['span']
         span_text(source, span)
+        if store.state.get('acquisition', {}).get('kind') == 'stacks-section':
+            return {'retained': True, 'text': source.text, 'source_revision': source.revision,
+                    'start': host_point(source, span, 'start'), 'end': host_point(source, span, 'end')}
         current = ordinary_source(str(source.path), source.revision)
         if str(current.path) != store.state['source']['path']:
             raise ValueError('Original source path was redirected')

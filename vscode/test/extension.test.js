@@ -857,3 +857,56 @@ test('adopted synchronized identity permits an old external route only in the ex
   h.api.env.clipboard.value=returnLink;await h.commands.get('mrw.openLinkFromClipboard')();
   assert.deepEqual(h.errors,[]);assert.equal(h.panels[0].webview.messages.at(-1).model.outline.id,created.outline.id);
 });
+
+test('Stacks import command previews identity/destination and preserves retained links, notes and repeat imports', async t => {
+  const root = await temporary(t, true), h = await harness(root);
+  h.setService((extension, executable, request, options) => runBridge(extension, executable, request, {
+    ...options, spawn: (command, args, settings) => require('node:child_process').spawn(command,
+      [args[0], path.join(extension, 'test/stacks_bridge.py')], settings),
+  }));
+  h.inputs.push('https://stacks.math.columbia.edu/tag/08ZD'); h.endings.push('Import section');
+  const imported = await h.commands.get('mrw.importStacksSection')();
+  assert.deepEqual(h.errors, []);
+  assert.equal(imported.outline.regions.length, 9);
+  assert.equal(imported.outline.published.tag, '08ZD');
+  assert.match(h.panels[0].webview.html, /MathML|mathml/);
+  assert.equal(h.requests.filter(r => r.method === 'outline_stacks_prepare').length, 1);
+  await h.panels[0].receive({ type: 'stacks_reference', tag: '08ZE' });
+  assert.deepEqual(h.errors, []);
+  assert.match(h.shown.at(-1).getText(), /\\label\{lemma-Hausdorff\}/);
+  const model = h.panels[0].webview.messages.filter(m => m.type === 'outline').at(-1).model;
+  assert.equal(model.reference.status, 'unchanged');
+  await h.panels[0].receive({ type: 'edit', change: { kind: 'annotation', region: null, id: null,
+    purpose: 'question', text: 'Synthetic bridge check, not user work.', origin: 'unknown', author: 'Automated fixture' } });
+  h.inputs.push('08ZD'); h.endings.push('Import section');
+  const repeated = await h.commands.get('mrw.importStacksSection')();
+  assert.equal(repeated.reused, true);
+  assert.equal(repeated.outline.id, imported.outline.id);
+  assert.equal(repeated.outline.annotations[0].text, 'Synthetic bridge check, not user work.');
+  assert.equal(h.panels.length, 1);
+  await h.panels[0].receive({ type: 'stacks_citation', tag: '08ZE' });
+  assert.match(h.api.external.path, /^https:\/\/stacks.math.columbia.edu\/tag\/08ZE$/);
+  const external = h.api.external;
+  await h.panels[0].receive({ type: 'stacks_citation', tag: 'ZZZZ' });
+  assert.equal(h.api.external, external);
+  assert.match(h.errors.at(-1), /not an identified citation/);
+  assert.ok(!h.requests.some(r => /send_assistance|project|check_documentary/.test(r.method)));
+});
+
+test('cancelled Stacks preview publishes no outline and invalid input cannot acquire a source', async t => {
+  const root = await temporary(t, true), h = await harness(root);
+  h.setService((extension, executable, request, options) => runBridge(extension, executable, request, {
+    ...options, spawn: (command, args, settings) => require('node:child_process').spawn(command,
+      [args[0], path.join(extension, 'test/stacks_bridge.py')], settings),
+  }));
+  await h.commands.get('mrw.importStacksSection')();
+  assert.equal(h.requests.length, 0);
+  h.inputs.push('08ZD');
+  await h.commands.get('mrw.importStacksSection')();
+  assert.equal(h.panels.length, 0);
+  assert.ok(!h.requests.some(r => r.method === 'outline_stacks_import'));
+  h.inputs.push('https://example.org/tag/08ZD');
+  await h.commands.get('mrw.importStacksSection')();
+  assert.match(h.errors.at(-1), /official/);
+  assert.equal(h.panels.length, 0);
+});

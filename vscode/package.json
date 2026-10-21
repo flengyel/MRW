@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -199,6 +199,12 @@
         "title": "Edit Investigation Current Question",
         "category": "MRW",
         "enablement": "!mrw.assistanceBusy"
+      },
+      {
+        "command": "mrw.importStacksSection",
+        "title": "Import Stacks Section\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.createOutline",
@@ -430,12 +436,13 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/theorem_terminal/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },
   "devDependencies": {
-    "@vscode/vsce": "4.0.0"
+    "@vscode/vsce": "4.0.0",
+    "katex": "0.19.0"
   },
   "activationEvents": [
     "onUri"
