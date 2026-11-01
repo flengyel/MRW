@@ -1,5 +1,54 @@
 # Codex continuation: MRW source work and companion notes
 
+## Navigable reading outline delivered — 2026-11-01
+
+The user explicitly authorized the next bounded extension of 0.5.0 Markdown
+overviews. Work started clean at the verified 0.8.0 baseline
+`2885857da79e60c81bc196b86d9958d9c5e84069`; no later commit or unrelated work was
+replaced. Extension **0.9.0** adds **MRW: Open Reading Outline** and **Return to
+Reading Outline**, plus an Explorer tree derived from one live ordinary Markdown
+overview. Headings collapse/expand and select exact document lines. Existing
+references open the unchanged retained reader/resolver; passage references retain
+revision, region and exact pinned range. Duplicate links return to their own
+occurrence. Existing insertion commands, ordinary Obsidian notes and the Linux
+artifact store remain in use. No second prose store, reference grammar or record schema is
+added. VS Code owns editing, save, undo and recovery. See
+[usage and bounds](READING_OUTLINE_WORKFLOW.md) and
+[checks and package evidence](READING_OUTLINE_VALIDATION.md).
+
+The bundled pinned CommonMark parser excludes code examples/comments/images and
+handles Unicode, escaped labels, repeated headings and reference links. The view
+refreshes on unsaved edits; workspace UI state retains only navigation preferences
+and exact return pins. Live pins follow nonoverlapping edits; overlap or a
+restart revision mismatch blocks return. Exact undo restores the captured pin.
+Opening/restoring the view starts no bridge. Following uses only existing
+retained operations; no import, acquisition, provider, compiler, notebook or
+container action is added.
+
+Normal Windows VS Code 1.143.1 / WSL Debian Development Host checks passed the
+two-source workflow, exact Stacks selections, separate duplicate occurrences,
+unsaved edits/undo/redo, changed associations/missing originals, error paths,
+save/normal-close/reopen and restored selection/collapse state. All 58 Node tests
+passed; the Python suite ran 362 tests
+(303 passed, 59 expected skips). Installed 0.9.0 has all 57 runtime files matching
+the verified VSIX, and its bundled bridge preserved note/store bytes. The ordinary
+installed-window attempt was blocked before input because Windows refused
+foreground focus. Reader opening and the navigator-to-reader/Return clicks there
+remain unobserved. Do not retry an extended UI campaign or infer those clicks
+from the scripted Development Host. The useful retained Stacks record was unchanged.
+The disposable overview is
+`.codex-work/stacks-import-20261021/reading-workspace/reading-navigation-validation.md`.
+Its second source and descriptions are synthetic functional-test material,
+not user mathematics. The initial focus-race setup failure is retained separately;
+its corrected Development Host used unrelated extensions disabled.
+
+Automatic outline generation, AI explanations, prerequisite discovery, source
+comparison, inference graphs and vertex elimination remain pending. Mathematical
+usefulness of this navigator has not been observed. Keep the prior practical-benefit
+report for Zettelkasten navigation separate. Windows-backed storage qualification
+remains deferred; do not change permissions, mounts, sync, the real store or vault.
+No Pi, R3, SagePod, exporter, Euclid or compulsory study campaign is needed.
+
 ## Stacks section import delivered — 2026-10-21
 
 The saved user prompt `MRW_Codex_Stacks_Import_Prompt_2026-10-21.txt` advances

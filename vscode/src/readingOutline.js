@@ -1,0 +1,167 @@
+'use strict';
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { digest } = require('./navigation');
+const { parseReadingMarkdown } = require('./readingMarkdown');
+const KEY = 'mrw.readingOutline.v1';
+
+// A location follows only edits wholly outside its exact selected syntax.
+// Overlap blocks return; undo restoring the original text restores the pin.
+function trackLocation(pin, changes, revision) {
+  if (!pin) return pin;
+  if (pin.initial?.revision === revision) return { ...pin, ...pin.initial, invalid: false };
+  let { start, end, invalid } = pin;
+  if (!invalid) for (const c of [...changes].sort((a, b) => b.rangeOffset - a.rangeOffset)) {
+    if (c.rangeOffset + c.rangeLength <= start) {
+      const delta = c.text.length - c.rangeLength; start += delta; end += delta;
+    } else if (c.rangeOffset < end) { invalid = true; break; }
+  }
+  return { ...pin, start, end, invalid: !!invalid, revision };
+}
+function validPin(pin) {
+  return pin && typeof pin.uri === 'string' && /^[a-f0-9]{64}$/.test(pin.revision) &&
+    Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start;
+}
+
+function registerReadingOutline({ vscode, context, register, followReference }) {
+  const saved = context.workspaceState.get(KEY) || {};
+  let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
+  let selected = validPin(saved.selected) ? saved.selected : undefined;
+  let collapsed = new Set(Array.isArray(saved.collapsed) ? saved.collapsed.filter(x => typeof x === 'string').slice(0, 1000) : []);
+  const changed = new vscode.EventEmitter();
+  const fail = error => vscode.window.showErrorMessage(`MRW: ${error.message}`);
+  const state = () => ({ uri: document?.uri.scheme === 'file' ? document.uri.toString() : saved.uri,
+    collapsed: [...collapsed].slice(-1000), selected: selected?.uri.startsWith('file:') ? selected : undefined,
+    origin: origin?.uri.startsWith('file:') ? origin : undefined });
+  let publication = Promise.resolve();
+  function persist() {
+    const value = state();
+    publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
+    return publication;
+  }
+  const provider = {
+    onDidChangeTreeData: changed.event,
+    getChildren: node => node ? node.children : model?.roots || [],
+    getTreeItem(node) {
+      const item = new vscode.TreeItem(Array.from(node.label).slice(0, 240).join(''), node.children.length ?
+        (collapsed.has(node.id) ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.Expanded) : vscode.TreeItemCollapsibleState.None);
+      item.id = node.id;
+      item.description = `${node.kind === 'heading' ? 'Heading' : 'Source'} · line ${node.line + 1}`;
+      item.tooltip = `${Array.from(node.label).slice(0, 600).join('')}\n${document.uri.fsPath || document.uri.toString()}:${node.line + 1}`;
+      item.command = { command: 'mrw.selectReadingOutlineItem', title: 'Open reading location', arguments: [node] };
+      return item;
+    },
+    getParent: node => model?.all.find(candidate => candidate.children.includes(node)),
+  };
+  const tree = vscode.window.createTreeView('mrw.readingOutline', { treeDataProvider: provider, showCollapseAll: true });
+  tree.message = 'Open a Markdown overview with MRW: Open Reading Outline.';
+  function refresh() {
+    clearTimeout(timer);
+    if (!document || document.isClosed) { model = undefined; changed.fire(); return; }
+    try {
+      model = parseReadingMarkdown(document.getText());
+      for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
+      tree.description = `${path.basename(document.uri.path)}${document.isDirty ? ' •' : ''}`;
+      tree.message = model.roots.length ? undefined : 'Add Markdown headings or insert an MRW outline reference.';
+    } catch (error) { model = undefined; tree.message = error.message; }
+    changed.fire();
+  }
+  async function checkDocument(doc) {
+    if (doc.languageId !== 'markdown' || !['file', 'untitled'].includes(doc.uri.scheme)) throw new Error('Focus an ordinary Markdown overview.');
+    if (doc.uri.scheme === 'file') {
+      const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
+      if (!folder || folder.uri.scheme !== 'file') throw new Error('The reading overview must belong to the current workspace.');
+      const root = await fs.realpath(folder.uri.fsPath), actual = await fs.realpath(doc.uri.fsPath);
+      const relative = path.relative(root, actual);
+      if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw new Error('The reading overview resolves outside this workspace.');
+    }
+  }
+  function pin(doc, start, end) {
+    const revision = digest(doc.getText());
+    return { uri: doc.uri.toString(), revision, start, end, initial: { revision, start, end } };
+  }
+  async function showLocation(doc, location) {
+    await checkDocument(doc);
+    if (location.invalid || digest(doc.getText()) !== location.revision || location.end > doc.getText().length) {
+      throw new Error('The exact reading-outline location changed or is unavailable. No replacement was guessed; select the intended location in the overview again.');
+    }
+    const version = doc.version;
+    const editor = await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.One });
+    if (doc.version !== version || doc.isClosed) throw new Error('The overview changed while opening. Select its location again.');
+    const range = new vscode.Range(doc.positionAt(location.start), doc.positionAt(location.end));
+    editor.selection = new vscode.Selection(range.start, range.end);
+    editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    return editor;
+  }
+  register('mrw.openReadingOutline', async () => {
+    const attempt = ++generation;
+    let doc = vscode.window.activeTextEditor?.document;
+    if (!doc || doc.languageId !== 'markdown' || !['file', 'untitled'].includes(doc.uri.scheme)) {
+      const uri = document?.uri || (typeof saved.uri === 'string' ? vscode.Uri.parse(saved.uri) : undefined);
+      if (!uri || uri.scheme !== 'file') throw new Error('Focus an ordinary Markdown overview first.');
+      // Refuse another workspace before asking VS Code to read the document.
+      if (!vscode.workspace.getWorkspaceFolder(uri)) throw new Error('The saved reading overview belongs to a different workspace.');
+      doc = await vscode.workspace.openTextDocument(uri);
+    }
+    await checkDocument(doc);
+    if (attempt !== generation) return;
+    if (document && document.uri.toString() !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
+    document = doc; refresh();
+    await vscode.commands.executeCommand('mrw.readingOutline.focus');
+    if (selected?.uri === doc.uri.toString() && model && selected.revision === model.revision) {
+      await showLocation(doc, selected);
+      const node = model.all.find(n => n.start === selected.start && n.end === selected.end);
+      if (node) await tree.reveal(node, { select: true, focus: false });
+    }
+    await persist();
+    return model;
+  });
+  register('mrw.refreshReadingOutline', () => { refresh(); return model; });
+  register('mrw.selectReadingOutlineItem', async node => {
+    if (!document || document.isClosed) throw new Error('Reopen the Markdown overview with MRW: Open Reading Outline.');
+    refresh();
+    const current = model?.all.find(n => n.id === node?.id);
+    if (!current || current.uri !== node.uri || current.revision !== node.revision || current.start !== node.start || current.end !== node.end) {
+      throw new Error('The overview changed. Select its current navigator entry again.');
+    }
+    const location = pin(document, current.start, current.end);
+    const editor = await showLocation(document, location);
+    selected = location;
+    if (current.kind === 'reference') {
+      // Pin before asynchronous resolution, so intervening document edits are
+      // tracked even while the retained reader is being opened.
+      const previous = origin; origin = location;
+      try { const result = await followReference(current.reference, editor); await persist(); return result; }
+      catch (error) { if (origin === location) origin = previous; throw error; }
+    }
+    await persist();
+  });
+  register('mrw.returnToReadingOutline', async () => {
+    if (!validPin(origin)) throw new Error('Follow a source from the reading-outline navigator first.');
+    const uri = vscode.Uri.parse(origin.uri);
+    if (!['file', 'untitled'].includes(uri.scheme) || (uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(uri))) {
+      throw new Error('The originating overview is unavailable in this workspace.');
+    }
+    const doc = await vscode.workspace.openTextDocument(uri);
+    await showLocation(doc, origin);
+    selected = origin;
+    if (document !== doc) { document = doc; collapsed = new Set(); }
+    refresh(); await persist();
+  });
+  context.subscriptions.push(changed, tree,
+    tree.onDidCollapseElement(e => { collapsed.add(e.element.id); void persist().catch(fail); }),
+    tree.onDidExpandElement(e => { collapsed.delete(e.element.id); void persist().catch(fail); }),
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (e.document !== document && e.document.uri.toString() !== origin?.uri) return;
+      const revision = digest(e.document.getText());
+      if (e.contentChanges.length) {
+        if (origin?.uri === e.document.uri.toString()) origin = trackLocation(origin, e.contentChanges, revision);
+        if (selected?.uri === e.document.uri.toString()) selected = trackLocation(selected, e.contentChanges, revision);
+      }
+      clearTimeout(timer); timer = setTimeout(() => { refresh(); void persist().catch(fail); }, 120);
+    }),
+    vscode.workspace.onDidCloseTextDocument(doc => { if (doc === document && doc.isClosed) refresh(); }),
+    { dispose() { clearTimeout(timer); } });
+  return { provider, refresh };
+}
+module.exports = { registerReadingOutline, trackLocation };

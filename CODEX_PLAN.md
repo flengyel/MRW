@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | First bounded increment: ordinary Markdown with explicit insertion/following of scoped source-outline and revision/range-pinned region references | Not implemented |
+| Manual overview across several sources | 0.9.0 adds a live collapsible reading navigator to 0.5.0 ordinary Markdown references, exact retained navigation and occurrence-specific return | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
@@ -60,6 +60,24 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Navigable Markdown reading outline — 2026-11-01
+
+The explicitly authorized next increment extends 0.5.0 overviews in extension
+0.9.0. **Open Reading Outline** derives headings and existing references from
+one selected live Markdown document. Sections collapse/expand; headings select
+their document locations; links reuse the existing scoped resolver/reader and
+exact retained ranges. Return preserves the originating occurrence, with safe
+edit tracking and explicit refusal when invalidated. VS Code owns all prose,
+saving, undo and recovery. Only navigation preferences/pins use workspace state.
+Multiple retained sources and repeated references require no prescribed sequence.
+See [usage](docs/READING_OUTLINE_WORKFLOW.md) and
+[validation](docs/READING_OUTLINE_VALIDATION.md).
+
+No automatic outline, AI explanation, prerequisite discovery, proof graph,
+vertex elimination, source comparison or new acquisition path is added.
+Windows-backed storage qualification remains deferred. Technical navigation
+checks do not establish mathematical usefulness, which remains unassessed.
 
 ### Bounded Stacks section import — 2026-10-21
 
@@ -517,7 +535,7 @@ their question. Preserve source locations and distinguish source assertions,
 proposed connections, reader synthesis, and any checking evidence.
 Formalization is optional.
 
-Only the manual Markdown reference increment is delivered here. Automatic
+The manual Markdown references and their 0.9.0 reading navigator are delivered. Automatic
 overview generation, discovery, cross-host transfer/synchronization and broader
 overview tooling require future bounded increments. No automatic corpus
 ingestion is authorized. The proof-outline requirement

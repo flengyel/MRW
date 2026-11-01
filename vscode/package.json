@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -320,6 +320,29 @@
         "command": "mrw.refreshArtifactLocation",
         "title": "Refresh Artifact Location",
         "category": "MRW"
+      },
+      {
+        "command": "mrw.openReadingOutline",
+        "title": "Open Reading Outline",
+        "category": "MRW",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "mrw.refreshReadingOutline",
+        "title": "Refresh Reading Outline",
+        "category": "MRW",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mrw.returnToReadingOutline",
+        "title": "Return to Reading Outline",
+        "category": "MRW",
+        "icon": "$(arrow-left)"
+      },
+      {
+        "command": "mrw.selectReadingOutlineItem",
+        "title": "Open Reading Outline Location",
+        "category": "MRW"
       }
     ],
     "views": {
@@ -327,6 +350,10 @@
         {
           "id": "mrw.research",
           "name": "Mathematical Research"
+        },
+        {
+          "id": "mrw.readingOutline",
+          "name": "Reading Outline"
         }
       ]
     },
@@ -340,6 +367,21 @@
         {
           "command": "mrw.return",
           "when": "view == mrw.research",
+          "group": "navigation"
+        },
+        {
+          "command": "mrw.openReadingOutline",
+          "when": "view == mrw.readingOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "mrw.returnToReadingOutline",
+          "when": "view == mrw.readingOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "mrw.refreshReadingOutline",
+          "when": "view == mrw.readingOutline",
           "group": "navigation"
         }
       ],
@@ -393,6 +435,17 @@
           "command": "mrw.followOutlineReference",
           "when": "editorLangId == markdown && (resourceScheme == file || resourceScheme == untitled)",
           "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.openReadingOutline",
+          "when": "editorLangId == markdown && (resourceScheme == file || resourceScheme == untitled)",
+          "group": "mrw-outline"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mrw.selectReadingOutlineItem",
+          "when": "false"
         }
       ]
     },
@@ -430,19 +483,26 @@
           "description": "Suggested destination for Move Artifact Directory. Changing this setting never changes the active store or moves saved work; use the explicit command."
         }
       }
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "mrw.readingOutline",
+        "contents": "Organize an ordinary Markdown overview with headings and MRW source references.\n[Open Reading Outline](command:mrw.openReadingOutline)"
+      }
+    ]
   },
   "scripts": {
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/theorem_terminal/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0",
-    "katex": "0.19.0"
+    "katex": "0.19.0",
+    "markdown-it": "14.1.0"
   },
   "activationEvents": [
     "onUri"

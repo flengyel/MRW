@@ -1,0 +1,24 @@
+{
+  "phase": "reopen",
+  "vscode": "1.143.1",
+  "remote": "wsl",
+  "platform": "linux",
+  "checks": [
+    "normal host restart reconstructs saved Markdown tree, selection and collapse preferences offline"
+  ],
+  "requests": [
+    "artifact_status",
+    "outline_follow_reference",
+    "outline_notes",
+    "outline_notes"
+  ],
+  "errors": [],
+  "stacks": {
+    "id": "22f61967-81f4-5c76-9a27-2325845e773e",
+    "revision": "c6bac8dcf8ad96dc47416bf34cb45ba4a10b894e40d67d3e1fa68d8ef0d9f872",
+    "outlineDigest": "25dcd7ca48ed7ee196d93827f233605ed424b31d1bf27535b86372cff1b59f7a"
+  },
+  "complete": true,
+  "extensionPath": "/home/flengyel/src/theorem_terminal/.codex-work/reading-outline-20261101/development-extension",
+  "store": "/home/flengyel/.vscode-server/data/User/workspaceStorage/4dcd674ec75a58af8faabf7f0731ffe6/flengyel.theorem-terminal/outlines-c2f90210a3b6ef0ecfaa712c8bcf286e3147f788efcc0875f9be62351995df3b"
+}

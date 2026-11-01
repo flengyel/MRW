@@ -7,6 +7,7 @@ const path = require('node:path');
 const { runBridge } = require('./bridge');
 const { registerAssistance } = require('./assistance');
 const { registerOutlines } = require('./outlines');
+const { registerReadingOutline } = require('./readingOutline');
 const { createArtifactStorage } = require('./artifactStorage');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
@@ -19,10 +20,10 @@ function activate(context) {
   const session = randomUUID();
   let serial = 0, reviewGeneration = 0, currentReview;
   const register = (name, action) => context.subscriptions.push(
-    vscode.commands.registerCommand(name, async () => {
+    vscode.commands.registerCommand(name, async (...args) => {
       try {
         if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
-        return await action();
+        return await action(...args);
       } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));
   const rawBridge = (request, options) => {
@@ -252,6 +253,7 @@ function activate(context) {
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
   const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients });
+  registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   const tree = {
     onDidChangeTreeData: changed.event,

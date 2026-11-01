@@ -157,6 +157,52 @@ before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
 and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
 
+## Navigable reading outlines (0.9.0)
+
+With an ordinary Markdown overview active, run **MRW: Open Reading Outline**.
+The **Reading Outline** view in Explorer shows its headings and existing MRW
+references. Expand/collapse sections; click a heading to select its line, or a
+source link to open the existing reader and its exact retained passage.
+**MRW: Return to Reading Outline**, the view's back arrow, or the reader's
+**Return to reading outline** button selects the originating Markdown occurrence.
+The same passage may appear several times with separate return destinations.
+
+Continue using **Insert Outline Reference…** in the ordinary Markdown editor.
+Reorganize headings, explanations and questions with normal editing and undo.
+The navigator refreshes from live text, including unsaved edits; **Refresh
+Reading Outline** is also explicit. Opening/refreshing the view invokes no
+Python bridge or acquisition. Following references reuses the original resolver
+and retained reader without import, model, compiler, notebook or container work.
+
+The bundled CommonMark parser recognizes ATX/Setext headings, inline/reference
+links, autolinks and bare MRW references. Code fences, indented code, inline code,
+images and HTML comments supply no navigation links. Unicode and escaped labels
+are decoded for display; repeated headings/references keep separate occurrences.
+Markdown extension plugins and Obsidian-specific syntax are not interpreted.
+The document limit is 4 MiB / 10,000 headings and references. Long display labels
+are bounded; their underlying destinations retain exact positions.
+
+Save/close/reopen the overview normally and run **Open Reading Outline** again.
+The view reconstructs from that document, restoring collapsed sections and the
+last selected location when its text revision still matches. From a source view,
+the same command can reopen the last selected saved overview in this workspace.
+There is one selected overview per window. Untitled overviews work live; their
+text and recovery remain VS Code's responsibility, and MRW persists no untitled
+navigation pin. Preferences for the selected saved overview and one exact return
+pin use VS Code workspace state; no prose, vault copy or source record is stored
+there. Startup registers the view without opening or reading the overview.
+
+A live return pin follows edits wholly outside its selected syntax. An overlapping
+edit blocks return; undo to the exact captured document restores it. After close
+or restart, mismatching text blocks an old return instead of guessing a matching
+heading/link. **Open Reading Outline** reconstructs current destinations so the
+reader can choose a new location. Missing originals do not block retained
+reading. Missing/incompatible retained storage or another workspace's scope
+fails clearly through existing checks without replacements or workspace search.
+See [examples and ownership](../docs/READING_OUTLINE_WORKFLOW.md) and
+[validation](../docs/READING_OUTLINE_VALIDATION.md). Broader proof-outline analysis
+and mathematical usefulness remain separate pending work.
+
 ## Manual Markdown overviews across sources
 
 Version 0.5.0 provides the first manual overview spanning several sources. Write
@@ -386,8 +432,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.8.0.vsix
-sha256sum vscode/theorem-terminal-0.8.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.0.vsix
+sha256sum vscode/theorem-terminal-0.9.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -419,11 +465,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.8.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.9.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.8.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.9.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

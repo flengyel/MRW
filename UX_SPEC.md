@@ -129,6 +129,30 @@ the smaller window. No production UX change or mathematical-use claim follows
 from this validation. Details and remaining limits are in the
 [host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 
+### Reading-outline navigation — 2026-11-01
+
+**MRW: Open Reading Outline** derives a collapsible Explorer view from the
+selected ordinary Markdown overview, including unsaved text. CommonMark headings
+supply organization; existing MRW links supply retained-source navigation.
+Code examples are excluded. Selecting a heading visibly selects its exact line;
+selecting a passage opens its pinned retained range through the existing reader.
+Repeated headings and repeated passage links remain distinct occurrences.
+**Return to Reading Outline** is available in the palette, view and reader.
+It selects the originating occurrence without saving or replacing note text.
+A live return location follows nonoverlapping edits; overlap blocks return,
+with exact undo restoring the original pin. Restart checks the saved text hash
+before returning; it never guesses from matching headings or similar links.
+
+The view refreshes from host document events and reconstructs after normal
+save/close/reopen. Collapsed-section preferences, last selected document/location
+and a return pin live in existing host-local workspace UI state. No prose or
+second outline record is stored. Opening/restoring the view starts no bridge,
+network, provider, compiler, notebook or container. Following invokes only the
+existing retained resolver/reader. Existing insertion commands and ordinary
+Obsidian notes remain in use; no vault is inspected. Navigation creates no
+premise, dependency, verification or comprehension status. See
+[usage and format bounds](docs/READING_OUTLINE_WORKFLOW.md).
+
 ### Obsidian companion navigation — 2026-10-17
 
 The source reader offers **Copy link to this outline** under **Whole outline**

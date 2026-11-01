@@ -146,6 +146,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
           if (!region) throw new Error('Unknown source region.');
           await mutate(c, { kind: 'region', region: region.id, title: region.title, level: region.level, collapsed: !region.collapsed });
         } else if (value.type === 'source') await openDocument(c);
+        else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline');
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
@@ -352,8 +353,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       await followExternalLink(uri.toString(true));
     } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
   } }));
-  async function markdown() {
-    const editor = vscode.window.activeTextEditor, document = editor?.document;
+  async function markdown(editor = vscode.window.activeTextEditor) {
+    const document = editor?.document;
     if (!document || document.languageId !== 'markdown' || !['file', 'untitled'].includes(document.uri.scheme)) {
       throw new Error('Focus an ordinary Markdown document in this workspace.');
     }
@@ -393,19 +394,24 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
     return result;
   }));
-  register('mrw.followOutlineReference', () => locked(async () => {
-    const { editor, store, root } = await markdown();
+  async function followReference(reference, originEditor) {
+    return locked(async () => {
+    const { editor, store, root } = await markdown(originEditor);
     const document = editor.document, version = document.version, selection = editor.selection;
-    const line = document.getText().split(/\r\n|\r|\n/)[selection.active.line] || '';
-    const reference = referenceAt(line, selection.active.character);
     const result = await bridge({ method: 'outline_follow_reference', store, project_root: root, reference });
-    if (vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
+    if (document.isClosed || vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
       throw new Error('Markdown or cursor changed during navigation; follow the reference again.');
     }
     const c = await display(result, store, root, result.reference);
     if (result.document) await openDocument(c, null, result.document);
     return result.reference;
-  }));
+    });
+  }
+  register('mrw.followOutlineReference', async () => {
+    const { editor } = await markdown();
+    const line = editor.document.getText().split(/\r\n|\r|\n/)[editor.selection.active.line] || '';
+    return followReference(referenceAt(line, editor.selection.active.character), editor);
+  });
   async function selection(c) {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.selection.isEmpty) throw new Error('Select a nonempty source region in the original or retained text.');
@@ -566,7 +572,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
-  return () => [['Import Stacks section…', 'mrw.importStacksSection'],
+  const rows = () => [['Open reading outline', 'mrw.openReadingOutline'],
+    ['Return to reading outline', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
     ['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
     ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
     ['Link an Obsidian note…', 'mrw.associateObsidianNote'],
@@ -574,6 +581,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     ...(panels.has(active) ? [['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
       ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
+  rows.followReference = followReference;
+  return rows;
 }
 
 module.exports = { registerOutlines, outlineHtml, normalize };

@@ -65,6 +65,13 @@ Only explicit import acquires the network. Offline reading, annotation and
 retained citation navigation execute no downloaded TeX or other tools.
 See `docs/STACKS_WORKFLOW.md` and `docs/STACKS_VALIDATION.md`. Whole-corpus
 ingestion, complete proof graphs and vertex elimination remain deferred.
+Extension 0.9.0 adds a collapsible Reading Outline view derived from one selected
+ordinary Markdown overview, including unsaved text. Headings select exact editor
+locations; existing scoped references open retained sources/passages and preserve
+the originating occurrence for return. No prose copy or new reference format is
+stored. Navigation preferences and exact return pins use host-local workspace
+state. See `docs/READING_OUTLINE_WORKFLOW.md` and its validation report. It adds
+no inferred dependency, proof graph, vertex elimination or comprehension status.
 The first manual overview across sources uses ordinary Markdown with explicit
 insertion/following of scoped saved-outline references. Region links pin the
 retained revision and exact range; changed associations never redirect earlier

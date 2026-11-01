@@ -1,0 +1,11 @@
+{
+  "name": "markdown-it",
+  "version": "14.1.0",
+  "source": "https://registry.npmjs.org/markdown-it/-/markdown-it-14.1.0.tgz",
+  "license": "MIT",
+  "files": {
+    "markdown-it.js": "433ba2a6946e8200c464d8845b98d826022a1836b4a713f01fa2830477c381e8",
+    "LICENSE": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473",
+    "THIRD_PARTY_LICENSES.txt": "62237ec17e3c398a065d9a56e73d263be234352103a1f5336daee9071f252435"
+  }
+}

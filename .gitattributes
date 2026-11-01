@@ -1,3 +1,6 @@
 # These retained validation sources are pinned by exact-byte SHA-256.
 docs/evidence/source-outline-20261014/euclid-ix20.txt -text whitespace=cr-at-eol
 docs/evidence/source-outline-20261014/euclid-page.html -text
+
+# Preserve the pinned upstream distribution byte-for-byte, including whitespace.
+vscode/media/markdown-it/markdown-it.js -text -whitespace

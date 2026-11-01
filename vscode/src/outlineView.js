@@ -168,6 +168,7 @@ function render() {
   if (blocked) el('p', 'Private writes are blocked. Keep unsaved annotation text and reload the host before further writes.', root, 'warning');
   const toolbar = el('div', undefined, root, 'toolbar');
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
+  button(toolbar, 'Return to reading outline', { type: 'reading_return' }, 'reading-return');
   button(toolbar, 'Refresh source status', { type: 'refresh' }, 'refresh');
   if (o.published?.error) el('p', o.published.error, root, 'warning');
   else if (o.published && window.MRWStacks) window.MRWStacks.header(root, o.published, publishedAction);

@@ -25,6 +25,12 @@ def verify(archive):
     for name, expected_digest in notice['files'].items():
         if sha256((extension / 'media/katex' / name).read_bytes()).hexdigest() != expected_digest:
             raise ValueError('Bundled math renderer or license bytes changed')
+    markdown = json.loads((extension / 'media/markdown-it/NOTICE.json').read_text())
+    if markdown['version'] != manifest['devDependencies']['markdown-it']:
+        raise ValueError('Bundled Markdown parser differs from its pinned dependency')
+    for name, expected_digest in markdown['files'].items():
+        if sha256((extension / 'media/markdown-it' / name).read_bytes()).hexdigest() != expected_digest:
+            raise ValueError('Bundled Markdown parser or license bytes changed')
     for path in (repository / 'src/theorem_terminal').rglob('*'):
         if path.is_file() and path.suffix in ('.py', '.json') and '__pycache__' not in path.parts:
             exact['extension/python/theorem_terminal/' + str(path.relative_to(repository / 'src/theorem_terminal'))] = path

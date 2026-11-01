@@ -24,7 +24,7 @@ function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file,
 async function harness(root, state = new Map()) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map();
   const opens = [], inputs = [], picks = [], endings = [], panels = [];
-  let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, service = runBridge;
+  let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, changeListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
   const disposable = { dispose() {} };
   const offset = (text, point) => text.split('\n').slice(0, point.line).reduce((n, line) => n + line.length + 1, 0) + point.character;
@@ -33,6 +33,7 @@ async function harness(root, state = new Map()) {
       // Exercise a user's *.txt language association for every virtual view.
       languageId: scheme === 'mrw-record' ? 'markdown' : 'plaintext',
       getText(range) { return range ? this.text.slice(offset(this.text, range.start), offset(this.text, range.end)) : this.text; },
+      positionAt(at) { const lines = this.text.slice(0, at).split('\n'); return new Position(lines.length - 1, lines.at(-1).length); },
       get lineCount() { return this.text.split('\n').length; }, validateRange: range => range };
     storedDocuments.set(doc.uri.toString(), doc);
     return doc;
@@ -48,11 +49,13 @@ async function harness(root, state = new Map()) {
       } };
   }
   const api = {
-    Position, Range, Selection, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => uri(x, 'https') },
+    Position, Range, Selection, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => x.startsWith('file:') ? uri(x.slice(5)) : uri(x, 'https') },
     ProgressLocation: { Notification: 15 },
     ViewColumn: { One: 1, Two: 2, Beside: -2 }, TextEditorRevealType: { InCenter: 1, InCenterIfOutsideViewport: 2 },
     EventEmitter: class { event() {} fire() {} dispose() {} }, TreeItem: class { constructor(label) { this.label = label; } },
-    commands: { registerCommand(name, action) { commands.set(name, action); return disposable; } },
+    TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
+    commands: { registerCommand(name, action) { commands.set(name, action); return disposable; },
+      async executeCommand(name, ...args) { return commands.get(name)?.(...args); } },
     workspace: {
       isTrusted: true, workspaceFolders: [{ uri: uri(root) }],
       getWorkspaceFolder: () => ({ uri: uri(root) }),
@@ -60,6 +63,7 @@ async function harness(root, state = new Map()) {
       registerTextDocumentContentProvider(scheme, provider) { providers.set(scheme, provider); return disposable; },
       onDidCloseTextDocument(fn) { const previous = closeListener; closeListener = doc => { previous(doc); fn(doc); }; return disposable; },
       onDidOpenTextDocument(fn) { openListener = fn; return disposable; },
+      onDidChangeTextDocument(fn) { changeListener = fn; return disposable; },
       async openTextDocument(location) {
         reads.push(location.toString());
         const existing = storedDocuments.get(location.toString());
@@ -81,6 +85,9 @@ async function harness(root, state = new Map()) {
       },
       onDidChangeActiveTextEditor(callback) { activeListener = callback; return disposable; },
       registerTreeDataProvider() { return disposable; },
+      createTreeView(_id, options) { api.readingProvider = options.treeDataProvider; return {
+        dispose() {}, onDidCollapseElement(fn) { api.collapseReading = fn; return disposable; },
+        onDidExpandElement(fn) { api.expandReading = fn; return disposable; }, async reveal() {} }; },
       registerUriHandler(handler) { api.uriHandler = handler; return disposable; },
       async showErrorMessage(message) { errors.push(message); },
       async showInformationMessage() {}, setStatusBarMessage() {},
@@ -116,6 +123,7 @@ async function harness(root, state = new Map()) {
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
     if (name === './outlines') return require('../src/outlines');
+    if (name === './readingOutline') return require('../src/readingOutline');
     if (name === './artifactStorage') return require('../src/artifactStorage');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };
     return require(name);
@@ -123,6 +131,8 @@ async function harness(root, state = new Map()) {
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
   return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, panels, state, document, editor, providers,
+    changeDocument(doc, at, length, text) { doc.text = doc.text.slice(0, at) + text + doc.text.slice(at + length); doc.version++; doc.isDirty = true;
+      changeListener({ document: doc, contentChanges: [{ rangeOffset: at, rangeLength: length, text }] }); },
     closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
     setService: fn => { service = fn; }, focus: ed => { api.window.activeTextEditor = ed; activeListener(ed); } };
 }
@@ -909,4 +919,63 @@ test('cancelled Stacks preview publishes no outline and invalid input cannot acq
   await h.commands.get('mrw.importStacksSection')();
   assert.match(h.errors.at(-1), /official/);
   assert.equal(h.panels.length, 0);
+});
+
+test('reading navigator derives live Markdown, follows two sources, pins returns, and reconstructs saved UI state', async t => {
+  const root = await temporary(t, true), h = await harness(root), references = [];
+  for (const name of ['book.txt', 'article.txt']) {
+    const file = path.join(root, name); await fs.writeFile(file, 'α😀 statement\nProof detail.\n');
+    const doc = h.document(file, await fs.readFile(file, 'utf8')), ed = h.editor(doc); h.focus(ed);
+    ed.selection = new Selection(new Position(0, 0), new Position(0, 13));
+    const created = await h.commands.get('mrw.createOutline')();
+    const model = created.outline;
+    const base = { store: path.join(root, '..', 'private-state', `outlines-${navigation.digest(root)}`), project_root: root };
+    for (const region of [null, model.regions[0].id]) references.push(await runBridge(path.resolve(__dirname, '..'), 'python3', {
+      method: 'outline_reference', ...base, id: model.id, revision: created.revision, region }));
+  }
+  const file = path.join(root, 'overview.md'), original = `# α😀\n\n${references[0].markdown}\n\n## Again\n${references[1].markdown}\n\n## Again\n${references[1].markdown}\n${references[2].markdown}\n`;
+  await fs.writeFile(file, original);
+  const doc = h.document(file, original); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  const before = h.requests.length;
+  let model = await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(h.requests.length, before, 'opening the tree launches no bridge');
+  assert.equal(model.all.length, 7);
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[4]);
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), '## Again');
+  h.api.collapseReading({ element: model.roots[0] });
+  let target = model.all.find(n => n.reference === references[1].reference);
+  await h.commands.get('mrw.selectReadingOutlineItem')(target);
+  assert.equal(h.api.window.activeTextEditor.document.getText(h.api.window.activeTextEditor.selection), 'α😀 statement');
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), references[1].markdown);
+  const prefix = 'Reader question\n\n'; h.changeDocument(doc, 0, 0, prefix);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), references[1].markdown);
+  assert.equal(await fs.readFile(file, 'utf8'), original); assert.ok(doc.isDirty);
+  model = await h.commands.get('mrw.refreshReadingOutline')();
+  assert.equal(model.all[0].line, 2);
+  await h.commands.get('mrw.selectReadingOutlineItem')(target);
+  assert.match(h.errors.pop(), /overview changed/);
+  target = model.all.find(n => n.reference === references[1].reference);
+  h.changeDocument(doc, target.start + 2, 1, 'X');
+  await h.commands.get('mrw.returnToReadingOutline')(); assert.match(h.errors.pop(), /exact reading-outline location changed/);
+  // Undo both edits to restore the exact original pin.
+  h.changeDocument(doc, 0, doc.getText().length, original);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), references[1].markdown);
+  model = await h.commands.get('mrw.refreshReadingOutline')();
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all.at(-1));
+  assert.equal(h.panels.at(-1).webview.messages.at(-1).reference.status, 'whole outline');
+  await h.commands.get('mrw.returnToReadingOutline')();
+  const restored = await harness(root, h.state);
+  const restoredDoc = restored.document(file, original); restoredDoc.languageId = 'markdown'; restored.focus(restored.editor(restoredDoc));
+  model = await restored.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all.length, 7);
+  assert.equal(restoredDoc.getText(restored.api.window.activeTextEditor.selection), references[2].markdown);
+  const beforeWrong = restored.requests.length;
+  restored.api.workspace.getWorkspaceFolder = () => undefined;
+  await restored.commands.get('mrw.returnToReadingOutline')(); assert.match(restored.errors.pop(), /workspace/);
+  assert.equal(restored.requests.length, beforeWrong);
+  assert.equal(await fs.readFile(file, 'utf8'), original);
+  assert.deepEqual(h.errors, []); assert.deepEqual(restored.errors, []);
 });

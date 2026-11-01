@@ -1,0 +1,7 @@
+{
+  "complete": false,
+  "developmentHost": false,
+  "failure": "Ordinary installed reading window did not acquire foreground; no input sent",
+  "steps": [],
+  "window": "Preview reading-navigation-validation.md - reading-workspace [WSL: Debian] - Visual Studio Code"
+}

@@ -34,6 +34,18 @@ continuation, private resumption and explicit ending. Their genuine mathematical
 remains pending. The first offline source-region reader is delivered in VS Code;
 proof-outline vertex elimination remains planned. This adds no broader model conversation.
 
+Extension **0.9.0** adds **MRW: Open Reading Outline** for an ordinary Markdown
+overview. Its collapsible Explorer view follows headings and existing scoped
+source links, opens the retained reader or exact passage, and returns to the
+originating occurrence, including from unsaved work. Editing and undo remain
+VS Code operations. Saved documents reconstruct the navigator; only navigation
+preferences and exact return pins live in host-local UI state. See
+[the workflow](docs/READING_OUTLINE_WORKFLOW.md) and
+[validation and limits](docs/READING_OUTLINE_VALIDATION.md).
+This is reader-authored navigation; automatic outlines, prerequisite discovery,
+proof graphs and vertex elimination remain pending. Windows-backed storage
+qualification remains deferred.
+
 Extension **0.8.0** adds **MRW: Import Stacks Section…**. Enter `08ZD` to
 retain Hausdorff spaces from a single pinned official Git revision, read the
 four statements and proofs with mathematical rendering, follow their local

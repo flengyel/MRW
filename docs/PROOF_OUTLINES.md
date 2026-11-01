@@ -7,6 +7,14 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Update, 2026-11-01:** 0.9.0 adds a navigable reading outline derived from one
+ordinary Markdown overview. Its headings collapse/expand and select exact editor
+locations; existing references open the same retained reader/passages and return
+to the originating occurrence. Unsaved editing, undo and recovery remain host
+responsibilities. This extends the manual overview contract below, without a
+new reference grammar or inference graph. See [usage](READING_OUTLINE_WORKFLOW.md)
+and [validation](READING_OUTLINE_VALIDATION.md). Vertex elimination remains planned.
+
 **Update, 2026-10-21:** 0.8.0 imports one explicitly selected Stacks section
 from pinned upstream source and tag-map bytes into this reader. Published
 statement/proof regions and explicit citations are source structure, not a
