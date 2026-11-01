@@ -131,12 +131,90 @@ not acquire foreground; no input sent.”** See
 [the desktop result](evidence/reading-outline-20261101/installed-window.json).
 No extended retry campaign followed.
 
-**Remaining installed-window observation:** run **Open Reading Outline** on the
+**At initial delivery, the remaining installed-window observation was:** run **Open Reading Outline** on the
 disposable overview, select its whole-source and exact-passage entries, observe
 the ordinary installed retained reader, and use **Return to Reading Outline** to
 confirm the originating occurrence. Ordinary-window reader opening from 0.8.0
-therefore remains unobserved; Development Host results and installed byte/bridge
-checks do not substitute for those clicks.
+was unobserved at that point; the follow-up below records the later ordinary
+reader opening and its presentation blocker.
+
+## Reading presentation follow-up — 2026-11-01
+
+The user explicitly requested further attempts and helped coordinate focus.
+The first coordinated retry still stopped before input. A passive diagnostic
+subsequently found the WSL-Debian terminal foreground, rather than the reading
+window; this suggests a launch/focus interaction without proving its cause.
+See [retry](evidence/reading-outline-20261101/installed-window-retry.json) and
+[passive diagnostic](evidence/reading-outline-20261101/foreground-diagnostic.json).
+A driver started before the next Ready signal did observe the intended window
+foreground. It sent the command-palette shortcut, then stopped before command
+text because its accessibility probe did not identify the palette. See
+[coordinated result](evidence/reading-outline-20261101/installed-window-coordinated.json).
+The title-bar workspace name also opened a menu when clicked; the earlier focus
+instructions were ambiguous. Editor-area focus and native F1 were clearer.
+
+The user then performed ordinary **installed 0.9.0** actions manually:
+**Open Reading Outline** displayed headings/references; its first whole-source
+link opened **Outline: Hausdorff spaces**. A passive
+[actual-window capture](evidence/reading-outline-20261101/installed-reader-whole.png)
+independently confirms that reader and its whole-source reference. Clicking
+**08ZE · statement** displayed the equivalence statement, as reported by the user.
+Thus the earlier ordinary-window reader-opening observation is now established.
+The [manual record](evidence/reading-outline-20261101/installed-manual-followup.json)
+keeps those observations separate from the uncompleted exact-link/Return steps.
+No mathematical study or correctness claim follows from these observations.
+
+This trial exposed an actual usability blocker. Long Markdown citations dominated
+the middle editor while controls and metadata crowded mathematics into a narrow
+right pane. The user could not recognize the intended reading destination and
+reported that mathematics occupied only a postage-stamp-sized area. Further
+manual test instructions were stopped; the blocker took priority over completing
+a checklist.
+
+Patch **0.9.1** implements the bounded repair:
+
+- Navigator labels use the short citation title; the original citation stays in
+  the tooltip and Markdown without rewriting note bytes.
+- Following a navigator reference uses VS Code's standard **Maximize Editor Group
+  and Hide Side Bars** command. Return expands the originating Markdown editor
+  and shows the navigator. Existing documents remain open.
+- Source content precedes passage controls. Metadata, section contents,
+  bibliographic editing and source controls start under **Source details and
+  tools**. A sticky Return button stays available while scrolling.
+- An unchanged, expanded published region with an exact matching retained span
+  opens at its rendered card. Exact TeX remains explicitly available. A changed,
+  removed, edited or collapsed current association retains the original pinned
+  text fallback and cannot select a replacement region.
+
+All **61 Node tests passed**, including new DOM/command checks for collapsed
+source tools, source-before-controls ordering, concise labels, one-time card
+focus, expanded-reader commands, Return and old-range fallback. Python again
+ran **362 tests: 303 passed, 59 expected skips**. Syntax, compilation and diff
+checks passed. Python services, acquisition, transport, schema and storage are
+unchanged. Packaging follows these bridge tests sequentially. The native layout
+commands were also checked in the
+[VS Code 1.85 source](https://github.com/microsoft/vscode/blob/1.85.0/src/vs/workbench/browser/parts/editor/editorActions.ts#L937);
+that API check does not establish a visual host result.
+
+The patch's fresh actual-host presentation check remains unavailable: VS Code
+1.144.0 restored the disposable Development Host without a workspace folder.
+The overview was correctly refused; attempts to open the driver's fixed test
+folder did not establish that workspace. Setup was stopped. See the
+[scoped blocked result](evidence/reading-outline-20261101/host-presentation-blocked.json).
+The new reader layout and exact rendered-link/Return path must not be described
+as visually accepted from the automated checks. The earlier 0.9.0 user
+observations remain valid and are the evidence for the repair.
+
+The 0.9.1 VSIX was built and verified after the completed bridge tests:
+`vscode/theorem-terminal-0.9.1.vsix`, 62 files, SHA-256
+`b1446a3091881c200a1ca7723411523c38ef37c656ddbe01651324e7650b5e61`.
+The 0.9.0 package and earlier packages remain unchanged. The [installed manifest and all 57 runtime files](evidence/reading-outline-20261101/installed-package-patch.json)
+match that archive. The [installed bridge](evidence/reading-outline-20261101/installed-bridge-patch.json)
+opened the original exact passage and preserved all note/store bytes; these checks
+are separate from visual acceptance. The already-open 0.9.0 window
+requires an explicit **Developer: Reload Window** to load the update. Only the
+isolated test Development Host was closed; user working windows were preserved.
+
 
 ## Boundaries
 

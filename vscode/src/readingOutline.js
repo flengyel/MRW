@@ -43,7 +43,10 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     onDidChangeTreeData: changed.event,
     getChildren: node => node ? node.children : model?.roots || [],
     getTreeItem(node) {
-      const item = new vscode.TreeItem(Array.from(node.label).slice(0, 240).join(''), node.children.length ?
+      // Citation prose remains authoritative in Markdown. The tree shows its
+      // short title; its original label and exact location remain in the tooltip.
+      const title = node.kind === 'reference' ? node.label.split(' · ')[0] : node.label;
+      const item = new vscode.TreeItem(Array.from(title).slice(0, 100).join(''), node.children.length ?
         (collapsed.has(node.id) ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.Expanded) : vscode.TreeItemCollapsibleState.None);
       item.id = node.id;
       item.description = `${node.kind === 'heading' ? 'Heading' : 'Source'} · line ${node.line + 1}`;
@@ -131,7 +134,11 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
       // Pin before asynchronous resolution, so intervening document edits are
       // tracked even while the retained reader is being opened.
       const previous = origin; origin = location;
-      try { const result = await followReference(current.reference, editor); await persist(); return result; }
+      try {
+        const result = await followReference(current.reference, editor, { reading: true });
+        await vscode.commands.executeCommand('workbench.action.maximizeEditorHideSidebar');
+        await persist(); return result;
+      }
       catch (error) { if (origin === location) origin = previous; throw error; }
     }
     await persist();
@@ -146,7 +153,12 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     await showLocation(doc, origin);
     selected = origin;
     if (document !== doc) { document = doc; collapsed = new Set(); }
-    refresh(); await persist();
+    refresh();
+    await vscode.commands.executeCommand('workbench.action.minimizeOtherEditors');
+    await vscode.commands.executeCommand('mrw.readingOutline.focus');
+    const node = model?.all.find(n => n.start === origin.start && n.end === origin.end);
+    if (node) await tree.reveal(node, { select: true, focus: false });
+    await persist();
   });
   context.subscriptions.push(changed, tree,
     tree.onDidCollapseElement(e => { collapsed.add(e.element.id); void persist().catch(fail); }),

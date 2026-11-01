@@ -34,6 +34,13 @@ continuation, private resumption and explicit ending. Their genuine mathematical
 remains pending. The first offline source-region reader is delivered in VS Code;
 proof-outline vertex elimination remains planned. This adds no broader model conversation.
 
+Patch **0.9.1** addresses the first installed-use reading blocker: concise
+navigator labels, an expanded mathematics view, and collapsed source details
+and editing tools. Following a matching published passage opens its rendered
+retained content; exact TeX remains available explicitly. Return brings back
+the Markdown overview and navigator. Existing note and source bytes are retained.
+See [the presentation follow-up](docs/READING_OUTLINE_VALIDATION.md#reading-presentation-follow-up--2026-11-01).
+
 Extension **0.9.0** adds **MRW: Open Reading Outline** for an ordinary Markdown
 overview. Its collapsible Explorer view follows headings and existing scoped
 source links, opens the retained reader or exact passage, and returns to the

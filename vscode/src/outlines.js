@@ -24,6 +24,7 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .region,.context,.evidence,.note{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.statement{border-left:3px solid var(--vscode-focusBorder);padding-left:9px}.note{border-left:3px solid var(--vscode-editorWarning-foreground)}.muted{opacity:.8;font-size:.9em}.warning{color:var(--vscode-editorWarning-foreground)}.toolbar{display:flex;flex-wrap:wrap;gap:3px}.selected{outline:2px solid var(--vscode-focusBorder)}.metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:8px}
 .companion{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.companion h3{margin:0 0 6px}.companion p{margin:6px 0}.companion-directions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.linked-note{font-weight:600;unicode-bidi:plaintext}.linked-note-row{padding:8px 0;border-bottom:1px solid var(--vscode-panel-border)}
 .published-content{line-height:1.65;font-size:1.05em;margin:12px 0}.published-math math{font-size:1.15em}.source-reference{display:inline;padding:1px 4px;margin:0 2px}.published-toc{display:flex;flex-wrap:wrap;margin:12px 0}.source-slogan{border-left:2px solid var(--vscode-panel-border);padding:8px;margin:10px 0}
+.reading-bar{position:sticky;top:0;z-index:2;background:var(--vscode-editor-background);padding:4px 0}.reading-bar button{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground);padding:5px 8px}.reader-tools{margin:10px 0 20px}.reader-tools>summary,.passage-tools>summary{cursor:pointer;font-size:.9em;opacity:.8}.region{scroll-margin-top:60px;border:0;border-top:1px solid var(--vscode-panel-border);padding:12px 0;margin:18px 0}.region>h2{font-size:1.15em}.passage-tools{margin:12px 0}.published-content{font-size:1.15em;line-height:1.75}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
@@ -33,7 +34,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
   }));
-  let active, busy = false;
+  let active, busy = false, focusSerial = 0;
   artifactClients?.push({
     async freeze(allowDirty = false) {
       if (busy) throw new Error('Wait for the current reader action before moving artifacts.');
@@ -85,7 +86,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft,
-      reference: c.reference, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
+      reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
   }
@@ -179,7 +180,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       await vscode.window.showErrorMessage(`MRW: ${error.message}`);
     } finally { await c.panel.webview.postMessage({ type: 'idle' }); }
   }
-  async function display(result, store, root, reference = null) {
+  async function display(result, store, root, reference = null, presentation = {}) {
     if (result.blocked) { blockedStores.add(store); throw new Error(`Outline publication failed: ${result.write_error}. Reload before further private writes.`); }
     const id = result.outline.id;
     let c = panels.get(id);
@@ -208,6 +209,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     } else c.panel.reveal(c.panel.viewColumn);
     c.reference = reference;
     if (reference) c.selected = reference.region;
+    c.readingFocus = presentation.reading ? { serial: ++focusSerial,
+      region: reference?.status === 'changed or removed' ? null : reference?.region || null } : undefined;
     active = id;
     await send(c, result);
     return c;
@@ -394,7 +397,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
     return result;
   }));
-  async function followReference(reference, originEditor) {
+  async function followReference(reference, originEditor, presentation = {}) {
     return locked(async () => {
     const { editor, store, root } = await markdown(originEditor);
     const document = editor.document, version = document.version, selection = editor.selection;
@@ -402,8 +405,14 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (document.isClosed || vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
       throw new Error('Markdown or cursor changed during navigation; follow the reference again.');
     }
-    const c = await display(result, store, root, result.reference);
-    if (result.document) await openDocument(c, null, result.document);
+    const c = await display(result, store, root, result.reference, presentation);
+    const region = result.outline.regions.find(r => r.id === result.reference.region);
+    const part = result.outline.published?.parts?.[region?.id];
+    const renderedExact = presentation.reading && result.reference.status === 'unchanged' && part && !region.collapsed &&
+      ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col'].every(key => part.span[key] === region.span[key]);
+    // Changed/removed associations still open their original pinned text. A
+    // current rendered region is used only after the existing resolver accepts it.
+    if (result.document && !renderedExact) await openDocument(c, null, result.document);
     return result.reference;
     });
   }

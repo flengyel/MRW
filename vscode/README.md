@@ -157,6 +157,24 @@ before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
 and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
 
+## Reading presentation (0.9.1)
+
+Following a source from **Reading Outline** expands the active reader group and
+hides the side bars using VS Code's standard layout command. Source text comes
+before passage tools; metadata, source controls and bibliographic editing live
+under **Source details and tools**. **Return to reading outline** stays available
+while scrolling. Return expands the originating Markdown editor and reopens the
+navigator. Documents remain open under VS Code ownership.
+
+The navigator shows the short citation title, with its full original label in
+the tooltip. Markdown text is unchanged. A matching, expanded published passage
+opens its rendered source card directly. Exact TeX remains under that card's
+source disclosure or the explicit source tools. Changed/removed associations,
+edited published ranges and collapsed passages retain the exact pinned-text
+fallback; no current card substitutes for an earlier reference. Reader annotations
+and supplied evidence remain separate and accessible. This patch changes no
+store, reference, source or mathematical checking status.
+
 ## Navigable reading outlines (0.9.0)
 
 With an ordinary Markdown overview active, run **MRW: Open Reading Outline**.
@@ -432,8 +450,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.0.vsix
-sha256sum vscode/theorem-terminal-0.9.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.1.vsix
+sha256sum vscode/theorem-terminal-0.9.1.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -465,11 +483,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.9.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.9.1.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.9.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.9.1**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

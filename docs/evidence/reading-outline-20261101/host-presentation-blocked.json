@@ -1,0 +1,9 @@
+{
+  "version": "0.9.1",
+  "vscode": "1.144.0",
+  "remote": "wsl",
+  "complete": false,
+  "blocker": "Windows CLI launches restored the disposable Development Host with an ordinary file and no workspace folders. The production overview check correctly refused the out-of-workspace document. Reopening the fixed test folder did not establish a usable workspace; setup was stopped.",
+  "layout_observation": "Unavailable. Node DOM/command checks do not substitute for an actual host layout result.",
+  "note_and_store_changes": "No test navigation or store mutation occurred in this blocked host."
+}

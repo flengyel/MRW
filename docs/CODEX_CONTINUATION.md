@@ -1,5 +1,38 @@
 # Codex continuation: MRW source work and companion notes
 
+## Installed reading trial and presentation repair — 2026-11-01
+
+Started this follow-up clean at `866c479930dede61b04ee5323f14fd609643ae5f`.
+The user explicitly requested focus retries. A same-process wait resolved the
+foreground guard, but accessibility automation did not identify Command Palette.
+Native F1 and user-performed actions then confirmed the ordinary installed
+0.9.0 navigator, whole-source reader and rendered 08ZE statement. The actual
+window capture is linked in the
+[follow-up validation](READING_OUTLINE_VALIDATION.md#reading-presentation-follow-up--2026-11-01).
+
+The trial exposed a reading blocker: long citation labels, a dominant raw
+Markdown selection, and a narrow reader crowded by controls/metadata. The user
+reported a postage-stamp-sized statement surrounded by instrumentation.
+Manual checklist requests were stopped. Patch **0.9.1** now uses concise view
+labels, expands reading with standard host layout commands, places source
+content before collapsed tools, and opens exact matching expanded published
+passages at their rendered cards. A sticky Return action restores Markdown and
+navigation. Changed/removed/edited/collapsed associations preserve their earlier
+pinned-text fallback. No prose, source bytes, reference grammar, schema,
+acquisition, provider or storage boundary changes.
+
+All 61 Node tests and the Python suite (303 passes, 59 skips) passed. New
+actual-host layout observation is unavailable because the disposable Development
+Host restored without a workspace; its fixed source was correctly refused and
+setup attempts were stopped. Do not label this patch visually accepted from
+API/DOM tests or the earlier 0.9.0 observation. Do not resume a prolonged desktop
+retry loop or ask the user to inspect mathematics to establish navigation.
+The observed reading problem remains the priority; broader outline/proof
+analysis and Windows storage qualification remain deferred.
+The verified 0.9.1 VSIX is installed; an already-open reading window needs
+**Developer: Reload Window**. Earlier packages are preserved. Keep the new
+installed byte/bridge evidence separate from the unobserved visual patch check.
+
 ## Navigable reading outline delivered — 2026-11-01
 
 The user explicitly authorized the next bounded extension of 0.5.0 Markdown

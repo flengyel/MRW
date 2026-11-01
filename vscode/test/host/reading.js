@@ -102,9 +102,10 @@ async function run(context) {
         const copies = model.all.filter(n => n.reference === seed.passage.reference);
         for (const node of copies) {
           await command('selectReadingOutlineItem', node);
-          assert.equal(vscode.window.activeTextEditor.document.uri.scheme, 'mrw-record');
-          const text = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.selection);
+          const opened = panels.find(p => p.value?.model.outline.id === stacks.id).value;
+          const text = opened.model.outline.regions.find(r => r.id === opened.reference.region).argument_text;
           assert.ok(text.includes('lemma')); seed.stacksExact = text;
+          assert.equal(opened.readingFocus.region, opened.reference.region);
           await command('returnToReadingOutline');
           assert.equal(doc.offsetAt(vscode.window.activeTextEditor.selection.start), node.start);
         }
@@ -169,7 +170,8 @@ async function run(context) {
         const model = await command('openReadingOutline'); assert.equal(model.all.length, 8);
         assert.equal(doc.getText(vscode.window.activeTextEditor.selection), seed.passage.markdown);
         await command('selectReadingOutlineItem', model.all.find(n => n.reference === seed.passage.reference));
-        assert.equal(vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.selection), seed.stacksExact);
+        const opened = panels.find(p => p.value?.model.outline.id === stacks.id).value;
+        assert.equal(opened.model.outline.regions.find(r => r.id === opened.reference.region).argument_text, seed.stacksExact);
         await command('returnToReadingOutline');
         assert.equal(digest(await fs.readFile(file)), seed.markdownDigest);
         assert.equal(digest(await fs.readFile(path.join(store, stacks.id, 'outline.json'))), stacksBytes);

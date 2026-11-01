@@ -22,7 +22,7 @@ class Selection extends Range { constructor(a, b) { super(a, b); this.active = b
 function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file, toString() { return `${scheme}:${file}`; } }; }
 
 async function harness(root, state = new Map()) {
-  const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map();
+  const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map(), executed = [];
   const opens = [], inputs = [], picks = [], endings = [], panels = [];
   let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, changeListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
@@ -55,7 +55,7 @@ async function harness(root, state = new Map()) {
     EventEmitter: class { event() {} fire() {} dispose() {} }, TreeItem: class { constructor(label) { this.label = label; } },
     TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
     commands: { registerCommand(name, action) { commands.set(name, action); return disposable; },
-      async executeCommand(name, ...args) { return commands.get(name)?.(...args); } },
+      async executeCommand(name, ...args) { executed.push(name); return commands.get(name)?.(...args); } },
     workspace: {
       isTrusted: true, workspaceFolders: [{ uri: uri(root) }],
       getWorkspaceFolder: () => ({ uri: uri(root) }),
@@ -130,7 +130,7 @@ async function harness(root, state = new Map()) {
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
-  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, panels, state, document, editor, providers,
+  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, panels, state, document, editor, providers, executed,
     changeDocument(doc, at, length, text) { doc.text = doc.text.slice(0, at) + text + doc.text.slice(at + length); doc.version++; doc.isDirty = true;
       changeListener({ document: doc, contentChanges: [{ rangeOffset: at, rangeLength: length, text }] }); },
     closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
@@ -978,4 +978,39 @@ test('reading navigator derives live Markdown, follows two sources, pins returns
   assert.equal(restored.requests.length, beforeWrong);
   assert.equal(await fs.readFile(file, 'utf8'), original);
   assert.deepEqual(h.errors, []); assert.deepEqual(restored.errors, []);
+});
+
+test('navigator opens exact published mathematics in an expanded reader, retaining changed-range fallback and Return', async t => {
+  const root = await temporary(t, true), h = await harness(root);
+  h.setService((extension, executable, request, options) => runBridge(extension, executable, request, {
+    ...options, spawn: (command, args, settings) => require('node:child_process').spawn(command,
+      [args[0], path.join(extension, 'test/stacks_bridge.py')], settings),
+  }));
+  h.inputs.push('08ZD'); h.endings.push('Import section');
+  const imported = await h.commands.get('mrw.importStacksSection')();
+  const id = imported.outline.id, region = imported.outline.regions[1];
+  const store = path.join(root, '..', 'private-state', `outlines-${navigation.digest(root)}`);
+  const ref = await runBridge(path.resolve(__dirname, '..'), 'python3', { method: 'outline_reference', store,
+    project_root: root, id, revision: imported.revision, region: region.id });
+  const file = path.join(root, 'overview.md'), text = '# Reading\n\n' + ref.markdown + '\n';
+  await fs.writeFile(file, text);
+  const doc = h.document(file, text); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  let model = await h.commands.get('mrw.openReadingOutline')(); const node = model.all[1];
+  assert.equal(h.api.readingProvider.getTreeItem(node).label, 'Hausdorff spaces');
+  const rawViews = () => h.shown.filter(d => d.uri.scheme === 'mrw-record').length;
+  const before = rawViews();
+  assert.equal((await h.commands.get('mrw.selectReadingOutlineItem')(node)).status, 'unchanged');
+  assert.equal(rawViews(), before, 'an exact rendered region does not open a TeX editor automatically');
+  assert.equal(h.panels[0].webview.messages.findLast(v => v.type === 'outline').readingFocus.region, region.id);
+  assert.ok(h.executed.includes('workbench.action.maximizeEditorHideSidebar'));
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), ref.markdown);
+  assert.ok(h.executed.includes('workbench.action.minimizeOtherEditors'));
+  await h.panels[0].receive({ type: 'edit', change: { kind: 'replace_region', region: region.id, start: [0, 0], end: [0, 3] } });
+  model = await h.commands.get('mrw.refreshReadingOutline')();
+  assert.equal((await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1])).status, 'changed or removed');
+  assert.equal(h.api.window.activeTextEditor.document.uri.scheme, 'mrw-record');
+  assert.equal(h.api.window.activeTextEditor.document.getText(h.api.window.activeTextEditor.selection), region.argument_text);
+  assert.equal(h.panels[0].webview.messages.findLast(v => v.type === 'outline').selected, null);
+  assert.equal(await fs.readFile(file, 'utf8'), text); assert.deepEqual(h.errors, []);
 });

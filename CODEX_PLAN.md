@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | 0.9.0 adds a live collapsible reading navigator to 0.5.0 ordinary Markdown references, exact retained navigation and occurrence-specific return | Not implemented |
+| Manual overview across several sources | 0.9.1: live collapsible Markdown reading navigator, concise titles, expanded rendered reading, exact retained navigation and occurrence-specific return | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
@@ -60,6 +60,20 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Observed reading-presentation blocker — 2026-11-01
+
+The installed 0.9.0 trial confirmed the navigator and whole-source reader opened,
+then exposed long citation labels and a control-heavy, narrow mathematics view.
+The user reported that the statement occupied a postage-stamp-sized part of an
+instrumentation-like panel. Patch 0.9.1 addresses that demonstrated blocker with
+concise navigator titles, expanded reading, content before tools, collapsed
+source details and direct focus on an exact rendered published passage. Return
+restores the overview and navigator. Markdown, retained bytes, reference identity
+and changed-range refusal remain unchanged. See the
+[validation follow-up](docs/READING_OUTLINE_VALIDATION.md#reading-presentation-follow-up--2026-11-01).
+This remains the same bounded reading-outline increment; it adds no proof graph,
+AI guidance or storage qualification.
 
 ### Navigable Markdown reading outline — 2026-11-01
 

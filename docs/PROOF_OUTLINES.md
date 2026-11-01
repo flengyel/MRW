@@ -7,6 +7,12 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Presentation follow-up, 2026-11-01:** patch 0.9.1 addresses the observed narrow,
+control-heavy reading view with concise navigator labels, expanded mathematics,
+collapsed source tools and direct focus on matching published passages. Source
+and note bytes, original reference grammar and earlier-range behavior remain
+unchanged. This is reading presentation, with no graph or inference capability.
+
 **Update, 2026-11-01:** 0.9.0 adds a navigable reading outline derived from one
 ordinary Markdown overview. Its headings collapse/expand and select exact editor
 locations; existing references open the same retained reader/passages and return

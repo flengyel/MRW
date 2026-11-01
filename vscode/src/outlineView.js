@@ -8,7 +8,7 @@ const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument',
 const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
-let notes = [], noteTargets = {}, noteError;
+let notes = [], noteTargets = {}, noteError, lastReadingFocus;
 let storageFrozen = false;
 const drafts = new Map();
 const submittedDrafts = new Map();
@@ -158,29 +158,34 @@ function render() {
   if (!model) return;
   const o = model.outline; root.replaceChildren();
   el('h1', o.source.bibliography.title || 'Mathematical source outline');
-  el('p', 'Source argument · reader reconstruction · supplied checking evidence are separate. A faithful outline does not establish correctness.', root, 'muted');
-  if (!o.published) el('p', `${o.source.path} · SHA-256 ${o.source.revision}`, root, 'muted');
-  el('p', `Original source: ${o.source_status}. Selections refer to the retained revision.`, root,
-    ['unchanged', 'retained upstream import'].includes(o.source_status) ? 'muted' : 'warning');
-  if (reference) el('p', reference.notice, root, reference.status === 'changed or removed' ? 'warning' : 'muted').dataset.reference = 'true';
+  if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
+  const readingBar = el('div', undefined, root, 'toolbar reading-bar');
+  button(readingBar, '← Return to reading outline', { type: 'reading_return' }, 'reading-return');
+  if (reference?.status === 'changed or removed') el('p', reference.notice, root, 'warning').dataset.reference = 'true';
   if (o.retained_error) el('p', `Retained source unavailable: ${o.retained_error}. No source text was guessed.`, root, 'warning');
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
   if (blocked) el('p', 'Private writes are blocked. Keep unsaved annotation text and reload the host before further writes.', root, 'warning');
-  const toolbar = el('div', undefined, root, 'toolbar');
+  const tools = el('details', undefined, root, 'reader-tools');
+  el('summary', 'Source details and tools', tools);
+  el('p', 'Source argument · reader reconstruction · supplied checking evidence are separate. A faithful outline does not establish correctness.', tools, 'muted');
+  if (!o.published) el('p', `${o.source.path} · SHA-256 ${o.source.revision}`, tools, 'muted');
+  el('p', `Original source: ${o.source_status}. Selections refer to the retained revision.`, tools,
+    ['unchanged', 'retained upstream import'].includes(o.source_status) ? 'muted' : 'warning');
+  if (reference) el('p', reference.notice, tools, 'muted');
+  const toolbar = el('div', undefined, tools, 'toolbar');
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
-  button(toolbar, 'Return to reading outline', { type: 'reading_return' }, 'reading-return');
   button(toolbar, 'Refresh source status', { type: 'refresh' }, 'refresh');
   if (o.published?.error) el('p', o.published.error, root, 'warning');
-  else if (o.published && window.MRWStacks) window.MRWStacks.header(root, o.published, publishedAction);
+  else if (o.published && window.MRWStacks) window.MRWStacks.header(tools, o.published, publishedAction);
   if (o.published) {
-    const links = el('details'); el('summary', 'Outline links and Obsidian note', links); companionActions(links);
-  } else companionActions(root);
+    const links = el('details', undefined, tools); el('summary', 'Outline links and Obsidian note', links); companionActions(links);
+  } else companionActions(tools);
   if (reference?.status === 'changed or removed') {
-    companionActions(root, null, true);
+    companionActions(tools, null, true);
   }
-  if (noteError) el('p', `Obsidian associations unavailable: ${noteError}. Refresh the reader to retry.`, root, 'warning');
+  if (noteError) el('p', `Obsidian associations unavailable: ${noteError}. Refresh the reader to retry.`, tools, 'warning');
   if (notes.length) {
-    const linked = el('details'); el('summary', 'All linked notes and earlier passage ranges', linked);
+    const linked = el('details', undefined, tools); el('summary', 'All linked notes and earlier passage ranges', linked);
     for (const note of notes) {
       const row = el('div', undefined, linked, 'linked-note-row'); el('p', note.label, row, 'linked-note');
       el('p', noteScope(note), row, 'muted');
@@ -188,8 +193,8 @@ function render() {
       button(row, 'Manage linked notes…', { type: 'manage_notes', note: note.id }, 'manage-notes', true);
     }
   }
-  el('p', 'Select text in the saved original or retained source, then use MRW: Add Selected Source Region, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', root, 'muted');
-  const metadata = el('details'); el('summary', 'Bibliographic identity and source authorship', metadata);
+  el('p', 'Select text in the saved original or retained source, then use MRW: Add Selected Source Region, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', tools, 'muted');
+  const metadata = el('details', undefined, tools); el('summary', 'Bibliographic identity and source authorship', metadata);
   const f = form(metadata, 'metadata', { ...o.source.bibliography, authorship: o.source.authorship });
   f.node.className = 'metadata';
   for (const key of ['title', 'authors', 'edition', 'revision', 'locator', 'reference']) field(f, key, `${label(key)} (blank means unknown)`);
@@ -199,9 +204,9 @@ function render() {
     for (const key of ['title', 'authors', 'edition', 'revision', 'locator', 'reference']) bibliography[key] = v[key] || null;
     return { type: 'edit', draft: 'metadata', change: { kind: 'metadata', bibliography, authorship: v.authorship } };
   }, 'save-metadata', true);
-  el('h2', 'Orientation and governing ideas');
-  for (const n of o.annotations) noteForm(root, null, n);
-  noteForm(root, null, null);
+  el('h2', 'Reader notes', tools);
+  for (const n of o.annotations) noteForm(tools, null, n);
+  noteForm(tools, null, null);
   if (o.contexts.length) {
     el('h2', 'Available source context and cited results');
     el('p', 'Reader-selected quotations remain accessible when argument details are hidden. These are available context, not an analysis of required premises.', root, 'muted');
@@ -211,7 +216,8 @@ function render() {
       el('summary', `${label(c.kind)}: ${c.label}`, box); el('p', spanLocation(c.span), box, 'muted');
       if (c.text !== null) el('pre', c.text, box).dataset.context = c.id;
       button(box, 'Go to source context', { type: 'navigate_context', context: c.id }, 'navigate-context');
-      const key = `context:${c.id}`, cf = form(box, key, { context_kind: c.kind, label: c.label });
+      const contextTools = el('details', undefined, box); el('summary', 'Edit context', contextTools);
+      const key = `context:${c.id}`, cf = form(contextTools, key, { context_kind: c.kind, label: c.label });
       field(cf, 'context_kind', 'Reading role', ['hypothesis', 'definition', 'local_assumption', 'cited_result', 'source_reference']);
       field(cf, 'label', 'Reader label (quotation above stays source-derived)');
       button(cf.node, 'Save context description', () => ({ type: 'edit', draft: key, change: {
@@ -224,31 +230,21 @@ function render() {
   }
   const importedArtifacts = new Set(o.published?.acquisition_artifacts || []);
   if (importedArtifacts.size) {
-    const files = el('details'); el('summary', 'Retained source metadata and license', files);
+    const files = el('details', undefined, tools); el('summary', 'Retained source metadata and license', files);
     for (const a of o.artifacts.filter(a => importedArtifacts.has(a.id))) {
       el('p', a.label, files);
       button(files, 'Open retained file', { type: 'artifact', artifact: a.id }, 'artifact');
     }
   }
-  evidence(root, o.artifacts.filter(a => !a.region && !importedArtifacts.has(a.id)));
-  el('h2', 'Selected source regions');
-  const nav = el('label', 'Reading level (freely navigable)'); const select = el('select', undefined, nav);
+  evidence(tools, o.artifacts.filter(a => !a.region && !importedArtifacts.has(a.id)));
+  const nav = el('label', 'Reading level (freely navigable)', tools); const select = el('select', undefined, nav);
   for (const key of ['', ...levels]) { const op = el('option', key ? label(key) : 'All levels', select); op.value = key; }
   select.value = filter; select.dataset.readingLevel = 'true';
   select.addEventListener('change', () => { filter = select.value; render(); });
   if (!o.regions.length) el('p', 'Select a passage in the source and add a region. Formal evidence is optional.');
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
     const box = el('section', undefined, root, `region${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
-    el('h3', `${r.title} · ${label(r.level)}`, box); el('p', spanLocation(r.span), box, 'muted');
-    const actions = el('div', undefined, box, 'toolbar');
-    const choose = button(actions, selected === r.id ? 'Selected for statement / evidence' : 'Select this region', { type: 'select', region: r.id }, 'select');
-    // Selection is local view state, not a publication; it requires no idle reply.
-    choose.addEventListener('click', () => { selected = r.id; busy = false; render(); });
-    button(actions, r.collapsed ? 'Expand exact source' : 'Hide argument detail', { type: 'toggle', region: r.id }, 'toggle', true);
-    button(actions, o.published ? 'Open exact retained passage' : 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
-    if (o.published) {
-      const links = el('details', undefined, box); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
-    } else companionActions(box, r.id);
+    el('h2', r.title, box);
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
     if (originalPart && !publishedPart) el('p', 'This region range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
@@ -261,6 +257,17 @@ function render() {
     } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
     if (r.collapsed) el('p', 'Argument detail hidden; expand against the retained source.', box, 'muted');
     else if (r.argument_text !== null && !publishedPart) el('pre', r.argument_text, box).dataset.argument = r.id;
+    const passageTools = el('details', undefined, box, 'passage-tools'); el('summary', 'Passage tools and links', passageTools);
+    el('p', spanLocation(r.span), passageTools, 'muted');
+    const actions = el('div', undefined, passageTools, 'toolbar');
+    const choose = button(actions, selected === r.id ? 'Selected for statement / evidence' : 'Select this region', { type: 'select', region: r.id }, 'select');
+    // Selection is local view state, not a publication; it requires no idle reply.
+    choose.addEventListener('click', () => { selected = r.id; busy = false; render(); });
+    button(actions, r.collapsed ? 'Expand exact source' : 'Hide argument detail', { type: 'toggle', region: r.id }, 'toggle', true);
+    button(actions, o.published ? 'Open exact retained passage' : 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
+    if (o.published) {
+      const links = el('details', undefined, box); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
+    } else companionActions(passageTools, r.id);
     evidence(box, o.artifacts.filter(a => a.region === r.id));
     const settings = el('details', undefined, box); el('summary', 'Edit region title / reading level', settings);
     const key = `region:${r.id}`, rf = form(settings, key, { title: r.title, level: r.level });
@@ -288,7 +295,13 @@ window.addEventListener('message', event => {
       submittedDrafts.delete(value.clearDraft);
     }
     api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();
-    if (reference) root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
+    if (value.readingFocus && value.readingFocus.serial !== lastReadingFocus) {
+      lastReadingFocus = value.readingFocus.serial;
+      const destination = [...root.querySelectorAll('section')].find(n => n.dataset.region === value.readingFocus.region);
+      if (destination) destination.scrollIntoView({ block: 'start' });
+      else if (reference?.status === 'changed or removed') root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
+      else root.scrollIntoView({ block: 'start' });
+    } else if (reference?.status === 'changed or removed') root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
   } else if (value.type === 'error') { error = value.message; blocked = !!value.writesBlocked; busy = false; render(); }
   else if (value.type === 'idle') { busy = false; controls(); }
   else if (value.type === 'publishedFocus') jumpPublished(value.region);

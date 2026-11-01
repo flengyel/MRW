@@ -1,0 +1,32 @@
+{
+  "installed_version": "0.9.0",
+  "windows_application_version": "1.144.0",
+  "method": "User performs ordinary installed-window actions and reports observations; no automated keyboard input.",
+  "checks": [
+    {
+      "action": "F1 → MRW: Open Reading Outline from reading-navigation-validation.md",
+      "reported_result": "Headings and source links appear",
+      "passed": true
+    },
+    {
+      "action": "Select the first Hausdorff spaces entry, the whole-source reference at overview line 5",
+      "reported_result": "User reports a wall of code; screenshot independently confirms the actual ordinary installed MRW reader is open on the right, with Overview reference: whole retained source outline and Return to reading outline controls.",
+      "passed": true,
+      "evidence": "installed-reader-whole.png",
+      "mathematical_content_visible_in_capture": false
+    },
+    {
+      "action": "Click 08ZE · statement in the installed reader",
+      "reported_result": "User confirms: OK clicked, I see it.",
+      "passed": true,
+      "observation": "User-reported rendered statement; no mathematical correctness or study-benefit claim."
+    }
+  ],
+  "feedback": {
+    "citation_label_readability": "User reports: Yes, though the links are long all right.",
+    "status": "Recorded; no runtime change in this validation follow-up.",
+    "layout": "The selected long Markdown citation dominates the middle pane. The reader occupies a narrow right pane, with controls above the mathematical content. User could not identify the intended reader from the earlier instructions."
+  },
+  "complete": false,
+  "reason_incomplete": "The exact-link/Return checklist was stopped after the user exposed the cramped, control-heavy reading presentation. The observed blocker led to patch 0.9.1; no further user study or acceptance checklist was required."
+}

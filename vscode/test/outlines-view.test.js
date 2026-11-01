@@ -30,15 +30,16 @@ test('reader webview permits only nonce code with no external resource fetch or 
 });
 
 function reader() {
+  const scrolled = [];
   class Node {
     constructor(tag) { this.tag = tag; this.children = []; this.dataset = {}; this.listeners = {}; this.textContent = ''; }
-    append(node) { this.children.push(node); }
+    append(node) { node.parent = this; this.children.push(node); }
     replaceChildren() { this.children = []; }
     addEventListener(type, callback) { this.listeners[type] = callback; }
     all() { return this.children.flatMap(n => [n, ...n.all()]); }
     querySelectorAll(tag) { return this.all().filter(n => tag.split(',').includes(n.tag)); }
     querySelector() { return this.all().find(n => n.dataset.reference); }
-    scrollIntoView() {}
+    scrollIntoView() { scrolled.push(this); }
     text() { return this.textContent + this.children.map(n => n.text()).join(' '); }
   }
   const root = new Node('main'), messages = [];
@@ -49,7 +50,7 @@ function reader() {
     addEventListener: (type, callback) => { receive = callback; } };
   globals.window = globals;
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/outlineView.js'), 'utf8'), globals);
-  return { root, messages, send: data => receive({data}),
+  return { root, messages, scrolled, send: data => receive({data}),
     scopes: () => root.all().filter(n => n.dataset.linkScope),
     button: (node, action) => node.all().find(n => n.dataset.action === action) };
 }
@@ -111,4 +112,30 @@ test('storage handshake freezes controls and preserves unsaved annotation text a
   h.send({type:'storageRelease'}); h.send(readingModel());
   assert.ok(h.root.all().some(n => n.tag === 'textarea' && n.value === 'Unsaved human α annotation'));
   assert.equal(h.root.all().find(n => n.tag === 'textarea').disabled, false);
+});
+
+test('reader puts source text before passage tools, collapses metadata, and focuses the resolved card once', () => {
+  const h = reader(), value = readingModel();
+  value.model.outline.regions[1].collapsed = false;
+  value.model.outline.regions[1].argument_text = 'Exact retained statement α.';
+  value.readingFocus = { serial: 1, region: 'other' };
+  h.send(value);
+  const tools = h.root.all().find(n => n.className === 'reader-tools');
+  assert.equal(tools.tag, 'details'); assert.ok(!tools.open);
+  assert.ok(h.root.children.find(n => n.className === 'toolbar reading-bar'));
+  const card = h.root.all().find(n => n.dataset.region === 'other');
+  const text = card.children.findIndex(n => n.dataset.argument === 'other');
+  const controls = card.children.findIndex(n => n.className === 'passage-tools');
+  assert.ok(text >= 0 && text < controls, 'source precedes editing/link controls');
+  assert.equal(h.scrolled.at(-1), card);
+  const count = h.scrolled.length;
+  value.reference = null;
+  h.send(value); assert.equal(h.scrolled.length, count, 'refresh does not steal focus from an annotation draft');
+});
+
+test('a retained publication error remains visible outside collapsed tools', () => {
+  const h = reader(), value = readingModel();
+  value.model.outline.published = { error: 'Retained acquisition unavailable' };
+  h.send(value);
+  assert.ok(h.root.children.some(n => n.className === 'warning' && n.textContent === 'Retained acquisition unavailable'));
 });

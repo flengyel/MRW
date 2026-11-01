@@ -65,6 +65,12 @@ Only explicit import acquires the network. Offline reading, annotation and
 retained citation navigation execute no downloaded TeX or other tools.
 See `docs/STACKS_WORKFLOW.md` and `docs/STACKS_VALIDATION.md`. Whole-corpus
 ingestion, complete proof graphs and vertex elimination remain deferred.
+Patch 0.9.1 addresses the installed reading-presentation blocker: concise
+navigator labels, expanded source reading through host layout commands, source
+content before collapsed tools, and direct focus on exact matching published
+passages. Return restores the overview and navigator. Keep original pinned-text
+fallbacks for changed or incompatible associations and preserve all note/source
+bytes. Do not turn navigation links into mathematical status.
 Extension 0.9.0 adds a collapsible Reading Outline view derived from one selected
 ordinary Markdown overview, including unsaved text. Headings select exact editor
 locations; existing scoped references open retained sources/passages and preserve

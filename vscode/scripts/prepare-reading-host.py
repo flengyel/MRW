@@ -26,11 +26,11 @@ manifest['activationEvents'].append('onStartupFinished')
 (ext / 'package.json').write_text(json.dumps(manifest, indent=2) + '\n')
 (ext / 'host-test.json').write_text(json.dumps(dict(phase=args.phase, artifacts=str(work), project=str(project))))
 code_root = Path('/mnt/c/Users/fleng/AppData/Local/Programs/Microsoft VS Code')
-cli = code_root / 'e646868227/resources/app/out/cli.js'
+cli = code_root / '2c33b50b16/resources/app/out/cli.js'
 if not cli.is_file():
     raise SystemExit('Expected Windows CLI not found; inspect current installation before launching.')
 launch = "$ErrorActionPreference='Stop'\n$env:ELECTRON_RUN_AS_NODE='1'\n"
-launch += "& 'C:\\Users\\fleng\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe' 'C:\\Users\\fleng\\AppData\\Local\\Programs\\Microsoft VS Code\\e646868227\\resources\\app\\out\\cli.js' --new-window --disable-workspace-trust --remote wsl+Debian "
+launch += "& 'C:\\Users\\fleng\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe' 'C:\\Users\\fleng\\AppData\\Local\\Programs\\Microsoft VS Code\\2c33b50b16\\resources\\app\\out\\cli.js' --new-window --disable-workspace-trust --remote wsl+Debian "
 launch += f'--disable-extensions --extensionDevelopmentPath=vscode-remote://wsl+Debian{ext} --folder-uri=vscode-remote://wsl+Debian{project} --skip-welcome --skip-release-notes\n'
 (work / 'launch.ps1').write_text(launch)
 (work / 'launch-installed.ps1').write_text(launch.replace(f'--disable-extensions --extensionDevelopmentPath=vscode-remote://wsl+Debian{ext} ', ''))

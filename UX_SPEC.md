@@ -129,6 +129,20 @@ the smaller window. No production UX change or mathematical-use claim follows
 from this validation. Details and remaining limits are in the
 [host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 
+### Reading presentation repair — 2026-11-01
+
+The first installed trial exposed a reading blocker: a selected long Markdown
+citation dominated the middle editor, while metadata and controls crowded the
+mathematics into a narrow reader. Patch 0.9.1 gives navigator references concise
+view labels without rewriting Markdown. Source navigation expands the reader
+with standard VS Code layout commands. Source text precedes passage actions;
+source details and editing controls start collapsed. A sticky Return action
+brings back the originating overview and navigator. A matching published passage
+is shown as rendered retained source at its exact card. Earlier/changed ranges
+continue to open their original pinned text, with a visible warning and no
+replacement region. Exact TeX, notes and evidence remain explicitly accessible.
+The patch changes no source identity, stored range, prose ownership or warrant.
+
 ### Reading-outline navigation — 2026-11-01
 
 **MRW: Open Reading Outline** derives a collapsible Explorer view from the

@@ -31,6 +31,23 @@ provider or prescribed reading sequence is required.
    last selected location when the saved text matches. From a reader, the same
    command can reopen the last saved overview for this window.
 
+Patch **0.9.1** improves the reading presentation observed in the first trial.
+Source entries use short titles in the navigator; their full citation labels
+remain in tooltips and the unchanged Markdown. Following an entry expands the
+reader and hides the side bars through VS Code's standard layout commands.
+Source content appears before its passage tools, and **Source details and tools**
+starts collapsed. The Return button stays visible while scrolling. Return
+expands the originating Markdown editor and opens Reading Outline again.
+
+A matching expanded published passage opens its rendered retained card directly.
+Its exact TeX is available by expanding the source disclosure on that card.
+Changed/removed region associations or an incompatible/collapsed current card
+still open the exact original pinned text. Source details, original-file/source
+controls, linked notes, bibliographic editing and evidence remain available;
+navigation does not rewrite them. **Source details and tools** also contains the
+section contents controls. The VS Code title-bar workspace name opens a menu;
+to focus the editor, click inside its text area. F1 opens the command palette.
+
 For example, an overview might have `# Separation`, `## Statements to compare`,
 and `## Questions for later`. Insert a whole-source reference to the retained
 Stacks **Hausdorff spaces** section under the first heading, an exact **08ZE**

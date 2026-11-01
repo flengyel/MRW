@@ -1,0 +1,14 @@
+{
+  "complete": false,
+  "developmentHost": false,
+  "failure": "Ordinary installed reading window did not acquire foreground; no input sent",
+  "steps": [],
+  "window": "Preview reading-navigation-validation.md - reading-workspace [WSL: Debian] - Visual Studio Code",
+  "user_coordinated": true,
+  "user_replied_ready": true,
+  "input_sent": false,
+  "note_bytes_unchanged": true,
+  "all_outline_store_bytes_unchanged": true,
+  "installed_version": "0.9.0",
+  "installed_runtime_files_match": 57
+}
