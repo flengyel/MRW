@@ -7,6 +7,13 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Proof-visibility follow-up, 2026-11-01:** 0.9.2 keeps annotation editing out of
+the source sequence and provides direct navigation between explicitly published
+statement/proof parts in the same retained import. Links require exact current
+span matches; multiple proofs remain distinct and changed associations are
+reported. Temporary expansion changes no source or saved outline bytes. This
+uses published source structure and supplies no inference or proof status.
+
 **Presentation follow-up, 2026-11-01:** patch 0.9.1 addresses the observed narrow,
 control-heavy reading view with concise navigator labels, expanded mathematics,
 collapsed source tools and direct focus on matching published passages. Source

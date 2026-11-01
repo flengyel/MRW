@@ -1,0 +1,14 @@
+{
+  "version": "0.9.2",
+  "entry": "./src/extension.js",
+  "extensionPath": "/home/flengyel/.vscode-server/extensions/flengyel.theorem-terminal-0.9.2",
+  "runtime_files": 58,
+  "runtime_bytes_match": true,
+  "commands": [
+    "mrw.openReadingOutline",
+    "mrw.refreshReadingOutline",
+    "mrw.returnToReadingOutline",
+    "mrw.selectReadingOutlineItem"
+  ],
+  "vsix_sha256": "f69c7d528629ea8ca1cde418c2c440c59b236c64a1e606de0a52dc8a020834bb"
+}

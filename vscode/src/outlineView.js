@@ -12,6 +12,22 @@ let notes = [], noteTargets = {}, noteError, lastReadingFocus;
 let storageFrozen = false;
 const drafts = new Map();
 const submittedDrafts = new Map();
+const revealed = new Set();
+const openDetails = new Map(), saveFeedback = new Map(), feedbackNodes = new Map();
+const noteDraft = key => typeof key === 'string' && key.startsWith('note:');
+function feedback(key, text, kind) {
+  saveFeedback.set(key, { text, kind });
+  const node = feedbackNodes.get(key);
+  if (node) {
+    node.textContent = text;
+    node.className = `save-feedback ${kind === 'error' || kind === 'newer' ? 'warning' : kind === 'saved' ? 'save-confirmation' : 'muted'}`;
+    node.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+  }
+}
+function keepOpen(node, key) {
+  node.dataset.disclosure = key;
+  node.open = openDetails.get(key) || false;
+}
 const label = value => value.replace(/_/g, ' ');
 function el(tag, text, parent = root, className) {
   const node = document.createElement(tag);
@@ -20,7 +36,10 @@ function el(tag, text, parent = root, className) {
   parent.append(node); return node;
 }
 function post(value) {
-  if (value.draft) submittedDrafts.set(value.draft, drafts.get(value.draft));
+  if (value.draft) {
+    submittedDrafts.set(value.draft, drafts.get(value.draft));
+    if (noteDraft(value.draft)) feedback(value.draft, 'Saving annotation…', 'pending');
+  }
   busy = true; controls(); api.postMessage(value);
 }
 function controls() {
@@ -38,10 +57,14 @@ function form(parent, key, values) {
   node.addEventListener('submit', event => event.preventDefault());
   const current = drafts.get(key) || values;
   node.addEventListener('input', () => {
-    drafts.set(key, Object.fromEntries(new FormData(node))); api.postMessage({ type: 'dirty', dirty: true });
+    drafts.set(key, Object.fromEntries(new FormData(node)));
+    if (noteDraft(key)) feedback(key, 'Unsaved changes.', 'draft');
+    api.postMessage({ type: 'dirty', dirty: true });
   });
   node.addEventListener('change', () => {
-    drafts.set(key, Object.fromEntries(new FormData(node))); api.postMessage({ type: 'dirty', dirty: true });
+    drafts.set(key, Object.fromEntries(new FormData(node)));
+    if (noteDraft(key)) feedback(key, 'Unsaved changes.', 'draft');
+    api.postMessage({ type: 'dirty', dirty: true });
   });
   return { node, current, read: () => Object.fromEntries(new FormData(node)) };
 }
@@ -54,8 +77,8 @@ function field(f, name, title, options) {
 }
 function noteForm(parent, region, note) {
   const key = `note:${region || 'overview'}:${note?.id || 'new'}`;
-  const box = el('details', undefined, parent, 'note'); box.open = !!note;
-  el('summary', note ? `Reader annotation: ${label(note.kind)}` : 'Add reader explanation / question / repair', box);
+  const box = el('details', undefined, parent, 'note'); keepOpen(box, key);
+  el('summary', note ? `Edit reader note: ${label(note.kind)}` : 'Add reader explanation / question / repair', box);
   el('p', 'Reader reconstruction and supplied attribution. This text carries no proof-checking status.', box, 'muted');
   if (note) el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, box, 'muted');
   const f = form(box, key, { purpose: note?.kind || 'explanation', text: note?.text || '',
@@ -67,6 +90,12 @@ function noteForm(parent, region, note) {
     const v = f.read(); return { type: 'edit', draft: key, change: { kind: 'annotation', region,
       id: note?.id || null, purpose: v.purpose, text: v.text, origin: v.origin, author: v.author || null } };
   }, 'save-note', true);
+  const status = el('p', '', f.node, 'save-feedback');
+  status.dataset.saveFeedback = key; status.setAttribute('aria-live', 'polite');
+  feedbackNodes.set(key, status);
+  const saved = saveFeedback.get(key);
+  if (saved) feedback(key, saved.text, saved.kind);
+  else status.setAttribute('role', 'status');
 }
 function spanLocation(span) { return `Lines ${span.start_line}:${span.start_col}–${span.end_line}:${span.end_col} (scalar columns)`; }
 const sameSpan = (a, b) => a && b && ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col'].every(k => a[k] === b[k]);
@@ -146,9 +175,32 @@ function evidence(parent, artifacts) {
   }
 }
 function jumpPublished(region) {
-  if (!model?.outline.regions.some(r => r.id === region)) return;
+  const current = model?.outline.regions.find(r => r.id === region);
+  if (!current) return;
+  const part = model.outline.published?.parts?.[region];
+  if (part && sameSpan(part.span, current.span)) revealed.add(region);
   filter = ''; selected = region; api.postMessage({ type: 'select', region }); render();
   [...root.querySelectorAll('section')].find(n => n.dataset.region === region)?.scrollIntoView({ block: 'start' });
+}
+function proofNavigation(parent, part) {
+  if (!part?.tag || !['statement', 'proof'].includes(part.role)) return;
+  const role = part.role === 'statement' ? 'proof' : 'statement';
+  // These are the importer's explicit published roles within this retained
+  // source, not an inferred dependency or a claim that a proof is correct.
+  const candidates = Object.values(model.outline.published.parts).filter(p => p.tag === part.tag && p.role === role);
+  const targets = candidates.filter(p => model.outline.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)));
+  if (!targets.length) {
+    if (candidates.length) el('p', `The published ${role}'s reading association changed. Its original text remains in the retained source.`, parent, 'warning');
+    return;
+  }
+  const nav = el('nav', undefined, parent, 'proof-navigation');
+  for (const [index, target] of targets.entries()) {
+    const text = role === 'proof' ? 'Proof' : 'Statement';
+    const link = el('button', text + (targets.length > 1 ? ` ${index + 1}` : '') + (role === 'proof' ? ' ↓' : ' ↑'), nav);
+    link.type = 'button'; link.dataset.action = 'published-companion'; link.dataset.region = target.region;
+    link.title = `Read the published ${role} in this exact retained source.`;
+    link.addEventListener('click', () => jumpPublished(target.region));
+  }
 }
 function publishedAction(type, target) {
   if (type === 'stacks_jump') return jumpPublished(target);
@@ -156,7 +208,9 @@ function publishedAction(type, target) {
 }
 function render() {
   if (!model) return;
-  const o = model.outline; root.replaceChildren();
+  const o = model.outline;
+  for (const node of root.querySelectorAll('details')) if (node.dataset.disclosure) openDetails.set(node.dataset.disclosure, !!node.open);
+  feedbackNodes.clear(); root.replaceChildren();
   el('h1', o.source.bibliography.title || 'Mathematical source outline');
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
@@ -166,6 +220,7 @@ function render() {
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
   if (blocked) el('p', 'Private writes are blocked. Keep unsaved annotation text and reload the host before further writes.', root, 'warning');
   const tools = el('details', undefined, root, 'reader-tools');
+  keepOpen(tools, 'source-tools');
   el('summary', 'Source details and tools', tools);
   el('p', 'Source argument · reader reconstruction · supplied checking evidence are separate. A faithful outline does not establish correctness.', tools, 'muted');
   if (!o.published) el('p', `${o.source.path} · SHA-256 ${o.source.revision}`, tools, 'muted');
@@ -216,15 +271,15 @@ function render() {
       el('summary', `${label(c.kind)}: ${c.label}`, box); el('p', spanLocation(c.span), box, 'muted');
       if (c.text !== null) el('pre', c.text, box).dataset.context = c.id;
       button(box, 'Go to source context', { type: 'navigate_context', context: c.id }, 'navigate-context');
-      const contextTools = el('details', undefined, box); el('summary', 'Edit context', contextTools);
+      const contextTools = el('details', undefined, tools); el('summary', `Edit context: ${c.label}`, contextTools);
       const key = `context:${c.id}`, cf = form(contextTools, key, { context_kind: c.kind, label: c.label });
       field(cf, 'context_kind', 'Reading role', ['hypothesis', 'definition', 'local_assumption', 'cited_result', 'source_reference']);
       field(cf, 'label', 'Reader label (quotation above stays source-derived)');
       button(cf.node, 'Save context description', () => ({ type: 'edit', draft: key, change: {
         kind: 'edit_context', context: c.id, context_kind: cf.read().context_kind, label: cf.read().label
       } }), 'save-context', true);
-      el('p', 'To replace its quoted range, select original or retained source text and run MRW: Replace Shared Context with Selection…. Removing shared context changes only this reading association; the original statement and hypotheses remain in Open retained source.', box, 'muted');
-      button(box, 'Remove shared context', { type: 'edit', draft: key,
+      el('p', 'To replace its quoted range, select original or retained source text and run MRW: Replace Shared Context with Selection…. Removing shared context changes only this reading association; the original statement and hypotheses remain in Open retained source.', contextTools, 'muted');
+      button(contextTools, 'Remove shared context', { type: 'edit', draft: key,
         change: { kind: 'remove_context', context: c.id } }, 'remove-context', true);
     }
   }
@@ -242,40 +297,56 @@ function render() {
   select.value = filter; select.dataset.readingLevel = 'true';
   select.addEventListener('change', () => { filter = select.value; render(); });
   if (!o.regions.length) el('p', 'Select a passage in the source and add a region. Formal evidence is optional.');
+  const readerNotes = [];
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
     const box = el('section', undefined, root, `region${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
     el('h2', r.title, box);
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
+    const expanded = !r.collapsed || !!publishedPart && revealed.has(r.id);
     if (originalPart && !publishedPart) el('p', 'This region range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
-    if (publishedPart && !r.collapsed && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
+    if (publishedPart && expanded && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
     if (r.statement && !publishedPart) {
       const statement = el('div', undefined, box, 'statement');
       el('p', r.statement.kind === 'declaration_statement' ? 'Exact declaration statement (reader-labeled source selection)' : 'Exact source statement (reader-selected)', statement);
       if (r.statement_text !== null) el('pre', r.statement_text, statement).dataset.statement = r.id;
       button(statement, 'Go to statement', { type: 'navigate', region: r.id, statement: true }, 'navigate-statement');
     } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
-    if (r.collapsed) el('p', 'Argument detail hidden; expand against the retained source.', box, 'muted');
+    if (!expanded) el('p', 'Argument detail hidden; expand against the retained source.', box, 'muted');
     else if (r.argument_text !== null && !publishedPart) el('pre', r.argument_text, box).dataset.argument = r.id;
-    const passageTools = el('details', undefined, box, 'passage-tools'); el('summary', 'Passage tools and links', passageTools);
+    if (publishedPart) proofNavigation(box, publishedPart);
+    // Editing forms live outside the statement/proof reading sequence. Opening
+    // an annotation editor must not insert a panel between them.
+    const passageTools = el('details', undefined, tools, 'passage-tools'); el('summary', `Notes and tools: ${r.title}`, passageTools);
+    keepOpen(passageTools, `passage:${r.id}`);
     el('p', spanLocation(r.span), passageTools, 'muted');
     const actions = el('div', undefined, passageTools, 'toolbar');
     const choose = button(actions, selected === r.id ? 'Selected for statement / evidence' : 'Select this region', { type: 'select', region: r.id }, 'select');
     // Selection is local view state, not a publication; it requires no idle reply.
     choose.addEventListener('click', () => { selected = r.id; busy = false; render(); });
-    button(actions, r.collapsed ? 'Expand exact source' : 'Hide argument detail', { type: 'toggle', region: r.id }, 'toggle', true);
+    button(actions, r.collapsed ? (expanded ? 'Keep source expanded' : 'Expand exact source') : 'Hide argument detail', () => {
+      revealed.delete(r.id); return { type: 'toggle', region: r.id };
+    }, 'toggle', true);
     button(actions, o.published ? 'Open exact retained passage' : 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
     if (o.published) {
-      const links = el('details', undefined, box); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
+      const links = el('details', undefined, passageTools); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
     } else companionActions(passageTools, r.id);
-    evidence(box, o.artifacts.filter(a => a.region === r.id));
-    const settings = el('details', undefined, box); el('summary', 'Edit region title / reading level', settings);
+    evidence(passageTools, o.artifacts.filter(a => a.region === r.id));
+    const settings = el('details', undefined, passageTools); el('summary', 'Edit region title / reading level', settings);
     const key = `region:${r.id}`, rf = form(settings, key, { title: r.title, level: r.level });
     field(rf, 'title', 'Region title'); field(rf, 'level', 'Reading level', levels);
     button(rf.node, 'Save region description', () => ({ type: 'edit', draft: key, change: { kind: 'region', region: r.id,
       title: rf.read().title, level: rf.read().level, collapsed: r.collapsed } }), 'save-region', true);
-    for (const n of r.annotations) noteForm(box, r.id, n);
-    noteForm(box, r.id, null);
+    for (const n of r.annotations) { noteForm(passageTools, r.id, n); readerNotes.push({ title: r.title, note: n }); }
+    noteForm(passageTools, r.id, null);
+  }
+  if (readerNotes.length) {
+    const notes = el('section', undefined, root, 'reader-notes'); el('h2', 'Reader notes', notes);
+    for (const { title, note } of readerNotes) {
+      el('h3', `${title} · ${label(note.kind)}`, notes);
+      el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
+      el('p', note.text, notes, 'reader-note-text');
+    }
   }
   controls();
 }
@@ -291,7 +362,10 @@ window.addEventListener('message', event => {
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
       // clear only the submitted draft, not newer typing in the same form.
-      if (drafts.get(value.clearDraft) === submittedDrafts.get(value.clearDraft)) drafts.delete(value.clearDraft);
+      const latest = drafts.get(value.clearDraft) === submittedDrafts.get(value.clearDraft);
+      if (latest) drafts.delete(value.clearDraft);
+      if (value.annotationSaved && noteDraft(value.clearDraft)) feedback(value.clearDraft,
+        latest ? 'Annotation saved.' : 'Submitted version saved. Your newer edits are still unsaved.', latest ? 'saved' : 'newer');
       submittedDrafts.delete(value.clearDraft);
     }
     api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();
@@ -302,7 +376,11 @@ window.addEventListener('message', event => {
       else if (reference?.status === 'changed or removed') root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
       else root.scrollIntoView({ block: 'start' });
     } else if (reference?.status === 'changed or removed') root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
-  } else if (value.type === 'error') { error = value.message; blocked = !!value.writesBlocked; busy = false; render(); }
+  } else if (value.type === 'error') {
+    error = value.message; blocked = !!value.writesBlocked; busy = false;
+    if (noteDraft(value.draft)) feedback(value.draft, 'Save not confirmed. ' + value.message, 'error');
+    render();
+  }
   else if (value.type === 'idle') { busy = false; controls(); }
   else if (value.type === 'publishedFocus') jumpPublished(value.region);
 });

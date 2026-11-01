@@ -25,6 +25,8 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .companion{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.companion h3{margin:0 0 6px}.companion p{margin:6px 0}.companion-directions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.linked-note{font-weight:600;unicode-bidi:plaintext}.linked-note-row{padding:8px 0;border-bottom:1px solid var(--vscode-panel-border)}
 .published-content{line-height:1.65;font-size:1.05em;margin:12px 0}.published-math math{font-size:1.15em}.source-reference{display:inline;padding:1px 4px;margin:0 2px}.published-toc{display:flex;flex-wrap:wrap;margin:12px 0}.source-slogan{border-left:2px solid var(--vscode-panel-border);padding:8px;margin:10px 0}
 .reading-bar{position:sticky;top:0;z-index:2;background:var(--vscode-editor-background);padding:4px 0}.reading-bar button{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground);padding:5px 8px}.reader-tools{margin:10px 0 20px}.reader-tools>summary,.passage-tools>summary{cursor:pointer;font-size:.9em;opacity:.8}.region{scroll-margin-top:60px;border:0;border-top:1px solid var(--vscode-panel-border);padding:12px 0;margin:18px 0}.region>h2{font-size:1.15em}.passage-tools{margin:12px 0}.published-content{font-size:1.15em;line-height:1.75}
+.proof-navigation{display:flex;gap:12px;margin:10px 0}.proof-navigation button{background:none;color:var(--vscode-textLink-foreground);padding:3px 0;margin:0;text-decoration:underline}.reader-note-text{white-space:pre-wrap;line-height:1.6}
+.save-feedback{min-height:1.2em}.save-confirmation{color:var(--vscode-testing-iconPassed,var(--vscode-foreground))}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
@@ -72,7 +74,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     try { await vscode.commands.executeCommand?.('setContext', 'mrw.outlineBusy', true); return await action(); }
     finally { busy = false; changed.fire(); await vscode.commands.executeCommand?.('setContext', 'mrw.outlineBusy', false); }
   }
-  async function send(c, result, clearDraft) {
+  async function send(c, result, clearDraft, annotationSaved = false) {
     if (result.blocked) {
       blockedStores.add(c.store);
       throw new Error(`Outline publication failed: ${result.write_error}. Retained sources remain unchanged. `
@@ -85,7 +87,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     } catch (error) { c.notes = null; c.noteError = error.message; }
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
-    await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft,
+    await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved,
       reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
@@ -95,7 +97,9 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     let result;
     try { result = await bridge(request(c, 'outline_mutate', { change })); }
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
-    return send(c, result, clearDraft);
+    const saved = await send(c, result, clearDraft, change.kind === 'annotation');
+    if (change.kind === 'annotation') vscode.window.setStatusBarMessage('MRW: Submitted annotation saved.', 6000);
+    return saved;
   }
   async function openDocument(c, artifact = null, pinned) {
     const result = pinned || await bridge(request(c, 'outline_document', { artifact }));
@@ -176,7 +180,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         else throw new Error('Unknown reader action.');
       });
     } catch (error) {
-      await c.panel.webview.postMessage({ type: 'error', message: error.message, writesBlocked: blockedStores.has(c.store) });
+      await c.panel.webview.postMessage({ type: 'error', message: error.message, draft: value.draft, writesBlocked: blockedStores.has(c.store) });
       await vscode.window.showErrorMessage(`MRW: ${error.message}`);
     } finally { await c.panel.webview.postMessage({ type: 'idle' }); }
   }

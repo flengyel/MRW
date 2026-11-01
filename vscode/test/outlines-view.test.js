@@ -29,13 +29,14 @@ test('reader webview permits only nonce code with no external resource fetch or 
   assert.ok(!html.includes('unsafe-inline')); assert.ok(!html.includes('https:'));
 });
 
-function reader() {
+function reader(published = false) {
   const scrolled = [];
   class Node {
     constructor(tag) { this.tag = tag; this.children = []; this.dataset = {}; this.listeners = {}; this.textContent = ''; }
     append(node) { node.parent = this; this.children.push(node); }
     replaceChildren() { this.children = []; }
     addEventListener(type, callback) { this.listeners[type] = callback; }
+    setAttribute(name, value) { this[name] = value; }
     all() { return this.children.flatMap(n => [n, ...n.all()]); }
     querySelectorAll(tag) { return this.all().filter(n => tag.split(',').includes(n.tag)); }
     querySelector() { return this.all().find(n => n.dataset.reference); }
@@ -49,6 +50,7 @@ function reader() {
     acquireVsCodeApi: () => ({ postMessage: value => messages.push(value) }),
     addEventListener: (type, callback) => { receive = callback; } };
   globals.window = globals;
+  if (published) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/outlineView.js'), 'utf8'), globals);
   return { root, messages, scrolled, send: data => receive({data}),
     scopes: () => root.all().filter(n => n.dataset.linkScope),
@@ -114,7 +116,7 @@ test('storage handshake freezes controls and preserves unsaved annotation text a
   assert.equal(h.root.all().find(n => n.tag === 'textarea').disabled, false);
 });
 
-test('reader puts source text before passage tools, collapses metadata, and focuses the resolved card once', () => {
+test('reader keeps all region forms outside the source flow and focuses the resolved card once', () => {
   const h = reader(), value = readingModel();
   value.model.outline.regions[1].collapsed = false;
   value.model.outline.regions[1].argument_text = 'Exact retained statement α.';
@@ -124,9 +126,9 @@ test('reader puts source text before passage tools, collapses metadata, and focu
   assert.equal(tools.tag, 'details'); assert.ok(!tools.open);
   assert.ok(h.root.children.find(n => n.className === 'toolbar reading-bar'));
   const card = h.root.all().find(n => n.dataset.region === 'other');
-  const text = card.children.findIndex(n => n.dataset.argument === 'other');
-  const controls = card.children.findIndex(n => n.className === 'passage-tools');
-  assert.ok(text >= 0 && text < controls, 'source precedes editing/link controls');
+  assert.ok(card.children.some(n => n.dataset.argument === 'other'));
+  assert.equal(card.all().some(n => ['form','input','textarea','select'].includes(n.tag)), false);
+  assert.ok(tools.all().some(n => n.className === 'passage-tools'));
   assert.equal(h.scrolled.at(-1), card);
   const count = h.scrolled.length;
   value.reference = null;
@@ -138,4 +140,97 @@ test('a retained publication error remains visible outside collapsed tools', () 
   value.model.outline.published = { error: 'Retained acquisition unavailable' };
   h.send(value);
   assert.ok(h.root.children.some(n => n.className === 'warning' && n.textContent === 'Retained acquisition unavailable'));
+});
+
+function publishedModel() {
+  const value = readingModel(), o = value.model.outline;
+  value.reference = null;
+  const span = line => ({ source_revision:'revision', start_line:line, start_col:0, end_line:line+1, end_col:3 });
+  const region = (id, line, collapsed = false) => ({ id, title:id, level:id==='statement'?'concepts_results':'argument',
+    span:span(line), annotations:[], collapsed, argument_text:collapsed?null:id+' exact text' });
+  o.regions = [region('statement',1), region('proof',3,true)];
+  o.regions[0].annotations = [{kind:'question',text:'Reader question, separate from source.',
+    provenance:{origin:'human_work',author:'Reader',at:'2026-11-01T00:00:00Z'}}];
+  const part = (r, role) => ({region:r.id, tag:'08ZE', role, span:r.span,
+    exact_text:r.id+' original', tokens:[{kind:'text',text:r.id+' published source'}]});
+  o.published = {authors:'Fixture authors',chapter:'Fixture',section_number:'1',tag:'08ZD',parts:{
+    statement:part(o.regions[0],'statement'),proof:part(o.regions[1],'proof')}};
+  return value;
+}
+
+test('statement has a direct Proof link; reading a collapsed proof changes no saved state', () => {
+  const h = reader(true), value = publishedModel(), before = JSON.stringify(value.model);
+  h.send(value);
+  const card = h.root.all().find(n => n.dataset.region === 'statement' && n.tag === 'section');
+  const proof = h.button(card,'published-companion');
+  assert.equal(proof.textContent, 'Proof ↓');
+  assert.equal(card.all().some(n => n.tag === 'form'),false);
+  proof.listeners.click();
+  const destination = h.scrolled.at(-1);
+  assert.equal(destination.dataset.region,'proof');
+  assert.match(destination.text(), /proof published source/);
+  assert.equal(h.button(destination,'published-companion').textContent,'Statement ↑');
+  assert.equal(JSON.stringify(value.model),before);
+  assert.equal(h.messages.some(m => ['edit','toggle','navigate','stacks_reference'].includes(m.type)),false);
+  assert.equal(h.messages.at(-1).type,'select');
+});
+
+test('annotation forms cannot occur between statement and proof; reader notes remain attributed', () => {
+  const h = reader(true); h.send(publishedModel());
+  const cards = h.root.children.filter(n => n.tag === 'section' && n.dataset.region);
+  assert.deepEqual(cards.map(n=>n.dataset.region),['statement','proof']);
+  for(const card of cards) assert.equal(card.all().some(n=>['form','input','textarea','select'].includes(n.tag)),false);
+  const tools = h.root.all().find(n=>n.className==='reader-tools');
+  assert.ok(tools.all().some(n=>n.dataset.draft==='note:statement:new'));
+  const notes = h.root.children.find(n=>n.className==='reader-notes');
+  assert.match(notes.text(),/Reader question, separate from source/); assert.match(notes.text(),/author: Reader/);
+  assert.ok(h.root.children.indexOf(notes)>h.root.children.indexOf(cards[1]));
+});
+
+test('Proof links preserve multiple published proofs and reject changed or unrelated associations', () => {
+  const value = publishedModel(), o=value.model.outline;
+  const second = {...o.regions[1],id:'proof2'};
+  o.regions.push(second);o.published.parts.proof2={...o.published.parts.proof,region:'proof2'};
+  const h=reader(true);h.send(value);
+  let card=h.root.all().find(n=>n.dataset.region==='statement'&&n.tag==='section');
+  assert.deepEqual(card.all().filter(n=>n.dataset.action==='published-companion').map(n=>n.textContent),['Proof 1 ↓','Proof 2 ↓']);
+  o.regions[1]={...o.regions[1],span:{...o.regions[1].span,start_line:20}};
+  o.published.parts.proof2={...o.published.parts.proof2,tag:'OTHER'};
+  h.send(value);card=h.root.all().find(n=>n.dataset.region==='statement'&&n.tag==='section');
+  assert.equal(h.button(card,'published-companion'),undefined);
+  assert.match(card.text(),/reading association changed/);
+});
+
+test('annotation save feedback preserves open editors and distinguishes newer unsaved text', () => {
+  const h=reader(), value=readingModel(), key='note:other:new';h.send(value);
+  const find=()=>h.root.all().find(n=>n.dataset.draft===key);
+  let form=find(), text=form.all().find(n=>n.tag==='textarea');
+  for(const node of h.root.all().filter(n=>n.dataset.disclosure))node.open=true;
+  text.value='Submitted α explanation';form.listeners.input();
+  h.button(form,'save-note').listeners.click();
+  assert.match(form.text(),/Saving annotation/);
+  text.value='Newer unsaved β explanation';form.listeners.input();
+  h.send({...value,clearDraft:key,annotationSaved:true});
+  form=find();assert.equal(form.all().find(n=>n.tag==='textarea').value,'Newer unsaved β explanation');
+  assert.match(form.text(),/Submitted version saved.*newer edits are still unsaved/);
+  for(const node of h.root.all().filter(n=>n.dataset.disclosure))assert.ok(node.open);
+  h.button(form,'save-note').listeners.click();
+  h.send({...value,clearDraft:key,annotationSaved:true});
+  assert.match(find().text(),/Annotation saved\./);
+  assert.equal(find().all().find(n=>n.dataset.saveFeedback===key).role,'status');
+  h.send({type:'storageCheck'});assert.equal(h.messages.at(-1).dirty,false);
+});
+
+test('failed or uncertain annotation saving keeps text and announces no confirmed success', () => {
+  const h=reader(), value=readingModel(), key='note:other:new';h.send(value);
+  let form=h.root.all().find(n=>n.dataset.draft===key);
+  form.all().find(n=>n.tag==='textarea').value='Keep this unsaved explanation';form.listeners.input();
+  h.button(form,'save-note').listeners.click();
+  h.send({type:'error',draft:key,message:'Directory synchronization failed',writesBlocked:true});
+  form=h.root.all().find(n=>n.dataset.draft===key);
+  assert.equal(form.all().find(n=>n.tag==='textarea').value,'Keep this unsaved explanation');
+  assert.match(form.text(),/Save not confirmed.*Directory synchronization failed/);
+  assert.doesNotMatch(form.text(),/Annotation saved\./);
+  assert.equal(form.all().find(n=>n.dataset.saveFeedback===key).role,'alert');
+  assert.equal(h.button(form,'save-note').disabled,true);
 });

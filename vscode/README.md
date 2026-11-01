@@ -8,6 +8,20 @@ VS Code owns ordinary files, editing, undo, saving, and document recovery.
 The offline source-region reader supports informal mathematical arguments as
 well as optional captured Lean evidence; see its independent boundary below.
 
+## Open MRW
+
+Click the **MRW** book icon in the Activity Bar. It opens **Reading Outline** and
+the collapsible **Research Tools** view. With your Markdown overview active,
+use the labelled **Open Reading Outline** button or **… → Open Reading Outline**. The Reading Outline **…** menu provides Refresh, Insert Outline
+Reference, saved-source opening, explicit source creation/import and Show Artifact
+Location. The title bar retains the Open and Return icons. Standard VS Code
+menus own view placement; previously customized positions remain user choices.
+**F1 → MRW: Open Reading Outline** also works.
+
+The sidebar replaces MRW's default placement inside Explorer. It reuses the
+same view/command IDs, document pointers and private records. Clicking its icon
+registers/displays UI only; no source, provider, compiler or network action starts.
+
 ## Workspace hosts and dependencies
 
 Keep one extension and the existing Python core in the workspace environment.
@@ -157,6 +171,38 @@ before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
 and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
 
+## Statement and proof reading (0.9.2)
+
+A published statement with an unchanged associated proof has a direct **Proof ↓**
+link. The proof has **Statement ↑** for the return. These links use the retained
+import's explicit roles and tag, with exact source-span matching. Multiple
+published proofs stay separately reachable. A changed association is reported;
+it never sends the reader to a different passage labelled as the old proof.
+A collapsed matching proof can be opened for this view without changing its
+saved collapse state or any source bytes. This adds no inference or proof graph.
+
+All region annotation forms, evidence controls, linked-note actions and editing
+settings live under **Source details and tools → Notes and tools: REGION**.
+They do not sit between a statement and the next proof. Existing reader notes
+are displayed separately after the retained source text, with their attribution;
+editing still requires the explicit existing Save action. Exact retained TeX
+remains available in each source card. Sources without explicit published
+statement/proof metadata retain manual region navigation; no pairing is guessed.
+
+### Annotation save feedback
+
+**Save annotation** shows **Saving annotation…**, then **Annotation saved.**
+after the existing core confirms publication. The host status bar also reports
+that the submitted annotation was saved. Open source tools and the note editor
+stay open across the reply. Existing note editors start collapsed; their saved
+text is readable in the separate Reader notes section.
+
+Typing while a save is in flight is preserved. The reply says **Submitted version
+saved. Your newer edits are still unsaved.** when it did not cover the newest
+text. A failure says **Save not confirmed** beside the editor, retains its text
+and keeps the existing uncertain-publication write block. Saving is explicit;
+there is no retry or automatic save.
+
 ## Reading presentation (0.9.1)
 
 Following a source from **Reading Outline** expands the active reader group and
@@ -178,7 +224,7 @@ store, reference, source or mathematical checking status.
 ## Navigable reading outlines (0.9.0)
 
 With an ordinary Markdown overview active, run **MRW: Open Reading Outline**.
-The **Reading Outline** view in Explorer shows its headings and existing MRW
+The **Reading Outline** view in the MRW sidebar shows its headings and existing MRW
 references. Expand/collapse sections; click a heading to select its line, or a
 source link to open the existing reader and its exact retained passage.
 **MRW: Return to Reading Outline**, the view's back arrow, or the reader's
@@ -219,7 +265,8 @@ reading. Missing/incompatible retained storage or another workspace's scope
 fails clearly through existing checks without replacements or workspace search.
 See [examples and ownership](../docs/READING_OUTLINE_WORKFLOW.md) and
 [validation](../docs/READING_OUTLINE_VALIDATION.md). Broader proof-outline analysis
-and mathematical usefulness remain separate pending work.
+remains pending. The later user-reported explanatory benefit for 08ZG is recorded
+separately from functional checks and general usefulness.
 
 ## Manual Markdown overviews across sources
 
@@ -450,8 +497,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.1.vsix
-sha256sum vscode/theorem-terminal-0.9.1.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.2.vsix
+sha256sum vscode/theorem-terminal-0.9.2.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -483,11 +530,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.9.1.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.9.2.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.9.1**.
+The extension identity is **flengyel.theorem-terminal**, version **0.9.2**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

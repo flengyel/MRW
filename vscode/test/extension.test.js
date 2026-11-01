@@ -1014,3 +1014,40 @@ test('navigator opens exact published mathematics in an expanded reader, retaini
   assert.equal(h.panels[0].webview.messages.findLast(v => v.type === 'outline').selected, null);
   assert.equal(await fs.readFile(file, 'utf8'), text); assert.deepEqual(h.errors, []);
 });
+
+test('annotation success feedback follows core publication and is absent after rejection', async t => {
+  const root=await temporary(t), file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+  const created=await h.commands.get('mrw.createOutline')();assert.ok(created);
+  const notices=[];h.api.window.setStatusBarMessage=text=>notices.push(text);
+  const panel=h.panels[0], draft='note:overview:new';
+  const value={type:'edit',draft,change:{kind:'annotation',region:null,id:null,purpose:'explanation',text:'Saved reader explanation',origin:'human_work',author:'Reader'}};
+  await panel.receive(value);
+  const saved=panel.webview.messages.findLast(m=>m.type==='outline');
+  assert.equal(saved.annotationSaved,true);assert.equal(saved.clearDraft,draft);
+  assert.equal(saved.model.outline.annotations[0].text,'Saved reader explanation');
+  assert.deepEqual(notices,['MRW: Submitted annotation saved.']);
+  const before=panel.webview.messages.length;
+  h.setService(async()=>{const e=new Error('Revision conflict');e.code='ACTION_REJECTED';throw e});
+  await panel.receive(value);
+  assert.equal(panel.webview.messages.slice(before).some(m=>m.annotationSaved),false);
+  assert.equal(panel.webview.messages.findLast(m=>m.type==='error').draft,draft);
+  assert.equal(notices.length,1);
+});
+
+test('MRW Activity Bar entry exposes existing views and a registered reading menu without starting a bridge', async t => {
+  const root=await temporary(t),h=await harness(root);
+  const manifest=JSON.parse(await fs.readFile(path.resolve(__dirname,'../package.json'),'utf8'));
+  const c=manifest.contributes,container=c.viewsContainers.activitybar.find(v=>v.id==='mrw');
+  assert.ok(container);assert.equal(container.title,'MRW');
+  const svg=await fs.readFile(path.resolve(__dirname,'..',container.icon),'utf8');
+  assert.match(svg,/<svg[^>]*viewBox="0 0 24 24"/);
+  assert.doesNotMatch(svg,/<script|<image|href=/i);
+  assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.research']);
+  assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
+  const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
+  for(const command of ['mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.openOutline','mrw.importStacksSection','mrw.artifactLocation']){
+    assert.ok(overflow.some(v=>v.command===command));assert.ok(h.commands.has(command));
+  }
+  assert.equal(h.requests.length,0,'registering the icon, views and menus launches no service');
+});

@@ -216,10 +216,101 @@ requires an explicit **Developer: Reload Window** to load the update. Only the
 isolated test Development Host was closed; user working windows were preserved.
 
 
+## Proof visibility follow-up — 2026-11-01
+
+The user reports that the ordinary installed **0.9.1** reading layout is
+improved. They then found the proof and identified the obstruction precisely:
+**Add reader explanation / question / repair**. Opening that editor put an
+administrative form between the statement and proof, pushing the proof away.
+The [user report](evidence/reading-outline-20261101/proof-visibility-report.json)
+establishes an observed reading problem, not absent retained source or a
+mathematical verification result.
+
+Patch **0.9.2** moves all region annotation forms, evidence controls, linked-note
+actions and settings into **Source details and tools → Notes and tools: REGION**.
+Context editing controls are there too. Source cards remain consecutive without
+editing forms between them. Existing reader notes appear separately after the
+source text, retaining attribution; their records and explicit Save boundary are unchanged.
+
+A published statement has a direct **Proof ↓** link; the proof has **Statement ↑**.
+The links use only explicit published roles and a shared tag from the same retained
+import, with exact matching source spans. Multiple published proofs remain
+separate. Changed or unrelated associations are not used as replacement targets.
+Opening a collapsed matching proof reveals it only for this live view, without
+publishing a changed outline. Manual sources retain manual region navigation;
+there is no automatic proof discovery, inferred dependency or checking status.
+
+The user also reported that **Save annotation** provided no feedback. Saves now
+show **Saving annotation…**, **Annotation saved.**, or **Save not confirmed**
+beside the editor, with a host status-bar message only after confirmed core
+publication. Open editors remain open; newer typing survives a reply with an
+explicit unsaved warning. A failed or uncertain save retains the text and the
+existing write block, without a success message or retry.
+
+The requested dedicated **MRW** Activity Bar book icon contains Reading Outline
+and collapsible Research Tools. Stable view IDs retain existing host navigation
+state. The native view-title **…** menu exposes Open Reading Outline, refresh,
+insertion, saved sources and the existing explicit source commands. An empty
+navigator shows its welcome button. Opening the container starts no bridge.
+This follows the [official Tree View contribution model](https://code.visualstudio.com/api/extension-guides/tree-view);
+the manifest/API check is separate from a visible installed-window observation.
+
+All **68 Node tests passed**. New DOM tests cover source/form separation,
+attributed note placement, direct statement/proof links, multiple proofs,
+changed spans and temporary expansion without any record mutation or edit
+request, plus pending/success/failure save feedback, newer edits and open editors.
+Command tests exercise the actual bundled core's confirmed and rejected saves;
+the container/menu integration test checks registrations and no startup bridge.
+Python again ran **362 tests: 303 passed, 59 expected skips**.
+JavaScript syntax, Python compilation and documentation/diff checks passed.
+Packaging follows bridge tests sequentially. Services, transport, importer,
+reference grammar and artifact-store configuration remain unchanged.
+
+The new 0.9.2 visual layout has not been independently observed. The known
+Development Host workspace setup barrier was not retried. The user's positive
+0.9.1 layout feedback is recorded as such, separately from the pending 0.9.2
+visual observation. No new exercise, study gate,
+provider, acquisition, compiler, notebook, container, Pi or storage campaign was
+introduced.
+
+The final **0.9.2** package was built after all command/bridge tests completed,
+then verified and installed through the existing WSL code-server workflow:
+`vscode/theorem-terminal-0.9.2.vsix`, **63 files**, SHA-256
+`f69c7d528629ea8ca1cde418c2c440c59b236c64a1e606de0a52dc8a020834bb`.
+The [installed manifest and all 58 runtime files](evidence/reading-outline-20261101/installed-package-proof.json)
+match the verified archive, including the new icon. The
+[installed read-only bridge check](evidence/reading-outline-20261101/installed-bridge-proof.json)
+opened the original exact retained 08ZE passage and preserved all overview and
+outline-store bytes, including the new genuine annotation described below.
+Earlier packages remain, and the preliminary 0.9.2 package from before the
+save-feedback/icon changes was preserved separately in the ignored work folder.
+The already-open window requires **Developer: Reload Window** after saving or
+copying any unsaved reader-form text. No user window was forcibly reloaded or
+closed. These package/bridge results do not establish visible acceptance of the
+new icon, menus, proof links or save feedback.
+
+## User-reported explanatory benefit
+
+During this ordinary reading, the user recognized the equation in **08ZG** as a
+diagonal preimage and reported that MRW was doing what it should. See the
+[scoped report](evidence/reading-outline-20261101/reading-use-report.json).
+The requested explanation was saved on the retained **08ZG — Proof**, with
+**Codex / AI proposal** attribution, separately from the published source.
+The user explicitly approved that authorship correction. The save used the
+existing core mutation/publication path and was confirmed by a subsequent load;
+source/support bytes, ordinary overview bytes and earlier annotations were
+preserved. The private annotation text is not committed. This workspace/store
+now contains genuine study work; old synthetic-test baseline hashes must not be
+used to reset it or rerun seed mutations.
+
+This is user-reported explanatory benefit for one passage. No formal checker
+ran on the explanation, no model API request was made, and no broad claim of
+proof correctness, comprehension or measured productivity follows from it.
+
 ## Boundaries
 
-Mathematical usefulness of the navigator remains unassessed. The user's earlier
-practical-benefit report for Zettelkasten navigation remains separate. Automatic
+The local explanatory-benefit report and the user's earlier practical-benefit
+report for Zettelkasten navigation remain separate from general usefulness. Automatic
 outlines, AI explanations, prerequisites, proof graphs, vertex elimination,
 PDF/OCR, whole-corpus import and source comparison remain pending. No new study,
 Pi, R3, SagePod, exporter or Euclid campaign was performed. No vault scan,

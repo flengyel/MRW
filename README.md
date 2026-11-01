@@ -34,6 +34,19 @@ continuation, private resumption and explicit ending. Their genuine mathematical
 remains pending. The first offline source-region reader is delivered in VS Code;
 proof-outline vertex elimination remains planned. This adds no broader model conversation.
 
+Open the **MRW** icon in VS Code's Activity Bar for the reading navigator and
+its **…** command menu. **Reading Outline** is the primary view; other commands
+remain in the collapsible **Research Tools** view. The command palette remains
+available. Opening the sidebar itself starts no Python, model or acquisition.
+
+Patch **0.9.2** keeps note-editing forms outside the statement/proof reading
+sequence and adds direct **Proof** / **Statement** links for matching published
+source parts. Reading a hidden proof expands it for the current view without
+changing saved source records. Reader notes remain separately attributed.
+Annotation saves show confirmation and retain newer unsaved edits separately.
+The user reports explanatory benefit while reading the retained 08ZG proof;
+this is a report about one passage. See [the follow-up and its limits](docs/READING_OUTLINE_VALIDATION.md#proof-visibility-follow-up--2026-11-01).
+
 Patch **0.9.1** addresses the first installed-use reading blocker: concise
 navigator labels, an expanded mathematics view, and collapsed source details
 and editing tools. Following a matching published passage opens its rendered

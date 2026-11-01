@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -346,14 +346,15 @@
       }
     ],
     "views": {
-      "explorer": [
-        {
-          "id": "mrw.research",
-          "name": "Mathematical Research"
-        },
+      "mrw": [
         {
           "id": "mrw.readingOutline",
           "name": "Reading Outline"
+        },
+        {
+          "id": "mrw.research",
+          "name": "Research Tools",
+          "visibility": "collapsed"
         }
       ]
     },
@@ -382,7 +383,57 @@
         {
           "command": "mrw.refreshReadingOutline",
           "when": "view == mrw.readingOutline",
-          "group": "navigation"
+          "group": "1_reading@1"
+        },
+        {
+          "command": "mrw.insertOutlineReference",
+          "when": "view == mrw.readingOutline",
+          "group": "1_reading@2"
+        },
+        {
+          "command": "mrw.openOutline",
+          "when": "view == mrw.readingOutline",
+          "group": "2_sources@1"
+        },
+        {
+          "command": "mrw.createOutline",
+          "when": "view == mrw.readingOutline",
+          "group": "2_sources@2"
+        },
+        {
+          "command": "mrw.importStacksSection",
+          "when": "view == mrw.readingOutline",
+          "group": "2_sources@3"
+        },
+        {
+          "command": "mrw.artifactLocation",
+          "when": "view == mrw.readingOutline",
+          "group": "3_storage@1"
+        },
+        {
+          "command": "mrw.openReadingOutline",
+          "when": "view == mrw.research",
+          "group": "1_reading@1"
+        },
+        {
+          "command": "mrw.openOutline",
+          "when": "view == mrw.research",
+          "group": "1_reading@2"
+        },
+        {
+          "command": "mrw.importStacksSection",
+          "when": "view == mrw.research",
+          "group": "1_reading@3"
+        },
+        {
+          "command": "mrw.artifactLocation",
+          "when": "view == mrw.research",
+          "group": "2_storage@1"
+        },
+        {
+          "command": "mrw.openReadingOutline",
+          "when": "view == mrw.readingOutline",
+          "group": "1_reading@0"
         }
       ],
       "editor/context": [
@@ -489,7 +540,16 @@
         "view": "mrw.readingOutline",
         "contents": "Organize an ordinary Markdown overview with headings and MRW source references.\n[Open Reading Outline](command:mrw.openReadingOutline)"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mrw",
+          "title": "MRW",
+          "icon": "media/mrw.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "bundle-core": "python3 scripts/bundle-core.py",

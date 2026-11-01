@@ -65,6 +65,21 @@ Only explicit import acquires the network. Offline reading, annotation and
 retained citation navigation execute no downloaded TeX or other tools.
 See `docs/STACKS_WORKFLOW.md` and `docs/STACKS_VALIDATION.md`. Whole-corpus
 ingestion, complete proof graphs and vertex elimination remain deferred.
+The MRW Activity Bar container owns the default placement of the existing Reading
+Outline and Research Tools views. Keep their IDs, the native view-title **…**
+menu and command-palette access. Opening the container launches no service or
+source acquisition; respect VS Code's saved user view placement.
+Patch 0.9.2 keeps annotation forms and region editing out of the source reading
+sequence. Direct statement/proof links use only explicit published roles within
+one retained import and exact matching spans. Temporary proof expansion is live
+view state, not a source-record mutation. Keep changed associations from
+redirecting those links; do not infer proof pairings or mathematical status.
+Annotation-save feedback must follow confirmed core publication. Preserve newer
+in-flight edits and report that they remain unsaved; uncertain publication must
+not show success or retry. Keep open note editors and their drafts across replies.
+The reading workspace now contains a user-requested, Codex-attributed explanation
+on the retained 08ZG proof. Preserve that genuine study annotation and the existing
+workspace identity; do not treat its retained store as disposable test data.
 Patch 0.9.1 addresses the installed reading-presentation blocker: concise
 navigator labels, expanded source reading through host layout commands, source
 content before collapsed tools, and direct focus on exact matching published

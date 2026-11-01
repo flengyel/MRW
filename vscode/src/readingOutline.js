@@ -57,7 +57,8 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     getParent: node => model?.all.find(candidate => candidate.children.includes(node)),
   };
   const tree = vscode.window.createTreeView('mrw.readingOutline', { treeDataProvider: provider, showCollapseAll: true });
-  tree.message = 'Open a Markdown overview with MRW: Open Reading Outline.';
+  // Leave the initial view empty so VS Code displays the contributed welcome
+  // content and its labelled Open Reading Outline button.
   function refresh() {
     clearTimeout(timer);
     if (!document || document.isClosed) { model = undefined; changed.fire(); return; }

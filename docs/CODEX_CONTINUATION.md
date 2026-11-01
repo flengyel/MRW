@@ -1,5 +1,64 @@
 # Codex continuation: MRW source work and companion notes
 
+## MRW entry point, proof visibility and save feedback — 2026-11-01
+
+Started clean at `9ee11b4bfa98be09e34e02783cabe0d1c710ca2c`. The user confirms
+the ordinary installed 0.9.1 layout is improved. They then found the proof, but
+reported that the **Add reader explanation / question / repair** form hid it.
+The proof was retained; the problem was a form inserted into the source reading
+sequence. See the [specific report and repair](READING_OUTLINE_VALIDATION.md#proof-visibility-follow-up--2026-11-01).
+
+Patch **0.9.2** moves region annotation/evidence/settings/link forms into
+**Source details and tools → Notes and tools: REGION**. Retained source cards
+remain consecutive. Existing reader notes are displayed separately after source
+text with attribution; their stored text and explicit edit/Save boundary are unchanged.
+Published statements have **Proof ↓**, and proofs have **Statement ↑**, based
+only on explicit part roles/tag in the same retained import and exact span
+matches. Multiple proofs remain distinct. Changed associations cannot acquire
+a replacement target. Opening a collapsed matching proof temporarily expands
+its live view without changing saved records. No proof pairing is inferred for
+manual sources; no proof graph or checking status is created.
+
+The user also requested a discoverable Activity Bar entry and reported missing
+Save feedback. The dedicated **MRW** book icon opens Reading Outline and a
+collapsible Research Tools view. Its native **…** menu includes Open Reading
+Outline, Open Saved Source Outline and existing explicit source commands. View
+IDs and host customizations remain stable; opening the sidebar starts no bridge.
+The empty navigator has a labelled Open Reading Outline welcome button.
+Annotation saves now show pending/confirmed/unconfirmed results beside the
+editor and a host status-bar confirmation. Open editors and newer typing survive
+replies; uncertain publication never reports success or retries.
+
+The user subsequently reported explanatory benefit: recognizing 08ZG's
+fixed-point equation as a diagonal preimage. Their requested expansion was saved
+on the retained **08ZG — Proof**, attributed to **Codex / AI proposal**. The
+original source, ordinary overview and earlier notes were preserved. This is
+genuine study work: preserve the reading workspace and its existing private
+store, and do not rerun old seed scripts against their stale baseline. The
+annotation body is private and is not committed. Record this as user-reported
+explanatory benefit for one passage, separate from proof verification or broad
+usefulness claims.
+
+All **68 Node checks pass**, including native-container/command integration,
+save feedback/failure/newer-edit preservation, form placement, direct-proof
+navigation, multiple proofs, changed spans and read-only temporary expansion.
+Python ran **362 tests (303 passed, 59 expected skips)**. The complete bridge
+test pass precedes packaging. Actual 0.9.2 visual acceptance remains unobserved;
+the known empty-workspace Development Host barrier was not retried. Do not ask
+for another Ready/checklist campaign. Keep Windows-backed storage qualification
+deferred.
+
+The verified final **0.9.2** VSIX is installed: 63 package files, all 58 installed
+runtime files identical, SHA-256
+`f69c7d528629ea8ca1cde418c2c440c59b236c64a1e606de0a52dc8a020834bb`.
+Its read-only bundled bridge followed the original exact retained passage and
+preserved overview/store bytes, including the genuine annotation. Earlier
+packages and the preliminary 0.9.2 package are preserved. The current window
+loads the final update with **Developer: Reload Window** after saving or copying
+unsaved reader-form text; do not force it. Then click the **MRW** Activity Bar
+icon, and use **… → Open Saved Source Outline…** or **Open Reading Outline**.
+New icon/menu, proof-link and Save-feedback visual acceptance remain unobserved.
+
 ## Installed reading trial and presentation repair — 2026-11-01
 
 Started this follow-up clean at `866c479930dede61b04ee5323f14fd609643ae5f`.
@@ -77,7 +136,8 @@ its corrected Development Host used unrelated extensions disabled.
 
 Automatic outline generation, AI explanations, prerequisite discovery, source
 comparison, inference graphs and vertex elimination remain pending. Mathematical
-usefulness of this navigator has not been observed. Keep the prior practical-benefit
+usefulness of this navigator had not been observed at initial delivery; the later
+scoped explanatory-benefit report is recorded above. Keep the prior practical-benefit
 report for Zettelkasten navigation separate. Windows-backed storage qualification
 remains deferred; do not change permissions, mounts, sync, the real store or vault.
 No Pi, R3, SagePod, exporter, Euclid or compulsory study campaign is needed.

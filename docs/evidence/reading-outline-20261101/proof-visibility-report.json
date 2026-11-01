@@ -1,0 +1,12 @@
+{
+  "version_observed": "0.9.1",
+  "observation": "User-performed ordinary installed-window reading",
+  "user_report": {
+    "layout": "Yes. This is improved.",
+    "proof": "Now I see it. A dropdown hid it.",
+    "specific_control": "The add reader explanation / question / repair hid the proof."
+  },
+  "assessment": "The proof was retained and reachable, but the annotation editor interrupted its reading path. This is a usability report, not mathematical correctness or usefulness evidence.",
+  "response": "0.9.2 moves editing forms out of the source reading sequence and adds exact published statement/proof links.",
+  "visual_acceptance_of_0_9_2": "Not observed; the known Development Host workspace setup barrier was not retried."
+}

@@ -4,6 +4,12 @@ MRW 0.9.0 adds **MRW: Open Reading Outline**. Use the current Linux artifact
 store and Windows VS Code connected to WSL. No storage move, new vault, Lean,
 provider or prescribed reading sequence is required.
 
+Click the **MRW** book icon in the Activity Bar to open the reading navigator.
+Its **…** menu contains the reading and source commands. **Research Tools** is
+collapsed by default; the same commands remain available through F1. This is a
+native VS Code view container over the existing extension, with no new project
+or private-store setup.
+
 1. Open an ordinary Markdown overview in the intended workspace. Write headings,
    explanations, connections and questions in your own words. Existing notes
    and Obsidian remain ordinary notes; MRW never scans the vault.
@@ -11,7 +17,7 @@ provider or prescribed reading sequence is required.
    either its whole source or one exact retained region. Repeat for other
    sources, or cite the same passage in several sections. This is the unchanged
    [0.5.0 reference format](PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
-3. Run **MRW: Open Reading Outline**. Explorer's **Reading Outline** view derives
+3. Run **MRW: Open Reading Outline**. The MRW sidebar's **Reading Outline** view derives
    headings and MRW references from the active document. Use the section arrows
    to collapse/expand. Select a heading to select its Markdown line visibly.
 4. Select a source reference to open its retained reader. A passage reference
@@ -47,6 +53,27 @@ controls, linked notes, bibliographic editing and evidence remain available;
 navigation does not rewrite them. **Source details and tools** also contains the
 section contents controls. The VS Code title-bar workspace name opens a menu;
 to focus the editor, click inside its text area. F1 opens the command palette.
+
+In **0.9.2**, use **Proof ↓** on a published statement to read its associated
+retained proof; **Statement ↑** returns to the statement. These links require
+explicit published roles and matching retained spans. Multiple proofs stay
+separate. A changed association is reported rather than redirecting the link.
+Opening a hidden proof for reading does not save a collapse-state change.
+
+Region editing forms now live under **Source details and tools → Notes and
+tools: REGION**, outside the statement/proof sequence. Opening an annotation
+form there cannot insert it between the statement and proof. Existing notes
+appear separately after the source text with their supplied attribution. Their
+text and saved records are unchanged. Manual sources retain manual region
+navigation; MRW does not infer which region proves another.
+
+When saving a note, look for **Saving annotation…** and then **Annotation saved.**
+The confirmation follows core publication; a status-bar message also identifies
+the submitted annotation. If you typed more during the save, the message says
+that the submitted version was saved and the newer edits remain unsaved. An
+unconfirmed or failed publication keeps the text and says **Save not confirmed**.
+The open editor stays open; the application does not retry or save newer text
+without another explicit action.
 
 For example, an overview might have `# Separation`, `## Statements to compare`,
 and `## Questions for later`. Insert a whole-source reference to the retained

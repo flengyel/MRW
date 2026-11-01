@@ -129,6 +129,31 @@ the smaller window. No production UX change or mathematical-use claim follows
 from this validation. Details and remaining limits are in the
 [host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 
+### MRW entry point — 2026-11-01
+
+MRW has a dedicated book icon in VS Code's Activity Bar. The sidebar contains
+Reading Outline and the collapsible Research Tools view, with existing IDs and
+state. Reading actions have a standard native **…** menu; Open and Return remain
+title icons. This replaces default placement under Explorer while respecting
+host-owned view customizations. Opening the sidebar starts no backend or source
+acquisition. All existing command-palette entry points remain available.
+
+### Proof visibility repair — 2026-11-01
+
+The user confirmed that the expanded 0.9.1 view improved reading, then found that
+opening the annotation form pushed the proof out of view. Patch 0.9.2 removes
+editing forms from the source reading sequence. Published statements and proofs
+have direct reciprocal links using existing explicit part roles, tag and exact
+retained spans. Temporary proof expansion changes only the live reader view.
+Reader notes are separately attributed after the source text; their editors
+and the remaining region controls are grouped under Source details and tools.
+Changed associations are never presented as the original proof. Source,
+Markdown, record identity, mathematical status and core request semantics stay
+unchanged. Annotation saving shows pending, confirmed and unconfirmed results inline. A confirmation covers
+only the submitted version; newer typing remains explicitly unsaved. Open note
+editors stay open across refresh and save replies, and failures preserve their
+text and the existing write block.
+
 ### Reading presentation repair — 2026-11-01
 
 The first installed trial exposed a reading blocker: a selected long Markdown

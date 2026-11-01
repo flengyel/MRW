@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | 0.9.1: live collapsible Markdown reading navigator, concise titles, expanded rendered reading, exact retained navigation and occurrence-specific return | Not implemented |
+| Manual overview across several sources | 0.9.2: live Markdown reading navigator, expanded source reading, published statement/proof links, exact retained navigation and occurrence-specific return | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
@@ -46,13 +46,13 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
 Use `vscode/README.md` for the independent private pointer, explicit Resume and
-ending commands, and failure boundaries. Mathematical usefulness remains pending.
+ending commands, and failure boundaries. Mathematical usefulness of R2/R3 remains pending.
 `docs/CODEX_CONTINUATION.md` records the next bounded handoff. Proof-outline
 reconnaissance is complete and the first manual source-region consumer is
 delivered; broader outline requirements remain deferred. The 2026-10-13 host validation
 completed the scoped command checks and a normal-host persistence check;
 see [evidence and limits](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
-Mathematical usefulness remains unobserved. The Qt delivery and observation
+The reader's scoped explanatory-benefit report is recorded below. The Qt delivery and observation
 reports below are historical evidence, not extension acceptance evidence.
 
 Documentation clarification, 2026-09-27: justification may exceed present
@@ -60,6 +60,26 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Observed proof visibility blocker — 2026-11-01
+
+The user reports the installed 0.9.1 reader is improved. The annotation editor
+still interrupted the statement/proof sequence and obscured the proof. Patch
+0.9.2 adds a dedicated MRW Activity Bar icon, a native reading menu and explicit
+annotation-save feedback. It moves administrative forms into source tools and
+adds direct links between
+explicitly associated published statement/proof parts, guarded by their retained
+spans. Reader notes remain separately attributed, without changes to saved bytes
+or reference identity. This is a source-reading repair within the same bounded
+increment, not proof inference or graph extraction. See
+[validation](docs/READING_OUTLINE_VALIDATION.md#proof-visibility-follow-up--2026-11-01).
+
+During ordinary reading, the user recognized the fixed-point equation in 08ZG
+as a diagonal preimage and reported that MRW was helping. A requested explanation
+was saved on its retained proof, with Codex authorship separate from the Stacks
+source and the user's own reasoning. This is user-reported explanatory benefit
+for one passage. It supplies no new proof-checking status, measured savings or
+general usefulness claim. Preserve this genuine annotation and workspace.
 
 ### Observed reading-presentation blocker — 2026-11-01
 
@@ -91,7 +111,8 @@ See [usage](docs/READING_OUTLINE_WORKFLOW.md) and
 No automatic outline, AI explanation, prerequisite discovery, proof graph,
 vertex elimination, source comparison or new acquisition path is added.
 Windows-backed storage qualification remains deferred. Technical navigation
-checks do not establish mathematical usefulness, which remains unassessed.
+checks establish mechanics; the subsequent user-reported explanatory benefit
+above has its own narrower evidence.
 
 ### Bounded Stacks section import — 2026-10-21
 
