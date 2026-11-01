@@ -50,6 +50,7 @@ function reader(published = false) {
     acquireVsCodeApi: () => ({ postMessage: value => messages.push(value) }),
     addEventListener: (type, callback) => { receive = callback; } };
   globals.window = globals;
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/annotationView.js'), 'utf8'), globals);
   if (published) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/outlineView.js'), 'utf8'), globals);
   return { root, messages, scrolled, send: data => receive({data}),
@@ -185,6 +186,55 @@ test('annotation forms cannot occur between statement and proof; reader notes re
   const notes = h.root.children.find(n=>n.className==='reader-notes');
   assert.match(notes.text(),/Reader question, separate from source/); assert.match(notes.text(),/author: Reader/);
   assert.ok(h.root.children.indexOf(notes)>h.root.children.indexOf(cards[1]));
+});
+
+test('overview and passage annotation displays retain raw editable TeX and attribution', () => {
+  const h = reader(), value = readingModel(), text = 'Explanation \\(X\\times X\\).';
+  const note = { id:'note', kind:'explanation', text, provenance:{origin:'ai_proposal',author:'Codex',at:'now'} };
+  value.model.outline.annotations.push(note);
+  value.model.outline.regions[1].annotations.push({...note,id:'passage-note'});
+  const before = JSON.stringify(value); h.send(value);
+  const notes = h.root.children.find(n => n.className === 'reader-notes');
+  assert.match(notes.text(), /Overview/); assert.match(notes.text(), /other/); assert.match(notes.text(), /author: Codex/);
+  assert.equal(notes.all().filter(n => n.tag === 'pre' && n.textContent === text).length, 2);
+  assert.equal(h.root.all().filter(n => n.tag === 'textarea' && n.value === text).length, 2);
+  assert.equal(JSON.stringify(value), before);
+});
+
+test('proof reading controls hide details, preserve statements and drafts, and reveal a chosen proof', () => {
+  const h = reader(true), value = publishedModel(); value.model.outline.regions[1].collapsed = false;
+  const before = JSON.stringify(value.model); h.send(value);
+  const card = id => h.root.all().find(n => n.tag === 'section' && n.dataset.region === id);
+  const form = h.root.all().find(n => n.dataset.draft === 'note:statement:new');
+  form.all().find(n => n.tag === 'textarea').value = 'Unsaved reader work'; form.listeners.input();
+  h.button(h.root, 'hide-proofs').listeners.click();
+  assert.match(card('statement').text(), /statement published source/);
+  assert.doesNotMatch(card('proof').text(), /proof published source/);
+  assert.equal(h.button(card('proof'), 'show-proof')['aria-expanded'], 'false');
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'proofVisibility',hidden:true}));
+  assert.ok(h.root.all().some(n => n.tag === 'textarea' && n.value === 'Unsaved reader work'));
+  h.button(card('statement'), 'published-companion').listeners.click();
+  assert.match(card('proof').text(), /proof published source/);
+  h.button(card('proof'), 'hide-proof').listeners.click();
+  assert.doesNotMatch(card('proof').text(), /proof published source/);
+  h.button(card('proof'), 'show-proof').listeners.click();
+  assert.match(card('proof').text(), /proof published source/);
+  h.button(h.root, 'show-proofs').listeners.click();
+  assert.match(card('proof').text(), /proof published source/);
+  assert.equal(JSON.stringify(value.model), before);
+  assert.equal(h.messages.some(m => ['edit','toggle','navigate'].includes(m.type)), false);
+});
+
+test('restored proof visibility preserves exact source and a focused proof remains a visible destination', () => {
+  const value = {...publishedModel(),proofsHidden:true};
+  const h = reader(true); h.send(value);
+  const card = () => h.root.all().find(n => n.tag === 'section' && n.dataset.region === 'proof');
+  assert.match(card().text(), /Proof hidden/);
+  h.send({...value,readingFocus:{serial:1,region:'proof'}});
+  assert.match(card().text(), /proof published source/);
+  h.send(value); assert.match(card().text(), /proof published source/, 'refresh keeps the chosen live expansion');
+  const fresh = reader(true); fresh.send(value);
+  assert.match(fresh.root.all().find(n => n.tag === 'section' && n.dataset.region === 'proof').text(), /Proof hidden/);
 });
 
 test('Proof links preserve multiple published proofs and reject changed or unrelated associations', () => {

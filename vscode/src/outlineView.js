@@ -1,7 +1,7 @@
 'use strict';
 (() => {
-// Ordinary quotations/annotations stay inert. Imported math uses bundled,
-// restricted MathML rendering; exact TeX is separately retained and accessible.
+// Prose stays inert. Imported math and explicitly delimited annotation equations
+// use bundled, restricted MathML rendering; their exact text stays accessible.
 const api = acquireVsCodeApi();
 const root = document.getElementById('reader');
 const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail'];
@@ -13,6 +13,8 @@ let storageFrozen = false;
 const drafts = new Map();
 const submittedDrafts = new Map();
 const revealed = new Set();
+const hiddenDetails = new Set();
+let proofsHidden = false, proofPreferenceLoaded = false;
 const openDetails = new Map(), saveFeedback = new Map(), feedbackNodes = new Map();
 const noteDraft = key => typeof key === 'string' && key.startsWith('note:');
 function feedback(key, text, kind) {
@@ -86,6 +88,7 @@ function noteForm(parent, region, note) {
   field(f, 'purpose', 'Purpose', purposes);
   field(f, 'origin', 'Supplied origin', ['human_work', 'ai_proposal', 'source_quotation', 'unknown']);
   field(f, 'author', 'Author / attribution (blank means unknown)'); field(f, 'text', 'Explanation or other reader material');
+  el('p', 'Math: \\( ... \\) inline; \\[ ... \\] or $$ ... $$ for a displayed equation.', f.node, 'muted');
   button(f.node, 'Save annotation', () => {
     const v = f.read(); return { type: 'edit', draft: key, change: { kind: 'annotation', region,
       id: note?.id || null, purpose: v.purpose, text: v.text, origin: v.origin, author: v.author || null } };
@@ -178,9 +181,24 @@ function jumpPublished(region) {
   const current = model?.outline.regions.find(r => r.id === region);
   if (!current) return;
   const part = model.outline.published?.parts?.[region];
-  if (part && sameSpan(part.span, current.span)) revealed.add(region);
+  if (part && sameSpan(part.span, current.span)) { revealed.add(region); hiddenDetails.delete(region); }
   filter = ''; selected = region; api.postMessage({ type: 'select', region }); render();
   [...root.querySelectorAll('section')].find(n => n.dataset.region === region)?.scrollIntoView({ block: 'start' });
+}
+function regionView(region, expanded) {
+  if (expanded) { hiddenDetails.delete(region); revealed.add(region); }
+  else { hiddenDetails.add(region); revealed.delete(region); }
+  render();
+  [...root.querySelectorAll('section')].find(n => n.dataset.region === region)?.scrollIntoView({ block: 'start' });
+}
+function proofViews(hidden) {
+  proofsHidden = hidden;
+  for (const part of Object.values(model.outline.published?.parts || {})) {
+    if (part.role !== 'proof' || !model.outline.regions.some(r => r.id === part.region && sameSpan(r.span, part.span))) continue;
+    hiddenDetails.delete(part.region);
+    if (hidden) revealed.delete(part.region); else revealed.add(part.region);
+  }
+  api.postMessage({ type: 'proofVisibility', hidden }); render();
 }
 function proofNavigation(parent, part) {
   if (!part?.tag || !['statement', 'proof'].includes(part.role)) return;
@@ -215,6 +233,13 @@ function render() {
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
   button(readingBar, '← Return to reading outline', { type: 'reading_return' }, 'reading-return');
+  if (Object.values(o.published?.parts || {}).some(p => p.role === 'proof' && o.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)))) {
+    for (const hidden of [true, false]) {
+      const control = el('button', hidden ? 'Hide proofs' : 'Show proofs', readingBar);
+      control.type = 'button'; control.dataset.action = hidden ? 'hide-proofs' : 'show-proofs';
+      control.addEventListener('click', () => proofViews(hidden));
+    }
+  }
   if (reference?.status === 'changed or removed') el('p', reference.notice, root, 'warning').dataset.reference = 'true';
   if (o.retained_error) el('p', `Retained source unavailable: ${o.retained_error}. No source text was guessed.`, root, 'warning');
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
@@ -297,13 +322,13 @@ function render() {
   select.value = filter; select.dataset.readingLevel = 'true';
   select.addEventListener('change', () => { filter = select.value; render(); });
   if (!o.regions.length) el('p', 'Select a passage in the source and add a region. Formal evidence is optional.');
-  const readerNotes = [];
+  const readerNotes = o.annotations.map(note => ({ title: 'Overview', note }));
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
     const box = el('section', undefined, root, `region${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
     el('h2', r.title, box);
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
-    const expanded = !r.collapsed || !!publishedPart && revealed.has(r.id);
+    const expanded = !hiddenDetails.has(r.id) && (revealed.has(r.id) || !r.collapsed && !(publishedPart?.role === 'proof' && proofsHidden));
     if (originalPart && !publishedPart) el('p', 'This region range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
     if (publishedPart && expanded && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
     if (r.statement && !publishedPart) {
@@ -312,8 +337,20 @@ function render() {
       if (r.statement_text !== null) el('pre', r.statement_text, statement).dataset.statement = r.id;
       button(statement, 'Go to statement', { type: 'navigate', region: r.id, statement: true }, 'navigate-statement');
     } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
-    if (!expanded) el('p', 'Argument detail hidden; expand against the retained source.', box, 'muted');
+    if (!expanded) el('p', publishedPart?.role === 'proof' ? 'Proof hidden.' : 'Argument detail hidden.', box, 'muted');
     else if (r.argument_text !== null && !publishedPart) el('pre', r.argument_text, box).dataset.argument = r.id;
+    if (!publishedPart || publishedPart.role === 'proof') {
+      const proof = publishedPart?.role === 'proof';
+      const control = el('button', (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box);
+      control.type = 'button'; control.dataset.action = (expanded ? 'hide-' : 'show-') + (proof ? 'proof' : 'details');
+      control.dataset.write = String(!expanded && !publishedPart && r.argument_text === null);
+      control.setAttribute('aria-expanded', String(expanded));
+      control.addEventListener('click', () => {
+        // Manual collapsed regions load exact source through the existing action.
+        if (!expanded && !publishedPart && r.argument_text === null) post({ type: 'toggle', region: r.id });
+        else regionView(r.id, !expanded);
+      });
+    }
     if (publishedPart) proofNavigation(box, publishedPart);
     // Editing forms live outside the statement/proof reading sequence. Opening
     // an annotation editor must not insert a panel between them.
@@ -325,7 +362,7 @@ function render() {
     // Selection is local view state, not a publication; it requires no idle reply.
     choose.addEventListener('click', () => { selected = r.id; busy = false; render(); });
     button(actions, r.collapsed ? (expanded ? 'Keep source expanded' : 'Expand exact source') : 'Hide argument detail', () => {
-      revealed.delete(r.id); return { type: 'toggle', region: r.id };
+      revealed.delete(r.id); hiddenDetails.delete(r.id); return { type: 'toggle', region: r.id };
     }, 'toggle', true);
     button(actions, o.published ? 'Open exact retained passage' : 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
     if (o.published) {
@@ -345,7 +382,8 @@ function render() {
     for (const { title, note } of readerNotes) {
       el('h3', `${title} · ${label(note.kind)}`, notes);
       el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
-      el('p', note.text, notes, 'reader-note-text');
+      if (window.MRWAnnotations) window.MRWAnnotations.render(notes, note.text);
+      else el('p', note.text, notes, 'reader-note-text');
     }
   }
   controls();
@@ -359,6 +397,12 @@ window.addEventListener('message', event => {
   if (value.type === 'outline') {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
+    if (!proofPreferenceLoaded) { proofsHidden = value.proofsHidden === true; proofPreferenceLoaded = true; }
+    if (value.readingFocus && value.readingFocus.serial !== lastReadingFocus) {
+      const region = model.outline.regions.find(r => r.id === value.readingFocus.region);
+      const part = region && model.outline.published?.parts?.[region.id];
+      if (part && sameSpan(part.span, region.span)) { revealed.add(region.id); hiddenDetails.delete(region.id); }
+    }
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
       // clear only the submitted draft, not newer typing in the same form.

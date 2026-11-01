@@ -1,0 +1,24 @@
+{
+  "version": "0.9.3",
+  "user_observation": {
+    "installed_0_9_2_icon": "Visible and liked by the user",
+    "annotation": "User reports the proof explanation is Unicode rather than typeset mathematics"
+  },
+  "design_clarification": "Support top-down reading with hidden/expanded proofs, toward vertex elimination when the reader supplies or develops a deductive outline.",
+  "annotation_edit": {
+    "saved": true,
+    "tag": "08ZG",
+    "role": "proof",
+    "annotation_id_preserved": true,
+    "origin": "ai_proposal",
+    "author": "Codex",
+    "expressions": 23,
+    "all_expressions_mathml": true,
+    "source_supporting_bytes_unchanged": true,
+    "overview_bytes_unchanged": true,
+    "other_outline_fields_and_annotations_preserved": true,
+    "previous_annotation_preserved_privately": true
+  },
+  "visual_acceptance_of_0_9_3": "Not observed; no repeat of the known desktop-automation campaign.",
+  "scope": "Rendering and reading visibility only; explicit inference graphs and vertex elimination remain planned."
+}

@@ -5,7 +5,8 @@
   "upstream": "https://github.com/KaTeX/KaTeX/tree/v0.19.0",
   "files": {
     "katex.min.js": "103a53763cc033bba8d175bf3f0ba597c3505c9b6747dd3f2c7bc2a6bfcc8ae7",
-    "LICENSE": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3"
+    "LICENSE": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3",
+    "auto-render.min.js": "e5372d199bcdae8b4de71d0f7ceba72a4ba12774a27c60a6f1f77d03b3228ee4"
   },
   "use": "Local MathML output only; no remote renderer, stylesheets or fonts"
 }

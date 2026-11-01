@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | 0.9.2: live Markdown reading navigator, expanded source reading, published statement/proof links, exact retained navigation and occurrence-specific return | Not implemented |
+| Manual overview across several sources | 0.9.3: MRW sidebar, live Markdown reading navigator, published statement/proof links, rendered annotation equations, exact retained navigation and occurrence-specific return | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
@@ -60,6 +60,27 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Reader annotation mathematics — 2026-11-01
+
+The user confirmed the installed MRW icon is visible and liked it, then pointed
+out that the saved explanation used Unicode rather than typeset mathematics.
+Patch 0.9.3 renders explicitly delimited TeX in overview and passage annotations
+with the existing bundled KaTeX, retaining exact editable text and attribution.
+Plain Unicode remains supported. This addresses a reading presentation issue;
+it adds no automatic explanation, proof checking or source-record conversion.
+The requested Codex explanation receives equivalent TeX notation through an
+explicit guarded edit, with other annotations and retained source bytes preserved.
+See [validation](docs/READING_OUTLINE_VALIDATION.md#annotation-mathematics--2026-11-01).
+
+The user also requested easily hidden proofs as part of the top-down outline
+principle. The reading toolbar now hides/shows published proofs while statements
+remain visible; each proof expands independently. A host-local workspace
+preference survives reopening, and following an exact proof temporarily reveals
+that destination. These controls supply progressive disclosure toward the
+deductive/vertex-elimination model when a reader supplies or develops an outline.
+Explicit inference structure, joint premises, local scope and recoverable
+eliminated steps remain obligations of the planned graph machinery.
 
 ### Observed proof visibility blocker — 2026-11-01
 

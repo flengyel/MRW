@@ -1019,6 +1019,8 @@ test('annotation success feedback follows core publication and is absent after r
   const root=await temporary(t), file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
   const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
   const created=await h.commands.get('mrw.createOutline')();assert.ok(created);
+  assert.match(h.panels[0].webview.html, /MRWAnnotations/);
+  assert.match(h.panels[0].webview.html, /renderMathInElement/);
   const notices=[];h.api.window.setStatusBarMessage=text=>notices.push(text);
   const panel=h.panels[0], draft='note:overview:new';
   const value={type:'edit',draft,change:{kind:'annotation',region:null,id:null,purpose:'explanation',text:'Saved reader explanation',origin:'human_work',author:'Reader'}};
@@ -1050,4 +1052,18 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
     assert.ok(overflow.some(v=>v.command===command));assert.ok(h.commands.has(command));
   }
   assert.equal(h.requests.length,0,'registering the icon, views and menus launches no service');
+});
+
+test('proof visibility uses only host-local UI preferences and survives reader reopening', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const state=new Map(),h=await harness(root,state);h.focus(h.editor(h.document(file,'Source.')));
+  const created=await h.commands.get('mrw.createOutline')();assert.ok(created);
+  const count=h.requests.length;
+  await h.panels[0].receive({type:'proofVisibility',hidden:true});
+  assert.equal(h.requests.length,count,'hiding invokes no Python service or record write');
+  assert.equal(h.state.get('mrw.readerProofsHidden.v1'),true);
+  await h.panels[0].receive({type:'ready'});
+  assert.equal(h.panels[0].webview.messages.findLast(v=>v.type==='outline').proofsHidden,true);
+  const reopened=await harness(root,state);await reopened.commands.get('mrw.openOutline')();
+  assert.equal(reopened.panels[0].webview.messages.findLast(v=>v.type==='outline').proofsHidden,true);
 });

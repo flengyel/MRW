@@ -60,6 +60,16 @@ explicit published roles and matching retained spans. Multiple proofs stay
 separate. A changed association is reported rather than redirecting the link.
 Opening a hidden proof for reading does not save a collapse-state change.
 
+In **0.9.3**, the sticky reading toolbar has **Hide proofs / Show proofs**.
+Statements stay visible, and each published proof has its own **Show proof /
+Hide proof** control. The workspace remembers whether to start with proofs
+hidden. Individual expansions last for the live view; following a proof link
+reveals that exact proof while other proofs can stay hidden. Source records and
+annotation drafts are preserved. Manual regions have visible Show/Hide details
+controls, retaining the existing saved expansion action when their text must be
+loaded. This lets a reader move from overview to detail while supplying or
+developing an outline; it requires no formalization or compulsory reading order.
+
 Region editing forms now live under **Source details and tools → Notes and
 tools: REGION**, outside the statement/proof sequence. Opening an annotation
 form there cannot insert it between the statement and proof. Existing notes
@@ -74,6 +84,14 @@ that the submitted version was saved and the newer edits remain unsaved. An
 unconfirmed or failed publication keeps the text and says **Save not confirmed**.
 The open editor stays open; the application does not retry or save newer text
 without another explicit action.
+
+Reader notes in **0.9.3** support typeset equations: write `\(x=s(f(x))\)`
+inline, or `\[s(Y)=G^{-1}(\Delta).\]` on a separate line. `$$ ... $$` also
+displays an equation. The saved text and editor retain those exact delimiters;
+**Exact annotation text** makes them available beside the rendered note.
+Plain Unicode remains supported. HTML, links and other prose stay literal;
+single dollar signs are ordinary text. Invalid TeX stays visible with a display
+warning. This uses the local bundled renderer without a compiler or network.
 
 For example, an overview might have `# Separation`, `## Statements to compare`,
 and `## Questions for later`. Insert a whole-source reference to the retained

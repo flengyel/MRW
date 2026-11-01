@@ -88,6 +88,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved,
+      proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
       reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
@@ -137,6 +138,12 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!value || typeof value.type !== 'string') return;
     if (value.type === 'storageStatus') { c.storageCheck?.(!!value.dirty); return; }
     if (value.type === 'ready') return send(c, c.result);
+    if (value.type === 'proofVisibility') {
+      if (typeof value.hidden !== 'boolean') return;
+      try { await context.workspaceState.update('mrw.readerProofsHidden.v1', value.hidden); }
+      catch (error) { await vscode.window.showErrorMessage(`MRW: Could not save the proof visibility preference: ${error.message}`); }
+      return;
+    }
     if (value.type === 'select') {
       if (c.result.outline.regions.some(r => r.id === value.region)) c.selected = value.region;
       active = c.result.outline.id; return;
@@ -204,10 +211,11 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
       const support = [];
+      for (const name of ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
+        support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
+      }
       if (result.outline.acquisition?.kind === 'stacks-section') {
-        for (const name of ['media/katex/katex.min.js', 'src/stacksView.js']) {
-          support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
-        }
+        support.push(await fs.readFile(path.join(context.extensionPath, 'src/stacksView.js'), 'utf8'));
       }
       panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support);
     } else c.panel.reveal(c.panel.viewColumn);

@@ -1,5 +1,59 @@
 # Codex continuation: MRW source work and companion notes
 
+## Typeset annotations and proof visibility — 2026-11-01
+
+Started clean at `ddab6489a28bf91914b9b106302647d55c66f587`. The user confirms
+the installed MRW icon is visible and likes it. They identified plain Unicode
+in the explanation as a presentation limitation, then requested easily hidden
+proofs in the top-down reading pattern. They clarified that vertex elimination
+is the deductive organizing model when a reader supplies or works toward an
+outline. Preserve that direction in `docs/PROOF_OUTLINES.md`; it does not turn
+current navigation links into inferred premises or implemented graph elimination.
+
+Patch **0.9.3** renders explicitly delimited annotation equations with bundled
+KaTeX 0.19.0 and its pinned auto-render helper. Support `\( ... \)` inline and
+`\[ ... \]` / `$$ ... $$` display math; single dollar signs remain prose.
+Annotations retain exact editable text and attribution. HTML/URLs stay literal,
+macros are isolated per expression, and errors keep the original TeX with a
+visible message. Overview annotations also have a separate reading display.
+No schema, resolver, reference, core publication or acquisition change is added.
+
+The sticky reading toolbar has **Hide proofs / Show proofs** and published
+proof cards have individual controls. Statements remain visible. A Boolean
+workspace UI preference controls initial visibility across reopening; individual
+choices last in the live view. Direct proof navigation reveals its exact target.
+Published-proof controls preserve records and unsaved drafts. Manual regions
+gain visible detail controls using their existing saved expansion action when
+the collapsed text needs loading.
+
+The specific Codex explanation on **08ZG — Proof** was changed to equivalent
+TeX notation by one guarded core edit, with the same annotation ID and attribution.
+All **23 equations** rendered to restricted MathML; the earlier text was saved
+privately first. All other outline fields/annotations, source/support blobs and
+ordinary overview bytes were verified unchanged. Preserve this genuine study
+work and do not rerun the guarded writer or old seed fixtures. No annotation body
+is committed. See [the validation follow-up](READING_OUTLINE_VALIDATION.md#annotation-mathematics--2026-11-01).
+
+The new math/proof-controls visual observation is pending. Keep the confirmed
+0.9.2 icon report separate. Do not restart the known desktop-automation retry
+campaign or demand another Ready/study sequence. Broader inference graphs and
+vertex elimination remain planned; Windows-backed storage qualification stays
+deferred.
+
+All **77 Node tests** pass. Python ran **362 tests (303 passed, 59 expected
+skips)**, with no later shared-service changes. Syntax, compilation and document
+checks pass; packaging follows completed command/bridge tests sequentially.
+
+The verified **0.9.3** VSIX is installed: **65 package files**, all **60 installed
+runtime files** matching, SHA-256
+`c9e3d2cd74b30e5646bda70e239b50f6c846f02af50b202404ffd42a3738396e`.
+The installed read-only bridge opened the exact retained passage and rendered
+all 23 saved annotation equations, preserving overview/store bytes. Earlier
+packages remain. The current window loads it with **Developer: Reload Window**
+after saving or copying unsaved reader-form text. Use **Hide proofs**, then
+**Proof ↓ / Show proof** to choose detail. Do not force a reload or repeat the
+private annotation writer. The new layout still needs a visible observation.
+
 ## MRW entry point, proof visibility and save feedback — 2026-11-01
 
 Started clean at `9ee11b4bfa98be09e34e02783cabe0d1c710ca2c`. The user confirms

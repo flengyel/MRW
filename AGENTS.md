@@ -69,6 +69,18 @@ The MRW Activity Bar container owns the default placement of the existing Readin
 Outline and Research Tools views. Keep their IDs, the native view-title **…**
 menu and command-palette access. Opening the container launches no service or
 source acquisition; respect VS Code's saved user view placement.
+Patch 0.9.3 renders explicitly delimited annotation equations with the bundled
+KaTeX auto-render helper and restricted native MathML. Keep prose inert, exact
+annotation text editable/available, attribution separate, macros isolated per
+expression and failure fallback visible. Rendering never rewrites saved notes
+or invokes a TeX process, network service or checker. Preserve older Unicode
+annotations; only an explicitly requested annotation edit changes their text.
+Published proof cards have visible Show/Hide controls and a Hide proofs / Show
+proofs reading toolbar. Keep the workspace's initial proof-visibility preference
+in host-local UI state; individual expansions are live view choices. Direct
+proof navigation reveals its exact destination. Preserve source records and
+drafts. This presentation supports reader-supplied/developing deductive outlines;
+explicit inference graphs and vertex elimination remain planned.
 Patch 0.9.2 keeps annotation forms and region editing out of the source reading
 sequence. Direct statement/proof links use only explicit published roles within
 one retained import and exact matching spans. Temporary proof expansion is live

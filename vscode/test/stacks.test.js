@@ -29,7 +29,7 @@ test('renderer refuses external resources and independent expressions do not sha
 });
 
 test('bundled math code stays under the existing nonce policy without network/fonts', () => {
-  const support = ['media/katex/katex.min.js', 'src/stacksView.js'].map(n =>
+  const support = ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/stacksView.js'].map(n =>
     fs.readFileSync(path.join(__dirname, '..', n), 'utf8'));
   const html = outlineHtml('const inert = "</script>";', support);
   assert.match(html, /default-src 'none'/);

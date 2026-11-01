@@ -138,6 +138,25 @@ title icons. This replaces default placement under Explorer while respecting
 host-owned view customizations. Opening the sidebar starts no backend or source
 acquisition. All existing command-palette entry points remain available.
 
+### Annotation mathematics — 2026-11-01
+
+Reader explanations and other annotations render explicit `\( ... \)` inline
+math and `\[ ... \]` / `$$ ... $$` display math with bundled KaTeX and native
+MathML. Other prose remains literal text, including Unicode, HTML and URLs;
+single dollar signs retain their ordinary meaning. Editing uses the exact saved
+text; the reading view also offers Exact annotation text. Invalid mathematics
+keeps its TeX with a visible fallback message. Rendering changes no attribution,
+saved content, source identity or mathematical status and starts no external tool.
+
+Published proof cards offer **Show proof / Hide proof** beside the mathematics.
+The sticky reading toolbar has **Hide proofs / Show proofs** for the source;
+statements remain visible. The initial visibility preference uses host-local
+workspace UI state. Individual choices stay in the live view; following an exact
+proof reveals that proof even when others are hidden. These controls preserve
+drafts and create no source-record mutation. Readers choose their level of detail
+without a prescribed sequence. Manual regions retain their existing saved
+expansion action and gain visible Show/Hide details controls.
+
 ### Proof visibility repair — 2026-11-01
 
 The user confirmed that the expanded 0.9.1 view improved reading, then found that

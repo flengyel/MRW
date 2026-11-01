@@ -39,6 +39,14 @@ its **…** command menu. **Reading Outline** is the primary view; other command
 remain in the collapsible **Research Tools** view. The command palette remains
 available. Opening the sidebar itself starts no Python, model or acquisition.
 
+Patch **0.9.3** typesets equations in reader annotations using the bundled
+KaTeX renderer. Use `\( ... \)` inline and `\[ ... \]` or `$$ ... $$` for
+displayed equations. The exact saved text remains available for editing and
+inspection; existing Unicode notes stay readable. Rendering works offline and
+keeps author attribution separate from the published source.
+The reading toolbar also offers **Hide proofs / Show proofs**, with individual
+controls on published proofs and a remembered workspace reading preference.
+
 Patch **0.9.2** keeps note-editing forms outside the statement/proof reading
 sequence and adds direct **Proof** / **Statement** links for matching published
 source parts. Reading a hidden proof expands it for the current view without

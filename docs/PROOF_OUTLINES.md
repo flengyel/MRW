@@ -7,6 +7,19 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+The reader supplies an outline or works toward one. For a deductive outline,
+vertex elimination provides the organizing model: selected claims remain visible,
+joint premises and local scope are preserved, and suppressed steps can be
+expanded back to the original argument. A prose heading or navigation link alone
+does not supply an inference. The current reading controls are a presentation
+step toward that model; the explicit inference graph remains to be implemented.
+
+**Annotation display, 2026-11-01:** 0.9.3 typesets explicitly delimited annotation
+equations locally, retaining exact editable text and attribution. This is a
+derived reading view, separate from the retained source and proof evidence.
+The reader can hide/show published proofs together or individually while
+retaining visible statements; exact proof navigation reveals its destination.
+
 **Proof-visibility follow-up, 2026-11-01:** 0.9.2 keeps annotation editing out of
 the source sequence and provides direct navigation between explicitly published
 statement/proof parts in the same retained import. Links require exact current

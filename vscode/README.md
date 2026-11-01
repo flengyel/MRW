@@ -171,6 +171,36 @@ before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
 and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
 
+## Annotation mathematics (0.9.3)
+
+Reader explanations, questions and other annotations can include TeX equations:
+`\( ... \)` inline, and `\[ ... \]` or `$$ ... $$` for displayed mathematics.
+Saved overview and passage annotations use bundled KaTeX 0.19.0 with its local
+auto-render helper and native MathML. The ordinary editor keeps the exact text;
+the reading view offers **Exact annotation text**. Existing Unicode notes remain
+readable, without automatic rewriting. This is mathematics within plain prose;
+HTML, Markdown links and URLs remain literal, and single dollar signs stay text.
+
+Malformed or unsupported notation keeps its exact text with a visible warning.
+Expressions have separate macro state, bounded expansion and untrusted mode,
+as in the source reader. Rendering needs no stylesheets, fonts, remote service,
+TeX process or checker. Attribution and the explicit Save boundary are unchanged.
+
+### Choose the level of detail
+
+Use **Hide proofs / Show proofs** in the reading toolbar to keep published
+statements visible while choosing their detail. A proof has its own **Show proof /
+Hide proof** control. These published-proof controls change the reading view,
+preserving source records and drafts. The initial preference survives reopening
+through host-local workspace UI state; individual expansions last for the live
+view. A direct proof reference reveals its exact destination. Manual regions
+offer Show/Hide details, using the existing saved expansion action when needed.
+
+This supports the top-down outline principle as a reader supplies or develops an
+outline. The broader deductive model preserves claims, joint premises, local
+scope and expansion of suppressed steps. Explicit inference graphs and vertex
+elimination remain a separate planned implementation.
+
 ## Statement and proof reading (0.9.2)
 
 A published statement with an unchanged associated proof has a direct **Proof ↓**
@@ -497,8 +527,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.2.vsix
-sha256sum vscode/theorem-terminal-0.9.2.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.3.vsix
+sha256sum vscode/theorem-terminal-0.9.3.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -530,11 +560,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.9.2.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.9.3.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.9.2**.
+The extension identity is **flengyel.theorem-terminal**, version **0.9.3**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

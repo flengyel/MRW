@@ -307,6 +307,78 @@ This is user-reported explanatory benefit for one passage. No formal checker
 ran on the explanation, no model API request was made, and no broad claim of
 proof correctness, comprehension or measured productivity follows from it.
 
+## Annotation mathematics — 2026-11-01
+
+Started clean at `ddab6489a28bf91914b9b106302647d55c66f587`. The user reports
+that the installed **0.9.2 MRW icon** is visible and likes it. That observation
+supersedes the earlier pending icon check; it does not establish the new 0.9.3
+math/proof-controls appearance. They pointed out that the saved explanation used
+Unicode, then requested hidden/expanded proofs for top-down reading. They
+clarified that vertex elimination informs the deductive model when a reader
+supplies or develops an outline. The
+[scoped report](evidence/reading-outline-20261101/annotation-math.json) separates
+these observations and design requests.
+
+Patch **0.9.3** adds local equation rendering for overview and passage
+annotations, preserving exact editable text, attribution and Save behavior.
+It uses the existing pinned KaTeX **0.19.0** and that version's bundled MIT
+auto-render helper, with exact hash/license checks. Only explicit `\( ... \)`,
+`\[ ... \]` and `$$ ... $$` delimiters render. Single dollars, Unicode, HTML,
+Markdown links and URLs remain literal prose. Exact annotation text remains
+available, and invalid math retains its text with a visible warning. Output is
+restricted native MathML, with fresh macro state per expression, bounded
+expansion/size and untrusted mode. See the official
+[delimiter API](https://katex.org/docs/autorender.html) and
+[rendering options](https://katex.org/docs/options.html); the bundled version
+and tests govern this implementation.
+
+The published-source reading toolbar has **Hide proofs / Show proofs**, with
+individual **Show proof / Hide proof** controls. Statements stay visible. A
+Boolean workspace UI preference restores initial visibility, while individual
+choices remain live view state. An exact proof destination reveals that proof.
+Published-proof hiding invokes no Python service or record publication, and
+preserves annotation drafts. Manual regions retain their existing saved
+expansion action, now with visible detail controls. This is progressive
+disclosure toward the reader's outline; explicit inference graphs and vertex
+elimination are still pending.
+
+One guarded core edit changed only the requested **Codex / AI proposal**
+annotation on **08ZG — Proof** to equivalent TeX notation. A subsequent load
+confirmed the same annotation ID and attribution. All **23 expressions**
+rendered to restricted MathML. All other outline fields/annotations, immutable
+source/support blobs and ordinary overview bytes were unchanged. The earlier
+annotation is preserved privately, and neither version's body is committed.
+The writer refuses a changed annotation or a repeated run.
+
+Focused checks cover actual bundled delimiter parsing and KaTeX output, inline
+and display math, literal Unicode/currency/HTML/links, malformed notation,
+isolated macros, exact editor text, fallback and the nonce policy. DOM/command
+checks cover hidden proofs with visible statements, chosen-proof expansion,
+exact focus, draft preservation, no record mutation and host-local preference
+restoration on reopening. Actual 0.9.3 layout observation remains unperformed;
+the known desktop-automation barrier was not retried. No provider request,
+source acquisition, compiler, notebook, container or storage trial was added.
+
+All **77 Node tests passed**, including command/bridge tests before packaging.
+The Python suite ran **362 tests: 303 passed, 59 expected skips**; no shared
+Python code changed afterward. JavaScript syntax, Python compilation,
+documentation targets and diff checks passed. Packaging and bridge checks ran
+sequentially. The first focused fallback test incorrectly tried to delete a
+nonconfigurable VM global; assigning it undefined exercised the intended
+missing-renderer path. This was a test setup correction.
+
+The verified **0.9.3** package contains **65 files**, SHA-256
+`c9e3d2cd74b30e5646bda70e239b50f6c846f02af50b202404ffd42a3738396e`.
+Installation through the established WSL code-server CLI succeeded; the
+[manifest and all 60 installed runtime files](evidence/reading-outline-20261101/installed-package-math.json)
+match the archive. The [installed bridge check](evidence/reading-outline-20261101/installed-bridge-math.json)
+opened the original exact retained passage and rendered the saved annotation's
+23 equations to MathML, with all note/store bytes unchanged. Earlier packages
+remain preserved. An open window loads this update with **Developer: Reload
+Window** after saving or copying unsaved reader-form text; no user window was
+forcibly reloaded or closed. Visible acceptance of these new controls remains
+unobserved and separate from those installed-byte/bridge results.
+
 ## Boundaries
 
 The local explanatory-benefit report and the user's earlier practical-benefit
