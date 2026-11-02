@@ -1,5 +1,46 @@
 # Codex continuation: MRW source work and companion notes
 
+## Compact proofs and closable Reader notes — 2026-11-01
+
+Started clean at `ff1b08324cb854b6dc1c98fe4bf81f410854dfce`. The user requested
+a screenshot because hidden proofs still occupied excessive space, then reported
+that Reader notes could not be closed. One passive Windows PrintWindow capture
+of the existing normal WSL reading window succeeded without focus changes or
+input. It confirms the 0.9.3 reading controls and typeset annotation mathematics,
+but also a tall, mostly empty hidden-proof card and always-expanded Reader notes.
+The image contains genuine private annotation text and stays in the ignored work
+folder, not Git. See [the scoped follow-up](READING_OUTLINE_VALIDATION.md#compact-hidden-details--2026-11-01).
+
+Patch **0.9.4** renders a hidden published proof as a single compact reveal row
+with its retained title. It removes the empty card's heading, status paragraph,
+large button spacing and redundant return link. Revealing it retains exact source
+navigation. Saved **Reader notes (N)** now uses a native disclosure, initially
+closed; the live open/closed choice survives refresh/save replies through the
+existing disclosure-state mechanism. Closing it changes no text, attribution,
+record or separate annotation-editor draft. The repair changes no shared core,
+storage, reference format, mathematical status or acquisition boundary.
+
+Do not publish the screenshot, rerun the private annotation writer, reset the
+genuine reading store, force-reload user windows or start another desktop retry
+campaign. The new 0.9.4 layout has not yet been observed in the installed window;
+the screenshot is evidence of the preceding problem, not acceptance of the fix.
+Broader inference graphs, vertex elimination and Windows storage qualification
+remain deferred.
+
+All **77 Node tests** pass, including updated hidden-proof and Reader notes
+open/close regression checks. Python ran **362 tests (303 passed, 59 expected
+skips)**. Syntax, compilation, document and diff checks pass; packaging follows
+completed command/bridge tests sequentially.
+
+The verified **0.9.4** VSIX is installed: 65 package files, all 60 installed
+runtime files matching, SHA-256
+`cee62ec8ec49cd4381b3031e36489d9f05f767a6946a3d6df1b19901754fa5fb`.
+The installed read-only bridge opened the original exact passage and rendered
+the saved explanation, preserving all overview/store bytes. Earlier packages
+remain. Load the update with **Developer: Reload Window** after saving or copying
+unsaved reader-form text; no window was forcibly reloaded. New layout acceptance
+remains unobserved.
+
 ## Typeset annotations and proof visibility — 2026-11-01
 
 Started clean at `ddab6489a28bf91914b9b106302647d55c66f587`. The user confirms

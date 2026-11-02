@@ -19,6 +19,8 @@ equations locally, retaining exact editable text and attribution. This is a
 derived reading view, separate from the retained source and proof evidence.
 The reader can hide/show published proofs together or individually while
 retaining visible statements; exact proof navigation reveals its destination.
+Patch 0.9.4 makes hidden proofs compact reveal rows and saved Reader notes a
+closable disclosure, preserving exact text and attribution.
 
 **Proof-visibility follow-up, 2026-11-01:** 0.9.2 keeps annotation editing out of
 the source sequence and provides direct navigation between explicitly published

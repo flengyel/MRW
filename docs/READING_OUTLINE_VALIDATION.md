@@ -379,6 +379,52 @@ Window** after saving or copying unsaved reader-form text; no user window was
 forcibly reloaded or closed. Visible acceptance of these new controls remains
 unobserved and separate from those installed-byte/bridge results.
 
+## Compact hidden details — 2026-11-01
+
+Started clean at `ff1b08324cb854b6dc1c98fe4bf81f410854dfce`. The user explicitly
+requested a screenshot of the excessive space occupied by hidden proofs, then
+reported that Reader notes could not be closed. A single passive PrintWindow
+capture of the existing normal Windows/WSL reader succeeded without changing
+focus or sending keyboard/mouse input. It confirms the installed 0.9.3 controls,
+hidden proof display and typeset annotation mathematics. Thus the earlier
+pending observation of those features is now established, alongside a newly
+observed layout problem. The capture is kept privately in
+`.codex-work/reading-outline-20261101/hidden-proofs-20261101.png`; it contains
+genuine annotation text and is not published. See the
+[sanitized report](evidence/reading-outline-20261101/compact-details.json).
+
+The hidden proof still occupied a large card with a heading, hidden-status
+paragraph, Show proof button and Statement return link. Reader notes consumed
+the remaining space without a closing control. Patch **0.9.4** replaces hidden
+published proof cards with a single compact reveal row, retaining their title
+and exact destination. Saved **Reader notes (N)** now uses a native disclosure,
+initially closed. The live choice survives refresh/save replies. Opening or
+closing it changes no saved note or separate editing draft; the source reading
+sequence and attribution stay intact.
+
+Focused reader checks pass for one-control hidden proofs, exact expansion,
+visible statements, note open/close across refresh, attribution, raw text and
+absence of record-mutation requests. The new 0.9.4 layout has not been observed
+in the installed window. The screenshot establishes the preceding defect and
+0.9.3 rendering, rather than visual acceptance of this repair. No additional
+desktop input/retry, private annotation edit, network acquisition, provider,
+compiler, notebook, container or storage campaign was introduced.
+
+All **77 Node tests passed**, including the actual bundled bridge and updated
+reader regressions. Python ran **362 tests: 303 passed, 59 expected skips**.
+Syntax, compilation, document targets and diff checks pass. Packaging follows
+these completed command/bridge tests sequentially.
+
+The verified **0.9.4** VSIX contains **65 files**, SHA-256
+`cee62ec8ec49cd4381b3031e36489d9f05f767a6946a3d6df1b19901754fa5fb`.
+It installed through the existing WSL code-server workflow. The
+[manifest and all 60 installed runtime files](evidence/reading-outline-20261101/installed-package-compact.json)
+match the archive, and the [installed read-only bridge](evidence/reading-outline-20261101/installed-bridge-compact.json)
+opened the original exact passage and rendered the saved explanation with all
+overview/store bytes unchanged. Earlier packages remain. A current window loads
+the update through **Developer: Reload Window** after saving or copying any
+unsaved annotation draft; no user window was forcibly reloaded or closed.
+
 ## Boundaries
 
 The local explanatory-benefit report and the user's earlier practical-benefit

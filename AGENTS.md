@@ -81,6 +81,11 @@ in host-local UI state; individual expansions are live view choices. Direct
 proof navigation reveals its exact destination. Preserve source records and
 drafts. This presentation supports reader-supplied/developing deductive outlines;
 explicit inference graphs and vertex elimination remain planned.
+Patch 0.9.4 gives hidden published proofs one compact reveal row, with no empty
+proof card, and makes the saved Reader notes display a native disclosure that
+starts closed and preserves its live open/closed choice across replies. Folding
+notes must never delete them or close their separate editing forms. Keep private
+screenshots of actual annotations outside Git.
 Patch 0.9.2 keeps annotation forms and region editing out of the source reading
 sequence. Direct statement/proof links use only explicit published roles within
 one retained import and exact matching spans. Temporary proof expansion is live

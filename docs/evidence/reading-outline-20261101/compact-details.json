@@ -1,0 +1,18 @@
+{
+  "observed_version": "0.9.3",
+  "observation": "One passive capture of the existing normal Windows VS Code / WSL reader, at the user request",
+  "dimensions": [
+    1985,
+    2075
+  ],
+  "input_sent": false,
+  "focus_changed": false,
+  "image_private": true,
+  "observed": [
+    "Hidden proof occupies a full card despite hidden source text",
+    "Reader notes has no closing control",
+    "Annotation mathematics renders visibly"
+  ],
+  "repair": "0.9.4 uses one compact proof reveal row and a native initially closed Reader notes disclosure",
+  "visual_acceptance_of_0_9_4": "Not observed"
+}

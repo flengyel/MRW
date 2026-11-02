@@ -324,11 +324,12 @@ function render() {
   if (!o.regions.length) el('p', 'Select a passage in the source and add a region. Formal evidence is optional.');
   const readerNotes = o.annotations.map(note => ({ title: 'Overview', note }));
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
-    const box = el('section', undefined, root, `region${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
-    el('h2', r.title, box);
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
     const expanded = !hiddenDetails.has(r.id) && (revealed.has(r.id) || !r.collapsed && !(publishedPart?.role === 'proof' && proofsHidden));
+    const compactProof = publishedPart?.role === 'proof' && !expanded;
+    const box = el('section', undefined, root, `region${compactProof ? ' compact-proof' : ''}${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
+    if (!compactProof) el('h2', r.title, box);
     if (originalPart && !publishedPart) el('p', 'This region range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
     if (publishedPart && expanded && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
     if (r.statement && !publishedPart) {
@@ -337,12 +338,14 @@ function render() {
       if (r.statement_text !== null) el('pre', r.statement_text, statement).dataset.statement = r.id;
       button(statement, 'Go to statement', { type: 'navigate', region: r.id, statement: true }, 'navigate-statement');
     } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
-    if (!expanded) el('p', publishedPart?.role === 'proof' ? 'Proof hidden.' : 'Argument detail hidden.', box, 'muted');
+    if (!expanded && !compactProof) el('p', 'Argument detail hidden.', box, 'muted');
     else if (r.argument_text !== null && !publishedPart) el('pre', r.argument_text, box).dataset.argument = r.id;
     if (!publishedPart || publishedPart.role === 'proof') {
       const proof = publishedPart?.role === 'proof';
-      const control = el('button', (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box);
+      const control = el('button', compactProof ? `▸ ${r.title}` : (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box,
+        compactProof ? 'proof-disclosure' : undefined);
       control.type = 'button'; control.dataset.action = (expanded ? 'hide-' : 'show-') + (proof ? 'proof' : 'details');
+      if (compactProof) control.title = 'Show proof';
       control.dataset.write = String(!expanded && !publishedPart && r.argument_text === null);
       control.setAttribute('aria-expanded', String(expanded));
       control.addEventListener('click', () => {
@@ -351,7 +354,7 @@ function render() {
         else regionView(r.id, !expanded);
       });
     }
-    if (publishedPart) proofNavigation(box, publishedPart);
+    if (publishedPart && !compactProof) proofNavigation(box, publishedPart);
     // Editing forms live outside the statement/proof reading sequence. Opening
     // an annotation editor must not insert a panel between them.
     const passageTools = el('details', undefined, tools, 'passage-tools'); el('summary', `Notes and tools: ${r.title}`, passageTools);
@@ -378,7 +381,8 @@ function render() {
     noteForm(passageTools, r.id, null);
   }
   if (readerNotes.length) {
-    const notes = el('section', undefined, root, 'reader-notes'); el('h2', 'Reader notes', notes);
+    const notes = el('details', undefined, root, 'reader-notes'); keepOpen(notes, 'reader-notes');
+    el('summary', `Reader notes (${readerNotes.length})`, notes);
     for (const { title, note } of readerNotes) {
       el('h3', `${title} · ${label(note.kind)}`, notes);
       el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');

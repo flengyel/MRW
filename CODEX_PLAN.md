@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | 0.9.3: MRW sidebar, live Markdown reading navigator, published statement/proof links, rendered annotation equations, exact retained navigation and occurrence-specific return | Not implemented |
+| Manual overview across several sources | 0.9.4: MRW sidebar, live Markdown reading navigator, compact hidden proofs, collapsible rendered annotations, exact retained navigation and occurrence-specific return | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
@@ -60,6 +60,18 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Compact hidden details — 2026-11-01
+
+The user requested a screenshot of the installed 0.9.3 reader because hidden
+proofs still occupied excessive space, and reported that Reader notes could not
+be closed. A passive capture confirms an almost empty full-height proof card
+and always-expanded notes; it also confirms rendered annotation mathematics.
+Patch 0.9.4 replaces each hidden published proof with one compact reveal row and
+makes Reader notes a native disclosure, initially closed. Notes and their editors
+remain intact; folding creates no source-record change. This repairs the same
+top-down reading workflow. See
+[validation](docs/READING_OUTLINE_VALIDATION.md#compact-hidden-details--2026-11-01).
 
 ### Reader annotation mathematics — 2026-11-01
 

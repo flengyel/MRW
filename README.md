@@ -39,6 +39,10 @@ its **…** command menu. **Reading Outline** is the primary view; other command
 remain in the collapsible **Research Tools** view. The command palette remains
 available. Opening the sidebar itself starts no Python, model or acquisition.
 
+Patch **0.9.4** reduces a hidden proof to one compact reveal row. **Reader notes**
+starts collapsed and can be opened or closed by its heading, keeping mathematics
+in view and saved annotations intact.
+
 Patch **0.9.3** typesets equations in reader annotations using the bundled
 KaTeX renderer. Use `\( ... \)` inline and `\[ ... \]` or `$$ ... $$` for
 displayed equations. The exact saved text remains available for editing and

@@ -27,6 +27,7 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .reading-bar{position:sticky;top:0;z-index:2;background:var(--vscode-editor-background);padding:4px 0}.reading-bar button{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground);padding:5px 8px}.reader-tools{margin:10px 0 20px}.reader-tools>summary,.passage-tools>summary{cursor:pointer;font-size:.9em;opacity:.8}.region{scroll-margin-top:60px;border:0;border-top:1px solid var(--vscode-panel-border);padding:12px 0;margin:18px 0}.region>h2{font-size:1.15em}.passage-tools{margin:12px 0}.published-content{font-size:1.15em;line-height:1.75}
 .proof-navigation{display:flex;gap:12px;margin:10px 0}.proof-navigation button{background:none;color:var(--vscode-textLink-foreground);padding:3px 0;margin:0;text-decoration:underline}.reader-note-text{white-space:pre-wrap;line-height:1.6}
 .save-feedback{min-height:1.2em}.save-confirmation{color:var(--vscode-testing-iconPassed,var(--vscode-foreground))}
+.region.compact-proof{border:0;margin:0;padding:2px 0}.proof-disclosure{background:none;color:var(--vscode-textLink-foreground);padding:2px 0;margin:0;text-align:left}.reader-notes{margin:14px 0}.reader-notes>summary{cursor:pointer;font-weight:600;padding:4px 0}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }

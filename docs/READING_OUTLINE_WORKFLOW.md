@@ -70,6 +70,12 @@ controls, retaining the existing saved expansion action when their text must be
 loaded. This lets a reader move from overview to detail while supplying or
 developing an outline; it requires no formalization or compulsory reading order.
 
+In **0.9.4**, hidden published proofs occupy one compact row, such as
+**▸ 08ZH — Proof**. Click the row to reveal it. **Reader notes (N)** starts
+collapsed; click its heading to open or close the saved notes. The live choice
+survives source refresh and save replies. Closing the display preserves the
+saved notes and any separate annotation-editor draft.
+
 Region editing forms now live under **Source details and tools → Notes and
 tools: REGION**, outside the statement/proof sequence. Opening an annotation
 form there cannot insert it between the statement and proof. Existing notes

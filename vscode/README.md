@@ -171,6 +171,14 @@ before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
 and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
 
+## Compact hidden details (0.9.4)
+
+A hidden published proof uses a compact **▸ TAG — Proof** row, rather than an
+empty card. Select it to expand the exact proof. **Reader notes (N)** is a native
+disclosure, initially closed; its heading opens or closes the saved notes. The
+choice survives live refresh/save replies and preserves note text, attribution
+and separate editor drafts. Folding these displays invokes no record write.
+
 ## Annotation mathematics (0.9.3)
 
 Reader explanations, questions and other annotations can include TeX equations:
@@ -527,8 +535,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.3.vsix
-sha256sum vscode/theorem-terminal-0.9.3.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.4.vsix
+sha256sum vscode/theorem-terminal-0.9.4.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -560,11 +568,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.9.3.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.9.4.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.9.3**.
+The extension identity is **flengyel.theorem-terminal**, version **0.9.4**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

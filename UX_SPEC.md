@@ -157,6 +157,16 @@ drafts and create no source-record mutation. Readers choose their level of detai
 without a prescribed sequence. Manual regions retain their existing saved
 expansion action and gain visible Show/Hide details controls.
 
+### Compact hidden details — 2026-11-01
+
+A hidden published proof is one compact reveal row labelled with its retained
+title. It keeps no large heading, empty card, hidden-status paragraph or duplicate
+return link. Selecting it reveals the exact proof in place. Reader notes is a
+native disclosure labelled with the note count and starts closed. The reader
+can open/close it with mouse or keyboard; its live state survives refresh/save
+replies. Folding saved notes leaves their text, attribution and editing drafts
+intact, and creates no record mutation.
+
 ### Proof visibility repair — 2026-11-01
 
 The user confirmed that the expanded 0.9.1 view improved reading, then found that

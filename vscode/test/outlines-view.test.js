@@ -184,8 +184,15 @@ test('annotation forms cannot occur between statement and proof; reader notes re
   const tools = h.root.all().find(n=>n.className==='reader-tools');
   assert.ok(tools.all().some(n=>n.dataset.draft==='note:statement:new'));
   const notes = h.root.children.find(n=>n.className==='reader-notes');
+  assert.equal(notes.tag, 'details'); assert.equal(notes.open, false);
+  assert.equal(notes.children[0].textContent, 'Reader notes (1)');
   assert.match(notes.text(),/Reader question, separate from source/); assert.match(notes.text(),/author: Reader/);
   assert.ok(h.root.children.indexOf(notes)>h.root.children.indexOf(cards[1]));
+  notes.open = true; h.send(publishedModel());
+  const reopened = h.root.children.find(n=>n.className==='reader-notes'); assert.equal(reopened.open, true);
+  reopened.open = false; h.send(publishedModel());
+  assert.equal(h.root.children.find(n=>n.className==='reader-notes').open, false);
+  assert.equal(h.messages.some(m=>['edit','toggle'].includes(m.type)), false, 'folding notes changes no saved text');
 });
 
 test('overview and passage annotation displays retain raw editable TeX and attribution', () => {
@@ -210,6 +217,8 @@ test('proof reading controls hide details, preserve statements and drafts, and r
   h.button(h.root, 'hide-proofs').listeners.click();
   assert.match(card('statement').text(), /statement published source/);
   assert.doesNotMatch(card('proof').text(), /proof published source/);
+  assert.equal(card('proof').children.length, 1, 'hidden proof has only its compact reveal control');
+  assert.equal(card('proof').children[0].textContent, '▸ proof');
   assert.equal(h.button(card('proof'), 'show-proof')['aria-expanded'], 'false');
   assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'proofVisibility',hidden:true}));
   assert.ok(h.root.all().some(n => n.tag === 'textarea' && n.value === 'Unsaved reader work'));
@@ -229,12 +238,13 @@ test('restored proof visibility preserves exact source and a focused proof remai
   const value = {...publishedModel(),proofsHidden:true};
   const h = reader(true); h.send(value);
   const card = () => h.root.all().find(n => n.tag === 'section' && n.dataset.region === 'proof');
-  assert.match(card().text(), /Proof hidden/);
+  assert.equal(card().children.length, 1); assert.ok(h.button(card(), 'show-proof'));
   h.send({...value,readingFocus:{serial:1,region:'proof'}});
   assert.match(card().text(), /proof published source/);
   h.send(value); assert.match(card().text(), /proof published source/, 'refresh keeps the chosen live expansion');
   const fresh = reader(true); fresh.send(value);
-  assert.match(fresh.root.all().find(n => n.tag === 'section' && n.dataset.region === 'proof').text(), /Proof hidden/);
+  const restored = fresh.root.all().find(n => n.tag === 'section' && n.dataset.region === 'proof');
+  assert.equal(restored.children.length, 1); assert.ok(fresh.button(restored, 'show-proof'));
 });
 
 test('Proof links preserve multiple published proofs and reject changed or unrelated associations', () => {
