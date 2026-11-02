@@ -7,6 +7,13 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Reader diagrams, 2026-11-02:** 0.10.0 explicitly renders saved TikZ annotation
+blocks to retained SVGs. Code, attribution and source statements remain separate;
+drawing an arrow or square supplies no checked dependency or commutativity.
+Diagrams support a reader's explanation as they develop an outline. The graph
+representation and vertex-elimination machinery remain planned. See
+[the bounded workflow](TIKZ_WORKFLOW.md).
+
 The reader supplies an outline or works toward one. For a deductive outline,
 vertex elimination provides the organizing model: selected claims remain visible,
 joint premises and local scope are preserved, and suppressed steps can be

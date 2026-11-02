@@ -96,6 +96,7 @@ def _dispatch(request):
         'outline_stacks_prepare': ({'store', 'project_root', 'input'}, set()),
         'outline_stacks_import': ({'store', 'project_root', 'ticket', 'packet'}, set()),
         'outline_stacks_reference': ({'store', 'project_root', 'id', 'revision', 'tag'}, set()),
+        'outline_render_diagram': ({'store', 'project_root', 'id', 'revision', 'annotation', 'code'}, set()),
     }
     if not isinstance(method, str) or method not in fields:
         raise ValueError('Unknown editor action')
@@ -114,6 +115,9 @@ def _dispatch(request):
     if method.startswith('outline_stacks_'):
         from .stacks_import import stacks_action
         return stacks_action(request)
+    if method == 'outline_render_diagram':
+        from .reader_diagrams import diagram_action
+        return diagram_action(request)
     if method.startswith('outline_'):
         return outline_action(request)
     if method in ('investigation_parent', 'investigation_state', 'resume_investigation',

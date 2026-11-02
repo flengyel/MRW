@@ -26,7 +26,7 @@ MAX_FILES = 20000
 JSON_LIMIT = 32 * 1024 * 1024
 FAMILY = re.compile(r'(outlines|investigation)-[a-f0-9]{64}')
 HEX = re.compile(r'[a-f0-9]{64}')
-WRITE = {'outline_create', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import',
+WRITE = {'outline_create', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import', 'outline_render_diagram',
          'update_investigation', 'end_investigation', 'resume_investigation', 'send_assistance'}
 
 
@@ -77,7 +77,7 @@ def inventory(root, *, legacy=False):
                     parts=name.split('/')
                     owned=(len(parts)==2 and parts[0]=='model-calls' and parts[1].endswith('.json'))
                     owned=owned or (len(parts)==2 and parts[0].startswith('investigation-') and parts[1]=='active.json')
-                    owned=owned or (len(parts)==3 and parts[0].startswith('outlines-') and re.fullmatch(r'[a-f0-9-]{36}',parts[1]) and (parts[2] in ('outline.json','obsidian-links.json') or re.fullmatch(r'(?:source|artifact)-[a-f0-9]{64}\.bin',parts[2])))
+                    owned=owned or (len(parts)==3 and parts[0].startswith('outlines-') and re.fullmatch(r'[a-f0-9-]{36}',parts[1]) and (parts[2] in ('outline.json','obsidian-links.json','diagram-renders.json') or re.fullmatch(r'(?:source|artifact)-[a-f0-9]{64}\.bin',parts[2])))
                     if not owned: continue
                 st = regular(p)
                 raw = read_bounded(p, LIMIT, 'artifact payload')
@@ -356,6 +356,8 @@ class ArtifactStorage:
                     store.check_spans(store.state)
                     for artifact in store.state['artifacts']: store.artifact(artifact)
                     note_action(dict(method='outline_notes',store=str(base),project_root=root,id=folder.name))
+                    from .reader_diagrams import validate_retained
+                    validate_retained(store)
             inv = InvestigationStore(str(payload/('investigation-'+key)), root)
             if inv.active:
                 checked_parent(inv.active)

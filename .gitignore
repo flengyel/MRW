@@ -17,3 +17,4 @@ __pycache__/
 /.codex-work/artifact-storage-*/
 /.codex-work/stacks-*/
 /.codex-work/reading-outline-*/
+/.codex-work/tikz-*/

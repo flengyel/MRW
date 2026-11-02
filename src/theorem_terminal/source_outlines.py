@@ -398,6 +398,8 @@ class OutlineStore:
         if value.get('acquisition', {}).get('kind') == 'stacks-section':
             from .stacks_import import enrich
             enrich(self, value)
+        from .reader_diagrams import enrich as diagram_view
+        diagram_view(self, value)
         return {'outline': value, 'revision': self.revision, 'blocked': False}
 
 

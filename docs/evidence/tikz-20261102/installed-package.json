@@ -1,0 +1,9 @@
+{
+  "version": "0.10.0",
+  "entry": "./src/extension.js",
+  "extensionPath": "/home/flengyel/.vscode-server/extensions/flengyel.theorem-terminal-0.10.0",
+  "runtime_files": 61,
+  "runtime_bytes_match": true,
+  "production_manifest_matches": true,
+  "vsix_sha256": "1ba44124d4755caca7516c26d9339a4fde784058943874c48010082fa1c43792"
+}

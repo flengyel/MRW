@@ -1,0 +1,22 @@
+{
+  "phase": "reopen",
+  "vscode": "1.144.0",
+  "remote": "wsl",
+  "checks": [
+    "Native webview decoded retained SVG with no CSP violation; exact note/source preserved"
+  ],
+  "requests": [
+    "artifact_status",
+    "outline_list",
+    "outline_load",
+    "outline_notes",
+    "outline_notes"
+  ],
+  "errors": [],
+  "image": {
+    "width": 64,
+    "height": 58
+  },
+  "outline": "8a747f4b-5bc1-4180-818b-9038deecd121",
+  "complete": true
+}

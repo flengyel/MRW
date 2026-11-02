@@ -68,6 +68,7 @@ folders. The confirmation lists the project roots. This bounded store moves:
 | Supplied evidence attachments | Corresponding `artifact-HASH.bin` files, with separate evidence distinctions |
 | Outline/region identity, spans, context and attributed annotations | `outline.json`, preserved exactly during relocation |
 | Obsidian return destinations and stored labels | `obsidian-links.json`; no note prose |
+| Reader diagram renderings | `diagram-renders.json` pins exact annotation/code keys; immutable SVG `artifact-HASH.bin` blobs accompany it |
 | Saved investigation question, correction, conclusion and pending work | `investigation-PROJECT_HASH/active.json` |
 | Retained terminal model records | The workspace's `model-calls/*.json` |
 | Required parent/child records outside that storage | Exact verified copies retained as dependencies; their external originals are preserved |

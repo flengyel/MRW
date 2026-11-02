@@ -86,6 +86,22 @@ proof card, and makes the saved Reader notes display a native disclosure that
 starts closed and preserves its live open/closed choice across replies. Folding
 notes must never delete them or close their separate editing forms. Keep private
 screenshots of actual annotations outside Git.
+Extension 0.10.0 adds explicit TikZ rendering for saved reader annotations. Read
+`docs/TIKZ_WORKFLOW.md` and its validation report. Only Render diagram invokes
+the Linux/WSL pdfLaTeX/Poppler job in bubblewrap; no compiler on Save, open,
+refresh, restore, theme changes or artifact migration. Fail if isolation or
+trusted system tools are unavailable, without an unrestricted fallback. Keep
+shell escape disabled, external workspace/home/network access unavailable,
+process/output limits and the restricted self-contained SVG profile. Native
+Windows backend rendering and a bundled WebAssembly engine remain unsupported.
+Pin retained SVGs to annotation UUID and exact UTF-8 code digest in the separate
+diagram index, using existing immutable blobs and mutable publication rules.
+Include the index in supported artifact moves; preserve epochs and workspace
+checks. Failed rerenders preserve prior output; uncertain publication blocks
+writes. No automatic annotation rewrite, compiler retry, diagram-to-proof graph
+conversion or checked status. Paper/Dark is host-local display state and keeps
+the original SVG and other colors. The user clicked Render again in the TikZ
+trial workspace; preserve it and do not reset/reseed it automatically.
 Patch 0.9.2 keeps annotation forms and region editing out of the source reading
 sequence. Direct statement/proof links use only explicit published roles within
 one retained import and exact matching spans. Temporary proof expansion is live

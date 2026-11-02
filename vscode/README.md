@@ -171,6 +171,35 @@ before handover. No second-host synchronization acceptance is claimed.
 See [scope, filesystem requirements and recovery](../docs/ARTIFACT_STORAGE.md)
 and [actual validation](../docs/ARTIFACT_STORAGE_VALIDATION.md).
 
+## TikZ diagrams in reader notes (0.10.0)
+
+Save an annotation containing a `tikz` fenced block, open **Reader notes (N)**,
+then choose **Render diagram**. The existing Linux/WSL pdfLaTeX and Poppler tools
+run inside bubblewrap only on that explicit action. The SVG is validated and
+retained beside the outline, keyed to the annotation and exact saved code.
+Saving, opening, refreshing, restoring, moving artifacts and changing appearance
+do not compile. Missing originals do not block valid retained images; changed
+code cannot acquire an earlier rendering. Unsaved form text survives replies.
+
+**Diagram appearance → Paper / Dark** is a workspace UI preference. Dark adapts
+black/white drawing values while keeping other colors and the original SVG.
+Use normal TikZ colors such as `\draw[red]`. Notes keep their exact editable
+source and attribution. Rendering creates no mathematical evidence or graph.
+
+This first renderer requires installed native **pdfLaTeX**, **Poppler**
+(`pdftocairo`/`pdfinfo`) and **bubblewrap** under `/usr` on Linux. Reading retained
+SVGs does not require those tools. There is no bundled TikZJax engine or native
+Windows backend support. The job has isolated filesystem/network, no shell
+escape, bounded resources and no unsafe fallback. One block must produce one
+page, and output must fit the self-contained SVG profile. Missing packages,
+unsupported output and failed jobs report errors and preserve prior valid output.
+Publication uncertainty retains drafts and blocks writes under existing rules.
+
+[Full examples, bounds and persistence](../docs/TIKZ_WORKFLOW.md),
+[actual host results and limits](../docs/TIKZ_VALIDATION.md). Ordinary Markdown
+preview and Obsidian remain separate host/plugin workflows; this feature neither
+installs another extension nor changes their notes.
+
 ## Compact hidden details (0.9.4)
 
 A hidden published proof uses a compact **▸ TAG — Proof** row, rather than an
@@ -535,8 +564,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.9.4.vsix
-sha256sum vscode/theorem-terminal-0.9.4.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.10.0.vsix
+sha256sum vscode/theorem-terminal-0.10.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -568,11 +597,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.9.4.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.10.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.9.4**.
+The extension identity is **flengyel.theorem-terminal**, version **0.10.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

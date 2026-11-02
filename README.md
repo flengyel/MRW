@@ -39,6 +39,14 @@ its **…** command menu. **Reading Outline** is the primary view; other command
 remain in the collapsible **Research Tools** view. The command palette remains
 available. Opening the sidebar itself starts no Python, model or acquisition.
 
+Extension **0.10.0** renders fenced TikZ diagrams in saved reader annotations
+only after **Render diagram**. Exact editable code and attribution remain in the
+note; retained SVGs reopen offline without compilation. **Paper / Dark** changes
+display, preserving other colors and the original output. Initial rendering uses
+the existing Linux/WSL pdfLaTeX, Poppler and bubblewrap tools; reading retained
+diagrams needs none of them. See [usage](docs/TIKZ_WORKFLOW.md) and
+[actual checks](docs/TIKZ_VALIDATION.md). Diagrams create no proof-checking status.
+
 Patch **0.9.4** reduces a hidden proof to one compact reveal row. **Reader notes**
 starts collapsed and can be opened or closed by its heading, keeping mathematics
 in view and saved annotations intact.

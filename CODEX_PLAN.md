@@ -42,6 +42,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
+| Reader TikZ diagrams | 0.10.0: explicit isolated native render, exact saved code, retained SVG, color and Paper/Dark display, offline reopening | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -60,6 +61,21 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Explicit reader diagrams — 2026-11-02
+
+The user reports the 0.9.4 layout is considerably improved and requested TikZ,
+using Obsidian TikZJax as the comparison. The agreed first MRW increment retains
+ordinary fenced annotation code and compiles only on **Render diagram**.
+Version 0.10.0 uses the existing Linux/WSL TeX/Poppler tools in an isolated
+bubblewrap job, with saved SVGs, exact code keys, private publication and offline
+reopening. A later user request adds Paper/Dark display and color support.
+An actual Windows/WSL Development Host saved/rendered/reopened a synthetic
+diagram; the user clicked Render again and reported “Nice.” Keep this scoped
+observation separate from mathematical usefulness. [Usage](docs/TIKZ_WORKFLOW.md),
+[validation](docs/TIKZ_VALIDATION.md). TikZJax itself is not bundled; other hosts
+and backends need separate checks. Inference graphs and vertex elimination
+remain planned, with reader explanations separate from source statements/evidence.
 
 ### Compact hidden details — 2026-11-01
 

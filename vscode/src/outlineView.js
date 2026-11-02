@@ -15,6 +15,7 @@ const submittedDrafts = new Map();
 const revealed = new Set();
 const hiddenDetails = new Set();
 let proofsHidden = false, proofPreferenceLoaded = false;
+let diagramAppearance = 'paper', diagramPreferenceLoaded = false;
 const openDetails = new Map(), saveFeedback = new Map(), feedbackNodes = new Map();
 const noteDraft = key => typeof key === 'string' && key.startsWith('note:');
 function feedback(key, text, kind) {
@@ -89,6 +90,7 @@ function noteForm(parent, region, note) {
   field(f, 'origin', 'Supplied origin', ['human_work', 'ai_proposal', 'source_quotation', 'unknown']);
   field(f, 'author', 'Author / attribution (blank means unknown)'); field(f, 'text', 'Explanation or other reader material');
   el('p', 'Math: \\( ... \\) inline; \\[ ... \\] or $$ ... $$ for a displayed equation.', f.node, 'muted');
+  el('p', 'For diagrams, add a fenced tikz block, save the annotation, then choose Render diagram in Reader notes.', f.node, 'muted');
   button(f.node, 'Save annotation', () => {
     const v = f.read(); return { type: 'edit', draft: key, change: { kind: 'annotation', region,
       id: note?.id || null, purpose: v.purpose, text: v.text, origin: v.origin, author: v.author || null } };
@@ -386,7 +388,11 @@ function render() {
     for (const { title, note } of readerNotes) {
       el('h3', `${title} · ${label(note.kind)}`, notes);
       el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
-      if (window.MRWAnnotations) window.MRWAnnotations.render(notes, note.text);
+      if (window.MRWAnnotations) window.MRWAnnotations.render(notes, note.text, { fragments: note.fragments,
+        appearance: diagramAppearance,
+        onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),
+        onAppearance: value => { diagramAppearance = value === 'dark' ? 'dark' : 'paper';
+          api.postMessage({ type: 'diagram_appearance', value: diagramAppearance }); render(); } });
       else el('p', note.text, notes, 'reader-note-text');
     }
   }
@@ -402,6 +408,7 @@ window.addEventListener('message', event => {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
     if (!proofPreferenceLoaded) { proofsHidden = value.proofsHidden === true; proofPreferenceLoaded = true; }
+    if (!diagramPreferenceLoaded) { diagramAppearance = value.diagramAppearance === 'dark' ? 'dark' : 'paper'; diagramPreferenceLoaded = true; }
     if (value.readingFocus && value.readingFocus.serial !== lastReadingFocus) {
       const region = model.outline.regions.find(r => r.id === value.readingFocus.region);
       const part = region && model.outline.published?.parts?.[region.id];

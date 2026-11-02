@@ -1067,3 +1067,29 @@ test('proof visibility uses only host-local UI preferences and survives reader r
   const reopened=await harness(root,state);await reopened.commands.get('mrw.openOutline')();
   assert.equal(reopened.panels[0].webview.messages.findLast(v=>v.type==='outline').proofsHidden,true);
 });
+
+test('diagram actions retain exact saved code, preserve notes, and reopen without rendering', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+  h.setService((extension,executable,request,options)=>runBridge(extension,executable,request,{
+    ...options,spawn:(command,args,settings)=>require('node:child_process').spawn(command,[args[0],path.join(extension,'test/diagram_bridge.py')],settings)}));
+  await h.commands.get('mrw.createOutline')();const panel=h.panels[0];
+  const text='Reader explanation α\n```tikz\n\\begin{tikzcd}A \\arrow[r] & B\\end{tikzcd}\n```';
+  await panel.receive({type:'edit',change:{kind:'annotation',region:null,id:null,purpose:'explanation',text,origin:'human_work',author:'Reader'}});
+  const saved=panel.webview.messages.findLast(m=>m.type==='outline').model;
+  const note=saved.outline.annotations[0],block=note.fragments.find(b=>b.kind==='tikz');
+  assert.equal(h.requests.filter(r=>r.method==='outline_render_diagram').length,0);
+  await panel.receive({type:'render_diagram',annotation:note.id,code:block.key});
+  const rendered=panel.webview.messages.findLast(m=>m.type==='outline').model;
+  assert.equal(rendered.revision,saved.revision);assert.equal(rendered.outline.annotations[0].text,text);
+  assert.ok(rendered.outline.annotations[0].fragments.find(b=>b.kind==='tikz').image);
+  assert.equal(h.requests.filter(r=>r.method==='outline_render_diagram').length,1);
+  const count=h.requests.length;await panel.receive({type:'diagram_appearance',value:'dark'});
+  assert.equal(h.requests.length,count);assert.equal(h.state.get('mrw.diagramAppearance.v1'),'dark');
+  await panel.receive({type:'ready'});
+  assert.equal(panel.webview.messages.findLast(m=>m.type==='outline').diagramAppearance,'dark');
+  const reopened=await harness(root);await reopened.commands.get('mrw.openOutline')();
+  assert.ok(reopened.panels[0].webview.messages.findLast(m=>m.type==='outline').model.outline.annotations[0].fragments.find(b=>b.kind==='tikz').image);
+  assert.equal(reopened.requests.some(r=>r.method==='outline_render_diagram'),false);
+  assert.equal(await fs.readFile(file,'utf8'),'Source.');assert.deepEqual(h.errors,[]);
+});

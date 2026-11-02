@@ -75,6 +75,24 @@ class ArtifactStorageTests(unittest.TestCase):
         restarted=ArtifactStorage(str(self.home));self.assertEqual(restarted.status()['store_id'],moved['store_id'])
         self.assertFalse(any('/locks/' in p for p in inventory(self.destination)))
 
+    def test_retained_diagram_moves_with_its_annotation_and_stale_render_is_refused(self):
+        from theorem_terminal.reader_diagrams import checked_svg
+        code = '```tikz\n\\begin{tikzpicture}\\draw (0,0)--(1,1);\\end{tikzpicture}\n```'
+        saved = self.call('outline_mutate',id=self.id,revision=self.created['revision'],change=dict(
+            kind='annotation',region=None,id=None,purpose='explanation',text=code,origin='human_work',author='Reader'))
+        note=saved['outline']['annotations'][0];block=next(b for b in note['fragments'] if b['kind']=='tikz')
+        svg=checked_svg(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 0L20 20"/></svg>')
+        request=dict(id=self.id,revision=saved['revision'],annotation=note['id'],code=block['key'])
+        with patch('theorem_terminal.reader_diagrams.compile_tikz',return_value=(svg,dict(pdflatex='1'*64,pdftocairo='2'*64))):
+            rendered=self.call('outline_render_diagram',**request)
+        image=next(b for b in rendered['outline']['annotations'][0]['fragments'] if b['kind']=='tikz')['image']
+        self.move()
+        with patch('theorem_terminal.reader_diagrams.compile_tikz',side_effect=AssertionError('Implicit compiler')):
+            reopened=self.call('outline_follow_reference',reference=self.ref)
+            self.assertEqual(next(b for b in reopened['outline']['annotations'][0]['fragments'] if b['kind']=='tikz')['image'],image)
+            self.epoch='legacy'
+            with self.assertRaisesRegex(ValueError,'stale client'):self.call('outline_render_diagram',**request)
+
     def test_location_aliases_do_not_rewrite_human_prose_or_source_provenance(self):
         from theorem_terminal.artifact_context import CURRENT, stable_paths
         from theorem_terminal.artifact_storage import StoreAccess

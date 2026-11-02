@@ -129,6 +129,23 @@ the smaller window. No production UX change or mathematical-use claim follows
 from this validation. Details and remaining limits are in the
 [host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 
+### Explicit TikZ reader diagrams — 2026-11-02
+
+A saved reader annotation can contain ordinary `tikz` fences. Save leaves the
+code inert. In Reader notes, **Render diagram** starts one isolated native job
+and retains a validated SVG for that annotation and exact code digest. Newer
+form typing survives the reply. **Exact TikZ code** and the full annotation text
+remain accessible. Changed code never adopts an older rendering. Failed renders
+keep prior valid output; uncertain publication never announces success.
+
+Reopening and refreshing display retained output without tools or networking.
+Paper/Dark display adapts monochrome ink and preserves other colors and the
+original SVG. Its workspace preference is host-local. Rendering needs supported
+Linux tools only for the explicit action; there is no unrestricted fallback.
+One block produces one diagram page; unsupported active/external SVG output
+fails visibly. This adds no graph inference or mathematical evidence. See
+[workflow](docs/TIKZ_WORKFLOW.md) and [checks](docs/TIKZ_VALIDATION.md).
+
 ### MRW entry point — 2026-11-01
 
 MRW has a dedicated book icon in VS Code's Activity Bar. The sidebar contains

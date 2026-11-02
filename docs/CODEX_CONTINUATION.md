@@ -1,5 +1,73 @@
 # Codex continuation: MRW source work and companion notes
 
+## Explicit TikZ diagrams and appearance — 2026-11-02
+
+Started clean at **0.9.4**, `a400589`. The user reports that layout is
+“Considerably improved” and requested TikZ after reviewing Obsidian TikZJax and
+VS Code preview options. They agreed to explicit rendering with retained output.
+Extension **0.10.0** adds **Render diagram** to saved annotation `tikz` fences,
+then reads the retained SVG on reopening. This first renderer uses installed
+Linux/WSL pdfLaTeX and Poppler inside bubblewrap; TikZJax is not bundled. Ordinary
+reading still needs only the existing Python host, without rendering tools.
+[Workflow](TIKZ_WORKFLOW.md), [validation](TIKZ_VALIDATION.md).
+
+Exact editable prose/code and attribution stay in the existing annotation.
+The separate diagram index pins annotation UUID/code SHA-256 to immutable SVG
+blobs, render time, renderer and compiler/converter fingerprints. It uses the
+existing mutable/immutable publication and artifact-epoch rules, and participates
+in supported moves. Missing/corrupt retained storage never initializes a
+replacement. Changed code never receives an earlier image as its own. Explicit
+rerender failures preserve prior output; uncertain publication blocks writes.
+
+Only Render starts tools. Save, open, refresh, restore, appearance and relocation
+do not compile. Native jobs have isolated filesystem/network, cleared environment,
+no shell escape, process/output limits and no unrestricted fallback. The SVG
+profile excludes active/external resources; output is displayed only as an image.
+One-page blocks, 2 MiB SVGs, 128 cache targets and an 8 MiB base-image view budget
+are bounded. Rendering creates no verification or inference graph.
+
+One normal Windows VS Code **1.144.0 / WSL Debian** Development Host workflow
+saved/rendered a synthetic commutative diagram, preserved a newer unsaved draft
+during compilation, decoded its SVG without a CSP violation and normally
+closed/reopened it with no compiler request. The user clicked through to open
+the workspace, later clicked **Render diagram again** and reported **“Nice.”**
+The trial workspace is `.codex-work/tikz-20261102/mrw-tikz-validation`.
+The annotation is explicitly synthetic, but preserve this workspace now that the
+user is interacting with it; do not reset it, rerun seed mutations, force-close
+its window or discard unexamined drafts. The genuine Stacks workspace and its
+Codex explanation were never modified. A disposable Linux move regression
+initially exposed the missing index inventory entry; it passes after the fix.
+
+The user's later request for white-on-dark and colors adds **Diagram appearance
+→ Paper / Dark**. It adapts monochrome values in a derived display copy, retains
+the original SVG and other colors, and saves only a workspace UI preference.
+Native red/blue checks and DOM/command preference tests pass; the selector's
+visible appearance remains unobserved in the actual window. No engine runs on
+appearance changes. The staged test extension may be updated atomically without
+rewriting the source or forcing a reload; its reopen driver is read-only.
+
+Keep Windows storage qualification, Pi/R3/SagePod/exporter campaigns, automatic
+ingestion, inference graphs and vertex elimination deferred. The user-reported
+diagram reaction is a scoped UX observation, not a proof or usefulness study.
+
+Final checks pass: **81 Node tests** and **376 Python tests (317 passed, 59
+expected skips)**, with actual native diagram tests enabled. Syntax, compilation
+and diff/document checks pass. Packaging follows completed command/bridge tests
+sequentially. Do not repeat the complete regression campaign without a new
+relevant change or unresolved concern.
+
+The final **0.10.0** VSIX is installed: **66 package files**, all **61 installed
+runtime files** matching, SHA-256
+`1ba44124d4755caca7516c26d9339a4fde784058943874c48010082fa1c43792`.
+An installed native-bridge fixture saved/rendered a colored diagram, obtained
+Paper/Dark images, preserved annotation bytes and reopened without its original
+or a new compiler request. A separate read-only check preserved every genuine
+Stacks store and overview byte. Earlier packages remain. The trial runtime was
+updated atomically; do not force-reload/close it. Save or copy unsaved reader
+drafts before **Developer: Reload Window**, then use **Diagram appearance →
+Dark** beside the rendered figure. The native prerequisites apply only to the
+explicit Render action; the final selector's visible appearance remains pending.
+
 ## Compact proofs and closable Reader notes — 2026-11-01
 
 Started clean at `ff1b08324cb854b6dc1c98fe4bf81f410854dfce`. The user requested

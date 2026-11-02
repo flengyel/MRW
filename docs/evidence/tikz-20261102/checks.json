@@ -1,0 +1,22 @@
+{
+  "version": "0.10.0",
+  "node": {
+    "tests": 81,
+    "passed": 81
+  },
+  "python": {
+    "tests": 376,
+    "passed": 317,
+    "skipped": 59,
+    "native_diagram_tests_enabled": true
+  },
+  "native": [
+    "Commutative diagram rendered with actual pdfLaTeX/Poppler inside bubblewrap",
+    "External PDF-stream file access refused",
+    "Looping TeX terminated",
+    "Red/blue strokes preserved in dark derived view",
+    "Multiple pages refused without partial output"
+  ],
+  "user_report": "Clicked Render diagram again in the Development Host and reported Nice.",
+  "scope": "Prototype host/native results; final installed package and dark selector visual observation are separate."
+}

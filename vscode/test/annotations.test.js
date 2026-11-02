@@ -12,7 +12,7 @@ function view() {
   class Node {
     constructor(name, text) {
       this.nodeName = name; this.nodeType = name === '#text' ? 3 : name === '#fragment' ? 11 : 1;
-      this.childNodes = []; this.className = ''; this.data = text || '';
+      this.childNodes = []; this.className = ''; this.data = text || ''; this.dataset = {}; this.listeners = {};
     }
     get nextSibling() { return this.parent?.childNodes[this.parent.childNodes.indexOf(this) + 1]; }
     get textContent() { return this.nodeType === 3 ? this.data : this.childNodes.map(n => n.textContent).join(''); }
@@ -25,6 +25,7 @@ function view() {
       this.childNodes.splice(this.childNodes.indexOf(old), 1, ...nodes);
     }
     remove() { this.parent.childNodes.splice(this.parent.childNodes.indexOf(this), 1); }
+    addEventListener(name, action) { this.listeners[name] = action; }
     all() { return this.childNodes.flatMap(n => [n, ...n.all()]); }
   }
   const calls = [], globals = {
@@ -40,7 +41,7 @@ function view() {
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', name), 'utf8'), globals);
   }
   const root = new Node('section');
-  return { root, calls, globals, render: text => globals.MRWAnnotations.render(root, text),
+  return { root, calls, globals, render: (text, options) => globals.MRWAnnotations.render(root, text, options),
     math: () => root.all().filter(n => n.mathml), raw: () => root.all().find(n => n.nodeName === 'pre') };
 }
 
@@ -85,4 +86,31 @@ test('missing renderer preserves the complete annotation and reports the fallbac
   const h = view(), text = 'Retain \\(X\\).'; h.globals.renderMathInElement = undefined; h.render(text);
   assert.equal(h.root.childNodes[0].textContent, text); assert.equal(h.raw().textContent, text);
   assert.ok(h.root.all().some(n => n.className === 'warning'));
+});
+
+test('TikZ and other fenced examples stay inert until the explicit diagram action', () => {
+  const h=view(), actions=[],code='\\begin{tikzcd}A \\arrow[r] & B\\end{tikzcd}',raw='```tikz\n'+code+'\n```';
+  const block={kind:'tikz',code,raw,key:'exact-code-hash',index:0,image:null};
+  h.render(raw,{fragments:[{kind:'code',text:'```text\n\\(not math\\)\n```'},block],onRender:b=>actions.push(b)});
+  assert.equal(h.calls.length,0);assert.equal(actions.length,0);assert.equal(h.math().length,0);
+  assert.ok(h.root.all().some(n=>n.nodeName==='pre'&&n.textContent===code));
+  h.root.all().find(n=>n.dataset.action==='render-diagram').listeners.click();
+  assert.equal(actions.length,1);assert.equal(actions[0],block);
+});
+
+test('a retained diagram is an image with exact code and never triggers a render', () => {
+  const h=view(), actions=[],image='data:image/svg+xml;base64,PHN2Zy8+';
+  h.render('saved',{fragments:[{kind:'tikz',code:'exact TeX',raw:'fence',key:'hash',image,rendered_at:'now'}],onRender:b=>actions.push(b)});
+  assert.equal(h.root.all().find(n=>n.nodeName==='img').src,image);assert.equal(actions.length,0);
+  assert.equal(h.root.all().find(n=>n.dataset.action==='render-diagram').textContent,'Render diagram again');
+});
+
+test('dark diagram appearance chooses a derived image and changes only a UI preference', () => {
+  const h=view(),preferences=[],image='data:image/svg+xml;base64,PHN2Zy8+',dark='data:image/svg+xml;base64,ZGFyaw==';
+  const fragments=[{kind:'tikz',code:'exact source',key:'hash',image,dark_image:dark,rendered_at:'now'}];
+  h.render('source',{fragments,appearance:'dark',onAppearance:value=>preferences.push(value)});
+  assert.equal(h.root.all().find(n=>n.nodeName==='img').src,dark);
+  assert.equal(h.root.all().find(n=>n.nodeName==='figure').dataset.appearance,'dark');
+  const select=h.root.all().find(n=>n.dataset.action==='diagram-appearance');select.value='paper';select.listeners.change();
+  assert.deepEqual(preferences,['paper']);assert.equal(fragments[0].image,image);
 });

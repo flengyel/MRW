@@ -14,7 +14,7 @@ function outlineHtml(script, support = []) {
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; base-uri 'none'; form-action 'none'">
 <title>Mathematical source outline</title><style nonce="${nonce}">
 body{font-family:var(--vscode-font-family);color:var(--vscode-editor-foreground);background:var(--vscode-editor-background);padding:12px;max-width:1000px;margin:auto;overflow-wrap:anywhere}
 h1{font-size:1.35em}h2{font-size:1.1em}h3{font-size:1em}button,input,select,textarea{font:inherit}
@@ -28,6 +28,8 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .proof-navigation{display:flex;gap:12px;margin:10px 0}.proof-navigation button{background:none;color:var(--vscode-textLink-foreground);padding:3px 0;margin:0;text-decoration:underline}.reader-note-text{white-space:pre-wrap;line-height:1.6}
 .save-feedback{min-height:1.2em}.save-confirmation{color:var(--vscode-testing-iconPassed,var(--vscode-foreground))}
 .region.compact-proof{border:0;margin:0;padding:2px 0}.proof-disclosure{background:none;color:var(--vscode-textLink-foreground);padding:2px 0;margin:0;text-align:left}.reader-notes{margin:14px 0}.reader-notes>summary{cursor:pointer;font-weight:600;padding:4px 0}
+.reader-diagram{margin:14px 0}.reader-diagram img{max-width:100%;height:auto;background:white;padding:6px;box-sizing:border-box}.reader-diagram figcaption{margin:4px 0}
+.reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
@@ -90,6 +92,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved,
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
+      diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v1', 'paper'),
       reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
@@ -139,6 +142,12 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!value || typeof value.type !== 'string') return;
     if (value.type === 'storageStatus') { c.storageCheck?.(!!value.dirty); return; }
     if (value.type === 'ready') return send(c, c.result);
+    if (value.type === 'diagram_appearance') {
+      if (!['paper', 'dark'].includes(value.value)) return;
+      try { await context.workspaceState.update('mrw.diagramAppearance.v1', value.value); }
+      catch (error) { await vscode.window.showErrorMessage(`MRW: Could not save the diagram appearance: ${error.message}`); }
+      return;
+    }
     if (value.type === 'proofVisibility') {
       if (typeof value.hidden !== 'boolean') return;
       try { await context.workspaceState.update('mrw.readerProofsHidden.v1', value.hidden); }
@@ -154,6 +163,14 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       await locked(async () => {
         active = c.result.outline.id;
         if (value.type === 'edit') await mutate(c, value.change, value.draft);
+        else if (value.type === 'render_diagram') {
+          writable(c);
+          let result;
+          try { result = await bridge(request(c, 'outline_render_diagram', { annotation: value.annotation, code: value.code })); }
+          catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
+          await send(c, result);
+          vscode.window.setStatusBarMessage('MRW: Diagram rendered and retained.', 6000);
+        }
         else if (value.type === 'toggle') {
           const region = c.result.outline.regions.find(r => r.id === value.region);
           if (!region) throw new Error('Unknown source region.');
