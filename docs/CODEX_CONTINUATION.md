@@ -1,5 +1,28 @@
 # Codex continuation: MRW source work and companion notes
 
+## AI setup deferred by the user — 2026-11-03
+
+After delivery `10a7fa0` (MRW 0.11.0 installed), the user restored the hidden
+Activity Bar themselves, located Research Tools, and reports reaching the
+model prompt and request preview. Their Send action returned **not sent** with
+`OPENAI_API_KEY is not configured on the extension host`. No provider request
+was made. These are user-reported window observations, separate from the earlier
+unobserved automated development-window check and installed-bridge tests.
+
+The user says they do not have an API key and explicitly requests deferral.
+**AI credential setup and a live assistance trial are deferred.** Do not create
+a key, read credentials, edit the WSL server environment, substitute Copilot,
+or retry Send as automatic continuation. Ordinary mathematical review, source
+annotations/outlines and the user's SagePod session remain available. Retain
+the existing feature for later; unsent questions are memory-only and should be
+copied by the user into an ordinary note if they want to preserve them.
+
+Actual-window exact-source comparison, return with unsaved annotations intact,
+live response review and assistance usefulness remain unobserved. Resume those
+only when the user returns to AI setup. This follow-up changes documentation
+and observation metadata only; use document checks, without another runtime,
+VSIX or host campaign. Obsidian testing remains separately pending.
+
 ## Direct reader AI assistance — 2026-11-03
 
 The installation-path documentation was committed/pushed as `ac063ff` after

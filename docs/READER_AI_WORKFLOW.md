@@ -117,9 +117,17 @@ user has interacted with its window. The test driver is
 `vscode/test/host/readerAssistance.js`; it uses only a synthetic response and is
 excluded from the VSIX.
 
-The exact remaining actual-window observation is: open a retained passage in
-the Windows/WSL reader, click its AI action, verify the exact preview, return
-with an unsaved reader annotation intact, and exercise response review with an
-explicit Send. A live request additionally needs the user's privately configured
-API credential and chosen model; none was read or sent here. Mathematical
-usefulness remains unassessed.
+In later user-led use on November 3, the user reported the model prompt, seeing
+the request preview, and the explicit **not sent** result because
+`OPENAI_API_KEY` was not configured on the extension host. This establishes
+user-reported access through preview and the missing-key preflight result;
+no provider request or response was observed. The user does not have an API key
+and explicitly asked to **defer AI setup**. Do not create credentials, change
+their server environment or make a live request as continuation work.
+
+Independent verification of the displayed source/preview, return with an unsaved
+annotation intact and response review remain unobserved in the actual window.
+Any live trial waits for the user to resume setup and explicitly Send with their
+credential and chosen model. Mathematical usefulness remains unassessed; ordinary
+reading/review and SagePod use continue independently. An unsent question is
+memory-only, so copy it into an ordinary note before closing if it should be kept.

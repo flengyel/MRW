@@ -19,5 +19,13 @@
   "actual_windows_wsl_reader_workflow": "unobserved: no host report after launch and user reload",
   "live_provider_request": false,
   "copilot_backend_implemented": false,
-  "earlier_archives_preserved": true
+  "earlier_archives_preserved": true,
+  "later_user_report": {
+    "request_preview_seen": true,
+    "send_result": "not_sent: OPENAI_API_KEY is not configured on the extension host",
+    "provider_request_made": false,
+    "api_key_available": false,
+    "ai_setup_deferred_by_user": true,
+    "live_response_observed": false
+  }
 }

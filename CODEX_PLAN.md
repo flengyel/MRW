@@ -43,7 +43,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
 | Reader TikZ diagrams | 0.10.0: explicit isolated native render, exact saved code, retained SVG, color and Paper/Dark display, offline reopening | Not implemented |
-| Direct reader AI assistance | 0.11.0: exact retained passage into existing OpenAI preview/Send and attributed response review; automated checks pass, actual-window observation pending | Not implemented |
+| Direct reader AI assistance | 0.11.0: exact retained passage into OpenAI preview/Send; automated checks pass, user reports preview and missing-key not-sent result; AI setup explicitly deferred | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -79,15 +79,19 @@ graph inference is added. [Workflow and checks](docs/READER_AI_WORKFLOW.md).
 This first implementation uses the existing OpenAI backend after explaining the
 choice; no Copilot integration or user account/model access is assumed. Copilot's
 presence alone does not connect the retained reader. Provider responses in tests
-are deterministic; live assistance usefulness and the actual installed-window
-reader action remain unobserved. The development-window launch was blocked by
+are deterministic; live assistance usefulness remains unassessed. The
+development-window launch was blocked by
 an unsigned PowerShell script; a direct executable launch returned, but no host
 report appeared, and the user clicked Reload and enable extensions. Further
 desktop retries were stopped. Preserve that trial and the genuine study work.
 
-The next functional work should follow the user's review task: evaluate a
-chosen explanation/critique after explicit preview and Send, then address a
-demonstrated blocker. AI outline proposals, explicit inference graphs and vertex
+In later user-led use, the user reports reaching the model prompt and request
+preview. Send correctly reported **not sent** because the extension host lacked
+`OPENAI_API_KEY`. The user has no API key and explicitly deferred AI setup.
+Preserve that decision; continue ordinary mathematical review without making
+credential setup or a provider trial a gate. If the user later resumes, retain
+the separate exact-preview/Send action and evaluate the resulting assistance
+on its actual contribution. AI outline proposals, explicit inference graphs and vertex
 elimination remain distinct pending capabilities. The two installation paths
 remain current, with SagePod and later Obsidian links optional.
 
