@@ -1,5 +1,12 @@
 # Mathematical Research Workstation for VS Code
 
+**New installation:** follow [Install MRW and use SagePod in WSL2](../docs/GETTING_STARTED_WSL_SAGEPOD.md).
+It covers getting the current VSIX, checking installation in WSL, choosing
+SagePod's authenticated Jupyter server and selecting the SageMath kernel.
+MRW 0.10.0 is distributed locally as a VSIX; a project-published Marketplace
+listing and GitHub release download are not yet available.
+The tutorial and source-build route require access to this private repository.
+
 The extension moves retained-record inspection, response
 review, exact passage retention and attributed note insertion onto the existing
 Python core. It adds saved return locations and explicit Lean/browser handoffs.
@@ -49,12 +56,13 @@ separately from this architectural direction.
 
 ## Study notebooks with SagePod
 
+Start with [the installation and connection tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md).
 Use [the SagePod notebook workflow](../docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) to
 connect Microsoft's Jupyter extension explicitly to an existing authenticated
 SagePod server and select its actual `sagemath` kernel. VS Code/Jupyter supplies
 ordinary `.ipynb` editing, mathematical rendering, saving and kernel controls;
-SagePod supplies computation. MRW 0.5.0 supplies the source reader and Markdown
-overview references, with its Python core still on the workspace host.
+SagePod supplies computation. MRW supplies the source reader and Markdown
+overview references introduced in 0.5.0, with its Python core still on the workspace host.
 
 Keep the notebook in the existing persistent notebook mount. Host `~/Jupyter`
 and container `/home/sage/notebooks` are distinct paths to that mount. Use

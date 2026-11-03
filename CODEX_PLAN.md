@@ -1,6 +1,6 @@
 # CODEX_PLAN.md
 
-Active product roadmap. VS Code migration and source-reader status updated 2026-10-15;
+Active product roadmap. Installation/tutorial and next reader-assistance priority updated 2026-11-02;
 the product assessment was reviewed 2026-09-20 against the integrated Qt R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
@@ -61,6 +61,40 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Installation tutorial and next reader-to-AI increment — 2026-11-02
+
+The user asks how to install MRW, connect it to SagePod in WSL2 and find an
+online tutorial. [The getting-started tutorial](docs/GETTING_STARTED_WSL_SAGEPOD.md)
+now covers the 0.10.0 VSIX, WSL versus Windows extension installation, the current
+SagePod URL helper, Jupyter server/kernel selection, persistent notebook paths
+and Markdown reading navigation. Both READMEs link to it prominently. No public
+GitHub release asset or project-published Marketplace listing is available;
+the tutorial includes a pinned source-build route. Public binary distribution
+and listing preparation remain separate work, without publication in this task.
+The repository is private: this online tutorial and cloning require repository
+access. A public tutorial/distribution route still needs a separate publication
+decision; do not change repository visibility to make an onboarding link public.
+
+This is documentation delivery, not a new runtime or notebook acceptance test.
+The October 16 Windows/WSL companion result remains historical evidence. A
+read-only November 2 inventory found no default `sagepod` container and only the
+separate SageQueue `sagemath` container on port 8888. No server was started,
+recreated, repaired or probed with a credential. Follow current installation
+state rather than treating an old running-container report as current.
+
+The user clarified that AI should assist with developing an outline. **The next
+functional priority is an explicit reader-to-AI assistance increment**, reusing
+the selected-work exact-preview/Send and attributed response infrastructure.
+Start from a reader-chosen retained passage with exact revision/range, let the
+reader ask for an explanation or outline proposal, and require a separate Send.
+Any retained explanation/proposal must keep model attribution separate from the
+source and remain reviewable/editable. Ordinary Markdown stays authoritative;
+no automatic note rewrite or background request. This bridge and AI-proposed
+outlines are planned, not delivered by 0.10.0. The current selected-editor-text
+assistance remains available. Explicit inference graphs, joint-premise/scope
+representation and vertex elimination remain subsequent requirements; manual
+graph entry is not a prerequisite to receiving bounded AI help.
 
 ### Explicit reader diagrams — 2026-11-02
 

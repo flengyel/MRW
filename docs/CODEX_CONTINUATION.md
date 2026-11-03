@@ -1,5 +1,49 @@
 # Codex continuation: MRW source work and companion notes
 
+## Installation tutorial and next reader assistance — 2026-11-02
+
+Started clean at delivered/installed **0.10.0**,
+`5d393b766d1f3e84115d23f492ce420443832990`. The user requested the roadmap,
+installation guidance, SagePod/WSL2 connection instructions and an online tutorial.
+[Getting started](GETTING_STARTED_WSL_SAGEPOD.md) is now linked prominently from
+both READMEs and the companion workflow. It documents the existing VSIX installation,
+WSL host dependencies, Jupyter's existing-server connection, the actual SageMath
+kernel, host/container paths, overview navigation and save/reopen boundaries.
+It includes a pinned fresh-checkout build because the repository has no GitHub
+releases and MRW has no project-published Marketplace listing. No release,
+Marketplace upload, new website, runtime change or new VSIX is part of this task.
+The GitHub repository is private; its online tutorial and source-build route
+require repository access. Public tutorial/distribution hosting remains pending;
+do not change repository visibility implicitly.
+
+Read-only checks confirmed the local 0.10.0 VSIX's recorded hash and installed
+WSL manifest. SagePod's checkout is now `4bc1bc3`; its pre-existing untracked
+`txt` is preserved. Current instructions provide `bin/jupyter-url.sh`, preferred
+over reading token-bearing logs. No authenticated URL was retrieved. The default
+`sagepod` container is absent from the current Podman inventory; the separate
+SageQueue `sagemath` container is running on port 8888. Leave it alone. Do not
+treat the October 16 historical running SagePod/8889 result as current service
+availability. No setup/start/restart, permission, mount, sync or kernel action
+was taken. A fresh installed-window notebook connection is not claimed.
+
+The user corrected the suggested next manual-outline step: they want AI to
+assist. The roadmap now makes **explicit assistance from a selected retained
+reading passage** the next functional priority. Reuse the existing R2 preview
+and separate Send, exact retained context and attribution. Reader-webview and
+notebook-cell capture, AI outline proposals and vertex elimination are not
+implemented. Keep ordinary Markdown authoritative and editable; proposed
+explanations/inferences do not inherit proof status. Do not make a live provider
+request as an implementation test or build an automatic graph first.
+
+Documentation checks pass: changed local Markdown links/anchors, MRW command
+names against the manifest, Bash/Python snippet syntax, version/hash claims,
+credential-pattern scan and whitespace. External instructions were checked
+against current Microsoft documentation and SagePod's README/helpers. GitHub
+metadata confirms the private repository and empty releases list. Runtime,
+packaging, bridge, SagePod, Pi, R3 and Euclid campaigns need no rerun. Preserve
+both genuine Stacks study work and the user-interacted-with TikZ trial described
+below. Windows-backed storage qualification remains deferred.
+
 ## Explicit TikZ diagrams and appearance — 2026-11-02
 
 Started clean at **0.9.4**, `a400589`. The user reports that layout is

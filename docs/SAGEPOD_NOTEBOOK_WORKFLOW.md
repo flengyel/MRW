@@ -1,5 +1,10 @@
 # Study notebooks with VS Code Jupyter and SagePod
 
+For installation and a first connection, start with
+[Install MRW and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
+This companion guide preserves the workflow boundaries and historical host
+evidence; the installed MRW version is now 0.10.0.
+
 Use an ordinary `.ipynb` for explanations, rendered mathematics, Sage code and
 saved outputs. VS Code and Microsoft's Jupyter extension provide the notebook
 editor and kernel interaction; SagePod provides SageMath in its existing
@@ -21,7 +26,7 @@ language extension's separate **Run SageMath File** command or require Sage on
 the workspace host. Its [language registration](https://github.com/n-WN/sagemath-vscode-enhanced/blob/main/package.json)
 is separate from Jupyter's server/kernel handling.
 
-MRW 0.5.0 supplies the overview-reference actions. Python
+MRW introduced the overview-reference actions in 0.5.0. Python
 3.11+ on the workspace host remains MRW's requirement; the Sage kernel uses the
 Python and Sage installed inside SagePod. Python/Pylance extensions are optional
 for this existing-server workflow; they do not install SageMath.
@@ -42,8 +47,10 @@ That helper can build a missing image; do not use it to initiate an unintended
 build. Do not rerun setup or permission repair for an already usable notebook
 mount. Save other sessions before any separately intended container changes.
 
-Obtain the current authenticated URL privately from SagePod's startup output
-or `podman logs --tail 2000 sagepod`. The log may contain a server token. Do not
+Obtain the current authenticated URL privately from the current SagePod checkout's
+`bin/jupyter-url.sh`. It reads the running server and published port without
+restarting kernels. For an older checkout without this helper, use its startup
+output or `podman logs --tail 2000 sagepod`. The output may contain a server token. Do not
 paste it into a note, settings file, issue, report or repository. Use the
 **host's published port** in the URL, not the container's internal port. The
 observed mapping was `http://127.0.0.1:8889` to container port 8888.

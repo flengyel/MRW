@@ -2,6 +2,14 @@
 
 Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
 
+**Start here:** [Install MRW and use SagePod in WSL2](docs/GETTING_STARTED_WSL_SAGEPOD.md).
+The tutorial covers the 0.10.0 VSIX, the WSL extension host, Jupyter's existing-server
+connection and the SageMath kernel. MRW is currently installed from a VSIX;
+there is no project-published Marketplace listing or GitHub release download.
+The tutorial and source-build route require access to this private repository.
+The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
+distinguishes delivered reading tools from the next reader-to-AI increment.
+
 The VS Code extension is the active frontend migration target. Its initial
 implementation and launch instructions are in [vscode/README.md](vscode/README.md).
 The existing Qt GUI remains available. The `theorem-terminal` CLI remains available for testing, automation, reproducibility, and low-level
@@ -1375,6 +1383,8 @@ problem families before selecting a problem.
 
 ## Documents
 
+- [Getting started with MRW and SagePod in WSL2](docs/GETTING_STARTED_WSL_SAGEPOD.md)
+  — installation and a step-by-step notebook/reading tutorial.
 - `VISION.md` — why the project exists.
 - `VOCABULARY.md` — controlled terminology used across the design documents.
 - `DOMAIN_MODEL.md` — entities, information classes, and invariants.
