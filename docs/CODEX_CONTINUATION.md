@@ -1,5 +1,28 @@
 # Codex continuation: MRW source work and companion notes
 
+## User-led SagePod connection and tutorial repair — 2026-11-03
+
+The user clarified that SagePod uses host port 8889. Codex confirmed that default
+configuration, then stopped the separate SageQueue `sagemath` container on the
+user's explicit request. A subsequent inventory showed no containers; the user
+then started SagePod themselves. Read-only output confirmed `sagepod` running
+on 8889 with the Sage 10.10 image. This supersedes the prior current-state note
+below; do not restart SageQueue or stop the user's SagePod session.
+
+The user opened the existing `~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb`,
+entered the authenticated URL privately, completed kernel selection and reported
+the factorization worked. Creating a new cell was not obvious. The getting-started
+tutorial now explicitly describes **+ Code**, clicking into the cell, **Ctrl+Enter**,
+**Shift+Enter**, saving and **Esc**, then **B**. The validation report separates
+this user report from observed container status and historical October tests.
+No notebook bytes, kernel, credentials or MRW retained study work were inspected
+or changed. No new save/reopen or mathematical-usefulness acceptance is claimed.
+
+This is a documentation repair of the same onboarding workflow, with no runtime
+change or VSIX. Check changed links, Markdown and whitespace; no new notebook,
+packaging or regression campaign is needed. AI assistance from an explicitly
+selected retained passage remains the next functional priority.
+
 ## Installation tutorial and next reader assistance — 2026-11-02
 
 Started clean at delivered/installed **0.10.0**,

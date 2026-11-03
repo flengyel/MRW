@@ -1,5 +1,28 @@
 # SagePod companion notebook validation — 2026-10-16
 
+## User-led reconnection and cell creation — 2026-11-03
+
+The installed MRW baseline is now 0.10.0. At the user's request, Codex stopped
+the separate SageQueue `sagemath` container. The user then started SagePod;
+read-only Podman output confirmed `sagepod` running with host port 8889 mapped
+to container port 8888, using the Sage 10.10 image. No SagePod restart, setup,
+permission/mount change or credential retrieval was performed by Codex.
+
+The existing `~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb` was located without
+reading or changing its contents. The user reports opening it in VS Code,
+entering the SagePod URL, completing kernel selection, and successfully running
+the requested `factor(2^10 - 1)` check. They reported that adding a new cell was
+not obvious. The tutorial now states how to insert a code cell, focus it, run
+it and save the result, with the keyboard alternative and next-cell behavior.
+
+This is user-reported execution through the notebook connection, with separately
+observed container status. No new screenshot, independent cell-output inspection,
+save/close/reopen observation or fresh-kernel rerun is claimed. It does not
+establish mathematical usefulness. The October 16 campaign below remains
+historical evidence; it was not repeated.
+
+## Original companion validation
+
 This increment connects existing components: MRW 0.5.0 at `2fe6b4e`, VS Code
 Jupyter, and the existing SagePod installation. It changes documentation and
 configuration, with no MRW runtime change or new VSIX. The WSL/Pi deployment

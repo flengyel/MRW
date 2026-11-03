@@ -62,6 +62,17 @@ changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
 
+### Notebook onboarding follow-up — 2026-11-03
+
+The user started SagePod and reported successful notebook factorization after
+the server/kernel selection. They found creation of a new cell unclear. The
+[tutorial](docs/GETTING_STARTED_WSL_SAGEPOD.md#add-a-cell-and-run-it) now gives
+explicit cell insertion, focus, execution and save steps. This is a documentation
+repair; [the validation follow-up](docs/SAGEPOD_NOTEBOOK_VALIDATION.md#user-led-reconnection-and-cell-creation--2026-11-03)
+records user-reported execution separately from observed container status and
+the historical complete notebook campaign. It adds no MRW capability or
+mathematical-usefulness claim. Reader-to-AI assistance remains the next increment.
+
 ### Installation tutorial and next reader-to-AI increment — 2026-11-02
 
 The user asks how to install MRW, connect it to SagePod in WSL2 and find an

@@ -165,14 +165,26 @@ In the WSL VS Code window:
 These are VS Code/Jupyter's [existing-server and kernel selection controls](https://code.visualstudio.com/docs/datascience/jupyter-kernel-management#_existing-jupyter-server).
 Jupyter owns the saved server connection; MRW does not store its token.
 
-If you want a small execution check, put this in a code cell and click that
-cell's **Run** button:
+### Add a cell and run it
+
+Click **+ Code** in the notebook's top toolbar to insert a code cell below the
+selected cell. You can also hover between cells and click **+ Code** there.
+Click inside the new cell to type. With a cell selected, **Esc**, then **B**
+adds a cell below using the keyboard.
+
+For a small execution check, enter:
 
 ```python
 from sage.env import SAGE_VERSION
 print(SAGE_VERSION)
 factor(2^10 - 1)
 ```
+
+Click the cell's **▶ Run** button on its left, or press **Ctrl+Enter** to execute
+it and display the output below. **Shift+Enter** runs the cell and advances to
+the next cell, creating one at the end when needed. Press **Ctrl+S** to save
+the notebook and output. See Microsoft's
+[cell creation instructions](https://code.visualstudio.com/docs/datascience/jupyter-notebooks#_add-additional-code-cells).
 
 With the recorded SagePod image, the version is `10.10` and the factorization
 is `3 * 11 * 31`. Run only cells you intend to execute. This example checks the
@@ -285,5 +297,6 @@ reading passage; the roadmap records this separately from delivered features.
 For detailed boundaries, use the [SagePod companion workflow](SAGEPOD_NOTEBOOK_WORKFLOW.md)
 and [its October 16 validation report](SAGEPOD_NOTEBOOK_VALIDATION.md). That report
 records actual Windows/WSL notebook execution, saving and reopening with MRW
-0.5.0. This tutorial updates installation guidance for 0.10.0; it does not claim
-a new end-to-end notebook test or a fresh SagePod installation.
+0.5.0. Its November 3 follow-up records the user's successful factorization and
+the cell-creation difficulty. This tutorial updates installation guidance for
+0.10.0; it does not claim a new end-to-end notebook test or a fresh SagePod installation.
