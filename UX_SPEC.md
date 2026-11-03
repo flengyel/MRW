@@ -18,6 +18,17 @@ platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
 
+Extension **0.11.0** adds direct questions from a retained source-reader passage.
+The reader action resolves the existing exact reference and prepares the shared
+R2 preview. It initially includes only the retained quotation and its source,
+outline, region and range identity. An earlier changed/removed linked range
+keeps its original quotation. Reader annotations, unsaved drafts and supplied
+evidence are excluded. The existing separate Send and attributed response review
+remain; returning to the source tab preserves reader drafts. Ordinary-editor
+selection remains an alternative. This uses the existing OpenAI connector;
+Copilot access, automatic annotation insertion, outline generation and checking
+are not supplied. See [the reader workflow](docs/READER_AI_WORKFLOW.md).
+
 The backend runs in the workspace environment with Python 3.11+, using standard
 local Linux, WSL2 or Remote SSH to Linux hosts. Windows may supply the editor
 while Linux runs the core. One extension and the existing Python services

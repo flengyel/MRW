@@ -4,7 +4,7 @@
 The guide separates prerequisites, the current AI connector and optional Obsidian
 links. Follow the [SagePod tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md) for
 the authenticated notebook connection, kernel selection and cell controls.
-MRW 0.10.0 is distributed locally as a VSIX; a project-published Marketplace
+MRW 0.11.0 is distributed locally as a VSIX; a project-published Marketplace
 listing and GitHub release download are not yet available.
 The tutorial and source-build route require access to this private repository.
 
@@ -29,6 +29,35 @@ menus own view placement; previously customized positions remain user choices.
 The sidebar replaces MRW's default placement inside Explorer. It reuses the
 same view/command IDs, document pointers and private records. Clicking its icon
 registers/displays UI only; no source, provider, compiler or network action starts.
+
+## Ask AI from the source reader (0.11.0)
+
+Click **Ask AI about this passage…** beside a visible retained passage, or use
+the reader toolbar's **Ask AI about a passage…** chooser. **F1 → MRW: Ask About
+Reader Passage…** opens the same chooser. Enter your mathematical question and
+choose the OpenAI model, or configure `mrw.model` in User/Remote settings.
+The current reader supplies the workspace; no ordinary text-editor selection
+is required.
+
+The core resolves the existing scoped passage reference. The preview includes
+its outline/region identity, exact source revision, scalar range and unchanged
+quotation. Reader notes, unsaved annotations and supplied evidence are excluded.
+An earlier changed/removed linked range has its own **Ask AI about the earlier
+linked passage…** control and keeps its original text. Missing originals are
+allowed; unavailable retained storage and wrong scopes are errors without repair.
+
+Review the full request, then choose **MRW: Send Exact Preview** with that preview
+active. This reuses the existing OpenAI Responses connector and attributed
+response review. `OPENAI_API_KEY` must be configured in the environment inherited
+by the WSL extension host; a Copilot sign-in does not configure it. Preparation
+needs no key or provider request. No automatic Send or retry occurs. Finish or
+discard an existing unsent request before starting another from the reader.
+Return by selecting the still-open source-reader tab; annotation drafts remain
+there. Retain/edit any contribution explicitly, keeping AI attribution separate.
+
+This is direct bounded assistance, without automatic outline generation,
+proof checking or a new conversation backend. See
+[workflow and validation](../docs/READER_AI_WORKFLOW.md).
 
 ## Workspace hosts and dependencies
 
@@ -573,8 +602,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.10.0.vsix
-sha256sum vscode/theorem-terminal-0.10.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.11.0.vsix
+sha256sum vscode/theorem-terminal-0.11.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -606,11 +635,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.10.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.11.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.10.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.11.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

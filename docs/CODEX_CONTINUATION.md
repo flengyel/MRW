@@ -1,5 +1,61 @@
 # Codex continuation: MRW source work and companion notes
 
+## Direct reader AI assistance — 2026-11-03
+
+The installation-path documentation was committed/pushed as `ac063ff` after
+`400e6c7`. The user then identified mathematical review as the immediate use,
+requested AI directly in the source reader and asked about Copilot. The existing
+OpenAI connector was recommended and used for the first implementation; the
+optional Copilot backend question received no answer before implementation.
+No additional provider adapter, credential retrieval or live request was added.
+
+Extension **0.11.0** adds per-passage **Ask AI about this passage…**, a reading
+toolbar chooser and **MRW: Ask About Reader Passage…**. The Python bridge reuses
+the current reference resolver to capture exact retained source text, including
+an earlier pinned range after its association changes. Reader annotations,
+unsaved drafts and formal evidence are excluded from the initial context. The
+same R2 preview, separate Send, terminal records and attributed response review
+are reused. Existing unsent requests and reader drafts are preserved. No source,
+annotation or overview is rewritten. [Workflow](READER_AI_WORKFLOW.md).
+
+The final Node syntax and command/bridge suite passes all 8 test files. Python
+runs **379 tests (317 passed, 62 skipped)**; Qt/native diagram opt-in checks were
+not repeated. Compilation passes. Focused tests cover exact Unicode/CRLF and
+source identity, missing originals, stale/changed regions, wrong scope,
+unavailable retained blobs, cancellation, duplicate drafts and separate Send
+with synthetic completed-response retention. These are development-host results.
+
+The actual Windows/WSL window check remains **unobserved**. Windows rejected the
+unsigned PowerShell script. One direct executable launch returned without a
+host report. The user clicked **Reload and enable extensions**; no report was
+obtained. Do not run an extended launch/focus retry campaign. The staged manifest
+was restored to the ordinary production entry point so another reload cannot
+reseed the test. Preserve `.codex-work/reader-ai-20261103`, the genuine Stacks
+workspace/Codex annotation and the TikZ trial. The host test driver is committed
+under `vscode/test/host/readerAssistance.js` and excluded from packaging.
+
+The precise remaining window check is one reader click through preview and
+return with an unsaved annotation intact, followed by explicit Send/response
+review. Actual OpenAI account/model access and mathematical usefulness are
+unassessed. Keep the API key on the WSL extension host, outside notes and Git;
+Copilot sign-in is separate. SagePod remains the user's running computation
+companion and was untouched. Obsidian remains optional with this user's test
+pending; a public webpage remains a later possibility.
+
+The verified **0.11.0** VSIX is installed in WSL: **66 archive files**, all **61
+installed runtime files**, manifest and license matching. SHA-256:
+`676a057a97cb5b10bb9a0b112e0ba86694bb22eb649ac3095a228c7bd0265296`.
+The installed isolated bridge capture/preview check passes after removal of its
+disposable original, with no provider request or byte changes. This is not a
+window observation. The first smoke driver sent extra protocol fields to
+`prepare_assistance`; correcting that driver, without production changes,
+resolved the rejection. The earlier packages' hashes remain unchanged.
+Packaging and verification followed the completed command/bridge suite
+sequentially. No further complete regression pass is required for these final
+documentation/evidence updates. Save reader-form drafts and ordinary notes
+before reloading the original reading-workspace window to load 0.11.0; do not
+force-close or reload user windows. Scope/use boundaries are in the workflow.
+
 ## Installation paths and immediate review use — 2026-11-03
 
 The user explicitly requested documented installation paths and described a

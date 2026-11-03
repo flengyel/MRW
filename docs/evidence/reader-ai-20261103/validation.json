@@ -1,0 +1,23 @@
+{
+  "version": "0.11.0",
+  "node_test_files_passed": 8,
+  "python_tests": 379,
+  "python_passed": 317,
+  "python_skipped": 62,
+  "syntax_and_compileall": true,
+  "archive_files": 66,
+  "installed_check": {
+    "version": "0.11.0",
+    "runtime_files_matching": 61,
+    "manifest_matching": true,
+    "license_matching": true,
+    "installed_isolated_bridge": true,
+    "missing_original_exact_retained_context": true,
+    "preview_only_no_provider_request": true,
+    "sha256": "676a057a97cb5b10bb9a0b112e0ba86694bb22eb649ac3095a228c7bd0265296"
+  },
+  "actual_windows_wsl_reader_workflow": "unobserved: no host report after launch and user reload",
+  "live_provider_request": false,
+  "copilot_backend_implemented": false,
+  "earlier_archives_preserved": true
+}

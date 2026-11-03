@@ -252,7 +252,8 @@ function activate(context) {
   });
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
-  const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients });
+  const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
+    askRetained: assistanceRows.askRetained });
   registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   const tree = {

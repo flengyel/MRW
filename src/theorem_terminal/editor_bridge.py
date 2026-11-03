@@ -14,7 +14,7 @@ import sys
 from .editor_assistance import assistance_action
 from .editor_investigation import editor_investigation_action
 from .source_outlines import outline_action
-from .outline_references import reference_action, parse_reference
+from .outline_references import reference_action, parse_reference, assistance_context_action
 from .outline_notes import note_action
 from .record_actions import call_passage, persist_call_passage, attributed_contribution
 from .record_views import inspect_record, read_call_snapshot
@@ -85,6 +85,7 @@ def _dispatch(request):
         'outline_reference': ({'store', 'project_root', 'id', 'revision', 'region'}, set()),
         'outline_parse_reference': ({'reference'}, set()),
         'outline_follow_reference': ({'store', 'project_root', 'reference'}, set()),
+        'outline_assistance_context': ({'store', 'project_root', 'reference'}, set()),
         'outline_notes': ({'store', 'project_root', 'id'}, {'reference'}),
         'outline_update_note': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
         'outline_mutate': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
@@ -110,6 +111,8 @@ def _dispatch(request):
         return parse_reference(request['reference'])
     if method in ('outline_reference', 'outline_follow_reference'):
         return reference_action(request)
+    if method == 'outline_assistance_context':
+        return assistance_context_action(request)
     if method in ('outline_notes', 'outline_update_note'):
         return note_action(request)
     if method.startswith('outline_stacks_'):

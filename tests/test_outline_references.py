@@ -37,6 +37,49 @@ class OutlineReferenceTests(unittest.TestCase):
     def inventory(self):
         return {str(p):sha256(p.read_bytes()).hexdigest() for p in self.home.rglob('*') if p.is_file()}
 
+    def test_assistance_freezes_exact_retained_passage_without_original_or_reader_notes(self):
+        ref = self.ref()['reference']
+        self.edit(kind='annotation', region=self.region['id'], id=None, purpose='explanation',
+                  origin='human_work', author=None, text='PRIVATE READER EXPLANATION')
+        self.path.unlink()
+        before = self.inventory()
+        with patch('urllib.request.urlopen', side_effect=AssertionError('No network')):
+            context = self.call('outline_assistance_context', reference=ref)['context']
+        self.assertEqual(context['text'], '😀 → β\r\nClaim')
+        self.assertEqual(context['source_identity'], ref)
+        self.assertEqual(context['source_revision'], sha256(self.raw).hexdigest())
+        self.assertIsNone(context['source_path'])
+        self.assertEqual((context['start'], context['end']), ('1.1', '2.5'))
+        self.assertNotIn('PRIVATE READER EXPLANATION', str(context))
+        self.assertEqual(before, self.inventory())
+        from theorem_terminal.editor_assistance import decode_context
+        self.assertEqual(decode_context(context).text, context['text'])
+
+    def test_assistance_keeps_earlier_range_after_reassociation_and_rejects_whole_or_wrong_scope(self):
+        ref = self.ref()['reference']
+        self.edit(kind='replace_region', region=self.region['id'], start=[2, 0], end=[2, 9])
+        before = self.inventory()
+        context = self.call('outline_assistance_context', reference=ref)['context']
+        self.assertEqual(context['text'], '😀 → β\r\nClaim')
+        self.assertIn('changed or removed', context['state'])
+        current = self.call('outline_assistance_context', reference=self.ref()['reference'])['context']
+        self.assertEqual(current['text'], 'Argument.')
+        with self.assertRaisesRegex(ValueError, 'one retained passage'):
+            self.call('outline_assistance_context', reference=self.ref(False)['reference'])
+        wrong = ref.replace(ref.split('/')[1], '0'*64, 1)
+        with self.assertRaisesRegex(ValueError, 'scope'):
+            self.call('outline_assistance_context', reference=wrong)
+        self.assertEqual(before, self.inventory())
+
+    def test_assistance_refuses_unavailable_retained_material_without_replacements(self):
+        ref = self.ref()['reference']
+        blob = next((Path(self.base['store'])/self.saved['outline']['id']).glob('source-*.bin'))
+        blob.unlink()
+        before = self.inventory()
+        with self.assertRaisesRegex(ValueError, 'Retained source unavailable'):
+            self.call('outline_assistance_context', reference=ref)
+        self.assertEqual(before, self.inventory())
+
     def test_two_sources_and_bibliography_annotation_edits_do_not_change_identity(self):
         bib = dict(title='Book [α] <tag>', authors='Known author', edition='2nd', revision=None,
                    locator='§ 2', reference='Supplied citation')

@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -31,6 +31,11 @@
   },
   "contributes": {
     "commands": [
+      {
+        "command": "mrw.askReader",
+        "title": "Ask About Reader Passage…",
+        "category": "MRW"
+      },
       {
         "command": "mrw.mark",
         "title": "Mark Return Location",

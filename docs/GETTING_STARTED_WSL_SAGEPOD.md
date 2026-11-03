@@ -6,8 +6,8 @@ That path also points to the existing AI connector; SagePod is an optional
 computation companion with its own installation.
 
 This tutorial gets you from Windows VS Code to a mathematical reading workspace
-with an ordinary notebook running SageMath. It describes **MRW 0.10.0** and the
-SagePod helpers at revision `4bc1bc3`, reviewed on **2026-11-02**.
+with an ordinary notebook running SageMath. It describes **MRW 0.11.0** and the
+SagePod helpers at revision `4bc1bc3`, reviewed on **2026-11-03**.
 
 MRW is the **Mathematical Research Workstation** VS Code extension, sometimes
 called the plugin. Install it from a `.vsix` package. There is currently no
@@ -77,15 +77,15 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`theorem-terminal-0.10.0.vsix`. Alternatively, in that window's WSL integrated
+`theorem-terminal-0.11.0.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.10.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.11.0.vsix
 code --list-extensions --show-versions
 ```
 
-Check that **Mathematical Research Workstation 0.10.0** appears under
+Check that **Mathematical Research Workstation 0.11.0** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
 The CLI identity is `flengyel.theorem-terminal@0.10.0`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
@@ -261,7 +261,7 @@ host paths for VS Code files.
 ## Build the VSIX
 
 Skip this section if you already have a trusted MRW package. The repository
-does not commit its generated VSIX files. To build **0.10.0** yourself, use
+does not commit its generated VSIX files. To build **0.11.0** yourself, use
 **Linux Node.js 22+, npm, Python 3.11+ and Git in WSL**. Node/npm are only
 packaging requirements. Check `node --version`, `npm --version` and
 `command -v node npm`; Windows npm launchers cannot run the Linux build chain.
@@ -272,17 +272,19 @@ Use a **new directory**, leaving existing checkouts and study work alone:
 mkdir -p ~/src
 git clone https://github.com/flengyel/theorem_terminal.git ~/src/mrw-install
 cd ~/src/mrw-install
-git switch --detach 5d393b766d1f3e84115d23f492ce420443832990
+git rev-parse HEAD
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.10.0.vsix
-sha256sum vscode/theorem-terminal-0.10.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.11.0.vsix
+sha256sum vscode/theorem-terminal-0.11.0.vsix
 ```
 
-This creates `~/src/mrw-install/vscode/theorem-terminal-0.10.0.vsix` and verifies
-its runtime bytes against that checkout. The recorded maintainer archive has
-SHA-256 `1ba44124d4755caca7516c26d9339a4fde784058943874c48010082fa1c43792`;
-byte-identical reproduction also depends on the recorded packaging tool versions.
+This creates `~/src/mrw-install/vscode/theorem-terminal-0.11.0.vsix` and verifies
+its runtime bytes against that checkout. Record the commit printed by
+`git rev-parse HEAD` and the archive's actual SHA-256. The
+[reader-assistance delivery record](READER_AI_WORKFLOW.md) identifies the
+maintainer package. Byte-identical reproduction also depends on the recorded
+packaging tool versions.
 See [packaging details](../vscode/README.md#package-and-install-a-vsix).
 Return to your **study workspace's WSL window** and [install the VSIX in step 2](#2-install-mrw-and-the-notebook-extensions).
 This builds locally and publishes nothing.
@@ -290,18 +292,18 @@ This builds locally and publishes nothing.
 ## Roadmap and further help
 
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
-is the active project roadmap. MRW 0.10.0 delivers the reading navigator, retained
+is the active project roadmap. MRW 0.11.0 delivers the reading navigator, retained
 source reader, attributed annotations, typeset annotation mathematics and explicit
 TikZ rendering. The existing [Ask About Selected Work](../vscode/README.md#workflows)
 action prepares assistance from selected ordinary editor text and requires a
-separate **Send Exact Preview** action. Direct assistance from the reader or
-notebook cells, AI-proposed outlines, inference graphs and vertex elimination
-remain pending. The next functional priority is AI assistance tied to the selected
-reading passage; the roadmap records this separately from delivered features.
+separate **Send Exact Preview** action. Direct retained-passage assistance is
+available from the source reader in 0.11.0; see the
+[reader AI workflow](READER_AI_WORKFLOW.md). Direct notebook-cell capture,
+AI-proposed outlines, inference graphs and vertex elimination remain pending.
 
 For detailed boundaries, use the [SagePod companion workflow](SAGEPOD_NOTEBOOK_WORKFLOW.md)
 and [its October 16 validation report](SAGEPOD_NOTEBOOK_VALIDATION.md). That report
 records actual Windows/WSL notebook execution, saving and reopening with MRW
 0.5.0. Its November 3 follow-up records the user's successful factorization and
 the cell-creation difficulty. This tutorial updates installation guidance for
-0.10.0; it does not claim a new end-to-end notebook test or a fresh SagePod installation.
+0.11.0; it does not claim a new end-to-end notebook test or a fresh SagePod installation.

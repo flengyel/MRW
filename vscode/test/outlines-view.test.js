@@ -69,6 +69,20 @@ function readingModel() {
   noteTargets:{whole:{region:null,span:null},earlier:{region:'changed',span:old},current:{region:'other',span:old}} };
 }
 
+test('reader AI controls distinguish current passages from an earlier pinned range', () => {
+  const h = reader(); h.send(readingModel());
+  const button = action => h.root.all().find(n => n.dataset.action === action);
+  button('ask-ai-passage').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'ask_ai',region:'changed'}));
+  h.send({type:'idle'});
+  button('ask-ai-pinned').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'ask_ai',pinned:true}));
+  h.send({type:'idle'});
+  button('ask-ai').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'ask_ai'}));
+  assert.equal(h.messages.some(m => m.type === 'send_assistance'), false);
+});
+
 test('reader distinguishes whole, current and earlier pinned targets and displays only their saved labels', () => {
   const h = reader(); h.send(readingModel());
   const [whole, pinned, changed, current] = h.scopes();

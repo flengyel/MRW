@@ -7,6 +7,13 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Reader assistance, 2026-11-03:** 0.11.0 connects an explicitly chosen retained
+passage to the existing exact-preview/Send workflow. A question can request an
+explanation or critique, using the exact source revision and range. The answer
+remains attributed AI material; this connector supplies no inference graph,
+vertex elimination, automatic outline generation or proof correctness. See
+[the workflow](READER_AI_WORKFLOW.md).
+
 **Reader diagrams, 2026-11-02:** 0.10.0 explicitly renders saved TikZ annotation
 blocks to retained SVGs. Code, attribution and source statements remain separate;
 drawing an arrow or square supplies no checked dependency or commutativity.

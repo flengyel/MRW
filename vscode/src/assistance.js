@@ -69,11 +69,9 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     },
     async release() { investigation.storageChanged(); invalidate(); },
   });
-  register('mrw.ask', () => change(async () => {
-    const target = capture(vscode.window.activeTextEditor);
-    const root = await projectRoot(vscode.window.activeTextEditor);
+  async function begin(target, root, prompt = 'Mathematical question about the selected work') {
     draft = undefined;
-    const question = await vscode.window.showInputBox({ prompt: 'Mathematical question about the selected work' });
+    const question = await vscode.window.showInputBox({ prompt });
     if (question === undefined) return;
     const configured = vscode.workspace.getConfiguration('mrw').get('model', '');
     const model = configured || await vscode.window.showInputBox({ prompt: 'OpenAI model identifier for this request' });
@@ -84,6 +82,11 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     draft = { project_root: root, target, contexts: [target], question, model,
       output: path.join(directory, `${id}.json`), exchange_id: id };
     await prepare();
+  }
+  register('mrw.ask', () => change(async () => {
+    const target = capture(vscode.window.activeTextEditor);
+    const root = await projectRoot(vscode.window.activeTextEditor);
+    await begin(target, root);
   }));
   register('mrw.addContext', () => change(async () => {
     if (!draft) throw new Error('Start with Ask About Selected Work.');
@@ -157,7 +160,7 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
       changed.fire();
     }
   });
-  return () => {
+  const rows = () => {
     const rows = [['Ask about selected work…', 'mrw.ask'], ...investigation.rows()];
     if (draft) rows.push(['Add selected context', 'mrw.addContext'], ['Remove context…', 'mrw.removeContext'],
       ['Edit question…', 'mrw.editQuestion'], ['Show exact request preview', 'mrw.previewRequest'],
@@ -165,5 +168,11 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     if (prepared) rows.push(['Send exact preview', 'mrw.sendRequest']);
     return rows;
   };
+  rows.askRetained = (target, root) => {
+    idle();
+    if (draft) throw new Error('Finish or discard the current unsent request before asking about another passage.');
+    return change(() => begin(target, root, 'Mathematical question about this exact retained source passage'));
+  };
+  return rows;
 }
 module.exports = { capture, registerAssistance };

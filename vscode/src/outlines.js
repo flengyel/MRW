@@ -34,7 +34,7 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients }) {
+function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -162,7 +162,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     try {
       await locked(async () => {
         active = c.result.outline.id;
-        if (value.type === 'edit') await mutate(c, value.change, value.draft);
+        if (value.type === 'ask_ai') await askPassage(c, value);
+        else if (value.type === 'edit') await mutate(c, value.change, value.draft);
         else if (value.type === 'render_diagram') {
           writable(c);
           let result;
@@ -262,6 +263,23 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
     return bridge(request(c, 'outline_reference', { region: value.region ?? null }));
   }
+  async function askPassage(c, value = {}) {
+    let region = value.region;
+    if (!value.pinned && region === undefined) {
+      if (!c.result.outline.regions.length) throw new Error('Add a retained source passage before asking the AI.');
+      const choice = await vscode.window.showQuickPick(c.result.outline.regions.map(r => ({
+        label: r.title, description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col}`, region: r.id,
+      })), { placeHolder: 'Choose the exact retained passage to ask about' });
+      if (!choice) return;
+      region = choice.region;
+    }
+    if (!value.pinned && !region) throw new Error('Add or select a retained source passage first.');
+    const target = await readerTarget(c, { region, pinned: value.pinned === true });
+    const result = await bridge({ method: 'outline_assistance_context', store: c.store,
+      project_root: c.root, reference: target.reference });
+    await askRetained(result.context, c.root);
+  }
+  register('mrw.askReader', () => locked(() => askPassage(current())));
   async function chooseTarget() {
     const { root, store } = await storage();
     const listed = await bridge({ method: 'outline_list', store, project_root: root });

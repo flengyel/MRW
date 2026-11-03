@@ -10,7 +10,15 @@ the notebook connection and cell steps. MRW is currently installed from a VSIX;
 there is no project-published Marketplace listing or GitHub release download.
 The tutorial and source-build route require access to this private repository.
 The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
-distinguishes delivered reading tools from the next reader-to-AI increment.
+distinguishes delivered reading tools and passage assistance from broader planned analysis.
+
+Extension **0.11.0** adds **Ask AI about this passage…** directly in the source
+reader, using the existing OpenAI connector and exact retained source reference.
+Review the complete request, then use the separate **MRW: Send Exact Preview**
+action. An API credential must be available to the WSL extension host. Copilot
+is a separate connection; it is not this reader's backend. See the
+[reader AI workflow](docs/READER_AI_WORKFLOW.md). Returned explanations stay
+separately attributed, with no automatic note rewrite or proof status.
 
 The VS Code extension is the active frontend migration target. Its initial
 implementation and launch instructions are in [vscode/README.md](vscode/README.md).

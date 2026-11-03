@@ -235,6 +235,7 @@ function render() {
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
   button(readingBar, '← Return to reading outline', { type: 'reading_return' }, 'reading-return');
+  button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');
   if (Object.values(o.published?.parts || {}).some(p => p.role === 'proof' && o.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)))) {
     for (const hidden of [true, false]) {
       const control = el('button', hidden ? 'Hide proofs' : 'Show proofs', readingBar);
@@ -242,7 +243,10 @@ function render() {
       control.addEventListener('click', () => proofViews(hidden));
     }
   }
-  if (reference?.status === 'changed or removed') el('p', reference.notice, root, 'warning').dataset.reference = 'true';
+  if (reference?.status === 'changed or removed') {
+    el('p', reference.notice, root, 'warning').dataset.reference = 'true';
+    button(root, 'Ask AI about the earlier linked passage…', { type: 'ask_ai', pinned: true }, 'ask-ai-pinned');
+  }
   if (o.retained_error) el('p', `Retained source unavailable: ${o.retained_error}. No source text was guessed.`, root, 'warning');
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
   if (blocked) el('p', 'Private writes are blocked. Keep unsaved annotation text and reload the host before further writes.', root, 'warning');
@@ -357,6 +361,10 @@ function render() {
       });
     }
     if (publishedPart && !compactProof) proofNavigation(box, publishedPart);
+    if (!compactProof) {
+      const assistance = el('div', undefined, box, 'proof-navigation');
+      button(assistance, 'Ask AI about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
+    }
     // Editing forms live outside the statement/proof reading sequence. Opening
     // an annotation editor must not insert a panel between them.
     const passageTools = el('details', undefined, tools, 'passage-tools'); el('summary', `Notes and tools: ${r.title}`, passageTools);

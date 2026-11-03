@@ -85,9 +85,9 @@ another folder for that work.
 
 ### 3. Obtain and install the MRW package
 
-The current delivered package is **`theorem-terminal-0.10.0.vsix`**, extension
+The current delivered package is **`theorem-terminal-0.11.0.vsix`**, extension
 identity **`flengyel.theorem-terminal`**. Obtain a trusted maintainer package, or
-follow the [pinned source-build instructions](GETTING_STARTED_WSL_SAGEPOD.md#build-the-vsix).
+follow the [source-build instructions](GETTING_STARTED_WSL_SAGEPOD.md#build-the-vsix).
 The source-build route needs Git, Linux Node.js 22+ and npm in addition to Python.
 
 In the intended **WSL VS Code window**, press **F1 → Extensions: Install from
@@ -95,7 +95,7 @@ VSIX…** and select the package. Or use that window's WSL integrated terminal,
 replacing this example with the package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.10.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.11.0.vsix
 code --list-extensions --show-versions
 ```
 
@@ -152,10 +152,12 @@ variables are separate.
 
 ## AI assistance for reviewing mathematics
 
-The existing connector uses the **OpenAI Responses API**. Its current entry
-point is **MRW: Ask About Selected Work** on ordinary editor text. It prepares
-an exact request preview; **MRW: Send Exact Preview** is a separate explicit
-action. Reading and preparing a preview require no provider call.
+The connector uses the **OpenAI Responses API**. In MRW 0.11.0, click **Ask AI
+about this passage…** directly in the source reader, or run **MRW: Ask About
+Reader Passage…**. **MRW: Ask About Selected Work** remains available for ordinary
+editor text. Both prepare an exact request preview; **MRW: Send Exact Preview**
+is a separate explicit action. Reading and preparing a preview require no
+provider call.
 
 To use that connector, configure an API credential as `OPENAI_API_KEY` in the
 environment inherited by the **WSL extension host**, and choose your model
@@ -165,11 +167,10 @@ creating and exporting a key. Keep it outside notes, workspace settings and
 version control. Setting it in an already-open integrated terminal does not
 change the environment of the existing extension host. MRW reads it only at Send.
 
-See the [existing assistance workflow](../vscode/README.md#workflows) for exact
-context selection, response review and retention. Copilot appearing in VS Code
-does not configure this connector. Direct access from the source reader is the
-requested next increment; its installation guidance will track the delivered
-connection. No provider request is needed to install MRW or SagePod.
+See the [reader AI workflow](READER_AI_WORKFLOW.md) for source selection, response
+review and retention. Copilot appearing in VS Code does not configure this
+connector; its models would require a separate MRW integration. No provider
+request is needed to install MRW or SagePod.
 
 ## Obsidian links: optional, later
 

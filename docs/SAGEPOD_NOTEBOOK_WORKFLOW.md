@@ -4,7 +4,7 @@ For installation, [choose the reading or computation path](INSTALLATION.md).
 SagePod is MRW's optional computation companion. For a first notebook connection,
 follow [Install MRW and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
 This companion guide preserves the workflow boundaries and historical host
-evidence; the installed MRW version is now 0.10.0.
+evidence; the current MRW package version is 0.11.0.
 
 Use an ordinary `.ipynb` for explanations, rendered mathematics, Sage code and
 saved outputs. VS Code and Microsoft's Jupyter extension provide the notebook

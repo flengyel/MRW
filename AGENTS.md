@@ -53,6 +53,16 @@ The extension implements record actions, return markers, explicit Lean/browser
 handoffs, R2 exact preview/Send, and bounded R3 continuation, restart resumption
 and R3.1 ending. The extension's independent private investigation pointer is
 specified in `vscode/README.md`; it does not import Qt workspace/recovery state.
+Extension 0.11.0 adds direct AI access from a retained reader passage through
+the existing OpenAI connector. Resolve the existing scoped reference in the
+Python core; preserve source revision, outline/region identity and exact scalar
+range, including an earlier changed/removed association. Include only that
+retained source quotation initially, excluding reader annotations and supplied
+evidence. Keep the exact preview and separate Send, existing terminal records
+and attribution. Reader clicks and preparing questions make no provider request;
+never substitute Copilot or another backend automatically. Preserve open reader
+drafts and existing unsent requests. No automatic annotation/prose rewrite,
+proof status or AI-generated graph is supplied. See `docs/READER_AI_WORKFLOW.md`.
 The offline source-region reader retains exact UTF-8 sources and optional
 supplied evidence separately from editable attributed reader annotations. It
 supports informal books/articles and AI-generated or AI-assisted manuscripts

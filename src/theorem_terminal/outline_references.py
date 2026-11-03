@@ -119,3 +119,28 @@ def reference_action(request):
     parts.append('retained SHA-256 ' + source.revision[:12])
     label = short_label(store, source, region['span'] if region else None)
     return dict(reference=uri, label=label, markdown=f"[{markdown_label(' · '.join(parts))}]({uri})")
+
+
+def assistance_context_action(request):
+    """Freeze one resolved retained passage; no acquisition or transmission."""
+    # Use the navigation resolver, including its workspace, store and revision
+    # checks. A changed/removed association must keep the originally pinned span.
+    followed = reference_action({**request, 'method': 'outline_follow_reference'})
+    ref = parse_reference(request['reference'])
+    if ref['span'] is None:
+        raise ValueError('Choose one retained passage for assistance, rather than the whole source')
+    store = OutlineStore(request['store'], request['project_root'], ref['outline'])
+    source = store.source()
+    if source.revision != ref['source']:
+        raise ValueError('Referenced source revision differs; no replacement was guessed')
+    span = ref['span']
+    selected = span_text(source, span)
+    return {'context': {
+        'buffer_id': request['reference'], 'source_identity': request['reference'],
+        'source_path': None, 'source_revision': source.revision, 'saved_revision': None,
+        'start': f"{span['start_line']}.{span['start_col']}",
+        'end': f"{span['end_line']}.{span['end_col']}", 'text': selected,
+        'state': ('Exact retained source passage; ' + followed['reference']['label'] +
+                  '; region association ' + followed['reference']['status'] +
+                  '. Reader annotations and supplied evidence are not included.'),
+    }}

@@ -361,6 +361,69 @@ async function ask(h, root) {
   return doc;
 }
 
+async function sourceReader(h, root) {
+  const file = path.join(root, 'reader-source.md'), text = 'α😀 → β\r\nClaim.\r\nPRIVATE UNSELECTED';
+  await fs.writeFile(file, text);
+  const ed = h.editor(h.document(file, text));
+  ed.selection = new Selection(new Position(0, 1), new Position(1, 5)); h.focus(ed);
+  const saved = await h.commands.get('mrw.createOutline')();
+  assert.deepEqual(h.errors, []);
+  return {file, text, saved, panel:h.panels[0], region:saved.outline.regions[0].id};
+}
+
+test('reader passage prepares frozen retained context without editor focus, then reuses explicit Send and review', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const {file, saved, panel, region} = await sourceReader(h, root);
+  panel.webview.dirty = true;
+  await fs.unlink(file); h.focus(undefined);
+  h.inputs.push('Explain this argument.', 'fake-model');
+  await panel.receive({type:'ask_ai',region});
+  const draft = h.requests.findLast(r=>r.method==='prepare_assistance').draft;
+  assert.equal(draft.contexts[0].text, '😀 → β\r\nClaim');
+  assert.match(draft.target.source_identity, /^mrw-outline:v1\//);
+  assert.equal(draft.target.source_revision, saved.outline.source.revision);
+  assert.equal(draft.target.source_path, null);
+  assert.equal(draft.target.start, '1.1'); assert.equal(draft.target.end, '2.5');
+  assert.equal(h.shown.at(-1).text.includes('PRIVATE UNSELECTED'), false);
+  assert.equal(h.requests.some(r=>r.method==='send_assistance'), false);
+  assert.equal(panel.webview.dirty, true);
+  await deterministicSend(h, draft);
+  assert.ok(h.requests.some(r=>r.method==='review'));
+  assert.equal(h.requests.filter(r=>r.method==='send_assistance').length, 1);
+  const retained=JSON.parse(await fs.readFile(draft.output,'utf8'));
+  assert.equal(retained.target.id,draft.target.source_identity);
+  assert.equal(retained.target.revision,saved.outline.source.revision);
+  assert.equal(retained.context_refs[0].revision,saved.outline.source.revision);
+  assert.equal(panel.webview.dirty, true);
+});
+
+test('reader command cancellation and an existing unsent request preserve the current preview', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const {panel, region} = await sourceReader(h, root);
+  await h.commands.get('mrw.askReader')(); // No question supplied: cancel.
+  assert.equal(h.requests.some(r=>r.method==='prepare_assistance'), false);
+  h.inputs.push('Explain.', 'fake-model');
+  await panel.receive({type:'ask_ai',region});
+  const preview=h.shown.at(-1), draft=h.requests.findLast(r=>r.method==='prepare_assistance').draft;
+  await panel.receive({type:'ask_ai',region});
+  assert.match(h.errors.pop(), /Finish or discard the current unsent request/);
+  assert.equal(h.shown.at(-1), preview);
+  assert.equal(h.requests.filter(r=>r.method==='prepare_assistance').length, 1);
+  await deterministicSend(h, draft);
+});
+
+test('stale reader association refuses preparation rather than selecting newer source text', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const {saved, panel, region} = await sourceReader(h, root);
+  const sourceRequest = h.requests.find(r=>r.method==='outline_create');
+  await runBridge(path.resolve(__dirname,'..'), 'python3', {method:'outline_mutate',store:sourceRequest.store,
+    project_root:root,id:saved.outline.id,revision:saved.revision,
+    change:{kind:'replace_region',region,start:[2,0],end:[2,5]}});
+  await panel.receive({type:'ask_ai',region});
+  assert.equal(h.requests.some(r=>r.method==='prepare_assistance'), false);
+  assert.match(h.errors.at(-1), /changed/);
+});
+
 test('unsaved Unicode preview contains only selection; remove and discard send nothing', async t => {
   const root = await temporary(t), h = await harness(root);
   const doc = await ask(h, root);
