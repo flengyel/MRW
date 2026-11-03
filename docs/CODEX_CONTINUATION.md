@@ -1,5 +1,35 @@
 # Codex continuation: MRW source work and companion notes
 
+## Installation paths and immediate review use — 2026-11-03
+
+The user explicitly requested documented installation paths and described a
+public webpage as a later possibility. [INSTALLATION.md](INSTALLATION.md) now
+separates path A, MRW for reading/review, from path B, the optional SagePod
+computation companion. It distinguishes Windows UI and WSL extension-host
+requirements, runtime versus source-build tools, Python outside the container,
+notebook extensions and current distribution limits. Both READMEs and the
+SagePod guides link to it. No website, Marketplace upload, public release or
+repository-visibility change is authorized by that future possibility.
+
+The user adds an Obsidian link for later and reports it untested in this setup.
+Keep it optional and its user test pending; older scoped validation remains
+historical evidence. Do not open/index a vault, create a new one, rewrite notes
+or repeat the Obsidian campaign for installation documentation.
+
+The immediate purpose is reviewing mathematics with AI directly in MRW's source
+reader. The user chose direct reader access over selecting ordinary editor text,
+then asked whether the Copilot UI suffices. The existing connector is the bounded
+OpenAI Responses API with exact preview, separate Send and immutable response
+records. Copilot's presence does not supply this reader bridge. Its Language
+Model API is a possible separate backend with user consent and availability
+handling; do not silently substitute it or assume the account has access. Keep
+the provider decision explicit. No credential or live provider request was used
+to investigate the installation/connector documentation.
+
+Installation-document checks pass: new local links/anchors, Markdown fences,
+Bash snippet syntax, credential-pattern scan and whitespace. This documentation
+delivery changes no runtime and requires no new VSIX or notebook campaign.
+
 ## User-led SagePod connection and tutorial repair — 2026-11-03
 
 The user clarified that SagePod uses host port 8889. Codex confirmed that default

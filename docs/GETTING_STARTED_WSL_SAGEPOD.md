@@ -1,5 +1,10 @@
 # Install MRW and use SagePod in WSL2
 
+This is **path B: MRW with SagePod**. For reading and mathematical review, start
+with [path A in the installation guide](INSTALLATION.md#a-mrw-for-reading).
+That path also points to the existing AI connector; SagePod is an optional
+computation companion with its own installation.
+
 This tutorial gets you from Windows VS Code to a mathematical reading workspace
 with an ordinary notebook running SageMath. It describes **MRW 0.10.0** and the
 SagePod helpers at revision `4bc1bc3`, reviewed on **2026-11-02**.

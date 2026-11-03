@@ -1,8 +1,9 @@
 # Mathematical Research Workstation for VS Code
 
-**New installation:** follow [Install MRW and use SagePod in WSL2](../docs/GETTING_STARTED_WSL_SAGEPOD.md).
-It covers getting the current VSIX, checking installation in WSL, choosing
-SagePod's authenticated Jupyter server and selecting the SageMath kernel.
+**New installation:** [choose MRW for reading or add SagePod for computation](../docs/INSTALLATION.md).
+The guide separates prerequisites, the current AI connector and optional Obsidian
+links. Follow the [SagePod tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md) for
+the authenticated notebook connection, kernel selection and cell controls.
 MRW 0.10.0 is distributed locally as a VSIX; a project-published Marketplace
 listing and GitHub release download are not yet available.
 The tutorial and source-build route require access to this private repository.

@@ -2,9 +2,11 @@
 
 Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
 
-**Start here:** [Install MRW and use SagePod in WSL2](docs/GETTING_STARTED_WSL_SAGEPOD.md).
-The tutorial covers the 0.10.0 VSIX, the WSL extension host, Jupyter's existing-server
-connection and the SageMath kernel. MRW is currently installed from a VSIX;
+**Start here:** [Choose an installation path](docs/INSTALLATION.md):
+**MRW for reading and mathematical review**, or **MRW with SagePod for computation**.
+The guide separates required components, optional AI assistance and later
+Obsidian links. The [SagePod tutorial](docs/GETTING_STARTED_WSL_SAGEPOD.md) gives
+the notebook connection and cell steps. MRW is currently installed from a VSIX;
 there is no project-published Marketplace listing or GitHub release download.
 The tutorial and source-build route require access to this private repository.
 The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
@@ -1383,6 +1385,8 @@ problem families before selecting a problem.
 
 ## Documents
 
+- [Installation paths](docs/INSTALLATION.md) — MRW for reading, the SagePod
+  computation companion, AI assistance and optional Obsidian links.
 - [Getting started with MRW and SagePod in WSL2](docs/GETTING_STARTED_WSL_SAGEPOD.md)
   — installation and a step-by-step notebook/reading tutorial.
 - `VISION.md` — why the project exists.

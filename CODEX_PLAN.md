@@ -1,6 +1,6 @@
 # CODEX_PLAN.md
 
-Active product roadmap. Installation/tutorial and next reader-assistance priority updated 2026-11-02;
+Active product roadmap. Installation paths and reader-assistance priority updated 2026-11-03;
 the product assessment was reviewed 2026-09-20 against the integrated Qt R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research
 below. It inherits the information-class invariants in `DOMAIN_MODEL.md` and the
@@ -61,6 +61,28 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Installation paths and immediate review use — 2026-11-03
+
+[The installation guide](docs/INSTALLATION.md) now distinguishes **MRW for
+reading and mathematical review** from **MRW with SagePod for computation**.
+The Windows path places the UI in Windows and MRW/Python in WSL2. Git is needed
+for source checkouts, Node/npm only for building the VSIX, and rootless Podman,
+SagePod, Jupyter and Sage language registration for the notebook companion.
+Both READMEs link to this guide; the detailed notebook tutorial remains path B.
+
+The user's immediate purpose is reviewing mathematics with AI available directly
+from the source reader. The existing OpenAI connector supports selected ordinary
+editor text and exact preview/Send; the direct-reader bridge is the requested
+next functional increment. Copilot appearing in VS Code does not connect it to
+MRW's retained passages. A Copilot route would need explicit integration and its
+own model/consent handling. Keep the backend choice and delivered status clear.
+
+The user requests an Obsidian link for later and has not tested that workflow
+in this setup. Document the existing optional companion without requiring a
+vault, running a new test or claiming personal acceptance. Repository docs remain
+the installation reference in this early stage. A public webpage is a possible
+later presentation, without current hosting, release or visibility changes.
 
 ### Notebook onboarding follow-up — 2026-11-03
 
