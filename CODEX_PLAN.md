@@ -67,11 +67,19 @@ changing implementation status or the delivered R1–R3.1 boundaries.
 
 The user accepts Codex's VS Code extension as the temporary AI companion to
 MRW. Use explicit passage quotation and its MRW reference in Codex, then retain
-useful explanations with AI attribution in ordinary notes or reader annotations.
+useful explanations with AI attribution in ordinary notes/notebooks or reader
+annotations. The user reports Codex installed and its sidebar opening successfully,
+with this development checkout open in **WSL: Debian**. That is sidebar startup
+evidence; the manual passage-to-Codex exchange and attributed saving remain
+untested in this setup. The existing Stacks study workspace must be reopened
+separately; [the handoff gives its path and UI steps](docs/CODEX_CONTINUATION.md#reopen-the-existing-study-workspace-beside-codex).
 Codex offers ChatGPT sign-in separately from MRW's API connector. MRW API-key
 setup remains deferred; general AI review through Codex need not wait for it.
 No automatic MRW-to-Codex handoff or shared authentication is implemented or
 validated. See [the companion workflow](docs/READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code).
+This is documentation-only setup guidance, with no new VSIX or desktop campaign.
+Windows-backed storage qualification remains deferred; preserve existing study
+records, annotations, notebooks and unrelated work.
 
 ### Reading navigator recheck and return race — 2026-11-03
 

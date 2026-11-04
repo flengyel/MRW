@@ -59,6 +59,15 @@ This is direct bounded assistance, without automatic outline generation,
 proof checking or a new conversation backend. See
 [workflow and validation](../docs/READER_AI_WORKFLOW.md).
 
+For the current [manual Codex companion workflow](../docs/READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code),
+copy the retained quotation and exact MRW passage reference into Codex, then
+save useful responses with AI attribution. The user reports Codex installation
+and successful sidebar startup in WSL: Debian; the passage exchange and attributed
+retention remain untested in this setup. MRW API-key setup and Windows-backed
+storage qualification remain deferred. [Reopen the existing study workspace](../docs/CODEX_CONTINUATION.md#reopen-the-existing-study-workspace-beside-codex)
+to access its saved reader separately from this development checkout. No new
+VSIX or desktop campaign is needed for this documentation follow-up.
+
 ## Workspace hosts and dependencies
 
 Keep one extension and the existing Python core in the workspace environment.

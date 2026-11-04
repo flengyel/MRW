@@ -8,20 +8,70 @@ MRW through that extension for now. This updates the earlier blanket wording
 that AI setup is deferred: the deferral applies to MRW's direct API credential
 setup and live connector trial, not to user-led mathematical questions in Codex.
 
-Use the existing WSL workspace and MRW reader. The immediate companion workflow
-is explicit: copy the intended retained passage and its MRW reference into a
-Codex question, then save any useful contribution with AI attribution in an
-ordinary note or reader annotation. OpenAI documents ChatGPT sign-in for the
+The user now reports that the Codex extension is installed and its sidebar opens
+successfully. They have opened `/home/flengyel/src/theorem_terminal` in Windows
+VS Code connected to **WSL: Debian**. This records successful sidebar startup by
+user report, separate from a tested MRW-to-Codex workflow. Transfer of a retained
+passage/reference, a resulting reply and explicit attributed retention remain
+untested in this setup. The existing 08ZG Codex annotation is earlier genuine
+study work, not acceptance evidence for the new companion route.
+
+Use the existing study workspace and MRW reader identified below. The immediate
+companion workflow is explicit: manually copy the intended retained quotation
+and its complete exact MRW passage reference into a Codex question, then save
+useful contributions with AI attribution in an ordinary note/notebook or a new
+reader annotation. See [the command and save steps](READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code).
+OpenAI documents ChatGPT sign-in for the
 [Codex extension](https://learn.chatgpt.com/docs/auth); this route does not require
 configuring MRW's `OPENAI_API_KEY`.
 
-This records the user's preferred interim workflow, not a completed installation
-or tested MRW-to-Codex integration. No automatic webview capture, source transfer,
-response retention or credential sharing is implemented. Do not read Codex
-credentials or turn its sign-in into an MRW API credential. A dedicated handoff
-button would be a separate implementation increment. Preserve the exact-source
-and attribution boundaries if that work is requested. No new provider request,
-VSIX build or desktop trial accompanies this documentation update.
+No automatic webview capture, source transfer, response retention or credential
+sharing is implemented. Manual Codex exchanges create no MRW API `ModelCall`.
+Do not read Codex credentials or turn its sign-in into an MRW API credential.
+A dedicated handoff button would be a separate implementation increment.
+MRW API-key setup/live connector use and Windows-backed storage qualification
+remain deferred. Preserve existing study records, annotations, ordinary notes,
+notebooks, the TikZ trial and unrelated changes. This follow-up changes
+documentation only: no new VSIX, provider request or desktop-testing campaign.
+
+### Reopen the existing study workspace beside Codex
+
+The current `/home/flengyel/src/theorem_terminal` folder is the **development
+checkout**. The retained Stacks study belongs to its own existing workspace:
+
+```text
+/home/flengyel/src/theorem_terminal/.codex-work/stacks-import-20261021/reading-workspace
+```
+
+Although this folder is under the checkout's ignored work directory, its private
+MRW store and genuine annotations belong to that workspace identity. Open the
+folder itself; adding it to the development workspace or copying its Markdown
+does not reopen the same private targets. Do not reseed, reimport or initialize
+a replacement store.
+
+1. Keep existing drafts in their windows. Use **File → New Window**, then
+   **F1 → WSL: Connect to WSL using Distro… → Debian** and **File → Open Folder…**
+   with the full study path above. Check that the bottom-left indicator says
+   **WSL: Debian**. Microsoft's [WSL guide](https://code.visualstudio.com/docs/remote/wsl#_from-vs-code)
+   describes this connection route. If its study window is already open, use it.
+2. Click the **MRW** book icon, then **F1 → MRW: Open Saved Source Outline… →
+   Hausdorff spaces**. This opens the already retained source offline. If the
+   outline is absent, first check the folder/window; do not import a new copy.
+3. Expand **Source details and tools** and select **08ZG · proof** in the section
+   contents, or select **08ZG · statement** and **Proof ↓**. Use **Show proof** if
+   hidden. Expand **Reader notes** to read the existing separately attributed
+   explanation. These are the saved study records, not disposable navigation
+   fixtures.
+4. With the reader tab open in the editor, choose the Codex icon or **F1 →
+   Codex: Open Codex Sidebar**. This leaves the MRW reader beside Codex. Following
+   a reading-outline link can hide sidebars to expand reading; reopen Codex with
+   that command afterward. Follow the manual companion steps linked above when
+   ready; successful startup alone does not test them.
+
+The separate SagePod notebook remains at
+`/home/flengyel/Jupyter/mrw-sagepod-study/sagepod-study.ipynb`, beside its existing
+`overview.md`. Preserve that project too. It has its own MRW targets; do not move
+or merge its files/private state with the Stacks study or development checkout.
 
 ## Repeated reading-navigator request and return race — 2026-11-03
 

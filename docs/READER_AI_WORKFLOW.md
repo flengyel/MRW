@@ -7,22 +7,54 @@ or sign-in is separate; MRW does not use Copilot's models in this increment.
 ## Temporary companion: Codex in VS Code
 
 The user prefers using Codex alongside MRW for now, while MRW's API credential
-setup remains deferred. In the existing WSL-connected window, open Codex's
-sidebar and use its **Sign in with ChatGPT** option if prompted. OpenAI documents
-this subscription sign-in separately from API-key access in its
-[authentication guide](https://learn.chatgpt.com/docs/auth).
+setup remains deferred. On **2026-11-03**, the user reports that the Codex
+extension is installed and its sidebar opens successfully, with the development
+checkout `/home/flengyel/src/theorem_terminal` open in **WSL: Debian**. This
+establishes user-reported sidebar startup. Passage transfer, a resulting Codex
+answer and saving that answer back into MRW have **not yet been tested** as a
+companion workflow. The earlier saved 08ZG Codex explanation remains separate
+study evidence; it does not establish this new extension workflow.
 
-Read the source in MRW, copy the intended passage and its MRW passage reference
-into a Codex question, and ask for the explanation or critique you need. A
-reference alone does not transfer its retained source text. Preserve useful
-answers explicitly in an ordinary note or saved reader annotation, with Codex/AI
-attribution separate from the source authors.
+First [reopen the existing study workspace and reader](CODEX_CONTINUATION.md#reopen-the-existing-study-workspace-beside-codex).
+Opening the development checkout alone does not expose that workspace's saved
+outlines. In the study window, choose the Codex icon or **F1 → Codex: Open Codex
+Sidebar**, as documented in OpenAI's
+[IDE extension guide](https://learn.chatgpt.com/docs/codex/ide). If prompted, use
+**Sign in with ChatGPT**; OpenAI documents that separately from API-key access in
+its [authentication guide](https://learn.chatgpt.com/docs/auth).
 
-This is a manual companion workflow. MRW's **Ask AI about this passage…** still
-uses its existing API connector; Codex sign-in does not configure that button.
-Automatic source handoff and automatic retention of Codex replies in MRW are
-not implemented. The Codex companion workflow has not yet been observed in the
-user's installed window. The API instructions below remain available for later.
+1. In MRW, choose the saved passage you want to discuss. For the retained Stacks
+   source, use the section contents to choose a statement or proof; **Show proof**
+   reveals a hidden proof.
+2. Run **F1 → MRW: Copy Outline or Passage Link…**, choose the saved outline and
+   the exact passage, and paste the complete copied Markdown link into an unsent
+   Codex question. It carries the existing scoped MRW reference, source revision,
+   region identity and pinned range. The reader's **Copy link to this passage**
+   under **Source details and tools → Notes and tools: PASSAGE → Passage links
+   and Obsidian note** supplies the same kind of destination. Obsidian is not
+   required to copy it. Keep the full link unchanged.
+3. Return to the reader and copy the matching quotation from **Exact retained
+   TeX for this passage** into the same question. Keep source text separate from
+   your question and any reader commentary. Ask for the explanation or critique
+   you need, review the composed question in Codex and submit it there explicitly.
+   A reference alone neither transfers retained text nor gives Codex access to
+   MRW's private store.
+4. Review the reply and manually save any useful contribution in an ordinary
+   note/notebook with the MRW reference and Codex/AI attribution. For a reader
+   annotation, return to **Source details and tools → Notes and tools: PASSAGE →
+   Add reader explanation / question / repair**, select **ai proposal** under
+   **Supplied origin**, enter **Codex** under **Author / attribution**, paste the
+   contribution and click **Save annotation**. Wait for confirmed save feedback;
+   newer typing may remain unsaved. Use a new annotation to preserve earlier
+   notes. Human corrections or synthesis should remain separately attributed.
+
+This is a manual companion workflow, with no automatic source handoff or reply
+retention. It creates no MRW API `ModelCall` record or proof-checking status.
+MRW's **Ask AI about this passage…** still uses its existing API connector;
+Codex sign-in does not configure that button or share its credentials with MRW.
+MRW API-key setup, a live connector trial and Windows-backed storage qualification
+remain deferred. This documentation update requires no new VSIX or desktop
+testing campaign. The API instructions below remain available for later.
 
 ## Setup
 

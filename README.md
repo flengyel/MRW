@@ -28,6 +28,14 @@ is a separate connection; it is not this reader's backend. See the
 [reader AI workflow](docs/READER_AI_WORKFLOW.md). Returned explanations stay
 separately attributed, with no automatic note rewrite or proof status.
 
+For now, the user prefers [Codex beside MRW](docs/READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code),
+manually copying a retained quotation and its exact MRW reference, then saving
+useful replies with AI attribution. Codex installation and sidebar startup in
+WSL: Debian are user-reported; the companion exchange/retention workflow remains
+untested. MRW API-key setup and Windows-backed storage qualification stay deferred.
+[Reopen the existing study workspace](docs/CODEX_CONTINUATION.md#reopen-the-existing-study-workspace-beside-codex)
+to find its saved reader; this development checkout has a separate workspace identity.
+
 The VS Code extension is the active frontend migration target. Its initial
 implementation and launch instructions are in [vscode/README.md](vscode/README.md).
 The existing Qt GUI remains available. The `theorem-terminal` CLI remains available for testing, automation, reproducibility, and low-level

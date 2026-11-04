@@ -31,7 +31,7 @@ WSL host, and Microsoft's Jupyter extension owns the notebook connection.
 | Linux Node.js 22+ and npm | Needed only to build the VSIX | Same packaging condition |
 | Rootless Podman and SagePod's host packages | Optional | Required; follow SagePod's setup |
 | Jupyter and SageMath Enhanced in WSL | Optional | Required for this notebook workflow |
-| AI account and API credential | Optional; see AI assistance below | Independent of SagePod |
+| AI access | Optional: Codex sign-in or MRW API credential; see AI assistance below | Independent of SagePod |
 | Obsidian, Lean and TikZ rendering tools | Optional | Optional |
 
 An installed MRW VSIX bundles its Python core. It needs no Node/npm, Qt,
@@ -152,14 +152,43 @@ variables are separate.
 
 ## AI assistance for reviewing mathematics
 
-The connector uses the **OpenAI Responses API**. In MRW 0.11.0, click **Ask AI
-about this passage…** directly in the source reader, or run **MRW: Ask About
+### Codex companion: current choice
+
+The user currently prefers the Codex VS Code extension alongside MRW, with MRW
+API-key setup deferred. On **2026-11-03**, the user reports that Codex is installed,
+its sidebar opens successfully and this development repository is open in
+**WSL: Debian**. That is sidebar startup evidence; the manual passage/question/
+response-retention workflow has not yet been tested in this setup.
+
+For retained work, [reopen its existing study workspace and MRW reader](CODEX_CONTINUATION.md#reopen-the-existing-study-workspace-beside-codex).
+Then choose the Codex icon or **F1 → Codex: Open Codex Sidebar**, as documented in
+OpenAI's [IDE extension guide](https://learn.chatgpt.com/docs/codex/ide). Use
+**Sign in with ChatGPT** if prompted; see OpenAI's
+[authentication guide](https://learn.chatgpt.com/docs/auth). This does not configure
+MRW's API connector.
+
+Manually paste both the retained source quotation and its complete exact MRW
+passage reference into a Codex question. Review the reply and save useful material
+with Codex/AI attribution in an ordinary note/notebook or new reader annotation.
+The [companion workflow](READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code)
+gives the copy-link, exact-TeX and annotation-save controls. A link alone does not
+transfer source text or private storage. There is no automatic handoff, reply
+retention or MRW API call record for this external exchange.
+
+Keep the current installation and Linux artifact location. MRW API-key setup
+and Windows-backed storage qualification remain deferred; this documentation
+follow-up requires no new VSIX or desktop-testing campaign.
+
+### MRW API connector: deferred in the current setup
+
+The existing connector uses the **OpenAI Responses API**. In MRW 0.11.0, click
+**Ask AI about this passage…** directly in the source reader, or run **MRW: Ask About
 Reader Passage…**. **MRW: Ask About Selected Work** remains available for ordinary
 editor text. Both prepare an exact request preview; **MRW: Send Exact Preview**
 is a separate explicit action. Reading and preparing a preview require no
 provider call.
 
-To use that connector, configure an API credential as `OPENAI_API_KEY` in the
+If you later choose to resume MRW API setup, configure `OPENAI_API_KEY` in the
 environment inherited by the **WSL extension host**, and choose your model
 through `mrw.model` in User/Remote settings or the request prompt. OpenAI's
 [API quickstart](https://developers.openai.com/api/docs/quickstart) describes
