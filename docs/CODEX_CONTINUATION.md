@@ -1,5 +1,24 @@
 # Codex continuation: MRW source work and companion notes
 
+## GitHub repository renamed MRW — 2026-11-04
+
+The user explicitly requested renaming the GitHub repository to **MRW**.
+The rename is complete: [flengyel/MRW](https://github.com/flengyel/MRW), retaining
+repository ID `R_kgDOTykQVQ`, private visibility and default branch `main`.
+The local `origin` is now `git@github.com:flengyel/MRW.git`; current installation
+and extension repository/package-content links use the new URL. This does not
+rename the checkout at `/home/flengyel/src/theorem_terminal`, its technical
+packages/records or any study workspace. No new VSIX or runtime behavior is added.
+
+The user is opening the existing hidden study folder as an interim measure and
+identifies its location as awkward. It began as validation material but now
+holds genuine study annotations; preserve it. A normal visible study home is
+desirable, but relocating its workspace/private targets has not been performed
+or validated. Do not simply move its Markdown files, reset its records or rename
+the checkout as part of the GitHub change. Existing notes, annotations, notebooks
+and unsaved drafts remain authoritative. MRW API-key setup and Windows-backed
+storage qualification stay deferred; no desktop-testing campaign is required.
+
 ## Codex extension as the temporary AI companion — 2026-11-03
 
 After navigator delivery `5e49c2f`, the user chose to move from Codex CLI to

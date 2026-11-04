@@ -212,7 +212,9 @@ it is deferred separately from the successful SagePod connection.
 
 ## Early-stage distribution and future webpage
 
-MRW's repository is currently **`flengyel/theorem_terminal`** and is private.
+MRW's repository is **[flengyel/MRW](https://github.com/flengyel/MRW)** and is
+private. It was renamed from `flengyel/theorem_terminal` on 2026-11-04; existing
+local checkout and study-workspace paths stay in place.
 This documentation and source cloning require repository access. The generated
 VSIX is not committed; there is no project-published Marketplace listing or
 GitHub release download. A public package download would let readers install

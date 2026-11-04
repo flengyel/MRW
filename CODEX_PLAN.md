@@ -63,6 +63,17 @@ changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
 
+### GitHub repository renamed MRW — 2026-11-04
+
+At the user's request, GitHub's `flengyel/theorem_terminal` is now
+[flengyel/MRW](https://github.com/flengyel/MRW). Its repository ID, private
+visibility and default branch remain unchanged. The existing checkout's `origin`,
+installation clone URL and extension repository/package-content URLs use the
+new name. Local checkout/study paths and technical package/record identities
+are unchanged. This is repository metadata and documentation upkeep, with no
+new runtime, VSIX or desktop campaign. MRW API-key setup and Windows-backed
+storage qualification remain deferred.
+
 ### Codex beside MRW for immediate AI review — 2026-11-03
 
 The user accepts Codex's VS Code extension as the temporary AI companion to

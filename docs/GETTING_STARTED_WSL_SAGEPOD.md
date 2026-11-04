@@ -270,7 +270,7 @@ Use a **new directory**, leaving existing checkouts and study work alone:
 
 ```bash
 mkdir -p ~/src
-git clone https://github.com/flengyel/theorem_terminal.git ~/src/mrw-install
+git clone https://github.com/flengyel/MRW.git ~/src/mrw-install
 cd ~/src/mrw-install
 git rev-parse HEAD
 npm ci --prefix vscode --ignore-scripts

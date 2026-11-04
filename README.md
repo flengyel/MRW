@@ -39,8 +39,10 @@ to find its saved reader; this development checkout has a separate workspace ide
 The VS Code extension is the active frontend migration target. Its initial
 implementation and launch instructions are in [vscode/README.md](vscode/README.md).
 The existing Qt GUI remains available. The `theorem-terminal` CLI remains available for testing, automation, reproducibility, and low-level
-operations. Repository, executable, Python package, Lean namespaces, and
-serialized record identities retain their existing technical names.
+operations. The private GitHub repository is [flengyel/MRW](https://github.com/flengyel/MRW),
+renamed on 2026-11-04. Existing local checkout paths, the executable, Python
+package, extension identity, Lean namespaces and serialized record identities
+retain their existing technical names.
 
 The deployment direction keeps one VS Code extension over the existing Python
 core, running in the workspace environment through standard local Linux, WSL2
