@@ -1,5 +1,28 @@
 # Codex continuation: MRW source work and companion notes
 
+## Codex extension as the temporary AI companion — 2026-11-03
+
+After navigator delivery `5e49c2f`, the user chose to move from Codex CLI to
+Codex's VS Code extension and clarified that AI assistance could work alongside
+MRW through that extension for now. This updates the earlier blanket wording
+that AI setup is deferred: the deferral applies to MRW's direct API credential
+setup and live connector trial, not to user-led mathematical questions in Codex.
+
+Use the existing WSL workspace and MRW reader. The immediate companion workflow
+is explicit: copy the intended retained passage and its MRW reference into a
+Codex question, then save any useful contribution with AI attribution in an
+ordinary note or reader annotation. OpenAI documents ChatGPT sign-in for the
+[Codex extension](https://learn.chatgpt.com/docs/auth); this route does not require
+configuring MRW's `OPENAI_API_KEY`.
+
+This records the user's preferred interim workflow, not a completed installation
+or tested MRW-to-Codex integration. No automatic webview capture, source transfer,
+response retention or credential sharing is implemented. Do not read Codex
+credentials or turn its sign-in into an MRW API credential. A dedicated handoff
+button would be a separate implementation increment. Preserve the exact-source
+and attribution boundaries if that work is requested. No new provider request,
+VSIX build or desktop trial accompanies this documentation update.
+
 ## Repeated reading-navigator request and return race — 2026-11-03
 
 Started clean at `62e8d64`, MRW 0.11.0 installed. The user repeated the original
@@ -59,7 +82,9 @@ was made. These are user-reported window observations, separate from the earlier
 unobserved automated development-window check and installed-bridge tests.
 
 The user says they do not have an API key and explicitly requests deferral.
-**AI credential setup and a live assistance trial are deferred.** Do not create
+**MRW API credential setup and a live connector trial are deferred.** The later
+Codex companion preference above permits user-led AI review through Codex.
+Do not create
 a key, read credentials, edit the WSL server environment, substitute Copilot,
 or retry Send as automatic continuation. Ordinary mathematical review, source
 annotations/outlines and the user's SagePod session remain available. Retain

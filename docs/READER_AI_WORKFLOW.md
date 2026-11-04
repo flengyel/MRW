@@ -4,6 +4,26 @@ MRW **0.11.0** adds direct AI access for reviewing mathematics in its source
 reader. It uses the existing **OpenAI Responses API** connector. A Copilot window
 or sign-in is separate; MRW does not use Copilot's models in this increment.
 
+## Temporary companion: Codex in VS Code
+
+The user prefers using Codex alongside MRW for now, while MRW's API credential
+setup remains deferred. In the existing WSL-connected window, open Codex's
+sidebar and use its **Sign in with ChatGPT** option if prompted. OpenAI documents
+this subscription sign-in separately from API-key access in its
+[authentication guide](https://learn.chatgpt.com/docs/auth).
+
+Read the source in MRW, copy the intended passage and its MRW passage reference
+into a Codex question, and ask for the explanation or critique you need. A
+reference alone does not transfer its retained source text. Preserve useful
+answers explicitly in an ordinary note or saved reader annotation, with Codex/AI
+attribution separate from the source authors.
+
+This is a manual companion workflow. MRW's **Ask AI about this passage…** still
+uses its existing API connector; Codex sign-in does not configure that button.
+Automatic source handoff and automatic retention of Codex replies in MRW are
+not implemented. The Codex companion workflow has not yet been observed in the
+user's installed window. The API instructions below remain available for later.
+
 ## Setup
 
 Use [installation path A](INSTALLATION.md#a-mrw-for-reading), with Python 3.11+

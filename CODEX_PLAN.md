@@ -43,7 +43,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
 | Reader TikZ diagrams | 0.10.0: explicit isolated native render, exact saved code, retained SVG, color and Paper/Dark display, offline reopening | Not implemented |
-| Direct reader AI assistance | 0.11.0: exact retained passage into OpenAI preview/Send; automated checks pass, user reports preview and missing-key not-sent result; AI setup explicitly deferred | Not implemented |
+| Direct reader AI assistance | 0.11.0: exact retained passage into OpenAI preview/Send; automated checks pass, user reports preview and missing-key not-sent result; MRW API setup deferred, Codex companion preferred for now | Not implemented |
 | Proof-outline vertex elimination | Planned separate increment | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
@@ -62,6 +62,16 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Codex beside MRW for immediate AI review — 2026-11-03
+
+The user accepts Codex's VS Code extension as the temporary AI companion to
+MRW. Use explicit passage quotation and its MRW reference in Codex, then retain
+useful explanations with AI attribution in ordinary notes or reader annotations.
+Codex offers ChatGPT sign-in separately from MRW's API connector. MRW API-key
+setup remains deferred; general AI review through Codex need not wait for it.
+No automatic MRW-to-Codex handoff or shared authentication is implemented or
+validated. See [the companion workflow](docs/READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code).
 
 ### Reading navigator recheck and return race — 2026-11-03
 
@@ -86,7 +96,7 @@ The one fresh ordinary Windows/WSL attempt stopped before input at a launch
 blocker. Current-window interaction/reopen observations remain outstanding;
 earlier ordinary source opening and development-host workflow evidence retain
 their distinct scopes. No desktop retry campaign is authorized by this result.
-Broader outlines/inference graphs remain pending; AI setup and Windows-backed
+Broader outlines/inference graphs remain pending; MRW API setup and Windows-backed
 storage remain deferred. No Pi, R3, SagePod, exporter or Euclid campaign is needed.
 
 ### Direct AI questions from retained reader passages — 2026-11-03
