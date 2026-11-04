@@ -1,12 +1,18 @@
 # Mathematical Research Workstation for VS Code
 
+**First session:** [First steps with MRW](media/first-steps.md), also available
+inside the installed extension with **MRW: Open Tutorial**. Begin with a question
+from your reading or paper notes, then add source references and optional
+computation as they become useful.
+
 **New installation:** [choose MRW for reading or add SagePod for computation](../docs/INSTALLATION.md).
 The guide separates prerequisites, the current AI connector and optional Obsidian
 links. Follow the [SagePod tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md) for
 the authenticated notebook connection, kernel selection and cell controls.
-MRW 0.12.0 is distributed locally as a VSIX; a project-published Marketplace
+MRW 0.13.0 is distributed locally as a VSIX; a project-published Marketplace
 listing and GitHub release download are not yet available.
-The tutorial and source-build route require access to this private repository.
+The linked SagePod installation guide and source-build route require repository
+access. The first-steps guide is bundled with the installed extension.
 
 The extension moves retained-record inspection, response
 review, exact passage retention and attributed note insertion onto the existing
@@ -19,16 +25,40 @@ well as optional captured Lean evidence; see its independent boundary below.
 ## Open MRW
 
 Click the **MRW** book icon in the Activity Bar. It opens **Reading Outline** and
-the collapsible **Research Tools** view. With your Markdown overview active,
-use the labelled **Open Reading Outline** button or **… → Open Reading Outline**. The Reading Outline **…** menu provides Refresh, Insert Outline
-Reference, saved-source opening, explicit source creation/import and Show Artifact
-Location. The title bar retains the Open and Return icons. Standard VS Code
-menus own view placement; previously customized positions remain user choices.
+the collapsible **Research Tools** view. The empty navigator offers **New Reading
+Overview**, **Open Reading Outline**, **Open Saved Source Outline…** and the
+offline tutorial. The **New Reading Overview…** command also has a title-bar
+button and an entry in the **…** menu; **Open Tutorial** is available in that menu
+and through F1. **Open Reading Outline** uses an active Markdown overview,
+reopens your remembered choice, or offers the native Markdown file picker.
+**… → Choose Reading Overview…** lets you choose a different file at any time.
+The menu also provides Refresh, Insert Outline Reference, saved-source opening,
+explicit source creation/import and Show Artifact Location. The title bar retains
+the Open and Return icons. Standard VS Code menus own view placement; previously
+customized positions remain user choices.
 **F1 → MRW: Open Reading Outline** also works.
 
 The sidebar replaces MRW's default placement inside Explorer. It reuses the
 same view/command IDs, document pointers and private records. Clicking its icon
 registers/displays UI only; no source, provider, compiler or network action starts.
+
+## Start a reading overview and learn MRW (0.13.0)
+
+**MRW: New Reading Overview…** opens the native Save dialog for a new `.md` or
+`.markdown` file in this workspace. It creates the starting page through VS Code's
+file-edit and Save operations, opens its ordinary editor and selects it in Reading
+Outline. Edit or remove the supplied headings as useful; later editing, undo and
+saving belong to VS Code. Existing filenames are refused. Cancellation preserves
+the current work; a failed first Save keeps the new editor draft and does not
+report a saved selection.
+
+The bundled [first-session tutorial](media/first-steps.md) explains reading overviews
+and retained source outlines, starting from a question or notes on paper. It
+walks through notes, exact source references, reader annotations, optional
+notebook computation or AI assistance, and resumption. **Open Tutorial** displays
+it through VS Code's Markdown preview with a read-only `mrw-help` document. No
+private study is created, workspace switched or service started by opening help.
+The tutorial is optional and opens only on request.
 
 ## Rename a study folder (0.12.0)
 
@@ -360,7 +390,14 @@ target opens. Overlapping edits still block exact return; undo to the original
 text restores it. Ordinary documents, saved sources and later reader features
 remain in place. See [the renewed validation](../docs/READING_OUTLINE_VALIDATION.md#reading-navigator-recheck-and-return-race--2026-11-03).
 
-With an ordinary Markdown overview active, run **MRW: Open Reading Outline**.
+Run **MRW: Open Reading Outline**. Patch **0.12.1** uses the active ordinary
+Markdown overview or the remembered overview, including a still-open untitled
+document. If none is available, or the remembered file is missing, it offers
+VS Code's native Markdown file picker. Cancel leaves the current navigator,
+drafts and saved choice intact. **Choose Reading Overview…** in the view's
+**…** menu or command palette always offers the picker to change that choice.
+Files must belong to this workspace; MRW does not search for a replacement.
+
 The **Reading Outline** view in the MRW sidebar shows its headings and existing MRW
 references. Expand/collapse sections; click a heading to select its line, or a
 source link to open the existing reader and its exact retained passage.
@@ -634,8 +671,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.12.0.vsix
-sha256sum vscode/theorem-terminal-0.12.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.13.0.vsix
+sha256sum vscode/theorem-terminal-0.13.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -667,11 +704,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.12.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.13.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.12.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.13.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -337,10 +337,27 @@
         "category": "MRW"
       },
       {
+        "command": "mrw.newReadingOverview",
+        "title": "New Reading Overview\u2026",
+        "category": "MRW",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "mrw.openTutorial",
+        "title": "Open Tutorial",
+        "category": "MRW",
+        "icon": "$(question)"
+      },
+      {
         "command": "mrw.openReadingOutline",
         "title": "Open Reading Outline",
         "category": "MRW",
         "icon": "$(list-tree)"
+      },
+      {
+        "command": "mrw.chooseReadingOverview",
+        "title": "Choose Reading Overview\u2026",
+        "category": "MRW"
       },
       {
         "command": "mrw.refreshReadingOutline",
@@ -394,6 +411,26 @@
           "command": "mrw.returnToReadingOutline",
           "when": "view == mrw.readingOutline",
           "group": "navigation"
+        },
+        {
+          "command": "mrw.newReadingOverview",
+          "when": "view == mrw.readingOutline",
+          "group": "navigation@0"
+        },
+        {
+          "command": "mrw.newReadingOverview",
+          "when": "view == mrw.readingOutline",
+          "group": "0_start@1"
+        },
+        {
+          "command": "mrw.openTutorial",
+          "when": "view == mrw.readingOutline",
+          "group": "4_help@1"
+        },
+        {
+          "command": "mrw.chooseReadingOverview",
+          "when": "view == mrw.readingOutline",
+          "group": "1_reading@0"
         },
         {
           "command": "mrw.refreshReadingOutline",
@@ -553,7 +590,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.readingOutline",
-        "contents": "Organize an ordinary Markdown overview with headings and MRW source references.\n[Open Reading Outline](command:mrw.openReadingOutline)"
+        "contents": "Start with your current mathematical question, a source passage, or notes from paper. A reading overview is your own editable page of notes and source references.\n[New Reading Overview](command:mrw.newReadingOverview)\n[Open Reading Outline](command:mrw.openReadingOutline)\n[Open Saved Source Outline…](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
       }
     ],
     "viewsContainers": {

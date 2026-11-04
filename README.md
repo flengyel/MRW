@@ -1,6 +1,21 @@
 # Mathematical Research Workstation
 
-Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
+Mathematical Research Workstation helps you continue work from books, paper and
+the blackboard in an editor, with your own notes, precise source passages and
+optional computation. It is being developed from the Theorem Terminal prototype.
+
+**First mathematical session:** [First steps with MRW](vscode/media/first-steps.md)
+starts with one question and shows how to keep notes, connect source passages,
+add computation when useful and leave a place to resume. In **0.13.0**, the MRW
+starting view offers **New Reading Overview**, **Open Reading Outline**,
+**Open Saved Source Outline…** and the offline tutorial. **MRW: Open Tutorial**
+reopens the guide in VS Code. New overviews are ordinary editable Markdown files.
+
+Patch **0.12.1** repairs **Open Reading Outline** when no Markdown editor is
+active: choose an overview with VS Code's native file picker, then reopen the
+remembered choice from the reader or another view. **Choose Reading Overview…**
+in the view's **…** menu selects a different file. [Usage](docs/READING_OUTLINE_WORKFLOW.md),
+[validation and limits](docs/READING_OUTLINE_VALIDATION.md#reading-overview-file-choice--2026-11-04).
 
 Extension **0.12.0** adds **MRW: Prepare Folder Rename…** and **MRW: Reconnect Saved
 Work After Folder Rename…**. Prepare the study's saved work, rename with your
@@ -9,18 +24,20 @@ retained passages and attributed annotations keep their identities. See
 [the workflow](docs/FOLDER_RENAME_WORKFLOW.md) and [checks and limits](docs/FOLDER_RENAME_VALIDATION.md).
 The current checkout and genuine study workspace have not been moved.
 
-**Start here:** [Choose an installation path](docs/INSTALLATION.md):
+**Installation:** [Choose an installation path](docs/INSTALLATION.md):
 **MRW for reading and mathematical review**, or **MRW with SagePod for computation**.
 The guide separates required components, optional AI assistance and later
 Obsidian links. The [SagePod tutorial](docs/GETTING_STARTED_WSL_SAGEPOD.md) gives
 the notebook connection and cell steps. MRW is currently installed from a VSIX;
 there is no project-published Marketplace listing or GitHub release download.
-The tutorial and source-build route require access to this private repository.
+The linked SagePod installation guide and source-build route require repository
+access. The first-steps guide is bundled with the installed extension.
 The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 distinguishes delivered reading tools and passage assistance from broader planned analysis.
 
-For a reading outline, open an ordinary Markdown overview in the intended
-workspace and run **MRW: Open Reading Outline**. Its headings and existing source
+For a reading outline, run **MRW: Open Reading Outline** in the intended
+workspace. It uses the active Markdown overview, reopens the remembered one, or
+offers a Markdown file picker when neither is available. Its headings and existing source
 references become the navigator; **MRW: Return to Reading Outline** returns to
 the originating occurrence. Patch **0.11.1** keeps the last successful return
 location when another source fails to open during unsaved edits. See

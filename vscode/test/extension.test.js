@@ -19,11 +19,16 @@ class Range {
   isEqual(other) { return JSON.stringify([this.start, this.end]) === JSON.stringify([other.start, other.end]); }
 }
 class Selection extends Range { constructor(a, b) { super(a, b); this.active = b; } }
+class WorkspaceEdit {
+  constructor() { this.operations = []; }
+  createFile(location, options) { this.operations.push({ kind: 'create', location, options }); }
+  insert(location, point, text) { this.operations.push({ kind: 'insert', location, point, text }); }
+}
 function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file, toString() { return `${scheme}:${file}`; } }; }
 
 async function harness(root, state = new Map(), options = {}) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map(), executed = [];
-  const opens = [], inputs = [], picks = [], endings = [], panels = [];
+  const opens = [], dialogs = [], saveChoices = [], saveDialogs = [], workspaceEdits = [], saves = [], commandCalls = [], inputs = [], picks = [], endings = [], panels = [];
   let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, changeListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
   const disposable = { dispose() {} };
@@ -33,6 +38,11 @@ async function harness(root, state = new Map(), options = {}) {
       // Exercise a user's *.txt language association for every virtual view.
       languageId: scheme === 'mrw-record' ? 'markdown' : 'plaintext',
       getText(range) { return range ? this.text.slice(offset(this.text, range.start), offset(this.text, range.end)) : this.text; },
+      async save() {
+        saves.push(this.uri.toString());
+        if (options.save === false) return false;
+        await fs.writeFile(this.uri.fsPath, this.text); this.isDirty = false; return true;
+      },
       positionAt(at) { const lines = this.text.slice(0, at).split('\n'); return new Position(lines.length - 1, lines.at(-1).length); },
       get lineCount() { return this.text.split('\n').length; }, validateRange: range => range };
     storedDocuments.set(doc.uri.toString(), doc);
@@ -49,13 +59,13 @@ async function harness(root, state = new Map(), options = {}) {
       } };
   }
   const api = {
-    Position, Range, Selection, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => x.startsWith('file:') ? uri(x.slice(5)) : uri(x, 'https') },
+    Position, Range, Selection, WorkspaceEdit, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => x.startsWith('file:') ? uri(x.slice(5)) : uri(x, 'https') },
     ProgressLocation: { Notification: 15 },
     ViewColumn: { One: 1, Two: 2, Beside: -2 }, TextEditorRevealType: { InCenter: 1, InCenterIfOutsideViewport: 2 },
     EventEmitter: class { event() {} fire() {} dispose() {} }, TreeItem: class { constructor(label) { this.label = label; } },
     TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
     commands: { registerCommand(name, action) { commands.set(name, action); return disposable; },
-      async executeCommand(name, ...args) { executed.push(name); return commands.get(name)?.(...args); } },
+      async executeCommand(name, ...args) { executed.push(name); commandCalls.push({ name, args }); return commands.get(name)?.(...args); } },
     workspace: {
       isTrusted: true, workspaceFolders: [{ uri: uri(root) }],
       getWorkspaceFolder: () => ({ uri: uri(root) }),
@@ -64,11 +74,24 @@ async function harness(root, state = new Map(), options = {}) {
       onDidCloseTextDocument(fn) { const previous = closeListener; closeListener = doc => { previous(doc); fn(doc); }; return disposable; },
       onDidOpenTextDocument(fn) { openListener = fn; return disposable; },
       onDidChangeTextDocument(fn) { changeListener = fn; return disposable; },
+      async applyEdit(edit) {
+        workspaceEdits.push(edit);
+        for (const op of edit.operations) {
+          if (op.kind === 'create') await fs.writeFile(op.location.fsPath, '', { flag: op.options.overwrite ? 'w' : 'wx' });
+          else {
+            const doc = await this.openTextDocument(op.location), at = offset(doc.text, op.point);
+            doc.text = doc.text.slice(0, at) + op.text + doc.text.slice(at); doc.version++; doc.isDirty = true;
+          }
+        }
+        return true;
+      },
       async openTextDocument(location) {
         reads.push(location.toString());
         const existing = storedDocuments.get(location.toString());
         if (existing) return existing;
-        return document(location.path, location.scheme === 'file' ? await fs.readFile(location.path, 'utf8') : providers.get(location.scheme).provideTextDocumentContent(location), location.scheme);
+        const doc = document(location.path, location.scheme === 'file' ? await fs.readFile(location.path, 'utf8') : await providers.get(location.scheme).provideTextDocumentContent(location), location.scheme);
+        if (location.scheme === 'file' && /\.(md|markdown)$/i.test(location.path)) doc.languageId = 'markdown';
+        return doc;
       },
     },
     window: {
@@ -92,7 +115,8 @@ async function harness(root, state = new Map(), options = {}) {
       async showErrorMessage(message) { errors.push(message); },
       async showInformationMessage() {}, setStatusBarMessage() {},
       async withProgress(_settings, action) { return action({}, { onCancellationRequested() { return disposable; } }); },
-      async showOpenDialog() { return opens.shift(); },
+      async showOpenDialog(options) { dialogs.push(options); return opens.shift(); },
+      async showSaveDialog(options) { saveDialogs.push(options); return saveChoices.shift(); },
       async showInputBox() { return inputs.shift(); },
       async showQuickPick(options) { return picks.length ? picks.shift() : options[0]; },
       async showWarningMessage() { return endings.shift(); },
@@ -134,7 +158,7 @@ async function harness(root, state = new Map(), options = {}) {
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
-  return { api, commands, errors, shown, reads, requests, opens, inputs, picks, endings, panels, state, document, editor, providers, executed,
+  return { api, commands, errors, shown, reads, requests, opens, dialogs, saveChoices, saveDialogs, workspaceEdits, saves, commandCalls, inputs, picks, endings, panels, state, document, editor, providers, executed,
     changeDocument(doc, at, length, text) { doc.text = doc.text.slice(0, at) + text + doc.text.slice(at + length); doc.version++; doc.isDirty = true;
       changeListener({ document: doc, contentChanges: [{ rangeOffset: at, rangeLength: length, text }] }); },
     closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
@@ -1112,6 +1136,256 @@ test('cancelled Stacks preview publishes no outline and invalid input cannot acq
   assert.equal(h.panels.length, 0);
 });
 
+test('new reading overview uses the native Save choice and host editing, then remembers an editable saved page', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'my-study.md');
+  const draft = h.document(path.join(root, 'other.md'), 'Unfinished work α😀'); draft.isDirty = true;
+  h.focus(h.editor(draft)); h.saveChoices.push(uri(file));
+  const model = await h.commands.get('mrw.newReadingOverview')();
+  assert.ok(model, h.errors.join('\n'));
+  assert.equal(h.saveDialogs.length, 1);
+  assert.deepEqual(h.saveDialogs[0].filters, { Markdown: ['md', 'markdown'] });
+  assert.equal(h.workspaceEdits.length, 1);
+  assert.deepEqual(h.workspaceEdits[0].operations[0].options, { overwrite: false, ignoreIfExists: false });
+  const doc = h.api.window.activeTextEditor.document;
+  assert.equal(doc.uri.toString(), uri(file).toString());
+  assert.equal(doc.languageId, 'markdown'); assert.equal(doc.isDirty, false);
+  assert.match(doc.getText(), /^# Reading overview\n/);
+  assert.ok(model.all.some(node => node.label === 'Current question'));
+  assert.equal(await fs.readFile(file, 'utf8'), doc.getText());
+  assert.deepEqual(h.saves, [uri(file).toString()]);
+  assert.equal(draft.getText(), 'Unfinished work α😀'); assert.equal(draft.isDirty, true);
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(file).toString());
+  const restarted = await harness(root, h.state);
+  assert.equal((await restarted.commands.get('mrw.openReadingOutline')()).all[0].label, 'Reading overview');
+  assert.equal(h.requests.length + restarted.requests.length, 0);
+  assert.deepEqual([...h.errors, ...restarted.errors], []);
+});
+
+test('cancelling a new overview leaves the selected overview, files and drafts intact', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'existing.md');
+  await fs.writeFile(file, '# Existing\n'); h.opens.push([uri(file)]);
+  await h.commands.get('mrw.openReadingOutline')();
+  const before = structuredClone(h.state.get('mrw.readingOutline.v1'));
+  await h.commands.get('mrw.newReadingOverview')();
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1'), before);
+  assert.equal(h.api.readingProvider.getChildren()[0].label, 'Existing');
+  assert.equal(h.workspaceEdits.length, 0); assert.equal(h.saves.length, 0);
+  assert.deepEqual(await fs.readdir(root), ['existing.md']);
+  assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
+});
+
+test('new overview refuses an existing filename, a non-Markdown name and a symlink outside the workspace', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'existing.md');
+  await fs.writeFile(file, 'Existing work α😀'); h.saveChoices.push(uri(file));
+  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /already exists/);
+  assert.equal(await fs.readFile(file, 'utf8'), 'Existing work α😀');
+  h.saveChoices.push(uri(path.join(root, 'wrong.txt')));
+  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /\.md or \.markdown/);
+  const outside = path.join(root, '..', 'outside'); await fs.mkdir(outside);
+  await fs.symlink(outside, path.join(root, 'escape'));
+  h.saveChoices.push(uri(path.join(root, 'escape', 'new.md')));
+  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /outside this workspace/);
+  assert.deepEqual(await fs.readdir(outside), []);
+  assert.equal(h.workspaceEdits.length, 0); assert.equal(h.saves.length, 0); assert.equal(h.state.size, 0);
+});
+
+test('a host creation failure preserves the prior navigator and never attempts Save', async t => {
+  const root = await temporary(t), h = await harness(root), original = path.join(root, 'original.md');
+  await fs.writeFile(original, '# Original\n'); h.opens.push([uri(original)]);
+  await h.commands.get('mrw.openReadingOutline')();
+  const before = structuredClone(h.state.get('mrw.readingOutline.v1'));
+  h.api.workspace.applyEdit = async () => false;
+  h.saveChoices.push(uri(path.join(root, 'new.md')));
+  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /could not be created/);
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1'), before);
+  assert.equal(h.api.readingProvider.getChildren()[0].label, 'Original');
+  assert.equal(h.saves.length, 0); assert.equal(h.requests.length, 0);
+});
+
+test('a failed first Save keeps the new editor draft without claiming a selected saved overview', async t => {
+  const root = await temporary(t), options = { save: false }, h = await harness(root, new Map(), options);
+  const file = path.join(root, 'new.md'); h.saveChoices.push(uri(file));
+  await h.commands.get('mrw.newReadingOverview')();
+  assert.match(h.errors.pop(), /open but was not saved/);
+  const doc = h.api.window.activeTextEditor.document;
+  assert.equal(doc.isDirty, true); assert.match(doc.getText(), /## Current question/);
+  assert.equal(h.state.size, 0);
+  assert.equal(await fs.readFile(file, 'utf8'), '');
+  options.save = true; await doc.save();
+  assert.ok(await h.commands.get('mrw.openReadingOutline')());
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(file).toString());
+  assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
+});
+
+test('a delayed New dialog cannot create a file after a newer overview selection', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'late.md');
+  let resolve;
+  h.api.window.showSaveDialog = () => new Promise(done => { resolve = done; });
+  const pending = h.commands.get('mrw.newReadingOverview')();
+  const original = path.join(root, 'original.md'); await fs.writeFile(original, '# Original\n');
+  const doc = await h.api.workspace.openTextDocument(uri(original)); h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  resolve(uri(file)); await pending;
+  assert.equal(h.workspaceEdits.length, 0);
+  await assert.rejects(fs.lstat(file), { code: 'ENOENT' });
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(original).toString());
+  assert.deepEqual(h.errors, []);
+});
+
+test('the offline tutorial opens a read-only Markdown preview without creating files or invoking services', async t => {
+  const root = await temporary(t), h = await harness(root);
+  assert.equal(h.reads.length, 0, 'activation does not read or open the tutorial');
+  await h.commands.get('mrw.openTutorial')();
+  const call = h.commandCalls.find(call => call.name === 'markdown.showPreview');
+  assert.ok(call); assert.equal(call.args[0].scheme, 'mrw-help');
+  const doc = await h.api.workspace.openTextDocument(call.args[0]);
+  const exact = await fs.readFile(path.resolve(__dirname, '../media/first-steps.md'), 'utf8');
+  assert.equal(doc.getText(), exact);
+  assert.match(exact, /Keep using paper/);
+  assert.match(exact, /New Reading Overview/);
+  assert.match(exact, /Save annotation/);
+  assert.match(exact, /Saved\s+outputs/);
+  assert.equal(h.workspaceEdits.length, 0); assert.equal(h.requests.length, 0);
+  assert.deepEqual(await fs.readdir(root), []);
+});
+
+test('the MRW starting view offers New, Open, saved sources and tutorial as registered commands', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
+  const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.readingOutline').contents;
+  for (const command of ['mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openOutline', 'mrw.openTutorial']) {
+    assert.ok(welcome.includes('(command:' + command + ')')); assert.ok(h.commands.has(command));
+  }
+  for (const command of ['mrw.newReadingOverview', 'mrw.openTutorial']) {
+    assert.ok(manifest.contributes.menus['view/title'].some(item => item.when === 'view == mrw.readingOutline' && item.command === command));
+  }
+  assert.equal(h.requests.length, 0); assert.equal(h.reads.length, 0);
+});
+
+test('reading outline offers a native Markdown file choice and remembers it without an active editor', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const file = path.join(root, 'overview.md'), text = '# Chosen overview α😀\n\n## Next question\n';
+  await fs.writeFile(file, text);
+  h.opens.push([uri(file)]);
+  let model = await h.commands.get('mrw.openReadingOutline')();
+  assert.ok(model, h.errors.join('\n'));
+  assert.equal(model.all.length, 2);
+  assert.equal(h.dialogs.length, 1);
+  assert.equal(h.dialogs[0].canSelectFiles, true);
+  assert.equal(h.dialogs[0].canSelectFolders, false);
+  assert.equal(h.dialogs[0].canSelectMany, false);
+  assert.deepEqual(h.dialogs[0].filters, { Markdown: ['md', 'markdown'] });
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(file).toString());
+  const doc = await h.api.workspace.openTextDocument(uri(file));
+  h.changeDocument(doc, 0, 0, '# Unsaved question\n');
+  h.focus(undefined);
+  model = await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all[0].label, 'Unsaved question');
+  assert.equal(h.dialogs.length, 1, 'the live overview is remembered, including unsaved edits');
+  const restored = await harness(root, h.state);
+  model = await restored.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all[0].label, 'Chosen overview α😀');
+  assert.equal(restored.dialogs.length, 0, 'a saved choice reopens after restart without another picker');
+  assert.equal(await fs.readFile(file, 'utf8'), text);
+  assert.equal(h.requests.length + restored.requests.length, 0);
+  assert.deepEqual([...h.errors, ...restored.errors], []);
+});
+
+test('reading overview choice can be cancelled or changed from the native menu without replacing drafts', async t => {
+  const root = await temporary(t), h = await harness(root);
+  assert.equal(await h.commands.get('mrw.openReadingOutline')(), undefined);
+  assert.equal(h.state.size, 0); assert.equal(h.reads.length, 0);
+  const file = path.join(root, 'first.md'); await fs.writeFile(file, '# First\n');
+  h.opens.push([uri(file)]); await h.commands.get('mrw.openReadingOutline')();
+  const doc = await h.api.workspace.openTextDocument(uri(file));
+  h.changeDocument(doc, 0, 0, 'Unsent question α😀\n');
+  h.api.collapseReading({ element: h.api.readingProvider.getChildren()[0] });
+  await h.commands.get('mrw.openReadingOutline')();
+  const before = structuredClone(h.state.get('mrw.readingOutline.v1'));
+  assert.ok(h.commands.has('mrw.chooseReadingOverview'));
+  await h.commands.get('mrw.chooseReadingOverview')();
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1'), before);
+  const second = path.join(root, 'second.markdown'); await fs.writeFile(second, '# Second\n');
+  h.opens.push([uri(second)]);
+  const model = await h.commands.get('mrw.chooseReadingOverview')();
+  assert.equal(model.all[0].label, 'Second');
+  assert.equal(doc.getText(), 'Unsent question α😀\n# First\n');
+  assert.ok(doc.isDirty);
+  assert.equal(await fs.readFile(file, 'utf8'), '# First\n');
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1').collapsed, []);
+  assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
+});
+
+test('a live untitled reading overview remains usable while another view is active', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const doc = h.document('Untitled-1', '# Live overview\n', 'untitled'); doc.languageId = 'markdown';
+  h.focus(h.editor(doc)); await h.commands.get('mrw.openReadingOutline')();
+  h.focus(undefined);
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all[0].label, 'Live overview');
+  assert.equal(h.dialogs.length, 0); assert.equal(h.reads.length, 0);
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, undefined);
+  assert.deepEqual(h.errors, []);
+});
+
+test('closing an untitled overview remembers the latest saved choice rather than the activation snapshot', async t => {
+  const root = await temporary(t), first = path.join(root, 'first.md'), latest = path.join(root, 'latest.md');
+  await fs.writeFile(first, '# First\n'); await fs.writeFile(latest, '# Latest\n');
+  const state = new Map([['mrw.readingOutline.v1', { uri: uri(first).toString() }]]);
+  const h = await harness(root, state);
+  const doc = await h.api.workspace.openTextDocument(uri(latest)); h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  const untitled = h.document('Untitled-2', '# Temporary\n', 'untitled'); untitled.languageId = 'markdown';
+  h.focus(h.editor(untitled)); await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(state.get('mrw.readingOutline.v1').uri, uri(latest).toString());
+  h.closeDocument(untitled); h.focus(undefined);
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all[0].label, 'Latest');
+  assert.equal(h.dialogs.length, 0); assert.deepEqual(h.errors, []);
+});
+
+test('a missing remembered overview offers a replacement choice and cancellation preserves the old pointer', async t => {
+  const root = await temporary(t), missing = path.join(root, 'missing.md'), next = path.join(root, 'next.md');
+  const initial = { uri: uri(missing).toString(), collapsed: ['remembered-section'] };
+  const state = new Map([['mrw.readingOutline.v1', initial]]), h = await harness(root, state);
+  await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(h.dialogs.length, 1);
+  assert.deepEqual(state.get('mrw.readingOutline.v1'), initial);
+  await fs.writeFile(next, '# Next\n'); h.opens.push([uri(next)]);
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all[0].label, 'Next');
+  assert.equal(state.get('mrw.readingOutline.v1').uri, uri(next).toString());
+  assert.deepEqual(state.get('mrw.readingOutline.v1').collapsed, []);
+  assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
+});
+
+test('reading overview choices reject foreign paths and escaping symlinks before opening their contents', async t => {
+  const root = await temporary(t), h = await harness(root), foreign = path.join(root, '..', 'foreign.md');
+  await fs.writeFile(foreign, '# Foreign\n');
+  h.api.workspace.getWorkspaceFolder = location => location.fsPath.startsWith(root + path.sep) ? { uri: uri(root) } : undefined;
+  h.opens.push([uri(foreign)]); await h.commands.get('mrw.openReadingOutline')();
+  assert.match(h.errors.pop(), /current workspace/);
+  const link = path.join(root, 'escape.md'); await fs.symlink(foreign, link);
+  h.opens.push([uri(link)]); await h.commands.get('mrw.openReadingOutline')();
+  assert.match(h.errors.pop(), /outside this workspace/);
+  assert.equal(h.reads.length, 0); assert.equal(h.state.size, 0); assert.equal(h.requests.length, 0);
+});
+
+test('a delayed reading overview picker cannot replace a newer selected overview', async t => {
+  const root = await temporary(t), h = await harness(root), older = path.join(root, 'older.md'), latest = path.join(root, 'latest.md');
+  await fs.writeFile(older, '# Older\n'); await fs.writeFile(latest, '# Latest\n');
+  let resolve;
+  h.api.window.showOpenDialog = () => new Promise(done => { resolve = done; });
+  const pending = h.commands.get('mrw.openReadingOutline')();
+  const doc = await h.api.workspace.openTextDocument(uri(latest)); h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  resolve([uri(older)]); await pending;
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(latest).toString());
+  assert.equal(h.api.readingProvider.getChildren()[0].label, 'Latest');
+  assert.ok(!h.reads.includes(uri(older).toString()));
+  assert.deepEqual(h.errors, []);
+});
+
 test('reading navigator derives live Markdown, follows two sources, pins returns, and reconstructs saved UI state', async t => {
   const root = await temporary(t, true), h = await harness(root), references = [];
   for (const name of ['book.txt', 'article.txt']) {
@@ -1299,7 +1573,7 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.research']);
   assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
   const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
-  for(const command of ['mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.openOutline','mrw.importStacksSection','mrw.artifactLocation']){
+  for(const command of ['mrw.chooseReadingOverview','mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.openOutline','mrw.importStacksSection','mrw.artifactLocation']){
     assert.ok(overflow.some(v=>v.command===command));assert.ok(h.commands.has(command));
   }
   assert.equal(h.requests.length,0,'registering the icon, views and menus launches no service');

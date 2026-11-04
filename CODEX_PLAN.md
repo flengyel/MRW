@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | 0.11.1: live Markdown reading navigator, exact retained navigation and occurrence-specific return; failed following preserves the last successful origin; 0.9.x reader presentation retained | Not implemented |
+| Manual overview across several sources | 0.13.0: explicit New overview and offline tutorial, native existing-file choice and remembered reopening; live navigator, exact retained navigation and occurrence-specific return preserved | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Folder rename preparation/reconnection | 0.12.0: explicit preparation, ordinary file-tool rename and verified reconnect for a single-project store/workspace; exact retained reading and annotations preserved; actual-window acceptance remains unobserved | Existing storage unchanged |
@@ -63,6 +63,42 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Starting mathematical work and learning MRW — 2026-11-04
+
+The user requests a visible way to begin new work and a tutorial that eases the
+transition from blackboard and paper to research computing. The bounded
+**0.13.0** increment adds **New Reading Overview…**, native Save choice and host
+file editing/saving, and an offline **Open Tutorial** command. The starting view
+offers New, Open, saved sources and the tutorial; persistent menus and Research
+Tools keep those actions available. Existing work is not replaced or imported.
+
+The tutorial begins with a current mathematical question and distinguishes the
+reader's working overview from retained source passages and attributed notes.
+Computation, AI and formal tools enter only as useful optional extensions. It
+introduces reproducible calculation and resumption without a prescribed exercise
+or study quota. The design objective is recorded in VISION.md; actual-window
+acceptance and mathematical usefulness remain unobserved. See
+[usage](vscode/media/first-steps.md) and
+[validation](docs/READING_OUTLINE_VALIDATION.md#new-work-and-tutorial--2026-11-04).
+All 109 Node tests and the shared Python suite pass. The verified 0.13.0 VSIX
+is installed in WSL without a window reload; visible first-session acceptance
+remains unobserved.
+
+### Reading overview choice — 2026-11-04
+
+The user reports that **Open Reading Outline** fails when Markdown is not open.
+Patch **0.12.1** replaces the initial focus requirement with a native Markdown
+file picker, remembers the chosen saved overview and reuses a live untitled
+overview from another view. A missing saved file offers a new explicit choice;
+**Choose Reading Overview…** is available in the view menu and command palette.
+Cancellation preserves existing state and drafts. The latest saved choice is
+retained across untitled use. This repairs an observed interaction blocker; it
+does not change workspace identity or saved research storage. See
+[validation](docs/READING_OUTLINE_VALIDATION.md#reading-overview-file-choice--2026-11-04).
+All 101 Node tests and the shared Python suite pass; the verified 0.12.1 package
+is installed in WSL without reloading the working window. Actual-window
+acceptance and mathematical usefulness remain unassessed.
 
 ### Folder rename preparation and reconnection — 2026-11-04
 

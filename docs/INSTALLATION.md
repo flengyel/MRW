@@ -85,7 +85,7 @@ another folder for that work.
 
 ### 3. Obtain and install the MRW package
 
-The current delivered package is **`theorem-terminal-0.12.0.vsix`**, extension
+The current delivered package is **`theorem-terminal-0.13.0.vsix`**, extension
 identity **`flengyel.theorem-terminal`**. Obtain a trusted maintainer package, or
 follow the [source-build instructions](GETTING_STARTED_WSL_SAGEPOD.md#build-the-vsix).
 The source-build route needs Git, Linux Node.js 22+ and npm in addition to Python.
@@ -95,7 +95,7 @@ VSIX…** and select the package. Or use that window's WSL integrated terminal,
 replacing this example with the package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.12.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.13.0.vsix
 code --list-extensions --show-versions
 ```
 
@@ -104,6 +104,12 @@ documents and any annotation forms before a requested window reload. Preserve
 the existing extension identity and workspace storage when upgrading.
 
 ### 4. Start reading
+
+In the MRW starting view, choose **New Reading Overview** to create your own
+working page, or **Open Reading Outline** for an existing overview. **Open Saved
+Source Outline…** returns to a retained source. **MRW: Open Tutorial** opens the
+offline [first steps guide](../vscode/media/first-steps.md), beginning with a
+question or notes from paper and introducing tools through their use.
 
 Click the **MRW book icon** in the Activity Bar. For retained work, run **MRW:
 Open Saved Source Outline…**. For a new source, open a saved UTF-8 mathematical

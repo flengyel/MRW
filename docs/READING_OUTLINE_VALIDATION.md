@@ -5,6 +5,83 @@ Started from clean main and origin/main at the supplied MRW 0.8.0 baseline,
 remote commits. No unrelated changes or user work were replaced.
 [Usage and format bounds](READING_OUTLINE_WORKFLOW.md).
 
+## New work and tutorial — 2026-11-04
+
+Extension **0.13.0** addresses the user's request for a visible new-work action
+and an introductory tutorial. **New Reading Overview…** uses a native Save
+chooser, creates a new Markdown file through the host's WorkspaceEdit and Save
+APIs, opens it for editing and selects its navigator. **Open Tutorial** reads
+the bundled guide through a read-only content provider in native Markdown
+preview. The empty view, title/menu actions and Research Tools expose these
+entry points without a workspace switch.
+
+Eight new command regressions cover creation and remembered restart, preserving
+other drafts, cancellation, existing-file/type/symlink refusal, failed creation,
+failed Save with a retained draft, a stale dialog, exact offline tutorial
+content and registered starting/menu actions. These use an API double; host
+file-edit and Save behavior, native dialogs and Markdown preview still need
+actual-window observation. The tutorial's mathematical-use contribution remains
+unassessed. No working window is reloaded, no genuine study store is seeded or
+moved, and no provider or compiler request is made.
+
+The final standard checks pass **109 Node tests** and **379 Python tests:
+317 passed, 62 skipped**, plus syntax and Python compilation. Skips remain the
+58 opt-in Qt checks, three opt-in native diagram checks and the unavailable
+authorized Windows-mounted test parent. All 11 changed Markdown files, 272
+parsed local links/anchors, version consistency and whitespace checks pass.
+Logs are private under `.codex-work/reading-outline-first-steps-20261104/`.
+
+The verified **0.13.0** VSIX has **67 files**, SHA-256
+`045559727b49189b0f9f97acaca394838161c9431375741a6139a8424eb097a2`.
+It is installed in WSL. All 64 non-manifest installed payload files match the
+archive exactly, including the offline tutorial and README; the production
+manifest matches after excluding VS Code installation metadata. The installed
+isolated bridge answered an artifact-status request against a disposable empty
+home. Previous archives are preserved. The new code loads on the user's next
+normal reload; this delivery does not reload their working window.
+
+## Reading overview file choice — 2026-11-04
+
+The user reports **Open Reading Outline** demanding an active Markdown editor.
+The initial no-overview branch reproduced the exact error in a command regression.
+Patch **0.12.1** offers VS Code's native Markdown file picker, remembers its
+selected file and adds **Choose Reading Overview…** to the native view menu and
+command palette. Missing saved files offer an explicit replacement choice.
+A live untitled overview remains usable from another view; closing it preserves
+the latest saved-file choice rather than the activation-time snapshot.
+
+Seven new command regressions cover initial file choice, live unsaved edits and
+restart reopening, initial/change cancellation, changing the selected file
+without changing drafts, untitled use, the latest saved choice, missing-file
+replacement, foreign/symlink scope rejection before host content reads, and a
+delayed chooser losing to a newer selection. The existing native-menu contract
+checks the new command. These checks use API doubles; no provider or Python
+bridge is invoked by overview selection.
+
+Final checks in the persistent checkout pass **101 Node tests**, all syntax
+checks and **379 Python tests: 317 passed, 62 skipped**. Skips are 58 opt-in Qt
+checks, three opt-in native diagram checks and the unavailable authorized
+Windows-mounted test parent. Python compilation, seven Markdown files, all 234
+parsed local links/anchors, release versions and whitespace checks pass. Initial
+temporary-copy storage regressions correctly rejected the sandbox's volatile
+`tmpfs`; verification was repeated on the persistent checkout without changing
+that guard. Logs are private under `.codex-work/reading-outline-choice-20261104/`.
+
+The verified **0.12.1** VSIX contains **66 files**, SHA-256
+`18652a113469444ed5b067df8ef8d77b8946370f7f4c4a5244ce3f5f29e38783`.
+It is installed in WSL. All 62 runtime/license files and the packaged README
+match exactly; the production manifest matches after excluding VS Code's added
+installation metadata. Its installed isolated bridge answered an artifact-status
+request against a disposable empty home. The earlier VSIX remains preserved.
+
+The fix does not switch workspaces or reload the window. This delivery performs
+no fresh Development Host or visible-dialog check; prior failed launch trials
+are not repeated and no working window is closed or reloaded. The updated code
+loads on the user's next normal reload. Native-dialog presentation and ordinary
+installed-window acceptance remain unobserved. The genuine study store,
+annotations and notebook project are not test fixtures. Mathematical usefulness
+remains unassessed.
+
 ## Reading navigator recheck and return race — 2026-11-03
 
 The repeated navigator request was reviewed from clean `62e8d64`, with MRW

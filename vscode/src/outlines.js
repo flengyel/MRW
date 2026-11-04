@@ -629,7 +629,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
-  const rows = () => [['Open reading outline', 'mrw.openReadingOutline'],
+  const rows = () => [['New reading overview…', 'mrw.newReadingOverview'], ['Open reading outline', 'mrw.openReadingOutline'],
+    ['Open tutorial', 'mrw.openTutorial'],
     ['Return to reading outline', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
     ['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
     ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],

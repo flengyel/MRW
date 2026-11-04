@@ -6,16 +6,16 @@ That path also points to the existing AI connector; SagePod is an optional
 computation companion with its own installation.
 
 This tutorial gets you from Windows VS Code to a mathematical reading workspace
-with an ordinary notebook running SageMath. It describes **MRW 0.12.0** and the
-SagePod helpers at revision `4bc1bc3`, reviewed on **2026-11-03**.
+with an ordinary notebook running SageMath. It describes **MRW 0.13.0**. The
+SagePod helper instructions use revision `4bc1bc3`, reviewed on **2026-11-03**.
 
 MRW is the **Mathematical Research Workstation** VS Code extension, sometimes
 called the plugin. Install it from a `.vsix` package. There is currently no
 project-published Marketplace installation or GitHub release download; if you
 do not already have the package, use [Build the VSIX](#build-the-vsix) below.
 This tutorial is hosted in the private project repository: viewing it and
-cloning the source require repository access. A public tutorial and downloadable
-binary are still pending.
+cloning the source require repository access. A public copy of this installation tutorial and a downloadable binary are
+still pending.
 
 The connection to SagePod belongs to **Microsoft's Jupyter extension**. There is
 no separate SagePod connection setting in MRW.
@@ -77,17 +77,17 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`theorem-terminal-0.12.0.vsix`. Alternatively, in that window's WSL integrated
+`theorem-terminal-0.13.0.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.12.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.13.0.vsix
 code --list-extensions --show-versions
 ```
 
-Check that **Mathematical Research Workstation 0.12.0** appears under
+Check that **Mathematical Research Workstation 0.13.0** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.theorem-terminal@0.12.0`. If an extension appears
+The CLI identity is `flengyel.theorem-terminal@0.13.0`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
@@ -261,7 +261,7 @@ host paths for VS Code files.
 ## Build the VSIX
 
 Skip this section if you already have a trusted MRW package. The repository
-does not commit its generated VSIX files. To build **0.12.0** yourself, use
+does not commit its generated VSIX files. To build **0.13.0** yourself, use
 **Linux Node.js 22+, npm, Python 3.11+ and Git in WSL**. Node/npm are only
 packaging requirements. Check `node --version`, `npm --version` and
 `command -v node npm`; Windows npm launchers cannot run the Linux build chain.
@@ -275,11 +275,11 @@ cd ~/src/mrw-install
 git rev-parse HEAD
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.12.0.vsix
-sha256sum vscode/theorem-terminal-0.12.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.13.0.vsix
+sha256sum vscode/theorem-terminal-0.13.0.vsix
 ```
 
-This creates `~/src/mrw-install/vscode/theorem-terminal-0.12.0.vsix` and verifies
+This creates `~/src/mrw-install/vscode/theorem-terminal-0.13.0.vsix` and verifies
 its runtime bytes against that checkout. Record the commit printed by
 `git rev-parse HEAD` and the archive's actual SHA-256. The
 [folder-rename delivery record](FOLDER_RENAME_VALIDATION.md) identifies the

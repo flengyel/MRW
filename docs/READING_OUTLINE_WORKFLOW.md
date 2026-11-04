@@ -1,9 +1,27 @@
 # Reading with an ordinary Markdown outline
 
-The navigator introduced in 0.9.0 is retained in **0.11.1**, including the MRW
-Activity Bar entry and later source-reader improvements. Open your selected
-ordinary Markdown document and run **MRW: Open Reading Outline**; there is no
-import, second prose copy or outline-generation step.
+For a first session, choose **New Reading Overview** in the MRW starting view
+or run **MRW: New Reading Overview…**. Choose a new Markdown filename in the
+native Save dialog; MRW opens the saved, editable starting page and selects its
+headings in the navigator. The headings are optional. Use **File → Save** for
+later edits. **MRW: Open Tutorial** opens the bundled
+[first steps guide](../vscode/media/first-steps.md), from work on paper to notes,
+source passages and optional computation. Both commands are available in the
+Reading Outline **…** menu. This is new in **0.13.0**.
+
+The navigator introduced in 0.9.0 is retained in **0.13.0**, including the MRW
+Activity Bar entry and later source-reader improvements. Run **MRW: Open Reading
+Outline**: use the active Markdown overview, reopen the remembered overview, or
+choose a Markdown file with VS Code's native picker when neither is available.
+A missing remembered file also offers the picker. Cancelling preserves the prior
+choice and navigator. **… → Choose Reading Overview…** (also in the command
+palette) always offers a new file choice. There is no import, prose copy or
+outline-generation step. Files remain scoped to the current workspace.
+
+A live untitled overview stays selected while a reader or another view is active.
+MRW retains its pointer only for this session; VS Code owns its text and recovery.
+After it closes, MRW remembers the latest selected saved overview. Selecting or
+reopening an overview does not switch the VS Code workspace or reload Codex.
 
 Patch 0.11.1 keeps the last successfully opened source's return location while
 another source resolves. If that follow fails during unsaved edits, Return
@@ -29,7 +47,7 @@ or private-store setup.
    sources, or cite the same passage in several sections. This is the unchanged
    [0.5.0 reference format](PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
 3. Run **MRW: Open Reading Outline**. The MRW sidebar's **Reading Outline** view derives
-   headings and MRW references from the active document. Use the section arrows
+   headings and MRW references from the selected overview. Use the section arrows
    to collapse/expand. Select a heading to select its Markdown line visibly.
 4. Select a source reference to open its retained reader. A passage reference
    additionally selects the exact original range in read-only retained text.

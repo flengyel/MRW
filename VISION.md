@@ -96,6 +96,23 @@ provenance, checking status, and the state at which work stopped. No one
 assistant becomes the authority. The system does not require a mathematician
 to complete a description of what is supposedly understood.
 
+### From paper to research computing
+
+MRW should ease a gradual transition from blackboard and pen-and-paper work to
+research computing. Begin with the mathematician's existing question, source
+and handwritten work. Ordinary editable notes, precise citations and an explicit
+place to resume supply continuity. When computation helps, keep the code, inputs,
+outputs and interpretation together so the calculation can be inspected and
+repeated. Source assertions, reader explanations, computed examples and checked
+results retain their distinct roles.
+
+The interface should make starting and continuing work discoverable, with visible
+new/open choices and an optional tutorial written for mathematicians entering
+this environment. Introduce tools when a task makes their purpose clear. Paper
+remains a working medium; adopting a complete toolchain, formalizing a proof or
+completing a tutorial is not a condition of using the workstation. This is a
+design objective, with benefit assessed through actual mathematical work.
+
 ### Access to existing literature
 
 The intended workflow begins with a chosen mathematical question or source.

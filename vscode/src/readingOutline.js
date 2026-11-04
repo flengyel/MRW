@@ -4,6 +4,7 @@ const path = require('node:path');
 const { digest } = require('./navigation');
 const { parseReadingMarkdown } = require('./readingMarkdown');
 const KEY = 'mrw.readingOutline.v1';
+const STARTER = '# Reading overview\n\n## Current question\n\n## Sources and passages\n\n## Working notes\n\n## Next step\n';
 
 // A location follows only edits wholly outside its exact selected syntax.
 // Overlap blocks return; undo restoring the original text restores the pin.
@@ -25,17 +26,19 @@ function validPin(pin) {
 
 function registerReadingOutline({ vscode, context, register, followReference }) {
   const saved = context.workspaceState.get(KEY) || {};
+  let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
   let selected = validPin(saved.selected) ? saved.selected : undefined;
   let collapsed = new Set(Array.isArray(saved.collapsed) ? saved.collapsed.filter(x => typeof x === 'string').slice(0, 1000) : []);
   const pendingOrigins = new Set();
   const changed = new vscode.EventEmitter();
   const fail = error => vscode.window.showErrorMessage(`MRW: ${error.message}`);
-  const state = () => ({ uri: document?.uri.scheme === 'file' ? document.uri.toString() : saved.uri,
+  const state = () => ({ uri: overviewUri,
     collapsed: [...collapsed].slice(-1000), selected: selected?.uri.startsWith('file:') ? selected : undefined,
     origin: origin?.uri.startsWith('file:') ? origin : undefined });
   let publication = Promise.resolve();
   function persist() {
+    if (document?.uri.scheme === 'file') overviewUri = document.uri.toString();
     const value = state();
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
     return publication;
@@ -71,15 +74,18 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     } catch (error) { model = undefined; tree.message = error.message; }
     changed.fire();
   }
+  const isOverview = doc => doc && !doc.isClosed && doc.languageId === 'markdown' && ['file', 'untitled'].includes(doc.uri.scheme);
+  async function checkFile(uri, newFile = false) {
+    const folder = uri.scheme === 'file' && vscode.workspace.getWorkspaceFolder(uri);
+    if (!folder || folder.uri.scheme !== 'file') throw new Error('The reading overview must belong to the current workspace.');
+    const root = await fs.realpath(folder.uri.fsPath);
+    const actual = await fs.realpath(newFile ? path.dirname(uri.fsPath) : uri.fsPath);
+    const relative = path.relative(root, actual);
+    if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw new Error('The reading overview resolves outside this workspace.');
+  }
   async function checkDocument(doc) {
-    if (doc.languageId !== 'markdown' || !['file', 'untitled'].includes(doc.uri.scheme)) throw new Error('Focus an ordinary Markdown overview.');
-    if (doc.uri.scheme === 'file') {
-      const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
-      if (!folder || folder.uri.scheme !== 'file') throw new Error('The reading overview must belong to the current workspace.');
-      const root = await fs.realpath(folder.uri.fsPath), actual = await fs.realpath(doc.uri.fsPath);
-      const relative = path.relative(root, actual);
-      if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw new Error('The reading overview resolves outside this workspace.');
-    }
+    if (!isOverview(doc)) throw new Error('Choose an ordinary Markdown overview.');
+    if (doc.uri.scheme === 'file') await checkFile(doc.uri);
   }
   function pin(doc, start, end) {
     const revision = digest(doc.getText());
@@ -98,19 +104,41 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     return editor;
   }
-  register('mrw.openReadingOutline', async () => {
+  async function openReadingOutline(choose = false) {
     const attempt = ++generation;
-    let doc = vscode.window.activeTextEditor?.document;
-    if (!doc || doc.languageId !== 'markdown' || !['file', 'untitled'].includes(doc.uri.scheme)) {
-      const uri = document?.uri || (typeof saved.uri === 'string' ? vscode.Uri.parse(saved.uri) : undefined);
-      if (!uri || uri.scheme !== 'file') throw new Error('Focus an ordinary Markdown overview first.');
-      // Refuse another workspace before asking VS Code to read the document.
-      if (!vscode.workspace.getWorkspaceFolder(uri)) throw new Error('The saved reading overview belongs to a different workspace.');
-      doc = await vscode.workspace.openTextDocument(uri);
+    let doc = choose ? undefined : vscode.window.activeTextEditor?.document;
+    if (!choose && !isOverview(doc) && isOverview(document)) doc = document;
+    if (!choose && !isOverview(doc) && overviewUri) {
+      const uri = vscode.Uri.parse(overviewUri);
+      if (uri.scheme === 'file') {
+        try {
+          // Validate scope, including symlinks, before asking the host to read.
+          await checkFile(uri);
+          if (attempt !== generation) return;
+          doc = await vscode.workspace.openTextDocument(uri);
+        } catch (error) {
+          if (!['ENOENT', 'ENOTDIR', 'FileNotFound'].includes(error.code)) throw error;
+          // A deleted/renamed overview needs an explicit new choice, not a guess.
+        }
+      }
     }
+    if (attempt !== generation) return;
+    if (!isOverview(doc)) {
+      const choices = await vscode.window.showOpenDialog({ title: 'Choose a Markdown reading overview',
+        openLabel: 'Open Reading Outline', canSelectFiles: true, canSelectFolders: false, canSelectMany: false,
+        filters: { Markdown: ['md', 'markdown'] }, defaultUri: vscode.workspace.workspaceFolders?.[0]?.uri });
+      if (attempt !== generation || !choices?.length) return;
+      await checkFile(choices[0]);
+      if (attempt !== generation) return;
+      doc = await vscode.workspace.openTextDocument(choices[0]);
+    }
+    return selectOverview(doc, attempt);
+  }
+  async function selectOverview(doc, attempt) {
     await checkDocument(doc);
     if (attempt !== generation) return;
-    if (document && document.uri.toString() !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
+    const previous = document?.uri.toString() || overviewUri;
+    if (previous && previous !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
     document = doc; refresh();
     await vscode.commands.executeCommand('mrw.readingOutline.focus');
     if (selected?.uri === doc.uri.toString() && model && selected.revision === model.revision) {
@@ -120,7 +148,39 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     }
     await persist();
     return model;
+  }
+  register('mrw.openReadingOutline', () => openReadingOutline());
+  register('mrw.chooseReadingOverview', () => openReadingOutline(true));
+  register('mrw.newReadingOverview', async () => {
+    const attempt = ++generation;
+    const root = vscode.workspace.workspaceFolders?.[0]?.uri;
+    if (!root || root.scheme !== 'file') throw new Error('Open a project folder before creating a reading overview.');
+    const uri = await vscode.window.showSaveDialog({ title: 'New Reading Overview', saveLabel: 'Create Reading Overview',
+      filters: { Markdown: ['md', 'markdown'] }, defaultUri: vscode.Uri.file(path.join(root.fsPath, 'reading-overview.md')) });
+    if (!uri || attempt !== generation) return;
+    if (!/\.(md|markdown)$/i.test(uri.path)) throw new Error('Choose a .md or .markdown filename for the reading overview.');
+    await checkFile(uri, true);
+    let existing = false;
+    try { await fs.lstat(uri.fsPath); existing = true; }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    if (existing) throw new Error('A file already exists there. Choose another name, or use Open Reading Outline.');
+    if (attempt !== generation) return;
+    // The explicit creation uses the host's file edit and Save operations.
+    // Do not introduce another ordinary-file writer or overwrite an existing file.
+    const edit = new vscode.WorkspaceEdit();
+    edit.createFile(uri, { overwrite: false, ignoreIfExists: false });
+    edit.insert(uri, new vscode.Position(0, 0), STARTER);
+    if (!await vscode.workspace.applyEdit(edit)) throw new Error('The reading overview could not be created. Check the editor for any draft left by VS Code.');
+    const doc = await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(doc, { preview: false });
+    if (!await doc.save()) throw new Error('The new overview is open but was not saved. Keep its draft and use Save to finish.');
+    return selectOverview(doc, attempt);
   });
+  const tutorial = vscode.Uri.from({ scheme: 'mrw-help', path: '/First steps with MRW.md' });
+  context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mrw-help', {
+    provideTextDocumentContent: () => fs.readFile(path.join(context.extensionPath, 'media', 'first-steps.md'), 'utf8'),
+  }));
+  register('mrw.openTutorial', () => vscode.commands.executeCommand('markdown.showPreview', tutorial));
   register('mrw.refreshReadingOutline', () => { refresh(); return model; });
   register('mrw.selectReadingOutlineItem', async node => {
     if (!document || document.isClosed) throw new Error('Reopen the Markdown overview with MRW: Open Reading Outline.');

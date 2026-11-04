@@ -1,5 +1,70 @@
 # Codex continuation: MRW source work and companion notes
 
+## New work and tutorial — 2026-11-04
+
+The user requests a visible way to start an outline and a tutorial supporting
+the transition from paper/blackboard mathematics to research computing. The
+bounded **0.13.0** increment adds **New Reading Overview…** and **Open Tutorial**.
+The empty navigator has New, Open, saved-source and tutorial choices. New and
+help remain in native menus and Research Tools; New also has a title-bar button.
+
+New uses a native Save choice and VS Code file-edit/Save APIs to create an
+ordinary Markdown starting page, then selects it in Reading Outline. Existing
+files are refused; cancellation preserves current work. A failed first Save
+keeps the visible editor draft. No saved-source record or import is implied.
+The bundled `vscode/media/first-steps.md` tutorial opens through a read-only
+`mrw-help` document in native Markdown preview, only on explicit request.
+It begins with one mathematical question, connects paper work, source references,
+annotations, optional computation/AI and resumption, and distinguishes each
+from mathematical checking. VISION.md records the gradual-transition objective.
+
+The verified **0.13.0** VSIX is installed in WSL: **67 archive files**, all
+installed payloads/tutorial/README and production manifest match. SHA-256:
+`045559727b49189b0f9f97acaca394838161c9431375741a6139a8424eb097a2`.
+All **109 Node tests** and **379 Python tests (317 passed, 62 skipped)** pass,
+with syntax, compilation, documentation and installed isolated-bridge checks.
+No window was reloaded; the update activates on the next normal reload. Do not
+repeat the full regressions for documentation-only changes. Native dialog, host
+Save and tutorial-preview acceptance remain unobserved; mathematical usefulness
+remains unassessed.
+
+Preserve the prior 0.12.1 changes, genuine study, annotations, drafts, notebooks
+and current workspace. The fixed same-window/no-repeat-reload constraint remains;
+do not ask it again or restart a desktop launch campaign.
+[Validation](READING_OUTLINE_VALIDATION.md#new-work-and-tutorial--2026-11-04)
+records the checks and actual-host limits.
+
+## Reading overview file choice — 2026-11-04
+
+The active blocker is the user-reported **Open Reading Outline** error when no
+Markdown editor is active. Patch **0.12.1** adds the native Markdown file picker
+when no usable active/remembered overview is available (including a missing
+saved file), plus **Choose Reading Overview…** in the view menu and command
+palette. The existing saved-file preference is reused. Live untitled overviews
+remain available from other views, and closing one retains the latest saved
+choice instead of the activation-time snapshot. Cancellation preserves the
+prior navigator, choice and drafts; scope validation precedes selected-file
+opening. Existing exact navigation and return semantics remain intact.
+
+The user's fixed constraint is to stay in the same VS Code window and avoid
+repeated Codex reloads. Do not ask that preference again or restart workspace/
+desktop launch campaigns. These outline commands select a document inside the
+current workspace; they do not open a different workspace or reload the window.
+The existing `MRW.code-workspace` in the genuine Stacks study is user work.
+Preserve it and all source records, annotations, overviews, drafts and bindings.
+No real store or directory is moved by this patch.
+
+The verified **0.12.1** VSIX is installed in WSL, with all installed runtime
+bytes/README and the production manifest matching. SHA-256:
+`18652a113469444ed5b067df8ef8d77b8946370f7f4c4a5244ce3f5f29e38783`.
+All **101 Node tests** and **379 Python tests (317 passed, 62 skipped)** pass,
+with syntax, compilation, documentation and installed isolated-bridge checks.
+No window was reloaded: the update loads on the user's next normal reload.
+Do not repeat complete regression for documentation-only changes.
+[The overview choice report](READING_OUTLINE_VALIDATION.md#reading-overview-file-choice--2026-11-04)
+records the evidence and limits. Actual-window acceptance remains unobserved;
+do not claim mathematical usefulness.
+
 ## Folder rename preparation and reconnection — 2026-11-04
 
 After the GitHub rename, the user held off renaming the local checkout and asked

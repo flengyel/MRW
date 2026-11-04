@@ -18,6 +18,42 @@ platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
 
+### New work and tutorial — 2026-11-04
+
+Extension **0.13.0** makes starting visible: **New Reading Overview**, **Open
+Reading Outline**, **Open Saved Source Outline…** and the tutorial appear in
+the empty MRW navigator. New is also a title-bar action and menu entry;
+**Open Tutorial** remains available in the menu and command palette. Research
+Tools exposes both commands.
+
+New opens a native Save dialog, creates a new Markdown working page through
+VS Code's file-edit and Save operations, opens its ordinary editor and selects
+it in Reading Outline. Its suggested headings can be changed or removed.
+Refuse existing paths and files outside the workspace; cancellation preserves
+the current selection. A failed first Save keeps the visible editor draft and
+reports the failure without selecting it as saved work. No automatic source
+outline or research record is created.
+
+The optional tutorial opens offline as a read-only Markdown preview. It starts
+from a question and paper notes, explains overviews, retained passages and
+annotations, and introduces computation or AI only where useful. Reproducibility,
+precise source locations and a next step make research computing approachable
+without requiring a complete toolchain or formalization. Opening help changes
+no workspace, source record or mathematical status and launches no backend.
+
+### Reading overview choice — 2026-11-04
+
+Patch **0.12.1** makes **Open Reading Outline** usable without focusing Markdown
+first. Use the active overview, reuse the chosen live overview or reopen its saved
+file. Without an available choice, including a missing saved file, show VS Code's
+native Markdown file picker. **Choose Reading Overview…** in the view menu and
+command palette always offers an explicit new selection. Cancellation leaves
+the navigator and preference unchanged. Preserve unsaved text and live untitled
+overviews; only saved-file pointers survive in MRW workspace UI state. Keep the
+latest saved choice when an untitled overview is used and closed. Check workspace
+and resolved file scope before opening a selected file. These actions do not
+change the VS Code workspace, reload extensions, save prose or move records.
+
 ### Folder rename preparation and reconnection — 2026-11-04
 
 Extension **0.12.0** gives a single-folder study two explicit actions: **Prepare
