@@ -9,6 +9,19 @@
       "safeStorage decryption error"
     ],
     "status": "unobserved",
+    "user_followup": {
+      "reported": [
+        "new VS Code terminal requested GitHub access",
+        "GitHub authentication completed",
+        "High Contrast mode enabled"
+      ],
+      "validation_window_identity_confirmed": false,
+      "host_report_received": false,
+      "staged_entry_and_config_disabled": true,
+      "disposable_fixture_renamed": false,
+      "workflow_acceptance": "unobserved",
+      "accessibility_acceptance": "unassessed"
+    },
     "user_window_close_or_reload": false
   },
   "date": "2026-11-04",

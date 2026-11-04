@@ -28,6 +28,12 @@ The single isolated Windows/WSL Development Host attempt produced no report and
 logged startup/storage errors. Actual-window rename/reconnect acceptance remains
 unobserved; do not infer it from API doubles or restart a launch/focus campaign.
 Its staged test entry/config are disabled, and its private trial is preserved.
+The user subsequently reported a new VS Code terminal requesting GitHub access,
+successful authentication and enabling High Contrast mode. No host report
+appeared on the follow-up check; the staged driver remains disabled and the
+disposable fixture is still at its original path. This records user-reported
+setup progress, not rename/reconnect or accessibility acceptance. Preserve the
+user-interacted-with window and display choice; do not reset/reseed the trial.
 Save ordinary work and reader forms before the user chooses to reload their
 working window to load 0.12.0. No user window was forcibly closed or reloaded.
 

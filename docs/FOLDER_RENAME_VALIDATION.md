@@ -78,6 +78,14 @@ production defect. No launch/focus retry, user-window close/reload or acceptance
 claim follows. The staged manifest was restored to the production entry and
 the test configuration disabled to prevent delayed seeding. Preserve the trial.
 
+The user later reported a new VS Code terminal requesting GitHub access,
+successful authentication and enabling High Contrast mode. A read-only follow-up
+found no host report, the test driver still disabled and the disposable fixture
+still at its original path. The report does not establish that this was the
+isolated validation window, why authentication was requested, successful MRW
+rename/reconnection or accessibility acceptance. Preserve the user-interacted-with
+window, its display setting and the trial; no driver reset or launch retry follows.
+
 The committed `vscode/test/host/folderRename.js` driver uses real commands and
 normal host storage, scripted choices, a disposable directory rename and
 `vscode.openFolder` to exercise a new workspace. It is excluded from the VSIX.
