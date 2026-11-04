@@ -1,5 +1,54 @@
 # Codex continuation: MRW source work and companion notes
 
+## Repeated reading-navigator request and return race — 2026-11-03
+
+Started clean at `62e8d64`, MRW 0.11.0 installed. The user repeated the original
+0.8.0-era navigator request. Preserve all later commits: the navigator is already
+delivered by 0.9.0, ordinary installed source opening was subsequently observed,
+and 0.9.x layout fixes, 0.10 TikZ and 0.11 direct reader AI are retained.
+
+Review found a concrete return race. If a new follow failed while the Markdown
+overview changed, tracking replaced the temporary origin object and failure
+rollback left Return pointing at the failed occurrence. The regression first
+failed on the wrong occurrence. Patch **0.11.1** keeps the committed origin
+while separately tracking candidates; only successful source opening commits
+the candidate. Focused checks pass for failure with outside edits, successful
+opening with outside edits, overlap refusal and exact-undo restoration.
+
+The new disposable overview is
+`.codex-work/stacks-import-20261021/reading-workspace/reading-outline-check-20261103.md`.
+It reuses the actual retained Stacks source and the already retained synthetic
+navigation source. Initial resolution used only status/load/reference/follow
+methods through the existing Linux binding; all 16 record-file hashes remained
+unchanged. No source record, annotation, original source or existing note was
+rewritten. Do not rerun old seed/mutation scripts: this is genuine study storage.
+The new private driver/results are under `.codex-work/reading-outline-recheck-20261103`.
+
+VS Code updated its Windows and WSL server commit to
+`261c84cb1eddf11235f9e2c921425e9663fbe556`; the old `2c33b50b16…` Node/CLI path
+no longer exists. Use the current installation, with Linux npm for packaging.
+Windows VS Code is now 1.144.1. The single ordinary installed-window attempt
+stopped at launch: a new window for the disposable overview could not be
+identified; Windows emitted a Crashpad CreateFile error (0x2). No keyboard/mouse
+input was sent and no user window was closed or reloaded. **Do not retry this
+desktop check automatically.** Earlier ordinary reader opening is established;
+the current two-source heading/collapse, whole/exact/duplicate follow/Return,
+unsaved undo/redo and saved normal reopen observations remain outstanding.
+Prior development-host seed/reopen evidence stays separate.
+
+Final syntax checks and **89 Node tests pass**. Python ran **379 tests: 317
+passed, 62 skipped**; compilation passed. Tests, packaging and installed bridge
+checks ran sequentially. Verified and installed **0.11.1**:
+`vscode/theorem-terminal-0.11.1.vsix`, 66 files, SHA-256
+`3adda92714ed3a4f41f5e934e8553c619c5cbe73a162ab373736608fabc93bfe`.
+All 61 installed runtime files, production manifest and packaged README match.
+Prior archives remain. Installed bridge checks followed both sources, refused
+wrong scope and absent targets without replacements, and confirmed all 16
+record files and the overview unchanged. See
+[the validation record](READING_OUTLINE_VALIDATION.md#reading-navigator-recheck-and-return-race--2026-11-03).
+Keep the separate AI credential/live-trial deferral below, Windows storage,
+Syncthing/mount changes and unrelated campaigns deferred.
+
 ## AI setup deferred by the user — 2026-11-03
 
 After delivery `10a7fa0` (MRW 0.11.0 installed), the user restored the hidden

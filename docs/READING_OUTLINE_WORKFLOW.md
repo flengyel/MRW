@@ -1,5 +1,16 @@
 # Reading with an ordinary Markdown outline
 
+The navigator introduced in 0.9.0 is retained in **0.11.1**, including the MRW
+Activity Bar entry and later source-reader improvements. Open your selected
+ordinary Markdown document and run **MRW: Open Reading Outline**; there is no
+import, second prose copy or outline-generation step.
+
+Patch 0.11.1 keeps the last successfully opened source's return location while
+another source resolves. If that follow fails during unsaved edits, Return
+still selects the earlier successful occurrence, adjusted for outside edits.
+Candidate locations also track edits during reader opening. An overlapping edit
+invalidates an exact return; restoring the original text with undo restores it.
+
 MRW 0.9.0 adds **MRW: Open Reading Outline**. Use the current Linux artifact
 store and Windows VS Code connected to WSL. No storage move, new vault, Lean,
 provider or prescribed reading sequence is required.

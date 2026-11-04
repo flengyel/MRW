@@ -85,7 +85,7 @@ another folder for that work.
 
 ### 3. Obtain and install the MRW package
 
-The current delivered package is **`theorem-terminal-0.11.0.vsix`**, extension
+The current delivered package is **`theorem-terminal-0.11.1.vsix`**, extension
 identity **`flengyel.theorem-terminal`**. Obtain a trusted maintainer package, or
 follow the [source-build instructions](GETTING_STARTED_WSL_SAGEPOD.md#build-the-vsix).
 The source-build route needs Git, Linux Node.js 22+ and npm in addition to Python.
@@ -95,7 +95,7 @@ VSIX…** and select the package. Or use that window's WSL integrated terminal,
 replacing this example with the package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.11.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.11.1.vsix
 code --list-extensions --show-versions
 ```
 

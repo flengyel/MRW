@@ -12,6 +12,14 @@ The tutorial and source-build route require access to this private repository.
 The [active roadmap](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
 distinguishes delivered reading tools and passage assistance from broader planned analysis.
 
+For a reading outline, open an ordinary Markdown overview in the intended
+workspace and run **MRW: Open Reading Outline**. Its headings and existing source
+references become the navigator; **MRW: Return to Reading Outline** returns to
+the originating occurrence. Patch **0.11.1** keeps the last successful return
+location when another source fails to open during unsaved edits. See
+[usage](docs/READING_OUTLINE_WORKFLOW.md) and
+[validation](docs/READING_OUTLINE_VALIDATION.md).
+
 Extension **0.11.0** adds **Ask AI about this passage…** directly in the source
 reader, using the existing OpenAI connector and exact retained source reference.
 Review the complete request, then use the separate **MRW: Send Exact Preview**

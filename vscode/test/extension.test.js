@@ -1043,6 +1043,66 @@ test('reading navigator derives live Markdown, follows two sources, pins returns
   assert.deepEqual(h.errors, []); assert.deepEqual(restored.errors, []);
 });
 
+test('failed source navigation during unsaved edits keeps the previous successful return occurrence', async t => {
+  const root=await temporary(t),h=await harness(root);
+  const {saved,region}=await sourceReader(h,root);
+  const base={store:path.join(root,'..','private-state',`outlines-${navigation.digest(root)}`),project_root:root};
+  const ref=(await runBridge(path.resolve(__dirname,'..'),'python3',{
+    method:'outline_reference',...base,id:saved.outline.id,revision:saved.revision,region,
+  })).reference;
+  const first=`[First occurrence](${ref})`,second=`[Second occurrence](${ref})`;
+  const original=`# Outline\n\n${first}\n\n${second}\n`,file=path.join(root,'overview.md');
+  await fs.writeFile(file,original);
+  const doc=h.document(file,original);doc.languageId='markdown';h.focus(h.editor(doc));
+  const model=await h.commands.get('mrw.openReadingOutline')();
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1]);
+  let rejectFollow,started;
+  const loading=new Promise(resolve=>{started=resolve;});
+  h.setService((...args)=>args[2].method==='outline_follow_reference'
+    ?new Promise((resolve,reject)=>{rejectFollow=reject;started();}):runBridge(...args));
+  const following=h.commands.get('mrw.selectReadingOutlineItem')(model.all[2]);
+  await loading;
+  h.changeDocument(doc,0,0,'An unsaved reader question.\n\n');
+  rejectFollow(Error('Retained source unavailable; no replacement was guessed.'));
+  await following;
+  assert.match(h.errors.pop(),/Retained source unavailable/);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection),first);
+  assert.equal(await fs.readFile(file,'utf8'),original);
+  assert.equal(doc.isDirty,true);assert.deepEqual(h.errors,[]);
+});
+
+test('pending source returns track outside edits and reject overlap until exact undo', async t => {
+  for (const overlap of [false,true]) await t.test(overlap?'overlap':'outside edit',async t=>{
+    const root=await temporary(t),h=await harness(root);
+    const {saved,region}=await sourceReader(h,root);
+    const base={store:path.join(root,'..','private-state',`outlines-${navigation.digest(root)}`),project_root:root};
+    const ref=(await runBridge(path.resolve(__dirname,'..'),'python3',{
+      method:'outline_reference',...base,id:saved.outline.id,revision:saved.revision,region,
+    })).reference;
+    const link=`[Retained passage](${ref})`,original=`# Outline\n\n${link}\n`,file=path.join(root,'overview.md');
+    await fs.writeFile(file,original);
+    const doc=h.document(file,original);doc.languageId='markdown';h.focus(h.editor(doc));
+    const model=await h.commands.get('mrw.openReadingOutline')();
+    let release,started;const loading=new Promise(resolve=>{started=resolve;});
+    const gate=new Promise(resolve=>{release=resolve;});
+    // Pause after reference validation, while the real reader loads its notes.
+    // Edits during the resolver itself are already refused by that caller.
+    h.setService(async(...args)=>{if(args[2].method==='outline_notes'){started();await gate;}return runBridge(...args);});
+    const following=h.commands.get('mrw.selectReadingOutlineItem')(model.all[1]);await loading;
+    if(overlap)h.changeDocument(doc,model.all[1].start+2,1,'X');
+    else h.changeDocument(doc,0,0,'An unsaved question.\n\n');
+    release();await following;await h.commands.get('mrw.returnToReadingOutline')();
+    if(overlap){
+      assert.match(h.errors.pop(),/exact reading-outline location changed/);
+      h.changeDocument(doc,0,doc.getText().length,original);
+      await h.commands.get('mrw.returnToReadingOutline')();
+    }
+    assert.equal(doc.getText(h.api.window.activeTextEditor.selection),link);
+    assert.equal(await fs.readFile(file,'utf8'),original);assert.deepEqual(h.errors,[]);
+  });
+});
+
 test('navigator opens exact published mathematics in an expanded reader, retaining changed-range fallback and Return', async t => {
   const root = await temporary(t, true), h = await harness(root);
   h.setService((extension, executable, request, options) => runBridge(extension, executable, request, {

@@ -28,6 +28,7 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
   let selected = validPin(saved.selected) ? saved.selected : undefined;
   let collapsed = new Set(Array.isArray(saved.collapsed) ? saved.collapsed.filter(x => typeof x === 'string').slice(0, 1000) : []);
+  const pendingOrigins = new Set();
   const changed = new vscode.EventEmitter();
   const fail = error => vscode.window.showErrorMessage(`MRW: ${error.message}`);
   const state = () => ({ uri: document?.uri.scheme === 'file' ? document.uri.toString() : saved.uri,
@@ -132,15 +133,17 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     const editor = await showLocation(document, location);
     selected = location;
     if (current.kind === 'reference') {
-      // Pin before asynchronous resolution, so intervening document edits are
-      // tracked even while the retained reader is being opened.
-      const previous = origin; origin = location;
+      // Track a candidate during resolution without replacing the last source's
+      // return pin. Both locations follow intervening edits; commit only once
+      // the retained target has actually opened.
+      const pending = { location }; pendingOrigins.add(pending);
       try {
         const result = await followReference(current.reference, editor, { reading: true });
+        origin = pending.location;
         await vscode.commands.executeCommand('workbench.action.maximizeEditorHideSidebar');
         await persist(); return result;
       }
-      catch (error) { if (origin === location) origin = previous; throw error; }
+      finally { pendingOrigins.delete(pending); }
     }
     await persist();
   });
@@ -165,11 +168,15 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     tree.onDidCollapseElement(e => { collapsed.add(e.element.id); void persist().catch(fail); }),
     tree.onDidExpandElement(e => { collapsed.delete(e.element.id); void persist().catch(fail); }),
     vscode.workspace.onDidChangeTextDocument(e => {
-      if (e.document !== document && e.document.uri.toString() !== origin?.uri) return;
+      const uri = e.document.uri.toString();
+      if (e.document !== document && uri !== origin?.uri && ![...pendingOrigins].some(p => p.location.uri === uri)) return;
       const revision = digest(e.document.getText());
       if (e.contentChanges.length) {
-        if (origin?.uri === e.document.uri.toString()) origin = trackLocation(origin, e.contentChanges, revision);
-        if (selected?.uri === e.document.uri.toString()) selected = trackLocation(selected, e.contentChanges, revision);
+        if (origin?.uri === uri) origin = trackLocation(origin, e.contentChanges, revision);
+        if (selected?.uri === uri) selected = trackLocation(selected, e.contentChanges, revision);
+        for (const pending of pendingOrigins) if (pending.location.uri === uri) {
+          pending.location = trackLocation(pending.location, e.contentChanges, revision);
+        }
       }
       clearTimeout(timer); timer = setTimeout(() => { refresh(); void persist().catch(fail); }, 120);
     }),

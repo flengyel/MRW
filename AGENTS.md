@@ -129,6 +129,10 @@ content before collapsed tools, and direct focus on exact matching published
 passages. Return restores the overview and navigator. Keep original pinned-text
 fallbacks for changed or incompatible associations and preserve all note/source
 bytes. Do not turn navigation links into mathematical status.
+Patch 0.11.1 commits a reading-outline return pin only after its source opens.
+Track both the current origin and in-flight candidates through document edits;
+a failed follow must not replace the previous source's return occurrence.
+Overlapping edits still block return until exact undo restores the pin.
 Extension 0.9.0 adds a collapsible Reading Outline view derived from one selected
 ordinary Markdown overview, including unsaved text. Headings select exact editor
 locations; existing scoped references open retained sources/passages and preserve

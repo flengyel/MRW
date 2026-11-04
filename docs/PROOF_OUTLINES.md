@@ -7,6 +7,13 @@ central concepts/results, governing ideas, argument structure and technical
 detail are freely navigable, not a compulsory sequence. A reader may use a
 cited theorem while deferring inspection of its proof.
 
+**Reading navigator recheck, 2026-11-03:** the repeated 0.8.0-era request is
+already implemented by the later Markdown navigator. Patch 0.11.1 repairs a
+return-pin race found during review: a failed follow during document edits
+preserves the last successful origin. It changes no prose/reference format,
+retained source identity, inference relation or proof-analysis capability.
+See [the workflow](READING_OUTLINE_WORKFLOW.md).
+
 **Reader assistance, 2026-11-03:** 0.11.0 connects an explicitly chosen retained
 passage to the existing exact-preview/Send workflow. A question can request an
 explanation or critique, using the exact source revision and range. The answer

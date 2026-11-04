@@ -18,6 +18,11 @@ platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
 
+Patch **0.11.1** preserves the prior source's originating Markdown occurrence
+when a later navigation fails during unsaved edits. Track candidate return pins
+while a source opens, commit only after successful following, and keep exact
+overlap refusal/undo restoration. Prose editing and saving remain VS Code-owned.
+
 Extension **0.11.0** adds direct questions from a retained source-reader passage.
 The reader action resolves the existing exact reference and prepares the shared
 R2 preview. It initially includes only the retained quotation and its source,

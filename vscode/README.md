@@ -4,7 +4,7 @@
 The guide separates prerequisites, the current AI connector and optional Obsidian
 links. Follow the [SagePod tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md) for
 the authenticated notebook connection, kernel selection and cell controls.
-MRW 0.11.0 is distributed locally as a VSIX; a project-published Marketplace
+MRW 0.11.1 is distributed locally as a VSIX; a project-published Marketplace
 listing and GitHub release download are not yet available.
 The tutorial and source-build route require access to this private repository.
 
@@ -328,6 +328,13 @@ store, reference, source or mathematical checking status.
 
 ## Navigable reading outlines (0.9.0)
 
+Patch **0.11.1** preserves the previous successful source's return pin if a
+later reference fails while the overview is edited. A candidate return location
+tracks edits during source opening and replaces the old pin only after the
+target opens. Overlapping edits still block exact return; undo to the original
+text restores it. Ordinary documents, saved sources and later reader features
+remain in place. See [the renewed validation](../docs/READING_OUTLINE_VALIDATION.md#reading-navigator-recheck-and-return-race--2026-11-03).
+
 With an ordinary Markdown overview active, run **MRW: Open Reading Outline**.
 The **Reading Outline** view in the MRW sidebar shows its headings and existing MRW
 references. Expand/collapse sections; click a heading to select its line, or a
@@ -602,8 +609,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.11.0.vsix
-sha256sum vscode/theorem-terminal-0.11.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.11.1.vsix
+sha256sum vscode/theorem-terminal-0.11.1.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -635,11 +642,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.11.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.11.1.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.11.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.11.1**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

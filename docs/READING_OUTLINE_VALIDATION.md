@@ -5,6 +5,85 @@ Started from clean main and origin/main at the supplied MRW 0.8.0 baseline,
 remote commits. No unrelated changes or user work were replaced.
 [Usage and format bounds](READING_OUTLINE_WORKFLOW.md).
 
+## Reading navigator recheck and return race — 2026-11-03
+
+The repeated navigator request was reviewed from clean `62e8d64`, with MRW
+0.11.0 already installed. The supplied 0.8.0 commit remains an ancestor;
+subsequent navigator, layout, TikZ and direct-reader AI commits are preserved.
+The requested navigator already exists. This delivery is patch **0.11.1** for
+one concrete return-location race found during the audit.
+
+If a second reference fails while the overview is edited, the old rollback
+compares object identity after edit tracking has replaced the candidate object.
+It can retain the failed reference as the origin of a still-open earlier source.
+The regression failed with **Second occurrence** selected instead of **First
+occurrence**. The fix tracks committed and pending locations independently and
+commits a candidate only after source opening succeeds. It also tracks edits
+during the reader-opening phase after reference validation. Overlapping edits
+still refuse return; exact undo restores it. Source and note formats are unchanged.
+
+Focused cases pass for the failed-follow race, successful opening with outside
+edits, overlap refusal and exact undo. Existing parser, command, bridge and
+private-store tests cover the rest of the requested workflow:
+
+| Requirement | Existing and renewed evidence |
+| --- | --- |
+| Headings, native expansion/collapse and visible selection | Markdown/parser and command tests; earlier real TreeView seed/reopen checks |
+| Several sources, whole-source and exact-passage links, duplicate occurrences | Real bridge tests and the two-source host overview |
+| Unsaved reorganization and undo/redo | Editor command tests and earlier actual-host document/undo observations |
+| Save, normal close, reopen, selected location and collapse restoration | Existing actual-host seed/reopen results and current state-reconstruction tests |
+| Changed associations, missing originals, unavailable retained bytes and wrong scope | Shared resolver regressions, with exact-range/hash and no-repair assertions |
+| Return during asynchronous edits and failed following | New regression and edit-tracking cases |
+| No acquisition/provider/compiler/notebook/container on navigation | Explicit bridge-method traces and offline resolver checks |
+
+The fresh disposable overview `reading-outline-check-20261103.md` lives in the
+existing Stacks reading workspace. It links the retained Stacks whole source,
+its exact 08ZE statement, a second already retained source, and a second
+occurrence of the same Stacks passage. A fenced example supplies no navigator
+entry. Preparation followed all three references through the installed bridge
+and current Linux binding; all **16 record-file hashes** remained unchanged.
+No original/private source was added or rewritten, and no import occurred.
+
+Final JavaScript syntax checks and all **89 Node tests pass**, including the
+real Python bridge and the new regressions. The shared Python suite ran **379
+tests: 317 passed, 62 skipped**, with no failures; compilation also passed.
+Skips are 58 opt-in Qt widget checks, three opt-in native diagram checks and one
+unavailable authorized Windows-mounted test parent. No Qt installation, Lean
+build or unrelated host campaign was required. Logs remain in
+`.codex-work/reading-outline-recheck-20261103/`.
+
+Tests, packaging and installed bridge checks ran sequentially. The verified
+archive is `vscode/theorem-terminal-0.11.1.vsix`, **66 files**, SHA-256
+`3adda92714ed3a4f41f5e934e8553c619c5cbe73a162ab373736608fabc93bfe`.
+The current WSL code-server CLI reported successful installation. All **61
+installed runtime files**, the production manifest and packaged README match
+the archive. Earlier 0.11.0, 0.10.0 and 0.9.4 archives retain their original hashes.
+Packaging used Linux Node **24.22.1**, npm **11.13.0**, vsce **4.0.0** and Python
+**3.13.5**. Final document checks passed for 12 changed Markdown files, all 256
+parsed local links/anchors, release JSON/version consistency and whitespace.
+The installed isolated bridge resolved the whole Stacks source, exact retained
+08ZE passage and second source. Wrong-workspace and unavailable-target requests
+were refused without replacements. All 16 retained record files and the new
+overview retained their exact bytes. See the
+[sanitized delivery record](evidence/reading-outline-recheck-20261103/validation.json).
+
+One ordinary installed-window attempt used Windows VS Code **1.144.1**, commit
+`261c84cb1eddf11235f9e2c921425e9663fbe556`, connected to WSL Debian. It stopped
+at launch: **A new ordinary window for the disposable overview was not
+identified; no input sent**. Windows also emitted
+`crashpad/util/win/registration_protocol_win.cc:108: CreateFile: The system cannot find the file specified. (0x2)`.
+This records the observed failure; it does not establish its cause. No keyboard
+or mouse input was sent, no working window was closed/reloaded, and no retry
+loop was undertaken.
+
+The earlier user-led ordinary installed reader opening remains established
+below; development-host seed/reopen evidence remains separate. Still unobserved
+in this current installed window are the new two-source overview's heading and
+collapse actions, whole/exact/duplicate navigation and occurrence-specific
+Return, unsaved reorganization with undo/redo, and normal saved close/reopen.
+Automated and earlier actual development-host results do not establish this
+fresh installed-window observation. No AI, graph or storage increment is included.
+
 ## Implementation and review
 
 MRW 0.9.0 adds a native Explorer tree, derived from one selected live Markdown

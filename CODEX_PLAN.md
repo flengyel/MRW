@@ -38,7 +38,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Retained records and R2 exact preview/Send | Implemented; scoped Windows/WSL host checks pass with deterministic responses | Delivered |
 | R3 continuation, restart resumption, and R3.1 ending | Implemented with independent private state; deterministic WSL host lifecycle checks | Delivered |
 | Manual offline source-region reader | Implemented for UTF-8 mathematical text with exact retained expansion, editable attributed reader material, revisable/removable context and manual evidence associations, and restart restoration | Not implemented |
-| Manual overview across several sources | 0.9.4: MRW sidebar, live Markdown reading navigator, compact hidden proofs, collapsible rendered annotations, exact retained navigation and occurrence-specific return | Not implemented |
+| Manual overview across several sources | 0.11.1: live Markdown reading navigator, exact retained navigation and occurrence-specific return; failed following preserves the last successful origin; 0.9.x reader presentation retained | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
@@ -62,6 +62,32 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Reading navigator recheck and return race — 2026-11-03
+
+The user repeated the original Markdown navigator task against the 0.8.0
+baseline. The clean current checkout is `62e8d64`, with the navigator already
+delivered in 0.9.0 and the later 0.9.x/0.10.0/0.11.0 work preserved. The new
+delivery is patch **0.11.1**: a failed source follow during an overview edit
+must preserve the last successful source's return occurrence. A regression
+first demonstrated the wrong occurrence; candidate and committed locations now
+track independently, committing a new origin only after the source opens.
+Overlap continues to block return until exact undo restores the text.
+
+The audit retains the complete existing navigator: ordinary authoritative
+Markdown, live headings/references, duplicates, native expansion/collapse,
+exact retained-source navigation, explicit return and saved navigation state.
+The fresh disposable overview reuses retained Stacks and a second retained
+source in the existing workspace, without new acquisition or source-record
+changes. See [validation](docs/READING_OUTLINE_VALIDATION.md#reading-navigator-recheck-and-return-race--2026-11-03).
+All 89 Node tests and the shared Python suite (317 passed, 62 skipped) pass;
+0.11.1 was packaged, verified and installed, with retained bytes unchanged.
+The one fresh ordinary Windows/WSL attempt stopped before input at a launch
+blocker. Current-window interaction/reopen observations remain outstanding;
+earlier ordinary source opening and development-host workflow evidence retain
+their distinct scopes. No desktop retry campaign is authorized by this result.
+Broader outlines/inference graphs remain pending; AI setup and Windows-backed
+storage remain deferred. No Pi, R3, SagePod, exporter or Euclid campaign is needed.
 
 ### Direct AI questions from retained reader passages — 2026-11-03
 

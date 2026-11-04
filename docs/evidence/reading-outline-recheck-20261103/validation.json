@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-03",
+  "version": "0.11.1",
+  "entry_revision": "62e8d64",
+  "supplied_baseline": "2885857da79e60c81bc196b86d9958d9c5e84069",
+  "baseline_is_ancestor": true,
+  "subsequent_commits_and_user_work_preserved": true,
+  "change": "Commit return origins only after successful source opening; track committed and pending locations independently through edits.",
+  "regression_reproduced_before_fix": true,
+  "automated": {
+    "javascript_syntax": "passed",
+    "node_tests_passed": 89,
+    "python_tests_run": 379,
+    "python_tests_passed": 317,
+    "python_tests_skipped": 62,
+    "python_tests_failed": 0,
+    "python_compilation": "passed",
+    "markdown_files_checked": 12,
+    "parsed_local_links_and_anchors_checked": 256,
+    "documentation_and_version_checks": "passed",
+    "new_cases": [
+      "Failed following during an outside edit preserves the earlier successful occurrence",
+      "Successful reader opening tracks outside edits",
+      "Overlapping edits refuse exact return",
+      "Exact undo restores return"
+    ]
+  },
+  "package": {
+    "path": "vscode/theorem-terminal-0.11.1.vsix",
+    "sha256": "3adda92714ed3a4f41f5e934e8553c619c5cbe73a162ab373736608fabc93bfe",
+    "files": 66,
+    "verified": true,
+    "wsl_cli_installation": "success",
+    "installed_runtime_files_matching": 61,
+    "installed_manifest_matches": true,
+    "installed_readme_matches_archive": true,
+    "earlier_archive_versions_preserved": ["0.11.0", "0.10.0", "0.9.4"],
+    "tests_packaging_and_installed_bridge_sequential": true,
+    "toolchain": {
+      "linux_node": "24.22.1",
+      "npm": "11.13.0",
+      "vsce": "4.0.0",
+      "python": "3.13.5"
+    }
+  },
+  "installed_bridge": {
+    "isolated_python_from_installed_bundle": true,
+    "existing_linux_artifact_binding": true,
+    "new_disposable_markdown_overviews": 1,
+    "retained_sources": 2,
+    "whole_source_follow": "passed",
+    "exact_stacks_08ZE_follow": "passed",
+    "second_source_follow": "passed",
+    "wrong_workspace_refused": true,
+    "missing_target_refused_without_replacement": true,
+    "record_files_checked": 16,
+    "all_record_bytes_unchanged": true,
+    "overview_bytes_unchanged": true,
+    "import_or_network_acquisition": false
+  },
+  "ordinary_installed_window": {
+    "windows_vscode": "1.144.1",
+    "windows_commit": "261c84cb1eddf11235f9e2c921425e9663fbe556",
+    "workspace_host": "WSL Debian",
+    "attempts": 1,
+    "complete": false,
+    "blocked_stage": "launch",
+    "failure": "A new ordinary window for the disposable overview was not identified; no input sent",
+    "stderr": "crashpad/util/win/registration_protocol_win.cc:108: CreateFile: The system cannot find the file specified. (0x2)",
+    "keyboard_or_mouse_input_sent": false,
+    "user_window_closed_or_reloaded": false,
+    "prior_user_led_ordinary_reader_opening": "Established in the separate 0.9.0 installed-manual-followup record",
+    "prior_development_host_evidence": "Separate seed/reopen results; not a current installed-window observation",
+    "remaining_current_window_observations": [
+      "Two-source overview headings and expand/collapse",
+      "Whole-source, exact-passage and duplicate references with occurrence-specific Return",
+      "Live unsaved reorganization and undo/redo",
+      "Saved normal close/reopen and navigation restoration"
+    ]
+  },
+  "scope": {
+    "markdown_authoritative": true,
+    "reference_format_and_core_schema_unchanged": true,
+    "new_mathematical_usefulness_claim": false,
+    "proof_graphs_and_vertex_elimination": "pending",
+    "ai_setup_and_live_requests": "deferred by user",
+    "windows_storage_qualification": "deferred"
+  }
+}
