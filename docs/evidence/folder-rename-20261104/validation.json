@@ -1,0 +1,52 @@
+{
+  "actual_host": {
+    "host_report_received": false,
+    "launch_attempts": 1,
+    "launch_retry": false,
+    "staged_entry_and_config_disabled": true,
+    "startup_logged": [
+      "existing mutex/fallback storage",
+      "safeStorage decryption error"
+    ],
+    "status": "unobserved",
+    "user_window_close_or_reload": false
+  },
+  "date": "2026-11-04",
+  "installed": {
+    "archive_sha256": "f68e28976f04e5998040bf1f23c740b343cc24b0c845fcaefc7903924c884243",
+    "installed_bridge_status": true,
+    "installed_runtime_files": 62,
+    "packaged_readme_matches": true,
+    "production_manifest_matches": true,
+    "runtime_bytes_match": true,
+    "version": "0.12.0"
+  },
+  "live_provider_calls": 0,
+  "mathematical_usefulness": "unassessed",
+  "node": {
+    "new_lifecycle_failure_cases": 5,
+    "passed": true,
+    "syntax_passed": true,
+    "test_files": 8
+  },
+  "package": {
+    "development_files_excluded": true,
+    "files": 66,
+    "path": "vscode/theorem-terminal-0.12.0.vsix",
+    "production_manifest_matches": true,
+    "runtime_bytes_match": true,
+    "sha256": "f68e28976f04e5998040bf1f23c740b343cc24b0c845fcaefc7903924c884243"
+  },
+  "python": {
+    "compilation_passed": true,
+    "core_changed": false,
+    "focused_artifact_tests": 20,
+    "passed": 317,
+    "skipped": 62,
+    "total": 379
+  },
+  "real_checkout_renamed": false,
+  "real_study_migration_attempted": false,
+  "scope": "Single-folder workspace and single-project store; prepare before ordinary file-tool rename, then explicit verified reconnect on the same host/profile.",
+  "version": "0.12.0"
+}

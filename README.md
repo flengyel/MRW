@@ -2,6 +2,13 @@
 
 Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
 
+Extension **0.12.0** adds **MRW: Prepare Folder Rename…** and **MRW: Reconnect Saved
+Work After Folder Rename…**. Prepare the study's saved work, rename with your
+ordinary file tools, then explicitly reconnect in the reopened folder. Existing
+retained passages and attributed annotations keep their identities. See
+[the workflow](docs/FOLDER_RENAME_WORKFLOW.md) and [checks and limits](docs/FOLDER_RENAME_VALIDATION.md).
+The current checkout and genuine study workspace have not been moved.
+
 **Start here:** [Choose an installation path](docs/INSTALLATION.md):
 **MRW for reading and mathematical review**, or **MRW with SagePod for computation**.
 The guide separates required components, optional AI assistance and later

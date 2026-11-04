@@ -4,7 +4,7 @@
 The guide separates prerequisites, the current AI connector and optional Obsidian
 links. Follow the [SagePod tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md) for
 the authenticated notebook connection, kernel selection and cell controls.
-MRW 0.11.1 is distributed locally as a VSIX; a project-published Marketplace
+MRW 0.12.0 is distributed locally as a VSIX; a project-published Marketplace
 listing and GitHub release download are not yet available.
 The tutorial and source-build route require access to this private repository.
 
@@ -29,6 +29,22 @@ menus own view placement; previously customized positions remain user choices.
 The sidebar replaces MRW's default placement inside Explorer. It reuses the
 same view/command IDs, document pointers and private records. Clicking its icon
 registers/displays UI only; no source, provider, compiler or network action starts.
+
+## Rename a study folder (0.12.0)
+
+In the existing single-folder study workspace, save work and run **MRW: Prepare
+Folder Rename…**. It verifies/moves saved artifacts to host-local storage outside
+the folder and remembers a convenience locator. Close the workspace, rename with
+your ordinary file tools, reopen the new folder in the same host/profile and run
+**MRW: Reconnect Saved Work After Folder Rename…**. Choose the prepared study and
+confirm its mapping. Existing exact references and saved annotations retain their
+identities. Occupied stores are never merged or overwritten.
+
+Prepare each nested study separately before renaming a parent. This does not
+rename folders itself, infer identity by filenames or transfer editor recovery,
+unsent requests, live drafts or UI pins. Historical original-file paths stay
+unchanged; retained text stays available. [Steps](../docs/FOLDER_RENAME_WORKFLOW.md),
+[validation and host limits](../docs/FOLDER_RENAME_VALIDATION.md).
 
 ## Ask AI from the source reader (0.11.0)
 
@@ -618,8 +634,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.11.1.vsix
-sha256sum vscode/theorem-terminal-0.11.1.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.12.0.vsix
+sha256sum vscode/theorem-terminal-0.12.0.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -651,11 +667,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.11.1.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.12.0.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.11.1**.
+The extension identity is **flengyel.theorem-terminal**, version **0.12.0**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally

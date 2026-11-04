@@ -85,7 +85,7 @@ another folder for that work.
 
 ### 3. Obtain and install the MRW package
 
-The current delivered package is **`theorem-terminal-0.11.1.vsix`**, extension
+The current delivered package is **`theorem-terminal-0.12.0.vsix`**, extension
 identity **`flengyel.theorem-terminal`**. Obtain a trusted maintainer package, or
 follow the [source-build instructions](GETTING_STARTED_WSL_SAGEPOD.md#build-the-vsix).
 The source-build route needs Git, Linux Node.js 22+ and npm in addition to Python.
@@ -95,7 +95,7 @@ VSIX…** and select the package. Or use that window's WSL integrated terminal,
 replacing this example with the package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.11.1.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.12.0.vsix
 code --list-extensions --show-versions
 ```
 
@@ -118,6 +118,12 @@ annotation forms with **Save annotation**.
 
 This completes the reading installation. Continue with AI assistance if desired,
 or add SagePod when your work calls for calculations.
+
+For a later folder rename, use **MRW: Prepare Folder Rename…** in the existing
+study first. After closing, renaming with your file tools and reopening its new
+location, use **MRW: Reconnect Saved Work After Folder Rename…**. See
+[the folder-rename workflow](FOLDER_RENAME_WORKFLOW.md) for exact steps and limits.
+The development checkout and each nested study have separate workspace identities.
 
 ## B. Add SagePod for computation
 

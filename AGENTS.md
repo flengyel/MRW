@@ -27,6 +27,18 @@ The VS Code extension is the active frontend migration target, explicitly
 authorized on 2026-10-13. Its first increment lives in `vscode/`; read
 `vscode/README.md` for its boundaries and development launch.
 
+Extension 0.12.0 adds explicit folder-rename preparation and reconnection for a
+single-project store in a single-folder workspace. Read
+`docs/FOLDER_RENAME_WORKFLOW.md` and its validation report. Preparation uses the
+existing verified artifact transaction to place saved work outside the folder;
+after an ordinary file-tool rename, reconnection explicitly maps the verified
+store to the reopened project. Host-local shortcuts are locators, never authority.
+Keep immutable source paths, exact references and attribution. Do not transfer
+live drafts, unsent requests or guessed editor pins, merge occupied stores or
+infer a project from filenames. Prepare nested study workspaces separately before
+a parent rename. The user's real checkout and genuine Stacks study remain in
+place; implementing/testing this feature does not authorize moving them.
+
 Prioritize simplicity and interoperability: retain one VS Code extension and
 the existing Python core in the workspace environment. Use standard local Linux,
 WSL2 and Remote SSH to Linux extension hosts. Windows VS Code connected to Linux

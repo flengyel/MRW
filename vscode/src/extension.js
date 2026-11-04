@@ -265,6 +265,8 @@ function activate(context) {
         ['Show saved artifact location', 'mrw.artifactLocation'],
         ['Move artifact directory…', 'mrw.moveArtifactDirectory'],
         ['Open existing artifact directory…', 'mrw.openArtifactDirectory'],
+        ['Prepare folder rename…', 'mrw.prepareFolderRename'],
+        ['Reconnect saved work after folder rename…', 'mrw.reconnectRenamedFolder'],
         ...savedMarkers().map(({ marker }) => [`Return: ${path.basename(marker.path)}:${marker.start[0] + 1} ${marker.preview}`, 'mrw.return']),
         ['Open Lean proof…', 'mrw.openProof'],
         ['Open external proof viewer', 'mrw.openViewer'], ['Inspect retained record…', 'mrw.inspect'],

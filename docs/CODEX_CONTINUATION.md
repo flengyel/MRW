@@ -1,5 +1,51 @@
 # Codex continuation: MRW source work and companion notes
 
+## Folder rename preparation and reconnection — 2026-11-04
+
+After the GitHub rename, the user held off renaming the local checkout and asked
+for easy directory renames. Extension **0.12.0** adds **MRW: Prepare Folder Rename…**
+and **MRW: Reconnect Saved Work After Folder Rename…** for single-project stores
+in a single-folder workspace. [Workflow](FOLDER_RENAME_WORKFLOW.md),
+[evidence and limits](FOLDER_RENAME_VALIDATION.md).
+
+Preparation uses the existing exact artifact transaction to move saved work
+outside the folder, into host-local extension storage. A global-state shortcut
+is a locator only. After closing, an ordinary file-tool rename and reopening,
+the user explicitly chooses the prepared study and confirms its project mapping.
+The core verifies the complete identity/content before adopting into an empty
+workspace. Old scoped passage references, annotations and attribution remain
+readable; no mathematical or historical source record is rewritten.
+
+The final **0.12.0** package is verified and installed in WSL: 66 archive files,
+62 installed runtime/license files, production manifest and README matching;
+SHA-256 `f68e28976f04e5998040bf1f23c740b343cc24b0c845fcaefc7903924c884243`.
+The installed isolated bridge check passes. All eight Node test files and 379
+Python tests (317 passed, 62 skipped), syntax, compilation and document checks
+pass. The directory-sync failure case also blocks an explicit retry until sync
+succeeds. No further complete regression is needed for documentation-only edits.
+
+The single isolated Windows/WSL Development Host attempt produced no report and
+logged startup/storage errors. Actual-window rename/reconnect acceptance remains
+unobserved; do not infer it from API doubles or restart a launch/focus campaign.
+Its staged test entry/config are disabled, and its private trial is preserved.
+Save ordinary work and reader forms before the user chooses to reload their
+working window to load 0.12.0. No user window was forcibly closed or reloaded.
+
+Existing source-file jumps may still name the old path; retained source access
+is preserved. Editor recovery, live drafts, unsent requests and host-local view
+pins/preferences are not transferred. Save first. A parent rename requires
+preparing every nested study separately; the development checkout cannot stand
+in for the genuine study's workspace. Earlier commands alone do not discover or
+repair an arbitrary already renamed legacy workspace.
+
+Do not rename the real checkout or move the genuine Stacks store as an
+implementation check. The user is holding off; their actual preparation and
+rename remain separate explicit actions after delivery. Preserve its 08ZG Codex
+annotation, current overviews, notebook project, TikZ trial and open drafts.
+The GitHub repository is already `flengyel/MRW`; the local path remains
+`/home/flengyel/src/theorem_terminal`. Keep API-key setup, Windows-backed storage
+qualification and unrelated host campaigns deferred.
+
 ## GitHub repository renamed MRW — 2026-11-04
 
 The user explicitly requested renaming the GitHub repository to **MRW**.

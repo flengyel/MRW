@@ -21,7 +21,7 @@ class Range {
 class Selection extends Range { constructor(a, b) { super(a, b); this.active = b; } }
 function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file, toString() { return `${scheme}:${file}`; } }; }
 
-async function harness(root, state = new Map()) {
+async function harness(root, state = new Map(), options = {}) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map(), executed = [];
   const opens = [], inputs = [], picks = [], endings = [], panels = [];
   let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, changeListener = () => {}, service = runBridge;
@@ -112,7 +112,11 @@ async function harness(root, state = new Map()) {
     } }, env: { uriScheme: 'vscode', clipboard: { value: '', async writeText(value) { this.value = value; }, async readText() { return this.value; } }, async openExternal(value) { api.external = value; return true; } },
   };
   const extension = path.resolve(__dirname, '..');
-  const context = { extensionPath: extension, storageUri: uri(path.join(root, '..', 'private-state')), subscriptions: [], workspaceState: {
+  const global = options.globalState || new Map();
+  const context = { extensionPath: extension, storageUri: uri(options.storage || path.join(root, '..', 'private-state')),
+    globalStorageUri: uri(options.globalHome || path.join(root, '..', 'global-state')),
+    globalState: { get: (key, fallback) => global.get(key) ?? fallback, async update(key, value) { global.set(key, value); } },
+    subscriptions: [], workspaceState: {
     get: key => state.get(key), keys: () => [...state.keys()],
     async update(key, value) { if (value === undefined) state.delete(key); else state.set(key, value); },
   } };
@@ -929,6 +933,130 @@ test('adopted synchronized identity permits an old external route only in the ex
   const returnLink=await receiver.commands.get('mrw.copyOutlineLink')();
   h.api.env.clipboard.value=returnLink;await h.commands.get('mrw.openLinkFromClipboard')();
   assert.deepEqual(h.errors,[]);assert.equal(h.panels[0].webview.messages.at(-1).model.outline.id,created.outline.id);
+});
+
+test('prepare, real folder rename, reconnect and reopen preserve exact passages, annotations and earlier links', async t => {
+  const root = await temporary(t, true), original = 'α😀 retained\nproof α\n';
+  const source = path.join(root, 'source α.txt'); await fs.writeFile(source, original);
+  const globalState = new Map(), h = await harness(root, new Map(), { globalState });
+  const editor = h.editor(h.document(source, original));
+  editor.selection = new Selection(new Position(0, 1), new Position(1, 5)); h.focus(editor);
+  const created = await h.commands.get('mrw.createOutline')(), region = created.outline.regions[0];
+  await h.panels[0].receive({ type: 'edit', change: { kind: 'annotation', region: region.id, id: null,
+    purpose: 'explanation', text: 'Synthetic AI explanation α', origin: 'ai_proposal', author: 'Synthetic AI' } });
+  h.picks.push({ id: created.outline.id }, { region: region.id });
+  const link = await h.commands.get('mrw.copyOutlineLink')();
+  h.endings.push('Prepare saved work');
+  const prepared = await h.commands.get('mrw.prepareFolderRename')();
+  assert.deepEqual(h.errors, []); assert.equal(prepared.committed, true);
+  assert.equal(path.dirname(prepared.location), path.join(root, '..', 'global-state'));
+  assert.equal((await fs.readFile(source, 'utf8')), original);
+  const hints = globalState.get('mrw.preparedFolderRenames.v1');
+  assert.equal(hints[prepared.store_id].location, prepared.location);
+  const renamed = path.join(root, '..', 'Renamed study α'); await fs.rename(root, renamed);
+  const options = { globalState, storage: path.join(renamed, '..', 'renamed-private-state') };
+  const receiver = await harness(renamed, new Map(), options);
+  receiver.endings.push('Reconnect saved work');
+  const connected = await receiver.commands.get('mrw.reconnectRenamedFolder')();
+  assert.deepEqual(receiver.errors, []); assert.equal(connected.store_id, prepared.store_id);
+  receiver.api.env.clipboard.value = link; await receiver.commands.get('mrw.openLinkFromClipboard')();
+  assert.deepEqual(receiver.errors, []);
+  let model = receiver.panels[0].webview.messages.findLast(m => m.type === 'outline').model;
+  assert.equal(model.outline.id, created.outline.id);
+  assert.equal(model.outline.source.path, source); // Immutable source provenance is historical.
+  assert.deepEqual(model.outline.regions[0].span, region.span);
+  assert.equal(model.outline.regions[0].annotations[0].text, 'Synthetic AI explanation α');
+  const selected = receiver.api.window.activeTextEditor;
+  assert.equal(selected.document.getText(selected.selection), '😀 retained\nproof');
+  await receiver.panels[0].receive({ type: 'edit', change: { kind: 'annotation', region: region.id, id: null,
+    purpose: 'question', text: 'Synthetic question after rename', origin: 'human_work', author: 'Test fixture' } });
+  const restarted = await harness(renamed, new Map(), options); await restarted.commands.get('mrw.openOutline')();
+  model = restarted.panels[0].webview.messages.findLast(m => m.type === 'outline').model;
+  assert.equal(model.outline.regions[0].annotations.length, 2);
+  assert.equal(model.outline.regions[0].annotations[0].provenance.author, 'Synthetic AI');
+  assert.equal(await fs.readFile(path.join(renamed, 'source α.txt'), 'utf8'), original);
+  assert.ok([...h.requests, ...receiver.requests, ...restarted.requests].every(r => /^(artifact_|outline_)/.test(r.method)));
+});
+
+test('folder preparation refuses reader drafts and cancellation without moving work or publishing a shortcut', async t => {
+  const root = await temporary(t, true), source = path.join(root, 'draft.txt'), globalState = new Map();
+  await fs.writeFile(source, 'retained\n');
+  const h = await harness(root, new Map(), { globalState }); h.focus(h.editor(h.document(source, 'retained\n')));
+  await h.commands.get('mrw.createOutline')(); const before = await h.commands.get('mrw.artifactLocation')();
+  h.panels[0].webview.dirty = true;
+  await h.commands.get('mrw.prepareFolderRename')(); assert.match(h.errors.pop(), /unsaved reader annotations/);
+  assert.equal(h.panels[0].webview.dirty, true);
+  h.panels[0].webview.dirty = false;
+  await h.commands.get('mrw.prepareFolderRename')();
+  assert.equal((await h.commands.get('mrw.artifactLocation')()).location, before.location);
+  assert.equal(globalState.size, 0); assert.ok(!h.requests.some(r => r.method === 'artifact_move'));
+  h.endings.push('Prepare saved work');
+  h.setService(async (...args) => args[2].method === 'artifact_move'
+    ? { committed: true, cleanup_pending: true, location: 'test location requiring recovery' } : runBridge(...args));
+  await h.commands.get('mrw.prepareFolderRename')();
+  assert.match(h.errors.pop(), /Preparation is unfinished.*Recover Artifact Move/);
+  assert.equal(globalState.size, 0);
+});
+
+test('reconnect shortcuts cannot replace a store or bypass identity verification', async t => {
+  const root = await temporary(t, true), source = path.join(root, 'retained.txt'), globalState = new Map();
+  await fs.writeFile(source, 'retained\n');
+  const h = await harness(root, new Map(), { globalState }); h.focus(h.editor(h.document(source, 'retained\n')));
+  const created = await h.commands.get('mrw.createOutline')(); h.endings.push('Prepare saved work');
+  const prepared = await h.commands.get('mrw.prepareFolderRename')(); assert.deepEqual(h.errors, []);
+  await h.commands.get('mrw.reconnectRenamedFolder')(); assert.match(h.errors.pop(), /already has a saved-work binding/);
+  const other = await temporary(t, true), receiver = await harness(other, new Map(), { globalState });
+  receiver.setService(async (...args) => args[2].method === 'artifact_inspect'
+    ? { store_id: 'different identity', projects: [root] } : runBridge(...args));
+  await receiver.commands.get('mrw.reconnectRenamedFolder')();
+  assert.match(receiver.errors.pop(), /identity differs/); assert.ok(!receiver.requests.some(r => r.method === 'artifact_adopt'));
+  receiver.setService(runBridge);
+  const ownSource = path.join(other, 'own.txt'); await fs.writeFile(ownSource, 'own study\n');
+  receiver.focus(receiver.editor(receiver.document(ownSource, 'own study\n')));
+  const own = await receiver.commands.get('mrw.createOutline')(); receiver.endings.push('Reconnect saved work');
+  await receiver.commands.get('mrw.reconnectRenamedFolder')();
+  assert.match(receiver.errors.pop(), /already has saved artifacts/);
+  assert.equal((await receiver.commands.get('mrw.artifactLocation')()).store_id, null);
+  await receiver.commands.get('mrw.openOutline')();
+  assert.equal(receiver.panels[0].webview.messages.at(-1).model.outline.id, own.outline.id);
+  assert.notEqual(own.outline.id, created.outline.id); assert.ok(prepared.store_id);
+});
+
+test('a reconnect-shortcut publication failure retains the committed store and reports its manual opening path', async t => {
+  const root = await temporary(t, true), source = path.join(root, 'retained.txt'), globalState = new Map();
+  await fs.writeFile(source, 'retained\n');
+  globalState.set = () => { throw new Error('Injected shortcut failure'); };
+  const h = await harness(root, new Map(), { globalState }); h.focus(h.editor(h.document(source, 'retained\n')));
+  const created = await h.commands.get('mrw.createOutline')(); h.endings.push('Prepare saved work');
+  await h.commands.get('mrw.prepareFolderRename')();
+  assert.match(h.errors.pop(), /Saved work moved to .*shortcut could not be saved.*Open Existing Artifact Directory/);
+  const status = await h.commands.get('mrw.artifactLocation')(); assert.ok(status.store_id);
+  assert.ok((await fs.stat(status.location)).isDirectory()); assert.equal(globalState.size, 0);
+  const restarted = await harness(root); await restarted.commands.get('mrw.openOutline')();
+  assert.deepEqual(restarted.errors, []); assert.equal(restarted.panels[0].webview.messages.at(-1).model.outline.id, created.outline.id);
+});
+
+test('host directory synchronization failure blocks preparation before moving work, including an explicit retry', async t => {
+  const root = await temporary(t, true), source = path.join(root, 'retained.txt'), globalState = new Map();
+  await fs.writeFile(source, 'retained\n');
+  const h = await harness(root, new Map(), { globalState }); h.focus(h.editor(h.document(source, 'retained\n')));
+  await h.commands.get('mrw.createOutline')();
+  const open = fs.open; let attempts = 0;
+  fs.open = async (...args) => {
+    if (args[0] === path.dirname(root) && args[1] === 'r') {
+      attempts++; return { async sync() { throw new Error('Injected host directory sync failure'); }, async close() {} };
+    }
+    return open(...args);
+  };
+  try {
+    for (let i = 0; i < 2; i++) {
+      h.endings.push('Prepare saved work'); await h.commands.get('mrw.prepareFolderRename')();
+      assert.match(h.errors.pop(), /Injected host directory sync failure/);
+    }
+  } finally { fs.open = open; }
+  assert.equal(attempts, 2); assert.equal(globalState.size, 0);
+  assert.ok(!h.requests.some(r => r.method === 'artifact_move'));
+  assert.equal((await h.commands.get('mrw.artifactLocation')()).store_id, null);
 });
 
 test('Stacks import command previews identity/destination and preserves retained links, notes and repeat imports', async t => {

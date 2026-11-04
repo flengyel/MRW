@@ -5,6 +5,13 @@ records for **this VS Code workspace**. Existing installations keep their curren
 location until you explicitly move it. Other workspaces are unchanged. Obsidian
 continues to own your notes and attachments; no new vault is needed.
 
+For an ordinary study-folder rename, **0.12.0** adds **Prepare Folder Rename…**
+and **Reconnect Saved Work After Folder Rename…** over this same core protocol.
+Preparation moves saved artifacts to stable host-local extension storage, then
+the reopened folder explicitly adopts the verified identity. See
+[the folder-rename workflow](FOLDER_RENAME_WORKFLOW.md). It does not change source
+provenance, merge stores or transfer editor recovery/UI state.
+
 ## Move this workspace's saved artifacts
 
 1. Save reader annotations and human investigation summaries. Finish any active

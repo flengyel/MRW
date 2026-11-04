@@ -41,6 +41,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Manual overview across several sources | 0.11.1: live Markdown reading navigator, exact retained navigation and occurrence-specific return; failed following preserves the last successful origin; 0.9.x reader presentation retained | Not implemented |
 | Obsidian companion navigation | 0.6.1: explicit outline/passage link directions, saved note labels, current/earlier pinned scopes; 0.6.0 navigation and private associations preserved | Not implemented |
 | Configurable saved artifact storage | 0.7.0: transactional move, recovery, stable identities and explicit verified copied-store adoption; original `/mnt/c` private modes unsupported; scoped metadata fixture works but replacement-denial qualification remains open | Existing storage unchanged |
+| Folder rename preparation/reconnection | 0.12.0: explicit preparation, ordinary file-tool rename and verified reconnect for a single-project store/workspace; exact retained reading and annotations preserved; actual-window acceptance remains unobserved | Existing storage unchanged |
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
 | Reader TikZ diagrams | 0.10.0: explicit isolated native render, exact saved code, retained SVG, color and Paper/Dark display, offline reopening | Not implemented |
 | Direct reader AI assistance | 0.11.0: exact retained passage into OpenAI preview/Send; automated checks pass, user reports preview and missing-key not-sent result; MRW API setup deferred, Codex companion preferred for now | Not implemented |
@@ -62,6 +63,24 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Folder rename preparation and reconnection — 2026-11-04
+
+The user identifies path-bound study setup as an obstacle to ordinary directory
+renaming. The bounded **0.12.0** increment adds preparation in the old study
+workspace and explicit reconnection after an ordinary file-tool rename. It
+reuses the existing verified artifact move/adopt protocol and stable identities,
+with a host-local convenience locator and no inferred identity, source rewrite,
+merge or replacement store. [Workflow](docs/FOLDER_RENAME_WORKFLOW.md),
+[validation](docs/FOLDER_RENAME_VALIDATION.md). Original-file jumps and editor/UI
+state are outside this bounded transfer; exact retained reading and attributed
+saved work are preserved. The bounded implementation is delivered with a verified
+WSL-installed package; eight Node test files and the shared Python suite pass.
+Actual-window rename/reconnect acceptance remains unobserved after one blocked
+isolated launch; mathematical usefulness remains unassessed. The user's
+checkout/study remain unmoved; broader automatic rename recovery, multiple-project
+convenience, inference graphs and vertex elimination remain pending. API-key
+setup and Windows-backed storage qualification stay deferred.
 
 ### GitHub repository renamed MRW — 2026-11-04
 

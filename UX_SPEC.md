@@ -18,6 +18,26 @@ platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
 
+### Folder rename preparation and reconnection — 2026-11-04
+
+Extension **0.12.0** gives a single-folder study two explicit actions: **Prepare
+Folder Rename…**, then **Reconnect Saved Work After Folder Rename…** after a
+normal file-tool rename and reopening. Preparation verifies/moves saved artifacts
+outside the project, preserving source bytes, exact references, annotations and
+required records through the existing core. It refuses unsaved research drafts
+and incomplete operations. A completed move whose convenience shortcut cannot
+be saved reports its actual location and the existing manual opening route.
+
+Reconnection shows the previous and current folder, verifies the selected store
+and explicitly maps the project. An occupied receiving workspace cannot merge
+or replace its work. No ordinary file, source provenance or historical path is
+rewritten; retained access remains available when an original-file jump becomes
+unavailable. VS Code owns ordinary saving/recovery and the directory operation;
+editor/UI state and unsent drafts do not transfer. Nested study workspaces need
+their own preparation before a parent rename. [Workflow](docs/FOLDER_RENAME_WORKFLOW.md).
+
+### Previously delivered reader assistance and navigation
+
 Patch **0.11.1** preserves the prior source's originating Markdown occurrence
 when a later navigation fails during unsaved edits. Track candidate return pins
 while a source opens, commit only after successful following, and keep exact
