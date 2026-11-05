@@ -1,5 +1,19 @@
 # Codex continuation: MRW source work and companion notes
 
+## Current assignment — study feedback and public preparation
+
+Read [CODEX_STUDY_FEEDBACK_PROMPT](CODEX_STUDY_FEEDBACK_PROMPT.md) and implement
+it from the latest reconciled checkout. The reviewed baseline is
+`098f2579e26e224b124369f9ffc4192199f2c722` (0.18.0).
+Prioritize the reproduced measurement/assessment defects, then retain companion
+help in the same study and complete an understandable first session. Prepare
+public-facing documentation and an exposure review in parallel.
+
+Do not repeat the 0.18 implementation or stop at another plan. Preserve genuine
+study work and complete the focused checks, package and main-branch delivery.
+Repository visibility remains private; native-host limitations must stay
+separate from browser/API evidence. The linked prompt supplies the full task.
+
 ## Current delivery — 2026-11-05
 
 The fetched task at origin/main `560e733` is implemented in **0.18.0**. Use

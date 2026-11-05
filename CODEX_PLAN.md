@@ -1,5 +1,21 @@
 # CODEX_PLAN.md
 
+## Current task — study feedback and public preparation
+
+The next task is [CODEX_STUDY_FEEDBACK_PROMPT](docs/CODEX_STUDY_FEEDBACK_PROMPT.md).
+Start from the delivered 0.18.0 implementation. Repair attempt/correction timing,
+cross-release comparisons and adaptation evidence; retain attributed companion
+help beside submitted work; simplify the first study session and preserve pending
+controls. Prepare concise installation/publication documents and inspect exposure
+in parallel. This is implementation work, not another design-only increment.
+
+Complete the source → question → attempt → retained help → continuation → resume
+path with meaningful local history. Keep the existing scheduler, provider
+boundaries and source identities. Publication preparation does not authorize
+changing visibility, publishing packages or rewriting Git history. The prompt
+defines delivery and focused verification; older completed priorities below
+supply context rather than additional work.
+
 ## Implemented increment — 0.18.0
 
 The source-focused attempt/effort/history/resumption path, pinned FSRS adapter,
@@ -10,7 +26,7 @@ implemented. Graph authoring remains optional. See
 baseline; delayed learning benefit remains unobserved. Preserve genuine study
 work and use recorded interaction obstacles to choose the next increment.
 
-## Current priority — active study and observation
+## Prior delivered priority — active study and observation
 
 Updated 2026-11-05. Deliver the bounded interaction in
 [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md), informed by

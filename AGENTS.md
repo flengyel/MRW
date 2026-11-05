@@ -1,6 +1,20 @@
 # Codex instructions
 
-## Active increment — 2026-11-05
+## Current task — study feedback and public preparation
+
+Follow [CODEX_STUDY_FEEDBACK_PROMPT](docs/CODEX_STUDY_FEEDBACK_PROMPT.md) and the
+current CODEX_PLAN.md section. MRW 0.18.0 is implemented. The next increment fixes
+how attempts/corrections support reports and adaptations, retains attributed
+companion feedback beside the attempt, and simplifies first use. Public README,
+installation and exposure review work proceeds alongside it. These priorities
+supersede older completed increment instructions below; shared persistence,
+source and attribution invariants remain applicable.
+
+Do not wait for a new human study session to repair the identified code defects
+or implement the requested interaction. Public preparation does not authorize a
+visibility change, publication, history rewrite or disclosure of private data.
+
+## Delivered active-study increment — 2026-11-05
 
 The user now authorizes source-focused study with frequent attempts, light
 rescheduling and cognitive-load tracking. Record meaningful MRW interactions
