@@ -1,5 +1,32 @@
 # Proof-outline projection validation — 2026-11-04
 
+## Loading-screen regression — 0.16.1, 2026-11-05
+
+The user’s native 0.16.0 proof view remained at “Opening recorded outline…”.
+The initial browser harness dispatched messages with no source window, so it
+missed this failure. Inspection of the installed VS Code preload shows that
+host replies are forwarded from a same-origin wrapper while window.parent is
+masked. The old event.source filter rejected those replies.
+
+The regression harness now uses real parent-frame postMessage delivery over
+HTTP, with the same parent masking. It reproduces 0.16.0 displaying zero vertices
+after receiving a 15-vertex graph. With 0.16.1 the graph renders 15 vertices.
+A sandboxed foreign frame’s actual message is ignored. Unit checks also reject
+Stacks-origin and opaque-origin messages and verify timeout, Retry and recovery.
+
+The parent-frame browser run passes real mouse selection of 08ZH, live tagged
+page display, 15 → 10 → 9 → 15 → 10 → 15 claims, animated layout, pan/zoom,
+unchanged iframe identity through deletion/restoration, saved statement/proof
+(267 MathML expressions, no KaTeX errors), and reduced motion. This is an
+isolated transport/browser test; native-window acceptance remains pending.
+
+The focused **14 command/renderer/layout tests** and syntax checks pass.
+The verified **0.16.1** VSIX is installed (SHA-256
+`fe53c679e4eb67627be70b74c39c8d346c6588d0eac10231ad746622fed00875`).
+Its production manifest and all 70 runtime files match the package. The private
+head, 12 retained study payload files, ordinary overview and graph JSON remain
+unchanged. No native window reload was invoked.
+
 ## Animated graph and tagged page — 0.16.0
 
 The user confirmed access to the 0.15.0 outline/source view, then reported that

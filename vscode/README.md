@@ -1,5 +1,11 @@
 # Mathematical Research Workstation for VS Code
 
+## Proof-view startup (0.16.1)
+
+Fixes the proof view stuck on its initial loading screen. VS Code sends replies
+from a same-origin wrapper window; the view accepts that origin and excludes
+messages from the embedded Stacks page. Startup timeouts offer Retry.
+
 ## Graph navigation and Stacks pages (0.16.0)
 
 Select a graph vertex to read the corresponding official Stacks tag alongside

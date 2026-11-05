@@ -164,18 +164,30 @@
     }
     controls();
   }
+  const startupTimer = setTimeout(() => {
+    if (state) return;
+    root.replaceChildren();
+    el('p', root, 'The proof outline did not open.', 'warning');
+    local(root, 'Retry', () => { busy = false; send('ready'); });
+  }, 15000);
   window.addEventListener('message', event => {
-    // An embedded Stacks page cannot impersonate the extension-host transport.
-    if (event.source && event.source !== window) return;
+    // VS Code forwards from a same-origin wrapper and masks window.parent.
+    // Its event.source is not this window; the embedded Stacks origin differs.
+    if (event.origin !== window.origin) return;
     const data = event.data;
     if (!data || typeof data !== 'object') return;
-    if (data.type === 'graph') { const previous = state; state = data; render(previous); }
+    if (data.type === 'graph') {
+      clearTimeout(startupTimer);
+      const previous = state; state = data;
+      try { render(previous); }
+      catch (error) { el('p', root, 'Cannot display proof outline: ' + error.message, 'warning'); }
+    }
     else if (data.type === 'passage' && data.node === selected && data.request === request && data.revision === state.documentRevision) {
       passage = data.passage;
       if (passage.tag && !/^[A-Z0-9]{4}$/.test(passage.tag)) passage = { tag: null, notice: 'Invalid Stacks tag.' };
       renderSource();
     } else if (data.type === 'idle') { busy = false; controls(); }
-    else if (data.type === 'error') el('p', inspector || root, data.message, 'warning');
+    else if (data.type === 'error') { clearTimeout(startupTimer); el('p', inspector || root, data.message, 'warning'); }
   });
   api.postMessage({ type: 'ready' });
 })();

@@ -1,5 +1,9 @@
 # Proof outlines and vertex deletion
 
+If the proof outline does not open within 15 seconds, **Retry** requests it
+again. Host errors and rendering failures appear in the view. Patch 0.16.1
+repairs the 0.16.0 wrapper-message filter that left the loading screen visible.
+
 ## Graph and tagged Stacks passage (0.16.0)
 
 Click a vertex to select it and show its corresponding Stacks tag beside the

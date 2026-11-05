@@ -109,7 +109,7 @@ test('AI preparation captures only the exact graph and requires an explicit acti
   h.doc.text+=' ';await h.action(p,'ask');assert.equal(h.asks.length,1);assert.match(h.errors.at(-1),/changed/);
 });
 
-async function renderer() {
+async function renderer({ initial = true } = {}) {
   class Node {
     constructor(tag){this.tag=tag;this.children=[];this.listeners={};this.dataset={};this.textContent='';this.classList={add(){}};}
     append(n){n.parent=this;this.children.push(n);}replaceChildren(){this.children=[];}
@@ -120,18 +120,22 @@ async function renderer() {
     querySelectorAll(tag){return this.all().filter(n=>n.tag===tag);}
     text(){return this.textContent+this.children.map(n=>n.text()).join(' ');}
   }
-  const root=new Node('main'),messages=[];let receive;
+  const root=new Node('main'),messages=[],timers=new Map(),wrapper={};let receive;
+  const origin='vscode-webview://proof-test';
   const global={document:{body:new Node('body'),getElementById:id=>id==='reader'?root:root.all().find(n=>n.id===id),createElement:t=>new Node(t),createElementNS:(_,t)=>new Node(t)},
     acquireVsCodeApi:()=>({postMessage:m=>messages.push(m)}),addEventListener:(_,f)=>{receive=f;}};
-  global.window=global;global.MRWAnnotations={render:(p,s)=>{const n=new Node('p');n.textContent=s;p.append(n);}};
+  global.window=global;global.parent=global;global.origin=origin;
+  global.setTimeout=f=>{timers.set(1,f);return 1;};global.clearTimeout=id=>timers.delete(id);
+  global.MRWAnnotations={render:(p,s)=>{const n=new Node('p');n.textContent=s;p.append(n);}};
   global.MRWStacks={part:(p,part)=>{const n=new Node('p');n.textContent=part.exact_text;p.append(n);}};
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/proofGraphMap.js'),'utf8'),global);
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/proofGraphView.js'),'utf8'),global);
   const graph=JSON.parse(await fs.readFile(fixture,'utf8'));
   graph.nodes[0].explanation.text='<img src=x onerror=alert(1)>';
   const model=await bridge({method:'proof_graph',graph,hidden:graph.suggested_hidden});
-  receive({data:{type:'graph',...model,sourceStatus:{},documentRevision:'pin'}});receive({data:{type:'idle'}});
-  return{root,messages,receive,model};
+  const deliver=event=>receive({origin,source:wrapper,...event});
+  if(initial){deliver({data:{type:'graph',...model,sourceStatus:{},documentRevision:'pin'}});deliver({data:{type:'idle'}});}
+  return{root,messages,receive:deliver,model,timers};
 }
 
 test('renderer exposes joint premises, alternative routes, complete witnesses and inert source prose', async () => {
@@ -201,7 +205,7 @@ test('selected vertex opens its exact tag beside the graph; deletion keeps the p
   assert.equal(h.root.all().find(n=>n.tag==='iframe'),frame);assert.equal(h.messages.filter(m=>m.type==='inspect').length,1);
   h.root.all().find(n=>n.dataset.action==='source-saved').listeners.click();assert.equal(h.root.all().filter(n=>n.tag==='iframe').length,0);
   assert.match(h.root.text(),/Exact statement/);assert.match(h.root.text(),/Exact proof/);
-  h.receive({source:{},data:{type:'graph',documentRevision:'forged'}});assert.match(h.root.text(),/08ZH/);
+  h.receive({origin:'https://stacks.math.columbia.edu',source:{},data:{type:'graph',documentRevision:'forged'}});assert.match(h.root.text(),/08ZH/);
 });
 
 test('iframe permission is scoped to the proof view and the JSON editor offers a graph action',async()=>{
@@ -210,4 +214,31 @@ test('iframe permission is scoped to the proof view and the JSON editor offers a
   assert.doesNotMatch(outlineHtml('',[],'',{stacksFrame:true}),/frame-src \*/);
   const manifest=JSON.parse(await fs.readFile(path.join(extension,'package.json'),'utf8'));
   assert.ok(manifest.contributes.menus['editor/title'].some(m=>m.command==='mrw.openProofOutline'&&m.when.includes('mrw-proof')));
+});
+
+
+test('VS Code wrapper messages render despite its masked parent; foreign frames cannot supply host data',async()=>{
+  const h=await renderer();
+  assert.match(h.root.text(),/08ZH: closed fiber products/);
+  const before=h.root.text();
+  for(const type of ['graph','error','idle','passage']){
+    h.receive({origin:'https://stacks.math.columbia.edu',source:{},data:{type,message:'forged',documentRevision:'forged'}});
+    assert.equal(h.root.text(),before);
+  }
+  h.receive({origin:'null',data:{type:'error',message:'forged opaque origin'}});
+  assert.equal(h.root.text(),before);
+  h.receive({data:{type:'error',message:'Host error reaches the reader'}});
+  assert.match(h.root.text(),/Host error reaches the reader/);
+});
+
+test('startup timeout offers an explicit retry and a host reply replaces the loading failure',async()=>{
+  const h=await renderer({initial:false});
+  h.timers.get(1)();
+  assert.match(h.root.text(),/proof outline did not open/);
+  h.root.all().find(n=>n.tag==='button'&&n.textContent==='Retry').listeners.click();
+  assert.equal(h.messages.at(-1).type,'ready');
+  h.receive({data:{type:'graph',...h.model,sourceStatus:{},documentRevision:'pin'}});
+  assert.match(h.root.text(),/08ZH: closed fiber products/);
+  assert.doesNotMatch(h.root.text(),/did not open/);
+  assert.equal(h.timers.size,0);
 });

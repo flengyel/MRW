@@ -8,6 +8,12 @@ purpose in `VISION.md`.
 
 ## Frontend scope and immediate delivery
 
+**0.16.1** repairs the reported loading-screen regression. The webview origin
+check matches VS Code’s wrapper transport; child-page messages remain excluded.
+Parent-frame browser regression checks reproduce the failure in 0.16.0 and pass
+with the fix. Startup timeout/retry and visible render errors prevent silent
+loading failures. Native-window confirmation remains separate.
+
 **0.16.0** addresses the user's comparison with Axiom's animated graph and
 corresponding tagged Stacks page. Vertex selection now opens the verified tag
 alongside the graph, with an offline pinned-text choice. Pan/zoom, search,

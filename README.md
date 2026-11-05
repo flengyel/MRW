@@ -1,5 +1,9 @@
 # Mathematical Research Workstation
 
+**0.16.1** fixes a proof view stuck at “Opening recorded outline…” by accepting
+VS Code’s same-origin wrapper messages while rejecting embedded-page messages.
+Startup timeouts offer Retry.
+
 **0.16.0:** clicking a proof-graph vertex shows its corresponding Stacks page
 beside the graph. Pan, zoom, animated deletion/restoration and an offline saved
 statement/proof view are available. A graph button appears on proof-outline JSON

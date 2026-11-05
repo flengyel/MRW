@@ -1,5 +1,32 @@
 # Codex continuation: MRW source work and companion notes
 
+## Proof-view startup regression — 2026-11-05
+
+The user reports the 0.16.0 native proof view stuck on “Opening recorded
+outline…”. The host updates its title but the renderer rejects its replies.
+The installed VS Code preload forwards messages from a same-origin wrapper
+and masks window.parent with the content window. The old event.source check
+therefore rejects the host. **0.16.1** checks event.origin against window.origin
+instead; the embedded Stacks origin cannot supply graph or passage replies.
+Startup has a 15-second timeout and explicit Retry; render exceptions are shown.
+
+A real parent-frame Chrome test reproduces zero rendered vertices in 0.16.0
+and renders 15 with the fix, with parent masking enabled. A sandboxed foreign
+frame cannot inject an error. The existing live/saved tagged-page, animated
+delete/restore, pan/zoom, frame preservation and reduced-motion interactions
+pass. The user’s actual VS Code window is not reloaded by the test.
+
+The user explicitly requested committing and pushing the accumulated work.
+Commit 5fb0259 is pushed to origin/main. This startup patch is a separate
+follow-up; no private study data or disposable browser artifacts belong in Git.
+
+Delivery: verified **0.16.1** is installed. Its production manifest and all 70
+runtime files match the checked VSIX. The overview, graph JSON, private store
+head and 12 retained payload files remain byte-identical. No window reload was
+invoked. Activation requires the user to save drafts, reload and reopen the
+proof outline. The focused 14 command/renderer/layout tests and parent-frame
+browser check pass; native-window confirmation remains pending.
+
 ## Animated graph with the corresponding Stacks page — 2026-11-04
 
 The user confirms reaching the 0.15.0 source/outline after an extra MRW-icon

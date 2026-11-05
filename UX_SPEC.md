@@ -1,5 +1,10 @@
 # UX_SPEC.md
 
+**Proof-view startup, 0.16.1 (2026-11-05).** The proof view accepts messages
+from VS Code’s same-origin wrapper. Embedded-page messages are rejected by
+origin. If no graph arrives within 15 seconds, Retry requests it again; there
+is no automatic source navigation, compiler or provider request.
+
 **Tagged-page interaction, 0.16.0 (2026-11-04).** Vertex selection brings up its
 exact corresponding Stacks tag in an adjacent panel. The graph supports pan,
 zoom, search, keyboard selection, neighbor highlighting and animated layout
