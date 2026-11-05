@@ -110,3 +110,17 @@ test('help handoff asks for ordinary prose while question generation keeps its s
  const s=study();s.unresolved='Explain this step.';const help=model.questionHandoff(s,'hint');assert.match(help,/ordinary prose/);assert.doesNotMatch(help,/"questions"\s*:/);assert.ok(help.includes(passage.text));
  assert.match(model.questionHandoff(s),/"questions"\s*:/);
 });
+test('failed study checkpoint never announces save success; retry preserves one live question',async t=>{
+ const h=await host(t);let fail=false;
+ const c=registerActiveStudy({...h.options,io:{...fs,writeFile:async(file,...args)=>{if(fail&&file.includes('active-studies-v1'))throw new Error('checkpoint unavailable');return fs.writeFile(file,...args);}}});
+ await h.commands.get('mrw.studyCurrent')();const file=path.join(h.home,'active-studies-v1',c.active.id+'.json');
+ const before=h.panels.at(-1).messages.length;fail=true;
+ await assert.rejects(c.receive({type:'question_save',question:value,form:value}),/checkpoint unavailable/);
+ assert.equal(c.active.questions.length,1);assert.equal(JSON.parse(await fs.readFile(file,'utf8')).questions.length,0);
+ assert.equal(h.panels.at(-1).messages.slice(before).some(m=>m.notice?.startsWith('Question saved.')),false);
+ fail=false;await c.receive({type:'question_save',question:value,form:value});assert.equal(c.active.questions.length,1);assert.equal(JSON.parse(await fs.readFile(file,'utf8')).questions.length,1);
+});
+test('a missing recent-study locator never replaces a saved study or unfinished attempt',async t=>{
+ const h=await host(t);await h.commands.get('mrw.studyCurrent')();await h.c.receive({type:'question_save',question:value});await h.c.receive({type:'next'});await h.c.receive({type:'draft',attempt:h.c.active.current.id,text:'Preserve older unfinished work',paper:false});await h.c.flush();
+ h.state.delete('mrw.lightStudy.recent.v1');const restored=registerActiveStudy({...h.options});await h.commands.get('mrw.studyCurrent')();assert.equal(restored.active.questions.length,1);assert.equal(restored.active.current.draft,'Preserve older unfinished work');
+});

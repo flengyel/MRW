@@ -3,22 +3,22 @@ const fs=require('node:fs/promises'),path=require('node:path');
 const model=require('./studyModel'),scheduler=require('./studyScheduler');
 const {outlineHtml}=require('./outlines');
 const {hash,summarize}=require('./studyHistory');
-function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,changed,getCurrent,readPassage,followPassage,selectPrerequisites}){
+function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,changed,getCurrent,readPassage,followPassage,selectPrerequisites,io=fs}){
   let active,panel,loaded=false,queue=Promise.resolve(),saveTail=Promise.resolve(),draftTimer;
   const studies=new Map(),recentKey='mrw.lightStudy.recent.v1';
   const home=context.storageUri&&path.join(context.storageUri.fsPath,'active-studies-v1');
   const recent=()=>context.workspaceState.get(recentKey)||[];
   async function load(){if(loaded)return;if(!home)throw new Error('Open a folder to save study continuity.');await recorder.init();
-    await fs.mkdir(home,{recursive:true,mode:0o700});
-    for(const item of recent())try{const s=JSON.parse(await fs.readFile(path.join(home,item.id+'.json'),'utf8'));if(s.version===2&&s.id===item.id)studies.set(s.id,s);}catch(e){recorder.record('operation.error',{operation:'study.restore',message:e.message,study:item.id});}
+    await io.mkdir(home,{recursive:true,mode:0o700});
+    for(const item of recent())try{const s=JSON.parse(await io.readFile(path.join(home,item.id+'.json'),'utf8'));if(s.version===2&&s.id===item.id)studies.set(s.id,s);}catch(e){recorder.record('operation.error',{operation:'study.restore',message:e.message,study:item.id});}
     loaded=true;
   }
   function persist(s){
     s.updated=new Date().toISOString();const snapshot=JSON.stringify(s,null,2)+'\n';
-    saveTail=saveTail.then(async()=>{try{
-      const dest=path.join(home,s.id+'.json'),temp=dest+'.pending';await fs.writeFile(temp,snapshot,{mode:0o600});await fs.rename(temp,dest);
+    const job=saveTail.then(async()=>{try{
+      const dest=path.join(home,s.id+'.json'),temp=dest+'.pending';await io.writeFile(temp,snapshot,{mode:0o600});await io.rename(temp,dest);
       const r=[{id:s.id,title:s.title,sources:s.passages.length,unfinished:!!s.current&&!s.current.finished},...recent().filter(x=>x.id!==s.id)].slice(0,30);await context.workspaceState.update(recentKey,r);changed.fire();
-    }catch(e){recorder.failure(e);await send('Study save failed; keep this view open or copy your draft. '+e.message);}});return saveTail;
+    }catch(e){recorder.failure(e);await send('Study save failed; keep this view open or copy your draft. '+e.message);throw e;}});saveTail=job.catch(()=>{});return job;
   }
   function syncContext(){if(active)recorder.setContext(model.identity(active));}
   function eligible(s){
@@ -36,16 +36,19 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(active&&active.id!==s.id){await persist(active);recorder.record('source.change',{from:active.id,to:s.id,unfinished:!!active.current&&!active.current.finished});}
     active=s;syncContext();recorder.record(reason==='resume'?'study.resume':'study.open',{restored_attempt:s.current?.id,has_draft:!!s.current?.draft});
     if(!panel){panel=vscode.window.createWebviewPanel('mrw.proofStudy','Study: '+s.title,vscode.ViewColumn.Active||1,{enableScripts:true,retainContextWhenHidden:true,localResourceRoots:[]});
-      panel.onDidDispose(()=>{clearTimeout(draftTimer);if(active){recorder.record('session.pause',{reason:'study-view-closed'});void persist(active);}panel=undefined;});
+      panel.onDidDispose(()=>{clearTimeout(draftTimer);if(active){recorder.record('session.pause',{reason:'study-view-closed'});void persist(active).catch(()=>{});}panel=undefined;});
       panel.onDidChangeViewState?.(e=>{if(!active)return;recorder.record(e.webviewPanel.active?'navigation.study_return':'navigation.study_away',{exposure_opportunity:!!e.webviewPanel.active});});
       panel.webview.onDidReceiveMessage(m=>{queue=queue.then(()=>receive(m)).catch(async e=>{recorder.record('operation.error',{operation:m?.type,message:e.message});await panel?.webview.postMessage({type:'study_error',message:e.message});}).finally(()=>{if(!['draft','form_draft'].includes(m?.type))return panel?.webview.postMessage({type:'study_idle'});});return queue;});
       const support=await Promise.all(['media/katex/katex.min.js','media/katex/auto-render.min.js','src/annotationView.js'].map(f=>fs.readFile(path.join(context.extensionPath,f),'utf8')));
-      panel.webview.html=outlineHtml(await fs.readFile(path.join(context.extensionPath,'src/activeStudyView.js'),'utf8'),support);
+      panel.webview.html=outlineHtml(await io.readFile(path.join(context.extensionPath,'src/activeStudyView.js'),'utf8'),support);
       context.subscriptions.push(panel);
     }else panel.reveal();
     panel.title='Study: '+s.title;await send();
   }
-  async function start(passages,root,title){await load();const created=model.createStudy(passages,root,title),s=studies.get(created.id)||created;
+  async function start(passages,root,title){await load();const created=model.createStudy(passages,root,title);let s=studies.get(created.id);
+    if(!s){try{s=JSON.parse(await io.readFile(path.join(home,created.id+'.json'),'utf8'));
+      if(s.version!==2||s.id!==created.id||s.root!==root||!Array.isArray(s.questions)||JSON.stringify(model.signature(s.passages))!==JSON.stringify(model.signature(passages)))throw new Error('Saved study identity differs.');
+    }catch(e){if(e.code!=='ENOENT')throw new Error('Saved study kept without replacement: '+e.message);s=created;}}
     studies.set(s.id,s);await persist(s);await open(s,'open');return s;
   }
   async function offerNext(){
@@ -70,7 +73,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       const target=studies.get(m.study)||active;
       if(m.type==='form_draft'&&Buffer.byteLength(JSON.stringify(m.form))<=64*1024)target.formDraft=m.form;
       if(m.type==='draft'&&target.current?.id===m.attempt&&!target.current.finished&&typeof m.text==='string'&&Buffer.byteLength(m.text)<=64*1024){target.current.draft=m.text;target.current.paper=!!m.paper;}
-      clearTimeout(draftTimer);draftTimer=setTimeout(()=>void persist(target),600);draftTimer.unref?.();return;
+      clearTimeout(draftTimer);draftTimer=setTimeout(()=>void persist(target).catch(()=>{}),600);draftTimer.unref?.();return;
     }
     const s=active;if(m.study&&m.study!==s.id)throw new Error('This study changed. Your earlier draft remains with its source.');
     syncContext();
@@ -83,7 +86,8 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     else if(m.type==='question_save'){
       if(s.current&&!s.current.finished)throw new Error('Finish or skip the attempt before revising a question.');
       const previous=m.previous?eligible(s).find(q=>q.revision===m.previous):null;
-      const q=model.question(m.question,s.passages,previous);if(previous&&previous.revision===q.revision){await send('Question unchanged.');return;}
+      const q=model.question(m.question,s.passages,previous);if(previous&&previous.revision===q.revision){s.formDraft=null;await persistOwners(s);await send('Question unchanged.');return;}
+      if(s.questions.some(old=>!old.retired&&old.revision===q.revision)){s.formDraft=null;await persistOwners(s);await send('Question saved.');return;}
       if(s.questions.length>=200)throw new Error('This study holds at most 200 question revisions. Retain a separate study for further questions.');
       if(previous)previous.retired=true;
       s.formDraft=null;s.questions.push(q);recorder.record(previous?'question.revise':'question.save',{id:q.id,revision:q.revision,previous:previous?.revision||null,snapshot:recorder.snapshot(q)});await persistOwners(s);await send('Question saved. Keep for review is a separate choice.');
@@ -149,11 +153,11 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     let text=summarize(selected);
     if(kind.kind==='json'){
       const ids=new Set(selected.map(e=>e.data.snapshot).filter(Boolean)),snapshots={};
-      for(const id of ids)try{snapshots[id]=JSON.parse(await fs.readFile(path.join(recorder.directory,'snapshots',id+'.json'),'utf8'));}catch{snapshots[id]={unavailable:true};}
+      for(const id of ids)try{snapshots[id]=JSON.parse(await io.readFile(path.join(recorder.directory,'snapshots',id+'.json'),'utf8'));}catch{snapshots[id]={unavailable:true};}
       text=JSON.stringify({schema:1,warning:'Descriptive, not causal. No pre-instrumentation baseline.',events:selected,snapshots},null,2);
     }
     // Host-owned ordinary export: native creation/save, refusing overwrite.
-    try{await fs.lstat(uri.fsPath);throw new Error('Choose a new export filename.');}catch(e){if(e.code!=='ENOENT')throw e;}
+    try{await io.lstat(uri.fsPath);throw new Error('Choose a new export filename.');}catch(e){if(e.code!=='ENOENT')throw e;}
     const edit=new vscode.WorkspaceEdit();edit.createFile(uri,{overwrite:false,ignoreIfExists:false});edit.insert(uri,new vscode.Position(0,0),text+'\n');
     if(!await vscode.workspace.applyEdit(edit))throw new Error('The editor declined export.');const doc=await vscode.workspace.openTextDocument(uri);await vscode.window.showTextDocument(doc,{preview:false});if(!await doc.save())throw new Error('Export remains unsaved in its ordinary document.');
     recorder.record('history.export',{sessions:picked.map(p=>p.id),format:kind.kind});

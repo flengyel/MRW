@@ -59,6 +59,10 @@ The two regressions and the current-source entry check pass after repair.
 
 The final broader extension run passes **179 tests**. Final focused graph/study
 checks pass **29 tests**, and the final command-facade check passes **3 tests**.
+A final **16-test** study run also covers checkpoint failure feedback, retry
+without duplicate questions, and reopening a saved study after its recent-item
+locator is lost. A failed checkpoint cannot announce save success; a missing
+locator cannot replace an earlier saved study or unfinished attempt.
 The affected Python run passes **45 tests** in artifact storage, proof graphs,
 editor assistance and question parsing. The final import-message wording check
 also passes. Existing immutable publication, genuine retained notes and sources,
