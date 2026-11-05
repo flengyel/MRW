@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.source_outlines import OutlineStore
+from theorem_terminal.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE
 
 
 class SourceOutlineTests(unittest.TestCase):
@@ -47,6 +47,131 @@ class SourceOutlineTests(unittest.TestCase):
     def context(self, label='Available hypothesis'):
         self.edit(kind='context', context_kind='hypothesis', label=label, start=[0, 0], end=[0, 7])
         return self.saved['outline']['contexts'][-1]
+
+    def test_obsidian_note_import_retains_external_markdown_and_reopens_without_the_vault(self):
+        vault = self.home / 'vault'; vault.mkdir()
+        path = vault / 'Note α😀.md'
+        raw = '\ufeff---\r\ntitle: A note\r\n---\r\n# Heading\r\n[[Other note]]\r\n![[scan.png]]\r\n$X \\times_Z Y$\r\n<script>inert</script>\r\n'.encode()
+        path.write_bytes(raw)
+        with patch('subprocess.Popen', side_effect=AssertionError('unexpected process')), \
+             patch('socket.socket.connect', side_effect=AssertionError('unexpected network')):
+            imported = self.call('outline_import_note', path=str(path), source_revision=sha256(raw).hexdigest())
+        outline = imported['outline']; self.assertFalse(imported['reused'])
+        self.assertEqual(outline['source']['path'], str(path))
+        self.assertEqual(outline['source']['bibliography']['title'], 'Note α😀')
+        self.assertEqual(outline['source']['authorship'], 'unknown')
+        self.assertEqual(outline['regions'][0]['argument_text'], raw.decode().removeprefix('\ufeff'))
+        self.assertEqual(path.read_bytes(), raw)
+        self.assertEqual(list(vault.iterdir()), [path])
+        retained = self.private/outline['id']/('source-'+outline['source']['revision']+'.bin')
+        self.assertEqual(retained.read_bytes(), raw)
+        path.unlink()
+        reopened = self.call('outline_load', id=outline['id'])
+        self.assertEqual(reopened['outline']['regions'], outline['regions'])
+        self.assertIn('missing', reopened['outline']['source_status'])
+
+    def test_obsidian_note_reimport_keeps_annotations_and_new_revisions_keep_previous_copies(self):
+        path = self.home/'note.md'; path.write_text('# Note\nOriginal text.')
+        digest = sha256(path.read_bytes()).hexdigest()
+        imported = self.call('outline_import_note', path=str(path), source_revision=digest)
+        saved = self.call('outline_mutate', id=imported['outline']['id'], revision=imported['revision'],
+                          change=dict(kind='annotation', region=None, id=None, purpose='question',
+                                      text='Keep this reader note', origin='human_work', author='Reader'))
+        reused = self.call('outline_import_note', path=str(path), source_revision=digest)
+        self.assertTrue(reused['reused'])
+        self.assertEqual(reused['revision'], saved['revision'])
+        self.assertEqual(reused['outline'], saved['outline'])
+        path.write_text('# Note\nChanged text.')
+        newer = self.call('outline_import_note', path=str(path), source_revision=sha256(path.read_bytes()).hexdigest())
+        self.assertNotEqual(newer['outline']['id'], imported['outline']['id'])
+        previous = self.call('outline_load', id=imported['outline']['id'])
+        self.assertEqual(previous['outline']['annotations'], saved['outline']['annotations'])
+        self.assertEqual(previous['outline']['regions'][0]['argument_text'], '# Note\nOriginal text.')
+
+    def test_obsidian_note_chunks_preserve_all_unicode_and_line_endings(self):
+        for text in ['a'*(MAX_REGION-1)+'\r\n😀end\r', 'α😀'*(MAX_REGION//5)+'tail', 'line\r\n'*(MAX_REGION//5)]:
+            with self.subTest(length=len(text)):
+                path = self.home/'long-note.md'; path.write_bytes(text.encode())
+                imported = self.call('outline_import_note', path=str(path), source_revision=sha256(path.read_bytes()).hexdigest())
+                regions = imported['outline']['regions']
+                self.assertGreater(len(regions), 1)
+                self.assertEqual(''.join(r['argument_text'] for r in regions), text)
+                self.assertTrue(all(len(r['argument_text'].encode()) <= MAX_REGION for r in regions))
+
+    def test_obsidian_note_invalid_changed_or_unsupported_input_creates_no_outline(self):
+        before = self.call('outline_list')
+        for name, raw in [('empty.md', b' \n'), ('bad.md', b'\xff'), ('nul.md', b'x\0'),
+                          ('large.md', b'x'*(MAX_SOURCE+1)), ('wrong.txt', b'Text')]:
+            path = self.home/name; path.write_bytes(raw)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.call('outline_import_note', path=str(path), source_revision=sha256(raw).hexdigest())
+        path = self.home/'changed.md'; path.write_text('Different bytes')
+        with self.assertRaisesRegex(ValueError, 'changed'):
+            self.call('outline_import_note', path=str(path), source_revision=sha256(b'Earlier bytes').hexdigest())
+        link = self.home/'symlink.md'; link.symlink_to(path)
+        with self.assertRaisesRegex(ValueError, 'non-symlink'):
+            self.call('outline_import_note', path=str(link), source_revision=sha256(path.read_bytes()).hexdigest())
+        self.assertEqual(self.call('outline_list'), before)
+
+    def test_obsidian_note_publication_failure_is_not_reported_as_an_import(self):
+        path = self.home/'note.md'; path.write_text('A note')
+        with patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+            result = self.call('outline_import_note', path=str(path), source_revision=sha256(path.read_bytes()).hexdigest())
+        self.assertTrue(result['blocked'])
+        self.assertEqual(len(self.call('outline_list')['outlines']), 1)
+        self.assertEqual(path.read_text(), 'A note')
+
+    def test_annotation_deletion_is_scoped_and_preserves_other_notes_and_source(self):
+        first = self.add()['id']; second = self.add([1, 0], [1, 5])['id']
+        self.note(first, 'Keep this human explanation')
+        self.note(second, 'Keep this AI explanation', 'ai_proposal')
+        self.note(None, 'Keep this whole-source note')
+        self.context()
+        for scope in (None, first):
+            for origin in ('human_work', 'ai_proposal', 'source_quotation', 'unknown'):
+                with self.subTest(scope=scope, origin=origin):
+                    self.note(scope, 'Remove only this annotation', origin)
+                    store = OutlineStore(str(self.private), str(self.project), self.saved['outline']['id'])
+                    expected = deepcopy(store.state)
+                    target = expected['annotations'] if scope is None else next(r for r in expected['regions'] if r['id'] == scope)['annotations']
+                    removed = target.pop()
+                    self.edit(kind='remove_annotation', region=scope, id=removed['id'])
+                    reopened = OutlineStore(str(self.private), str(self.project), self.saved['outline']['id'])
+                    self.assertEqual(reopened.state, expected)
+                    self.assertEqual(reopened.source().text.encode(), self.raw)
+                    self.assertEqual(self.source.read_bytes(), self.raw)
+
+    def test_annotation_deletion_rejects_wrong_scope_missing_identity_and_stale_revision(self):
+        region = self.add()['id']; self.note(region)
+        note = self.saved['outline']['regions'][0]['annotations'][0]
+        before = deepcopy(self.saved)
+        for scope, identity in ((None, note['id']), (region, region), (region, None)):
+            with self.subTest(scope=scope, identity=identity), self.assertRaises(ValueError):
+                self.edit(kind='remove_annotation', region=scope, id=identity)
+        self.assertEqual(self.call('outline_load', id=before['outline']['id']), before)
+        self.note(None, 'Newer unrelated note')
+        newer = deepcopy(self.saved)
+        with self.assertRaisesRegex(ValueError, 'changed'):
+            self.call('outline_mutate', id=before['outline']['id'], revision=before['revision'],
+                      change=dict(kind='remove_annotation', region=region, id=note['id']))
+        self.assertEqual(self.call('outline_load', id=before['outline']['id']), newer)
+        self.edit(kind='remove_annotation', region=region, id=note['id'])
+        deleted = deepcopy(self.saved)
+        with self.assertRaisesRegex(ValueError, 'identity changed'):
+            self.edit(kind='remove_annotation', region=region, id=note['id'])
+        self.assertEqual(self.call('outline_load', id=before['outline']['id']), deleted)
+
+    def test_annotation_deletion_does_not_report_failed_or_uncertain_publication_as_success(self):
+        self.note(); note = self.saved['outline']['annotations'][0]; before = deepcopy(self.saved)
+        with patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+            result = self.edit(kind='remove_annotation', region=None, id=note['id'])
+        self.assertTrue(result['blocked'])
+        self.assertEqual(self.call('outline_load', id=before['outline']['id']), before)
+        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
+            result = self.edit(kind='remove_annotation', region=None, id=note['id'])
+        self.assertTrue(result['blocked'])
+        self.assertEqual(self.saved, before)
+        self.assertEqual(self.call('outline_load', id=before['outline']['id'])['outline']['annotations'], [])
 
     def evidence(self, region, kind='goal_context'):
         artifact = self.home / 'capture.json'

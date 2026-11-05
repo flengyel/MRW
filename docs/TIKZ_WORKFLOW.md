@@ -46,7 +46,10 @@ neither retained MRW sources nor the private rendered SVG.
 
 ## Appearance and color
 
-Use **Diagram appearance → Paper / Dark** beside a rendered figure. Paper shows
+Use **Diagram appearance → Theme / Paper / Dark** beside a rendered figure.
+**Theme** is the default in 0.14.4 and follows VS Code's light, dark and high
+contrast themes immediately, without rebuilding notes or changing drafts.
+Paper shows
 the retained SVG against white. Dark adapts black and white drawing values for
 the dark background; other colors stay unchanged. This is a derived display:
 the stored SVG and exact source are preserved. The workspace remembers the

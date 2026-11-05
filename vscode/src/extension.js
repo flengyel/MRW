@@ -8,8 +8,67 @@ const { runBridge } = require('./bridge');
 const { registerAssistance } = require('./assistance');
 const { registerOutlines } = require('./outlines');
 const { registerReadingOutline } = require('./readingOutline');
+const { registerProofGraph } = require('./proofGraph');
 const { createArtifactStorage } = require('./artifactStorage');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
+
+const researchTooltips = Object.freeze({
+  "mrw.ask": "Use the selected editor text to prepare a question for the AI model. Review the request before choosing Send exact preview.",
+  "mrw.addContext": "Include the current editor selection in the unsent AI request and update its preview.",
+  "mrw.removeContext": "Choose a quoted passage to remove from the unsent AI request, then update its preview.",
+  "mrw.editQuestion": "Change the question in the unsent AI request and update its preview.",
+  "mrw.previewRequest": "Display the question, quoted passages and model that will be sent. Sending is a separate action.",
+  "mrw.discardRequest": "Discard the unsent request and its preview. Saved response records remain available.",
+  "mrw.sendRequest": "Send the currently displayed request preview to the chosen AI model and retain the returned outcome. Requires a configured API key.",
+  "mrw.continueAnswer": "Choose passages from a completed AI response and prepare one follow-up question. Review the preview before sending.",
+  "mrw.selectPriorPassages": "Choose which numbered passages from the earlier AI response to include in the follow-up request.",
+  "mrw.editCorrection": "Edit a correction, changed assumption or alternative for the follow-up request or active investigation. Use Save human task summary to save investigation edits.",
+  "mrw.editConclusion": "Edit the last useful conclusion for the follow-up request or active investigation. Use Save human task summary to save investigation edits.",
+  "mrw.editIssue": "Edit the unresolved issue for the follow-up request or active investigation. Use Save human task summary to save investigation edits.",
+  "mrw.resumeInvestigation": "Reopen this project's saved investigation and show its current question, task summary and request status.",
+  "mrw.editInvestigationQuestion": "Change the active investigation's mathematical question. Use Save human task summary to save the change.",
+  "mrw.saveInvestigationSummary": "Save the active investigation's edited question, correction, last useful conclusion and unresolved issue.",
+  "mrw.insertInvestigationHandoff": "Insert the investigation's current task summary and record references at the active note's cursor. Save the note with Ctrl+S.",
+  "mrw.reviewInvestigationParent": "Review the earlier AI response used to start this investigation, beginning with its numbered passage index.",
+  "mrw.reviewInvestigationChild": "Review the completed response to this investigation's follow-up request, beginning with its numbered passage index.",
+  "mrw.endInvestigation": "Close the active investigation after choosing whether to insert its task summary into a note. Response records remain saved.",
+  "mrw.newReadingOverview": "Choose a filename and create a Markdown overview with headings for your question, sources, notes and next step.",
+  "mrw.openReadingOutline": "Show headings and source links from the active or last chosen Markdown overview. Choose a file if needed.",
+  "mrw.openTutorial": "Read the bundled guide to source reading, annotations, links and saved-work directories.",
+  "mrw.returnToReadingOutline": "Open the rendered reading overview. When a source link opened the reader, return to that exact link; otherwise reopen the selected overview or choose one.",
+  "mrw.importStacksSection": "Enter a Stacks Project tag or URL to download and retain that section at a recorded Git revision.",
+  "mrw.importObsidianNote": "Choose a Markdown note and import it as a saved source, a passage annotation, or text at the reading overview’s cursor.",
+  "mrw.createOutline": "Retain the active saved text, Markdown or TeX file as a source outline. A selected passage becomes its first region.",
+  "mrw.openOutline": "Choose one of this project's saved sources and open its retained text, passages and annotations.",
+  "mrw.openProofOutline": "Open a proof graph with attributed summaries, joint premises, source links and reversible vertex deletion.",
+  "mrw.refreshSourceOutline": "Reload saved annotations and source status in the open source reader. Unsaved annotation text stays in its editing form.",
+  "mrw.copyOutlineLink": "Choose a saved source or passage and copy its Markdown link for use in an overview or Obsidian note.",
+  "mrw.openLinkFromClipboard": "Read an MRW source link from the clipboard and open its saved outline or passage.",
+  "mrw.associateObsidianNote": "Choose a saved source or passage, then paste an Obsidian note URL to add a return link from MRW to that note.",
+  "mrw.insertOutlineReference": "Choose a saved source or passage and insert its Markdown link at the active overview's cursor.",
+  "mrw.followOutlineReference": "Follow the MRW source link at the editor cursor to its saved outline or passage.",
+  "mrw.addOutlineRegion": "Add the current source selection as a passage in the open source outline.",
+  "mrw.setOutlineStatement": "Mark the current source selection as the exact statement for a chosen outline region.",
+  "mrw.replaceOutlineRegion": "Replace a chosen outline region's source range with the current source selection.",
+  "mrw.addOutlineContext": "Keep the selected source quotation as a hypothesis, definition, assumption, cited result or reference alongside the outline.",
+  "mrw.replaceOutlineContext": "Choose a shared context quotation and replace its source range with the current selection.",
+  "mrw.attachOutlineEvidence": "Choose a saved evidence record or supporting text file and associate it with the source or selected passage.",
+  "mrw.artifactLocation": "Show the directory holding this workspace's saved MRW sources, outlines, annotations and investigation records.",
+  "mrw.moveArtifactDirectory": "Transfer this workspace's saved MRW records to a chosen directory and reconnect the workspace to it.",
+  "mrw.openArtifactDirectory": "Connect this workspace to saved MRW records in a chosen directory. Files stay in that directory.",
+  "mrw.prepareFolderRename": "Place saved MRW work outside the study folder before you rename that folder with your file tools.",
+  "mrw.reconnectRenamedFolder": "After renaming a study folder, select its prepared saved work and connect it to the folder now open.",
+  "mrw.return": "Choose a saved return location and jump back to its editor selection.",
+  "mrw.openProof": "Choose a Lean file and line to open beside your work. MRW saves your current editor location for return.",
+  "mrw.openViewer": "Open the proof viewer URL configured in MRW settings and save your current editor location for return.",
+  "mrw.inspect": "Choose a saved response, projection, verification bundle or documentary package to inspect its contents and attribution.",
+  "mrw.review": "Choose a completed AI response record and open its numbered passage index.",
+  "mrw.passage": "Choose a numbered passage from the AI response currently under review.",
+  "mrw.index": "Show a page of numbered passages from the response under review, starting at a passage number you choose.",
+  "mrw.fullResponse": "Display the complete saved AI response currently under review.",
+  "mrw.retain": "Save the displayed response passage as a separate record, keeping its source and AI attribution.",
+  "mrw.insert": "Insert the displayed response passage with its attribution at the active note's cursor. Save the note with Ctrl+S."
+});
 
 function activate(context) {
   const documents = new Map();
@@ -24,7 +83,7 @@ function activate(context) {
       try {
         if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
         return await action(...args);
-      } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
+      } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));
   const rawBridge = (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
@@ -255,6 +314,8 @@ function activate(context) {
   const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
     askRetained: assistanceRows.askRetained });
   registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference });
+  registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
+    askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   const tree = {
     onDidChangeTreeData: changed.event,
@@ -262,9 +323,10 @@ function activate(context) {
       const rows = [
         ...assistanceRows(),
         ...outlineRows(),
+        ['Open proof outline…', 'mrw.openProofOutline'],
         ['Show saved artifact location', 'mrw.artifactLocation'],
-        ['Move artifact directory…', 'mrw.moveArtifactDirectory'],
-        ['Open existing artifact directory…', 'mrw.openArtifactDirectory'],
+        ['Move saved work directory…', 'mrw.moveArtifactDirectory'],
+        ['Open saved work directory…', 'mrw.openArtifactDirectory'],
         ['Prepare folder rename…', 'mrw.prepareFolderRename'],
         ['Reconnect saved work after folder rename…', 'mrw.reconnectRenamedFolder'],
         ...savedMarkers().map(({ marker }) => [`Return: ${path.basename(marker.path)}:${marker.start[0] + 1} ${marker.preview}`, 'mrw.return']),
@@ -275,10 +337,12 @@ function activate(context) {
       if (currentReview) rows.push([`Review: ${path.basename(currentReview.path)}${currentReview.number ? ` · passage ${currentReview.number}` : ''}`, 'mrw.passage'], ['Show index page…', 'mrw.index'],
         ['Show full response', 'mrw.fullResponse'], ['Retain shown passage…', 'mrw.retain'],
         ['Insert shown passage into active note', 'mrw.insert']);
-      return rows.map(([label, command]) => ({ label, command }));
+      return rows.sort(([a], [b]) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
+        .map(([label, command, tooltipKey = command]) => ({ label, command, tooltip: researchTooltips[tooltipKey] }));
     },
     getTreeItem: row => {
       const item = new vscode.TreeItem(row.label);
+      item.tooltip = row.tooltip;
       if (row.command) item.command = { command: row.command, title: row.label };
       return item;
     },

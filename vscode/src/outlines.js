@@ -9,12 +9,12 @@ const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require(
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
 
-function outlineHtml(script, support = []) {
+function outlineHtml(script, support = [], diagramStyle = '', options = {}) {
   script = [...support, script].join('\n;\n');
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; ${options.stacksFrame ? 'frame-src https://stacks.math.columbia.edu; ' : ''}base-uri 'none'; form-action 'none'">
 <title>Mathematical source outline</title><style nonce="${nonce}">
 body{font-family:var(--vscode-font-family);color:var(--vscode-editor-foreground);background:var(--vscode-editor-background);padding:12px;max-width:1000px;margin:auto;overflow-wrap:anywhere}
 h1{font-size:1.35em}h2{font-size:1.1em}h3{font-size:1em}button,input,select,textarea{font:inherit}
@@ -30,6 +30,8 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .region.compact-proof{border:0;margin:0;padding:2px 0}.proof-disclosure{background:none;color:var(--vscode-textLink-foreground);padding:2px 0;margin:0;text-align:left}.reader-notes{margin:14px 0}.reader-notes>summary{cursor:pointer;font-weight:600;padding:4px 0}
 .reader-diagram{margin:14px 0}.reader-diagram img{max-width:100%;height:auto;background:white;padding:6px;box-sizing:border-box}.reader-diagram figcaption{margin:4px 0}
 .reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
+.proof-map{overflow:auto;max-width:100%;margin:12px 0}.proof-map svg{display:block}.proof-map text{cursor:pointer}
+${diagramStyle}
 </style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
@@ -77,7 +79,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     try { await vscode.commands.executeCommand?.('setContext', 'mrw.outlineBusy', true); return await action(); }
     finally { busy = false; changed.fire(); await vscode.commands.executeCommand?.('setContext', 'mrw.outlineBusy', false); }
   }
-  async function send(c, result, clearDraft, annotationSaved = false) {
+  async function send(c, result, clearDraft, annotationSaved = false, deletedAnnotation) {
     if (result.blocked) {
       blockedStores.add(c.store);
       throw new Error(`Outline publication failed: ${result.write_error}. Retained sources remain unchanged. `
@@ -90,21 +92,43 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     } catch (error) { c.notes = null; c.noteError = error.message; }
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
-    await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved,
+    await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
-      diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v1', 'paper'),
+      diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v2', 'theme'),
       reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
+  }
+  async function refresh(c) {
+    return send(c, await bridge({ method: 'outline_load', store: c.store, project_root: c.root, id: c.result.outline.id }));
   }
   async function mutate(c, change, clearDraft) {
     writable(c);
     let result;
     try { result = await bridge(request(c, 'outline_mutate', { change })); }
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
-    const saved = await send(c, result, clearDraft, change.kind === 'annotation');
+    const deleted = change.kind === 'remove_annotation' ? { region: change.region, id: change.id } : undefined;
+    const saved = await send(c, result, clearDraft, change.kind === 'annotation', deleted);
     if (change.kind === 'annotation') vscode.window.setStatusBarMessage('MRW: Submitted annotation saved.', 6000);
+    if (deleted) vscode.window.setStatusBarMessage('MRW: Reader note deleted.', 6000);
     return saved;
+  }
+  async function deleteAnnotation(c, value) {
+    writable(c);
+    const region = value.region === null ? null : c.result.outline.regions.find(r => r.id === value.region);
+    if (value.region !== null && !region) throw new Error('Unknown source region.');
+    const notes = region ? region.annotations : c.result.outline.annotations;
+    const note = notes.find(n => n.id === value.annotation);
+    if (!note) throw new Error('Reader note changed; refresh the saved source outline.');
+    const revision = c.result.revision;
+    const excerpt = Array.from(note.text.replace(/\s+/gu, ' ').trim()).slice(0, 180).join('');
+    const choice = await vscode.window.showWarningMessage(
+      `Delete this reader note from ${region?.title || 'Source notes'}?\n${excerpt}`
+      + (value.unsaved ? '\nUnsaved edits to this note will also be discarded.' : ''),
+      { modal: true }, 'Delete note');
+    if (choice !== 'Delete note') return;
+    if (c.result.revision !== revision) throw new Error('The outline changed while confirming deletion; refresh and choose the note again.');
+    return mutate(c, { kind: 'remove_annotation', region: value.region, id: note.id });
   }
   async function openDocument(c, artifact = null, pinned) {
     const result = pinned || await bridge(request(c, 'outline_document', { artifact }));
@@ -143,15 +167,15 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (value.type === 'storageStatus') { c.storageCheck?.(!!value.dirty); return; }
     if (value.type === 'ready') return send(c, c.result);
     if (value.type === 'diagram_appearance') {
-      if (!['paper', 'dark'].includes(value.value)) return;
-      try { await context.workspaceState.update('mrw.diagramAppearance.v1', value.value); }
-      catch (error) { await vscode.window.showErrorMessage(`MRW: Could not save the diagram appearance: ${error.message}`); }
+      if (!['theme', 'paper', 'dark'].includes(value.value)) return;
+      try { await context.workspaceState.update('mrw.diagramAppearance.v2', value.value); }
+      catch (error) { void vscode.window.showErrorMessage(`MRW: Could not save the diagram appearance: ${error.message}`); }
       return;
     }
     if (value.type === 'proofVisibility') {
       if (typeof value.hidden !== 'boolean') return;
       try { await context.workspaceState.update('mrw.readerProofsHidden.v1', value.hidden); }
-      catch (error) { await vscode.window.showErrorMessage(`MRW: Could not save the proof visibility preference: ${error.message}`); }
+      catch (error) { void vscode.window.showErrorMessage(`MRW: Could not save the proof visibility preference: ${error.message}`); }
       return;
     }
     if (value.type === 'select') {
@@ -159,11 +183,13 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       active = c.result.outline.id; return;
     }
     if (value.type === 'dirty') { c.panel.title = `${value.dirty ? '• ' : ''}Outline: ${c.result.outline.source.bibliography.title || path.basename(c.result.outline.source.path)}`; return; }
+    c.pending++;
     try {
       await locked(async () => {
         active = c.result.outline.id;
         if (value.type === 'ask_ai') await askPassage(c, value);
         else if (value.type === 'edit') await mutate(c, value.change, value.draft);
+        else if (value.type === 'delete_annotation') await deleteAnnotation(c, value);
         else if (value.type === 'render_diagram') {
           writable(c);
           let result;
@@ -198,7 +224,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
             throw new Error('The canonical Stacks citation could not be opened.');
           }
         }
-        else if (value.type === 'refresh') await send(c, await bridge({ method: 'outline_load', store: c.store, project_root: c.root, id: c.result.outline.id }));
+        else if (value.type === 'refresh') await refresh(c);
         else if (['copy_link', 'associate_note', 'open_note', 'manage_notes'].includes(value.type)) {
           const target = await readerTarget(c, value);
           await companionAction(value.type, c, target);
@@ -207,8 +233,11 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       });
     } catch (error) {
       await c.panel.webview.postMessage({ type: 'error', message: error.message, draft: value.draft, writesBlocked: blockedStores.has(c.store) });
-      await vscode.window.showErrorMessage(`MRW: ${error.message}`);
-    } finally { await c.panel.webview.postMessage({ type: 'idle' }); }
+      void vscode.window.showErrorMessage(`MRW: ${error.message}`);
+    } finally {
+      c.pending--;
+      if (!c.pending) await c.panel.webview.postMessage({ type: 'idle' });
+    }
   }
   async function display(result, store, root, reference = null, presentation = {}) {
     if (result.blocked) { blockedStores.add(store); throw new Error(`Outline publication failed: ${result.write_error}. Reload before further private writes.`); }
@@ -222,10 +251,13 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       const panel = vscode.window.createWebviewPanel('mrw.sourceOutline', 'Mathematical source outline', column,
         { enableScripts: true, retainContextWhenHidden: true,
           localResourceRoots: [] });
-      c = { panel, result, store, root, selected: result.outline.regions.at(-1)?.id };
+      c = { panel, result, store, root, selected: result.outline.regions.at(-1)?.id, pending: 0 };
       panels.set(id, c);
       context.subscriptions.push(panel, panel.webview.onDidReceiveMessage(value => message(c, value)),
-        panel.onDidChangeViewState(event => { if (event.webviewPanel.active) active = id; }),
+        panel.onDidChangeViewState(event => {
+          if (event.webviewPanel.active) active = id;
+          if (event.webviewPanel.visible && !c.pending) void panel.webview.postMessage({ type: 'idle' });
+        }),
         panel.onDidDispose(() => { panels.delete(id); if (active === id) active = undefined; changed.fire(); }));
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
@@ -236,7 +268,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       if (result.outline.acquisition?.kind === 'stacks-section') {
         support.push(await fs.readFile(path.join(context.extensionPath, 'src/stacksView.js'), 'utf8'));
       }
-      panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support);
+      const diagramStyle = await fs.readFile(path.join(context.extensionPath, 'media', 'diagram-theme.css'), 'utf8');
+      panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support, diagramStyle);
     } else c.panel.reveal(c.panel.viewColumn);
     c.reference = reference;
     if (reference) c.selected = reference.region;
@@ -280,21 +313,23 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     await askRetained(result.context, c.root);
   }
   register('mrw.askReader', () => locked(() => askPassage(current())));
-  async function chooseTarget() {
-    const { root, store } = await storage();
+  async function chooseTarget(passagesOnly = false, location) {
+    const { root, store } = location || await storage();
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
     if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
     const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path), description: o.locator || o.path, detail: o.upstream_revision || undefined, id: o.id })),
       { placeHolder: 'Choose an existing saved outline' });
     if (!outline) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
-    const choice = await vscode.window.showQuickPick([{ label: 'Whole retained source outline', region: null },
+    if (passagesOnly && !loaded.outline.regions.length) throw new Error('This source has no passages. Add a source region before importing an annotation.');
+    const choice = await vscode.window.showQuickPick([...(passagesOnly ? [] : [{ label: 'Whole retained source outline', region: null }]),
       ...loaded.outline.regions.map(r => ({ label: r.title, description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col}`, region: r.id }))],
-    { placeHolder: 'Choose outline or exact retained passage' });
+    { placeHolder: passagesOnly ? 'Choose the passage for the imported annotation' : 'Choose outline or exact retained passage' });
     if (!choice) return;
     const target = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id, revision: loaded.revision, region: choice.region });
     const c = await display(loaded, store, root);
-    return { c, target };
+    if (passagesOnly) c.selected = choice.region;
+    return { c, target, region: choice.region };
   }
   async function companionAction(action, c, target) {
     if (action === 'copy_link') {
@@ -402,7 +437,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       // '=' and '&' delimiters. Our payload is already restricted to base64url;
       // preserve those delimiters when passing it to the strict URL parser.
       await followExternalLink(uri.toString(true));
-    } catch (error) { await vscode.window.showErrorMessage(`MRW: ${error.message}`); }
+    } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
   } }));
   async function markdown(editor = vscode.window.activeTextEditor) {
     const document = editor?.document;
@@ -542,6 +577,80 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       : 'Stacks section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source Outline…');
     return controller.result;
   }));
+  register('mrw.importObsidianNote', () => locked(async () => {
+    const choice = await vscode.window.showQuickPick([
+      { label: 'Open it as a saved source outline', kind: 'source', description: 'Retain a copy for reading, passages and annotations' },
+      { label: 'Add it as a reader annotation on a passage', kind: 'annotation', description: 'Choose a saved passage; up to 16 KiB of note text' },
+      { label: 'Insert it into the reading overview', kind: 'overview', description: 'Insert Markdown at the overview cursor; save with Ctrl+S' },
+    ], { placeHolder: 'Where should the imported Obsidian note’s text go?' });
+    if (!choice) return;
+    let overview;
+    if (choice.kind === 'overview') {
+      let editor = vscode.window.activeTextEditor;
+      if (!editor || editor.document.languageId !== 'markdown' || !['file', 'untitled'].includes(editor.document.uri.scheme)
+          || (editor.document.uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(editor.document.uri))) {
+        const selected = await vscode.window.showOpenDialog({ title: 'Choose the reading overview',
+          canSelectFiles: true, canSelectFolders: false, canSelectMany: false, filters: { Markdown: ['md', 'markdown'] } });
+        if (!selected?.length) return;
+        if (selected[0].scheme !== 'file' || !/\.(md|markdown)$/i.test(selected[0].path)) throw new Error('Choose a Markdown overview in this workspace.');
+        await markdown({ document: { uri: selected[0], languageId: 'markdown' } });
+        const doc = await vscode.workspace.openTextDocument(selected[0]);
+        await markdown({ document: doc });
+        editor = await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.One });
+      }
+      await markdown(editor);
+      overview = { editor, document: editor.document, version: editor.document.version, selection: editor.selection };
+    }
+    const destination = choice.kind === 'overview' ? null : await storage(vscode.window.activeTextEditor);
+    const selected = await vscode.window.showOpenDialog({ title: 'Import Obsidian note', openLabel: 'Import Note',
+      canSelectFiles: true, canSelectFolders: false, canSelectMany: false, filters: { Markdown: ['md', 'markdown'] } });
+    if (!selected?.length) return;
+    const uri = selected[0];
+    if (uri.scheme !== 'file' || !/\.(md|markdown)$/i.test(uri.path)) throw new Error('Choose a .md or .markdown note on this workspace host.');
+    const savedNote = canonical => {
+      if ((vscode.workspace.textDocuments || []).some(d => d.isDirty && d.uri.scheme === 'file'
+          && [uri.fsPath, canonical].includes(d.uri.fsPath))) throw new Error('Save the Obsidian note’s editor changes before importing it.');
+    };
+    savedNote(uri.fsPath);
+    const note = await sourceSnapshot(uri.fsPath);
+    savedNote(note.path);
+    if (!note.text.trim()) throw new Error('The selected note is empty.');
+    const unchanged = async () => {
+      savedNote(note.path);
+      if ((await sourceSnapshot(uri.fsPath)).revision !== note.revision) throw new Error('The note changed during import. Select it again.');
+      savedNote(note.path);
+    };
+    if (choice.kind === 'source') {
+      writable(destination);
+      let result;
+      try { result = await bridge({ method: 'outline_import_note', store: destination.store, project_root: destination.root,
+        path: note.path, source_revision: note.revision }); }
+      catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(destination.store); throw error; }
+      await display(result, destination.store, destination.root);
+      vscode.window.setStatusBarMessage(result.reused ? 'MRW: Opened the saved copy of this note.' : 'MRW: Note imported as a saved source outline.', 6000);
+      return result;
+    }
+    if (choice.kind === 'annotation') {
+      if (Buffer.byteLength(note.text, 'utf8') > 16384) throw new Error('A reader annotation holds up to 16 KiB. Import this note as a saved source outline or into the overview.');
+      const picked = await chooseTarget(true, destination);
+      if (!picked) return;
+      await unchanged();
+      const saved = await mutate(picked.c, { kind: 'annotation', region: picked.region, id: null, purpose: 'explanation',
+        text: note.text, origin: 'unknown', author: null });
+      picked.c.panel.reveal(picked.c.panel.viewColumn);
+      await picked.c.panel.webview.postMessage({ type: 'publishedFocus', region: picked.region });
+      return saved;
+    }
+    await unchanged();
+    const { editor, document, version, selection } = overview;
+    if (document.isClosed || document.version !== version || vscode.window.activeTextEditor !== editor || !editor.selection.isEqual(selection)) {
+      throw new Error('The overview or cursor changed during import. Run import again at the intended location.');
+    }
+    if (Buffer.byteLength(document.getText(), 'utf8') + Buffer.byteLength(note.text, 'utf8') > 4 * 1024 * 1024) throw new Error('The combined overview exceeds the 4 MiB navigation limit.');
+    const applied = await editor.edit(edit => edit.insert(selection.active, note.text), { undoStopBefore: true, undoStopAfter: true });
+    if (!applied) throw new Error('The editor declined the note insertion.');
+    vscode.window.setStatusBarMessage('MRW: Note inserted into the overview. Save with Ctrl+S.', 6000);
+  }));
   register('mrw.createOutline', () => locked(async () => {
     const editor = ordinaryEditor(), document = editor.document, version = document.version, range = editor.selection;
     if (document.isDirty) throw new Error('Save the source before creating an exact retained outline.');
@@ -561,6 +670,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
     return c.result;
   }));
+  register('mrw.refreshSourceOutline', () => locked(() => refresh(current())));
   register('mrw.openOutline', () => locked(async () => {
     const { store, root } = await storage(vscode.window.activeTextEditor);
     const result = await bridge({ method: 'outline_list', store, project_root: root });
@@ -632,14 +742,25 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   const rows = () => [['New reading overview…', 'mrw.newReadingOverview'], ['Open reading outline', 'mrw.openReadingOutline'],
     ['Open tutorial', 'mrw.openTutorial'],
     ['Return to reading outline', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
+    ['Import Obsidian note…', 'mrw.importObsidianNote'],
     ['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
     ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
     ['Link an Obsidian note…', 'mrw.associateObsidianNote'],
     ['Insert outline reference…', 'mrw.insertOutlineReference'], ['Follow outline reference at cursor', 'mrw.followOutlineReference'],
-    ...(panels.has(active) ? [['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
+    ...(panels.has(active) ? [['Refresh saved source outline', 'mrw.refreshSourceOutline'],
+      ['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
       ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
   rows.followReference = followReference;
+  rows.readPinned = (reference, root) => bridge({ method: 'outline_follow_reference',
+    store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`), project_root: root, reference });
+  rows.followPinned = (reference, root) => locked(async () => {
+    const store = path.join(context.storageUri.fsPath, `outlines-${digest(root)}`);
+    const result = await bridge({ method: 'outline_follow_reference', store, project_root: root, reference });
+    const c = await display(result, store, root, result.reference, { reading: true });
+    if (result.document && result.reference.status !== 'unchanged') await openDocument(c, null, result.document);
+    return result.reference;
+  });
   return rows;
 }
 

@@ -23,6 +23,19 @@ MRW retains its pointer only for this session; VS Code owns its text and recover
 After it closes, MRW remembers the latest selected saved overview. Selecting or
 reopening an overview does not switch the VS Code workspace or reload Codex.
 
+Patch **0.14.3** opens the rendered Markdown overview on **Return to reading
+outline**. It recreates the native preview even after both the editor and preview
+tabs have been closed. The source location is checked and restored first;
+ordinary Markdown editing and unsaved text remain under VS Code ownership.
+
+Patch **0.14.2** also supports **Return to reading outline** after opening a
+saved source directly. With no source-link origin, Return reopens the selected
+live or remembered overview and restores a matching selection. If no overview
+is available, it offers a Markdown file choice; cancelling keeps the reader.
+An unrelated active Markdown editor does not replace the selected overview.
+An existing source-link origin still requires the exact text and workspace;
+an invalid origin never redirects to another location.
+
 Patch 0.11.1 keeps the last successfully opened source's return location while
 another source resolves. If that follow fails during unsaved edits, Return
 still selects the earlier successful occurrence, adjusted for outside edits.

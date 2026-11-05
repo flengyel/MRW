@@ -45,6 +45,13 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
         }
       }
     }
+    async function withCompletionNotice(action, message, allowDirty = false) {
+      const result = await transaction(action, allowDirty);
+      // A notification can remain open indefinitely. Release readers and the
+      // operation guard before displaying it; dismissal is not part of storage.
+      if (result !== undefined) void vscode.window.showInformationMessage(message(result));
+      return result;
+    }
     async function progress(action) {
       const controller = new AbortController();
       return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification,
@@ -56,12 +63,12 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
     }
     register('mrw.artifactLocation', async () => {
       const s = await refresh();
-      await vscode.window.showInformationMessage(`MRW saved sources, outlines and annotations: ${s.location}. ${s.scope}.`
+      void vscode.window.showInformationMessage(`MRW saved sources, outlines and annotations: ${s.location}. ${s.scope}.`
         + (s.recovery_required ? ' A storage operation needs recovery: run MRW: Recover Artifact Move.' : ''));
       return s;
     });
     register('mrw.refreshArtifactLocation', () => transaction(async () => refresh(), true));
-    register('mrw.prepareFolderRename', () => transaction(async () => {
+    register('mrw.prepareFolderRename', () => withCompletionNotice(async () => {
       const folders = await roots();
       if (folders.length !== 1) throw new Error('Prepare a folder rename in its own single-folder workspace.');
       const current = await refresh();
@@ -102,14 +109,13 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
         await context.globalState.update(renameKey, { ...hints, [result.store_id]: hint });
       } catch (error) {
         throw new Error(`Saved work moved to ${result.location}, but its reconnect shortcut could not be saved. `
-          + 'Keep this path and use MRW: Open Existing Artifact Directory… after reopening the renamed folder. ' + error.message);
+          + 'Keep this path and use MRW: Open Saved Work Directory… after reopening the renamed folder. ' + error.message);
       }
-      await vscode.window.showInformationMessage('Saved MRW work prepared. Close this workspace, rename the folder with your file tools, '
-        + 'open its new location, then run MRW: Reconnect Saved Work After Folder Rename…. '
-        + `Keep this saved-work location: ${result.location}`);
       return result;
-    }));
-    register('mrw.reconnectRenamedFolder', () => transaction(async () => {
+    }, result => 'Saved MRW work prepared. Close this workspace, rename the folder with your file tools, '
+      + 'open its new location, then run MRW: Reconnect Saved Work After Folder Rename…. '
+      + `Keep this saved-work location: ${result.location}`));
+    register('mrw.reconnectRenamedFolder', () => withCompletionNotice(async () => {
       const folders = await roots();
       if (folders.length !== 1) throw new Error('Reconnect a renamed folder in its own single-folder workspace.');
       const current = await refresh();
@@ -118,7 +124,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const hints = Object.values(context.globalState.get(renameKey, {})).filter(hint => hint && typeof hint.project === 'string'
         && typeof hint.location === 'string' && typeof hint.store_id === 'string');
       if (!hints.length) throw new Error('No prepared folder renames are recorded in this host/profile. Prepare the original workspace first, '
-        + 'or use MRW: Open Existing Artifact Directory… with an already verified artifact store.');
+        + 'or use MRW: Open Saved Work Directory… with a verified artifact store.');
       const picked = await vscode.window.showQuickPick(hints.map(hint => ({ label: path.basename(hint.project),
         description: hint.project, detail: hint.location, hint })), { placeHolder: 'Choose the saved study prepared before this folder rename' });
       if (!picked) return;
@@ -138,15 +144,14 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       if (choice !== 'Reconnect saved work') return;
       const result = await control('artifact_adopt', { destination: hint.location, mapping: { [folders[0]]: original },
         store_id: inspected.store_id, head_hash: inspected.head_hash });
-      await vscode.window.showInformationMessage('Saved MRW study reconnected. Use MRW: Open Saved Source Outline… '
-        + 'or MRW: Open Link from Clipboard for an earlier external passage link.');
       return result;
-    }));
-    register('mrw.moveArtifactDirectory', () => transaction(async () => {
+    }, () => 'Saved MRW study reconnected. Use MRW: Open Saved Source Outline… '
+      + 'or MRW: Open Link from Clipboard for an earlier external passage link.'));
+    register('mrw.moveArtifactDirectory', () => withCompletionNotice(async () => {
       const current = await refresh();
       if (current.recovery_required) throw new Error('Run MRW: Recover Artifact Move before another move.');
       const destination = await vscode.window.showInputBox({
-        title: 'Move saved MRW artifacts for this VS Code workspace',
+        title: 'Move Saved Work Directory',
         prompt: `Current location: ${current.location}. Enter a new directory on the workspace host. Ordinary notes, source documents and notebooks stay in place.`,
         value: vscode.workspace.getConfiguration('mrw').get('artifactMoveDestination', ''), ignoreFocusOut: true });
       if (destination === undefined) return;
@@ -154,19 +159,18 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const folders = await roots();
       const plan = await control('artifact_plan', { destination, roots: folders });
       const choice = await vscode.window.showWarningMessage(
-        `Move saved MRW artifacts?\nFrom: ${plan.location}\nTo: ${plan.destination}\nScope: ${plan.scope}\nProjects: ${plan.projects.join(', ')}\n`
-        + `${plan.files} existing files (${plan.bytes} bytes), plus any required retained record dependencies. `
-        + 'The complete destination is verified before switching the active location; old artifact copies are then removed. Existing stores are never merged.',
-        { modal: true }, 'Move artifacts');
-      if (choice !== 'Move artifacts') return;
+        `Move saved MRW work?\nFrom: ${plan.location}\nTo: ${plan.destination}\nScope: ${plan.scope}\nProjects: ${plan.projects.join(', ')}\n`
+        + `${plan.files} files (${plan.bytes} bytes), plus any required retained record dependencies. `
+        + 'The complete destination is verified before switching the active location; old artifact copies are then removed. Stores are never merged.',
+        { modal: true }, 'Move saved work');
+      if (choice !== 'Move saved work') return;
       const result = await progress(options => control('artifact_move', { destination: plan.destination, roots: folders, manifest: plan.source_manifest }, options));
-      await vscode.window.showInformationMessage(`${result.message}. Effective location: ${result.location}.`
-        + (result.cleanup_pending ? ' Run MRW: Recover Artifact Move to retry cleanup.' : ''));
       return result;
-    }));
-    register('mrw.openArtifactDirectory', () => transaction(async () => {
-      const destination = await vscode.window.showInputBox({ title: 'Open an existing synchronized MRW artifact directory',
-        prompt: 'This verifies an existing store and maps its projects to this workspace. It does not move or merge stores.',ignoreFocusOut:true });
+    }, result => `${result.message}. Effective location: ${result.location}.`
+      + (result.cleanup_pending ? ' Run MRW: Recover Artifact Move to retry cleanup.' : '')));
+    register('mrw.openArtifactDirectory', () => withCompletionNotice(async () => {
+      const destination = await vscode.window.showInputBox({ title: 'Open Saved Work Directory',
+        prompt: 'Enter the directory containing your saved sources, outlines and annotations. This connects the workspace without moving files.', ignoreFocusOut: true });
       if (destination === undefined) return;
       const inspected = await control('artifact_inspect', { destination });
       const folders = await roots(), available = [...folders], mapping = {};
@@ -176,20 +180,18 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
         if (!selected) return;
         mapping[selected] = original; available.splice(available.indexOf(selected), 1);
       }
-      const choice = await vscode.window.showWarningMessage(`Open verified MRW store ${inspected.store_id}?\nDirectory: ${destination}\n`
+      const choice = await vscode.window.showWarningMessage(`Open saved MRW work?\nDirectory: ${destination}\n`
         + Object.entries(mapping).map(([local, original]) => `${original} → ${local}`).join('\n')
         + '\nConfirm that other computers have stopped writing and synchronization has completed. Local locks do not coordinate other computers.',
-        { modal: true }, 'Open existing store');
-      if (choice !== 'Open existing store') return;
+        { modal: true }, 'Open saved work');
+      if (choice !== 'Open saved work') return;
       const result = await control('artifact_adopt', { destination, mapping, store_id: inspected.store_id, head_hash: inspected.head_hash });
-      await vscode.window.showInformationMessage(`${result.message}. Effective location: ${result.location}.`);
       return result;
-    }));
-    register('mrw.recoverArtifactMove', () => transaction(async () => {
+    }, result => `${result.message}. Effective location: ${result.location}.`));
+    register('mrw.recoverArtifactMove', () => withCompletionNotice(async () => {
       const result = await control('artifact_recover');
-      await vscode.window.showInformationMessage(`${result.message}. Effective location: ${result.location}.`);
       return result;
-    }, true));
+    }, result => `${result.message}. Effective location: ${result.location}.`, true));
   }
   return { bridge, registerCommands };
 }

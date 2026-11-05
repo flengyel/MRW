@@ -1,0 +1,181 @@
+'use strict';
+(() => {
+  const api = acquireVsCodeApi(), root = document.getElementById('reader');
+  let state, busy = false, selected, request = 0, passage, sourceMode = 'live';
+  let shell, header, bar, count, mapHost, map, inspector, sourceArea, readingList;
+  const el = (tag, parent, text, className) => {
+    const n = document.createElement(tag); if (text !== undefined) n.textContent = text;
+    if (className) n.className = className; parent.append(n); return n;
+  };
+  function controls() { for (const b of root.querySelectorAll('button')) b.disabled = (busy && b.dataset.local !== 'true') || b.dataset.pinned === 'true'; }
+  function send(type, extra = {}) {
+    if (busy) return; busy = true; controls(); api.postMessage({ type, revision: state?.documentRevision, ...extra });
+  }
+  function button(parent, title, type, extra = {}, tooltip = '') {
+    const b = el('button', parent, title); b.type = 'button'; b.title = tooltip; b.dataset.action = type;
+    b.dataset.node = extra.node || ''; b.addEventListener('click', () => send(type, extra)); return b;
+  }
+  function local(parent, title, action, tooltip = '') {
+    const b = el('button', parent, title); b.type = 'button'; b.dataset.local = 'true'; b.title = tooltip;
+    b.addEventListener('click', action); return b;
+  }
+  function math(parent, text) { window.MRWAnnotations.render(parent, text, { exact: false }); }
+  function attributed(parent, value) {
+    el('p', parent, `${value.origin === 'ai_proposal' ? 'AI proposal' : 'Reader explanation'} · ${value.author}`, 'muted'); math(parent, value.text);
+  }
+  function context(parent, node) {
+    const box = el('details', parent); el('summary', box, `Variables and hypotheses · ${node.scope}`);
+    for (const sid of state.projection.scope_chains[node.scope]) {
+      const scope = state.graph.scopes.find(s => s.id === sid);
+      for (const v of scope.variables) math(box, v);
+      for (const a of scope.assumptions) math(box, 'Assume ' + a);
+    }
+  }
+  function citations(parent, node) {
+    if (!node.citations.length) return;
+    const box = el('details', parent); el('summary', box, `Sources (${node.citations.length})`);
+    node.citations.forEach((citation, i) => {
+      const source = state.graph.sources.find(s => s.id === citation.source), row = el('div', box, undefined, 'proof-navigation');
+      button(row, source.title + (citation.declaration ? ` · ${citation.declaration}` : ''), 'source', { node: node.id, citation: i }, 'Read the exact pinned source quotation.');
+      if (citation.reference) button(row, 'Reader notes', 'published', { node: node.id, citation: i }, 'Open the saved source reader and its notes.');
+      button(row, 'Upstream', 'upstream', { node: node.id, citation: i }, 'Open the pinned source URL in your browser.');
+      const tier = { published: 'Published Stacks text', human_reviewed: 'Human reviewed by the project', awaiting_human_review: 'Awaiting human review by the project' }[source.review];
+      el('p', box, `${tier} · ${state.sourceStatus[source.id]}`, 'muted');
+      if (source.environment) el('p', box, source.environment, 'muted');
+    });
+  }
+  const title = id => state.graph.nodes.find(n => n.id === id).title;
+  function witness(parent, route) {
+    const box = el('details', parent); el('summary', box, `Expand original steps (${route.hidden.length} omitted)`);
+    for (const id of route.hidden) {
+      const n = state.graph.nodes.find(n => n.id === id), part = el('section', box, undefined, 'context');
+      el('h3', part, n.title); math(part, n.claim); attributed(part, n.explanation); context(part, n); citations(part, n);
+      button(part, 'Restore vertex', 'restore', { node: id }, 'Return this claim to the displayed graph.');
+    }
+    for (const id of route.inferences) {
+      const r = state.graph.inferences.find(r => r.id === id), item = el('section', box);
+      el('p', item, `${r.premises.map(title).join(' AND ')} ⇒ ${title(r.conclusion)}`);
+      if (r.discharges.length) el('p', item, 'Discharges assumptions in: ' + r.discharges.join(', '));
+      attributed(item, r.explanation);
+    }
+  }
+  function argument(parent, node) {
+    context(parent, node); citations(parent, node);
+    for (const [i, route] of state.projection.derivations[node.id].entries()) {
+      const part = el('div', parent, undefined, 'context'), routes = state.projection.derivations[node.id];
+      el('p', part, `${routes.length > 1 ? `Alternative ${i+1}: ` : 'Uses: '}${route.premises.map(title).join(' AND ')}${route.premises.length > 1 ? ' jointly' : ''}.`);
+      witness(part, route);
+    }
+  }
+  function nodeActions(parent, node) {
+    const actions = el('div', parent, undefined, 'toolbar');
+    if (!state.projection.pinned.includes(node.id)) button(actions, 'Delete vertex', 'delete', { node: node.id }, 'Omit this intermediate claim and reconnect its dependencies.');
+    else el('p', actions, state.graph.goals.includes(node.id) ? 'Conclusion' : state.graph.inferences.some(r => r.conclusion === node.id) ? 'Scope boundary' : 'Premise', 'muted');
+    button(actions, 'Edit summary', 'edit', { node: node.id }, 'Edit this claim in its ordinary JSON document.');
+  }
+  function renderSource() {
+    if (!sourceArea) return; sourceArea.replaceChildren();
+    if (!passage) { el('p', sourceArea, 'Opening saved Stacks association…', 'muted'); return; }
+    if (!passage.tag) {
+      el('p', sourceArea, passage.notice || 'No corresponding Stacks tag is saved.', 'warning');
+      if (passage.exact_text) el('pre', sourceArea, passage.exact_text);
+      return;
+    }
+    el('h3', sourceArea, 'Stacks Project · Tag ' + passage.tag);
+    const tabs = el('div', sourceArea, undefined, 'proof-tabs');
+    for (const [mode, label] of [['live', 'Stacks page'], ['saved', 'Saved text']]) {
+      const b = local(tabs, label, () => { sourceMode = mode; renderSource(); }, mode === 'live' ? 'Load the corresponding tagged page from the Stacks Project.' : 'Read the pinned statement and proof offline.');
+      b.dataset.action = 'source-' + mode; b.setAttribute('aria-pressed', String(sourceMode === mode));
+    }
+    button(tabs, 'Open on Stacks ↗', 'stacks_page', { node: selected }, 'Open this exact tag in your browser.');
+    if (sourceMode === 'live') {
+      el('p', sourceArea, 'Current Stacks page · ' + passage.tag, 'source-caption');
+      const frame = el('iframe', sourceArea, undefined, 'proof-stacks-page');
+      frame.title = 'Stacks Project · Tag ' + passage.tag;
+      frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
+      frame.setAttribute('referrerpolicy', 'no-referrer');
+      // Only a tag verified against a retained published part can reach here.
+      frame.src = 'https://stacks.math.columbia.edu/tag/' + passage.tag;
+    } else {
+      el('p', sourceArea, `${passage.authors} · Git ${passage.commit}`, 'source-caption');
+      for (const part of passage.parts) {
+        el('h3', sourceArea, part.role === 'statement' ? 'Statement' : 'Proof');
+        window.MRWStacks.part(sourceArea, part, (action, tag) => send('stacks_citation', { node: selected, tag }));
+      }
+    }
+    controls();
+  }
+  function clearSelection() {
+    selected = undefined; passage = undefined; request++;
+    inspector.replaceChildren(); el('p', inspector, 'Select a vertex to read its Stacks passage.', 'muted');
+    map.select(undefined); sourceArea = undefined;
+  }
+  function selectNode(id, focus = false) {
+    if (!state.projection.order.includes(id)) return;
+    selected = id; passage = undefined; map.select(id, focus); inspector.replaceChildren();
+    const node = state.graph.nodes.find(n => n.id === id);
+    el('h2', inspector, node.title); math(inspector, node.claim); attributed(inspector, node.explanation); nodeActions(inspector, node);
+    const details = el('details', inspector); el('summary', details, 'Premises and original steps'); argument(details, node);
+    sourceArea = el('section', inspector); renderSource();
+    api.postMessage({ type: 'inspect', revision: state.documentRevision, node: id, request: ++request });
+    controls();
+  }
+  function setup() {
+    root.replaceChildren(); document.body?.classList?.add('proof-workspace');
+    header = el('header', root); bar = el('div', root, undefined, 'reading-bar'); count = el('p', root, undefined, 'proof-count');
+    shell = el('div', root, undefined, 'proof-shell'); const stage = el('section', shell, undefined, 'proof-stage');
+    const controls = el('div', stage, undefined, 'proof-map-controls');
+    local(controls, '−', () => map.zoom(1.25), 'Zoom out'); local(controls, 'Fit', () => map.fit(), 'Fit the displayed graph'); local(controls, '+', () => map.zoom(.8), 'Zoom in');
+    const search = el('input', controls); search.type = 'search'; search.placeholder = 'Find a claim'; search.setAttribute('aria-label', 'Find a claim');
+    search.addEventListener('keydown', e => { if (e.key === 'Enter' && search.value.trim()) { const id = map.find(search.value.trim()); if (id) selectNode(id, true); } });
+    mapHost = el('div', stage); map = window.MRWProofMap.create(mapHost, selectNode);
+    el('p', stage, 'Select to read · drag to pan · wheel to zoom · dashed arrows cross deleted steps', 'proof-legend');
+    inspector = el('aside', shell, undefined, 'proof-inspector'); inspector.setAttribute('aria-label', 'Selected claim and Stacks passage');
+    readingList = el('details', root, undefined, 'proof-reading-list');
+    clearSelection();
+  }
+  function render(previous) {
+    const { graph, projection } = state; if (!shell) setup();
+    const changed = previous && previous.documentRevision !== state.documentRevision;
+    header.replaceChildren(); el('h1', header, graph.title); attributed(header, graph.description);
+    const provenance = el('details', header); el('summary', provenance, 'Provenance');
+    el('p', provenance, 'Claims and dependencies are an attributed reconstruction from source text. Lean checking is reported by the source project; MRW has not run Lean.');
+    if (state.notice) el('p', header, state.notice, 'warning');
+    bar.replaceChildren();
+    button(bar, graph.description.origin === 'ai_proposal' ? 'Use AI outline' : 'Use proposed outline', 'proposal', {}, 'Apply the proposed selection.');
+    button(bar, 'Restore all vertices', 'restore_all', {}, 'Display every original claim and inference.');
+    button(bar, 'Edit outline', 'edit', {}, 'Edit claims and summaries in the ordinary JSON document.');
+    button(bar, 'Ask AI…', 'ask', {}, 'Prepare an exact request; Send remains separate.'); button(bar, 'Refresh', 'refresh');
+    local(bar, 'Conclusion', () => selectNode(graph.goals[0], true), 'Read the conclusion and its corresponding Stacks tag.');
+    count.textContent = `${projection.order.length} visible claims · ${projection.hidden.length} deleted from display`;
+    if (changed) { mapHost.replaceChildren(); map = window.MRWProofMap.create(mapHost, selectNode); }
+    map.update(state);
+    if (changed || (selected && !projection.order.includes(selected))) clearSelection();
+    else if (selected) map.select(selected);
+    readingList.replaceChildren(); el('summary', readingList, 'All displayed claims and derivations');
+    for (const id of projection.order) {
+      const n = graph.nodes.find(n => n.id === id), card = el('section', readingList, undefined, 'region'); card.id = 'claim-' + id;
+      local(card, n.title, () => selectNode(id, true), 'Select this claim in the graph and read its Stacks passage.');
+      math(card, n.claim); attributed(card, n.explanation); nodeActions(card, n); argument(card, n);
+    }
+    if (projection.hidden.length) {
+      const omitted = el('details', readingList); el('summary', omitted, 'Deleted vertices');
+      for (const id of projection.hidden) button(omitted, 'Restore: ' + title(id), 'restore', { node: id });
+    }
+    controls();
+  }
+  window.addEventListener('message', event => {
+    // An embedded Stacks page cannot impersonate the extension-host transport.
+    if (event.source && event.source !== window) return;
+    const data = event.data;
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'graph') { const previous = state; state = data; render(previous); }
+    else if (data.type === 'passage' && data.node === selected && data.request === request && data.revision === state.documentRevision) {
+      passage = data.passage;
+      if (passage.tag && !/^[A-Z0-9]{4}$/.test(passage.tag)) passage = { tag: null, notice: 'Invalid Stacks tag.' };
+      renderSource();
+    } else if (data.type === 'idle') { busy = false; controls(); }
+    else if (data.type === 'error') el('p', inspector || root, data.message, 'warning');
+  });
+  api.postMessage({ type: 'ready' });
+})();

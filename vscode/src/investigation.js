@@ -190,7 +190,7 @@ function registerInvestigation({ vscode, context, register, bridge, show, projec
         ['Edit human correction…', 'mrw.editCorrection'], ['Edit last useful conclusion…', 'mrw.editConclusion'], ['Edit unresolved issue…', 'mrw.editIssue'],
         ['Save human task summary', 'mrw.saveInvestigationSummary'], ['Insert task handoff into active note', 'mrw.insertInvestigationHandoff'],
         ['Review exact parent', 'mrw.reviewInvestigationParent'], ['Review completed child', 'mrw.reviewInvestigationChild'],
-        ['End investigation…', isBusy() ? undefined : 'mrw.endInvestigation']);
+        ['End investigation…', isBusy() ? undefined : 'mrw.endInvestigation', 'mrw.endInvestigation']);
       return rows;
     },
   };

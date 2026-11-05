@@ -1,5 +1,376 @@
 # Codex continuation: MRW source work and companion notes
 
+## Animated graph with the corresponding Stacks page — 2026-11-04
+
+The user confirms reaching the 0.15.0 source/outline after an extra MRW-icon
+step, then explicitly prefers Axiom's animated graph and display of the
+corresponding tagged Stacks portion. **0.16.0** adds a native SVG map, an adjacent
+tag panel and a graph action on the JSON editor title bar. Nodes open the exact
+official tag; Saved text uses the checked retained statement/proof. No corpus
+graph acquisition, extraction, new schema or Python inference change is added.
+
+`proofGraphMap.js` owns pan/zoom, rank layout, search, keyboard hit targets,
+neighbor highlighting and animation with reduced-motion support. The webview
+keeps its source panel in place across deletion/restoration. `tagPassage` uses
+scope-checked retained references and matching published spans; late replies and
+changed associations cannot redirect it. The iframe is limited to the official
+Stacks origin and sandboxed; child-frame messages cannot impersonate host data.
+Opening a graph alone has no live frame. Live selection is explicit navigation;
+Saved text remains available offline. Provider requests still contain exact
+graph JSON only, never implicit page text.
+
+Browser tests use a disposable profile and real mouse input. The conclusion
+opens the official 08ZH page visibly beside the graph. Pan/zoom, animated
+projection, preserved iframe identity, offline statement/proof and reduced
+motion pass. User confirmation in the native 0.16.0 view remains pending.
+See [workflow](PROOF_GRAPH_WORKFLOW.md) and [validation](PROOF_GRAPH_VALIDATION.md).
+
+
+Delivery: **0.16.0 is installed**, with the production manifest and all 70
+runtime files verified against the VSIX. No window reload was invoked. After
+saving drafts, the user can reload and reopen **MRW: Open Proof Outline…**.
+Select Closed diagonal for 08ZE or the conclusion for 08ZH; Saved text reads the
+retained statement/proof. All 152 extension checks passed. The study graph,
+overview, private head and 12 payload files were verified unchanged.
+
+
+## 08ZE / 08ZH summaries and vertex deletion — 2026-11-04
+
+The user authorized the Axiom Math comparison as a test of AI summaries and
+vertex deletion. MRW **0.15.0** implements the bounded consumer in
+`proof_graph.py`, `proofGraph.js` and `proofGraphView.js`. It validates a finite
+source-based hypergraph, projects dependency paths, preserves joint-premise
+alternatives with original inference witnesses, protects scope boundaries and
+keeps the original ordinary file unchanged. Workspace state holds only the
+revision-bound display selection. There is no Lean parser, compiler invocation,
+inference checking or automatic provider call.
+
+The study case is `proof-outlines/08zh.mrw-proof.json`: 15 claims, 8 inferences,
+two goal routes and a five-vertex Codex proposal. Retain source snapshots,
+upstream pins and licenses together. The portable test fixture omits private
+MRW references. Study references point to the genuine retained 08ZE/08ZH proofs,
+whose notes and diagrams remain untouched. Axiom's 08ZE is in StacksCore and
+08ZH in StacksFrontier. Mathlib's `isClosed_eq` uses the closed diagonal.
+Lean/Mathlib revisions and project-reported checking are separate from the
+AI-proposed intermediate claims/dependencies and their explanation attribution.
+
+The reader can alter selection in the view and edit summaries in the native
+JSON editor, then Refresh. Ask AI captures only exact JSON through existing
+preview/Send and preserves an existing unsent request. See
+[workflow](PROOF_GRAPH_WORKFLOW.md) and [validation](PROOF_GRAPH_VALIDATION.md).
+Observe whether the proposed selection helps the user reconstruct the argument;
+do not turn a smaller graph or a passing test count into usefulness evidence.
+
+
+Delivery: verified **0.15.0** is installed in WSL without a window reload.
+After saving drafts, the user can reload and run **MRW: Open Proof Outline…**,
+choosing `/home/flengyel/Mathematics/Stacks/proof-outlines/08zh.mrw-proof.json`.
+Use AI outline applies the proposed deletion; Conclusion locates the two
+argument routes. The existing overview, head and 12 private payload files were
+verified unchanged. See the installed results in PROOF_GRAPH_VALIDATION.md.
+
+## Theme-following diagrams and preview tabs — 2026-11-04
+
+The user sees the 08ZH pullback but wants VS Code's theme to choose its default
+appearance, including reader notes. MRW **0.14.4** adds Theme/Paper/Dark with
+Theme as the default in new `mrw.diagramAppearance.v2` UI state. Their old v1
+preference was Dark; it remains intact but no longer prevents theme following.
+Both retained image variants are supplied to CSS, using VS Code's light, dark
+and high-contrast body classes. Theme switches require no message, compiler,
+model call, note rerender or record mutation. Missing dark views fall back to
+paper so black ink remains readable. Explicit overrides persist in v2.
+
+The shared `media/diagram-theme.css` is inlined in the reader and contributed to
+native Markdown previews. The overview's Markdown and saved return pin remain unchanged. Its exported SVG
+adapts monochrome ink to the embedding image's color scheme, which the stylesheet
+sets from VS Code's theme class. Original SVG, TikZ code, source prose and reader
+annotations are preserved.
+
+For saved overviews, Return prefers the native `markdown.reopenAsPreview` when
+registered and the checked overview is still active. It replaces that source
+tab rather than creating another preview alongside it; older hosts and untitled
+overviews keep the earlier explicit-URI preview fallback. Focus changes cannot
+reopen an unrelated Untitled draft. The user's Untitled-1 origin was not
+identified; no unsaved buffer is closed or discarded. The saved overview URI
+is correct, and Return itself creates no untitled document.
+
+Scoped tests cover theme defaults/overrides and preserved draft focus. The SVG
+exports are visually checked on light/dark backgrounds; the native-window
+confirmation remains pending. Leave reload to the user after saving reader
+drafts and finishing an open request.
+All 37 focused command checks and 42 renderer/parser/link checks pass. The
+overview stays byte-identical, preserving all six exact source references and
+its saved return location; the SVG export retains every original path.
+The 0.14.4 package installed successfully through VS Code's local extension
+installer. Registry, manifest, contributed stylesheet and all 65 runtime files
+match the checked VSIX. The exported theme-aware SVG is published at the same
+image path; the overview remains byte-identical. No window reload was invoked.
+
+A headless Chrome check verifies light and dark rendering from the VS Code
+theme classes. A live light-to-dark switch keeps the same image nodes and
+unsaved text while changing diagram visibility; Theme remains selected. The
+overview SVG receives the embedding image’s color scheme, following the
+[CSS media-query rule](https://drafts.csswg.org/mediaqueries-5/#prefers-color-scheme).
+The actual VS Code window still needs user confirmation after activation.
+
+
+## Return reopens the rendered overview — 2026-11-04
+
+The user closed editor/preview tabs, opened the saved source, and clicked
+Return. MRW correctly reopened the overview file but showed raw Markdown.
+Patch **0.14.3** explicitly opens `markdown.showPreview` after restoring the
+checked source location. The shared presentation helper serves exact-origin
+returns and the no-origin overview fallback. It uses the native preview's
+in-place command, keeping ordinary editing and unsaved text under VS Code.
+
+Two regressions fail against 0.14.2 and pass with the fix: repeated Return after
+closing overview tabs, and exact duplicate-link return followed by rejection of
+an overlapping edit before any replacement preview. Existing remembered-overview,
+untitled/draft and cancellation checks also assert preview behavior. The current
+VS Code installation's Markdown command implementation was inspected locally;
+no private Markdown command, new renderer or source-record mutation is added.
+All 33 focused command checks and 40 renderer/parser/link checks pass.
+The 0.14.3 VSIX is installed in WSL Debian; the selected registry version,
+manifest and all 64 runtime files match the verified package. The window CLI
+relay hung before installation began; only that client was stopped, then the
+same VS Code installation's local `code-server --install-extension` completed.
+The VS Code window and server were left running; no reload was invoked.
+Installed-window confirmation remains pending. Leave reload to the user after
+saving reader drafts and finishing any open request.
+
+## 08ZH diagram in Markdown preview — 2026-11-04
+
+The user reports that the pullback square is invisible in the dark Markdown
+preview. The retained SVG has black paths on transparency; the MRW reader's
+white image background was not present in the standalone export. The overview
+now uses `figures/08zh-pullback-paper.svg`: the same paths with an opaque white
+background, padding, a 400-pixel width and conventional SVG namespaces. A new
+image filename avoids the previously cached transparent version. The original
+SVG, TikZ code, proof prose and saved reader records remain unchanged.
+
+Rasterizing the transparent SVG on black reproduces the blank image. The
+corrected SVG renders visibly on both black and white backgrounds; both were
+inspected. No compiler, extension release or window reload was needed. User
+confirmation in the native preview remains pending.
+
+## Codex-assisted 08ZH proof outline — 2026-11-04
+
+After confirming that direct saved-source opening followed by Return now works,
+the user authorized the first AI-assisted proof outline for 08ZH. Codex replaced
+the empty 97-byte template at
+`/home/flengyel/Mathematics/Stacks/reading-overview.md` with a mathematical outline:
+closed diagonal, continuous product map, inverse-image identification, and the
+closedness conclusion using all three claims jointly. Each step names its
+premises. Six reference occurrences point to four exact retained 08ZE/08ZH
+statement/proof regions, preserving the current store scope and source revision.
+
+`/home/flengyel/Mathematics/Stacks/figures/08zh-pullback.svg` and
+`08zh-pullback.tikz` are exact copies of the existing Codex 08ZH reader annotation
+and its retained rendering. The SVG is shown beside the inverse-image argument;
+no compiler was invoked. The study README records Codex attribution and the
+Stacks source revision, and no longer describes the deleted synthetic 08ZE note.
+The genuine 08ZG/08ZH annotations and all 12 retained payload files are unchanged.
+
+Checked core references resolve against retained Git revision
+`a04446e57ec1fbc252a871afcec7752fb2807b14`; the six actual Markdown references
+have exact navigator offsets. The bundled KaTeX renders all 31 math expressions,
+and the retained diagram was inspected. No new model request or extension
+release was needed; MRW remains 0.14.2. VS Code owns the ordinary Markdown.
+The navigator exposes the claims as headings and source links. Explicit
+inference relations, graph editing and vertex elimination remain planned.
+
+## Return after direct source opening — 2026-11-04
+
+The user opened a saved source directly and Return reported that a source must
+first be followed from the reading navigator. Direct opening has no originating
+link, but the reader always shows Return. Patch **0.14.2** reopens the selected
+live or remembered overview when that origin is absent, or offers a Markdown
+file choice when no overview is available. An unrelated active Markdown editor
+cannot replace it. Matching selections restore; ordinary text and drafts remain
+under VS Code ownership. No source-link origin is fabricated.
+
+An existing origin retains exact-text, overlap/undo and workspace validation;
+an invalid origin never triggers fallback. Return still preserves the 0.14.1
+idle-control behavior and does not wait for error-notification dismissal.
+
+Four new regressions fail against 0.14.1 and pass with this fix: remembered
+overview after restart, live untitled overview with unsaved edits, first choice
+and cancellation with continued reader use, and workspace checks before reads.
+The existing failed-Return regression now uses an invalid exact origin.
+The focused navigation/control run passes 37 checks, and the renderer/parser/link
+run passes 40 (with overlapping proof-control coverage). The checked VSIX matches
+the production manifest and runtime bytes; see the validation report for its hash.
+VS Code reported successful 0.14.2 installation in WSL Debian. The registry,
+manifest and all 64 installed runtime files match the checked package.
+The user subsequently reports that direct saved-source opening followed by
+Return works. No automated window trial or reload was invoked. Do not reload the user's window
+automatically; save annotation drafts and finish any open request first.
+
+## Return leaves reader controls usable — 2026-11-04
+
+The user found that Return to reading outline disabled controls such as Hide
+proofs. A failed return awaited error-notification dismissal inside the shared
+command wrapper, keeping the reader request locked. Patch **0.14.1** makes
+command/reader error notifications nonblocking, avoids marking Return busy in
+the webview, and restores idle controls on reader visibility only after its
+pending actions finish. It preserves storage/write guards, drafts and return pins.
+
+The three new regressions fail against 0.14.0 and pass with the fix; existing
+view and focused command checks are recorded in
+[validation](READING_OUTLINE_VALIDATION.md#return-leaves-reader-controls-usable--2026-11-04).
+Do not reload the user’s window automatically or discard an open request. If
+controls are currently stuck on an MRW error notification, dismiss that message
+to release the old version’s wait before saving drafts and reloading.
+
+The 0.14.1 package installed successfully in WSL Debian. Its manifest, runtime
+bytes, extension registry and all 64 installed runtime files were verified.
+All 32 renderer and 11 focused command checks pass. Activation is left to the
+user after drafts and open requests are handled; no reload was invoked.
+
+## Import an Obsidian note — 2026-11-04
+
+The user requested note import and clarified that all three destinations should
+be choices in the application, rather than selecting one destination in chat.
+MRW **0.14.0** adds **Import Obsidian note…** in Research Tools and the command
+palette. It offers saved source outline, passage annotation, and reading-overview
+insertion, then selects one Markdown file. The original file remains unchanged.
+
+Source import uses checked core publication and the artifact epoch. It retains
+exact bytes, splits long notes within existing passage limits, keeps attribution
+unknown, and reuses the same path/revision without replacing saved annotations.
+Different revisions have different retained identities. Annotation import saves
+text with unknown attribution on the chosen passage; overview import uses host
+editing/undo and leaves the editor unsaved. Notes, wiki links, YAML and embeds
+remain text; this is not a vault importer or Obsidian renderer.
+
+Core, command and storage checks are recorded in
+[validation](OBSIDIAN_VALIDATION.md#three-destination-note-import--2026-11-04).
+No real vault note has been selected or imported during implementation. Do not
+reload the current window automatically or discard an open request.
+
+The 0.14.0 package is installed in WSL Debian; source/manifest verification,
+extension registry and all 64 installed runtime files match. Leave activation
+to the user after the open request is finished or discarded. In Research Tools,
+choose **Import Obsidian note…**, select one of the three destinations, then
+choose the Markdown file. Imported sources show literal retained Markdown, not
+resolved Obsidian embeds or a copied vault.
+
+## Delete reader annotations — 2026-11-04
+
+The user requested removal of the synthetic validation annotation on
+**Lemma 08ZE — Statement** and a way to delete notes. Patch **0.13.5** adds
+**Delete note…** beside saved annotations, including whole-source notes. The
+host confirms the note and passage before the scoped, revision-checked core
+mutation. Only confirmed publication removes its display and draft. Cancellation,
+rejection and uncertain publication keep the live note/draft; other drafts stay
+editable. Core, view and command checks are recorded in
+[validation](READING_OUTLINE_VALIDATION.md#delete-reader-annotations--2026-11-04).
+
+The specified synthetic annotation `41893ab6-69c0-4b8f-a948-befb8b1706be` was
+removed from region `ec62c033-0308-5eaf-8561-561b32863c4c` through the checked
+installed core bridge. The reopened outline contains only that intended change;
+all other retained files are byte-identical. The genuine Codex 08ZG and 08ZH
+notes are unchanged and the retained 08ZH diagram still loads. Preserve them.
+
+The 0.13.5 package installed successfully in WSL Debian; registry and all 64
+runtime files match the checked VSIX. No reload was invoked. Refresh the saved
+source outline to remove the old note from its current display. Delete controls
+activate after a normal reload; finish or discard any open request first.
+
+## Research Tools hover descriptions — 2026-11-04
+
+The user activated 0.13.3 and reported that the UI is better, then requested
+explanatory tooltips for each Research Tools entry. Patch **0.13.4** supplies
+plain-text descriptions for all 53 command identities, including contextual
+request, review and investigation actions. Disabled End investigation keeps its
+description. Static coverage and a temporary 215-item tree smoke check pass, as
+do five existing command checks; see
+[validation](READING_OUTLINE_VALIDATION.md#research-tools-hover-descriptions--2026-11-04).
+
+The user has an Exact-request-preview tab open. Do not reload automatically;
+finish or discard the unsent request before activating an installed update.
+Hover construction makes no service calls and does not touch drafts.
+
+The 0.13.4 package passed manifest/runtime verification and installed successfully
+in WSL Debian. The extension registry and all 64 installed runtime files were
+verified. Activation is left to the user after the open request is finished or
+discarded; no reload or workspace switch was invoked.
+
+## Alphabetical tools and visible refresh — 2026-11-04
+
+The user could not find refresh inside collapsed Source details and tools and
+requested alphabetical Research Tools. Patch **0.13.3** sorts the entire displayed
+list and exposes **Refresh saved source outline** on the reader toolbar, in
+Research Tools for an open source, and as `mrw.refreshSourceOutline` in the command
+palette. It reloads through the existing read-only path and retains drafts.
+The 29 renderer checks and two temporary command/view smoke checks pass; see
+[validation](READING_OUTLINE_VALIDATION.md#alphabetical-tools-and-visible-refresh--2026-11-04).
+
+A Codex-attributed TikZ annotation was saved beneath **08ZH — Proof**, annotation
+`1cc6f765-164c-404a-a7b6-5a602e52243d`, through the checked core bridge. It shows
+the pullback of the diagonal with the fiber product upper-left. The requested
+diagram was rendered and reopened from its retained SVG. All preceding source
+records and annotations, including 08ZG, were preserved exactly. The study store
+now has this additional annotation; the old pre-move outline hash is historical.
+Preserve the new note and render as genuine study work.
+
+The 0.13.3 package and 64 installed runtime files were verified; VS Code reported
+successful installation in WSL Debian. Leave activation to the user: save reader
+drafts, then reload normally. No workspace switch or reload was invoked.
+
+## Notes beside source passages — 2026-11-04
+
+The user reported that annotations were separated from the items they explain.
+The saved Codex-attributed explanation on **08ZG — Proof**, including
+`G(x) = (x, s(f(x)))`, was found intact; its outline hash and store HEAD matched
+the pre-move receipt. Preserve that annotation and its attribution.
+
+Patch **0.13.2** places saved Reader notes in the associated source card. The
+notes remain accessible with the proof folded and keep independent disclosure
+state. Source-wide notes appear near the heading. Editing forms stay in Source
+details and tools. This is a view change, with no record migration or rewrite.
+The user corrected the earlier proof-control report: the control was present.
+No proof-collapse repair is included in this patch.
+
+The 29 view/renderer checks, five reader command/bridge cases and 32 Python
+source-outline/reference/note tests pass. The 0.13.2 package, installed version and 64 runtime files were verified
+in WSL Debian; installation completed without reloading the window. [Validation](READING_OUTLINE_VALIDATION.md#notes-beside-source-passages--2026-11-04)
+records checks and delivery. Actual-window confirmation remains pending.
+Activation requires a normal reload after installation; leave that action to
+the user and preserve this conversation in Codex history.
+
+## Storage blocker and tutorial correction — 2026-11-04
+
+The checkout is now `/home/flengyel/MRW`; the study is
+`/home/flengyel/Mathematics/Stacks`. Its host-local binding maps that folder to
+the original retained project in `/home/flengyel/.local/share/mrw-stacks-study`.
+The binding was inspected after the user ran Open directory; no further move
+or reconnection is needed for this study. Keep the current window in place.
+
+The reported busy-state defect is awaiting completion-notification dismissal in
+storage transaction handlers. Patch **0.13.1** releases readers and the operation
+guard before presenting success notifications. It preserves blocking while
+input/confirmation dialogs or core operations are pending. Displayed names are
+**Open Saved Work Directory…** and **Move Saved Work Directory…**; IDs and core
+transaction rules are unchanged. The user may have selected Move unintentionally;
+the notification defect is separately reproduced by regression tests.
+
+The user requests concise prose and removal of obvious study advice and empty
+adjectives. The bundled tutorial now explains controls, file behavior and saving.
+An empty reading overview contains headings only; the sidebar is its navigator.
+Do not present that empty template as substantive mathematical assistance.
+
+The five notification regressions and the pending-prompt cancellation case pass.
+The broad extension run passed 114 of 115 cases; the sole failure was a stale
+tutorial advice assertion. After removing those content assertions, the tutorial
+and starting-view tests pass. Python: 312 passed, 67 skipped. The 0.13.1 VSIX is
+packaged, verified and installed in WSL Debian without reloading the window.
+The installed version and runtime bytes were verified. Activation in the running
+window remains unconfirmed. Validation and package delivery are recorded in
+[the storage report](ARTIFACT_STORAGE_VALIDATION.md#completion-notifications-and-command-labels--2026-11-04).
+Actual-window confirmation of the patch remains pending. Do not reload or switch
+the user's window to activate an update automatically.
+
 ## New work and tutorial — 2026-11-04
 
 The user requests a visible way to start an outline and a tutorial supporting
@@ -1000,8 +1371,7 @@ finished. Practical-benefit reports remain distinct from broader usefulness.
 
 The authorized storage increment builds on actual clean `9f1c4c7` (implementation
 `c1508bc`, installed 0.6.1), with no intervening or unrelated changes. Version
-**0.7.0** adds explicit workspace-scoped **Move Artifact Directory…**, **Open
-Existing Artifact Directory…**, **Show Artifact Location**, **Refresh Artifact
+**0.7.0** adds explicit workspace-scoped **Move Saved Work Directory…**, **Open Saved Work Directory…**, **Show Artifact Location**, **Refresh Artifact
 Location** and **Recover Artifact Move** commands. Read [the storage guide](ARTIFACT_STORAGE.md)
 and [validation report](ARTIFACT_STORAGE_VALIDATION.md) before changing its protocol.
 

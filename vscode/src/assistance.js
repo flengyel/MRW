@@ -173,6 +173,11 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     if (draft) throw new Error('Finish or discard the current unsent request before asking about another passage.');
     return change(() => begin(target, root, 'Mathematical question about this exact retained source passage'));
   };
+  rows.askProof = (target, root) => {
+    idle();
+    if (draft) throw new Error('Finish or discard the current unsent request before asking about a proof outline.');
+    return change(() => begin(target, root, 'Question about this proof outline: summary, intermediate claims, or omitted steps'));
+  };
   return rows;
 }
 module.exports = { capture, registerAssistance };

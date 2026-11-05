@@ -4,6 +4,7 @@ This private view state uses Source/SourceOccurrence/VersionedSpan semantics.
 It is not a proof graph, a FormalFact generator, a checker or a model client.
 """
 from copy import deepcopy
+from bisect import bisect_right
 from datetime import datetime, timezone
 from hashlib import sha256
 from functools import lru_cache
@@ -11,7 +12,7 @@ import json
 import os
 from pathlib import Path
 import re
-from uuid import uuid4
+from uuid import uuid4, uuid5, NAMESPACE_URL
 
 from .local_files import read_bounded
 from .mutable_files import private_directory, save_mutable, sync_directory
@@ -480,6 +481,13 @@ def mutate(store, change):
             if old is None:
                 raise ValueError('Annotation identity changed; reopen it')
             target[target.index(old)] = updated
+    elif kind == 'remove_annotation':
+        fields(change, {'kind', 'region', 'id'}, 'annotation removal')
+        target = value['annotations'] if change['region'] is None else region()['annotations']
+        old = item_by_id(target, identity(change['id']))
+        if old is None:
+            raise ValueError('Annotation identity changed; reopen it')
+        target.remove(old)
     elif kind == 'metadata':
         fields(change, {'kind', 'bibliography', 'authorship'}, 'source description')
         value['source']['bibliography'] = change['bibliography']
@@ -488,6 +496,56 @@ def mutate(store, change):
         raise ValueError('Unknown outline edit')
     store.check_spans(value)
     return store.publish(value)
+
+
+def import_note(store, source):
+    if source.path.suffix.lower() not in {'.md', '.markdown'}:
+        raise ValueError('Choose an Obsidian .md or .markdown note')
+    value, starts, lines = line_table(source)
+    if not value.strip():
+        raise ValueError('The selected note is empty')
+    store.id = str(uuid5(NAMESPACE_URL, str(store.root) + '\0obsidian-note\0' + str(source.path) + '\0' + source.revision))
+    store.directory = store.base / store.id
+    if (store.directory / 'outline.json').exists():
+        saved = OutlineStore(str(store.base), str(store.root), store.id)
+        if saved.state['source']['path'] != str(source.path) or saved.state['source']['revision'] != source.revision:
+            raise ValueError('Saved note identity differs; no outline was replaced')
+        return dict(**saved.view(), reused=True)
+    regions = []
+    offset = 0
+    def point(at):
+        line = bisect_right(starts, at) - 1
+        return line + 1, at - starts[line]
+    while offset < len(value):
+        # A partial trailing UTF-8 character remains in value for the next span.
+        part = value[offset:].encode('utf-8')[:MAX_REGION].decode('utf-8', errors='ignore')
+        end = offset + len(part)
+        if value[end - 1:end + 1] == '\r\n':
+            end -= 1
+            part = part[:-1]
+        newline = part.rfind('\n')
+        if end < len(value) and newline > len(part) // 2:
+            end = offset + newline + 1
+        a, b = point(offset), point(end)
+        span = dict(source_revision=source.revision, start_line=a[0], start_col=a[1], end_line=b[0], end_col=b[1])
+        span_text(source, span)
+        regions.append(dict(id=str(uuid4()), title='Note', level='argument', span=span,
+                            statement=None, collapsed=False, annotations=[]))
+        offset = end
+    if len(regions) > 1:
+        for index, region in enumerate(regions, 1):
+            region['title'] = f'Note — part {index}'
+    store.state = dict(schema=SCHEMA, version=1, id=store.id, project_root=str(store.root), created_at=now(),
+        source=dict(path=str(source.path), revision=source.revision, authorship='unknown',
+                    bibliography={key: source.path.stem if key == 'title' else None for key in BIBLIOGRAPHY}),
+        regions=regions, contexts=[], annotations=[], artifacts=[])
+    validate_state(store.state, store.root, store.id)
+    try:
+        directory(store.directory)
+        store.retain(source.text.encode('utf-8'), source=True)
+    except (OSError, ValueError) as exc:
+        return dict(blocked=True, write_error=str(exc))
+    return dict(**store.publish(store.state), reused=False)
 
 
 def outline_action(request):
@@ -519,6 +577,8 @@ def outline_action(request):
                                locator=saved.state['source']['bibliography']['locator'],
                                upstream_revision=saved.state['source']['bibliography']['revision']))
         return {'outlines': result}
+    if method == 'outline_import_note':
+        return import_note(store, ordinary_source(request['path'], request['source_revision']))
     if method == 'outline_create':
         source = ordinary_source(request['path'], request['source_revision'])
         store.id = str(uuid4()); store.directory = store.base / store.id

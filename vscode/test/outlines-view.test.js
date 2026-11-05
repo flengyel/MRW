@@ -190,22 +190,23 @@ test('statement has a direct Proof link; reading a collapsed proof changes no sa
   assert.equal(h.messages.at(-1).type,'select');
 });
 
-test('annotation forms cannot occur between statement and proof; reader notes remain attributed', () => {
+test('saved notes appear with their passage while annotation forms stay outside the source flow', () => {
   const h = reader(true); h.send(publishedModel());
   const cards = h.root.children.filter(n => n.tag === 'section' && n.dataset.region);
   assert.deepEqual(cards.map(n=>n.dataset.region),['statement','proof']);
   for(const card of cards) assert.equal(card.all().some(n=>['form','input','textarea','select'].includes(n.tag)),false);
   const tools = h.root.all().find(n=>n.className==='reader-tools');
   assert.ok(tools.all().some(n=>n.dataset.draft==='note:statement:new'));
-  const notes = h.root.children.find(n=>n.className==='reader-notes');
+  const notes = cards[0].all().find(n=>n.dataset.notesFor==='statement');
   assert.equal(notes.tag, 'details'); assert.equal(notes.open, false);
   assert.equal(notes.children[0].textContent, 'Reader notes (1)');
   assert.match(notes.text(),/Reader question, separate from source/); assert.match(notes.text(),/author: Reader/);
-  assert.ok(h.root.children.indexOf(notes)>h.root.children.indexOf(cards[1]));
+  assert.equal(notes.parent, cards[0]);
+  assert.equal(h.root.children.some(n=>n.className==='reader-notes'), false);
   notes.open = true; h.send(publishedModel());
-  const reopened = h.root.children.find(n=>n.className==='reader-notes'); assert.equal(reopened.open, true);
+  const reopened = h.root.all().find(n=>n.dataset.notesFor==='statement'); assert.equal(reopened.open, true);
   reopened.open = false; h.send(publishedModel());
-  assert.equal(h.root.children.find(n=>n.className==='reader-notes').open, false);
+  assert.equal(h.root.all().find(n=>n.dataset.notesFor==='statement').open, false);
   assert.equal(h.messages.some(m=>['edit','toggle'].includes(m.type)), false, 'folding notes changes no saved text');
 });
 
@@ -215,11 +216,87 @@ test('overview and passage annotation displays retain raw editable TeX and attri
   value.model.outline.annotations.push(note);
   value.model.outline.regions[1].annotations.push({...note,id:'passage-note'});
   const before = JSON.stringify(value); h.send(value);
-  const notes = h.root.children.find(n => n.className === 'reader-notes');
-  assert.match(notes.text(), /Overview/); assert.match(notes.text(), /other/); assert.match(notes.text(), /author: Codex/);
-  assert.equal(notes.all().filter(n => n.tag === 'pre' && n.textContent === text).length, 2);
+  const overview = h.root.children.find(n => n.dataset.notesFor === 'overview');
+  const card = h.root.children.find(n => n.dataset.region === 'other');
+  const passage = card.all().find(n => n.dataset.notesFor === 'other');
+  assert.equal(overview.children[0].textContent, 'Source notes (1)');
+  assert.match(overview.text(), /author: Codex/); assert.match(passage.text(), /author: Codex/);
+  assert.equal(h.root.all().filter(n => n.tag === 'pre' && n.textContent === text).length, 2);
   assert.equal(h.root.all().filter(n => n.tag === 'textarea' && n.value === text).length, 2);
   assert.equal(JSON.stringify(value), before);
+});
+
+test('note deletion targets its scope, freezes its editor, and clears only its draft after publication', () => {
+  const h = reader(), value = readingModel();
+  const note = {id:'remove-me',kind:'question',text:'Synthetic note',provenance:{origin:'unknown',author:'Automated check',at:'now'}};
+  value.model.outline.regions[0].annotations.push(note);
+  value.model.outline.annotations.push({...note,id:'source-note'});
+  h.send(value);
+  const form = key => h.root.all().find(n => n.tag === 'form' && n.dataset.draft === key);
+  const target = 'note:changed:remove-me', other = 'note:other:new';
+  for (const [key,text] of [[target,'Unsaved target text'],[other,'Keep this other draft']]) {
+    const f=form(key); f.all().find(n=>n.tag==='textarea').value=text; f.listeners.input();
+  }
+  const remove = h.root.all().find(n=>n.dataset.action==='delete-note'&&n.dataset.annotation==='remove-me');
+  assert.equal(remove.dataset.write,'true'); remove.listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)),JSON.stringify({type:'delete_annotation',region:'changed',annotation:'remove-me',unsaved:true}));
+  assert.ok(form(target).all().filter(n=>['input','textarea','select'].includes(n.tag)).every(n=>n.disabled));
+  assert.equal(form(other).all().find(n=>n.tag==='textarea').disabled,false);
+  h.send({type:'idle'});
+  assert.equal(form(target).all().find(n=>n.tag==='textarea').value,'Unsaved target text');
+  assert.equal(form(target).all().find(n=>n.tag==='textarea').disabled,false);
+  h.root.all().find(n=>n.dataset.action==='delete-note'&&n.dataset.annotation==='remove-me').listeners.click();
+  const updated=JSON.parse(JSON.stringify(value));updated.model.outline.regions[0].annotations=[];
+  updated.deletedAnnotation={region:'changed',id:'remove-me'};h.send(updated);h.send({type:'idle'});
+  assert.equal(form(target),undefined);
+  assert.equal(h.root.all().some(n=>n.dataset.notesFor==='changed'),false);
+  assert.equal(form(other).all().find(n=>n.tag==='textarea').value,'Keep this other draft');
+  assert.ok(h.root.all().some(n=>n.dataset.annotation==='source-note'));
+  assert.equal(h.messages.some(m=>m.type==='edit'),false);
+});
+
+test('failed note deletion keeps its saved display and draft; whole-source deletion has a null region', () => {
+  const h=reader(),value=readingModel();
+  value.model.outline.annotations.push({id:'whole',kind:'explanation',text:'Saved text',provenance:{origin:'ai_proposal',author:'Codex',at:'now'}});
+  h.send(value);
+  const form=h.root.all().find(n=>n.dataset.draft==='note:overview:whole'&&n.tag==='form');
+  form.all().find(n=>n.tag==='textarea').value='Keep draft after failure';form.listeners.input();
+  h.root.all().find(n=>n.dataset.action==='delete-note').listeners.click();
+  assert.equal(h.messages.at(-1).region,null);
+  h.send({type:'error',message:'Deletion not confirmed',writesBlocked:true});
+  assert.match(h.root.all().find(n=>n.dataset.notesFor==='overview').text(),/Saved text/);
+  assert.ok(h.root.all().some(n=>n.tag==='textarea'&&n.value==='Keep draft after failure'&&!n.disabled));
+  assert.equal(h.root.all().find(n=>n.dataset.action==='delete-note').disabled,true);
+});
+
+test('proof notes stay beside a folded proof and keep their own disclosure state and editor draft', () => {
+  const value = publishedModel(), note = { id:'proof-note',kind:'explanation',text:'G(x) = (x, s(f(x)))',
+    provenance:{origin:'ai_proposal',author:'Codex',at:'now'} };
+  value.model.outline.regions[1].annotations.push(note);
+  value.model.outline.annotations.push({...note,id:'source-note',text:'Source-wide note.'});
+  const before = JSON.stringify(value), h = reader(true); h.send(value);
+  const card = id => h.root.children.find(n => n.dataset.region === id);
+  const notes = id => h.root.all().find(n => n.dataset.notesFor === id);
+  assert.equal(notes('proof').parent, card('proof'));
+  assert.match(notes('proof').text(), /G\(x\) = \(x, s\(f\(x\)\)\)/);
+  assert.equal(h.root.children.indexOf(notes('overview')) < h.root.children.indexOf(card('statement')), true);
+  assert.doesNotMatch(notes('statement').text(), /G\(x\)/);
+  notes('proof').open = true;
+  const form = h.root.all().find(n => n.dataset.draft === 'note:proof:new');
+  form.all().find(n => n.tag === 'textarea').value = 'Unsaved proof question'; form.listeners.input();
+  h.send(value);
+  assert.equal(notes('proof').open, true); assert.equal(notes('statement').open, false);
+  h.button(h.root, 'hide-proofs').listeners.click();
+  assert.doesNotMatch(card('proof').text(), /proof published source/);
+  assert.equal(notes('proof').open, true);
+  notes('proof').open = false; h.send(value);
+  assert.equal(notes('proof').open, false);
+  assert.ok(h.root.all().some(n => n.tag === 'textarea' && n.value === 'Unsaved proof question'));
+  h.button(card('proof'), 'show-proof').listeners.click();
+  assert.match(card('proof').text(), /proof published source/);
+  assert.equal(notes('proof').parent, card('proof'));
+  assert.equal(JSON.stringify(value), before);
+  assert.equal(h.messages.some(m => ['edit','toggle'].includes(m.type)), false);
 });
 
 test('proof reading controls hide details, preserve statements and drafts, and reveal a chosen proof', () => {
@@ -246,6 +323,22 @@ test('proof reading controls hide details, preserve statements and drafts, and r
   assert.match(card('proof').text(), /proof published source/);
   assert.equal(JSON.stringify(value.model), before);
   assert.equal(h.messages.some(m => ['edit','toggle','navigate'].includes(m.type)), false);
+});
+
+test('Return keeps local proof controls usable without a completion message and preserves drafts', () => {
+  const h=reader(true),value=publishedModel();h.send(value);
+  const form=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:statement:new');
+  form.all().find(n=>n.tag==='textarea').value='Keep this unsaved note';form.listeners.input();
+  h.button(h.root,'reading-return').listeners.click();
+  assert.equal(h.messages.at(-1).type,'reading_return');
+  assert.equal(h.button(h.root,'hide-proofs').disabled,false);
+  h.button(h.root,'hide-proofs').listeners.click();
+  const card=h.root.all().find(n=>n.tag==='section'&&n.dataset.region==='proof');
+  assert.ok(h.button(card,'show-proof'));assert.equal(h.button(h.root,'show-proofs').disabled,false);
+  assert.ok(h.root.all().some(n=>n.tag==='textarea'&&n.value==='Keep this unsaved note'));
+  assert.equal(h.messages.some(m=>m.type==='edit'||m.type==='toggle'),false);
+  h.send({type:'storageCheck'});h.send({type:'idle'});
+  assert.ok(h.root.all().filter(n=>n.tag==='button').every(n=>n.disabled));
 });
 
 test('restored proof visibility preserves exact source and a focused proof remains a visible destination', () => {

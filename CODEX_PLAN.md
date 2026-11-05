@@ -8,6 +8,65 @@ purpose in `VISION.md`.
 
 ## Frontend scope and immediate delivery
 
+**0.16.0** addresses the user's comparison with Axiom's animated graph and
+corresponding tagged Stacks page. Vertex selection now opens the verified tag
+alongside the graph, with an offline pinned-text choice. Pan/zoom, search,
+keyboard selection, neighbor highlighting, animated deletion/restoration and a
+JSON-editor title action improve navigation. The original graph/projection core,
+source records, joint-premise alternatives and AI-request boundary are unchanged.
+See [workflow](docs/PROOF_GRAPH_WORKFLOW.md#graph-and-tagged-stacks-passage-0160)
+and [browser/command checks](docs/PROOF_GRAPH_VALIDATION.md).
+
+**0.15.0** adds the explicitly requested 08ZE/08ZH summary and vertex-deletion
+trial. A bounded source-based inference document distinguishes joint premises,
+alternatives and local scopes. The Python projection retains all path witnesses;
+the VS Code graph expands omitted steps and restores vertices without changing
+the file. Codex supplies the first attributed summaries and selection. Lean
+sources are pinned separately from informal claims and project review tiers.
+No Lean extraction/checking or automatic provider request is added. See
+[workflow](docs/PROOF_GRAPH_WORKFLOW.md) and [validation](docs/PROOF_GRAPH_VALIDATION.md).
+
+Patch **0.14.4** makes reader diagrams and the 08ZH overview diagram
+follow the VS Code theme. Reader notes offer Theme (default), Paper and Dark.
+Theme changes use CSS and preserve drafts and exact saved diagrams. Return
+uses native Reopen as Preview when available to avoid another source/preview pair.
+
+Patch **0.14.3** makes Return reopen the rendered reading overview after checking
+its saved location. Both exact source-link returns and direct source opening
+use the native Markdown preview, including after the user closes its tabs.
+
+The first Codex-assisted **08ZH proof outline** is saved in the study's
+`reading-overview.md` (2026-11-04). Four steps state their premises and retain
+links to 08ZE/08ZH; the pullback diagram and editable TikZ source sit with the
+inverse-image step. The last step uses the three preceding claims together.
+This first draft uses the Markdown navigator and Codex companion, with API setup
+still deferred. The subsequent 0.15.0 trial above adds explicit inferences and
+reversible vertex deletion.
+
+Patch **0.14.2** makes Return usable after direct saved-source opening: reopen
+the selected overview, including after restart, or offer a file choice when
+none is available. Exact source-link returns, draft ownership and scope guards
+remain unchanged. This removes the unnecessary source-follow prerequisite.
+
+Patch **0.14.1** fixes reader controls after Return: navigation stays out of the
+webview busy state, error notifications do not hold request completion, and
+visibility restores idle controls only after pending actions finish.
+
+MRW **0.14.0** imports a selected Obsidian Markdown note into one of three
+reader-chosen destinations: saved source outline, passage annotation, or reading
+overview. It preserves the original and uses existing source/record/editor owners.
+
+Patch **0.13.5** adds explicit deletion of reader annotations by scope and UUID,
+with confirmation, revision checks and preservation of unrelated notes/drafts.
+
+Patch **0.13.4** adds descriptions to all Research Tools entries, including
+contextual and disabled investigation actions. Tooltips explain targets and
+effects without running commands or services.
+
+Patch **0.13.3** sorts Research Tools alphabetically and exposes **Refresh saved
+source outline** on the reader toolbar, in Research Tools for an open source,
+and in the command palette. Refresh preserves annotation drafts.
+
 VS Code is the active frontend target. The extension owns explicit research
 commands and views; VS Code owns ordinary editing, saving, undo, and document
 recovery. Shared Python services own record validation, exact request preparation,
@@ -45,7 +104,7 @@ Lean, SageMath, containers and providers remain optional for reading/outlining.
 | Selected Stacks section import | 0.8.0: pinned official Git source/tag map, complete statement/proof regions, restricted MathML, retained local citations and annotations | Not implemented |
 | Reader TikZ diagrams | 0.10.0: explicit isolated native render, exact saved code, retained SVG, color and Paper/Dark display, offline reopening | Not implemented |
 | Direct reader AI assistance | 0.11.0: exact retained passage into OpenAI preview/Send; automated checks pass, user reports preview and missing-key not-sent result; MRW API setup deferred, Codex companion preferred for now | Not implemented |
-| Proof-outline vertex elimination | Planned separate increment | Not implemented |
+| Proof-outline vertex elimination | 0.15.0: source-based AI/manual inference outlines, joint-premise projection, all-path witnesses and reversible display deletion; 08ZE/08ZH case; mathematical usefulness pending | Not implemented |
 
 The initial actual-host validation and bounded R3/R3.1 transfer are delivered.
 Use `vscode/README.md` for the independent private pointer, explicit Resume and
@@ -63,6 +122,29 @@ understanding; the four benefit categories below refine evaluation without
 changing implementation status or the delivered R1–R3.1 boundaries.
 
 ## Active roadmap: mathematical usefulness first
+
+### Notes beside source passages — 2026-11-04
+
+The user found the saved 08ZG explanation difficult to locate in the combined
+notes section at the bottom. Patch **0.13.2** displays each passage's notes beneath
+that passage. Whole-source notes appear near the heading; separate disclosures
+preserve live folding choices, annotation editors and drafts. Proof folding does
+not hide access to its notes. Record bytes and annotation scope do not change.
+[Validation](docs/READING_OUTLINE_VALIDATION.md#notes-beside-source-passages--2026-11-04)
+separates DOM/bridge checks from pending actual-window confirmation.
+
+### Storage completion and tutorial correction — 2026-11-04
+
+Patch **0.13.1** addresses the reported storage-operation blocker: readers and
+the operation guard are released before completion notifications are displayed.
+Open directory and Move directory keep separate confirmation and core validation.
+Their displayed names are **Open Saved Work Directory…** and **Move Saved Work
+Directory…**; command IDs and record formats stay unchanged.
+
+The tutorial now documents source controls, Markdown navigation, storage and
+saving. Generic study advice is removed. The screenshot supplied by the user
+shows heading navigation in the empty template; it establishes no mathematical
+usefulness. [Validation](docs/ARTIFACT_STORAGE_VALIDATION.md#completion-notifications-and-command-labels--2026-11-04).
 
 ### Starting mathematical work and learning MRW — 2026-11-04
 

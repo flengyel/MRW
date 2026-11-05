@@ -1,5 +1,36 @@
 # Obsidian companion navigation validation
 
+## Three-destination note import — 2026-11-04
+
+MRW **0.14.0** adds one explicit file import command with three destinations:
+a saved source outline, an annotation on a selected retained passage, and text
+at the reading overview’s cursor. The input is one selected Markdown file; no
+vault scan, linked-note/attachment acquisition or background synchronization runs.
+
+Five new core tests cover byte-exact BOM/CRLF/Unicode retention, external vault
+paths, reopening after source deletion, annotation-preserving repeat imports,
+separate retained revisions, bounded Unicode/line-ending splits, invalid/stale
+input and failed publication. All 24 source-outline tests pass. A disposable
+persistent-storage test verifies the new action enters epoch-checked generation
+publication and preserves existing references and note associations.
+
+Six command/bridge tests cover the three destination choices, source reopen,
+annotation scope and attribution, overview insertion/undo grouping and unsaved
+state, overview selection, cancellation, dirty notes, annotation size, and cursor
+or document changes. All pass. Existing native-UI acceptance for this import
+remains pending; these are core and command-double checks.
+
+The final import command tests pass after adding focus on the selected passage.
+Another 23 existing view/link checks and four existing command regressions pass,
+including companion navigation and annotation-preserving reopen. Syntax, manifest,
+documentation targets and diff whitespace were checked.
+
+The delivered 0.14.0 VSIX passed source/manifest verification with SHA-256
+`92e15a199128baecec10fcfd2601dd3a7ae5b3545692f504784def5bd4c69875`.
+VS Code reported successful installation in WSL Debian. Its registry selects
+0.14.0 and all 64 installed runtime files match the package. No window reload
+was invoked; finish or discard an open request before reloading to activate it.
+
 ## User-requested closed-application storage check — 2026-10-20
 
 The user normally exited Obsidian and authorized one disposable check. Zero

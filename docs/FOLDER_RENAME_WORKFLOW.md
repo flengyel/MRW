@@ -56,7 +56,7 @@ success or retry automatically. Existing [artifact recovery rules](ARTIFACT_STOR
 still govern authority and cleanup.
 
 If saving the convenience shortcut fails after a successful move, MRW reports
-the committed location. Keep that path: **MRW: Open Existing Artifact Directory…**
+the committed location. Keep that path: **MRW: Open Saved Work Directory…**
 in the new empty workspace supplies the existing explicit verification/mapping
 route. A missing or changed store fails without creating a replacement.
 

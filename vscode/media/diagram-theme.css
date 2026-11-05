@@ -1,0 +1,16 @@
+/* Shared by Markdown previews and the retained-source reader. */
+body.vscode-light img,
+body.vscode-high-contrast-light img { color-scheme: only light; }
+body.vscode-dark img,
+body.vscode-high-contrast img { color-scheme: only dark; }
+.mrw-diagram-theme img {
+  max-width: 100%;
+  height: auto;
+  background: var(--vscode-editor-background);
+}
+.mrw-diagram-theme .mrw-diagram-light { display: inline-block; }
+.mrw-diagram-theme .mrw-diagram-dark { display: none; }
+body.vscode-dark .mrw-diagram-theme .mrw-diagram-light,
+body.vscode-high-contrast .mrw-diagram-theme .mrw-diagram-light { display: none; }
+body.vscode-dark .mrw-diagram-theme .mrw-diagram-dark,
+body.vscode-high-contrast .mrw-diagram-theme .mrw-diagram-dark { display: inline-block; }

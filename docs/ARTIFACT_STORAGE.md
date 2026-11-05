@@ -12,6 +12,16 @@ the reopened folder explicitly adopts the verified identity. See
 [the folder-rename workflow](FOLDER_RENAME_WORKFLOW.md). It does not change source
 provenance, merge stores or transfer editor recovery/UI state.
 
+## Open or move saved work (0.13.1)
+
+**Open Saved Work Directory…** connects this workspace to saved sources,
+outlines and annotations at the entered directory. It does not move those files.
+**Move Saved Work Directory…** transfers saved records to a new directory.
+Ordinary source documents, Markdown files and notebooks stay in place.
+
+Input and confirmation dialogs must be completed or cancelled with Esc before
+another record operation. Completion notifications do not block reading.
+
 ## Move this workspace's saved artifacts
 
 1. Save reader annotations and human investigation summaries. Finish any active
@@ -19,10 +29,10 @@ provenance, merge stores or transfer editor recovery/UI state.
    0.7.0 cannot honor the new migration exclusion. Ordinary notes and notebooks
    can stay open in their editors.
 2. Run **MRW: Show Artifact Location** in the intended workspace.
-3. Run **MRW: Move Artifact Directory…**. Enter an absolute **new directory**
+3. Run **MRW: Move Saved Work Directory…**. Enter an absolute **new directory**
    on the Linux/WSL/SSH workspace host. Its parent must already exist.
 4. Review the current directory, destination, affected project folders and
-   workspace scope. Choose **Move artifacts** to commit the operation.
+   workspace scope. Choose **Move saved work** to commit the operation.
 5. The result shows the effective directory. Open readers rebind to it. Run
    **MRW: Show Artifact Location** whenever you want to check it.
 
@@ -154,9 +164,9 @@ by local API status or copied-store tests.
 2. On the receiving computer, open a workspace with one local folder for each
    project in the store. This workspace must have no existing MRW saved artifacts
    or store binding. There is no replace/merge operation in this release.
-3. Run **MRW: Open Existing Artifact Directory…** and choose the local complete
+3. Run **MRW: Open Saved Work Directory…** and choose the local complete
    copy. Map each stored project explicitly to its local folder, then confirm
-   **Open existing store** and the one-writing-computer requirement.
+   **Open saved work** and the one-writing-computer requirement.
 4. MRW verifies every required file/hash and record dependency before binding.
    The same spelling of a directory path is never evidence of identity.
 5. When switching computers again, stop writing, close and finish synchronization

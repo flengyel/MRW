@@ -1,15 +1,35 @@
 # Mathematical Research Workstation for VS Code
 
-**First session:** [First steps with MRW](media/first-steps.md), also available
-inside the installed extension with **MRW: Open Tutorial**. Begin with a question
-from your reading or paper notes, then add source references and optional
-computation as they become useful.
+## Graph navigation and Stacks pages (0.16.0)
+
+Select a graph vertex to read the corresponding official Stacks tag alongside
+it. **Saved text** reads the retained statement/proof offline. Drag to pan,
+wheel to zoom, or use **Fit**. Deletion and restoration animate the layout while
+keeping the selected page open. A title-bar graph icon opens the interactive
+view from a `.mrw-proof.json` editor. See
+[usage and source boundaries](../docs/PROOF_GRAPH_WORKFLOW.md#graph-and-tagged-stacks-passage-0160).
+
+## Proof outlines (0.15.0)
+
+**Open Proof Outline…** opens a `.mrw-proof.json` document with attributed
+summaries, joint premises, alternative derivations and pinned source quotations.
+**Delete vertex** projects the display; **Expand original steps** and **Restore**
+retain the original argument. **Use AI outline** applies a saved proposal;
+**Ask AI…** uses exact preview/Send. Edit summaries in the ordinary JSON editor.
+The first case is Stacks 08ZE/08ZH with pinned Axiom Math and Mathlib source.
+See [the workflow](../docs/PROOF_GRAPH_WORKFLOW.md) and
+[validation](../docs/PROOF_GRAPH_VALIDATION.md). Source inspection supplies the
+proposed structure; no elaborated Lean graph or local Lean check is inferred.
+
+**Commands and file behavior:** [Using MRW](media/first-steps.md), also available
+inside the extension with **MRW: Open Tutorial**. The guide covers source reading,
+annotations, Markdown navigation, saved-work directories and saving.
 
 **New installation:** [choose MRW for reading or add SagePod for computation](../docs/INSTALLATION.md).
 The guide separates prerequisites, the current AI connector and optional Obsidian
 links. Follow the [SagePod tutorial](../docs/GETTING_STARTED_WSL_SAGEPOD.md) for
 the authenticated notebook connection, kernel selection and cell controls.
-MRW 0.13.0 is distributed locally as a VSIX; a project-published Marketplace
+MRW 0.14.4 is distributed locally as a VSIX; a project-published Marketplace
 listing and GitHub release download are not yet available.
 The linked SagePod installation guide and source-build route require repository
 access. The first-steps guide is bundled with the installed extension.
@@ -25,7 +45,8 @@ well as optional captured Lean evidence; see its independent boundary below.
 ## Open MRW
 
 Click the **MRW** book icon in the Activity Bar. It opens **Reading Outline** and
-the collapsible **Research Tools** view. The empty navigator offers **New Reading
+the collapsible **Research Tools** view. Each Research Tools entry has a hover
+description of the command’s target and effect. The empty navigator offers **New Reading
 Overview**, **Open Reading Outline**, **Open Saved Source Outline…** and the
 offline tutorial. The **New Reading Overview…** command also has a title-bar
 button and an entry in the **…** menu; **Open Tutorial** is available in that menu
@@ -52,13 +73,57 @@ saving belong to VS Code. Existing filenames are refused. Cancellation preserves
 the current work; a failed first Save keeps the new editor draft and does not
 report a saved selection.
 
-The bundled [first-session tutorial](media/first-steps.md) explains reading overviews
-and retained source outlines, starting from a question or notes on paper. It
-walks through notes, exact source references, reader annotations, optional
-notebook computation or AI assistance, and resumption. **Open Tutorial** displays
-it through VS Code's Markdown preview with a read-only `mrw-help` document. No
+The bundled [command guide](media/first-steps.md) covers source reading, annotations,
+Markdown links, saved-work directories and the difference between editor Save
+and Save annotation. It states that the empty Markdown template contains only
+headings; the navigator selects headings and follows inserted source links.
+**Open Tutorial** displays it through VS Code's Markdown preview with a read-only `mrw-help` document. No
 private study is created, workspace switched or service started by opening help.
 The tutorial is optional and opens only on request.
+
+## Diagram theme (0.14.4)
+
+Reader diagrams start in **Theme**, following the active VS Code light, dark or
+high contrast theme. **Diagram appearance → Theme / Paper / Dark** supplies
+explicit overrides. Theme changes only switch displayed images through CSS;
+notes, drafts, SVGs and TikZ code remain unchanged. The 08ZH overview SVG adapts
+to the color scheme supplied by that stylesheet in the native Markdown preview.
+
+For saved overviews, Return uses **Reopen as Preview** when VS Code provides it,
+replacing the source tab with its preview. Older hosts use the preview command.
+Unrelated Untitled drafts are preserved.
+
+## Rendered overview on Return (0.14.3)
+
+**Return to reading outline** opens VS Code's rendered Markdown preview. Closing
+the overview editor and preview tabs does not change this: Return recreates the
+preview from the checked overview. The ordinary Markdown editor remains available
+for edits. Existing exact return checks, unsaved text and proof controls remain.
+
+## Return after opening a saved source directly (0.14.2)
+
+**Return to reading outline** reopens the selected overview even when the source
+was opened directly. It uses the live overview or remembered file and restores
+a matching selection. If no overview is available, choose a Markdown file;
+cancellation keeps the reader. An unrelated active Markdown editor is ignored.
+Returns from a source link still select that exact occurrence, with the same
+changed-text and workspace checks.
+
+## Reader controls after Return (0.14.1)
+
+**Return to reading outline** leaves local reader controls usable. An error
+notification can remain open while other actions continue. When an idle reader
+becomes visible again, its controls recover without refreshing its records or
+clearing drafts. Controls for a pending action remain guarded.
+
+## Import an Obsidian note (0.14.0)
+
+**MRW: Import Obsidian Note…** offers three destinations: saved source outline,
+reader annotation on a passage, or text inserted at a Markdown overview cursor.
+Select one `.md` or `.markdown` file. The original stays unchanged; links and
+embeds remain text. The retained-source route preserves bytes and previous
+annotations on repeat imports. An overview insertion stays unsaved until Ctrl+S.
+See [destination behavior and limits](../docs/OBSIDIAN_WORKFLOW.md#import-note-text-0140).
 
 ## Rename a study folder (0.12.0)
 
@@ -212,7 +277,14 @@ Interoperability establishes no mathematical usefulness.
 
 ## Saved artifact location (0.7.0)
 
-Run **MRW: Show Artifact Location**, then **MRW: Move Artifact Directory…**
+Patch **0.13.1** names the commands **Open Saved Work Directory…** and
+**Move Saved Work Directory…**, preserving their IDs. Open connects the workspace
+to records at the supplied directory; Move transfers records to a new directory.
+Readers are released before a completion notification appears. Dismissing that
+notification is not required to continue. Input and confirmation dialogs still
+block competing record operations until completed or cancelled.
+
+Run **MRW: Show Artifact Location**, then **MRW: Move Saved Work Directory…**
 to move this workspace's saved sources, outlines, annotations, evidence, linked
 notes' addresses and required investigation records. The command shows source,
 destination and project scope before confirmation, verifies the staged bytes,
@@ -222,7 +294,7 @@ Save reader drafts first; stale clients cannot write to the retired location.
 retries committed cleanup. **MRW: Refresh Artifact Location** rebinds updated
 windows while keeping drafts. `mrw.artifactMoveDestination` is a suggestion only.
 
-**MRW: Open Existing Artifact Directory…** verifies a complete synchronized copy
+**MRW: Open Saved Work Directory…** verifies a complete synchronized copy
 and explicitly maps its projects into an empty/unbound workspace. It never
 merges stores or invents missing records. Logical store/project IDs and verified
 legacy mappings preserve `mrw-outline:v1` references and exact pinned ranges.
@@ -274,7 +346,8 @@ Saving, opening, refreshing, restoring, moving artifacts and changing appearance
 do not compile. Missing originals do not block valid retained images; changed
 code cannot acquire an earlier rendering. Unsaved form text survives replies.
 
-**Diagram appearance → Paper / Dark** is a workspace UI preference. Dark adapts
+**Diagram appearance → Theme / Paper / Dark** is a workspace UI preference.
+Theme follows VS Code and is the default. Dark adapts
 black/white drawing values while keeping other colors and the original SVG.
 Use normal TikZ colors such as `\draw[red]`. Notes keep their exact editable
 source and attribution. Rendering creates no mathematical evidence or graph.
@@ -292,6 +365,31 @@ Publication uncertainty retains drafts and blocks writes under existing rules.
 [actual host results and limits](../docs/TIKZ_VALIDATION.md). Ordinary Markdown
 preview and Obsidian remain separate host/plugin workflows; this feature neither
 installs another extension nor changes their notes.
+
+## Alphabetical tools and source refresh (0.13.3)
+
+**Research Tools** lists commands alphabetically, including contextual actions.
+**Refresh saved source outline** appears on the source reader’s top toolbar,
+in Research Tools while a source is open, and as **MRW: Refresh Saved Source
+Outline** in the command palette. It reloads saved annotations and source status
+without saving or discarding unsaved annotation text.
+
+## Delete reader notes (0.13.5)
+
+**Delete note…** appears beneath each saved annotation in Reader notes and
+Source notes. Confirm the quoted note and passage to remove it. Unsaved edits to
+that note are discarded only after deletion succeeds; other notes and drafts
+remain. Cancellation or an unconfirmed publication keeps the live text.
+
+## Notes beside their passages (0.13.2)
+
+Saved **Reader notes (N)** appears beneath the statement or proof it annotates.
+It remains accessible when a proof is folded. Notes about the whole source use
+**Source notes (N)** near the source heading. There is no combined notes section
+at the bottom. Each disclosure starts closed and keeps its own live open/closed
+choice across replies. Editing forms remain under Source details and tools;
+folding a note or proof preserves drafts, attribution, exact text and diagrams.
+This changes display placement only; no saved record is rewritten.
 
 ## Compact hidden details (0.9.4)
 
@@ -328,8 +426,8 @@ offer Show/Hide details, using the existing saved expansion action when needed.
 
 This supports the top-down outline principle as a reader supplies or develops an
 outline. The broader deductive model preserves claims, joint premises, local
-scope and expansion of suppressed steps. Explicit inference graphs and vertex
-elimination remain a separate planned implementation.
+scope and expansion of suppressed steps. The separate 0.15.0 proof-outline view
+now implements source-based inference graphs and reversible display deletion.
 
 ## Statement and proof reading (0.9.2)
 
@@ -355,7 +453,7 @@ statement/proof metadata retain manual region navigation; no pairing is guessed.
 after the existing core confirms publication. The host status bar also reports
 that the submitted annotation was saved. Open source tools and the note editor
 stay open across the reply. Existing note editors start collapsed; their saved
-text is readable in the separate Reader notes section.
+text is readable in Reader notes beneath its passage.
 
 Typing while a save is in flight is preserved. The reply says **Submitted version
 saved. Your newer edits are still unsaved.** when it did not cover the newest
@@ -403,7 +501,10 @@ references. Expand/collapse sections; click a heading to select its line, or a
 source link to open the existing reader and its exact retained passage.
 **MRW: Return to Reading Outline**, the view's back arrow, or the reader's
 **Return to reading outline** button selects the originating Markdown occurrence.
+Return then opens the rendered overview, recreating its preview if closed.
 The same passage may appear several times with separate return destinations.
+If the source was opened directly without a source-link origin, Return opens
+the selected overview or offers a file choice instead.
 
 Continue using **Insert Outline Reference…** in the ordinary Markdown editor.
 Reorganize headings, explanations and questions with normal editing and undo.
@@ -671,8 +772,8 @@ root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.13.0.vsix
-sha256sum vscode/theorem-terminal-0.13.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.14.4.vsix
+sha256sum vscode/theorem-terminal-0.14.4.vsix
 ```
 
 In WSL, use Linux Node and npm for this build; a Windows npm launcher cannot
@@ -704,11 +805,11 @@ under the local UI's extensions. Alternatively, in that connected window's
 integrated terminal on the workspace host:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.13.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.14.4.vsix
 code --list-extensions --show-versions
 ```
 
-The extension identity is **flengyel.theorem-terminal**, version **0.13.0**.
+The extension identity is **flengyel.theorem-terminal**, version **0.14.4**.
 Reload the window if VS Code requests it. Open a trusted ordinary Linux workspace
 and run an **MRW:** command from the Command Palette; F5 or a development manifest
 is unnecessary. Python 3.11+ must be available on that host (normally
@@ -972,8 +1073,9 @@ may still occur on supported hosts and are reported without automatic retries. N
 been exercised. Linux bridge checks do not establish cross-platform GUI support.
 
 PDF position tracking,
-internal Lean graphs, vertex elimination, and AI outline
-proposals remain to be transferred or implemented. PDF, LaTeX, Lean and notebook
+internal Lean graphs and automatic AI outline generation
+remain to be transferred or implemented. Source-based proposed outlines and
+reversible vertex deletion are available in 0.15.0. PDF, LaTeX, Lean and notebook
 editing can use installed host extensions under their own settings and execution
 behavior. MRW does not configure or attest to those tools.
 

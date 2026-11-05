@@ -1,0 +1,528 @@
+{
+  "version": 1,
+  "title": "08ZH: closed fiber products",
+  "description": {
+    "text": "Let \\(f:X\\to Z\\) and \\(g:Y\\to Z\\) be continuous, with \\(Z\\) Hausdorff. The fiber product is closed because equality of the two images is membership in the closed diagonal of \\(Z\\times Z\\). The equalizer lemma used by the Lean proof packages the diagonal and inverse-image steps.",
+    "author": "Codex companion",
+    "origin": "ai_proposal"
+  },
+  "sources": [
+    {
+      "id": "stacks",
+      "title": "Stacks Project Authors · 08ZE / 08ZH",
+      "file": "sources/topology.tex",
+      "sha256": "c6bac8dcf8ad96dc47416bf34cb45ba4a10b894e40d67d3e1fa68d8ef0d9f872",
+      "url": "https://github.com/stacks/stacks-project/blob/a04446e57ec1fbc252a871afcec7752fb2807b14/topology.tex",
+      "revision": "a04446e57ec1fbc252a871afcec7752fb2807b14",
+      "review": "published"
+    },
+    {
+      "id": "axiom-diagonal",
+      "title": "Axiom Math · 08ZE · StacksCore",
+      "file": "sources/Diagonal.lean",
+      "sha256": "251a40a72df0fc1f1f3d7b9d01a9d52a91f21ec8b7d2cc7698646b54c009fe52",
+      "url": "https://github.com/AxiomMath/Stacks/blob/f8e70c5dd04bfabcb423d5e325461f527c85a5d6/StacksCore/Topology/Separation/Diagonal.lean",
+      "revision": "f8e70c5dd04bfabcb423d5e325461f527c85a5d6",
+      "review": "human_reviewed",
+      "environment": "Lean v4.34.0-rc2; Mathlib 16edf57de7933555826307a3d81b4391a3657a09; checking reported by Axiom Math; not run by MRW"
+    },
+    {
+      "id": "axiom-fibre",
+      "title": "Axiom Math · 08ZH · StacksFrontier",
+      "file": "sources/FibreProduct.lean",
+      "sha256": "5861d69d9488b31c347a619b454c067a1f3c5a39a96525f2e795f6a73da98147",
+      "url": "https://github.com/AxiomMath/Stacks/blob/f8e70c5dd04bfabcb423d5e325461f527c85a5d6/StacksFrontier/Topology/Separation/FibreProduct.lean",
+      "revision": "f8e70c5dd04bfabcb423d5e325461f527c85a5d6",
+      "review": "awaiting_human_review",
+      "environment": "Lean v4.34.0-rc2; Mathlib 16edf57de7933555826307a3d81b4391a3657a09; checking reported by Axiom Math; not run by MRW"
+    },
+    {
+      "id": "mathlib",
+      "title": "Mathlib contributors · Hausdorff separation",
+      "file": "sources/Hausdorff.lean",
+      "sha256": "b5fca6ab7c5d0cc90b8661f188089eae707cf0c22d99d620b74ac6139d3f7679",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/16edf57de7933555826307a3d81b4391a3657a09/Mathlib/Topology/Separation/Hausdorff.lean",
+      "revision": "16edf57de7933555826307a3d81b4391a3657a09",
+      "review": "human_reviewed",
+      "environment": "Lean v4.34.0-rc2; Mathlib 16edf57de7933555826307a3d81b4391a3657a09; checking reported by Axiom Math; not run by MRW"
+    }
+  ],
+  "scopes": [
+    {
+      "id": "global",
+      "parent": null,
+      "variables": [
+        "\\(X,Y,Z\\) are topological spaces; \\(f:X\\to Z\\), \\(g:Y\\to Z\\).",
+        "Write \\(F=X\\times_ZY=\\{(x,y)\\in X\\times Y:f(x)=g(y)\\}\\).",
+        "Let \\(h=f\\times g:X\\times Y\\to Z\\times Z\\), \\(h(x,y)=(f(x),g(y))\\), and \\(\\Delta_Z(z)=(z,z)\\).",
+        "Let \\(p_X:X\\times Y\\to X\\) and \\(p_Y:X\\times Y\\to Y\\) be the product projections; put \\(u=f\\circ p_X\\) and \\(v=g\\circ p_Y\\)."
+      ],
+      "assumptions": []
+    }
+  ],
+  "nodes": [
+    {
+      "id": "hausdorff",
+      "title": "Hausdorff target",
+      "claim": "The target \\(Z\\) is Hausdorff.",
+      "explanation": {
+        "text": "This hypothesis makes the diagonal closed.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        }
+      ]
+    },
+    {
+      "id": "continuous-f",
+      "title": "Continuity of f",
+      "claim": "The map \\(f:X\\to Z\\) is continuous.",
+      "explanation": {
+        "text": "Composition with \\(p_X\\) gives a continuous map on the product.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        },
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        }
+      ]
+    },
+    {
+      "id": "continuous-g",
+      "title": "Continuity of g",
+      "claim": "The map \\(g:Y\\to Z\\) is continuous.",
+      "explanation": {
+        "text": "Composition with \\(p_Y\\) gives the second continuous map on the product.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        },
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        }
+      ]
+    },
+    {
+      "id": "projection-fact",
+      "title": "Product projections",
+      "claim": "The product projections \\(p_X\\) and \\(p_Y\\) are continuous.",
+      "explanation": {
+        "text": "The product topology supplies these two maps.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        }
+      ]
+    },
+    {
+      "id": "diagonal-fact",
+      "title": "08ZE: diagonal criterion",
+      "claim": "For a topological space \\(Z\\), Hausdorffness is equivalent to closedness of \\(\\Delta_Z(Z)\\subseteq Z\\times Z\\).",
+      "explanation": {
+        "text": "Only the forward implication is needed for 08ZH.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 122,
+          "end_line": 145
+        },
+        {
+          "source": "axiom-diagonal",
+          "start_line": 19,
+          "end_line": 19,
+          "declaration": "t2_iff_isClosed_diagonal"
+        },
+        {
+          "source": "mathlib",
+          "start_line": 163,
+          "end_line": 170,
+          "declaration": "t2_iff_isClosed_diagonal / isClosed_diagonal"
+        }
+      ]
+    },
+    {
+      "id": "preimage-fact",
+      "title": "Closed inverse images",
+      "claim": "The inverse image of a closed set under a continuous map is closed.",
+      "explanation": {
+        "text": "This converts continuity of \\(h\\) and closedness of the diagonal into a closed subset of \\(X\\times Y\\).",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "mathlib",
+          "start_line": 488,
+          "end_line": 490,
+          "declaration": "isClosed_eq"
+        }
+      ]
+    },
+    {
+      "id": "equalizer-fact",
+      "title": "Closed equalizers",
+      "claim": "If \\(A\\) is a topological space, \\(Z\\) is Hausdorff, and \\(u,v:A\\to Z\\) are continuous, then \\(\\{a\\in A:u(a)=v(a)\\}\\) is closed.",
+      "explanation": {
+        "text": "Mathlib proves this using the continuous pair map \\(a\\mapsto(u(a),v(a))\\) and the closed diagonal. It packages the inverse-image argument.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "mathlib",
+          "start_line": 488,
+          "end_line": 490,
+          "declaration": "isClosed_eq"
+        }
+      ]
+    },
+    {
+      "id": "fiber-definition",
+      "title": "Fiber product definition",
+      "claim": "\\(F=\\{(x,y)\\in X\\times Y:f(x)=g(y)\\}\\).",
+      "explanation": {
+        "text": "This identifies the fiber product with the equalizer of \\(u\\) and \\(v\\).",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        },
+        {
+          "source": "axiom-fibre",
+          "start_line": 18,
+          "end_line": 22,
+          "declaration": "fibreProduct"
+        }
+      ]
+    },
+    {
+      "id": "closed-diagonal",
+      "title": "Closed diagonal",
+      "claim": "The set \\(\\Delta_Z(Z)\\) is closed in \\(Z\\times Z\\).",
+      "explanation": {
+        "text": "Apply the forward implication of 08ZE to the Hausdorff target \\(Z\\).",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 122,
+          "end_line": 145
+        },
+        {
+          "source": "mathlib",
+          "start_line": 163,
+          "end_line": 170,
+          "declaration": "t2_iff_isClosed_diagonal / isClosed_diagonal"
+        }
+      ]
+    },
+    {
+      "id": "continuous-u",
+      "title": "Continuity of u",
+      "claim": "The map \\(u=f\\circ p_X:X\\times Y\\to Z\\) is continuous.",
+      "explanation": {
+        "text": "Use continuity of \\(f\\) and \\(p_X\\) jointly.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        }
+      ]
+    },
+    {
+      "id": "continuous-v",
+      "title": "Continuity of v",
+      "claim": "The map \\(v=g\\circ p_Y:X\\times Y\\to Z\\) is continuous.",
+      "explanation": {
+        "text": "Use continuity of \\(g\\) and \\(p_Y\\) jointly.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        }
+      ]
+    },
+    {
+      "id": "continuous-h",
+      "title": "Continuity of h",
+      "claim": "The map \\(h=f\\times g:X\\times Y\\to Z\\times Z\\) is continuous.",
+      "explanation": {
+        "text": "Its coordinate maps are \\(u\\) and \\(v\\), so the product-topology criterion applies.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        },
+        {
+          "source": "mathlib",
+          "start_line": 488,
+          "end_line": 490,
+          "declaration": "isClosed_eq"
+        }
+      ]
+    },
+    {
+      "id": "inverse-image",
+      "title": "Inverse-image identity",
+      "claim": "For \\((x,y)\\in X\\times Y\\), \\((x,y)\\in h^{-1}(\\Delta_Z(Z))\\) if and only if \\(f(x)=g(y)\\), if and only if \\((x,y)\\in F\\). Thus \\(F=h^{-1}(\\Delta_Z(Z))\\).",
+      "explanation": {
+        "text": "The defining equality of the fiber product is precisely membership of the image pair in the diagonal.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        }
+      ]
+    },
+    {
+      "id": "closed-equalizer",
+      "title": "Closed equalizer set",
+      "claim": "The set \\(E=\\{(x,y)\\in X\\times Y:u(x,y)=v(x,y)\\}\\) is closed.",
+      "explanation": {
+        "text": "Apply isClosed_eq to \\(u\\) and \\(v\\), using both continuity proofs and the Hausdorff target.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        },
+        {
+          "source": "mathlib",
+          "start_line": 488,
+          "end_line": 490,
+          "declaration": "isClosed_eq"
+        }
+      ]
+    },
+    {
+      "id": "closed-fiber",
+      "title": "08ZH: closed fiber product",
+      "claim": "Let \\(f:X\\to Z\\) and \\(g:Y\\to Z\\) be continuous maps of topological spaces, with \\(Z\\) Hausdorff. Then \\(X\\times_ZY\\) is closed in \\(X\\times Y\\).",
+      "explanation": {
+        "text": "The diagonal route uses the closed diagonal, continuity of \\(h\\), and the inverse-image identity jointly. The Lean route applies the closed-equalizer lemma to the two coordinate composites and unfolds the fiber product definition.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "scope": "global",
+      "citations": [
+        {
+          "source": "stacks",
+          "start_line": 174,
+          "end_line": 184
+        },
+        {
+          "source": "axiom-fibre",
+          "start_line": 24,
+          "end_line": 32,
+          "declaration": "fibreProduct_isClosed"
+        },
+        {
+          "source": "mathlib",
+          "start_line": 488,
+          "end_line": 490,
+          "declaration": "isClosed_eq"
+        }
+      ]
+    }
+  ],
+  "inferences": [
+    {
+      "id": "apply-08ze",
+      "premises": [
+        "hausdorff",
+        "diagonal-fact"
+      ],
+      "conclusion": "closed-diagonal",
+      "explanation": {
+        "text": "Apply 08ZE to the Hausdorff space Z.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "compose-f",
+      "premises": [
+        "continuous-f",
+        "projection-fact"
+      ],
+      "conclusion": "continuous-u",
+      "explanation": {
+        "text": "Compose f with the first product projection.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "compose-g",
+      "premises": [
+        "continuous-g",
+        "projection-fact"
+      ],
+      "conclusion": "continuous-v",
+      "explanation": {
+        "text": "Compose g with the second product projection.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "pair-continuity",
+      "premises": [
+        "continuous-u",
+        "continuous-v"
+      ],
+      "conclusion": "continuous-h",
+      "explanation": {
+        "text": "A map to a product is continuous when both coordinate maps are continuous.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "identify-preimage",
+      "premises": [
+        "fiber-definition"
+      ],
+      "conclusion": "inverse-image",
+      "explanation": {
+        "text": "Expand membership of the diagonal and the fiber product.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "diagonal-route",
+      "premises": [
+        "closed-diagonal",
+        "continuous-h",
+        "inverse-image",
+        "preimage-fact"
+      ],
+      "conclusion": "closed-fiber",
+      "explanation": {
+        "text": "Take the inverse image of the closed diagonal under h, then use the set identity.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "apply-equalizer",
+      "premises": [
+        "hausdorff",
+        "continuous-u",
+        "continuous-v",
+        "equalizer-fact"
+      ],
+      "conclusion": "closed-equalizer",
+      "explanation": {
+        "text": "Apply Mathlib isClosed_eq with source X × Y and target Z.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    },
+    {
+      "id": "equalizer-route",
+      "premises": [
+        "closed-equalizer",
+        "fiber-definition"
+      ],
+      "conclusion": "closed-fiber",
+      "explanation": {
+        "text": "Unfold fibreProduct; its defining predicate is the equality defining the closed equalizer.",
+        "author": "Codex companion",
+        "origin": "ai_proposal"
+      },
+      "discharges": []
+    }
+  ],
+  "goals": [
+    "closed-fiber"
+  ],
+  "suggested_hidden": [
+    "continuous-u",
+    "continuous-v",
+    "continuous-h",
+    "inverse-image",
+    "closed-equalizer"
+  ]
+}

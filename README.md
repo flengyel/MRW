@@ -1,5 +1,56 @@
 # Mathematical Research Workstation
 
+**0.16.0:** clicking a proof-graph vertex shows its corresponding Stacks page
+beside the graph. Pan, zoom, animated deletion/restoration and an offline saved
+statement/proof view are available. A graph button appears on proof-outline JSON
+editors. [Usage](docs/PROOF_GRAPH_WORKFLOW.md#graph-and-tagged-stacks-passage-0160).
+
+**0.15.0: proof outlines.** **MRW: Open Proof Outline…** displays attributed
+summaries, joint premises, alternative derivations and source links. Intermediate
+vertices can be deleted from the display and expanded back to their original
+steps. The first case compares the Stacks 08ZH diagonal proof with Axiom Math's
+Lean equalizer proof. [Workflow and bounds](docs/PROOF_GRAPH_WORKFLOW.md).
+
+Patch **0.14.4** makes reader diagrams follow the VS Code theme by default,
+with **Theme / Paper / Dark** choices. The 08ZH overview also switches diagrams
+with the theme. Return reopens the overview in the same tab when supported.
+
+Patch **0.14.3** makes Return to reading outline reopen the rendered Markdown
+overview, including after its editor and preview tabs have been closed.
+
+Patch **0.14.2** makes Return to reading outline work when a saved source was
+opened directly: it reopens the selected overview, or offers a Markdown file
+choice when none is selected. Returns from source links keep their exact pins.
+
+Patch **0.14.1** fixes Return to reading outline leaving source-reader controls
+disabled. Error notifications release operations immediately; revealing a reader
+restores idle controls after completed actions.
+
+MRW **0.14.0** adds **Import Obsidian note…** with three destinations: a saved
+source outline, an annotation on a chosen passage, or text inserted into a
+reading overview. The original Markdown file stays in its vault.
+
+Patch **0.13.5** adds **Delete note…** beside saved reader annotations.
+Deletion names the note and passage for confirmation and preserves other notes
+and their drafts.
+
+Patch **0.13.4** adds hover descriptions to every Research Tools entry,
+explaining its target and effect, including contextual request and investigation
+actions.
+
+Patch **0.13.3** sorts **Research Tools** alphabetically, including contextual
+actions. **Refresh saved source outline** appears on the reader toolbar, in
+Research Tools while a source is open, and in the command palette.
+
+Patch **0.13.2** places saved reader notes beneath the passage they annotate,
+with separate folding controls. Source-wide notes appear near the source heading;
+editing forms and drafts keep their existing locations.
+
+Patch **0.13.1** releases the reader before storage completion notifications.
+**Open Saved Work Directory…** connects saved records; **Move Saved Work
+Directory…** transfers them. The [tutorial](vscode/media/first-steps.md) now
+documents controls, file behavior and saving without prescribing study habits.
+
 Mathematical Research Workstation helps you continue work from books, paper and
 the blackboard in an editor, with your own notes, precise source passages and
 optional computation. It is being developed from the Theorem Terminal prototype.
@@ -92,7 +143,7 @@ begin-again lifecycle are delivered in the standalone Qt application. The
 extension supplies record actions, R2 preview/Send and the bounded R3/R3.1
 continuation, private resumption and explicit ending. Their genuine mathematical-use observation
 remains pending. The first offline source-region reader is delivered in VS Code;
-proof-outline vertex elimination remains planned. This adds no broader model conversation.
+source-based proof-outline vertex deletion is available in 0.15.0. This adds no broader model conversation.
 
 Open the **MRW** icon in VS Code's Activity Bar for the reading navigator and
 its **…** command menu. **Reading Outline** is the primary view; other commands
@@ -143,7 +194,8 @@ preferences and exact return pins live in host-local UI state. See
 [the workflow](docs/READING_OUTLINE_WORKFLOW.md) and
 [validation and limits](docs/READING_OUTLINE_VALIDATION.md).
 This is reader-authored navigation; automatic outlines, prerequisite discovery,
-proof graphs and vertex elimination remain pending. Windows-backed storage
+automatic proof-graph extraction remains pending; 0.15.0 adds manual/AI-proposed
+inference outlines and display projection. Windows-backed storage
 qualification remains deferred.
 
 Extension **0.8.0** adds **MRW: Import Stacks Section…**. Enter `08ZD` to
@@ -186,11 +238,11 @@ The user reports that the Zettelkasten integration is helpful in practice;
 this is reported practical benefit, separate from broader mathematical
 usefulness or measured productivity claims.
 
-Extension **0.7.0** adds **MRW: Move Artifact Directory…** for this workspace's
+Extension **0.7.0** adds **MRW: Move Saved Work Directory…** for this workspace's
 saved sources, outlines, annotations, evidence, note links and required
 investigation records. A verified copy is committed through one host-local
 binding, then old owned payloads are removed. Settings alone never switch stores.
-**MRW: Open Existing Artifact Directory…** separately verifies a complete copied
+**MRW: Open Saved Work Directory…** separately verifies a complete copied
 store and maps its projects to this computer. Existing links retain their exact
 targets. See [storage workflow and recovery](docs/ARTIFACT_STORAGE.md) and
 [validation/unsupported filesystems](docs/ARTIFACT_STORAGE_VALIDATION.md).
@@ -285,7 +337,7 @@ repairs preserve exact response identity and distinguish preflight rejection
 from uncertain transmission; see [the review report](docs/VS_CODE_ASSISTANCE_REVIEW.md).
 R3/R3.1 now adds one exact linked child, independent private investigation state,
 restart resumption, and explicit ending through the same core. Proof-outline
-vertex elimination remains planned. Automated bridge and command checks establish
+display vertex deletion is available in 0.15.0. Automated bridge and command checks establish
 mechanics. Scoped real-host command and restart checks now pass in Windows
 VS Code connected to WSL with deterministic responses; see
 [host results and limits](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).

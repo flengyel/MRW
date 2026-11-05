@@ -22,6 +22,23 @@ def interrupted_move(home, destination, roots, manifest, phase):
 
 
 class ArtifactStorageTests(unittest.TestCase):
+    def test_note_import_uses_managed_publication_epoch_and_preserves_existing_records(self):
+        self.move()
+        note = self.base/'outside-note.md'; raw = b'# Note\nExternal vault text.'; note.write_bytes(raw)
+        before = (self.destination/'HEAD.json').read_bytes()
+        with self.assertRaisesRegex(ValueError, 'stale'):
+            dispatch(dict(protocol=1, method='outline_import_note', artifact_home=str(self.home),
+                          artifact_epoch='legacy', store=str(self.store), project_root=str(self.root),
+                          path=str(note), source_revision=sha256(raw).hexdigest()))
+        self.assertEqual((self.destination/'HEAD.json').read_bytes(), before)
+        imported = self.call('outline_import_note', path=str(note), source_revision=sha256(raw).hexdigest())
+        self.assertNotEqual((self.destination/'HEAD.json').read_bytes(), before)
+        self.assertEqual(imported['outline']['regions'][0]['argument_text'], raw.decode())
+        self.assertEqual(self.call('outline_load', id=imported['outline']['id'])['outline'], imported['outline'])
+        self.assertEqual(self.call('outline_follow_reference', reference=self.ref)['document']['text'].encode(), self.raw)
+        self.assertEqual(self.call('outline_notes', id=self.id)['links'][0]['label'], 'Existing α note')
+        self.assertEqual(note.read_bytes(), raw)
+
     def setUp(self):
         test_root=Path(__file__).resolve().parents[1]/'.codex-work/artifact-storage-tests'
         test_root.mkdir(parents=True,exist_ok=True)

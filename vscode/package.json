@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.13.0",
+  "version": "0.16.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -30,10 +30,13 @@
     }
   },
   "contributes": {
+    "markdown.previewStyles": [
+      "./media/diagram-theme.css"
+    ],
     "commands": [
       {
         "command": "mrw.askReader",
-        "title": "Ask About Reader Passage…",
+        "title": "Ask About Reader Passage\u2026",
         "category": "MRW"
       },
       {
@@ -206,6 +209,12 @@
         "enablement": "!mrw.assistanceBusy"
       },
       {
+        "command": "mrw.importObsidianNote",
+        "title": "Import Obsidian Note\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
         "command": "mrw.importStacksSection",
         "title": "Import Stacks Section\u2026",
         "category": "MRW",
@@ -220,6 +229,12 @@
       {
         "command": "mrw.openOutline",
         "title": "Open Saved Source Outline\u2026",
+        "category": "MRW",
+        "enablement": "!mrw.outlineBusy"
+      },
+      {
+        "command": "mrw.refreshSourceOutline",
+        "title": "Refresh Saved Source Outline",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -308,12 +323,12 @@
       },
       {
         "command": "mrw.moveArtifactDirectory",
-        "title": "Move Artifact Directory\u2026",
+        "title": "Move Saved Work Directory\u2026",
         "category": "MRW"
       },
       {
         "command": "mrw.openArtifactDirectory",
-        "title": "Open Existing Artifact Directory\u2026",
+        "title": "Open Saved Work Directory\u2026",
         "category": "MRW"
       },
       {
@@ -375,6 +390,12 @@
         "command": "mrw.selectReadingOutlineItem",
         "title": "Open Reading Outline Location",
         "category": "MRW"
+      },
+      {
+        "command": "mrw.openProofOutline",
+        "title": "Open Proof Outline\u2026",
+        "category": "MRW",
+        "icon": "$(type-hierarchy)"
       }
     ],
     "views": {
@@ -486,6 +507,11 @@
           "command": "mrw.openReadingOutline",
           "when": "view == mrw.readingOutline",
           "group": "1_reading@0"
+        },
+        {
+          "command": "mrw.openProofOutline",
+          "when": "view == mrw.readingOutline",
+          "group": "2_sources@4"
         }
       ],
       "editor/context": [
@@ -550,6 +576,13 @@
           "command": "mrw.selectReadingOutlineItem",
           "when": "false"
         }
+      ],
+      "editor/title": [
+        {
+          "command": "mrw.openProofOutline",
+          "when": "resourceFilename =~ /\\.mrw-proof\\.json$/",
+          "group": "navigation"
+        }
       ]
     },
     "configuration": {
@@ -583,14 +616,14 @@
           "type": "string",
           "default": "",
           "scope": "machine",
-          "description": "Suggested destination for Move Artifact Directory. Changing this setting never changes the active store or moves saved work; use the explicit command."
+          "description": "Suggested destination for Move Saved Work Directory. Changing this setting never changes the active store or moves saved work; use the explicit command."
         }
       }
     },
     "viewsWelcome": [
       {
         "view": "mrw.readingOutline",
-        "contents": "Start with your current mathematical question, a source passage, or notes from paper. A reading overview is your own editable page of notes and source references.\n[New Reading Overview](command:mrw.newReadingOverview)\n[Open Reading Outline](command:mrw.openReadingOutline)\n[Open Saved Source Outline…](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
+        "contents": "Start with your current mathematical question, a source passage, or notes from paper. A reading overview is your own editable page of notes and source references.\n[New Reading Overview](command:mrw.newReadingOverview)\n[Open Reading Outline](command:mrw.openReadingOutline)\n[Open Saved Source Outline\u2026](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
       }
     ],
     "viewsContainers": {
@@ -607,7 +640,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },

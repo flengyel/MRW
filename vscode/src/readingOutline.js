@@ -104,9 +104,21 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     return editor;
   }
-  async function openReadingOutline(choose = false) {
+  async function showReadingView(doc) {
+    // The source editor supplies the checked selection and scroll position.
+    // Reopen the native rendered view even when its previous tab was closed.
+    const commands = await vscode.commands.getCommands?.(true);
+    if (doc.uri.scheme === 'file' && commands?.includes('markdown.reopenAsPreview') && vscode.window.activeTextEditor?.document === doc) {
+      await vscode.commands.executeCommand('markdown.reopenAsPreview');
+    } else await vscode.commands.executeCommand('markdown.showPreview', doc.uri);
+    await vscode.commands.executeCommand('workbench.action.minimizeOtherEditors');
+    await vscode.commands.executeCommand('mrw.readingOutline.focus');
+  }
+  async function openReadingOutline(choose = false, fromReader = false) {
     const attempt = ++generation;
-    let doc = choose ? undefined : vscode.window.activeTextEditor?.document;
+    // Return prefers the selected overview, including after restart. A text
+    // editor left active behind a reader need not be that overview.
+    let doc = choose ? undefined : fromReader ? document : vscode.window.activeTextEditor?.document;
     if (!choose && !isOverview(doc) && isOverview(document)) doc = document;
     if (!choose && !isOverview(doc) && overviewUri) {
       const uri = vscode.Uri.parse(overviewUri);
@@ -132,14 +144,19 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
       if (attempt !== generation) return;
       doc = await vscode.workspace.openTextDocument(choices[0]);
     }
-    return selectOverview(doc, attempt);
+    const opened = await selectOverview(doc, attempt, fromReader);
+    if (fromReader && opened && attempt === generation) {
+      await showReadingView(doc);
+    }
+    return opened;
   }
-  async function selectOverview(doc, attempt) {
+  async function selectOverview(doc, attempt, showEditor = false) {
     await checkDocument(doc);
     if (attempt !== generation) return;
     const previous = document?.uri.toString() || overviewUri;
     if (previous && previous !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
     document = doc; refresh();
+    if (showEditor) await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.One });
     await vscode.commands.executeCommand('mrw.readingOutline.focus');
     if (selected?.uri === doc.uri.toString() && model && selected.revision === model.revision) {
       await showLocation(doc, selected);
@@ -208,7 +225,7 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     await persist();
   });
   register('mrw.returnToReadingOutline', async () => {
-    if (!validPin(origin)) throw new Error('Follow a source from the reading-outline navigator first.');
+    if (!validPin(origin)) return openReadingOutline(false, true);
     const uri = vscode.Uri.parse(origin.uri);
     if (!['file', 'untitled'].includes(uri.scheme) || (uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(uri))) {
       throw new Error('The originating overview is unavailable in this workspace.');
@@ -218,8 +235,7 @@ function registerReadingOutline({ vscode, context, register, followReference }) 
     selected = origin;
     if (document !== doc) { document = doc; collapsed = new Set(); }
     refresh();
-    await vscode.commands.executeCommand('workbench.action.minimizeOtherEditors');
-    await vscode.commands.executeCommand('mrw.readingOutline.focus');
+    await showReadingView(doc);
     const node = model?.all.find(n => n.start === origin.start && n.end === origin.end);
     if (node) await tree.reveal(node, { select: true, focus: false });
     await persist();

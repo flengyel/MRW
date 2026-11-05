@@ -97,9 +97,10 @@ async function harness(root, state = new Map(), options = {}) {
     window: {
       activeTextEditor: undefined,
       createWebviewPanel(type, title, column) {
-        let receive;
+        let receive, viewState;
         const panel = { title, viewColumn: column === -2 ? (api.window.activeTextEditor?.viewColumn || 1) + 1 : column, dispose() {}, reveal() {},
-          onDidDispose() { return disposable; }, onDidChangeViewState() { return disposable; },
+          onDidDispose() { return disposable; }, onDidChangeViewState(callback) { viewState = callback; return disposable; },
+          changeVisibility(visible) { this.visible = visible; this.active = visible; return viewState?.({ webviewPanel: this }); },
           webview: { html: '', messages: [], cspSource: 'vscode-webview:', asWebviewUri: uri => uri.toString(),
             onDidReceiveMessage(callback) { receive = callback; return disposable; },
             async postMessage(value) { this.messages.push(value); if (value.type === 'storageCheck') await receive({ type: 'storageStatus', dirty: !!this.dirty }); return true; } },
@@ -141,7 +142,7 @@ async function harness(root, state = new Map(), options = {}) {
     globalStorageUri: uri(options.globalHome || path.join(root, '..', 'global-state')),
     globalState: { get: (key, fallback) => global.get(key) ?? fallback, async update(key, value) { global.set(key, value); } },
     subscriptions: [], workspaceState: {
-    get: key => state.get(key), keys: () => [...state.keys()],
+    get: (key, fallback) => state.get(key) ?? fallback, keys: () => [...state.keys()],
     async update(key, value) { if (value === undefined) state.delete(key); else state.set(key, value); },
   } };
   const source = await fs.readFile(path.join(extension, 'src/extension.js'), 'utf8');
@@ -152,6 +153,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === './assistance') return require('../src/assistance');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');
+    if (name === './proofGraph') return require('../src/proofGraph');
     if (name === './artifactStorage') return require('../src/artifactStorage');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };
     return require(name);
@@ -908,7 +910,7 @@ test('artifact move confirms scope, rebinds an open reader, keeps old links and 
   await h.commands.get('mrw.associateObsidianNote')();
   const savedNoteReference=h.panels[0].webview.messages.at(-1).notes[0].reference;
   const stale=await harness(root); await stale.commands.get('mrw.openOutline')();
-  const destination=path.join(root,'..','moved α');h.inputs.push(destination);h.endings.push('Move artifacts');
+  const destination=path.join(root,'..','moved α');h.inputs.push(destination);h.endings.push('Move saved work');
   const moved=await h.commands.get('mrw.moveArtifactDirectory')();
   assert.equal(h.errors.length,0);assert.equal(moved.committed,true);assert.equal(moved.location,destination);
   assert.ok(h.panels[0].webview.messages.some(m=>m.type==='storageCheck'));
@@ -926,6 +928,72 @@ test('artifact move confirms scope, rebinds an open reader, keeps old links and 
   await stale.panels[0].receive({type:'toggle',region:created.outline.regions[0].id});
   assert.match(stale.errors.at(-1),/stale client/);
   const status=await h.commands.get('mrw.artifactLocation')();assert.equal(status.location,destination);
+});
+
+for (const operation of ['move', 'open', 'prepare', 'reconnect', 'recover']) {
+  test(`saved sources remain readable while the ${operation} completion notice is undismissed`, { timeout: 60000 }, async t => {
+    const root = await temporary(t, true), source = path.join(root, 'source.txt');
+    await fs.writeFile(source, 'Retained source.\n');
+    const globalState = new Map();
+    let h = await harness(root, new Map(), { globalState });
+    h.focus(h.editor(h.document(source, 'Retained source.\n')));
+    const created = await h.commands.get('mrw.createOutline')();
+    let command;
+    if (operation === 'move') {
+      h.inputs.push(path.join(root, '..', 'saved-work'));
+      h.endings.push('Move saved work'); command = 'mrw.moveArtifactDirectory';
+    } else if (operation === 'open') {
+      const destination = path.join(root, '..', 'saved-work');
+      h.inputs.push(destination); h.endings.push('Move saved work');
+      await h.commands.get('mrw.moveArtifactDirectory')();
+      h = await harness(await temporary(t, true));
+      h.inputs.push(destination); h.endings.push('Open saved work'); command = 'mrw.openArtifactDirectory';
+    } else if (operation === 'prepare') {
+      h.endings.push('Prepare saved work'); command = 'mrw.prepareFolderRename';
+    } else if (operation === 'reconnect') {
+      h.endings.push('Prepare saved work'); await h.commands.get('mrw.prepareFolderRename')();
+      const renamed = path.join(root, '..', 'renamed-study'); await fs.rename(root, renamed);
+      h = await harness(renamed, new Map(), { globalState, storage: path.join(root, '..', 'reconnected-state') });
+      h.endings.push('Reconnect saved work'); command = 'mrw.reconnectRenamedFolder';
+    } else command = 'mrw.recoverArtifactMove';
+    assert.deepEqual(h.errors, []);
+    let announce, dismiss;
+    const displayed = new Promise(resolve => { announce = resolve; });
+    const notification = new Promise(resolve => { dismiss = resolve; });
+    h.api.window.showInformationMessage = () => { announce(); return notification; };
+    const action = h.commands.get(command)();
+    t.after(async () => { dismiss(); await action; });
+    await Promise.race([displayed, action.then(() => {
+      throw new Error(`No completion notice: ${h.errors.join('; ')}`);
+    })]);
+    await h.commands.get('mrw.openOutline')();
+    assert.deepEqual(h.errors, []);
+    const model = h.panels.at(-1).webview.messages.findLast(message => message.type === 'outline').model;
+    assert.equal(model.outline.id, created.outline.id);
+    dismiss(); await action;
+  });
+}
+
+test('cancelling a pending Open or Move directory prompt releases the reader without changing stores', async t => {
+  const root = await temporary(t, true), source = path.join(root, 'source.txt');
+  await fs.writeFile(source, 'Retained source.\n');
+  const h = await harness(root); h.focus(h.editor(h.document(source, 'Retained source.\n')));
+  const created = await h.commands.get('mrw.createOutline')();
+  for (const command of ['mrw.openArtifactDirectory', 'mrw.moveArtifactDirectory']) {
+    let announce, cancel;
+    const displayed = new Promise(resolve => { announce = resolve; });
+    h.api.window.showInputBox = () => { announce(); return new Promise(resolve => { cancel = resolve; }); };
+    const pending = h.commands.get(command)();
+    t.after(async () => { cancel?.(); await pending; });
+    await displayed;
+    await h.commands.get('mrw.openOutline')();
+    assert.match(h.errors.pop(), /operation is in progress/);
+    assert.ok(!h.requests.some(request => ['artifact_move', 'artifact_adopt'].includes(request.method)));
+    cancel(); await pending;
+    await h.commands.get('mrw.openOutline')();
+    assert.deepEqual(h.errors, []);
+    assert.equal(h.panels.at(-1).webview.messages.findLast(message => message.type === 'outline').model.outline.id, created.outline.id);
+  }
 });
 
 test('artifact move cancellation and dirty reader drafts preserve the original store', async t => {
@@ -946,10 +1014,10 @@ test('adopted synchronized identity permits an old external route only in the ex
   const root=await temporary(t,true),source=path.join(root,'portable α.txt');await fs.writeFile(source,'exact retained α\n');
   const h=await harness(root);h.focus(h.editor(h.document(source,'exact retained α\n')));
   const created=await h.commands.get('mrw.createOutline')();const markdown=await h.commands.get('mrw.copyOutlineLink')();
-  const moved=path.join(root,'..','portable artifacts');h.inputs.push(moved);h.endings.push('Move artifacts');
+  const moved=path.join(root,'..','portable artifacts');h.inputs.push(moved);h.endings.push('Move saved work');
   await h.commands.get('mrw.moveArtifactDirectory')();assert.deepEqual(h.errors,[]);
   const local=await temporary(t,true),copy=path.join(local,'..','synchronized artifacts');await fs.cp(moved,copy,{recursive:true});
-  const receiver=await harness(local);receiver.inputs.push(copy);receiver.endings.push('Open existing store');
+  const receiver=await harness(local);receiver.inputs.push(copy);receiver.endings.push('Open saved work');
   await receiver.commands.get('mrw.openArtifactDirectory')();assert.deepEqual(receiver.errors,[]);
   receiver.api.env.clipboard.value=markdown;await receiver.commands.get('mrw.openLinkFromClipboard')();
   assert.deepEqual(receiver.errors,[]);assert.ok(receiver.requests.some(r=>r.method==='artifact_match_reference'));
@@ -1053,7 +1121,7 @@ test('a reconnect-shortcut publication failure retains the committed store and r
   const h = await harness(root, new Map(), { globalState }); h.focus(h.editor(h.document(source, 'retained\n')));
   const created = await h.commands.get('mrw.createOutline')(); h.endings.push('Prepare saved work');
   await h.commands.get('mrw.prepareFolderRename')();
-  assert.match(h.errors.pop(), /Saved work moved to .*shortcut could not be saved.*Open Existing Artifact Directory/);
+  assert.match(h.errors.pop(), /Saved work moved to .*shortcut could not be saved.*Open Saved Work Directory/);
   const status = await h.commands.get('mrw.artifactLocation')(); assert.ok(status.store_id);
   assert.ok((await fs.stat(status.location)).isDirectory()); assert.equal(globalState.size, 0);
   const restarted = await harness(root); await restarted.commands.get('mrw.openOutline')();
@@ -1241,12 +1309,99 @@ test('the offline tutorial opens a read-only Markdown preview without creating f
   const doc = await h.api.workspace.openTextDocument(call.args[0]);
   const exact = await fs.readFile(path.resolve(__dirname, '../media/first-steps.md'), 'utf8');
   assert.equal(doc.getText(), exact);
-  assert.match(exact, /Keep using paper/);
-  assert.match(exact, /New Reading Overview/);
-  assert.match(exact, /Save annotation/);
-  assert.match(exact, /Saved\s+outputs/);
   assert.equal(h.workspaceEdits.length, 0); assert.equal(h.requests.length, 0);
   assert.deepEqual(await fs.readdir(root), []);
+});
+
+test('Obsidian import offers three destinations and retains an external note as a reopenable source', async t => {
+  const root=await temporary(t),note=path.join(root,'..','Note α.md');
+  const text='---\r\ntitle: Note\r\n---\r\n# Claim\r\n[[Other]] ![[image.png]]\r\n\\(X\\times_ZY\\)\r\n';
+  await fs.writeFile(note,'\ufeff'+text);
+  const h=await harness(root),choices=[];
+  h.api.window.showQuickPick=async options=>{choices.push(options);return options.find(o=>o.kind==='source')};
+  h.opens.push([uri(note)]);
+  const imported=await h.commands.get('mrw.importObsidianNote')();assert.ok(imported,h.errors.join('\n'));
+  assert.deepEqual(choices[0].map(o=>o.kind),['source','annotation','overview']);
+  assert.equal(imported.outline.regions[0].argument_text,text);
+  assert.equal(imported.outline.source.authorship,'unknown');
+  assert.equal(imported.outline.source.path,note);
+  assert.equal(await fs.readFile(note,'utf8'),'\ufeff'+text);
+  assert.equal(h.requests.filter(r=>r.method==='outline_import_note').length,1);
+  await fs.unlink(note);const reopened=await harness(root);await reopened.commands.get('mrw.openOutline')();
+  assert.equal(reopened.panels[0].webview.messages.findLast(m=>m.type==='outline').model.outline.regions[0].argument_text,text);
+  assert.equal(h.requests.some(r=>r.method==='send_assistance'||r.method==='outline_render_diagram'),false);
+  const manifest=JSON.parse(await fs.readFile(path.resolve(__dirname,'../package.json'),'utf8'));
+  assert.ok(manifest.contributes.commands.some(c=>c.command==='mrw.importObsidianNote'));
+});
+
+test('Obsidian import can add exact note text to a chosen passage without replacing its notes', async t => {
+  const root=await temporary(t),source=path.join(root,'source.txt'),note=path.join(root,'..','Obsidian.md');
+  await fs.writeFile(source,'Source.');await fs.writeFile(note,'# My note\r\nA quotation [[Other]].');
+  const h=await harness(root);h.focus(h.editor(h.document(source,'Source.')));
+  const created=await h.commands.get('mrw.createOutline')(),region=created.outline.regions[0].id;
+  await h.panels[0].receive({type:'edit',change:{kind:'annotation',region,id:null,purpose:'question',text:'Keep this note',origin:'human_work',author:'Reader'}});
+  h.picks.push({kind:'annotation'});h.opens.push([uri(note)]);
+  const saved=await h.commands.get('mrw.importObsidianNote')();assert.ok(saved,h.errors.join('\n'));
+  const notes=saved.outline.regions[0].annotations;
+  assert.equal(notes.length,2);assert.equal(notes[0].text,'Keep this note');
+  assert.equal(notes[1].text,await fs.readFile(note,'utf8'));
+  assert.equal(notes[1].provenance.origin,'unknown');assert.equal(notes[1].provenance.author,null);
+  assert.equal(saved.outline.id,created.outline.id);
+  assert.deepEqual(h.panels[0].webview.messages.at(-1),{type:'publishedFocus',region});
+  assert.equal(h.requests.some(r=>r.method==='outline_import_note'),false);
+});
+
+test('Obsidian overview import uses the editor cursor and leaves the file unsaved without private writes', async t => {
+  const root=await temporary(t),overview=path.join(root,'overview.md'),note=path.join(root,'..','Obsidian.md');
+  const original='# Overview\n',text='# Imported\n[[Other]]\n';
+  await fs.writeFile(overview,original);await fs.writeFile(note,text);
+  const h=await harness(root),doc=await h.api.workspace.openTextDocument(uri(overview)),editor=h.editor(doc);
+  editor.selection=new Selection(new Position(0,0),new Position(0,0));h.focus(editor);
+  const edit=editor.edit.bind(editor);editor.edit=(change,options)=>{assert.deepEqual(options,{undoStopBefore:true,undoStopAfter:true});return edit(change)};
+  h.picks.push({kind:'overview'});h.opens.push([uri(note)]);
+  await h.commands.get('mrw.importObsidianNote')();
+  assert.equal(doc.getText(),text+original);assert.equal(doc.isDirty,true);
+  assert.equal(await fs.readFile(overview,'utf8'),original);assert.equal(await fs.readFile(note,'utf8'),text);
+  assert.equal(h.requests.length,0);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('Obsidian overview import offers a target picker when no overview is active', async t => {
+  const root=await temporary(t),overview=path.join(root,'overview.md'),note=path.join(root,'..','Obsidian.md');
+  await fs.writeFile(overview,'# Overview\n');await fs.writeFile(note,'Imported text');
+  const h=await harness(root);h.picks.push({kind:'overview'});h.opens.push([uri(overview)],[uri(note)]);
+  await h.commands.get('mrw.importObsidianNote')();
+  assert.equal(h.dialogs[0].title,'Choose the reading overview');assert.equal(h.dialogs[1].title,'Import Obsidian note');
+  assert.ok(h.api.window.activeTextEditor.document.getText().includes('Imported text'));
+  assert.equal(h.requests.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('Obsidian import cancellation, unsaved notes and annotation limits make no private writes', async t => {
+  const root=await temporary(t),note=path.join(root,'..','Obsidian.md');await fs.writeFile(note,'Text');
+  const cancelled=await harness(root);cancelled.picks.push(undefined);await cancelled.commands.get('mrw.importObsidianNote')();
+  assert.equal(cancelled.dialogs.length,0);assert.equal(cancelled.requests.length,0);
+  const noFile=await harness(root);noFile.picks.push({kind:'source'});await noFile.commands.get('mrw.importObsidianNote')();
+  assert.equal(noFile.requests.length,0);
+  const dirty=await harness(root);const doc=dirty.document(note,'Changed buffer');doc.isDirty=true;dirty.api.workspace.textDocuments=[doc];
+  dirty.picks.push({kind:'source'});dirty.opens.push([uri(note)]);await dirty.commands.get('mrw.importObsidianNote')();
+  assert.match(dirty.errors[0],/Save the Obsidian note/);assert.equal(dirty.requests.length,0);
+  await fs.writeFile(note,'x'.repeat(16385));const large=await harness(root);large.picks.push({kind:'annotation'});large.opens.push([uri(note)]);
+  await large.commands.get('mrw.importObsidianNote')();assert.match(large.errors[0],/16 KiB/);assert.equal(large.requests.length,0);
+});
+
+test('Obsidian overview import refuses a changed cursor or document without overwriting edits', async t => {
+  for(const moved of [true,false]){
+    const root=await temporary(t),overview=path.join(root,'overview.md'),note=path.join(root,'..','Obsidian.md');
+    await fs.writeFile(overview,'# Overview\n');await fs.writeFile(note,'Imported text');
+    const h=await harness(root),doc=await h.api.workspace.openTextDocument(uri(overview)),editor=h.editor(doc);h.focus(editor);
+    h.picks.push({kind:'overview'});h.api.window.showOpenDialog=async()=>{
+      if(moved)editor.selection=new Selection(new Position(0,0),new Position(0,0));
+      else h.changeDocument(doc,0,0,'User edit\n');return[uri(note)];
+    };
+    await h.commands.get('mrw.importObsidianNote')();
+    assert.match(h.errors[0],/overview or cursor changed/);assert.ok(!doc.getText().includes('Imported text'));
+    if(!moved)assert.ok(doc.getText().startsWith('User edit'));
+    assert.equal(h.requests.length,0);
+  }
 });
 
 test('the MRW starting view offers New, Open, saved sources and tutorial as registered commands', async t => {
@@ -1579,6 +1734,220 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   assert.equal(h.requests.length,0,'registering the icon, views and menus launches no service');
 });
 
+test('reader Return reopens the rendered overview after its editor and preview tabs are closed', async t => {
+  const root=await temporary(t),h=await harness(root),source=path.join(root,'source.txt');
+  await fs.writeFile(source,'Source.');h.focus(h.editor(h.document(source,'Source.')));
+  await h.commands.get('mrw.createOutline')();
+  const file=path.join(root,'overview.md'),text='# Reading\n\n$x=y$\n';await fs.writeFile(file,text);
+  const doc=h.document(file,text);doc.languageId='markdown';h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();h.closeDocument(doc);h.focus(undefined);
+  const previews=[];
+  h.commands.set('markdown.showPreview',resource=>{
+    assert.equal(h.api.window.activeTextEditor.document.uri.toString(),resource.toString());
+    previews.push(h.api.window.activeTextEditor.document);h.focus(undefined);
+  });
+  for(let i=0;i<2;i++){
+    await h.commands.get('mrw.openOutline')();const panel=h.panels[0],before=h.requests.length;
+    await panel.receive({type:'reading_return'});
+    assert.equal(previews.length,i+1,'Return must recreate a closed rendered view');
+    assert.equal(previews.at(-1).uri.fsPath,file);assert.equal(previews.at(-1).getText(),text);
+    assert.equal(h.api.window.activeTextEditor,undefined,'The rendered overview is the reading destination');
+    assert.equal(h.requests.length,before);assert.equal(panel.webview.messages.at(-1).type,'idle');
+    h.closeDocument(previews.at(-1));
+  }
+  assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);
+  assert.equal(h.state.get('mrw.readingOutline.v1').origin,undefined);assert.deepEqual(h.errors,[]);
+});
+
+test('reader Return renders the exact source-link occurrence and rejects changed origins before preview', async t => {
+  const root=await temporary(t),h=await harness(root);
+  const {saved,region}=await sourceReader(h,root);
+  const ref=(await runBridge(path.resolve(__dirname,'..'),'python3',{
+    method:'outline_reference',store:path.join(root,'..','private-state',`outlines-${navigation.digest(root)}`),
+    project_root:root,id:saved.outline.id,revision:saved.revision,region,
+  })).reference;
+  const link=`[Retained passage](${ref})`,text=`# Reading\n\n${link}\n\n## Again\n\n${link}\n`,file=path.join(root,'overview.md');
+  await fs.writeFile(file,text);const doc=h.document(file,text);doc.languageId='markdown';h.focus(h.editor(doc));
+  const model=await h.commands.get('mrw.openReadingOutline')(),target=model.all.at(-1);
+  await h.commands.get('mrw.selectReadingOutlineItem')(target);h.closeDocument(doc);h.focus(undefined);
+  const previews=[];
+  h.commands.set('markdown.showPreview',resource=>{
+    const editor=h.api.window.activeTextEditor;
+    previews.push({resource,doc:editor.document,selected:editor.document.getText(editor.selection),start:editor.selection.start});
+    h.focus(undefined);
+  });
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(previews.length,1);assert.equal(previews[0].resource.fsPath,file);
+  assert.equal(previews[0].selected,link);assert.equal(previews[0].start.line,6);
+  assert.equal(h.api.window.activeTextEditor,undefined);
+  h.changeDocument(previews[0].doc,target.start+2,1,'X');
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.match(h.errors.pop(),/exact reading-outline location changed/);
+  assert.equal(previews.length,1,'A failed exact return must not open a replacement preview');
+  assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('reader Return without a source-link origin reopens the selected overview after restart', async t => {
+  const root=await temporary(t),h=await harness(root),source=path.join(root,'source.txt');
+  await fs.writeFile(source,'Source.');h.focus(h.editor(h.document(source,'Source.')));
+  await h.commands.get('mrw.createOutline')();
+  const file=path.join(root,'overview.md'),text='# Reading\n\n## Current question\n';
+  await fs.writeFile(file,text);const doc=h.document(file,text);doc.languageId='markdown';h.focus(h.editor(doc));
+  const model=await h.commands.get('mrw.openReadingOutline')();
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1]);
+  assert.equal(h.state.get('mrw.readingOutline.v1').origin,undefined);
+  const restored=await harness(root,h.state);
+  await restored.commands.get('mrw.openOutline')();const panel=restored.panels[0];
+  const other=path.join(root,'README.md');await fs.writeFile(other,'# Other document\n');
+  const unrelated=restored.document(other,'# Other document\n');unrelated.languageId='markdown';
+  restored.focus(restored.editor(unrelated));
+  const before=restored.requests.length;
+  await panel.receive({type:'reading_return'});
+  const editor=restored.api.window.activeTextEditor;
+  assert.equal(editor.document.uri.fsPath,file);
+  assert.equal(editor.document.getText(editor.selection),'## Current question');
+  assert.equal(restored.api.readingProvider.getChildren()[0].label,'Reading');
+  assert.ok(restored.executed.includes('workbench.action.minimizeOtherEditors'));
+  assert.ok(restored.executed.includes('mrw.readingOutline.focus'));
+  assert.equal(panel.webview.messages.at(-1).type,'idle');
+  assert.equal(restored.requests.length,before,'Returning without a link does not read or change source records');
+  assert.equal(restored.state.get('mrw.readingOutline.v1').origin,undefined,'An overview return is not a source-link occurrence');
+  assert.equal(restored.commandCalls.findLast(call=>call.name==='markdown.showPreview').args[0].fsPath,file);
+  assert.equal(await fs.readFile(file,'utf8'),text);
+  assert.deepEqual(restored.errors,[]);
+});
+
+test('Return without a source-link origin preserves the live untitled overview and unsaved edits', async t => {
+  const root=await temporary(t),h=await harness(root);
+  const doc=h.document('/Reading draft.md','# Reading\n\n## Question\n','untitled');
+  doc.languageId='markdown';h.focus(h.editor(doc));
+  const model=await h.commands.get('mrw.openReadingOutline')();
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1]);
+  h.changeDocument(doc,0,0,'An unsaved question.\n\n');h.focus(undefined);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(h.api.window.activeTextEditor.document,doc);
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection),'## Question');
+  assert.equal(doc.isDirty,true);assert.match(doc.getText(),/^An unsaved question/);
+  assert.equal(h.commandCalls.findLast(call=>call.name==='markdown.showPreview').args[0].scheme,'untitled');
+  assert.equal(h.requests.length,0);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('reader Return without an overview offers a choice and cancellation leaves the reader usable', async t => {
+  const root=await temporary(t),h=await harness(root),file=path.join(root,'source.txt');
+  await fs.writeFile(file,'Source.');h.focus(h.editor(h.document(file,'Source.')));
+  await h.commands.get('mrw.createOutline')();const panel=h.panels[0],before=h.requests.length;
+  await panel.receive({type:'reading_return'});
+  assert.equal(h.dialogs.at(-1).title,'Choose a Markdown reading overview');
+  assert.equal(panel.webview.messages.at(-1).type,'idle');
+  assert.equal(h.requests.length,before);assert.equal(h.state.has('mrw.readingOutline.v1'),false);
+  assert.equal(h.commandCalls.some(call=>call.name==='markdown.showPreview'),false);
+  const overview=path.join(root,'overview.md');await fs.writeFile(overview,'# Chosen overview\n');
+  h.opens.push([uri(overview)]);await panel.receive({type:'reading_return'});
+  assert.equal(h.api.window.activeTextEditor.document.uri.fsPath,overview);
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri,uri(overview).toString());
+  assert.equal(h.state.get('mrw.readingOutline.v1').origin,undefined);
+  assert.ok(await h.commands.get('mrw.refreshSourceOutline')());
+  assert.deepEqual(h.errors,[]);
+});
+
+test('Return without a source-link origin checks the remembered overview workspace before reading', async t => {
+  const root=await temporary(t),file=path.join(root,'..','outside.md');await fs.writeFile(file,'# Outside\n');
+  const state=new Map([['mrw.readingOutline.v1',{uri:uri(file).toString()}]]),h=await harness(root,state);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.match(h.errors.at(-1),/outside this workspace/);
+  assert.equal(h.reads.includes(uri(file).toString()),false);assert.equal(h.shown.length,0);
+  assert.equal(h.state.get('mrw.readingOutline.v1').origin,undefined);
+});
+
+test('failed reader Return releases controls while its error notification remains open', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const overview=path.join(root,'overview.md');await fs.writeFile(overview,'# Reading\n');
+  const state=new Map([['mrw.readingOutline.v1',{uri:uri(overview).toString(),
+    origin:{uri:uri(overview).toString(),revision:'0'.repeat(64),start:0,end:1}}]]);
+  const h=await harness(root,state);h.focus(h.editor(h.document(file,'Source.')));
+  await h.commands.get('mrw.createOutline')();const panel=h.panels[0];
+  let dismiss,finished=false;
+  h.api.window.showErrorMessage=message=>{h.errors.push(message);return new Promise(resolve=>{dismiss=resolve})};
+  const pending=panel.receive({type:'reading_return'}).then(()=>{finished=true});
+  try {
+    await new Promise(resolve=>setTimeout(resolve,50));
+    assert.match(h.errors.at(-1),/exact reading-outline location changed/);
+    assert.equal(finished,true,'Dismissing an error notification is not part of Return');
+    assert.equal(panel.webview.messages.at(-1).type,'idle');
+    const refreshed=await h.commands.get('mrw.refreshSourceOutline')();
+    assert.ok(refreshed,'A failed Return must release the outline operation lock');
+  } finally { dismiss?.(); await pending; }
+});
+
+test('revealing a reader restores controls only after its pending operation finishes', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+  const saved=await h.commands.get('mrw.createOutline')(),panel=h.panels[0];
+  panel.changeVisibility(false);let start=panel.webview.messages.length;
+  const reads=h.requests.length;await panel.changeVisibility(true);
+  assert.ok(panel.webview.messages.slice(start).some(m=>m.type==='idle'));
+  assert.equal(h.requests.length,reads,'Restoring controls performs no core request');
+  let release,entered;
+  const waiting=new Promise(resolve=>{entered=resolve});
+  h.setService(async(_a,_b,request)=>{
+    if(request.method==='outline_load'){entered();return new Promise(resolve=>{release=()=>resolve(saved)})}
+    if(request.method==='outline_notes')return{links:[],targets:{}};
+    throw new Error('Unexpected request '+request.method);
+  });
+  const pending=panel.receive({type:'refresh'});await waiting;
+  try {
+    panel.changeVisibility(false);start=panel.webview.messages.length;await panel.changeVisibility(true);
+    assert.equal(panel.webview.messages.slice(start).some(m=>m.type==='idle'),false);
+  } finally {release();await pending;}
+  assert.equal(panel.webview.messages.at(-1).type,'idle');
+});
+
+test('reader note deletion is confirmed, scoped, and announced only after core publication', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+  await h.commands.get('mrw.createOutline')();const panel=h.panels[0];
+  const edit=async(region,text)=>panel.receive({type:'edit',change:{kind:'annotation',region,id:null,purpose:'explanation',text,origin:'ai_proposal',author:'Automated check'}});
+  let latest=()=>panel.webview.messages.findLast(m=>m.type==='outline');
+  const region=latest().model.outline.regions[0].id;
+  await edit(null,'Keep source note');await edit(region,'Remove synthetic note');
+  const note=latest().model.outline.regions[0].annotations[0],notices=[];
+  h.api.window.setStatusBarMessage=text=>notices.push(text);
+  const deletion={type:'delete_annotation',region,annotation:note.id,unsaved:true};
+  let count=h.requests.length;await panel.receive(deletion);
+  assert.equal(h.requests.length,count,'Cancellation makes no bridge call');
+  assert.equal(latest().model.outline.regions[0].annotations.length,1);
+  const confirmations=[];
+  h.api.window.showWarningMessage=async(...args)=>{confirmations.push(args);return 'Delete note'};
+  await panel.receive(deletion);
+  assert.match(confirmations[0][0],/Remove synthetic note/);assert.match(confirmations[0][0],/Unsaved edits/);
+  assert.deepEqual(confirmations[0].slice(1),[{modal:true},'Delete note']);
+  assert.equal(latest().model.outline.regions[0].annotations.length,0);
+  assert.equal(latest().model.outline.annotations[0].text,'Keep source note');
+  assert.deepEqual(latest().deletedAnnotation,{region,id:note.id});
+  assert.deepEqual(notices,['MRW: Reader note deleted.']);
+  const before=h.requests.length;await panel.receive(deletion);
+  assert.equal(h.requests.length,before);assert.equal(notices.length,1);
+  assert.match(h.errors.at(-1),/Reader note changed/);
+});
+
+test('reader note deletion rejection and uncertain publication preserve live notes without a success reply', async t => {
+  for(const blocked of [false,true]){
+    const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+    const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+    await h.commands.get('mrw.createOutline')();const panel=h.panels[0];
+    await panel.receive({type:'edit',change:{kind:'annotation',region:null,id:null,purpose:'question',text:'Keep until confirmed',origin:'human_work',author:'Reader'}});
+    const saved=panel.webview.messages.findLast(m=>m.type==='outline'),note=saved.model.outline.annotations[0],notices=[];
+    h.api.window.setStatusBarMessage=text=>notices.push(text);h.endings.push('Delete note');
+    h.setService(async()=>{if(blocked)return{blocked:true,write_error:'Uncertain publication'};const e=new Error('Revision conflict');e.code='ACTION_REJECTED';throw e});
+    const count=panel.webview.messages.length;
+    await panel.receive({type:'delete_annotation',region:null,annotation:note.id});
+    assert.equal(panel.webview.messages.slice(count).some(m=>m.deletedAnnotation),false);
+    assert.equal(panel.webview.messages.findLast(m=>m.type==='outline'),saved);
+    assert.deepEqual(notices,[]);
+    assert.equal(panel.webview.messages.findLast(m=>m.type==='error').writesBlocked,blocked);
+  }
+});
+
 test('proof visibility uses only host-local UI preferences and survives reader reopening', async t => {
   const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
   const state=new Map(),h=await harness(root,state);h.focus(h.editor(h.document(file,'Source.')));
@@ -1610,11 +1979,56 @@ test('diagram actions retain exact saved code, preserve notes, and reopen withou
   assert.ok(rendered.outline.annotations[0].fragments.find(b=>b.kind==='tikz').image);
   assert.equal(h.requests.filter(r=>r.method==='outline_render_diagram').length,1);
   const count=h.requests.length;await panel.receive({type:'diagram_appearance',value:'dark'});
-  assert.equal(h.requests.length,count);assert.equal(h.state.get('mrw.diagramAppearance.v1'),'dark');
+  assert.equal(h.requests.length,count);assert.equal(h.state.get('mrw.diagramAppearance.v2'),'dark');
   await panel.receive({type:'ready'});
   assert.equal(panel.webview.messages.findLast(m=>m.type==='outline').diagramAppearance,'dark');
   const reopened=await harness(root);await reopened.commands.get('mrw.openOutline')();
   assert.ok(reopened.panels[0].webview.messages.findLast(m=>m.type==='outline').model.outline.annotations[0].fragments.find(b=>b.kind==='tikz').image);
   assert.equal(reopened.requests.some(r=>r.method==='outline_render_diagram'),false);
   assert.equal(await fs.readFile(file,'utf8'),'Source.');assert.deepEqual(h.errors,[]);
+});
+
+test('diagram Theme default supersedes the legacy fixed mode and persists explicit overrides without core work', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const state=new Map([['mrw.diagramAppearance.v1','dark']]),h=await harness(root,state);
+  h.focus(h.editor(h.document(file,'Source.')));await h.commands.get('mrw.createOutline')();
+  const panel=h.panels[0],latest=()=>panel.webview.messages.findLast(m=>m.type==='outline');
+  assert.equal(latest().diagramAppearance,'theme');assert.match(panel.webview.html,/body\.vscode-dark/);
+  const before=h.requests.length;
+  for(const value of ['paper','dark','theme']){
+    await panel.receive({type:'diagram_appearance',value});
+    assert.equal(h.state.get('mrw.diagramAppearance.v2'),value);
+  }
+  assert.equal(h.requests.length,before);assert.equal(h.state.get('mrw.diagramAppearance.v1'),'dark');
+  await panel.receive({type:'ready'});assert.equal(latest().diagramAppearance,'theme');
+  const reopened=await harness(root,state);await reopened.commands.get('mrw.openOutline')();
+  assert.equal(reopened.panels[0].webview.messages.findLast(m=>m.type==='outline').diagramAppearance,'theme');
+  assert.equal(reopened.requests.some(r=>r.method==='outline_render_diagram'),false);
+});
+
+test('Return reopens the active overview as one preview when VS Code supports it and preserves an unrelated Untitled draft', async t => {
+  const root=await temporary(t),h=await harness(root),file=path.join(root,'overview.md');await fs.writeFile(file,'# Reading\n');
+  const doc=h.document(file,'# Reading\n');doc.languageId='markdown';h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  const draft=h.document('Untitled-1','Unsaved reader work','untitled');draft.isDirty=true;
+  h.api.commands.getCommands=async()=>['markdown.reopenAsPreview'];
+  let rendered;
+  h.commands.set('markdown.reopenAsPreview',()=>{rendered=h.api.window.activeTextEditor.document;h.focus(undefined)});
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(rendered,doc);assert.equal(h.commandCalls.some(c=>c.name==='markdown.showPreview'),false);
+  assert.equal(draft.getText(),'Unsaved reader work');assert.equal(draft.isDirty,true);assert.equal(draft.isClosed,false);
+  assert.equal(h.requests.length,0);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('Return never reopens an unrelated Untitled draft as a preview when editor focus changes', async t => {
+  const root=await temporary(t),h=await harness(root),file=path.join(root,'overview.md');await fs.writeFile(file,'# Reading\n');
+  const doc=h.document(file,'# Reading\n');doc.languageId='markdown';h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  const draft=h.document('Untitled-1','Keep my draft','untitled');draft.isDirty=true;
+  h.api.commands.getCommands=async()=>{h.focus(h.editor(draft));return ['markdown.reopenAsPreview']};
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(h.commandCalls.some(c=>c.name==='markdown.reopenAsPreview'),false);
+  assert.equal(h.commandCalls.findLast(c=>c.name==='markdown.showPreview').args[0].fsPath,file);
+  assert.equal(draft.getText(),'Keep my draft');assert.equal(draft.isDirty,true);assert.equal(draft.isClosed,false);
+  assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
 });

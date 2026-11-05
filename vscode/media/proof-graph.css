@@ -1,0 +1,24 @@
+body.proof-workspace{max-width:none;padding:14px 18px}
+.proof-shell{display:grid;grid-template-columns:minmax(400px,1.2fr) minmax(350px,1fr);gap:18px;align-items:start;margin:14px 0}
+.proof-stage{position:sticky;top:55px;min-width:0;border:1px solid var(--vscode-panel-border);border-radius:8px;overflow:hidden}
+.proof-map-controls{display:flex;align-items:center;flex-wrap:wrap;padding:6px;border-bottom:1px solid var(--vscode-panel-border);gap:4px}
+.proof-map-controls input{width:180px;flex:1;min-width:120px}.proof-map-controls button{padding:5px 10px}
+.proof-canvas{display:block;width:100%;height:clamp(360px,65vh,760px);touch-action:none;cursor:grab;user-select:none}
+.proof-canvas:active{cursor:grabbing}.proof-node{cursor:pointer;outline:none}
+.proof-node rect{fill:var(--vscode-editorWidget-background,var(--vscode-editor-background));stroke:var(--vscode-panel-border,var(--vscode-editor-foreground));stroke-width:1.5}
+.proof-node text{fill:var(--vscode-editor-foreground);font-family:var(--vscode-font-family);font-size:14px;pointer-events:none}
+.proof-node.selected rect,.proof-node:focus rect{stroke:var(--vscode-focusBorder);stroke-width:3}
+.proof-node.related rect{stroke:var(--vscode-textLink-foreground);stroke-width:2}
+.proof-node.dim{opacity:.35}.proof-edge{fill:none;stroke:var(--vscode-editor-foreground);opacity:.3;stroke-width:1.4;pointer-events:none}
+.proof-edge.related{stroke:var(--vscode-textLink-foreground);opacity:.95;stroke-width:2.5}
+.proof-edge.omitted{stroke-dasharray:6 4}.proof-legend{padding:5px 10px;margin:0;font-size:.85em;opacity:.8}
+.proof-inspector{min-width:0;border:1px solid var(--vscode-panel-border);border-radius:8px;padding:12px;scroll-margin-top:65px}
+.proof-inspector h2{margin:4px 0 10px}.proof-inspector .context{padding:8px;margin:8px 0}
+.proof-inspector .published-content{font-size:1.05em;line-height:1.6}.proof-inspector .proof-navigation{flex-wrap:wrap;gap:10px}
+.proof-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--vscode-panel-border);padding-bottom:5px;margin:12px 0 8px}
+.proof-tabs button[aria-pressed="true"]{outline:2px solid var(--vscode-focusBorder)}
+.proof-stacks-page{width:100%;height:clamp(400px,67vh,850px);border:0;background:white;display:block;border-radius:3px}
+.proof-inspector .source-caption{margin:6px 0;font-size:.85em;opacity:.8}.proof-reading-list{margin-top:24px}
+.proof-shell .hidden-pane{display:none}.proof-count{margin:8px 0;font-size:.9em;opacity:.8}
+@media(max-width:850px){.proof-shell{grid-template-columns:1fr}.proof-stage{position:relative;top:auto}.proof-canvas{height:440px}}
+@media(prefers-reduced-motion:reduce){.proof-node,.proof-edge{transition:none}}

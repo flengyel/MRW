@@ -1,5 +1,87 @@
 # UX_SPEC.md
 
+**Tagged-page interaction, 0.16.0 (2026-11-04).** Vertex selection brings up its
+exact corresponding Stacks tag in an adjacent panel. The graph supports pan,
+zoom, search, keyboard selection, neighbor highlighting and animated layout
+changes, respecting reduced motion. Saved text gives the pinned statement and
+proof offline. Live navigation follows explicit selection and stays separate
+from retained source revisions and AI-proposed claims. Projection changes keep
+the selected page open. A JSON-editor title action opens the graph directly.
+
+**Proof-outline trial, 0.15.0 (2026-11-04).** **Open Proof Outline…** displays
+the ordinary inference document, attributed summaries, source pins and explicit
+joint-premise alternatives. Deletion changes only the display; expansion shows
+the original steps. Premises, goals and scope boundaries stay visible. Selection
+persists per exact document revision. VS Code owns summary editing and recovery;
+Ask AI keeps the existing separate exact preview and Send. The 08ZE/08ZH case
+compares source arguments with pinned Lean declarations, without claiming an
+elaborated proof graph or local check. See [the workflow](docs/PROOF_GRAPH_WORKFLOW.md).
+
+Extension patch **0.14.4** defaults reader diagrams to **Theme**. CSS selects
+the light or dark retained view from the VS Code theme class, including high
+contrast themes, without rebuilding notes or touching drafts. **Paper** and
+**Dark** remain explicit overrides. The new preference starts in Theme rather
+than carrying forward the earlier fixed-mode choice. The shared stylesheet passes
+VS Code’s color scheme to SVG images in the native Markdown preview. Return uses native
+Reopen as Preview for saved files when available, with the earlier preview
+command as fallback; unrelated Untitled drafts are never reopened or closed.
+
+Extension patch **0.14.3** opens VS Code's Markdown preview on Return to reading
+outline. It first restores the checked source location or selected overview,
+then opens its rendered view. Closing preview/editor tabs does not change the
+reading destination. Ordinary editing, unsaved text and source pins remain
+under their existing owners; Return never saves the overview.
+
+Extension patch **0.14.2** lets Return to reading outline reopen the selected
+overview when the reader was opened without a source-link origin. It preserves
+live drafts and remembered selections, or offers a Markdown file choice when
+no overview is available. Existing source-link origins still require exact
+revision and workspace checks; an invalid origin never falls back elsewhere.
+
+Extension patch **0.14.1** keeps local reader controls usable during Return to
+reading outline. Command and reader error notifications are nonblocking. A
+reader becoming visible receives idle state only when its own requests have
+finished; pending writes and storage freezes retain their guards. This changes
+control state only, preserving proof choices, return pins, notes and drafts.
+
+Extension **0.14.0** adds **Import Obsidian note…** to alphabetical Research
+Tools and the command palette. Each invocation offers all three destinations:
+saved source outline, reader annotation on a passage, or reading-overview text.
+The file picker selects one Markdown note. Source import retains exact bytes
+and a readable passage; repeat import of the same path/revision reopens its
+saved copy. Annotation import uses the chosen passage and unknown attribution.
+Overview insertion uses host editing and undo, pins its cursor/version, and
+leaves saving to the user. The note file remains unchanged.
+
+Extension patch **0.13.5** places **Delete note…** beside each displayed reader
+annotation, including whole-source notes. Confirmation names the passage and
+quotes the note. Only the selected annotation is removed through revision-checked
+core publication. Its editor is frozen during deletion; cancellation and failure
+keep the saved display and draft. Confirmed deletion clears that note’s draft
+and leaves other drafts intact.
+
+Extension patch **0.13.4** gives every Research Tools entry a plain-text hover
+description of its target and effect. Disabled investigation actions retain their
+description. Constructing tooltips performs no command, service call or write.
+
+Extension patch **0.13.3** sorts the full Research Tools list alphabetically.
+**Refresh saved source outline** is visible on the reader toolbar and available
+in Research Tools for an open source, with command-palette access. Refresh
+reloads saved notes and source status while preserving unsaved annotation forms.
+
+Extension patch **0.13.2** places saved Reader notes within their associated
+source card, including when its proof is folded. Whole-source notes appear near
+the source heading. Each note disclosure starts closed and keeps its own live
+state. Editors remain in Source details and tools; folding leaves drafts and
+saved bytes unchanged.
+
+Extension patch **0.13.1** releases frozen readers and the storage-operation
+guard before showing completion notifications. A notification may remain open
+while reading continues. Directory inputs and confirmation dialogs retain their
+operation guard. **Open Saved Work Directory…** connects a workspace without
+moving files; **Move Saved Work Directory…** transfers saved records. The
+tutorial explains controls and persistence rather than mathematical study advice.
+
 The mathematician's workflow the interface must support. Companion to
 `VISION.md` (why the system exists) and `DOMAIN_MODEL.md` (entities and
 invariants). Present implementation and limitations are documented in README.
@@ -263,7 +345,7 @@ opening the annotation form pushed the proof out of view. Patch 0.9.2 removes
 editing forms from the source reading sequence. Published statements and proofs
 have direct reciprocal links using existing explicit part roles, tag and exact
 retained spans. Temporary proof expansion changes only the live reader view.
-Reader notes are separately attributed after the source text; their editors
+Reader notes are separately attributed beneath their associated passage; their editors
 and the remaining region controls are grouped under Source details and tools.
 Changed associations are never presented as the original proof. Source,
 Markdown, record identity, mathematical status and core request semantics stay
@@ -295,7 +377,13 @@ Code examples are excluded. Selecting a heading visibly selects its exact line;
 selecting a passage opens its pinned retained range through the existing reader.
 Repeated headings and repeated passage links remain distinct occurrences.
 **Return to Reading Outline** is available in the palette, view and reader.
-It selects the originating occurrence without saving or replacing note text.
+It selects the originating occurrence and opens the rendered Markdown overview,
+including when its previous preview tab was closed, without saving or replacing
+note text. The ordinary Markdown editor remains available for editing.
+When no source-link origin exists, it opens the selected live or remembered
+overview instead, restoring a matching selection. Without an overview it offers
+a Markdown file choice; cancellation keeps the reader. An unrelated active
+Markdown editor cannot replace the selected overview during Return.
 A live return location follows nonoverlapping edits; overlap blocks return,
 with exact undo restoring the original pin. Restart checks the saved text hash
 before returning; it never guesses from matching headings or similar links.
@@ -352,7 +440,7 @@ execution. Copying a note transfers no private targets. See
 ### Saved artifact location — 2026-10-19
 
 **MRW: Show Artifact Location** reports the effective directory for this
-workspace. **MRW: Move Artifact Directory…** names the current location,
+workspace. **MRW: Move Saved Work Directory…** names the current location,
 proposed new directory and all affected project folders before confirmation.
 It protects unsaved reader/assistance edits, verifies a complete staged copy,
 commits one host-local binding, rebinds readers and removes only exact old owned
@@ -362,7 +450,7 @@ authority. **MRW: Refresh Artifact Location** retains drafts when another update
 local window has moved the store. Editing `mrw.artifactMoveDestination` merely
 changes the suggested input.
 
-**MRW: Open Existing Artifact Directory…** is distinct: an empty/unbound
+**MRW: Open Saved Work Directory…** is distinct: an empty/unbound
 workspace explicitly maps projects and verifies every required byte before using
 a complete synchronized copy. It does not merge stores or move ordinary notes,
 source documents or notebooks. Missing mounts, partial synchronization and

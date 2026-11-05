@@ -1,5 +1,52 @@
 # Artifact storage validation — 2026-10-19
 
+## Completion notifications and command labels — 2026-11-04
+
+The user reported an operation-in-progress error while opening a saved source
+after reconnecting a relocated study. The new host-local binding was present
+and there was no pending move journal. The user also reported possibly choosing
+Move instead of Open; the exact click sequence is unconfirmed.
+
+The command handlers awaited `showInformationMessage` inside their storage
+transaction. A completion notice that remained open therefore kept readers
+frozen and the operation guard set. Patch 0.13.1 completes the transaction,
+refreshes its epoch and releases readers before displaying the notice.
+
+Five regression cases leave completion notifications unresolved and then open
+the retained source: Move, Open, folder preparation, reconnection and recovery.
+They use disposable stores on the persistent Linux filesystem. An initial /tmp
+fixture attempt was refused by the core's tmpfs check; no check was weakened.
+The original preparation and recovery cases reproduced the operation-in-progress
+error. Three initial baseline cases exceeded a 15-second test limit; the patched
+focused run used a 60-second limit and passed all five cases.
+
+The shared Python run completed 379 tests: 312 passed and 67 were skipped. The
+skips were:
+58 opt-in Qt widget checks, five unavailable built-checker checks, three opt-in
+TikZ host checks and one unauthorized Windows-backed fixture. Syntax checks,
+Python compilation and 271 local documentation links pass. The 0.13.1 VSIX
+matches its production manifest and all runtime bytes; development files are
+excluded. Its SHA-256 is
+`1f27ab7b1e40e0a517ed9d6001071fd965e389079fc0b6f56d878af1aff91b29`.
+The broad extension run executed 115 tests: 114 passed. Its only failure was an
+obsolete assertion requiring the removed tutorial advice. The content-string
+assertions were removed; exact preview bytes, read-only behavior, no file
+creation and no service calls remain checked. The tutorial and starting-view
+cases then both passed. No production code changed after the broad run. The
+pending Open/Move cancellation case also passed, confirming that prompts retain
+the guard until cancelled and cancellation does not move or adopt a store.
+
+The VS Code CLI reported successful installation of 0.13.1 in WSL Debian.
+The installed version and 64 packaged runtime files were checked against the
+verified VSIX. No window reload or workspace switch was invoked. Actual-window
+acceptance remains pending; installation does not establish that the running
+extension has loaded the update.
+
+Commands are labelled **Open Saved Work Directory…** and **Move Saved Work
+Directory…**. IDs, source records and core publication behavior are unchanged.
+The bundled tutorial covers controls and persistence; generic study advice is
+removed. API-double checks do not establish actual-window acceptance.
+
 ## User-requested Obsidian-closed check — 2026-10-20
 
 Started at clean `2101421395f1ac43799efbb5f6217f835f85d6d2`. The user

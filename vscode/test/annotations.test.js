@@ -114,3 +114,25 @@ test('dark diagram appearance chooses a derived image and changes only a UI pref
   const select=h.root.all().find(n=>n.dataset.action==='diagram-appearance');select.value='paper';select.listeners.change();
   assert.deepEqual(preferences,['paper']);assert.equal(fragments[0].image,image);
 });
+
+test('diagrams default to Theme with light and dark images and explicit overrides', () => {
+  const h=view(),preferences=[],image='data:image/svg+xml;base64,PHN2Zy8+',dark='data:image/svg+xml;base64,ZGFyaw==';
+  const block={kind:'tikz',code:'exact source',key:'hash',image,dark_image:dark,rendered_at:'now'};
+  h.render('source',{fragments:[block],onAppearance:value=>preferences.push(value)});
+  const figure=h.root.all().find(n=>n.nodeName==='figure'),images=figure.all().filter(n=>n.nodeName==='img');
+  assert.equal(figure.dataset.appearance,'theme');assert.match(figure.className,/mrw-diagram-theme/);
+  assert.equal(images.length,2);assert.equal(images[0].src,image);assert.equal(images[1].src,dark);
+  assert.equal(images[0].className,'mrw-diagram-light');assert.equal(images[1].className,'mrw-diagram-dark');
+  const choice=figure.all().find(n=>n.nodeName==='select');assert.equal(choice.value,'theme');
+  assert.deepEqual(choice.all().filter(n=>n.nodeName==='option').map(n=>n.value),['theme','paper','dark']);
+  choice.value='paper';choice.listeners.change();choice.value='theme';choice.listeners.change();
+  assert.deepEqual(preferences,['paper','theme']);assert.equal(block.image,image);assert.equal(block.dark_image,dark);
+});
+
+test('Theme falls back to a readable paper image when a dark rendering is unavailable', () => {
+  const h=view(),image='data:image/svg+xml;base64,PHN2Zy8+';
+  h.render('source',{fragments:[{kind:'tikz',code:'saved code',key:'hash',image}],appearance:'theme'});
+  const figure=h.root.all().find(n=>n.nodeName==='figure');assert.equal(figure.dataset.appearance,'paper');
+  assert.doesNotMatch(figure.className,/mrw-diagram-theme/);
+  assert.equal(figure.all().filter(n=>n.nodeName==='img').length,1);
+});

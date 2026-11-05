@@ -1,9 +1,31 @@
 # TikZ reader-diagram validation — 2026-11-02
 
+## Theme default — 2026-11-04
+
+Patch 0.14.4 adds Theme as the default and keeps Paper/Dark overrides. The
+reader uses paired retained images selected through CSS. The native Markdown
+preview passes VS Code's color scheme to the theme-aware SVG export. No operating-system theme inference,
+compiler, record write or note rerender is required on a theme change.
+The two-color preference starts anew in host-local v2 state with Theme; the old
+fixed choice is retained separately. Tests cover paired images, explicit
+overrides, paper fallback without a dark image, persistence and no core work.
+The 08ZH light/dark SVG exports were rasterized and visually inspected. Native
+theme switching remains to be confirmed in the user's window.
+The focused command run passes 37 checks and the renderer/parser/link run
+passes 42. Neither run changes the genuine study annotations.
+
 Started clean at **0.9.4**, `a400589`, preserving later/user work. The user agreed
 to explicit rendering of saved diagram code with retained SVGs, then requested a
 white-on-dark option and colors while trying the prototype. The implementation
 is **0.10.0**. [Workflow and bounds](TIKZ_WORKFLOW.md).
+
+A headless Chrome check verifies light and dark rendering from the VS Code
+theme classes. A live light-to-dark switch keeps the same image nodes and
+unsaved text while changing diagram visibility; Theme remains selected. The
+overview SVG receives the embedding image’s color scheme, following the
+[CSS media-query rule](https://drafts.csswg.org/mediaqueries-5/#prefers-color-scheme).
+The actual VS Code window still needs user confirmation after activation.
+
 
 ## Implementation and review
 

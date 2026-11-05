@@ -1,5 +1,262 @@
 # Reading-outline navigator validation — 2026-11-01
 
+## Theme-following diagrams and preview tabs — 2026-11-04
+
+The user confirms that the rendered overview shows the pullback and requests
+theme following there and in reader notes. Patch **0.14.4** shares theme CSS
+between the reader and native Markdown previews. Theme is the default; reader
+notes also retain explicit Paper/Dark overrides. Changes do not rebuild note
+forms, compile diagrams or modify records. The new v2 preference defaults to
+Theme instead of retaining the user's old fixed-Dark setting.
+
+Tests cover paired display images, the three choices, missing-dark fallback,
+preference persistence and no core work for appearance changes. Return prefers
+the native same-tab preview command for saved overviews when available; tests
+preserve an unrelated Untitled draft and refuse to reopen it after a focus
+change. The current Untitled-1 was not identified as MRW-owned and is left intact.
+The 08ZH overview's six source references and mathematical text are unchanged.
+Light/dark display images were visually inspected; native theme switching is
+pending user confirmation.
+
+All 37 focused command checks and 42 renderer/parser/link checks pass. The
+overview stays byte-identical to preserve the saved return pin and all six
+source references. Its theme-aware SVG preserves the original paths. The host API double now
+honors the documented workspace-state default argument.
+
+A headless Chrome check verifies light and dark rendering from the VS Code
+theme classes. A live light-to-dark switch keeps the same image nodes and
+unsaved text while changing diagram visibility; Theme remains selected. The
+overview SVG receives the embedding image’s color scheme, following the
+[CSS media-query rule](https://drafts.csswg.org/mediaqueries-5/#prefers-color-scheme).
+The actual VS Code window still needs user confirmation after activation.
+
+The checked 0.14.4 VSIX matches the production manifest and runtime bytes and
+has SHA-256
+`2a0d376202892e2bd1122a74722572c0e6f019f6a138c0ed5d7138759067ef2f`.
+The local extension installer reports success in WSL Debian. Registry and
+manifest select 0.14.4; all 65 installed runtime files match. The overview is
+byte-identical and its exported SVG matches the browser-tested file. No window
+reload was invoked.
+
+
+## Rendered overview after closing tabs — 2026-11-04
+
+The user's screenshot shows raw Markdown after closing editor/preview tabs,
+opening a saved source and using Return. Patch **0.14.3** opens the native
+Markdown preview after restoring the checked overview or exact source-link
+location. No file is saved or rewritten during Return.
+
+Two new command regressions fail against 0.14.2 and pass with the fix. They cover
+repeated reopening after editor/preview closure and previewing the exact duplicate
+source-link occurrence while blocking a changed origin. Existing tests also
+check the preview target after restart, live untitled drafts and cancellation.
+The installed Markdown extension's public preview command implementation was
+inspected locally. These are command/bridge and renderer checks; a native-window
+confirmation remains pending. No window reload is invoked automatically.
+
+All 33 focused command/bridge checks and 40 renderer/parser/link checks pass,
+covering reading choices, drafts, source pins across edits and undo, failed-return
+lock release, proof controls and the two new preview regressions.
+The checked 0.14.3 VSIX matches the production manifest and runtime bytes,
+excludes development files, and has SHA-256
+`1b335059f9789d0e116bfc8a281006ad99d7d89a7ce4d42490bb9e64012ba67d`.
+VS Code's local extension installer reports successful installation in WSL
+Debian. The registry selects 0.14.3 and all 64 installed runtime files match.
+The unresponsive window CLI relay was stopped before this local install;
+the window and server were not restarted. No reload was invoked.
+
+## 08ZH diagram contrast in Markdown — 2026-11-04
+
+The user's dark preview exposes the transparent SVG's black paths without the
+MRW reader's white image background. The overview now links to a separate
+`08zh-pullback-paper.svg`, retaining the original SVG and exact TikZ code. The
+display export adds a white rectangle, padding and 400-pixel sizing; diagram
+paths and links are unchanged. It uses conventional SVG namespaces.
+
+The original export rasterizes as a blank image against black. The corrected
+export was rasterized against black and white and visually inspected in both
+cases. XML comparison preserves all original child elements and adds only the
+background rectangle; the root changes only in namespace serialization and
+display dimensions. The Markdown source changes only in its image filename.
+No TeX compiler or model call was made. Native-preview confirmation is pending.
+
+## First 08ZH proof outline — 2026-11-04
+
+The user authorized an AI-assisted outline of the retained 08ZH proof. The study
+overview now contains four claims with explicit premises, an inverse-image
+calculation and the retained pullback diagram at that calculation. The final
+claim cites all three previous claims jointly. Codex attribution is recorded in
+the study README; the original Stacks passages and reader notes remain intact.
+
+The installed checked core generates and resolves all four cited region
+references with unchanged associations. The Markdown navigator parses the
+actual document into six headings and six exact reference occurrences. All 31
+inline/display math expressions render with the bundled KaTeX in strict mode.
+The SVG is byte-identical to the previously retained rendering and was visually
+inspected; the TikZ code is copied exactly from its annotation. All 12 retained
+payload files remain byte-identical. No compiler, API call, extension release
+or window reload was needed. This checks the ordinary Markdown/source-link
+workflow; graph extraction and vertex elimination remain planned.
+
+## Return after direct source opening — 2026-11-04
+
+The user reported the missing-origin error after opening a saved source directly
+and clicking Return. Patch **0.14.2** reopens the selected overview in this case,
+including after restart, or offers a Markdown file choice. It does not fabricate
+a source-link origin or change source records. Existing exact origins still
+reject changed text and foreign workspaces.
+
+Four new command regressions fail against 0.14.1 and pass with the fix: remembered
+overview with an unrelated editor active, live untitled overview with unsaved
+edits, file choice/cancellation with continued reader use, and workspace
+validation before reads. The error-notification regression uses a changed exact
+origin rather than a missing one. These are command/bridge and DOM checks;
+the user's subsequent installed-window confirmation is recorded below.
+
+The focused navigation/control run passes 37 checks; the renderer, Markdown
+parser and link run passes 40 checks. Their coverage overlaps on local proof
+controls. These runs preserve exact-source returns across edits, undo and
+restart, failed-return lock release, pending-operation guards, proof visibility,
+annotation drafts, overview import and workspace checks. The checked 0.14.2
+VSIX has SHA-256
+`12c75effe3fbbb8d40640097875d01b01bd5f17bb57a882ed405294cbb40066a`;
+its manifest and runtime bytes match the checkout and exclude development files.
+VS Code reported successful installation in WSL Debian. The selected extension
+registry entry, installed manifest and all 64 runtime files match 0.14.2.
+No window reload was invoked by Codex. The user subsequently reports that the
+direct saved-source opening followed by Return works in their window.
+
+## Return leaves reader controls usable — 2026-11-04
+
+The user reported that Return to reading outline disabled controls such as
+Hide proofs. The shared toolbar sender marked Return busy; a failed return then
+waited in the command wrapper for error-notification dismissal, preventing the
+reader action from completing. Reader error handling also awaited notifications.
+
+Patch **0.14.1** makes these notifications nonblocking and keeps the reader out
+of its busy state for Return navigation. On visibility changes the host sends
+idle state only when that reader has no pending requests. Actual pending work,
+write blocking and storage freezes retain their guards.
+
+Three regressions fail before the fix and pass afterward: failed Return with an
+undismissed error notification, restoring a reader while idle versus during a
+pending action, and proof controls/drafts after Return without a completion
+message. All 32 view/annotation/Stacks renderer checks pass. Focused command
+checks cover pinned navigation, proof preferences, annotation feedback and
+deletion failure, overview import and the new regressions. These are DOM and
+command/bridge checks; installed-window confirmation remains pending.
+
+The focused command run passes 11 checks, alongside the 32 renderer checks.
+The checked 0.14.1 VSIX has SHA-256
+`1f2e497e5bb63a1380dea7fc29529db19fecc82a8d7314f1a856b328ea5a352a`.
+VS Code reported successful installation in WSL Debian; registry and all 64
+installed runtime files match. No window reload was invoked. Dismiss an MRW
+error notification holding the old lock, save drafts and finish any open request
+before reloading to activate the fix.
+
+## Delete reader annotations — 2026-11-04
+
+Patch **0.13.5** adds **Delete note…** inside Reader notes and Source notes.
+The host confirms the selected note and passage; the core checks its scope, UUID
+and outline revision before publication. Confirmed publication updates the
+reading display and removes only that note’s draft. The target editor is frozen
+while confirming and deleting; other text fields remain editable.
+
+The 19 core source-outline checks pass, including new tests for whole-source
+and passage notes of all four origins, wrong scopes and missing identities,
+stale revisions, repeated deletion, and failed/uncertain publication. The 31
+view/annotation/Stacks renderer checks pass, including deletion routing, draft
+preservation, cancellation/failure and write-blocked controls. Five focused
+command/bridge checks cover confirmed deletion, cancellation, rejection and
+uncertain publication alongside source retention, annotation saving and diagrams.
+JavaScript syntax and diff whitespace checks pass. Native installed-window
+confirmation remains pending.
+
+The checked 0.13.5 VSIX has SHA-256
+`8981f565223c72ae686728d6189c73e422b8d3ecaeeabaf945415a4c0cae807f`.
+VS Code reported successful installation in WSL Debian; registry and all 64
+installed runtime files match. No window reload was invoked.
+
+The user-authorized synthetic 08ZE annotation was removed through the installed
+checked bridge. The reopened raw outline equals its prior state with only that
+annotation removed; all other retained payload files are byte-identical. The
+08ZG and 08ZH study notes remain unchanged, and the 08ZH retained SVG reopens.
+The current reader needs Refresh saved source outline to display the new state.
+
+## Research Tools hover descriptions — 2026-11-04
+
+Patch **0.13.4** supplies descriptions for all 53 Research Tools command
+identities. The tree sets native plain-text TreeItem tooltips; the disabled
+End investigation row retains its description through a separate tooltip key.
+Descriptions explain command targets, preparation versus sending, editor saving,
+and the difference between opening and moving saved work.
+
+A static coverage check finds a description for every command in the fixed and
+contextual row definitions. A temporary smoke script checks 215 tree items across
+initial, return-marker, source, request-preview and busy/idle investigation states,
+including disabled End investigation. Constructing hover items makes no bridge
+calls and preserves command routing. Five existing command checks pass, covering
+activation, tutorial opening, source annotation, save feedback and proof
+visibility. JavaScript syntax and diff whitespace checks pass. Actual native
+hover display remains for user confirmation.
+
+The checked 0.13.4 VSIX has SHA-256
+`110ee3fb11692fa5ffd2cffb439303f7a0fbb15c2b5e85a7f66ba854968a87a3`.
+VS Code reported successful installation in WSL Debian. Its registry selects
+0.13.4 and all 64 installed runtime files match the package. No reload was
+invoked; finish or discard the open request before reloading to activate it.
+
+## Alphabetical tools and visible refresh — 2026-11-04
+
+Patch **0.13.3** sorts all Research Tools entries by their displayed labels,
+including source, review and return-marker actions. The source reader moves
+refresh out of the collapsed Source details and tools section to its visible
+reading toolbar. **Refresh saved source outline** also has a Research Tools row
+for an open source and a command-palette entry. All routes use the existing
+read-only outline load and preserve reader drafts.
+
+The 29 existing view/annotation/Stacks renderer checks pass. Two temporary smoke
+checks exercise alphabetical initial and contextual rows, command routing, a
+second client saving a note followed by refresh without record changes, visible
+toolbar placement, and draft preservation. JavaScript syntax checks pass. These
+checks use DOM and command doubles; actual-window acceptance remains pending.
+
+The 0.13.3 VSIX passed source/manifest verification with SHA-256
+`d7acaac04019437211727d66bb89eb0488315727f1083ae372a2c4b20edfc59b`.
+VS Code reported successful installation in WSL Debian; its registry selects
+0.13.3 and all 64 installed runtime files match the package. No window reload
+was invoked. Save annotation drafts and reload normally to activate the update.
+
+## Notes beside source passages — 2026-11-04
+
+The user found the retained 08ZG explanation in the combined bottom notes
+section, away from its proof. The stored explanation and attribution were intact;
+the retained outline and HEAD matched the relocation receipt. No data recovery
+or mathematical reconstruction was needed.
+
+Patch 0.13.2 renders saved notes in their source card and whole-source notes near
+the heading. Separate native disclosures retain independent live state. Folding
+a proof leaves its note disclosure available. Editing forms stay outside the
+source sequence; the change does not publish records or alter attribution.
+
+Three placement/preservation tests fail against the prior placement and pass
+with the change. They check local association, source-wide scope, exact TeX,
+attribution, independent disclosure state, folded-proof access, unsaved editor
+text and absence of record-edit messages. Annotation renderer tests retain
+math/diagram behavior and explicit render boundaries.
+
+The final focused run passed 29 DOM/renderer tests, five reader command/bridge
+cases and 32 Python source-outline/reference/note tests. JavaScript syntax checks
+and diff whitespace checks pass. DOM doubles and bridge results do not establish
+installed-window acceptance. The 0.13.2 VSIX matches the production manifest and runtime bytes, with
+SHA-256 `89928cb668e9a36990d50bd667e1b0472c90b256fd143b5e15ac98f1e17def20`.
+All 273 checked documentation links resolve. The retained Hausdorff outline,
+including the 08ZG annotation, still matches its pre-move hash. VS Code reported successful installation of 0.13.2 in WSL Debian. Its extension
+registry selects 0.13.2 and all 64 installed runtime files match the package.
+No reload or workspace switch was invoked. A normal user-triggered reload is
+required to activate the update; actual-window confirmation remains pending. The user's correction that proof folding
+was present is recorded separately from this requested notes-placement change.
+
 Started from clean main and origin/main at the supplied MRW 0.8.0 baseline,
 `2885857da79e60c81bc196b86d9958d9c5e84069`. A final fetch confirmed no later
 remote commits. No unrelated changes or user work were replaced.

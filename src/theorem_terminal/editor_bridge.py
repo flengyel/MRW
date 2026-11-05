@@ -72,6 +72,8 @@ def _dispatch(request):
         'review': ({'path', 'mode', 'number'}, {'revision'}),
         'contribution': ({'path', 'number', 'revision'}, set()),
         'project': ({'path', 'number', 'revision', 'destination'}, set()),
+        'proof_graph': ({'graph', 'hidden'}, set()),
+        'proof_graph_parse': ({'text'}, set()),
         'investigation_parent': ({'path'}, {'revision'}),
         'investigation_state': ({'store', 'project_root'}, set()),
         'resume_investigation': ({'store', 'project_root', 'revision'}, set()),
@@ -81,6 +83,7 @@ def _dispatch(request):
         'end_investigation': ({'store', 'project_root', 'revision'}, set()),
         'outline_list': ({'store', 'project_root'}, set()),
         'outline_create': ({'store', 'project_root', 'path', 'source_revision'}, set()),
+        'outline_import_note': ({'store', 'project_root', 'path', 'source_revision'}, set()),
         'outline_load': ({'store', 'project_root', 'id'}, set()),
         'outline_reference': ({'store', 'project_root', 'id', 'revision', 'region'}, set()),
         'outline_parse_reference': ({'reference'}, set()),
@@ -107,6 +110,15 @@ def _dispatch(request):
         raise ValueError('Invalid editor action fields')
     if method in ('prepare_assistance', 'send_assistance'):
         return assistance_action(request)
+    if method == 'proof_graph':
+        from .proof_graph import graph_action
+        return graph_action(request)
+    if method == 'proof_graph_parse':
+        from .proof_graph import graph_action, MAX_BYTES
+        raw = request['text']
+        if not isinstance(raw, str) or len(raw.encode('utf-8')) > MAX_BYTES:
+            raise ValueError('Proof outline exceeds 512 KiB')
+        return graph_action({'graph': strict_json(raw.encode('utf-8')), 'hidden': []})
     if method == 'outline_parse_reference':
         return parse_reference(request['reference'])
     if method in ('outline_reference', 'outline_follow_reference'):

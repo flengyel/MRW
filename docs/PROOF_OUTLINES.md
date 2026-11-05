@@ -1,5 +1,24 @@
 # Mathematical source outlines and proof-outline vertex elimination
 
+**0.15.0, 2026-11-04:** the 08ZE/08ZH trial now has an explicit source-based
+inference graph, attributed Codex summaries, a proposed selection and reversible
+vertex deletion. Joint-premise alternatives, local scopes and original witnesses
+survive projection. The original file stays editable under VS Code; no Lean
+structure is inferred from declaration links. See [the bounded implementation](PROOF_GRAPH_WORKFLOW.md)
+and [validation](PROOF_GRAPH_VALIDATION.md). Earlier status entries below describe
+the reader before this increment; automatic extraction and formal checking remain
+separate from this proposed argument representation.
+
+**First Codex-assisted case, 2026-11-04:** the study overview outlines the
+retained 08ZH proof in four claims with explicit premises and exact 08ZE/08ZH
+source links. Its pullback diagram and editable TikZ source accompany the
+inverse-image calculation. The final step uses the closed diagonal, continuity
+and inverse-image identification jointly. The Markdown navigator displays these
+claims as headings and links. The mathematical draft is Codex material,
+attributed in the study README. This first outline supplies the informal argument
+for the 0.15.0 trial above. See
+[the scoped checks](READING_OUTLINE_VALIDATION.md#first-08zh-proof-outline--2026-11-04).
+
 **Scope:** understanding and logical deconstruction of arguments in textbooks,
 monographs, articles, and AI-generated or AI-assisted manuscripts, including
 sources with no Lean formalization. Lean evidence is optional. Orientation,

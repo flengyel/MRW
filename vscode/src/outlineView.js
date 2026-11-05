@@ -10,12 +10,13 @@ const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 let notes = [], noteTargets = {}, noteError, lastReadingFocus;
 let storageFrozen = false;
+let deletingDraft;
 const drafts = new Map();
 const submittedDrafts = new Map();
 const revealed = new Set();
 const hiddenDetails = new Set();
 let proofsHidden = false, proofPreferenceLoaded = false;
-let diagramAppearance = 'paper', diagramPreferenceLoaded = false;
+let diagramAppearance = 'theme', diagramPreferenceLoaded = false;
 const openDetails = new Map(), saveFeedback = new Map(), feedbackNodes = new Map();
 const noteDraft = key => typeof key === 'string' && key.startsWith('note:');
 function feedback(key, text, kind) {
@@ -39,15 +40,23 @@ function el(tag, text, parent = root, className) {
   parent.append(node); return node;
 }
 function post(value) {
+  if (value.type === 'delete_annotation') {
+    deletingDraft = `note:${value.region || 'overview'}:${value.annotation}`;
+    value.unsaved = drafts.has(deletingDraft);
+  }
   if (value.draft) {
     submittedDrafts.set(value.draft, drafts.get(value.draft));
     if (noteDraft(value.draft)) feedback(value.draft, 'Saving annotation…', 'pending');
   }
-  busy = true; controls(); api.postMessage(value);
+  if (value.type !== 'reading_return') { busy = true; controls(); }
+  api.postMessage(value);
 }
 function controls() {
-  for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
+  for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || !!deletingDraft || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
   for (const input of root.querySelectorAll('input,textarea,select')) input.disabled = storageFrozen;
+  if (deletingDraft) for (const form of root.querySelectorAll('form')) {
+    if (form.dataset.draft === deletingDraft) for (const input of form.querySelectorAll('input,textarea,select')) input.disabled = true;
+  }
 }
 function button(parent, title, value, action, write = false) {
   const node = el('button', title, parent); node.type = 'button';
@@ -102,6 +111,27 @@ function noteForm(parent, region, note) {
   if (saved) feedback(key, saved.text, saved.kind);
   else status.setAttribute('role', 'status');
 }
+function renderNotes(parent, annotations, scope, title = 'Reader notes') {
+  if (!annotations.length) return;
+  const notes = el('details', undefined, parent, 'reader-notes');
+  notes.dataset.notesFor = scope;
+  keepOpen(notes, `reader-notes:${scope}`);
+  el('summary', `${title} (${annotations.length})`, notes);
+  for (const note of annotations) {
+    el('h3', label(note.kind), notes);
+    el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
+    if (window.MRWAnnotations) window.MRWAnnotations.render(notes, note.text, { fragments: note.fragments,
+      appearance: diagramAppearance,
+      onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),
+      onAppearance: value => { diagramAppearance = ['paper', 'dark'].includes(value) ? value : 'theme';
+        api.postMessage({ type: 'diagram_appearance', value: diagramAppearance }); render(); } });
+    else el('p', note.text, notes, 'reader-note-text');
+    const remove = button(notes, 'Delete note…', { type: 'delete_annotation',
+      region: scope === 'overview' ? null : scope, annotation: note.id }, 'delete-note', true);
+    remove.dataset.annotation = note.id;
+    remove.title = 'Delete this saved annotation after confirmation.';
+  }
+}
 function spanLocation(span) { return `Lines ${span.start_line}:${span.start_col}–${span.end_line}:${span.end_col} (scalar columns)`; }
 const sameSpan = (a, b) => a && b && ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col'].every(k => a[k] === b[k]);
 function targetNotes(region, pinned) {
@@ -128,7 +158,7 @@ function companionActions(parent, region = null, pinned = false) {
   const back = el('div', undefined, directions);
   el('p', 'From MRW to your note', back);
   const linked = targetNotes(region, pinned);
-  if (noteError) el('p', 'Linked notes unavailable. Refresh source status to retry.', back, 'muted');
+  if (noteError) el('p', 'Linked notes unavailable. Refresh the saved source outline to retry.', back, 'muted');
   else if (!linked.length) el('p', `No Obsidian note linked to ${pinned ? 'this earlier range' : passage ? 'this passage' : 'this outline'} yet. Link a note to add the return destination.`, back, 'muted');
   else el('p', linked.length === 1 ? linked[0].label : `${linked.length} linked notes — choose when opening`, back, linked.length === 1 ? 'linked-note' : 'muted');
   const open = button(back, 'Open linked note in Obsidian', { type: 'open_note', ...data }, 'open-note');
@@ -236,6 +266,7 @@ function render() {
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
   button(readingBar, '← Return to reading outline', { type: 'reading_return' }, 'reading-return');
   button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');
+  button(readingBar, 'Refresh saved source outline', { type: 'refresh' }, 'refresh');
   if (Object.values(o.published?.parts || {}).some(p => p.role === 'proof' && o.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)))) {
     for (const hidden of [true, false]) {
       const control = el('button', hidden ? 'Hide proofs' : 'Show proofs', readingBar);
@@ -260,7 +291,6 @@ function render() {
   if (reference) el('p', reference.notice, tools, 'muted');
   const toolbar = el('div', undefined, tools, 'toolbar');
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
-  button(toolbar, 'Refresh source status', { type: 'refresh' }, 'refresh');
   if (o.published?.error) el('p', o.published.error, root, 'warning');
   else if (o.published && window.MRWStacks) window.MRWStacks.header(tools, o.published, publishedAction);
   if (o.published) {
@@ -293,6 +323,7 @@ function render() {
   el('h2', 'Reader notes', tools);
   for (const n of o.annotations) noteForm(tools, null, n);
   noteForm(tools, null, null);
+  renderNotes(root, o.annotations, 'overview', 'Source notes');
   if (o.contexts.length) {
     el('h2', 'Available source context and cited results');
     el('p', 'Reader-selected quotations remain accessible when argument details are hidden. These are available context, not an analysis of required premises.', root, 'muted');
@@ -328,7 +359,6 @@ function render() {
   select.value = filter; select.dataset.readingLevel = 'true';
   select.addEventListener('change', () => { filter = select.value; render(); });
   if (!o.regions.length) el('p', 'Select a passage in the source and add a region. Formal evidence is optional.');
-  const readerNotes = o.annotations.map(note => ({ title: 'Overview', note }));
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
@@ -361,6 +391,7 @@ function render() {
       });
     }
     if (publishedPart && !compactProof) proofNavigation(box, publishedPart);
+    renderNotes(box, r.annotations, r.id);
     if (!compactProof) {
       const assistance = el('div', undefined, box, 'proof-navigation');
       button(assistance, 'Ask AI about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
@@ -387,22 +418,8 @@ function render() {
     field(rf, 'title', 'Region title'); field(rf, 'level', 'Reading level', levels);
     button(rf.node, 'Save region description', () => ({ type: 'edit', draft: key, change: { kind: 'region', region: r.id,
       title: rf.read().title, level: rf.read().level, collapsed: r.collapsed } }), 'save-region', true);
-    for (const n of r.annotations) { noteForm(passageTools, r.id, n); readerNotes.push({ title: r.title, note: n }); }
+    for (const n of r.annotations) noteForm(passageTools, r.id, n);
     noteForm(passageTools, r.id, null);
-  }
-  if (readerNotes.length) {
-    const notes = el('details', undefined, root, 'reader-notes'); keepOpen(notes, 'reader-notes');
-    el('summary', `Reader notes (${readerNotes.length})`, notes);
-    for (const { title, note } of readerNotes) {
-      el('h3', `${title} · ${label(note.kind)}`, notes);
-      el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
-      if (window.MRWAnnotations) window.MRWAnnotations.render(notes, note.text, { fragments: note.fragments,
-        appearance: diagramAppearance,
-        onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),
-        onAppearance: value => { diagramAppearance = value === 'dark' ? 'dark' : 'paper';
-          api.postMessage({ type: 'diagram_appearance', value: diagramAppearance }); render(); } });
-      else el('p', note.text, notes, 'reader-note-text');
-    }
   }
   controls();
 }
@@ -416,11 +433,16 @@ window.addEventListener('message', event => {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
     if (!proofPreferenceLoaded) { proofsHidden = value.proofsHidden === true; proofPreferenceLoaded = true; }
-    if (!diagramPreferenceLoaded) { diagramAppearance = value.diagramAppearance === 'dark' ? 'dark' : 'paper'; diagramPreferenceLoaded = true; }
+    if (!diagramPreferenceLoaded) { diagramAppearance = ['paper', 'dark'].includes(value.diagramAppearance) ? value.diagramAppearance : 'theme'; diagramPreferenceLoaded = true; }
     if (value.readingFocus && value.readingFocus.serial !== lastReadingFocus) {
       const region = model.outline.regions.find(r => r.id === value.readingFocus.region);
       const part = region && model.outline.published?.parts?.[region.id];
       if (part && sameSpan(part.span, region.span)) { revealed.add(region.id); hiddenDetails.delete(region.id); }
+    }
+    if (value.deletedAnnotation) {
+      const key = `note:${value.deletedAnnotation.region || 'overview'}:${value.deletedAnnotation.id}`;
+      drafts.delete(key); submittedDrafts.delete(key); saveFeedback.delete(key); openDetails.delete(key);
+      if (deletingDraft === key) deletingDraft = undefined;
     }
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
@@ -440,11 +462,11 @@ window.addEventListener('message', event => {
       else root.scrollIntoView({ block: 'start' });
     } else if (reference?.status === 'changed or removed') root.querySelector('[data-reference]')?.scrollIntoView({ block: 'start' });
   } else if (value.type === 'error') {
-    error = value.message; blocked = !!value.writesBlocked; busy = false;
+    error = value.message; blocked = !!value.writesBlocked; busy = false; deletingDraft = undefined;
     if (noteDraft(value.draft)) feedback(value.draft, 'Save not confirmed. ' + value.message, 'error');
     render();
   }
-  else if (value.type === 'idle') { busy = false; controls(); }
+  else if (value.type === 'idle') { busy = false; deletingDraft = undefined; controls(); }
   else if (value.type === 'publishedFocus') jumpPublished(value.region);
 });
 api.postMessage({ type: 'ready' });

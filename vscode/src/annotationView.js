@@ -40,17 +40,24 @@
         exactText = true;
         const figure = node('figure', parent, undefined, 'reader-diagram');
         if (fragment.image?.startsWith('data:image/svg+xml;base64,')) {
-          const dark = options.appearance === 'dark' && fragment.dark_image?.startsWith('data:image/svg+xml;base64,');
-          figure.dataset.appearance = dark ? 'dark' : 'paper';
-          const image = node('img', figure);
-          image.src = dark ? fragment.dark_image : fragment.image; image.alt = 'Retained rendering of this exact reader-supplied TikZ block';
+          const mode = ['paper', 'dark'].includes(options.appearance) ? options.appearance : 'theme';
+          const hasDark = fragment.dark_image?.startsWith('data:image/svg+xml;base64,');
+          const theme = mode === 'theme' && hasDark;
+          figure.dataset.appearance = theme ? 'theme' : mode === 'dark' && hasDark ? 'dark' : 'paper';
+          if (theme) figure.className += ' mrw-diagram-theme';
+          const images = theme ? [[fragment.image, 'mrw-diagram-light'], [fragment.dark_image, 'mrw-diagram-dark']]
+            : [[mode === 'dark' && hasDark ? fragment.dark_image : fragment.image, '']];
+          for (const [source, className] of images) {
+            const image = node('img', figure, undefined, className);
+            image.src = source; image.alt = 'Retained rendering of this exact reader-supplied TikZ block';
+          }
           node('figcaption', figure, `Rendered diagram · ${fragment.rendered_at}`, 'muted');
           const label = node('label', figure, 'Diagram appearance '), choice = node('select', label);
           choice.dataset.action = 'diagram-appearance';
-          for (const [value, text] of [['paper', 'Paper'], ['dark', 'Dark']]) {
+          for (const [value, text] of [['theme', 'Theme'], ['paper', 'Paper'], ['dark', 'Dark']]) {
             const option = node('option', choice, text); option.value = value;
           }
-          choice.value = dark ? 'dark' : 'paper';
+          choice.value = mode;
           choice.addEventListener('change', () => options.onAppearance?.(choice.value));
         } else node('p', figure, 'TikZ diagram · not rendered yet', 'muted');
         if (fragment.error) node('p', figure, 'Retained diagram unavailable: ' + fragment.error, 'warning');
@@ -63,7 +70,7 @@
         const code = node('details', figure); node('summary', code, 'Exact TikZ code'); node('pre', code, fragment.code);
       }
     }
-    if (!exactText) return;
+    if (!exactText || options.exact === false) return;
     const exact = node('details', parent);
     node('summary', exact, 'Exact annotation text');
     node('pre', exact, text);

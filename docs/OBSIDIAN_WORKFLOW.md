@@ -1,10 +1,38 @@
 # Obsidian notes and MRW retained passages
 
-MRW 0.7.0 retains navigation that connects the existing Obsidian Zettelkasten to saved source outlines
-and exact retained passages. Obsidian owns note editing, mathematical rendering,
+MRW connects Obsidian notes to saved source outlines and exact retained passages.
+It can also import the text of a Markdown note through the choices below. Obsidian owns note editing, mathematical rendering,
 links and attachments. MRW owns its source reader and retained material.
 Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
 references from the Obsidian note. No LaTeX transcription is required.
+
+## Import note text (0.14.0)
+
+Run **MRW: Import Obsidian Note…** from Research Tools or F1. Choose where its
+text should go, then select the note’s `.md` or `.markdown` file:
+
+| Destination | Result |
+| --- | --- |
+| Open it as a saved source outline | Retains the file and opens its text for reading, passage links and annotations |
+| Add it as a reader annotation on a passage | Select a saved source and passage; its reader notes receive the note text |
+| Insert it into the reading overview | Inserts text at the active Markdown overview cursor, or offers an overview file picker |
+
+The source option saves its retained copy during import. Importing the same file
+at the same revision reopens that copy and preserves annotations. A changed file
+gets a separate copy. Notes up to 2 MiB are supported; longer passages are split
+at the reader’s 256 KiB range limit. The source remains readable after the vault
+file changes or disappears. The source title initially uses the filename.
+
+Annotation import saves up to 16 KiB of text, with origin and author initially
+unknown. Edit its attribution in the reader when known. Overview insertion
+leaves an unsaved editor change: **Ctrl+S** saves it and ordinary Undo reverses
+it. The combined overview retains the 4 MiB navigation limit.
+
+The original note stays unchanged. YAML, wiki links and embeds remain in the
+Markdown text; linked notes and attachments are not copied or resolved. The
+source reader shows retained Markdown as text. Save open note-editor changes
+before importing. In WSL, select a Windows vault file through its `/mnt/c/…`
+path; no vault discovery or background synchronization runs.
 
 ## Link a note to an outline or passage
 
@@ -111,8 +139,8 @@ neither note nor retained material. Concurrent writing installations remain unsu
 **Copying or synchronizing a Markdown note does not copy its MRW saved material.**
 Here that material means retained sources, saved outlines, annotations and note
 associations. The note contains an address, not those separately saved files.
-No new Obsidian vault is required. **MRW: Move Artifact Directory…** separately
-moves this workspace's complete saved material; **MRW: Open Existing Artifact
+No new Obsidian vault is required. **MRW: Move Saved Work Directory…** separately
+moves this workspace's complete saved material; **MRW: Open Saved Work
 Directory…** verifies a complete synchronized copy on another installation.
 See [storage scope, commands and recovery](ARTIFACT_STORAGE.md). The current
 `/mnt/c` mount cannot preserve MRW's private modes and is rejected. This feature
