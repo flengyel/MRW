@@ -141,3 +141,16 @@ small offline example. Publish validation limits and the exact package digest
 with it. Do not include private study stores, generated session histories,
 credential-bearing URLs or unreviewed host artifacts. No public release is created
 by building, locally installing or privately pushing this increment.
+
+## Final delivery inspection
+
+The root's final review covers all 37 implementation/documentation paths plus
+build identity metadata. A bounded credential-pattern scan found zero matches;
+no genuine study histories, attempts or screenshots were added. The clean-built
+VSIX contains the expected 90 files, including 85 runtime files, and excludes
+personal history/checkpoints, tests, build logs and repository evidence files.
+The Python Appendix A material identified above remains included intentionally
+in this private package; its public disclosure decision is still unresolved.
+[Delivery validation](docs/ACTIVE_STUDY_VALIDATION.md) records exact source/package
+identity, actual checks, the installed-file comparison and unchanged study data.
+No publication surface or Git history was rewritten.

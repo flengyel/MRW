@@ -83,6 +83,35 @@ causal release improvement, provider call, compiler or mathematical check is cla
 rights/disclosure decisions before any publication. Repository visibility remains
 private; no release/Marketplace upload or history rewrite is authorized here.
 
+## Verified package and committed build
+
+The final **0.19.0** VSIX was built from clean local checkout `b368e89` after
+`npm ci --prefix vscode --ignore-scripts` installed all 127 pinned build packages.
+The initial sandboxed install lacked network access; the authorized fresh install
+completed. Tools: Node **24.22.1**, npm **11.13.0**, Python **3.13.5**. The documented
+root package command ran with `TZ=UTC SOURCE_DATE_EPOCH=1792094267`; its bundled-core
+step completed. No source-build checkout modifications were produced.
+
+The verifier checks the production manifest, exact allowed 90-entry archive,
+all runtime bytes and pinned renderer/parser/scheduler notices. Development tests,
+logs and personal studies/history are excluded. VSCE rewrites relative README
+links to the configured repository base URL; installed README bytes match the
+package. Package SHA-256:
+
+`18980e01c6976ebec01e6f11017d06d0fff01d8e0f5baa3e6282640f90b11942`
+
+The embedded implementation identity is
+`3f1dedf03ae89ec76e71a65e9e2f1ac704fefbc4`. The established WSL extension host
+successfully installed it; its production manifest and all **85 runtime files**
+match the VSIX, and its extension registry points to 0.19.0. All **50 inventoried
+ordinary study, managed-source and private-state files** still match their
+starting hashes. The working window was not reloaded, switched or reset.
+
+First action after saving/checkpointing and reloading when convenient:
+**F1 → MRW: Open Study Example**. For genuine unfinished work use
+**MRW: Resume Study** instead. No native-host acceptance or mathematical/learning
+result is inferred from packaging, installation or fixture interactions.
+
 ---
 
 # Active study delivery — 0.18.0

@@ -23,6 +23,16 @@ must stay intact. The working window was not reloaded or switched. Public
 release remains separately authorized, with concrete disclosure/rights decisions
 in PUBLIC_READINESS.md; do not rewrite history or change visibility.
 
+Delivery is installed as **0.19.0**: manifest plus 85 runtime files verified,
+VSIX SHA-256 `18980e01c6976ebec01e6f11017d06d0fff01d8e0f5baa3e6282640f90b11942`.
+Implementation: `3f1dedf03ae89ec76e71a65e9e2f1ac704fefbc4`; clean package build:
+`b368e89`. Broad Node checks: 206 passing. Python: 402 run, 340 passing and
+62 opt-in/unavailable skips. The isolated fixture browser cycle passes; native
+Code.exe exits 255 before the runner. All 50 baseline files remain unchanged.
+First action after the reader elects to reload: **MRW: Open Study Example**.
+Use **Resume Study** for genuine saved work. Manual clipboard relay, self-reports
+and unsupported current-study/history migration remain the practical limits.
+
 ## Earlier delivery — 0.18.0
 
 The fetched task at origin/main `560e733` is implemented in **0.18.0**. Use
