@@ -182,4 +182,3 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
   });
 }
 module.exports = { registerProofStudy, studyPassages, sources, validateStudy, handoff, bindProposal };
-

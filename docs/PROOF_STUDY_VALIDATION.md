@@ -90,7 +90,7 @@ acceptance and improved understanding remain to be observed.
 
 Verified **0.17.0** is installed; its production manifest and all 73 runtime
 files match the checked VSIX (SHA-256
-`1c8389c18d69025cdcd15dd1cc7f144a30a16f4326d5318a2cf9c1298a046f8b`). The original
+`36502f2f72e11b7d998e7add7e165bc4774b65d862b6a359521f334423255af3`). The original
 21 ordinary study files, private HEAD and all 12 retained payload files are
 byte-identical to the inventory taken before creating the second study. Only
 the new 08ZG study/outline and their quotation snapshots were added. The installed
