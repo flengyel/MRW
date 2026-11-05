@@ -805,6 +805,13 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const target=await bridge(request(c,'outline_reference',{region:c.selected||null}));
     return rows.studyPassage(target.reference,root);
   };
+  rows.loadStudyExample = () => locked(async () => {
+    const {store,root}=await storage(vscode.window.activeTextEditor);writable({store});
+    const source=await sourceSnapshot(path.join(context.extensionPath,'media/study-example.md'));
+    const result=await bridge({method:'outline_import_note',store,project_root:root,path:source.path,source_revision:source.revision});
+    const target=await bridge({method:'outline_reference',store,project_root:root,id:result.outline.id,revision:result.revision,region:result.outline.regions[0].id});
+    return {root,passage:{...await rows.studyPassage(target.reference,root),authors:'Codex companion (OpenAI)',license:'CC0-1.0'}};
+  });
   rows.captureStudySelection = async root => {
     const result=await vscode.commands.executeCommand('mrw.createOutline');
     if(!result)return null;

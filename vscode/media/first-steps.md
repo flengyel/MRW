@@ -2,27 +2,41 @@
 
 ## Study current material
 
-Select a retained passage and choose **Study current material**, or select
-ordinary saved text and run **MRW: Study Current Material**. A cited graph claim
-has **Study this claim**. No question popup is required.
+Run **MRW: Open Study Example** for an attributed offline source and two
+questions. It preserves other work and marks practice separately from research.
+For your source, select saved text and run **MRW: Study Current Material**, or
+choose **Study current material** in a retained reader. A cited graph claim has
+**Study this claim**.
 
-Use **Add question**, or **Copy question handoff for Codex** and **Import questions
-from clipboard**. Graph JSON is optional. **Keep for review** admits a question;
-saving/importing alone does not. **Begin short block** selects relevant questions
-within the adjustable three-question/five-minute/one-new-question defaults.
+An empty study shows its source, **Enter a question** and **Request questions
+from Codex**. The latter copies exact source text, references and a question
+schema; paste the request into Codex, then **Import questions from clipboard**.
+Manual question entry works offline. **Keep for review** explicitly enrolls a
+question. A short block is offered once eligible questions exist.
 
-Type an attempt or choose **Worked on paper**, then **Submit answer**. Reveal
-hints, the reference answer or source when useful. Report the outcome and source
-consultation for that submission. Later reveals preserve its earlier snapshot.
-The occasional effort item is optional and refers to that specific attempt.
-**Pause / save** and **MRW: Resume Study** preserve unfinished work.
+Starting recall conceals source and answer within the study. Type your work or
+choose **Worked on paper**, then **Submit answer**. Use **Reveal source context**,
+hints or the reference answer when needed. A later reveal leaves the earlier
+submission unchanged. Earlier study exposure does not rule out later recall.
 
-The **Studies** sidebar lists recent studies, sources and questions. Its **…**
-menu and the Command Palette contain source operations and **Inspect Study
-History** / **Export Study History…**. History is private local data; explicit
-exports are ordinary saved files. The first instrumented release supplies no
-earlier usage baseline. Scheduling and source/format validation do not check
-the mathematics.
+For help, use **Copy help request for Codex** and paste the handoff into the
+companion. Back in MRW, **Paste companion response… → Review pasted response →
+Retain response** keeps prose and equations beside the attempt. Review the author;
+manual paste does not authenticate it. **Edit response** retains an attributed
+revision alongside the original. Successive replies stay separate.
+
+**Submit revised work** records another immutable submission while the attempt
+is unfinished. Once completed, **Continue with revised work** starts a linked
+attempt. Report outcome and consultation for the particular submission; pending
+choices persist through reveals and pause/reopen. They are never sent automatically.
+An occasional effort report is optional and names its attempt.
+
+**Pause / save** and **MRW: Resume Study** restore unfinished work. The **Studies**
+sidebar lists recent studies, sources and questions. Its **…** menu and Command
+Palette contain source operations and **Inspect Study History / Export Study
+History…**. History is local private data; exports can contain mathematics,
+work and replies. Source-store moves do not yet move current-study/history data.
+Scheduling, source retention and graph validation do not check the mathematics.
 
 ## Begin or resume a proof study (0.17.0)
 

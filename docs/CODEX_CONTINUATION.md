@@ -1,20 +1,29 @@
 # Codex continuation: MRW source work and companion notes
 
-## Current assignment — study feedback and public preparation
+## Current delivery — study feedback, 0.19.0
 
-Read [CODEX_STUDY_FEEDBACK_PROMPT](CODEX_STUDY_FEEDBACK_PROMPT.md) and implement
-it from the latest reconciled checkout. The reviewed baseline is
-`098f2579e26e224b124369f9ffc4192199f2c722` (0.18.0).
-Prioritize the reproduced measurement/assessment defects, then retain companion
-help in the same study and complete an understandable first session. Prepare
-public-facing documentation and an exposure review in parallel.
+The fetched `origin/main` task at `923539a` is implemented after a clean
+fast-forward. Three parallel workers handled measurement, study UI and public
+preparation with separate file ownership; the root integrated retention and
+performed delivery checks. Read [workflow](ACTIVE_STUDY_WORKFLOW.md),
+[validation](ACTIVE_STUDY_VALIDATION.md) and [public readiness](../PUBLIC_READINESS.md).
 
-Do not repeat the 0.18 implementation or stop at another plan. Preserve genuine
-study work and complete the focused checks, package and main-branch delivery.
-Repository visibility remains private; native-host limitations must stay
-separate from browser/API evidence. The linked prompt supplies the full task.
+Do not repeat the measurement repairs. Immutable attempts/submissions resolve
+linked corrections before grouping; timing is fixed at submission against the
+preceding eligible review, and late assessments replay FSRS chronologically.
+Reader/AI/application/unknown-assistance evidence remains separate. Requests and
+retained prose have exact snapshots and attributed revisions; explicit assisted
+continuations preserve completed attempts. Empty study orientation, pending
+reports and an explicitly loaded practice example complete first use.
 
-## Current delivery — 2026-11-05
+No current-study/history migration, automatic provider call, mathematical check
+or learning benefit is claimed. Native launch exited 255 before the runner;
+browser/API evidence is distinct. Genuine source/store/study/history content
+must stay intact. The working window was not reloaded or switched. Public
+release remains separately authorized, with concrete disclosure/rights decisions
+in PUBLIC_READINESS.md; do not rewrite history or change visibility.
+
+## Earlier delivery — 0.18.0
 
 The fetched task at origin/main `560e733` is implemented in **0.18.0**. Use
 [ACTIVE_STUDY_WORKFLOW](ACTIVE_STUDY_WORKFLOW.md) and

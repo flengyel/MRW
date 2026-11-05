@@ -1,6 +1,23 @@
 # UX_SPEC.md
 
-## Delivered active study — 0.18.0
+## Delivered study feedback — 0.19.0
+
+An empty study shows its selected source and Enter a question / Request questions
+from Codex. Recall conceals source/reference answer within the study. Pending
+outcome choices persist by attempt ID without automatic reporting. Paste companion
+response reviews ordinary prose with attribution, preserves the original and
+separate edits, and retains it beside work through Resume. Requests, previews,
+retention and display remain distinct observations. A completed attempt’s revised
+work begins an explicit linked continuation. A later independent attempt resets
+exposure while keeping history. Open Study Example is explicit, original CC0
+material with separately marked practice history. Native Studies remains the
+navigation surface; no workspace rearrangement or background requests occur.
+See [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
+[validation](docs/ACTIVE_STUDY_VALIDATION.md). Graph structure and mathematical
+checking remain separate; reader reports and pasted AI proposals establish no
+checked proof or learning benefit.
+
+## Earlier delivered active study — 0.18.0
 
 Study Current Material starts from a selected retained passage, cited graph
 claim or captured saved text selection, without a preliminary question popup.

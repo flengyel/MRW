@@ -1,239 +1,134 @@
 # Install Mathematical Research Workstation
 
-MRW helps you review mathematical sources, keep attributed reader notes and
-organize an ordinary Markdown reading outline. This guide covers **Windows
-VS Code connected to WSL2**, with Python running in Linux. Other host arrangements
-and their recorded checks are listed in the
-[workspace-host guide](../vscode/README.md#workspace-hosts-and-dependencies).
-
-Choose a starting path:
-
-| Your work | Installation path |
-| --- | --- |
-| Read and review mathematics, annotate sources, navigate an outline | [A. MRW for reading](#a-mrw-for-reading) |
-| Add SageMath calculations in a notebook beside the reading | Complete A, then [B. Add SagePod](#b-add-sagepod-for-computation) |
-| Ask an AI about mathematical text | Complete A, then [AI assistance](#ai-assistance-for-reviewing-mathematics) |
-| Link existing Obsidian notes | Optional [Obsidian companion](#obsidian-links-optional-later) |
-
-SagePod is a separate [companion project](https://github.com/flengyel/sagepod).
-It supplies containerized SageMath and Jupyter. MRW's Python core stays on the
-WSL host, and Microsoft's Jupyter extension owns the notebook connection.
-
-## Prerequisites by path
-
-| Component | A: Reading | B: Add SagePod |
-| --- | --- | --- |
-| Windows VS Code and its WSL extension | Required | Same installation |
-| WSL2 Linux distribution | Required for this Windows path | Same distribution/user |
-| Python 3.11+ on WSL | Required by MRW | Still required outside the container |
-| MRW VSIX installed in WSL | Required | Same extension |
-| Git on WSL | Needed if building MRW from source | Needed to obtain SagePod |
-| Linux Node.js 22+ and npm | Needed only to build the VSIX | Same packaging condition |
-| Rootless Podman and SagePod's host packages | Optional | Required; follow SagePod's setup |
-| Jupyter and SageMath Enhanced in WSL | Optional | Required for this notebook workflow |
-| AI access | Optional: Codex sign-in or MRW API credential; see AI assistance below | Independent of SagePod |
-| Obsidian, Lean and TikZ rendering tools | Optional | Optional |
-
-An installed MRW VSIX bundles its Python core. It needs no Node/npm, Qt,
-separate MRW Python-package installation or SageMath installation on the host.
+MRW 0.19.0 is installed from a VSIX. There is no published Marketplace listing or
+GitHub release. Obtain a maintainer package or [build from source](../vscode/README.md#package-and-install-a-vsix)
+with repository access. The extension identity is `flengyel.theorem-terminal`.
 
 ## A. MRW for reading
 
-### 1. Prepare Windows and WSL2
+The established Windows arrangement uses **VS Code 1.95+ on Windows connected to
+WSL2 Debian**, with **Python 3.11+ in Linux**. The extension runs on the workspace
+host. Other arrangements and their evidence are listed in the
+[host table](../vscode/README.md#workspace-hosts-and-dependencies).
 
-On a new machine, follow Microsoft's
-[WSL installation instructions](https://learn.microsoft.com/en-us/windows/wsl/install)
-to install a Linux distribution. Debian is the distribution used in the recorded
-Windows/WSL checks. In **Windows PowerShell**, check an existing installation with:
+An installed VSIX needs no Qt, npm, separate MRW Python-package installation,
+Lean, SageMath or AI account. Build tools are needed only when making the package.
 
-```powershell
-wsl --list --verbose
-```
+### 1. Open the intended Linux workspace
 
-The chosen distribution should show **VERSION 2**. Reuse an existing suitable
-distribution and Linux user. Install **VS Code on Windows**, then Microsoft's
-**WSL** extension (`ms-vscode-remote.remote-wsl`) locally in Windows. Follow the
-[VS Code WSL guide](https://code.visualstudio.com/docs/remote/wsl#_installation).
+Install Windows VS Code and Microsoft's WSL extension (`ms-vscode-remote.remote-wsl`)
+if needed. [Microsoft's WSL guide](https://code.visualstudio.com/docs/remote/wsl#_installation)
+covers connecting the window. Use a WSL2 distribution; `wsl --list --verbose` in
+Windows PowerShell reports its version.
 
-### 2. Open your study workspace and check Python
+Reopen your study's folder or saved workspace. Existing sources and annotations
+belong to that workspace. For a new study only, in a WSL terminal:
 
-In your **WSL terminal**, go to the existing study folder and run `code .`.
-For a first workspace, you can create an ordinary folder, for example:
-
-```bash
+```sh
 mkdir -p ~/mrw-study
 cd ~/mrw-study
 code .
 ```
 
-The window's bottom-left corner should show **WSL: Debian**, or the distribution
-you chose. In **Terminal → New Terminal** in that window, run:
+In that window's integrated terminal, check:
 
-```bash
+```sh
 python3 --version
 ```
 
-Install Python **3.11 or later** in WSL if needed. On a current Debian installation,
-the distribution's `python3` package supplies it; check the version before
-continuing. To use another installed interpreter, set `mrw.pythonExecutable`
-in VS Code's **Remote** settings to that executable's path.
+Python must be 3.11 or later on the workspace host, normally `python3`. An
+alternative executable path can be set in `mrw.pythonExecutable` in User or Remote
+settings. Keep the workspace and private storage on the Linux filesystem;
+Windows-backed artifact storage is not qualified.
 
-Keep the workspace and MRW's default private storage on the Linux filesystem.
-Windows-backed artifact storage remains unqualified. Existing sources and
-annotations belong to their original workspace; reopen it rather than creating
-another folder for that work.
+For a Linux SSH host, connect with Microsoft's Remote - SSH extension, open the
+study folder there and perform the same Python and extension-host checks.
+The earlier scoped SSH reader check used Raspberry Pi 5/Debian 12 ARM64; it does
+not establish acceptance of every SSH host or the current study interaction.
 
-### 3. Obtain and install the MRW package
+### 2. Install the VSIX in that workspace host
 
-The current delivered package is **`theorem-terminal-0.14.4.vsix`**, extension
-identity **`flengyel.theorem-terminal`**. Obtain a trusted maintainer package, or
-follow the [source-build instructions](GETTING_STARTED_WSL_SAGEPOD.md#build-the-vsix).
-The source-build route needs Git, Linux Node.js 22+ and npm in addition to Python.
+Run **Extensions: Install from VSIX…** and select
+`theorem-terminal-0.19.0.vsix`. Alternatively, in the connected window's Linux
+integrated terminal, substitute the actual package path:
 
-In the intended **WSL VS Code window**, press **F1 → Extensions: Install from
-VSIX…** and select the package. Or use that window's WSL integrated terminal,
-replacing this example with the package's actual Linux path:
-
-```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.14.4.vsix
+```sh
+code --install-extension /absolute/path/to/theorem-terminal-0.19.0.vsix
 code --list-extensions --show-versions
 ```
 
-Verify MRW under **WSL — Installed** in the Extensions view. Save ordinary
-documents and any annotation forms before a requested window reload. Preserve
-the existing extension identity and workspace storage when upgrading.
+Confirm `flengyel.theorem-terminal@0.19.0` under the WSL/SSH host's installed
+extensions. Installing only in the Windows/local interface is insufficient.
+Save ordinary files and checkpoint MRW forms before a requested reload. Upgrades retain
+the extension identity; do not delete workspace storage.
 
-### 4. Start reading
+### 3. Open a study
 
-In the MRW starting view, choose **New Reading Overview** to create your own
-working page, or **Open Reading Outline** for an existing overview. **Open Saved
-Source Outline…** returns to a retained source. **MRW: Open Tutorial** opens the
-offline [first steps guide](../vscode/media/first-steps.md), beginning with a
-question or notes from paper and introducing tools through their use.
+Run **MRW: Open Study Example** for an attributed offline example with two
+questions. It records practice separately and preserves other work.
 
-Click the **MRW book icon** in the Activity Bar. For retained work, run **MRW:
-Open Saved Source Outline…**. For a new source, open a saved UTF-8 mathematical
-text, select a passage and run **MRW: Create Outline from Saved Source**.
+For your own source, select saved UTF-8 text/Markdown/TeX and run **MRW: Study
+Current Material**, or use **Study current material** in a retained reader.
+An empty study offers **Enter a question** or **Request questions from Codex**.
+Submit work, retain help when needed, and use **Pause / save** followed by
+**MRW: Resume Study**. The [bundled tutorial](../vscode/media/first-steps.md) lists
+these controls; the [study workflow](ACTIVE_STUDY_WORKFLOW.md) explains their state.
 
-Write an ordinary Markdown overview with your own headings and prose. Use
-**MRW: Insert Outline Reference…** to add saved source or passage references,
-then **MRW: Open Reading Outline** to navigate them. See the
-[reading guide](READING_OUTLINE_WORKFLOW.md) for exact navigation, return and
-unsaved-edit behavior. VS Code owns Markdown editing and saving; save reader
-annotation forms with **Save annotation**.
-
-This completes the reading installation. Continue with AI assistance if desired,
-or add SagePod when your work calls for calculations.
-
-For a later folder rename, use **MRW: Prepare Folder Rename…** in the existing
-study first. After closing, renaming with your file tools and reopening its new
-location, use **MRW: Reconnect Saved Work After Folder Rename…**. See
-[the folder-rename workflow](FOLDER_RENAME_WORKFLOW.md) for exact steps and limits.
-The development checkout and each nested study have separate workspace identities.
-
-## B. Add SagePod for computation
-
-Start with path A. Add the following components in the **same WSL distribution
-and Linux user**:
-
-1. Install **Git**, **rootless Podman** and SagePod's documented host packages,
-   including its ACL, user-namespace, networking and Python-venv prerequisites.
-   Follow [SagePod's prerequisites](https://github.com/flengyel/sagepod#prerequisites),
-   including its WSL/systemd instructions where applicable.
-2. Obtain and install [SagePod](https://github.com/flengyel/sagepod#install) using
-   its own instructions. Its explicit setup downloads/builds the image, configures
-   its persistent directories and starts Jupyter. Reuse an existing usable
-   installation without rerunning setup or permission repair.
-3. In VS Code's **WSL** Extensions view, install **Jupyter**
-   (`ms-toolsai.jupyter`) and **SageMath Enhanced** (`Lov3.sagemath-enhanced`).
-   Save work and reload after adding the Sage language registration.
-4. Obtain the current login URL privately with `bin/jupyter-url.sh` in the
-   SagePod checkout. The default host port is **8889**; **8888** is the internal
-   container port. Keep the URL's credential out of notes and configuration.
-5. Create or open an ordinary `.ipynb` in the persistent notebook folder, normally
-   `~/Jupyter`. Choose **Select Kernel → Select Another Kernel… → Existing
-   Jupyter Server…**, enter the URL and select the actual **SageMath** kernel.
-6. Use **+ Code** to add a cell, click inside to type and **Ctrl+Enter** to run
-   it. **Ctrl+S** saves the notebook and its outputs.
-
-The [complete SagePod tutorial](GETTING_STARTED_WSL_SAGEPOD.md) covers setup
-branches, server/kernel selection, cell creation, persistent paths and returning
-to the Markdown overview. SagePod manages computation; opening MRW starts no
-container and executes no notebook cells. Saved outputs and live kernel
-variables are separate.
+The **MRW** Activity Bar icon opens **Studies** and **Reading Outline**. Other
+commands remain in the views' **…** menus and Command Palette. **Open Saved Source
+Outline…** reopens retained reading material. For an ordinary Markdown overview,
+use **Open Reading Outline**. This navigator follows headings and explicit source
+links; it does not generate mathematical content.
 
 ## AI assistance for reviewing mathematics
 
-### Codex companion: current choice
+### Codex companion
 
-The user currently prefers the Codex VS Code extension alongside MRW, with MRW
-API-key setup deferred. On **2026-11-03**, the user reports that Codex is installed,
-its sidebar opens successfully and this development repository is open in
-**WSL: Debian**. That is sidebar startup evidence; the manual passage/question/
-response-retention workflow has not yet been tested in this setup.
+The study editor copies a complete, exact question/help handoff to the clipboard.
+Paste it into your configured Codex companion. Copy the answer, then use **Paste
+companion response…**, review text and author, and **Retain response** in MRW.
+Question proposals use **Import questions from clipboard**; ordinary help requires
+no JSON. This exchange is manual. MRW makes no provider request or clipboard watch.
+The pasted author's identity and mathematical correctness are not authenticated.
 
-For retained work, [reopen its existing study workspace and MRW reader](CODEX_CONTINUATION.md#reopen-the-existing-study-workspace-beside-codex).
-Then choose the Codex icon or **F1 → Codex: Open Codex Sidebar**, as documented in
-OpenAI's [IDE extension guide](https://learn.chatgpt.com/docs/codex/ide). Use
-**Sign in with ChatGPT** if prompted; see OpenAI's
-[authentication guide](https://learn.chatgpt.com/docs/auth). This does not configure
-MRW's API connector.
+Codex setup and sign-in belong to that extension. Its account connection does not
+configure MRW's separate API connector. Offline manual questions and attempts need
+no companion. See [the active study workflow](ACTIVE_STUDY_WORKFLOW.md).
 
-Manually paste both the retained source quotation and its complete exact MRW
-passage reference into a Codex question. Review the reply and save useful material
-with Codex/AI attribution in an ordinary note/notebook or new reader annotation.
-The [companion workflow](READER_AI_WORKFLOW.md#temporary-companion-codex-in-vs-code)
-gives the copy-link, exact-TeX and annotation-save controls. A link alone does not
-transfer source text or private storage. There is no automatic handoff, reply
-retention or MRW API call record for this external exchange.
+### Separate MRW API connector
 
-Keep the current installation and Linux artifact location. MRW API-key setup
-and Windows-backed storage qualification remain deferred; this documentation
-follow-up requires no new VSIX or desktop-testing campaign.
+**Ask About Selected Work** and **Ask About Reader Passage…** prepare an exact
+request preview. **Send Exact Preview** is a separate action using the existing
+OpenAI connector. It requires `OPENAI_API_KEY` in the environment inherited by the
+Linux extension host, read only at Send; an integrated terminal export does not
+change an already-running host. Keep credentials outside files and version control.
+No API key is needed to install or use offline study. See
+[the reader AI workflow](READER_AI_WORKFLOW.md) for this separate record lifecycle.
 
-### MRW API connector: deferred in the current setup
+## B. Add SagePod for computation
 
-The existing connector uses the **OpenAI Responses API**. In MRW 0.11.0, click
-**Ask AI about this passage…** directly in the source reader, or run **MRW: Ask About
-Reader Passage…**. **MRW: Ask About Selected Work** remains available for ordinary
-editor text. Both prepare an exact request preview; **MRW: Send Exact Preview**
-is a separate explicit action. Reading and preparing a preview require no
-provider call.
+[SagePod](https://github.com/flengyel/sagepod) is an optional companion supplying
+SageMath and Jupyter in a rootless Podman container. MRW's Python remains on the
+workspace host; Microsoft's Jupyter extension owns notebook editing/connection.
 
-If you later choose to resume MRW API setup, configure `OPENAI_API_KEY` in the
-environment inherited by the **WSL extension host**, and choose your model
-through `mrw.model` in User/Remote settings or the request prompt. OpenAI's
-[API quickstart](https://developers.openai.com/api/docs/quickstart) describes
-creating and exporting a key. Keep it outside notes, workspace settings and
-version control. Setting it in an already-open integrated terminal does not
-change the environment of the existing extension host. MRW reads it only at Send.
+Follow [the SagePod tutorial](GETTING_STARTED_WSL_SAGEPOD.md) for its prerequisites,
+installation, authenticated server URL, actual SageMath kernel and cell controls.
+Keep login URLs private. Opening MRW starts no container or notebook execution.
 
-See the [reader AI workflow](READER_AI_WORKFLOW.md) for source selection, response
-review and retention. Copilot appearing in VS Code does not configure this
-connector; its models would require a separate MRW integration. No provider
-request is needed to install MRW or SagePod.
+## Optional reading tools and data
 
-## Obsidian links: optional, later
+[Obsidian](OBSIDIAN_WORKFLOW.md) links or imports notes without converting a vault.
+[TikZ](TIKZ_WORKFLOW.md) rendering needs separate Linux tools and is explicit;
+reading saved diagrams works offline. [Folder-rename preparation](FOLDER_RENAME_WORKFLOW.md)
+and [source-store move/reconnect](ARTIFACT_STORAGE.md) preserve supported source
+records. They do not yet transfer current-study checkpoints or event histories.
 
-Use Obsidian with your existing notes if desired. MRW already supplies explicit
-links to retained outlines/passages and separately configured return links to
-Obsidian. Follow the [Obsidian companion guide](OBSIDIAN_WORKFLOW.md) when ready.
-No vault conversion, indexing, automatic rewriting or new vault is part of
-installation. Testing those links in the user's current setup is **pending**;
-it is deferred separately from the successful SagePod connection.
+Current studies/history are private data in the extension's VS Code workspace
+storage on the Linux host. **Inspect Study History** reads it; **Export Study
+History…** explicitly saves a selected readable/JSON copy, which can contain
+source text, attempts, replies and private references. Review before sharing.
+[The project README](../README.md#data-and-transfers) describes the boundary.
 
-## Early-stage distribution and future webpage
-
-MRW's repository is **[flengyel/MRW](https://github.com/flengyel/MRW)** and is
-private. It was renamed from `flengyel/theorem_terminal` on 2026-11-04; existing
-local checkout and study-workspace paths stay in place.
-This documentation and source cloning require repository access. The generated
-VSIX is not committed; there is no project-published Marketplace listing or
-GitHub release download. A public package download would let readers install
-without the source-build tools.
-
-For now, these repository guides are the installation reference. A public
-webpage could later introduce MRW, link a downloadable package and present these
-paths. Web hosting, Marketplace publication and repository visibility changes
-are future decisions. The [roadmap](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
-keeps current features separate from planned reader assistance and proof analysis.
+Legacy Qt/CLI setup and the Lean justification experiment are kept in the
+[historical account](../CHANGELOG.md#standalone-qt-installation-and-launch).
+They are not prerequisites for a VS Code study.

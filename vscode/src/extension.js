@@ -290,7 +290,7 @@ function activate(context) {
   registerProofStudy({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });
   const studyController=registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge:rawBridge,changed,
-    readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,selectPrerequisites:outlineRows.selectStudyPrerequisites,
+    readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,selectPrerequisites:outlineRows.selectStudyPrerequisites,loadExample:outlineRows.loadStudyExample,
     getCurrent:async root=>{
       const editor=vscode.window.activeTextEditor;
       if(currentMaterial?.root===root&&currentMaterial.reference)return outlineRows.studyPassage(currentMaterial.reference,root);

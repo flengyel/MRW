@@ -58,6 +58,12 @@ test('reader annotations render explicit inline and display TeX while keeping ex
   }
 });
 
+test('study prose opts into ordinary dollar mathematics while preserving inert exact input',()=>{
+ const h=view(),text='For $x\\in X$, use $$f(x)=x.$$ <script>inert</script>';
+ h.render(text,{inlineDollars:true});assert.equal(h.math().length,2);assert.equal(h.raw().textContent,text);
+ assert.deepEqual(h.calls.map(c=>c.displayMode),[false,true]);assert.equal(h.root.all().some(n=>n.nodeName==='script'),false);
+});
+
 test('plain Unicode, currency, HTML, Markdown links and unmatched delimiters remain literal', () => {
   for (const text of ['x = s(f(x)); Δ ⊆ X × X. $5 and $10.', '<img src=x onerror=bad> [link](command:bad)', 'Incomplete \\(x']) {
     const h = view(); h.render(text);

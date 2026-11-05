@@ -1,20 +1,20 @@
 # CODEX_PLAN.md
 
-## Current task — study feedback and public preparation
+## Implemented increment — 0.19.0
 
-The next task is [CODEX_STUDY_FEEDBACK_PROMPT](docs/CODEX_STUDY_FEEDBACK_PROMPT.md).
-Start from the delivered 0.18.0 implementation. Repair attempt/correction timing,
-cross-release comparisons and adaptation evidence; retain attributed companion
-help beside submitted work; simplify the first study session and preserve pending
-controls. Prepare concise installation/publication documents and inspect exposure
-in parallel. This is implementation work, not another design-only increment.
+The [study-feedback task](docs/CODEX_STUDY_FEEDBACK_PROMPT.md) is implemented.
+Linked attempts/corrections resolve before release comparison; original timing,
+missing evidence, task-linked reader effort and assistance remain separate.
+Companion prose is retained with exact originals, attributed edits, request/source
+bindings and explicit assisted continuations. First use orients from the source,
+pending controls survive resumption, and an explicit CC0 example marks practice
+separately. Existing source stores, notes and graphs are preserved.
 
-Complete the source → question → attempt → retained help → continuation → resume
-path with meaningful local history. Keep the existing scheduler, provider
-boundaries and source identities. Publication preparation does not authorize
-changing visibility, publishing packages or rewriting Git history. The prompt
-defines delivery and focused verification; older completed priorities below
-supply context rather than additional work.
+The root/install/tutorial documents describe current behavior; older development
+accounts remain linked. [Public readiness](PUBLIC_READINESS.md) records the scope,
+rights/disclosure decisions and unchanged private visibility. No publication,
+history rewrite or provider integration is part of delivery. Actual checks and
+package identity belong in [validation](docs/ACTIVE_STUDY_VALIDATION.md).
 
 ## Implemented increment — 0.18.0
 

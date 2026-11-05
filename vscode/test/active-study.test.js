@@ -37,7 +37,7 @@ test('due ordering, limited new admission and block time/question budgets',()=>{
 });
 test('effort missingness and conservative adaptation preserve high-effort success',async t=>{
  const h=await history(t),s=study();begin(s,h);model.submit(s,'answer',false,h);model.outcome(s,{outcome:'unaided_success',assessor:'reader',consulted:false},h);
- assert.equal(model.adaptation(s,null,await h.events()),null);const a=model.adaptation(s,9,await h.events());assert.deepEqual(a.choices,['continue','pause']);
+ assert.equal(model.adaptation(s,null,await h.events()),null);h.record('effort.response',{attempt:s.current.id,rating:9},'reader_report');const a=model.adaptation(s,9,await h.events());assert.deepEqual(a.choices,['continue','pause']);
  h.record('effort.offer',{attempt:s.current.id});const text=summarize(await h.events());assert.match(text,/no response: 1/);assert.match(text,/mean unavailable/);assert.match(text,/Descriptive only/);
 });
 test('recorder failure preserves event order and snapshots, exposes a gap and recovers without blocking',async t=>{
@@ -89,7 +89,7 @@ test('effort offers record nonresponse on the next task; repeated difficulty off
  const offer=h.record('effort.offer',{attempt:s.current.id});s.current.effortOffer={id:offer.id,disposition:'no_response'};
  const q=model.question({...value,prompt:'Another missing step'},[passage]);s.questions.push(q);model.begin(s,q,'reader override',h);model.submit(s,'second',false,h);model.outcome(s,{outcome:'help_dependent',assessor:'reader',consulted:true},h);
  const events=await h.events();assert.ok(events.some(e=>e.action==='effort.response'&&e.data.disposition==='no_response'));assert.match(summarize(events),/no response: 1/);
- const a=model.adaptation(s,8,events);assert.ok(a.choices.includes('smaller_step'));assert.equal(s.current.outcome.outcome,'help_dependent');
+ h.record('effort.response',{attempt:s.current.id,rating:8},'reader_report');const a=model.adaptation(s,8,await h.events());assert.ok(a.choices.includes('smaller_step'));assert.equal(s.current.outcome.outcome,'help_dependent');
 });
 test('serialized FSRS state resumes and a changed source never inherits it',()=>{
  let q={kept:true,reviews:[]};const o={attempt:'first',activity:'definition',outcome:'unaided_success',assessor:'reader',consulted:false,hints:0,answer_visible:false};

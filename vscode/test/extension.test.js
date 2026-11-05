@@ -2063,3 +2063,13 @@ test('Study Current Material uses the selected retained passage without a questi
  assert.equal(manifest.contributes.views.mrw.find(v=>v.id==='mrw.research').name,'Studies');
  assert.ok(manifest.contributes.menus['view/title'].some(v=>v.command==='mrw.studyCurrent'&&v.group==='navigation'));
 });
+
+test('Open Study Example retains the bundled source explicitly and reuses the saved practice without replacing research',async t=>{
+ const root=await temporary(t),h=await harness(root);await sourceReader(h,root);const sourcePanels=h.panels.length;
+ const inputs=h.inputs.length;await h.commands.get('mrw.openStudyExample')();assert.deepEqual(h.errors,[]);assert.equal(h.inputs.length,inputs);
+ const p=h.panels.at(-1);await p.receive({type:'ready'});const s=p.webview.messages.findLast(m=>m.type==='active_study').study;
+ assert.ok(s.practice);assert.equal(s.questions.length,2);assert.ok(s.passages[0].reference.startsWith('mrw-outline:v1/'));
+ assert.match(s.passages[0].text,/Sums of odd integers/);assert.equal(s.passages[0].license,'CC0-1.0');assert.equal(h.panels.length,sourcePanels+1);
+ await p.receive({type:'next'});await p.receive({type:'draft',study:s.id,attempt:p.webview.messages.findLast(m=>m.type==='active_study').study.current.id,text:'Saved example work',paper:false});
+ await h.commands.get('mrw.openStudyExample')();await p.receive({type:'ready'});assert.equal(p.webview.messages.findLast(m=>m.type==='active_study').study.current.draft,'Saved example work');
+});

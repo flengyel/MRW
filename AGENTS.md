@@ -1,9 +1,9 @@
 # Codex instructions
 
-## Current task — study feedback and public preparation
+## Delivered task — study feedback and public preparation
 
 Follow [CODEX_STUDY_FEEDBACK_PROMPT](docs/CODEX_STUDY_FEEDBACK_PROMPT.md) and the
-current CODEX_PLAN.md section. MRW 0.18.0 is implemented. The next increment fixes
+current CODEX_PLAN.md section. MRW 0.19.0 implements the next increment: it fixes
 how attempts/corrections support reports and adaptations, retains attributed
 companion feedback beside the attempt, and simplifies first use. Public README,
 installation and exposure review work proceeds alongside it. These priorities

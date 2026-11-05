@@ -1,3 +1,90 @@
+# Study feedback delivery — 0.19.0
+
+Date: 2026-11-05. Baseline: `923539a` fetched from `origin/main` and fast-forwarded
+from clean `098f257`; no ongoing work was discarded. The assignment is
+[CODEX_STUDY_FEEDBACK_PROMPT](CODEX_STUDY_FEEDBACK_PROMPT.md). Measurement, UI and
+publication review ran in parallel with assigned file ownership before integration.
+
+## Confirmed repairs
+
+The baseline grouped corrections after partitioning releases, recomputed recall
+delay using assessment time, and allowed AI/unknown-assistance outcomes to support
+less-guidance offers. Focused regressions cover linked cross-release corrections,
+deduplicated events, distinct attempt/submission/assessment denominators, selected
+exports with supporting context and missing parents, delayed assessment, restart,
+multiple submissions, reversed clocks and legacy unknown timing. A further test
+found that late assessment could send an earlier time to FSRS after a subsequent
+shared-question review; chronological replay now preserves both observations.
+Adaptations use reader recall reports with explicit consultation and effort tied
+to that attempt. Application and AI evidence stay separate. Reports name selections,
+requests, retention and display opportunities without inferring use or benefit.
+
+## Observed feedback interaction
+
+The disposable host-controller session enters a question, submits exact work,
+changes the unsent draft, copies a handoff containing both distinctly, pastes
+ordinary prose, edits attribution, retains the original and revision, reports an
+outcome and begins a linked assisted continuation. It resumes from real checkpoint
+files and inspects readable history. Separate cases cover a failed help checkpoint
+followed by a further edit/retry without duplicate retention, independently
+attempted later recall, pending outcome choices through reveal/reopen, adaptation
+request/response links and explicit example loading without replacing research.
+The core-backed example entry check retains the actual bundled Markdown through
+the existing outline path and reuses an unfinished saved example. An initial test
+caught the whole-source reference where a passage was required; it now pins the
+retained region. No genuine study is a test fixture.
+
+An isolated headless Chrome session uses the actual integrated renderer/controller,
+real checkpoint/history filesystem, the existing parent-masked webview transport,
+and an API clipboard fixture. It exercises source → question → submission → pasted
+help → attributed retention → linked continuation → outcome → pause/reopen →
+readable history. Its 52 events are `developer_fixture`: two attempts, two immutable
+submissions and two reader-report fixtures. Pending choices survive answer reveal;
+post-submission help leaves the first submission unchanged. The original pasted
+AI text and Reader edit remain distinct. Three MathML expressions render, with
+zero KaTeX or runtime errors. The browser and API facade are not native VS Code.
+The screenshot and session/history artifacts remain outside Git and the VSIX.
+
+One isolated Windows VS Code / WSL development-host launch used a new disposable
+profile and project. `Code.exe` exited **255** with empty output before the runner
+produced a report. Native study interaction is unvalidated in this run. No further
+launch diagnostics, working-window reuse, reload or editor installation repair
+was performed.
+
+## Checks and delivery
+
+The focused integrated study/measurement/view/annotation run passes **50 tests**;
+the separate core-backed current-material/example entry run passes **2 tests**.
+Syntax checking and Python compilation pass. The final broader extension run
+passes **206 tests**. The required shared Python suite runs **402 tests**, with
+**340 passing and 62 expected skips** (opt-in Qt/native diagrams and unavailable
+mounted-project checks). No provider or mathematical-checking gate was invoked.
+Storage tests run in a disposable ext4 checkout; an initial temporary-filesystem
+run was stopped and superseded. The package is built from committed sources with
+a fresh dependency installation; its verified identity is appended below.
+
+## Interaction changes and remaining friction
+
+Removed: external storage of companion explanations, manual association of replies
+with attempts, JSON for ordinary help, accidental loss of pending report controls,
+and the empty bank's non-working block action. A linked continuation replaces the
+need to recreate the question after feedback. The optional example is explicit,
+attributed CC0 material with practice history separate from research.
+
+Still manual: copying requests/replies, reviewing attribution, selecting questions,
+reporting outcomes/consultation, optional effort and review admission. A pasted
+reply is manually associated, not authenticated or mathematically checked. Help
+questions and later independent recall remain reader choices. Current-study and
+history migration between workspaces/machines remains unsupported. Batched drafts
+can lose changes not yet checkpointed on abrupt termination. No learning outcome,
+causal release improvement, provider call, compiler or mathematical check is claimed.
+
+[Public readiness](../PUBLIC_READINESS.md) records the exposure review and concrete
+rights/disclosure decisions before any publication. Repository visibility remains
+private; no release/Marketplace upload or history rewrite is authorized here.
+
+---
+
 # Active study delivery — 0.18.0
 
 Date: 2026-11-05. Implementation baseline: fetched `origin/main` at `560e733`,

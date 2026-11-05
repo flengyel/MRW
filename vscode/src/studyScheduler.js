@@ -1,13 +1,13 @@
 'use strict';
 const { fsrs, createEmptyCard, Rating } = require('../media/fsrs/index.cjs');
-const IDENTITY = 'ts-fsrs/5.4.2:defaults:no-fuzz:adapter-1';
+const {readerRecall,unaidedRecall}=require('./studyEvidence');
+const IDENTITY = 'ts-fsrs/5.4.2:defaults:no-fuzz:adapter-2';
 const engine = fsrs({ enable_fuzz: false });
 // Default weights/retention. Deterministic fuzz setting is explicitly identified.
 function observe(item, observation, now = new Date()) {
-  if (!item.kept || item.retired || observation.assessor !== 'reader' || observation.activity === 'application' ||
-      !['unaided_success','help_dependent','unresolved'].includes(observation.outcome) || observation.consulted === null) return { changed: false, reason: 'Not an eligible reader-reported recall observation.' };
+  if (!item.kept || item.retired || !readerRecall(observation)) return { changed: false, reason: 'Not an eligible reader-reported recall observation.' };
   if (item.reviews?.some(r => r.attempt === observation.attempt)) return { changed: false, reason: 'Attempt already scheduled.' };
-  const unaided = observation.outcome === 'unaided_success' && !observation.hints && !observation.answer_visible && !observation.consulted;
+  const unaided = unaidedRecall(observation);
   const rating = unaided ? Rating.Good : Rating.Again;
   const before = item.card || createEmptyCard(now), result = engine.next(before, now, rating);
   item.card = result.card; item.reviews ||= []; item.reviews.push({ ...observation, at: now.toISOString(), rating, scheduler: IDENTITY });
