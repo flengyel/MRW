@@ -1,17 +1,22 @@
 # Mathematical Research Workstation
 
+## Active study (0.18.0)
+
+**Study Current Material** opens source-linked questions and attempts directly,
+with graphs optional. The Studies sidebar contains current/recent study content.
+Manual and bounded Codex question entry, immutable submitted work, corrected
+outcomes, optional effort reports, source-scoped FSRS review and local history/
+export support continuation. Existing proof studies and source material remain
+compatible. See [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
+[validation](docs/ACTIVE_STUDY_VALIDATION.md). Scheduling and format checks do
+not establish mathematical correctness or learning benefit.
+
 MRW is an experimental VS Code workstation for studying and investigating
 mathematics with retained sources, notes, AI assistance and optional checking.
 
-**Next, designed but not implemented:** source-focused study with light spaced
-review, task-linked mental-effort tracking and detailed local interaction
-history for adaptation and release evaluation.
-[Design](docs/ACTIVE_STUDY_DESIGN.md) ·
-[Research](docs/LEARNING_RESEARCH.md) ·
-[Codex implementation prompt](docs/CODEX_LIGHT_STUDY_PROMPT.md).
-
-**Current implementation: 0.17.0.** The release descriptions below distinguish
-available behavior from the proposed design.
+**Current implementation: 0.18.0.**
+[Design](docs/ACTIVE_STUDY_DESIGN.md) · [Research](docs/LEARNING_RESEARCH.md).
+Earlier release descriptions follow.
 
 **0.17.0:** select a retained proof and prerequisites, copy one exact handoff for
 Codex, import its attributed outline, correct summaries in the viewer and save

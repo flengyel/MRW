@@ -1,24 +1,32 @@
 # Codex continuation: MRW source work and companion notes
 
-## Current handoff — 2026-11-05
+## Current delivery — 2026-11-05
 
-Use [CODEX_LIGHT_STUDY_PROMPT.md](CODEX_LIGHT_STUDY_PROMPT.md) for the next
-implementation. Its authoritative interaction is
-[ACTIVE_STUDY_DESIGN.md](ACTIVE_STUDY_DESIGN.md); its evidence is
-[LEARNING_RESEARCH.md](LEARNING_RESEARCH.md).
+The fetched task at origin/main `560e733` is implemented in **0.18.0**. Use
+[ACTIVE_STUDY_WORKFLOW](ACTIVE_STUDY_WORKFLOW.md) and
+[ACTIVE_STUDY_VALIDATION](ACTIVE_STUDY_VALIDATION.md) for exact capability and
+validation boundaries. Current-material study no longer begins with the
+preliminary question popup. It supports manual/bounded Codex questions,
+immutable submissions, help/source exposure order, corrected reader outcomes,
+sparse optional effort, resumption, source-scoped FSRS blocks, a native Studies
+content view and local inspect/export. Proof graphs and old study files remain
+available. The first instrumented release establishes a baseline; no earlier
+usage, human learning or mathematical-checking result is claimed.
 
-The user requests a light review schedule focused on currently opened
-mathematics, cognitive-load tracking, and as much useful interaction history
-as possible to improve both the current response and future versions.
-Implement one source-focused study interaction using the delivered 0.17.0
-reader, handoff, graph and resumption facilities. Do not repeat the completed
-0.17.0 work or postpone implementation for another research cycle.
-Track reported effort separately from recall and observations; preserve
-versioned decision reasons and outcomes. CHREST is a later modeling option.
+The maintained ts-fsrs 5.4.2 adapter is pinned, bundled with its MIT license and
+hash verification, default parameters and deterministic no-fuzz configuration.
+VS Code 1.95+ supplies its Node 20+ runtime. Question/source revisions isolate
+history. New learning state lives outside Git/VSIX in private workspace storage;
+its transfer through managed source-store moves is not implemented. Preserve it
+and all genuine retained mathematical work. Do not reseed personal sessions
+with test questions or reinterpret scripted observations as user reports.
 
-This is a design-only update. No runtime version, installed package, user
-study data or repository visibility is changed. The notes below remain a
-record of prior deliveries, not a competing next task.
+The initial broad check found a logger-induced picker delay and test cleanup
+race; both are repaired. Native development-host launch exited before running
+its tests, so browser/API observations remain distinct from native acceptance.
+The user's window stays open. Use the first real recorded interaction to locate
+the next obstacle; no CHREST runtime, curriculum engine, analytics service,
+provider change or repository-visibility change is authorized by this delivery.
 
 ## Prior delivery notes
 

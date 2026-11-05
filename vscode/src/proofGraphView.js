@@ -49,6 +49,7 @@
   const title = id => state.graph.nodes.find(n => n.id === id).title;
   function witness(parent, route) {
     const box = el('details', parent); el('summary', box, `Expand original steps (${route.hidden.length} omitted)`);
+    box.addEventListener('toggle',()=>api.postMessage({type:'view_event',event:'expand_steps',revision:state.documentRevision,node:selected,expanded:box.open}));
     for (const id of route.hidden) {
       const n = state.graph.nodes.find(n => n.id === id), part = el('section', box, undefined, 'context');
       el('h3', part, n.title); math(part, n.claim); attributed(part, n.explanation); context(part, n); citations(part, n);
@@ -62,6 +63,7 @@
     }
   }
   function argument(parent, node) {
+    button(parent,'Study this claim','study_current',{node:node.id});
     context(parent, node); citations(parent, node);
     for (const [i, route] of state.projection.derivations[node.id].entries()) {
       const part = el('div', parent, undefined, 'context'), routes = state.projection.derivations[node.id];
@@ -88,7 +90,7 @@
     inspector.insertBefore(form, sourceArea);
     const status = el('p', form); editDraft = { node: node.id, status };
     local(form, 'Save summary', () => send('update_summary', { node: node.id, ...Object.fromEntries(Object.entries(values).map(([k, v]) => [k, v.value])) }));
-    local(form, 'Cancel', () => { if (!busy) { editDraft = undefined; form.remove(); } });
+    local(form, 'Cancel', () => { if (!busy) { editDraft = undefined;api.postMessage({type:'view_event',event:'summary_cancel',revision:state.documentRevision,node:node.id});form.remove(); } });
   }
   function renderSource() {
     if (!sourceArea) return; sourceArea.replaceChildren();
@@ -101,7 +103,7 @@
     el('h3', sourceArea, 'Stacks Project · Tag ' + passage.tag);
     const tabs = el('div', sourceArea, undefined, 'proof-tabs');
     for (const [mode, label] of [['live', 'Stacks page'], ['saved', 'Saved text']]) {
-      const b = local(tabs, label, () => { sourceMode = mode; renderSource(); }, mode === 'live' ? 'Load the corresponding tagged page from the Stacks Project.' : 'Read the pinned statement and proof offline.');
+      const b = local(tabs, label, () => { sourceMode = mode;api.postMessage({type:'view_event',event:'source_mode',revision:state.documentRevision,node:selected,mode});renderSource(); }, mode === 'live' ? 'Load the corresponding tagged page from the Stacks Project.' : 'Read the pinned statement and proof offline.');
       b.dataset.action = 'source-' + mode; b.setAttribute('aria-pressed', String(sourceMode === mode));
     }
     button(tabs, 'Open on Stacks ↗', 'stacks_page', { node: selected }, 'Open this exact tag in your browser.');

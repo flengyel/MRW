@@ -1,5 +1,15 @@
 # CODEX_PLAN.md
 
+## Implemented increment — 0.18.0
+
+The source-focused attempt/effort/history/resumption path, pinned FSRS adapter,
+short source-scoped blocks, native Studies content and compact local exports are
+implemented. Graph authoring remains optional. See
+[workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
+[validation](docs/ACTIVE_STUDY_VALIDATION.md). The first recorder establishes a
+baseline; delayed learning benefit remains unobserved. Preserve genuine study
+work and use recorded interaction obstacles to choose the next increment.
+
 ## Current priority — active study and observation
 
 Updated 2026-11-05. Deliver the bounded interaction in
@@ -23,8 +33,8 @@ Updated 2026-11-05. Deliver the bounded interaction in
 The defaults and adaptation thresholds in the design are prototype choices.
 The claim to evaluate is less effort to study and resume, with useful delayed
 performance; no quota, effort score or test count demonstrates it.
-MRW 0.17.0 remains the implemented baseline. This documentation change does not
-add runtime capability or change repository visibility.
+MRW 0.17.0 was the implementation baseline. The 0.18.0 delivery above changes
+runtime behavior and preserves repository visibility.
 
 ## Earlier roadmap context
 

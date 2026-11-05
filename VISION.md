@@ -1,5 +1,12 @@
 # VISION.md
 
+## Implemented study interaction — 0.18.0
+
+The first source-focused attempt, effort, review and local-history interaction
+is implemented; see [workflow](docs/ACTIVE_STUDY_WORKFLOW.md). It establishes an
+instrumentation baseline. Learning benefit, an individual cognitive-load model
+and causal release comparisons remain hypotheses requiring observations.
+
 ## Current product direction — 2026-11-05
 
 The next increment organizes MRW around the mathematics currently open:
@@ -19,7 +26,7 @@ the [research review](docs/LEARNING_RESEARCH.md) supplies its evidence and limit
 Spacing has support in mathematics; retrieval findings are broader and less
 conclusive for mathematics specifically. CHREST informs questions about
 expertise and presentation without becoming a prerequisite for implementation.
-These are design commitments, not capabilities claimed for 0.17.0.
+These supplied the design commitments; the 0.18.0 workflow distinguishes delivered behavior from unobserved benefits.
 
 Why Theorem Terminal exists. Companion to `DOMAIN_MODEL.md` (entities and
 invariants), `UX_SPEC.md` (the human workflow), and `CODEX_PLAN.md` (staged

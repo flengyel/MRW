@@ -23,8 +23,9 @@ Use the existing scheduler/model ecosystem; CHREST is research context, not a
 runtime dependency. Complete the bounded interaction without creating a
 curriculum engine, telemetry service or another frontend.
 
-The current change updates design documents only; it neither implements these
-features nor changes repository visibility. For the implementation task, use
+The 0.18.0 interaction is implemented within `docs/ACTIVE_STUDY_WORKFLOW.md`;
+`docs/ACTIVE_STUDY_VALIDATION.md` records its evidence and limits. Repository
+visibility is unchanged. For subsequent work, use
 the current user's selected material; older Marcus/Appendix/Stacks examples
 are not mandatory acceptance gates.
 

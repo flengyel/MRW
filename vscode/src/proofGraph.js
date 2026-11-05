@@ -59,7 +59,7 @@ function citedTags(passage) {
   return tags;
 }
 
-function registerProofGraph({ vscode, context, register, bridge, projectRoot, choosePath, show, askProof, followPinned, readPinned }) {
+function registerProofGraph({ vscode, context, register, bridge, projectRoot, choosePath, show, askProof, followPinned, readPinned, recorder, onMaterial }) {
   const panels = new Map();
   const key = (file, revision) => 'mrw.proofGraph.v1.' + digest(file + '\0' + revision);
   async function render(c, hidden) {
@@ -93,10 +93,15 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
   }
   async function message(c, m) {
     if (!m || typeof m !== 'object') return;
+    if(m.type==='view_event'){
+      if(m.revision===c.revision&&['source_mode','expand_steps','summary_cancel'].includes(m.event)&&c.graph?.nodes.some(n=>n.id===m.node))recorder?.record('navigation.graph_'+m.event,{node:m.node,revision:c.revision,mode:['live','saved'].includes(m.mode)?m.mode:null,expanded:!!m.expanded,meaning:'Exposure opportunity only.'});return;
+    }
     if (m.type === 'inspect') {
       if (m.revision !== c.revision || !Number.isSafeInteger(m.request) || m.request < 1) return;
       const node = c.graph.nodes.find(n => n.id === m.node);
       if (!node) return;
+      const picked=node.citations.find(x=>x.reference); if(picked)onMaterial?.({root:c.root,reference:picked.reference,claim:node.id,revision:c.revision});
+      recorder?.record('navigation.graph_select',{node:node.id,revision:c.revision,reference:picked?.reference});
       const token = c.inspection = (c.inspection || 0) + 1, revision = c.revision;
       try {
         const citation = node.citations.find(x => x.reference);
@@ -113,11 +118,15 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     }
     if (c.busy) return;
     c.busy = true;
+    recorder?.record('navigation.graph_action',{action:m.type,node:m.node,revision:c.revision});
     try {
       if (m.type === 'ready' || m.type === 'refresh') { await load(c); return; }
       if (m.revision !== c.revision) throw new Error('Outline view changed; use its current controls.');
       const node = c.graph.nodes.find(n => n.id === m.node);
-      if (m.type === 'update_summary') {
+      if (m.type === 'study_current') {
+        const citation=node?.citations.find(x=>x.reference);if(!citation)throw new Error('Select a claim with a retained passage citation.');
+        await vscode.commands.executeCommand('mrw.studyCurrent',{reference:citation.reference});
+      } else if (m.type === 'update_summary') {
         if (!node) throw new Error('Unknown proof vertex.');
         const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(c.file)), raw = doc.getText(), version = doc.version;
         if (digest(raw) !== c.revision) throw new Error('Outline changed; refresh before editing its summary.');
@@ -186,6 +195,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
         }
       }
     } catch (error) {
+      recorder?.record('operation.error',{operation:'graph.'+m.type,message:error.message,revision:c.revision});
       await c.panel.webview.postMessage({ type: 'error', message: error.message });
       void vscode.window.showErrorMessage(`MRW: ${error.message}`);
     } finally {

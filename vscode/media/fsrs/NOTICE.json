@@ -1,0 +1,10 @@
+{
+  "name": "ts-fsrs",
+  "version": "5.4.2",
+  "source": "https://github.com/open-spaced-repetition/ts-fsrs",
+  "integrity": "sha512-z4qop4pzTcyTzuJ566d9EaX/4bZZzhYfeaPImfVr+xcYT65c5oBgFDijUhCE/D+C78eaolHIhKRZ04/RwF+v2g==",
+  "files": {
+    "index.cjs": "abf2062dd8218357662d4dbe7cb39bc7c0e9b0be8760a5d74bb515c75321f533",
+    "LICENSE": "8b83a73dd2894ff553d6de6113064b3ad9dfad3f839837b61f3b183881131d01"
+  }
+}

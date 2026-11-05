@@ -74,6 +74,7 @@ def _dispatch(request):
         'project': ({'path', 'number', 'revision', 'destination'}, set()),
         'proof_graph': ({'graph', 'hidden'}, set()),
         'proof_graph_parse': ({'text'}, set()),
+        'study_questions_parse': ({'text', 'sources'}, set()),
         'investigation_parent': ({'path'}, {'revision'}),
         'investigation_state': ({'store', 'project_root'}, set()),
         'resume_investigation': ({'store', 'project_root', 'revision'}, set()),
@@ -119,6 +120,12 @@ def _dispatch(request):
         if not isinstance(raw, str) or len(raw.encode('utf-8')) > MAX_BYTES:
             raise ValueError('Proof outline exceeds 512 KiB')
         return graph_action({'graph': strict_json(raw.encode('utf-8')), 'hidden': []})
+    if method == 'study_questions_parse':
+        from .study_questions import validate_questions
+        raw = request['text']
+        if not isinstance(raw, str) or len(raw.encode('utf-8')) > 256 * 1024:
+            raise ValueError('Questions exceed 256 KiB')
+        return validate_questions(strict_json(raw.encode('utf-8')), request['sources'])
     if method == 'outline_parse_reference':
         return parse_reference(request['reference'])
     if method in ('outline_reference', 'outline_follow_reference'):

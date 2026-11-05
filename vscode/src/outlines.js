@@ -36,7 +36,7 @@ ${diagramStyle}
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained }) {
+function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -174,16 +174,18 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
     if (value.type === 'proofVisibility') {
       if (typeof value.hidden !== 'boolean') return;
+      recorder?.record('source.visibility',{outline:c.result.outline.id,hidden:value.hidden,meaning:'Exposure opportunity only.'});
       try { await context.workspaceState.update('mrw.readerProofsHidden.v1', value.hidden); }
       catch (error) { void vscode.window.showErrorMessage(`MRW: Could not save the proof visibility preference: ${error.message}`); }
       return;
     }
     if (value.type === 'select') {
       if (c.result.outline.regions.some(r => r.id === value.region)) c.selected = value.region;
-      active = c.result.outline.id; return;
+      active = c.result.outline.id; onMaterial?.({ root:c.root, outline:c.result.outline.id, region:c.selected }); recorder?.record('navigation.reader_select',{outline:c.result.outline.id,region:c.selected,source_revision:c.result.outline.source.revision}); return;
     }
     if (value.type === 'dirty') { c.panel.title = `${value.dirty ? '• ' : ''}Outline: ${c.result.outline.source.bibliography.title || path.basename(c.result.outline.source.path)}`; return; }
     c.pending++;
+    recorder?.record('navigation.reader_action',{action:value.type,outline:c.result.outline.id,region:c.selected,source_revision:c.result.outline.source.revision});
     try {
       await locked(async () => {
         active = c.result.outline.id;
@@ -203,6 +205,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
           if (!region) throw new Error('Unknown source region.');
           await mutate(c, { kind: 'region', region: region.id, title: region.title, level: region.level, collapsed: !region.collapsed });
         } else if (value.type === 'source') await openDocument(c);
+        else if (value.type === 'study_current') { const ref=await bridge(request(c,'outline_reference',{region:c.selected||null})); await vscode.commands.executeCommand('mrw.studyCurrent',{reference:ref.reference}); }
         else if (value.type === 'proof_study') await vscode.commands.executeCommand('mrw.prepareProofStudy');
         else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline');
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
@@ -277,6 +280,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     c.readingFocus = presentation.reading ? { serial: ++focusSerial,
       region: reference?.status === 'changed or removed' ? null : reference?.region || null } : undefined;
     active = id;
+    onMaterial?.({root:c.root,outline:id,region:c.selected});
+    recorder?.record('navigation.source_open',{outline:id,region:c.selected,source_revision:result.outline.source.revision});
     await send(c, result);
     return c;
   }
@@ -785,6 +790,27 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       result.push(await rows.studyPassage(target.reference, root));
     }
     return result;
+  };
+  rows.selectStudyPrerequisites = async (root,existing) => {
+    const store=path.join(context.storageUri.fsPath,`outlines-${digest(root)}`),listed=await bridge({method:'outline_list',store,project_root:root}),choices=[];
+    for(const item of listed.outlines){const loaded=await bridge({method:'outline_load',store,project_root:root,id:item.id});
+      for(const r of loaded.outline.regions)choices.push({label:r.title,description:item.title||item.path,id:item.id,revision:loaded.revision,region:r.id});}
+    const selected=await vscode.window.showQuickPick(choices,{canPickMany:true,placeHolder:'Add explicitly selected prerequisite passages'});if(!selected)return null;
+    const result=[];for(const choice of selected){const target=await bridge({method:'outline_reference',store,project_root:root,id:choice.id,revision:choice.revision,region:choice.region});
+      if(!existing.some(p=>p.reference===target.reference))result.push(await rows.studyPassage(target.reference,root));}
+    if(existing.length+result.length>16)throw new Error('Keep at most sixteen selected passages.');return result;
+  };
+  rows.currentStudyPassage = async root => {
+    const c=panels.get(active); if(!c || c.root!==root)return null;
+    const target=await bridge(request(c,'outline_reference',{region:c.selected||null}));
+    return rows.studyPassage(target.reference,root);
+  };
+  rows.captureStudySelection = async root => {
+    const result=await vscode.commands.executeCommand('mrw.createOutline');
+    if(!result)return null;
+    const store=path.join(context.storageUri.fsPath,`outlines-${digest(root)}`);
+    const target=await bridge({method:'outline_reference',store,project_root:root,id:result.outline.id,revision:result.revision,region:result.outline.regions.at(-1)?.id||null});
+    return rows.studyPassage(target.reference,root);
   };
   rows.followReference = followReference;
   rows.readPinned = (reference, root) => bridge({ method: 'outline_follow_reference',

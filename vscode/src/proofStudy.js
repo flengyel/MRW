@@ -62,7 +62,7 @@ function bindProposal(graph, study) {
   if (!graph.nodes.some(n => n.citations.some(c => c.source === study.passages[0].id))) throw new Error('The outline must cite the selected proof.');
   return graph;
 }
-function registerProofStudy({ vscode, context, register, bridge, projectRoot, choosePath, selectPassages, readPassage }) {
+function registerProofStudy({ vscode, context, register, bridge, projectRoot, choosePath, selectPassages, readPassage, startStudy, recorder }) {
   const sessions = new Map(), last = 'mrw.proofStudy.v1';
   const schema = () => fs.readFile(path.join(context.extensionPath, 'media/proof-outline.schema.json'), 'utf8').then(JSON.parse);
   async function scoped(file, root, suffix) {
@@ -152,12 +152,14 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
     panel.webview.onDidReceiveMessage(async m => {
       if (c.busy || !m || typeof m !== 'object') return; c.busy = true;
       try {
-        if (m.type === 'ready') await send(c);
+        if(m.type!=='ready')recorder?.record('navigation.proof_study_action',{action:m.type,study_revision:digest(c.raw)});
+        if(m.type==='active_study'&&startStudy){const s=await startStudy(c.study.passages,c.root,c.study.title);if(!s.unresolved)s.unresolved=c.study.question;}
+        else if (m.type === 'ready') await send(c);
         else if (m.type === 'save_question') { await update(c, { ...c.study, question: m.question }); await send(c, 'Question saved.'); }
         else if (m.type === 'copy') { await current(c); await vscode.env.clipboard.writeText(handoff(c.study, await schema())); await send(c, 'Handoff copied. Paste it into Codex.'); }
         else if (m.type === 'import') await importProposal(c);
         else if (m.type === 'outline' && c.study.outline) await vscode.commands.executeCommand('mrw.openProofOutline', vscode.Uri.file(path.join(path.dirname(file), c.study.outline)));
-      } catch (error) { await panel.webview.postMessage({ type: 'error', message: error.message }); }
+      } catch (error) { recorder?.record('operation.error',{operation:'proof-study.'+m.type,message:error.message});await panel.webview.postMessage({ type: 'error', message: error.message }); }
       finally { c.busy = false; await panel.webview.postMessage({ type: 'idle' }); }
     });
     panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src/proofStudyView.js'), 'utf8'));

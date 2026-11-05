@@ -17,7 +17,7 @@
         root.replaceChildren();el('h1',m.title);el('p',m.file);
         el('label','Unresolved question');question=el('textarea');question.setAttribute('aria-label','Unresolved question');
         question.addEventListener('input',()=>{dirty=true;status.textContent='Question not saved.';});
-        action('Save question','save_question');action('Copy handoff for Codex','copy');action('Import outline from clipboard','import');openButton=action('Open outline','outline');
+        action('Questions and attempts','active_study');action('Save question','save_question');action('Copy handoff for Codex','copy');action('Import outline from clipboard','import');openButton=action('Open outline','outline');
         status=el('p');status.setAttribute('role','status');const d=el('details');el('summary','Exact handoff',d);preview=el('pre',undefined,d);
       }
       if(!dirty||m.notice==='Question saved.'){question.value=m.question;dirty=false;}

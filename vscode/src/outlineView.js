@@ -265,6 +265,7 @@ function render() {
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
   button(readingBar, '← Return to reading outline', { type: 'reading_return' }, 'reading-return');
+  button(readingBar, 'Study current material', { type: 'study_current' }, 'study-current');
   button(readingBar, 'Prepare proof study…', { type: 'proof_study' }, 'proof-study');
   button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');
   button(readingBar, 'Refresh saved source outline', { type: 'refresh' }, 'refresh');

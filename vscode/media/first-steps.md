@@ -1,5 +1,29 @@
 # Using MRW
 
+## Study current material
+
+Select a retained passage and choose **Study current material**, or select
+ordinary saved text and run **MRW: Study Current Material**. A cited graph claim
+has **Study this claim**. No question popup is required.
+
+Use **Add question**, or **Copy question handoff for Codex** and **Import questions
+from clipboard**. Graph JSON is optional. **Keep for review** admits a question;
+saving/importing alone does not. **Begin short block** selects relevant questions
+within the adjustable three-question/five-minute/one-new-question defaults.
+
+Type an attempt or choose **Worked on paper**, then **Submit answer**. Reveal
+hints, the reference answer or source when useful. Report the outcome and source
+consultation for that submission. Later reveals preserve its earlier snapshot.
+The occasional effort item is optional and refers to that specific attempt.
+**Pause / save** and **MRW: Resume Study** preserve unfinished work.
+
+The **Studies** sidebar lists recent studies, sources and questions. Its **…**
+menu and the Command Palette contain source operations and **Inspect Study
+History** / **Export Study History…**. History is private local data; explicit
+exports are ordinary saved files. The first instrumented release supplies no
+earlier usage baseline. Scheduling and source/format validation do not check
+the mathematics.
+
 ## Begin or resume a proof study (0.17.0)
 
 Open a saved source as described below. Choose **Prepare proof study…** in the
@@ -37,16 +61,13 @@ form. **Refresh** reads changes made in the ordinary backing document.
 
 ## Open a source
 
-Click the **MRW** book icon, then **Open saved source outline…** under
-**Research Tools**. Select a source to open its retained text and annotations.
-**Research Tools** is sorted alphabetically.
+Click the **MRW** book icon, then **Studies → … → Open Saved Source Outline…**. Select a source to open its retained text and annotations.
 **F1 → MRW: Open Saved Source Outline…** does the same thing.
 
 In the reader:
 
 - **Refresh saved source outline** on the top toolbar reloads saved annotations
-  and source status. The same command appears in **Research Tools** while a
-  source is open.
+  and source status. The same command remains in the Command Palette.
 
 - **Show proof** expands a published proof; **Hide proof** folds it.
 - **Reader notes** beneath a passage displays its saved annotations.
@@ -69,7 +90,7 @@ saved work without moving files or importing another copy of the source.
 
 ## Import an Obsidian note
 
-Run **Import Obsidian note…** from Research Tools. Choose a destination:
+Run **MRW: Import Obsidian Note…** from the Command Palette. Choose a destination:
 
 - **Open it as a saved source outline** retains a copy for reading and annotations.
 - **Add it as a reader annotation on a passage** saves the text on a chosen passage.

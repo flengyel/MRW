@@ -1,9 +1,23 @@
 # UX_SPEC.md
 
+## Delivered active study — 0.18.0
+
+Study Current Material starts from a selected retained passage, cited graph
+claim or captured saved text selection, without a preliminary question popup.
+The existing study surface supports manual/attributed Codex questions, typed or
+paper attempts, ordered immutable submissions, source/help reveals, corrected
+reader outcomes and sparse optional effort. Source changes preserve earlier
+work. Studies replaces the command tree with recent study/source/question data;
+older commands remain in menus/Command Palette. Local history, explicit exports
+and source-scoped short FSRS blocks are implemented. See
+[workflow](docs/ACTIVE_STUDY_WORKFLOW.md) for exact mapping and limits.
+The following design text remains rationale where it describes intentions;
+[validation](docs/ACTIVE_STUDY_VALIDATION.md) states the observed scope.
+
 ## Active VS Code study design — 2026-11-05
 
-The next interaction is specified in [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md).
-It is authorized and not yet implemented. Start from current supported material;
+The governing interaction is specified in [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md).
+Its bounded implementation is described above. Start from current supported material;
 offer a few pertinent questions, feedback and light spaced revisits. Keep the
 source and unfinished work available. Graph creation is optional.
 
@@ -22,7 +36,7 @@ every step or a dashboard that displaces the mathematics.
 See the [research review](docs/LEARNING_RESEARCH.md) and
 [Codex prompt](docs/CODEX_LIGHT_STUDY_PROMPT.md).
 The release notes below describe delivered behavior at their stated versions;
-they do not supersede this next-increment design.
+the current workflow states implementation bounds.
 
 ## Delivered extension behavior
 

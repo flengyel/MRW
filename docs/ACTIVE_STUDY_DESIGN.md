@@ -1,6 +1,6 @@
 # Active study, light review, and cognitive-load tracking
 
-Status: authorized design, not an implemented 0.17.0 capability.
+Status: implemented in 0.18.0 within the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
 Updated 2026-11-05. Baseline: `db656402190c255afd6a296da6ef8e549cc0b293`.
 
 ## Purpose and next delivery

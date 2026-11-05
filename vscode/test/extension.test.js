@@ -10,6 +10,7 @@ const vm = require('node:vm');
 const { runBridge } = require('../src/bridge');
 const navigation = require('../src/navigation');
 
+const shutdowns=new Map();
 class Position { constructor(line, character) { Object.assign(this, { line, character }); } }
 class Range {
   constructor(a, b, c, d) {
@@ -154,6 +155,8 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === './assistance') return require('../src/assistance');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');
+    if (name === './activeStudy') return require('../src/activeStudy');
+    if (name === './studyHistory') return {StudyHistory:class extends require('../src/studyHistory').StudyHistory{constructor(...a){super(a[0],a[1],{origin:'test'});}}};
     if (name === './proofStudy') return require('../src/proofStudy');
     if (name === './proofGraph') return require('../src/proofGraph');
     if (name === './artifactStorage') return require('../src/artifactStorage');
@@ -162,6 +165,7 @@ async function harness(root, state = new Map(), options = {}) {
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
   module.exports.activate(context);
+  shutdowns.set(root,[...(shutdowns.get(root)||[]),()=>module.exports.deactivate()]);
   return { api, commands, errors, shown, reads, requests, opens, dialogs, saveChoices, saveDialogs, workspaceEdits, saves, commandCalls, inputs, picks, endings, panels, state, document, editor, providers, executed,
     changeDocument(doc, at, length, text) { doc.text = doc.text.slice(0, at) + text + doc.text.slice(at + length); doc.version++; doc.isDirty = true;
       changeListener({ document: doc, contentChanges: [{ rangeOffset: at, rangeLength: length, text }] }); },
@@ -174,7 +178,7 @@ async function temporary(t, persistent = false) {
   await fs.mkdir(parent, {recursive:true});
   const directory = await fs.mkdtemp(path.join(parent, 'mrw-command-'));
   const root = path.join(directory, 'project'); await fs.mkdir(root);
-  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  t.after(async() => {for(const close of shutdowns.get(root)||[])await close();shutdowns.delete(root);await fs.rm(directory, { recursive: true, force: true });});
   return root;
 }
 
@@ -2045,4 +2049,17 @@ test('Return never reopens an unrelated Untitled draft as a preview when editor 
   assert.equal(h.commandCalls.findLast(c=>c.name==='markdown.showPreview').args[0].fsPath,file);
   assert.equal(draft.getText(),'Keep my draft');assert.equal(draft.isDirty,true);assert.equal(draft.isClosed,false);
   assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('Study Current Material uses the selected retained passage without a question popup and preserves the old reader',async t=>{
+ const root=await temporary(t),h=await harness(root),{saved,region}=await sourceReader(h,root),reader=h.panels[0];
+ await reader.receive({type:'select',region});h.focus(undefined);
+ const before=h.inputs.length;await reader.receive({type:'study_current'});
+ assert.equal(h.inputs.length,before);assert.deepEqual(h.errors,[]);
+ const study=h.panels.at(-1);await study.receive({type:'ready'});const view=study.webview.messages.findLast(m=>m.type==='active_study');
+ assert.ok(view);assert.equal(view.study.passages.length,1);assert.ok(view.study.passages[0].reference.startsWith('mrw-outline:v1/'));assert.equal(view.study.questions.length,0);
+ assert.ok(h.panels.includes(reader));assert.equal(saved.outline.regions.some(r=>r.id===region),true);
+ const manifest=JSON.parse(await fs.readFile(path.resolve(__dirname,'../package.json'),'utf8'));
+ assert.equal(manifest.contributes.views.mrw.find(v=>v.id==='mrw.research').name,'Studies');
+ assert.ok(manifest.contributes.menus['view/title'].some(v=>v.command==='mrw.studyCurrent'&&v.group==='navigation'));
 });

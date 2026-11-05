@@ -31,6 +31,12 @@ def verify(archive):
     for name, expected_digest in markdown['files'].items():
         if sha256((extension / 'media/markdown-it' / name).read_bytes()).hexdigest() != expected_digest:
             raise ValueError('Bundled Markdown parser or license bytes changed')
+    scheduler = json.loads((extension / 'media/fsrs/NOTICE.json').read_text())
+    if scheduler['version'] != manifest['devDependencies']['ts-fsrs']:
+        raise ValueError('Bundled scheduler differs from its pinned build dependency')
+    for name, expected_digest in scheduler['files'].items():
+        if sha256((extension / 'media/fsrs' / name).read_bytes()).hexdigest() != expected_digest:
+            raise ValueError('Bundled scheduler or license bytes changed')
     for path in (repository / 'src/theorem_terminal').rglob('*'):
         if path.is_file() and path.suffix in ('.py', '.json') and '__pycache__' not in path.parts:
             exact['extension/python/theorem_terminal/' + str(path.relative_to(repository / 'src/theorem_terminal'))] = path

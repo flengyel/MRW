@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -10,7 +10,7 @@
     "url": "https://github.com/flengyel/MRW.git"
   },
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.95.0"
   },
   "categories": [
     "Other"
@@ -407,6 +407,33 @@
         "title": "Resume Proof Study",
         "category": "MRW",
         "icon": "$(book)"
+      },
+      {
+        "command": "mrw.studyCurrent",
+        "title": "Study Current Material",
+        "category": "MRW",
+        "icon": "$(book)"
+      },
+      {
+        "command": "mrw.resumeStudy",
+        "title": "Resume Study",
+        "category": "MRW",
+        "icon": "$(history)"
+      },
+      {
+        "command": "mrw.inspectStudyHistory",
+        "title": "Inspect Study History",
+        "category": "MRW"
+      },
+      {
+        "command": "mrw.exportStudyHistory",
+        "title": "Export Study History\u2026",
+        "category": "MRW"
+      },
+      {
+        "command": "mrw.openStudyItem",
+        "title": "Open Study Item",
+        "category": "MRW"
       }
     ],
     "views": {
@@ -417,8 +444,9 @@
         },
         {
           "id": "mrw.research",
-          "name": "Research Tools",
-          "visibility": "collapsed"
+          "name": "Studies",
+          "visibility": "collapsed",
+          "icon": "media/mrw.svg"
         }
       ]
     },
@@ -523,9 +551,44 @@
           "command": "mrw.openProofOutline",
           "when": "view == mrw.readingOutline",
           "group": "2_sources@4"
+        },
+        {
+          "command": "mrw.studyCurrent",
+          "when": "view == mrw.research",
+          "group": "navigation"
+        },
+        {
+          "command": "mrw.resumeStudy",
+          "when": "view == mrw.research",
+          "group": "1_study@1"
+        },
+        {
+          "command": "mrw.inspectStudyHistory",
+          "when": "view == mrw.research",
+          "group": "1_study@2"
+        },
+        {
+          "command": "mrw.exportStudyHistory",
+          "when": "view == mrw.research",
+          "group": "1_study@3"
+        },
+        {
+          "command": "mrw.prepareProofStudy",
+          "when": "view == mrw.research",
+          "group": "2_sources@4"
+        },
+        {
+          "command": "mrw.resumeProofStudy",
+          "when": "view == mrw.research",
+          "group": "2_sources@5"
         }
       ],
       "editor/context": [
+        {
+          "command": "mrw.studyCurrent",
+          "when": "editorHasSelection && resourceScheme == file",
+          "group": "mrw@0"
+        },
         {
           "command": "mrw.mark",
           "when": "resourceScheme == file",
@@ -586,6 +649,10 @@
         {
           "command": "mrw.selectReadingOutlineItem",
           "when": "false"
+        },
+        {
+          "command": "mrw.openStudyItem",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -597,6 +664,11 @@
         {
           "command": "mrw.resumeProofStudy",
           "when": "resourceFilename =~ /\\.mrw-study\\.json$/",
+          "group": "navigation"
+        },
+        {
+          "command": "mrw.studyCurrent",
+          "when": "editorHasSelection && resourceScheme == file && !(resourceFilename =~ /\\.mrw-(proof|study)\\.json$/)",
           "group": "navigation"
         }
       ]
@@ -633,6 +705,27 @@
           "default": "",
           "scope": "machine",
           "description": "Suggested destination for Move Saved Work Directory. Changing this setting never changes the active store or moves saved work; use the explicit command."
+        },
+        "mrw.studyQuestions": {
+          "type": "integer",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Questions per short study block. Prototype default; stops at an attempt boundary."
+        },
+        "mrw.studyMinutes": {
+          "type": "integer",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Approximate minutes per block. Time is not a mental-effort measure."
+        },
+        "mrw.studyNewQuestions": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Maximum new questions per block. Saved questions enter continuing review only by Keep for review."
         }
       }
     },
@@ -640,6 +733,10 @@
       {
         "view": "mrw.readingOutline",
         "contents": "Start with your current mathematical question, a source passage, or notes from paper. A reading overview is your own editable page of notes and source references.\n[New Reading Overview](command:mrw.newReadingOverview)\n[Open Reading Outline](command:mrw.openReadingOutline)\n[Open Saved Source Outline\u2026](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
+      },
+      {
+        "view": "mrw.research",
+        "contents": "Select a source passage, a cited graph claim, or ordinary saved text.\n[Study Current Material](command:mrw.studyCurrent)\n[Resume Study](command:mrw.resumeStudy)"
       }
     ],
     "viewsContainers": {
@@ -656,14 +753,15 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0",
     "katex": "0.19.0",
-    "markdown-it": "14.1.0"
+    "markdown-it": "14.1.0",
+    "ts-fsrs": "5.4.2"
   },
   "activationEvents": [
     "onUri"

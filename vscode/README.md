@@ -1,11 +1,17 @@
 # Mathematical Research Workstation for VS Code
 
-**Next increment (design only):** study the current material with light
-rescheduling, sparse effort reports and detailed local interaction tracking.
-Read the [active design](../docs/ACTIVE_STUDY_DESIGN.md) and
-[implementation prompt](../docs/CODEX_LIGHT_STUDY_PROMPT.md).
-Current runtime capability remains 0.17.0; no new schedule or load meter is
-claimed by this documentation update.
+## Active study (0.18.0)
+
+Use **MRW: Study Current Material**, the reader's matching action or **Study this
+claim** on a cited graph claim. The Studies sidebar shows recent studies,
+sources and questions; **…** retains source operations and study/history commands.
+Add a question or import up to ten attributed questions through the explicit
+Codex clipboard handoff. Submit typed or paper work, request help, report an
+outcome and resume the draft later. Graphs remain optional. Short source-scoped
+FSRS blocks and sparse optional effort reports keep original observations.
+History and explicit comparison exports are local. The new private study/history
+state is outside Git/VSIX and is not yet transferred by managed source moves.
+[Workflow and limits](../docs/ACTIVE_STUDY_WORKFLOW.md).
 
 ## Proof study with Codex (0.17.0)
 
@@ -72,8 +78,7 @@ well as optional captured Lean evidence; see its independent boundary below.
 ## Open MRW
 
 Click the **MRW** book icon in the Activity Bar. It opens **Reading Outline** and
-the collapsible **Research Tools** view. Each Research Tools entry has a hover
-description of the command’s target and effect. The empty navigator offers **New Reading
+the **Studies** content view. Recent studies expand to source and question rows. The empty navigator offers **New Reading
 Overview**, **Open Reading Outline**, **Open Saved Source Outline…** and the
 offline tutorial. The **New Reading Overview…** command also has a title-bar
 button and an entry in the **…** menu; **Open Tutorial** is available in that menu

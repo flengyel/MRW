@@ -5,3 +5,4 @@ docs/evidence/source-outline-20261014/euclid-page.html -text
 # Preserve the pinned upstream distribution byte-for-byte, including whitespace.
 vscode/media/markdown-it/markdown-it.js -text -whitespace
 vscode/media/katex/auto-render.min.js -text -whitespace
+vscode/media/fsrs/index.cjs -text -whitespace
