@@ -1,5 +1,18 @@
 # Mathematical Research Workstation
 
+MRW is an experimental VS Code workstation for studying and investigating
+mathematics with retained sources, notes, AI assistance and optional checking.
+
+**Next, designed but not implemented:** source-focused study with light spaced
+review, task-linked mental-effort tracking and detailed local interaction
+history for adaptation and release evaluation.
+[Design](docs/ACTIVE_STUDY_DESIGN.md) ·
+[Research](docs/LEARNING_RESEARCH.md) ·
+[Codex implementation prompt](docs/CODEX_LIGHT_STUDY_PROMPT.md).
+
+**Current implementation: 0.17.0.** The release descriptions below distinguish
+available behavior from the proposed design.
+
 **0.17.0:** select a retained proof and prerequisites, copy one exact handoff for
 Codex, import its attributed outline, correct summaries in the viewer and save
 the question for resumption. The second case is 08ZG. Rejected-write generation

@@ -1,5 +1,33 @@
 # CODEX_PLAN.md
 
+## Current priority — active study and observation
+
+Updated 2026-11-05. Deliver the bounded interaction in
+[ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md), informed by
+[LEARNING_RESEARCH](docs/LEARNING_RESEARCH.md). Use
+[CODEX_LIGHT_STUDY_PROMPT](docs/CODEX_LIGHT_STUDY_PROMPT.md) as the execution handoff.
+
+1. Consolidate the existing reader/study workflow around current supported
+   material and native VS Code content views.
+2. Add source-linked attempts, feedback and light rescheduling with an existing
+   scheduler, a small time budget and limited admission.
+3. Track task-linked mental effort and detailed meaningful MRW events.
+   Keep reports, observations, assessments and estimates distinct.
+4. Use that same versioned history for present-session adaptations and a compact
+   local report showing what helped, failed or added burden across sessions and
+   releases. Preserve missing observations and comparison limits.
+5. Deliver and document the usable increment; update the bundled tutorial.
+   CHREST simulation, a trained load estimator, corpus-wide study planning and
+   a new analytics service are outside this increment.
+
+The defaults and adaptation thresholds in the design are prototype choices.
+The claim to evaluate is less effort to study and resume, with useful delayed
+performance; no quota, effort score or test count demonstrates it.
+MRW 0.17.0 remains the implemented baseline. This documentation change does not
+add runtime capability or change repository visibility.
+
+## Earlier roadmap context
+
 Active product roadmap. Installation paths and reader-assistance priority updated 2026-11-03;
 the product assessment was reviewed 2026-09-20 against the integrated Qt R1–R3.1
 implementations, the supplied September 13–14 session reports, and the research

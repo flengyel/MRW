@@ -1,5 +1,27 @@
 # Codex continuation: MRW source work and companion notes
 
+## Current handoff — 2026-11-05
+
+Use [CODEX_LIGHT_STUDY_PROMPT.md](CODEX_LIGHT_STUDY_PROMPT.md) for the next
+implementation. Its authoritative interaction is
+[ACTIVE_STUDY_DESIGN.md](ACTIVE_STUDY_DESIGN.md); its evidence is
+[LEARNING_RESEARCH.md](LEARNING_RESEARCH.md).
+
+The user requests a light review schedule focused on currently opened
+mathematics, cognitive-load tracking, and as much useful interaction history
+as possible to improve both the current response and future versions.
+Implement one source-focused study interaction using the delivered 0.17.0
+reader, handoff, graph and resumption facilities. Do not repeat the completed
+0.17.0 work or postpone implementation for another research cycle.
+Track reported effort separately from recall and observations; preserve
+versioned decision reasons and outcomes. CHREST is a later modeling option.
+
+This is a design-only update. No runtime version, installed package, user
+study data or repository visibility is changed. The notes below remain a
+record of prior deliveries, not a competing next task.
+
+## Prior delivery notes
+
 ## Reusable proof-study workflow — 2026-11-05
 
 The user requested finishing the loading repair, reviewing two findings against

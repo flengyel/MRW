@@ -1,5 +1,35 @@
 # Codex instructions
 
+## Active increment — 2026-11-05
+
+The user now authorizes source-focused study with frequent attempts, light
+rescheduling and cognitive-load tracking. Record meaningful MRW interactions
+for both present-session adaptation and evaluation across software versions.
+Read [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md),
+[LEARNING_RESEARCH](docs/LEARNING_RESEARCH.md) and the
+[implementation prompt](docs/CODEX_LIGHT_STUDY_PROMPT.md).
+These control this increment where older priority/feature-status passages
+below differ; shared source, attribution and persistence invariants still apply.
+
+MRW 0.17.0 already implements the proof-study handoff/import/correction/resume
+workflow and fixes the two reported data-handling defects. Do not repeat it.
+Make study begin from current supported material, with graphs optional.
+Keep recall scheduling, reported mental effort, observed behavior and
+mathematical assessment separate. Sparse optional effort reports are authorized;
+they never become prerequisites for work. Detailed local event capture is
+authorized for meaningful MRW interactions, with version tags and inspect/export,
+not unrelated applications or passive inference of comprehension.
+Use the existing scheduler/model ecosystem; CHREST is research context, not a
+runtime dependency. Complete the bounded interaction without creating a
+curriculum engine, telemetry service or another frontend.
+
+The current change updates design documents only; it neither implements these
+features nor changes repository visibility. For the implementation task, use
+the current user's selected material; older Marcus/Appendix/Stacks examples
+are not mandatory acceptance gates.
+
+## Existing implementation and retained invariants
+
 Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
 
 The project should help people work with mathematics whose justification exceeds

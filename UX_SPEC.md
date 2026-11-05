@@ -1,5 +1,31 @@
 # UX_SPEC.md
 
+## Active VS Code study design — 2026-11-05
+
+The next interaction is specified in [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md).
+It is authorized and not yet implemented. Start from current supported material;
+offer a few pertinent questions, feedback and light spaced revisits. Keep the
+source and unfinished work available. Graph creation is optional.
+
+Follow Microsoft's native view and contextual-action guidance. The sidebar
+shows studies, sources and questions rather than an alphabetized command list.
+Keep infrequent maintenance actions in menus/Command Palette. Retain host-owned
+editing, undo and movable views.
+
+Track detailed local MRW events with task/revision and software/policy versions.
+Keep sparse mental-effort reports, task outcomes, AI assessments and derived
+estimates distinct. Use the history both for immediate help and descriptive
+evaluation across releases. A pause, source opening or missed rating is not
+failed recall. Capture/expose meaningful events without a questionnaire at
+every step or a dashboard that displaces the mathematics.
+
+See the [research review](docs/LEARNING_RESEARCH.md) and
+[Codex prompt](docs/CODEX_LIGHT_STUDY_PROMPT.md).
+The release notes below describe delivered behavior at their stated versions;
+they do not supersede this next-increment design.
+
+## Delivered extension behavior
+
 **Proof study, 0.17.0 (2026-11-05).** Prepare chooses one retained proof and
 explicit prerequisite passages. A single handoff contains their exact text,
 references and the outline schema for the Codex companion. Import opens the

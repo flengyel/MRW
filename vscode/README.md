@@ -1,5 +1,12 @@
 # Mathematical Research Workstation for VS Code
 
+**Next increment (design only):** study the current material with light
+rescheduling, sparse effort reports and detailed local interaction tracking.
+Read the [active design](../docs/ACTIVE_STUDY_DESIGN.md) and
+[implementation prompt](../docs/CODEX_LIGHT_STUDY_PROMPT.md).
+Current runtime capability remains 0.17.0; no new schedule or load meter is
+claimed by this documentation update.
+
 ## Proof study with Codex (0.17.0)
 
 **Prepare Proof Study…** selects a retained proof and prerequisites. Copy its
@@ -34,7 +41,8 @@ view from a `.mrw-proof.json` editor. See
 summaries, joint premises, alternative derivations and pinned source quotations.
 **Delete vertex** projects the display; **Expand original steps** and **Restore**
 retain the original argument. **Use AI outline** applies a saved proposal;
-**Ask AI…** uses exact preview/Send. Edit summaries in the ordinary JSON editor.
+**Ask AI…** uses exact preview/Send. In 0.17.0, Edit summary opens a correction
+form; the ordinary JSON file remains available for advanced editing.
 The first case is Stacks 08ZE/08ZH with pinned Axiom Math and Mathlib source.
 See [the workflow](../docs/PROOF_GRAPH_WORKFLOW.md) and
 [validation](../docs/PROOF_GRAPH_VALIDATION.md). Source inspection supplies the

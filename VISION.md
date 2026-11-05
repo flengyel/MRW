@@ -1,5 +1,26 @@
 # VISION.md
 
+## Current product direction — 2026-11-05
+
+The next increment organizes MRW around the mathematics currently open:
+study, attempt, receive useful feedback, and return later. Frequent retrieval
+opportunities belong within study mode; a graph is one optional explanation.
+A small review budget and selective admission prevent old material from
+becoming an ever-expanding obligation.
+
+Track cognitive load through task-linked reports of mental effort and separate
+observations of assistance, outcomes, interruptions and navigation. Record
+enough meaningful interaction detail to adapt the present session and evaluate
+later MRW versions. Preserve the distinction between what was observed,
+reported, assessed or inferred. No single score establishes understanding.
+
+The [active design](docs/ACTIVE_STUDY_DESIGN.md) supplies the delivery scope;
+the [research review](docs/LEARNING_RESEARCH.md) supplies its evidence and limits.
+Spacing has support in mathematics; retrieval findings are broader and less
+conclusive for mathematics specifically. CHREST informs questions about
+expertise and presentation without becoming a prerequisite for implementation.
+These are design commitments, not capabilities claimed for 0.17.0.
+
 Why Theorem Terminal exists. Companion to `DOMAIN_MODEL.md` (entities and
 invariants), `UX_SPEC.md` (the human workflow), and `CODEX_PLAN.md` (staged
 implementation).
@@ -64,8 +85,9 @@ both.
   informal and formal representations remain distinct.
 * Theorem Terminal explores tools for learning, solving problems,
   reconstructing arguments, integrating results, and retaining mathematics.
-* Evidence comes from mathematical work and later performance, not from reports
-  about an internal mental state.
+* Evidence of learning comes from mathematical work and later performance.
+  Reported mental effort supplies separate evidence about experienced effort;
+  it does not establish understanding or mathematical correctness.
 
 Theorem Terminal is intended both for navigating and learning from a large
 corpus, such as the Stacks Project

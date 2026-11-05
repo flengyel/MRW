@@ -1,15 +1,39 @@
 # Using MRW
 
-In a proof graph, click a vertex to read its Stacks tag beside the graph.
-**Saved text** shows the retained statement and proof offline. Drag to pan;
-use the wheel or **− / Fit / +** to zoom. The graph icon on a proof-outline
-JSON editor opens this view directly.
+## Begin or resume a proof study (0.17.0)
 
-**Proof graphs:** **Open Proof Outline…** opens a `.mrw-proof.json` file.
+Open a saved source as described below. Choose **Prepare proof study…** in the
+reader, or **MRW: Prepare Proof Study…** from the Command Palette. Select the
+proof and the prerequisite passages to include, enter the question and save.
+
+In the study tab:
+
+1. **Copy handoff for Codex** includes the selected quotations, references and
+   outline instructions together. Paste it into the Codex companion.
+2. Copy the proposed JSON response, then **Import outline from clipboard**.
+   MRW validates the format and source references and opens the graph.
+3. In the graph, select a claim and choose **Edit summary**. Edit the claim and
+   explanation in its form, identify the author/origin, then **Save summary**.
+4. Return to the study tab to edit and **Save question**.
+   **MRW: Resume Proof Study** reopens the saved study. An active study file
+   also has an editor-title action.
+
+The question and graph currently occupy separate tabs. The Codex transfer is
+manual. Opening or preparing a study makes no model request. Format/source
+checks do not check the mathematical argument.
+
+## Read a proof graph
+
+**Open Proof Outline…** opens a saved `.mrw-proof.json` file. Its editor-title
+icon opens the same view. Select a vertex to read its Stacks tag beside the
+graph. **Saved text** shows the retained statement and proof offline. Drag to
+pan; use the wheel or **− / Fit / +** to zoom.
+
 **Delete vertex** omits an intermediate claim; **Expand original steps** shows
 its argument and **Restore** brings it back. **Use AI outline** applies the
-file's proposed selection. **Edit summary** uses the ordinary editor; **Refresh**
-reads your changes. **Ask AI…** prepares an exact request for separate Send.
+selection already proposed in the file. **Edit summary** opens the correction
+form. **Refresh** reads changes made in the ordinary backing document.
+**Ask AI…** uses the separate API request preview and Send workflow.
 
 ## Open a source
 
@@ -112,8 +136,9 @@ A completion notification can remain visible while you continue reading.
 
 ## Use Codex or notebooks alongside MRW
 
-For Codex, use **MRW: Copy Outline or Passage Link…** and paste the complete link
-and the quoted passage into the chat. The link alone does not supply the text.
+For a proof study, use the combined **Copy handoff for Codex** action described
+above. For a standalone question or note outside that workflow, **MRW: Copy
+Outline or Passage Link…** copies only the link: paste the quotation separately.
 To save a reply as a reader annotation, select **Supplied origin: ai proposal**,
 enter **Author / attribution: Codex**, and use **Save annotation**.
 
