@@ -20,7 +20,10 @@ unchanged iframe identity through deletion/restoration, saved statement/proof
 (267 MathML expressions, no KaTeX errors), and reduced motion. This is an
 isolated transport/browser test; native-window acceptance remains pending.
 
-The focused **14 command/renderer/layout tests** and syntax checks pass.
+All **154 extension tests** pass in the completed persistent-checkout run,
+including the focused **14 command/renderer/layout tests**. Syntax checks pass.
+The initial broad command was terminated before completion; the subsequent run
+completed with 154 passed and no failures.
 The verified **0.16.1** VSIX is installed (SHA-256
 `fe53c679e4eb67627be70b74c39c8d346c6588d0eac10231ad746622fed00875`).
 Its production manifest and all 70 runtime files match the package. The private

@@ -25,7 +25,8 @@ runtime files match the checked VSIX. The overview, graph JSON, private store
 head and 12 retained payload files remain byte-identical. No window reload was
 invoked. Activation requires the user to save drafts, reload and reopen the
 proof outline. The focused 14 command/renderer/layout tests and parent-frame
-browser check pass; native-window confirmation remains pending.
+browser check pass. The complete persistent-checkout regression run passes all
+154 extension tests; native-window confirmation remains pending.
 
 ## Animated graph with the corresponding Stacks page — 2026-11-04
 
