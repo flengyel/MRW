@@ -1,5 +1,18 @@
 # Mathematical Research Workstation for VS Code
 
+## Proof study with Codex (0.17.0)
+
+**Prepare Proof Study…** selects a retained proof and prerequisites. Copy its
+single handoff into Codex, then **Import outline from clipboard** to open the
+proposed graph. **Edit summary** corrects claims/explanations without editing
+JSON, with explicit author and origin. **Save question** keeps the unresolved
+question; **Resume Proof Study** reconstructs it. Reader notes are excluded
+from the handoff. No model request or compiler runs automatically.
+
+See the [workflow](../docs/PROOF_STUDY_WORKFLOW.md) and
+[validation](../docs/PROOF_STUDY_VALIDATION.md), including the 08ZG case and
+remaining manual steps. Imports validate structure/source pins, not mathematics.
+
 ## Proof-view startup (0.16.1)
 
 Fixes the proof view stuck on its initial loading screen. VS Code sends replies

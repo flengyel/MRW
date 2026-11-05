@@ -117,7 +117,22 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
       if (m.type === 'ready' || m.type === 'refresh') { await load(c); return; }
       if (m.revision !== c.revision) throw new Error('Outline view changed; use its current controls.');
       const node = c.graph.nodes.find(n => n.id === m.node);
-      if (m.type === 'delete' || m.type === 'restore') {
+      if (m.type === 'update_summary') {
+        if (!node) throw new Error('Unknown proof vertex.');
+        const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(c.file)), raw = doc.getText(), version = doc.version;
+        if (digest(raw) !== c.revision) throw new Error('Outline changed; refresh before editing its summary.');
+        const graph = JSON.parse(JSON.stringify(c.graph)), changed = graph.nodes.find(n => n.id === node.id);
+        changed.claim = m.claim; changed.explanation = { text: m.explanation, author: m.author, origin: m.origin ?? 'human' };
+        const checked = await bridge({ method: 'proof_graph', graph, hidden: c.model.projection.hidden });
+        if (doc.isClosed || doc.version !== version || doc.getText() !== raw) throw new Error('Outline changed during summary editing.');
+        const edit = new vscode.WorkspaceEdit();
+        edit.replace(doc.uri, new vscode.Range(new vscode.Position(0, 0), doc.positionAt(raw.length)), JSON.stringify(checked.graph, null, 2) + '\n');
+        if (!await vscode.workspace.applyEdit(edit)) throw new Error('The editor declined the summary edit.');
+        if (!await doc.save()) throw new Error('Summary changes remain unsaved in the ordinary outline document.');
+        await context.workspaceState.update(key(c.file, digest(doc.getText())), c.model.projection.hidden);
+        await c.panel.webview.postMessage({ type: 'summary_saved', node: node.id });
+        await load(c);
+      } else if (m.type === 'delete' || m.type === 'restore') {
         if (!node) throw new Error('Unknown proof vertex.');
         const hidden = new Set(c.model.projection.hidden);
         if (m.type === 'delete') hidden.add(node.id); else hidden.delete(node.id);
@@ -178,9 +193,9 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
       await c.panel.webview.postMessage({ type: 'idle' });
     }
   }
-  register('mrw.openProofOutline', async () => {
+  register('mrw.openProofOutline', async uri => {
     const active = vscode.window.activeTextEditor?.document;
-    const chosen = active?.uri.scheme === 'file' && active.uri.fsPath.endsWith('.mrw-proof.json') ? active.uri.fsPath : await choosePath('Open proof outline (.mrw-proof.json)');
+    const chosen = uri?.scheme === 'file' ? uri.fsPath : active?.uri.scheme === 'file' && active.uri.fsPath.endsWith('.mrw-proof.json') ? active.uri.fsPath : await choosePath('Open proof outline (.mrw-proof.json)');
     if (!chosen) return;
     if (!chosen.endsWith('.mrw-proof.json')) throw new Error('Choose a .mrw-proof.json file.');
     const file = await fs.realpath(chosen);

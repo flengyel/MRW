@@ -1,5 +1,10 @@
 # Choose where MRW keeps saved work
 
+Patch 0.17.0 discards a rejected write’s own unpublished generation only after
+checking its directory identity, the current HEAD and the absence of a recovery
+journal. Not-sent requests use the same cleanup. Blocked/uncertain publications
+and journaled operations preserve their bytes; older generations are not swept.
+
 MRW 0.7.0 lets you move the saved sources, outlines, annotations and associated
 records for **this VS Code workspace**. Existing installations keep their current
 location until you explicitly move it. Other workspaces are unchanged. Obsidian

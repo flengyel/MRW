@@ -1,14 +1,16 @@
 'use strict';
 (() => {
   const api = acquireVsCodeApi(), root = document.getElementById('reader');
+  let editDraft, reselectAfterSave;
   let state, busy = false, selected, request = 0, passage, sourceMode = 'live';
   let shell, header, bar, count, mapHost, map, inspector, sourceArea, readingList;
   const el = (tag, parent, text, className) => {
     const n = document.createElement(tag); if (text !== undefined) n.textContent = text;
     if (className) n.className = className; parent.append(n); return n;
   };
-  function controls() { for (const b of root.querySelectorAll('button')) b.disabled = (busy && b.dataset.local !== 'true') || b.dataset.pinned === 'true'; }
+  function controls() { for (const field of root.querySelectorAll('textarea')) field.disabled = busy; for (const field of root.querySelectorAll('input')) field.disabled = busy; for (const field of root.querySelectorAll('select')) field.disabled = busy; for (const b of root.querySelectorAll('button')) b.disabled = (busy && b.dataset.local !== 'true') || b.dataset.pinned === 'true'; }
   function send(type, extra = {}) {
+    if (editDraft && type !== 'update_summary') { editDraft.status.textContent = 'Save or cancel this summary first.'; return; }
     if (busy) return; busy = true; controls(); api.postMessage({ type, revision: state?.documentRevision, ...extra });
   }
   function button(parent, title, type, extra = {}, tooltip = '') {
@@ -71,7 +73,22 @@
     const actions = el('div', parent, undefined, 'toolbar');
     if (!state.projection.pinned.includes(node.id)) button(actions, 'Delete vertex', 'delete', { node: node.id }, 'Omit this intermediate claim and reconnect its dependencies.');
     else el('p', actions, state.graph.goals.includes(node.id) ? 'Conclusion' : state.graph.inferences.some(r => r.conclusion === node.id) ? 'Scope boundary' : 'Premise', 'muted');
-    button(actions, 'Edit summary', 'edit', { node: node.id }, 'Edit this claim in its ordinary JSON document.');
+    local(actions, 'Edit summary', () => editSummary(node), 'Correct the claim and explanation here; save through the ordinary outline document.');
+  }
+  function editSummary(node) {
+    if (editDraft) return;
+    const form = el('section', inspector, undefined, 'context'), values = {};
+    for (const [key, label, value] of [['claim', 'Claim', node.claim], ['explanation', 'Explanation', node.explanation.text], ['author', 'Author', 'Reader']]) {
+      el('label', form, label); const input = el(key === 'author' ? 'input' : 'textarea', form); input.value = value;
+      input.setAttribute('aria-label', label); values[key] = input;
+    }
+    el('label', form, 'Origin'); const origin = el('select', form); origin.setAttribute('aria-label', 'Origin');
+    for (const [value, text] of [['human', 'Reader correction'], ['ai_proposal', 'AI proposal']]) { const option = el('option', origin, text); option.value = value; }
+    origin.value = 'human'; values.origin = origin;
+    inspector.insertBefore(form, sourceArea);
+    const status = el('p', form); editDraft = { node: node.id, status };
+    local(form, 'Save summary', () => send('update_summary', { node: node.id, ...Object.fromEntries(Object.entries(values).map(([k, v]) => [k, v.value])) }));
+    local(form, 'Cancel', () => { if (!busy) { editDraft = undefined; form.remove(); } });
   }
   function renderSource() {
     if (!sourceArea) return; sourceArea.replaceChildren();
@@ -111,6 +128,7 @@
     map.select(undefined); sourceArea = undefined;
   }
   function selectNode(id, focus = false) {
+    if (editDraft) { editDraft.status.textContent = 'Save or cancel this summary first.'; return; }
     if (!state.projection.order.includes(id)) return;
     selected = id; passage = undefined; map.select(id, focus); inspector.replaceChildren();
     const node = state.graph.nodes.find(n => n.id === id);
@@ -139,7 +157,7 @@
     const changed = previous && previous.documentRevision !== state.documentRevision;
     header.replaceChildren(); el('h1', header, graph.title); attributed(header, graph.description);
     const provenance = el('details', header); el('summary', provenance, 'Provenance');
-    el('p', provenance, 'Claims and dependencies are an attributed reconstruction from source text. Lean checking is reported by the source project; MRW has not run Lean.');
+    el('p', provenance, 'Structure validated. Claims and inferences remain attributed proposals; mathematical correctness has not been checked.');
     if (state.notice) el('p', header, state.notice, 'warning');
     bar.replaceChildren();
     button(bar, graph.description.origin === 'ai_proposal' ? 'Use AI outline' : 'Use proposed outline', 'proposal', {}, 'Apply the proposed selection.');
@@ -162,6 +180,7 @@
       const omitted = el('details', readingList); el('summary', omitted, 'Deleted vertices');
       for (const id of projection.hidden) button(omitted, 'Restore: ' + title(id), 'restore', { node: id });
     }
+    if (reselectAfterSave) { const id = reselectAfterSave; reselectAfterSave = undefined; selectNode(id); }
     controls();
   }
   const startupTimer = setTimeout(() => {
@@ -182,6 +201,7 @@
       try { render(previous); }
       catch (error) { el('p', root, 'Cannot display proof outline: ' + error.message, 'warning'); }
     }
+    else if (data.type === 'summary_saved') { editDraft = undefined; reselectAfterSave = data.node; }
     else if (data.type === 'passage' && data.node === selected && data.request === request && data.revision === state.documentRevision) {
       passage = data.passage;
       if (passage.tag && !/^[A-Z0-9]{4}$/.test(passage.tag)) passage = { tag: null, notice: 'Invalid Stacks tag.' };

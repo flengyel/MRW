@@ -713,6 +713,21 @@ class ArtifactStorage:
         finally: CURRENT.reset(token)
         return dict(**self.status(),message='Exact retained request outcome recovered. Resume the saved investigation explicitly; no request was retried')
 
+    def discard_candidate(self, location, payload, identity):
+        """Discard only this call's unpublished, unjournaled private generation."""
+        try:
+            if self.journal.exists() or not payload.exists(): return
+            current = strict_json(read_bounded(Path(location)/'HEAD.json', JSON_LIMIT, 'active artifact head'))
+            if current['generation'] == payload.parent.name: return
+            observed = payload.stat()
+            if (observed.st_dev, observed.st_ino) != identity: return
+            rows = inventory(payload)
+            if safe_cleanup(payload, rows): return
+            payload.rmdir(); payload.parent.rmdir(); sync_directory(payload.parent.parent)
+        except (OSError, ValueError):
+            # An identity change or uncertain cleanup preserves bytes for inspection.
+            pass
+
     def run(self, request, dispatch):
         """Every updated extension writer enters this exclusion and reads binding."""
         if self.journal.exists(): raise ValueError('Artifact operation needs recovery; run MRW: Recover Artifact Move. Writes remain blocked')
@@ -737,11 +752,16 @@ class ArtifactStorage:
         generation=str(uuid4()) if copying else head['generation']
         active_payload=Path(b['location'])/'versions'/generation/'payload'
         old_files=inventory(payload) if copying else None
-        if copying: self.copy_payload(payload,active_payload,head['files'])
+        candidate_identity = None
+        if copying:
+            directory(active_payload)
+            st = active_payload.stat(); candidate_identity = (st.st_dev, st.st_ino)
         access=StoreAccess(self,ident,active_payload,head['aliases'])
         access.head_raw=head_raw;access.parent_payload=payload;access.parent_files=old_files
         token=CURRENT.set(access)
+        preserve_candidate = False
         try:
+            if copying: self.copy_payload(payload,active_payload,head['files'])
             req=deepcopy(request)
             def translate(value):
                 root=value.get('project_root')
@@ -766,11 +786,15 @@ class ArtifactStorage:
             if method=='send_assistance' and result.get('status')=='not_sent':
                 return stable_paths(result)
             if result.get('blocked') or result.get('investigation',{}).get('blocked'):
+                preserve_candidate = True
                 return result
             if copying:
                 self.publish_generation(access)
             return stable_paths(result)
-        finally: CURRENT.reset(token)
+        finally:
+            CURRENT.reset(token)
+            if copying and not preserve_candidate:
+                self.discard_candidate(b['location'], active_payload, candidate_identity)
 
 
 def storage_action(request):

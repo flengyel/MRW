@@ -203,6 +203,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
           if (!region) throw new Error('Unknown source region.');
           await mutate(c, { kind: 'region', region: region.id, title: region.title, level: region.level, collapsed: !region.collapsed });
         } else if (value.type === 'source') await openDocument(c);
+        else if (value.type === 'proof_study') await vscode.commands.executeCommand('mrw.prepareProofStudy');
         else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline');
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
@@ -751,6 +752,40 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       ['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
       ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
+  rows.studyPassage = async (reference, root) => {
+    const store = path.join(context.storageUri.fsPath, `outlines-${digest(root)}`);
+    const followed = await bridge({ method: 'outline_follow_reference', store, project_root: root, reference });
+    const { context: selected } = await bridge({ method: 'outline_assistance_context', store, project_root: root, reference });
+    const pub = followed.outline.published, bib = followed.outline.source.bibliography;
+    const url = pub && /^[a-f0-9]{40}$/.test(pub.commit) ? `https://github.com/stacks/stacks-project/blob/${pub.commit}/${pub.source_file}` : bib.reference;
+    const part = pub?.parts?.[followed.reference.region];
+    return { reference, label: part ? `${part.tag} ${part.role} · ${bib.title}` : followed.reference.label, text: selected.text, source_revision: selected.source_revision,
+      url, authors: pub?.authors || bib.authors || null, license: pub?.license || null, review: pub ? 'published' : 'awaiting_human_review' };
+  };
+  rows.selectStudyPassages = async root => {
+    const store = path.join(context.storageUri.fsPath, `outlines-${digest(root)}`);
+    const listed = await bridge({ method: 'outline_list', store, project_root: root }), choices = [];
+    for (const item of listed.outlines) {
+      const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: item.id });
+      for (const region of loaded.outline.regions) choices.push({ label: region.title, description: item.title || item.path,
+        id: item.id, revision: loaded.revision, region: region.id, role: loaded.outline.published?.parts?.[region.id]?.role });
+    }
+    if (!choices.length) throw new Error('Retain a proof passage before preparing a study.');
+    const proofs = choices.filter(c => c.role === 'proof');
+    const proof = await vscode.window.showQuickPick(proofs.length ? proofs : choices, { placeHolder: 'Choose the retained proof' });
+    if (!proof) return;
+    const prerequisites = await vscode.window.showQuickPick(choices.filter(c => c !== proof),
+      { canPickMany: true, placeHolder: 'Select prerequisite passages to include; no others will be copied' });
+    if (!prerequisites) return;
+    if (prerequisites.length > 15) throw new Error('Select at most fifteen prerequisites.');
+    const result = [];
+    for (const selected of [proof, ...prerequisites]) {
+      const target = await bridge({ method: 'outline_reference', store, project_root: root,
+        id: selected.id, revision: selected.revision, region: selected.region });
+      result.push(await rows.studyPassage(target.reference, root));
+    }
+    return result;
+  };
   rows.followReference = followReference;
   rows.readPinned = (reference, root) => bridge({ method: 'outline_follow_reference',
     store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`), project_root: root, reference });

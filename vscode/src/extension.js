@@ -9,10 +9,13 @@ const { registerAssistance } = require('./assistance');
 const { registerOutlines } = require('./outlines');
 const { registerReadingOutline } = require('./readingOutline');
 const { registerProofGraph } = require('./proofGraph');
+const { registerProofStudy } = require('./proofStudy');
 const { createArtifactStorage } = require('./artifactStorage');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
 const researchTooltips = Object.freeze({
+  "mrw.prepareProofStudy": "Select a retained proof and prerequisite passages, then save one exact handoff for Codex.",
+  "mrw.resumeProofStudy": "Reopen the saved study question, handoff and proposed outline.",
   "mrw.ask": "Use the selected editor text to prepare a question for the AI model. Review the request before choosing Send exact preview.",
   "mrw.addContext": "Include the current editor selection in the unsent AI request and update its preview.",
   "mrw.removeContext": "Choose a quoted passage to remove from the unsent AI request, then update its preview.",
@@ -317,6 +320,8 @@ function activate(context) {
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
+  registerProofStudy({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
+    selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage });
   const tree = {
     onDidChangeTreeData: changed.event,
     getChildren: () => {
@@ -324,6 +329,7 @@ function activate(context) {
         ...assistanceRows(),
         ...outlineRows(),
         ['Open proof outline…', 'mrw.openProofOutline'],
+        ['Prepare proof study…', 'mrw.prepareProofStudy'], ['Resume proof study', 'mrw.resumeProofStudy'],
         ['Show saved artifact location', 'mrw.artifactLocation'],
         ['Move saved work directory…', 'mrw.moveArtifactDirectory'],
         ['Open saved work directory…', 'mrw.openArtifactDirectory'],

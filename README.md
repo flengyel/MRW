@@ -1,5 +1,11 @@
 # Mathematical Research Workstation
 
+**0.17.0:** select a retained proof and prerequisites, copy one exact handoff for
+Codex, import its attributed outline, correct summaries in the viewer and save
+the question for resumption. The second case is 08ZG. Rejected-write generation
+cleanup and unsent-request preservation are repaired. [Workflow](docs/PROOF_STUDY_WORKFLOW.md),
+[checks and remaining friction](docs/PROOF_STUDY_VALIDATION.md).
+
 **0.16.1** fixes a proof view stuck at “Opening recorded outline…” by accepting
 VS Code’s same-origin wrapper messages while rejecting embedded-page messages.
 Startup timeouts offer Retry.

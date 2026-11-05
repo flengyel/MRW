@@ -8,6 +8,16 @@ purpose in `VISION.md`.
 
 ## Frontend scope and immediate delivery
 
+**0.17.0** completes the requested retained-proof → selected prerequisites →
+Codex handoff → imported proposal → summary correction → saved-question cycle.
+08ZG exercises the same path beyond the prepared 08ZH graph. The handoff includes
+exact quotations, source attribution, references and schema; import preserves
+those pins and opens the existing viewer. The question is an ordinary saved
+study document. Structural checks do not check the mathematics. Confirmed
+HEAD defects in rejected-write candidate cleanup and ordinary Ask draft loss
+are repaired with focused regressions. Keep further work tied to observed
+obstacles in this workflow. [Validation](docs/PROOF_STUDY_VALIDATION.md).
+
 **0.16.1** repairs the reported loading-screen regression. The webview origin
 check matches VS Code’s wrapper transport; child-page messages remain excluded.
 Parent-frame browser regression checks reproduce the failure in 0.16.0 and pass

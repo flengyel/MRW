@@ -24,11 +24,12 @@ async function host(t, state = new Map()) {
   const commands = new Map(), panels = [], requests = [], shown = [], asks = [], follows = [], urls = [], errors = [];
   let failUpdates = false, service = bridge, reader;
   const doc = { uri: { scheme:'file', fsPath:file, path:file, toString:()=>file },
-    getText: () => doc.text, text:raw, positionAt: n => { const s=doc.text.slice(0,n).split('\n');return new Position(s.length-1,s.at(-1).length); } };
-  const vscode = { Uri:{file:p=>({scheme:'file',fsPath:p}),parse:u=>u}, ViewColumn:{Active:1}, Position, Selection,
+    getText: () => doc.text, text:raw, version:1, async save(){await fs.writeFile(file,doc.text);return true;}, positionAt: n => { const s=doc.text.slice(0,n).split('\n');return new Position(s.length-1,s.at(-1).length); } };
+  class WorkspaceEdit { constructor(){this.operations=[];} replace(uri,range,text){this.operations.push({uri,range,text});} }
+  const vscode = { WorkspaceEdit, Uri:{file:p=>({scheme:'file',fsPath:p}),parse:u=>u}, ViewColumn:{Active:1}, Position, Selection,
     Range:class { constructor(a,b){this.start=a;this.end=b;} }, TextEditorRevealType:{InCenterIfOutsideViewport:1},
     env:{openExternal:async u=>urls.push(u)},
-    workspace:{openTextDocument:async()=>doc},
+    workspace:{openTextDocument:async()=>doc,applyEdit:async edit=>{for(const op of edit.operations){doc.text=op.text;doc.version++;}return true;}},
     window:{showErrorMessage:e=>errors.push(e),showTextDocument:async()=>({revealRange(){}}),
       createWebviewPanel(type,title,column,options){
         const p={type,title,options,reveal(){},onDidDispose(fn){p.dispose=fn;},webview:{
@@ -112,7 +113,7 @@ test('AI preparation captures only the exact graph and requires an explicit acti
 async function renderer({ initial = true } = {}) {
   class Node {
     constructor(tag){this.tag=tag;this.children=[];this.listeners={};this.dataset={};this.textContent='';this.classList={add(){}};}
-    append(n){n.parent=this;this.children.push(n);}replaceChildren(){this.children=[];}
+    append(n){n.parent=this;this.children.push(n);}insertBefore(n,b){this.children=this.children.filter(x=>x!==n);const i=this.children.indexOf(b);this.children.splice(i<0?this.children.length:i,0,n);n.parent=this;}replaceChildren(){this.children=[];}
     remove(){if(this.parent)this.parent.children=this.parent.children.filter(n=>n!==this);}
     getBoundingClientRect(){return{left:0,top:0,width:900,height:600};}
     setAttribute(n,v){this[n]=v;}addEventListener(n,f){this.listeners[n]=f;}
@@ -241,4 +242,37 @@ test('startup timeout offers an explicit retry and a host reply replaces the loa
   assert.match(h.root.text(),/08ZH: closed fiber products/);
   assert.doesNotMatch(h.root.text(),/did not open/);
   assert.equal(h.timers.size,0);
+});
+
+
+test('summary corrections use the ordinary document, keep dependencies and deletion selection, and reject stale edits',async t=>{
+  const h=await host(t),p=await h.open();await h.action(p,'proposal');
+  const original=JSON.parse(h.doc.text),hidden=h.model(p).projection.hidden;
+  await h.action(p,'update_summary',{node:'closed-fiber',claim:'Corrected claim',explanation:'Corrected explanation',author:'Reader α'});
+  const changed=JSON.parse(await fs.readFile(h.file,'utf8'));
+  assert.equal(changed.nodes.find(n=>n.id==='closed-fiber').claim,'Corrected claim');
+  assert.deepEqual(changed.nodes.find(n=>n.id==='closed-fiber').explanation,{text:'Corrected explanation',author:'Reader α',origin:'human'});
+  assert.deepEqual(changed.inferences,original.inferences);assert.deepEqual(changed.sources,original.sources);
+  assert.deepEqual(h.model(p).projection.hidden,hidden);assert.ok(p.messages.some(m=>m.type==='summary_saved'));
+  await h.action(p,'update_summary',{node:'closed-fiber',claim:'AI clarification',explanation:'AI explanation',author:'Codex companion',origin:'ai_proposal'});
+  assert.equal(JSON.parse(h.doc.text).nodes.find(n=>n.id==='closed-fiber').explanation.origin,'ai_proposal');
+  const saved=h.doc.text;h.doc.text+=' ';
+  await p.receive({type:'update_summary',revision:digest(saved),node:'closed-fiber',claim:'Must not save',explanation:'Later edit',author:'Reader'});
+  assert.match(h.errors.at(-1),/changed/);assert.equal(await fs.readFile(h.file,'utf8'),saved);
+});
+
+test('summary form preserves typed corrections across local navigation and failed replies',async()=>{
+  const h=await renderer();h.root.all().find(n=>n.tag==='g'&&n['data-node']==='closed-fiber').listeners.click();
+  h.root.all().find(n=>n.tag==='button'&&n.textContent==='Edit summary').listeners.click();
+  const claim=h.root.all().find(n=>n['aria-label']==='Claim');claim.value='Typed correction';
+  h.root.all().find(n=>n.tag==='g'&&n['data-node']==='closed-diagonal').listeners.click();
+  assert.equal(h.root.all().find(n=>n['aria-label']==='Claim'),claim);
+  h.root.all().find(n=>n.tag==='button'&&n.textContent==='Save summary').listeners.click();
+  assert.equal(h.messages.at(-1).type,'update_summary');assert.equal(h.messages.at(-1).claim,'Typed correction');assert.equal(claim.disabled,true);
+  h.receive({data:{type:'error',message:'Rejected write'}});h.receive({data:{type:'idle'}});
+  assert.equal(h.root.all().find(n=>n['aria-label']==='Claim').value,'Typed correction');assert.equal(claim.disabled,false);
+  h.receive({data:{type:'summary_saved',node:'closed-fiber'}});
+  const graph=JSON.parse(JSON.stringify(h.model));graph.graph.nodes.find(n=>n.id==='closed-fiber').claim='Typed correction';
+  h.receive({data:{type:'graph',...graph,sourceStatus:{},documentRevision:'new-pin'}});
+  assert.equal(h.root.all().some(n=>n['aria-label']==='Claim'),false);assert.match(h.root.text(),/Typed correction/);
 });

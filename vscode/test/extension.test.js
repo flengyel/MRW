@@ -23,6 +23,7 @@ class WorkspaceEdit {
   constructor() { this.operations = []; }
   createFile(location, options) { this.operations.push({ kind: 'create', location, options }); }
   insert(location, point, text) { this.operations.push({ kind: 'insert', location, point, text }); }
+  replace(location, range, text) { this.operations.push({ kind: 'replace', location, range, text }); }
 }
 function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file, toString() { return `${scheme}:${file}`; } }; }
 
@@ -79,8 +80,8 @@ async function harness(root, state = new Map(), options = {}) {
         for (const op of edit.operations) {
           if (op.kind === 'create') await fs.writeFile(op.location.fsPath, '', { flag: op.options.overwrite ? 'w' : 'wx' });
           else {
-            const doc = await this.openTextDocument(op.location), at = offset(doc.text, op.point);
-            doc.text = doc.text.slice(0, at) + op.text + doc.text.slice(at); doc.version++; doc.isDirty = true;
+            const doc = await this.openTextDocument(op.location), at = op.kind === 'replace' ? 0 : offset(doc.text, op.point);
+            doc.text = op.kind === 'replace' ? op.text : doc.text.slice(0, at) + op.text + doc.text.slice(at); doc.version++; doc.isDirty = true;
           }
         }
         return true;
@@ -153,6 +154,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === './assistance') return require('../src/assistance');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');
+    if (name === './proofStudy') return require('../src/proofStudy');
     if (name === './proofGraph') return require('../src/proofGraph');
     if (name === './artifactStorage') return require('../src/artifactStorage');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };
@@ -502,6 +504,18 @@ test('old preview cannot authorize replacement; preparation error invalidates Se
   await h.commands.get('mrw.previewRequest')();
   await h.commands.get('mrw.sendRequest')();
   assert.ok(h.requests.every(r => r.method === 'prepare_assistance' || r.method === 'artifact_status'));
+});
+
+test('ordinary Ask preserves the unsent draft and exact preview before any replacement dialog', async t => {
+  const root=await temporary(t),h=await harness(root);await ask(h,root);
+  const original=h.requests.filter(r=>r.method==='prepare_assistance').at(-1).draft;
+  const preview=h.shown.at(-1);h.focus(h.editor(h.document(path.join(root,'other.md'),'Other selected work')));
+  await h.commands.get('mrw.ask')();
+  assert.match(h.errors.at(-1),/unsent request/);
+  await h.commands.get('mrw.previewRequest')();
+  assert.deepEqual(h.requests.filter(r=>r.method==='prepare_assistance').at(-1).draft,original);
+  assert.equal(h.shown.at(-1).text,preview.text);
+  assert.equal(h.requests.some(r=>r.method==='send_assistance'),false);
 });
 
 test('cancelled question and malformed Unicode never prepare or send', async t => {

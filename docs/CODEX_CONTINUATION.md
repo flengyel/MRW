@@ -1,5 +1,47 @@
 # Codex continuation: MRW source work and companion notes
 
+## Reusable proof-study workflow — 2026-11-05
+
+The user requested finishing the loading repair, reviewing two findings against
+HEAD, then completing one mathematical workflow with the graph and Codex
+companion. HEAD 6899ff5 already contains the 0.16.1 origin/Retry repair. Its
+regressions and the parent-frame browser check pass. Both new defect regressions
+fail against HEAD and pass with the repairs: discard only unpublished,
+unjournaled call-owned candidate generations; refuse ordinary Ask replacement
+before touching an unsent draft/preview. Preserve uncertain publication and
+interrupted Send recovery. Do not sweep historical generations.
+
+**0.17.0** adds Prepare Proof Study and Resume Proof Study. Reader selection
+uses the existing scoped reference and exact-assistance-quotation core. The
+handoff contains only the selected text, references, source attribution and
+the bounded graph schema. Clipboard transfer to/from Codex is explicit. Import
+checks graph structure and exact source/citation pins, writes new ordinary
+files, and opens the existing viewer. Claim/explanation corrections have
+author/origin fields and use ordinary document edits/save/undo. The study tab
+saves the unresolved question and reconstructs it after restart. No new
+provider adapter, compiler, private store or checker is introduced.
+
+The second real study is `proof-studies/08zg.mrw-study.json`, with its sibling
+outline and three content-addressed selected quotations. It uses the genuine
+retained proof/statement plus 08ZE statement. Original 08ZH, overview, reader
+notes and diagrams are preserved. Codex companion authored the proposed
+claims; no MRW API ModelCall or mathematical checking is claimed.
+
+Read [workflow](PROOF_STUDY_WORKFLOW.md) and
+[validation](PROOF_STUDY_VALIDATION.md) for removed manual steps, remaining
+relay/prerequisite/format friction and test scope. Observe the user’s actual
+study before adding infrastructure or display features. Native-window
+confirmation and mathematical usefulness remain distinct from command/browser
+checks. Do not reload or switch the user’s window automatically.
+
+Delivery: **0.17.0 is installed** and all 73 runtime files plus the production
+manifest match the verified package. The original 21 ordinary study files and
+12 private payload files/HEAD are unchanged. The second study adds only new
+files. The broad checks pass 160 extension tests and 43 Python tests; final
+focused runs cover 15 graph and seven study lifecycle cases. Browser workflow
+checks pass. Save drafts and leave Reload Window to the user. No mathematical
+checker was run. The new study is `proof-studies/08zg.mrw-study.json`.
+
 ## Proof-view startup regression — 2026-11-05
 
 The user reports the 0.16.0 native proof view stuck on “Opening recorded

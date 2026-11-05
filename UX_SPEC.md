@@ -1,5 +1,14 @@
 # UX_SPEC.md
 
+**Proof study, 0.17.0 (2026-11-05).** Prepare chooses one retained proof and
+explicit prerequisite passages. A single handoff contains their exact text,
+references and the outline schema for the Codex companion. Import opens the
+existing graph. Summary forms edit ordinary documents with author/origin and
+save/undo under VS Code. A study tab saves the unresolved question and resumes
+it from an ordinary study file. No API call is implicit. Structure and source
+pins are validated separately from mathematical correctness. See
+[workflow](docs/PROOF_STUDY_WORKFLOW.md).
+
 **Proof-view startup, 0.16.1 (2026-11-05).** The proof view accepts messages
 from VS Code’s same-origin wrapper. Embedded-page messages are rejected by
 origin. If no graph arrives within 15 seconds, Retry requests it again; there

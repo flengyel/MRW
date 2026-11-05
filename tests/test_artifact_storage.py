@@ -353,6 +353,48 @@ class ArtifactStorageTests(unittest.TestCase):
         self.move();evidence.unlink();view=self.call('outline_follow_reference',reference=self.ref)
         self.assertEqual(self.call('outline_document',id=self.id,revision=view['revision'],artifact=artifact)['text'].encode(),raw)
 
+    def test_rejected_managed_writes_discard_only_their_candidate_generation(self):
+        self.move()
+        before = (self.destination/'HEAD.json').read_bytes()
+        versions = set((self.destination/'versions').iterdir())
+        for _ in range(3):
+            with self.assertRaises(ValueError):
+                self.call('outline_mutate', id=self.id, revision='0'*64,
+                          change=dict(kind='remove_region', id=self.region))
+            self.assertEqual((self.destination/'HEAD.json').read_bytes(), before)
+            self.assertEqual(set((self.destination/'versions').iterdir()), versions)
+        self.assertEqual(self.call('outline_follow_reference', reference=self.ref)['document']['text'].encode(), self.raw)
+
+    def test_failed_candidate_copy_is_cleaned_but_uncertain_publication_is_preserved(self):
+        self.move()
+        versions = set((self.destination/'versions').iterdir())
+        def reject(phase):
+            if phase == 'copy_file': raise ValueError('copy rejected')
+        self.manager.checkpoint = reject
+        with self.manager.exclusive(), self.assertRaisesRegex(ValueError, 'copy rejected'):
+            self.manager.run(dict(method='outline_mutate', artifact_epoch=self.epoch), lambda r: {})
+        self.assertEqual(set((self.destination/'versions').iterdir()), versions)
+        self.manager.checkpoint = lambda phase: None
+        with self.manager.exclusive():
+            self.manager.run(dict(method='outline_mutate', artifact_epoch=self.epoch), lambda r: {'blocked': True})
+        self.assertEqual(len(set((self.destination/'versions').iterdir()) - versions), 1)
+
+    def test_not_sent_candidate_is_removed_and_journaled_failure_is_preserved(self):
+        self.move()
+        versions = set((self.destination/'versions').iterdir())
+        with self.manager.exclusive():
+            result = self.manager.run(dict(method='send_assistance', artifact_epoch=self.epoch),
+                                      lambda r: {'status': 'not_sent'})
+        self.assertEqual(result['status'], 'not_sent')
+        self.assertEqual(set((self.destination/'versions').iterdir()), versions)
+        def interrupted(request):
+            self.manager.journal_save(dict(version=1, operation='send', evidence='preserve for recovery'))
+            raise ValueError('after reservation')
+        with self.manager.exclusive(), self.assertRaisesRegex(ValueError, 'after reservation'):
+            self.manager.run(dict(method='send_assistance', artifact_epoch=self.epoch), interrupted)
+        self.assertTrue(self.manager.journal.exists())
+        self.assertEqual(len(set((self.destination/'versions').iterdir()) - versions), 1)
+
     def test_managed_explicit_send_keeps_pending_reservation_durable_before_transport(self):
         from theorem_terminal.editor_assistance import assistance_action
         from theorem_terminal.openai_response import TransportResult

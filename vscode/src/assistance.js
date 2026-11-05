@@ -70,7 +70,6 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     async release() { investigation.storageChanged(); invalidate(); },
   });
   async function begin(target, root, prompt = 'Mathematical question about the selected work') {
-    draft = undefined;
     const question = await vscode.window.showInputBox({ prompt });
     if (question === undefined) return;
     const configured = vscode.workspace.getConfiguration('mrw').get('model', '');
@@ -83,11 +82,15 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
       output: path.join(directory, `${id}.json`), exchange_id: id };
     await prepare();
   }
-  register('mrw.ask', () => change(async () => {
-    const target = capture(vscode.window.activeTextEditor);
-    const root = await projectRoot(vscode.window.activeTextEditor);
-    await begin(target, root);
-  }));
+  register('mrw.ask', () => {
+    idle();
+    if (draft) throw new Error('Finish or discard the current unsent request before asking about other work.');
+    return change(async () => {
+      const target = capture(vscode.window.activeTextEditor);
+      const root = await projectRoot(vscode.window.activeTextEditor);
+      await begin(target, root);
+    });
+  });
   register('mrw.addContext', () => change(async () => {
     if (!draft) throw new Error('Start with Ask About Selected Work.');
     if (draft.contexts.length >= 8) throw new Error('At most eight contexts can be included.');

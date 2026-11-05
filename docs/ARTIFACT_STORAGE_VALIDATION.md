@@ -1,5 +1,14 @@
 # Artifact storage validation — 2026-10-19
 
+## Rejected candidate generations — 2026-11-05
+
+New regressions reproduce candidate leakage on HEAD 6899ff5 after rejected
+mutation and interrupted copy. The fix removes only that call’s unpublished,
+unjournaled generation. HEAD and retained source bytes remain unchanged.
+Not-sent cleanup, blocked publication preservation and journal preservation pass;
+existing pending-before-transport and interrupted-Send recovery checks also pass.
+See [the study validation](PROOF_STUDY_VALIDATION.md) for the complete scope.
+
 ## Completion notifications and command labels — 2026-11-04
 
 The user reported an operation-in-progress error while opening a saved source
