@@ -87,3 +87,16 @@ workspace host and is not included in managed source-store moves or cross-machin
 handover. The scheduler has default parameters and has not been personalized or
 validated for advanced mathematical learning. These are stated limits, not
 reasons to fabricate success or delay the implemented interaction for a ceremony.
+
+## Installed package
+
+The verified **0.18.0** package is installed. The production manifest and all
+**81 runtime files** match the VSIX. SHA-256:
+`eb7ff047a6425ab2d3371715f23e8664293f3e6978e737cc89c74aa0e134820b`.
+The package records implementation commit
+`876a33dfa2d9eda3089a26d3161bbab370f04c30`.
+The 26 ordinary study files and 13 managed-store files match their recorded
+baselines after installation. No original source, annotation, graph or workspace
+file was replaced. The actual window was not reloaded or switched. Save drafts
+and reload when ready; select a retained passage and choose **Study current
+material**, or use **MRW: Resume Study** for a saved current-material session.

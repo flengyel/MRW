@@ -28,6 +28,17 @@ The user's window stays open. Use the first real recorded interaction to locate
 the next obstacle; no CHREST runtime, curriculum engine, analytics service,
 provider change or repository-visibility change is authorized by this delivery.
 
+Delivery: **0.18.0 is installed**, with the production manifest and all 81 runtime
+files verified against its VSIX. Package SHA-256:
+`eb7ff047a6425ab2d3371715f23e8664293f3e6978e737cc89c74aa0e134820b`.
+All 26 ordinary study files and the managed store's 13 inventoried files remain
+byte-identical. The broader Node run passes 179 checks; Python passes 45; the
+final study persistence run passes 16. Actual native launch did not reach its
+runner, so do not turn browser/API checks into native acceptance. No user-window
+reload was invoked. The first action after saving/reloading is **Study Current
+Material** from a selected retained passage; **Resume Study** restores new local
+sessions, and legacy **Resume Proof Study** retains its earlier file workflow.
+
 ## Prior delivery notes
 
 ## Reusable proof-study workflow — 2026-11-05
