@@ -6,7 +6,7 @@ That path also points to the existing AI connector; SagePod is an optional
 computation companion with its own installation.
 
 This tutorial gets you from Windows VS Code to a mathematical reading workspace
-with an ordinary notebook running SageMath. It describes **MRW 0.19.0**. The
+with an ordinary notebook running SageMath. It describes **MRW 0.19.2**. The
 SagePod helper instructions use revision `4bc1bc3`, reviewed on **2026-11-03**.
 
 MRW is the **Mathematical Research Workstation** VS Code extension, sometimes
@@ -22,7 +22,7 @@ no separate SagePod connection setting in MRW.
 | Component | Where it runs | What it supplies |
 | --- | --- | --- |
 | VS Code | Windows | Windows, tabs, editing, saving and undo |
-| MRW and Python 3.11+ | Your WSL2 distribution | Retained sources, reader annotations and Markdown reading outlines |
+| MRW and Python 3.11+ | Your WSL2 distribution | Retained sources, reader annotations and Markdown Contents |
 | Jupyter extension | The same WSL workspace host | Notebook editing and connection to the SagePod server |
 | SagePod | A rootless Podman container in WSL2 | Jupyter server and the actual SageMath kernel |
 
@@ -76,17 +76,17 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`theorem-terminal-0.19.0.vsix`. Alternatively, in that window's WSL integrated
+`theorem-terminal-0.19.2.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.19.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.19.2.vsix
 code --list-extensions --show-versions
 ```
 
-Check that **Mathematical Research Workstation 0.19.0** appears under
+Check that **Mathematical Research Workstation 0.19.2** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.theorem-terminal@0.19.0`. If an extension appears
+The CLI identity is `flengyel.theorem-terminal@0.19.2`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
@@ -99,7 +99,7 @@ Run controls; **Run SageMath File** is a separate command requiring its own
 setup. Sage does not need to be installed directly on the WSL host.
 
 **You should now see the MRW book icon in the left Activity Bar.** Click it to
-open Studies and Reading Outline. MRW's **…** menu and **F1 → MRW:**
+open **Studies** and **Contents**. MRW's **…** menu and **F1 → MRW:**
 commands remain available. An installed VSIX needs no Node/npm, Qt, Lean or
 separate Python-package installation. Upgrading it does not require deleting
 workspace storage.
@@ -196,46 +196,46 @@ connection; it is not a required mathematical exercise.
 
 ## 5. Read, take notes and calculate together
 
-Keep an ordinary Markdown overview beside the notebook. Give it any headings
+Keep an ordinary Markdown working note beside the notebook. Give it any headings
 and prose useful for your work; there is no required template.
 
-1. In the **same workspace**, open a saved UTF-8 source text and select a passage.
-   Use **MRW: Create Outline from Saved Source**. Add other passages with
-   **MRW: Add Selected Source Region**. Existing work can instead use
-   **MRW: Open Saved Source Outline…**.
-2. In your Markdown overview, place the cursor where you want a reference.
-   Run **MRW: Insert Outline Reference…** and choose the saved whole source
-   outline or an exact passage. Repeat for other retained sources as needed.
-3. With that Markdown document active, click the **MRW book icon → Open Reading
-   Outline**, or run **MRW: Open Reading Outline**. Expand sections, choose a
-   heading to reach its editor location, or choose a source/passage reference
-   to open the reader. **MRW: Return to Reading Outline** returns to its
-   originating overview location. Editing the overview, including unsaved edits
-   and undo/redo, updates the navigator.
+1. In the **same workspace**, open a UTF-8 source text, save any editor changes
+   and select a passage. Use **MRW: Retain Document as Source**. Add other
+   passages with **MRW: Add Selected Passage**. Existing retained work can
+   instead use **MRW: Open Saved Source…**.
+2. In the working note, place the cursor where a reference belongs. Run
+   **MRW: Insert Source or Passage Link…** and choose the saved whole source
+   or an exact passage. Repeat for other retained sources as needed.
+3. With that Markdown document active, run **MRW: Show Contents**. Expand
+   sections, choose a heading to reach its editor location, or choose a
+   source/passage reference to open the reader. **MRW: Return to Document**
+   returns to its originating occurrence in the rendered document. Editing the
+   document, including unsaved edits and undo/redo, updates Contents.
+   Contents currently requires a saved Markdown file to belong to the workspace.
 4. In a notebook Markdown cell, a relative link such as
-   `[Reading overview](overview.md)` opens the companion file. Use an ordinary
-   file link in the overview to return to your notebook. MRW reference commands
+   `[Working note](overview.md)` opens the companion file. Use an ordinary
+   file link in that note to return to the notebook. MRW reference commands
    operate in the Markdown editor; following a link in a notebook cell or Markdown
    preview does not supply that command bridge.
 
 Use an explicit [Stacks section import](STACKS_WORKFLOW.md) if that is the source
-you want. Import is a separate network action. Opening retained sources, the
-reading outline and saved annotations does not import or execute anything.
-See the [reading-outline guide](READING_OUTLINE_WORKFLOW.md) for exact navigation
-and return behavior.
+needed. Import is a separate network action. Opening retained sources, Contents
+and saved annotations does not import or execute anything.
+See the [documents and Contents guide](READING_OUTLINE_WORKFLOW.md) for exact
+navigation and return behavior.
 
 MRW's retained sources and annotations live in private storage scoped to the
 workspace. Opening a different folder does not expose another workspace's
-outlines. Copying only the notebook and Markdown does not transfer private MRW
-targets. Keep the same workspace for existing references; use the documented
+saved sources. Copying only the notebook and Markdown does not transfer private
+MRW targets. Keep the same workspace for existing references; use the documented
 [artifact workflow](ARTIFACT_STORAGE.md) for an explicitly intended transfer.
 
 ## 6. Save and return later
 
 Press **Ctrl+S** to save your notebook and Markdown. Save MRW annotation forms
 using their own **Save annotation** button. On reopening the same workspace,
-open the notebook normally and use **MRW: Open Reading Outline** on its saved
-overview or **MRW: Open Saved Source Outline…** for the reader.
+open the notebook and working note normally. With the note's Markdown editor
+active, use **MRW: Show Contents**; **MRW: Open Saved Source…** reopens the reader.
 
 Saved notebook outputs remain in the file. Live Sage variables belong to the
 kernel and may be gone after it stops. Reconnect to the current server/kernel
@@ -260,10 +260,12 @@ host paths for VS Code files.
 ## Build the VSIX
 
 Skip this section if you already have a trusted MRW package. The repository
-does not commit its generated VSIX files. To build **0.19.0** yourself, use
+does not commit its generated VSIX files. To build **0.19.2** yourself, use
 **Linux Node.js 22+, npm, Python 3.11+ and Git in WSL**. Node/npm are only
 packaging requirements. Check `node --version`, `npm --version` and
 `command -v node npm`; Windows npm launchers cannot run the Linux build chain.
+These package filenames describe 0.19.2. If the checkout's version has advanced,
+use the version in `vscode/package.json` in the package and install commands.
 
 Use a **new directory**, leaving existing checkouts and study work alone:
 
@@ -274,16 +276,16 @@ cd ~/src/mrw-install
 git rev-parse HEAD
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.0.vsix
-sha256sum vscode/theorem-terminal-0.19.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.2.vsix
+sha256sum vscode/theorem-terminal-0.19.2.vsix
 ```
 
-This creates `~/src/mrw-install/vscode/theorem-terminal-0.19.0.vsix` and verifies
+This creates `~/src/mrw-install/vscode/theorem-terminal-0.19.2.vsix` and verifies
 its runtime bytes against that checkout. Record the commit printed by
 `git rev-parse HEAD` and the archive's actual SHA-256. The
-[active-study validation record](ACTIVE_STUDY_VALIDATION.md) identifies the
-current package. Byte-identical reproduction also depends on the recorded
-packaging tool versions.
+[terminology validation record](DOCUMENT_TERMINOLOGY_VALIDATION.md) identifies
+the delivered 0.19.2 package and its build revision. Byte-identical reproduction
+also depends on the source revision and recorded packaging tool versions.
 See [packaging details](../vscode/README.md#package-and-install-a-vsix).
 Return to your **study workspace's WSL window** and [install the VSIX in step 2](#2-install-mrw-and-the-notebook-extensions).
 This builds locally and publishes nothing.
@@ -291,7 +293,7 @@ This builds locally and publishes nothing.
 ## Roadmap and further help
 
 [CODEX_PLAN.md](../CODEX_PLAN.md) records current implementation and remaining work.
-MRW 0.19.0 adds retained companion help and linked study continuation. The
+MRW 0.19.0 introduced retained companion help and linked study continuation. The
 [study workflow](ACTIVE_STUDY_WORKFLOW.md) covers that interaction; notebook-cell
 capture still belongs to the separate Jupyter workflow described here.
 [Reader AI](READER_AI_WORKFLOW.md) documents the separate API preview/Send path.

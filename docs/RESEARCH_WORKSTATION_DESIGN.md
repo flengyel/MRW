@@ -2,7 +2,8 @@
 
 Status: approved design direction, 2026-11-06. The terminology increment is
 implemented in 0.19.2; the following integrations remain staged below.
-Reviewed baseline: MRW 0.19.1, `82f310bb8d0984af0535e296b2361d6cc38e5ce6`.
+Latest review: MRW 0.19.2, `42b465f2fbdab96445e4c59cc5c3818cb735b4e7`.
+The active task is [existing documents and tutorial](CODEX_EXISTING_DOCUMENTS_PROMPT.md).
 This document governs the next product increments. Earlier delivery reports
 remain evidence of what was implemented and observed; they are not superseded
 as records of those deliveries.
@@ -54,8 +55,8 @@ filename once selected. Retire Reading overview as an application object name.
 Keep overview and outline as ordinary mathematical or expository words where
 they have their ordinary meanings.
 
-The immediate GUI patch changes visible labels, help, welcome text and current
-workflow instructions. It preserves command IDs, view IDs, settings keys,
+The delivered 0.19.2 GUI patch changed visible labels, help, welcome text and
+current workflow instructions. It preserved command IDs, view IDs, settings keys,
 serialized records, stored references, existing filenames and note bytes.
 In particular, `mrw-outline:v1` remains a compatible reference format.
 The exact first-patch label map and implementation boundaries are in
@@ -64,9 +65,9 @@ The exact first-patch label map and implementation boundaries are in
 At the reviewed baseline, the document navigator handles Markdown headings and
 MRW retained-source links. Its choose/show actions select a Markdown document
 and focus the tree; they do not constitute a general file-opening action.
-The first patch must not imply PDF contents, vault WikiLink resolution or
-opening an arbitrary external file has been delivered. Its picker/help should
-state the Markdown support plainly. Existing **File: Open File…** remains
+The 0.19.2 patch does not supply PDF contents, vault WikiLink resolution or
+opening an arbitrary external file through MRW. Its picker/help states the
+Markdown support plainly. Existing **File: Open File…** remains
 available through the host. General document opening is the next increment.
 
 ## Existing documents and optional integrations
@@ -202,14 +203,14 @@ distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 | Increment | Deliverable | Concrete completion evidence |
 | --- | --- | --- |
 | 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | Existing create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
-| 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff | Open a supplied note, follow another note and a PDF, return without an import or note rewrite; the ordinary-folder path works without Obsidian. |
+| 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
 | 3. Research resumption | Saved questions independent of ModelCall, linked documents/calculations/checks, persistent conclusion/gap/next action | Stop one investigation and resume its documents and unfinished work; ending the session preserves the summary. |
 | 4. Integrated reconstruction | One compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
 
 Deliver coherent increments in that order; do not combine a naming patch with
 a storage rewrite. A discovered data-loss defect takes priority. The broad
-design is authorized; the immediate Codex task implements increment 1, with
-the following increments specified here rather than hidden in a feature backlog.
+design is authorized; increment 1 is delivered and the immediate Codex task
+implements increment 2. The following increments remain specified here.
 
 Evaluate practical continuity, explanatory help and learning separately. Extend
 the existing local history for explicit research open/resume, document-link
@@ -226,6 +227,13 @@ another manual study ceremony. Automated checks demonstrate mechanics; genuine
 use demonstrates whether work became easier to resume or understand.
 
 ## Interface guidance and scope
+
+The bundled tutorial is part of each increment. Lead with opening existing work,
+then navigating, retaining a useful passage when needed, working through a step,
+and saving/resuming. Keep optional graphs and setup/recovery in linked guides.
+Describe only delivered commands and show the active extension build in help;
+repository Markdown and installed help can differ. A tutorial update is not
+complete until its packaged content and reopening behavior are checked.
 
 Follow Microsoft's [UX overview](https://code.visualstudio.com/api/ux-guidelines/overview),
 [Views](https://code.visualstudio.com/api/ux-guidelines/views) and

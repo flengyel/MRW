@@ -1,193 +1,141 @@
 # Using MRW
 
-A document may be a note, paper, manuscript or notebook. The current **Contents**
-view uses Markdown headings and MRW source links. Opening an ordinary file and
-retaining a source revision are separate actions.
+These instructions describe MRW 0.19.2. Begin with a document already in use.
+Open the Command Palette with **F1** to run the commands named below.
 
-## Study current material
+## Open existing work
 
-Run **MRW: Open Study Example** for an attributed offline source and two
-questions. It preserves other work and marks practice separately from research.
-For your source, select saved text and run **MRW: Study Current Material**, or
-choose **Study current material** in a retained reader. A cited graph claim has
-**Study this claim**.
+Use VS Code's **File → Open File…** to open a note, paper or manuscript.
+An Obsidian note is an ordinary Markdown file and can remain in its vault.
+PDFs use an available VS Code reader; MRW does not extract their text or build
+PDF Contents. Notebooks use VS Code's notebook editor.
 
-An empty study shows its source, **Enter a question** and **Request questions
-from Codex**. The latter copies exact source text, references and a question
-schema; paste the request into Codex, then **Import questions from clipboard**.
-Manual question entry works offline. **Keep for review** explicitly enrolls a
-question. A short block is offered once eligible questions exist.
+| Name | Meaning |
+| --- | --- |
+| Document | The file being worked on; its format determines available operations |
+| Contents | Headings and MRW source links from one selected Markdown document |
+| Saved source | An explicitly retained revision with passages and annotations |
 
-Starting recall conceals source and answer within the study. Type your work or
-choose **Worked on paper**, then **Submit answer**. Use **Reveal source context**,
-hints or the reference answer when needed. A later reveal leaves the earlier
-submission unchanged. Earlier study exposure does not rule out later recall.
-
-For help, use **Copy help request for Codex** and paste the handoff into the
-companion. Back in MRW, **Paste companion response… → Review pasted response →
-Retain response** keeps prose and equations beside the attempt. Review the author;
-manual paste does not authenticate it. **Edit response** retains an attributed
-revision alongside the original. Successive replies stay separate.
-
-**Submit revised work** records another immutable submission while the attempt
-is unfinished. Once completed, **Continue with revised work** starts a linked
-attempt. Report outcome and consultation for the particular submission; pending
-choices persist through reveals and pause/reopen. They are never sent automatically.
-An occasional effort report is optional and names its attempt.
-
-**Pause / save** and **MRW: Resume Study** restore unfinished work. The **Studies**
-sidebar lists recent studies, sources and questions. Its **…** menu and Command
-Palette contain source operations and **Inspect Study History / Export Study
-History…**. History is local private data; exports can contain mathematics,
-work and replies. Source-store moves do not yet move current-study/history data.
-Scheduling, source retention and graph validation do not check the mathematics.
-
-## Begin or resume a proof study (0.17.0)
-
-Open a saved source as described below. Choose **Prepare proof study…** in the
-reader, or **MRW: Prepare Proof Study…** from the Command Palette. Select the
-proof and the prerequisite passages to include, enter the question and save.
-
-In the study tab:
-
-1. **Copy handoff for Codex** includes the selected quotations, references and
-   outline instructions together. Paste it into the Codex companion.
-2. Copy the proposed JSON response, then **Import outline from clipboard**.
-   MRW validates the format and source references and opens the graph.
-3. In the graph, select a claim and choose **Edit summary**. Edit the claim and
-   explanation in its form, identify the author/origin, then **Save summary**.
-4. Return to the study tab to edit and **Save question**.
-   **MRW: Resume Proof Study** reopens the saved study. An active study file
-   also has an editor-title action.
-
-The question and graph currently occupy separate tabs. The Codex transfer is
-manual. Opening or preparing a study makes no model request. Format/source
-checks do not check the mathematical argument.
-
-## Read a proof graph
-
-**Open Proof Outline…** opens a saved `.mrw-proof.json` file. Its editor-title
-icon opens the same view. Select a vertex to read its Stacks tag beside the
-graph. **Saved text** shows the retained statement and proof offline. Drag to
-pan; use the wheel or **− / Fit / +** to zoom.
-
-**Delete vertex** omits an intermediate claim; **Expand original steps** shows
-its argument and **Restore** brings it back. **Use AI outline** applies the
-selection already proposed in the file. **Edit summary** opens the correction
-form. **Refresh** reads changes made in the ordinary backing document.
-**Ask AI…** uses the separate API request preview and Send workflow.
-
-## Open a source
-
-Click the **MRW** book icon, then **Studies → … → Open Saved Source…**. Select a source to open its retained text and annotations.
-**F1 → MRW: Open Saved Source…** does the same thing.
-
-In the reader:
-
-- **Refresh saved source** on the top toolbar reloads saved annotations
-  and source status. The same command remains in the Command Palette.
-
-- **Show proof** expands a published proof; **Hide proof** folds it.
-- **Reader notes** beneath a passage displays its saved annotations.
-  **Source notes** near the source heading displays notes about the whole source.
-- **Delete note…** below an annotation removes that note after confirmation.
-- **Diagram appearance → Theme** follows VS Code. **Paper** and **Dark** override
-  the theme for reader diagrams.
-- **Source details and tools** contains source information and passage tools.
-- **Save annotation** saves a reader form. **Ctrl+S** saves editor files, not
-  reader forms.
-
-To add an annotation, expand **Source details and tools → Notes and tools:**
-for the passage, then **Add reader explanation / question / repair**. Complete
-the form and click **Save annotation**.
-
-If the source list is empty after moving a study folder, use **MRW: Open Saved
-Work Directory…** and enter the directory containing its saved MRW records.
-Confirm the mapping to the study folder now open in VS Code. This connects
-saved work without moving files or importing another copy of the source.
-
-## Import Markdown text
-
-Run **MRW: Import Markdown Text…** from the Command Palette. Choose a destination:
-
-- **Retain a source copy** retains a copy for reading and annotations.
-- **Add text to a passage annotation** saves the text on a chosen passage.
-- **Insert text into a Markdown document** inserts text at the document cursor.
-
-Select the note’s Markdown file. The original file stays unchanged. For insertion into a Markdown document,
-save with **Ctrl+S**. Imported wiki links and embeds remain text;
-linked notes and attachments are not imported.
-
-## Retain a passage from a file
-
-Open a saved UTF-8 text, Markdown or TeX file, select a passage, then run
-**MRW: Retain Document as Source**. MRW retains that revision and selection;
-later edits to the file do not replace the retained text. PDF text extraction
-is not supported.
-
-For a Stacks Project section, use **MRW: Import Stacks Section…**. Importing
-acquires the pinned source; subsequent reading uses the retained copy offline.
+For a new Markdown file, use **MRW: New Document…** and choose a filename in
+**New Markdown document**. The initial headings can be edited or removed.
+Creating a new document is optional; opening an existing file needs no import.
 
 ## Navigate a Markdown document
 
-The names in the interface mean:
+With the Markdown editor active, run **MRW: Show Contents**. Click a heading
+to select its editor location; use the arrows to fold sections. Heading edits
+update Contents before saving. **MRW: Choose Document…** selects another file.
 
-| Name | What it is |
-| --- | --- |
-| Document | Material opened for work; its format determines available operations |
-| Contents | Headings and MRW source links from the selected Markdown document |
-| Saved source | An explicitly retained source revision with passages and annotations |
+Contents currently requires a saved file to belong to the current workspace;
+an untitled Markdown document works for the current session. Opening a vault
+note outside the workspace does not make it eligible for Contents.
+**Show Contents** uses the active Markdown document, the remembered document,
+or a picker, then focuses the navigator. It is not the general file-opening
+action. Contents currently omits ordinary file links and wiki links; embeds are
+not resolved. Leading YAML metadata can appear as a false heading. These limits
+do not prevent opening and editing the original file normally.
 
-**New Document…** opens **New Markdown document** and creates a `.md` or
-`.markdown` file with optional headings. Existing files and headings are unchanged.
+## Keep a passage and link back to it
 
-**Show Contents** uses the active Markdown document, reopens the last
-chosen document, or offers a file picker. **… → Choose Document…**
-opens **Choose a Markdown document for Contents** to select a different file.
-**Show Contents** focuses the navigator; it does not open arbitrary documents.
-Use VS Code's ordinary Open File action for other formats, including PDFs with
-an available host reader. MRW does not extract PDF text or derive PDF Contents.
+1. Open a UTF-8 text, Markdown or TeX source and save any editor changes.
+2. Select the passage, then run **MRW: Retain Document as Source**. MRW keeps
+   that source revision and selection and opens its reader. Later edits to the
+   original file do not replace the retained text.
+3. In a working Markdown document, place the cursor where the reference belongs.
+   Run **MRW: Insert Source or Passage Link…** and choose the saved target.
+4. Select that link in Contents to read the retained material. Use
+   **MRW: Return to Document** to return to that occurrence in the rendered
+   document. The command can recreate a closed preview tab.
 
-Clicking a heading in Contents selects its location in the editor.
-The arrows fold sections in the navigator. Editing Markdown headings updates
-the navigator, including before saving.
+Use **MRW: Open Saved Source…** to reopen retained material independently.
+In the reader, **Reader notes** displays passage annotations. To add one,
+expand **Source details and tools → Notes and tools:** for the passage, choose
+**Add reader explanation / question / repair**, and **Save annotation**.
+**Refresh saved source** reloads retained state and annotations; it does not
+acquire a new revision of the original file.
 
-To add a source link:
+## Work through a difficult step
 
-1. Place the editor cursor where the link belongs.
-2. Run **MRW: Insert Source or Passage Link…** and choose a source or passage.
-3. Click the resulting entry in Contents to open the retained text.
-4. Use **Return to document** to reopen the rendered document. It restores
-   the link's source location and recreates a closed preview tab.
+Select saved source text and run **MRW: Study Current Material**, or choose
+**Study current material** in its retained reader. A cited graph claim offers
+**Study this claim**. The study keeps the selected source fixed while working
+in other tabs or in Codex.
 
-Save the Markdown file with **Ctrl+S**. Save reader forms with **Save annotation**.
+1. Choose **Enter a question**. For example: “Which hypothesis justifies this
+   equality?” or “Supply the omitted argument.” A reference answer is optional.
+   Alternatively, **Request questions from Codex** copies the source and request;
+   paste it into Codex, then use **Import questions from clipboard** for its
+   returned question object.
+2. Choose **Attempt** on a question, or **Begin short block** when offered.
+   Starting recall conceals source and answer inside the study. Type the work
+   or choose **Worked on paper**, then **Submit answer**.
+3. Use **Reveal source context**, hints or the reference answer when needed.
+   For an explanation, **Copy help request for Codex** includes the selected
+   source, question and work. Paste the request into Codex.
+4. Copy the reply, then use **Paste companion response… → Review pasted
+   response → Retain response**. Review its attribution. Manual paste does not
+   authenticate authorship; **Edit response** retains a separate revision.
+5. Use **Submit revised work** while the attempt is unfinished. After recording
+   an outcome, **Continue with revised work** starts a linked attempt. Earlier
+   submissions and retained replies remain available.
 
-## Open or move saved work
+Report the outcome and whether the source was consulted for that submission.
+These are reader reports, not mathematical verification. **Keep for review**
+opts a question into later review of the selected material; saving a question
+alone does not enroll it. Occasional effort reports are optional.
 
-Ordinary Markdown files and MRW records are stored separately. Copying a
-Markdown file does not copy its linked retained sources or annotations.
+## Save and return later
 
-| Command | Effect |
-| --- | --- |
-| **Show Artifact Location** | Reports this workspace's record directory |
-| **Open Saved Work Directory…** | Connects this workspace to records at the specified directory; moves no files |
-| **Move Saved Work Directory…** | Transfers this workspace's saved sources and annotations to a new directory |
+| Work | Save | Return |
+| --- | --- | --- |
+| Ordinary document | **Ctrl+S** in its editor | Open the file normally |
+| Reader annotation | **Save annotation** | **MRW: Open Saved Source…**, then **Reader notes** |
+| Current question and attempt | **Pause / save** | **MRW: Resume Study**, or its row in **Studies** |
+| Proof-study question | **Save question** in its study tab | **MRW: Resume Proof Study** |
 
-Both Open and Move require confirmation. **Esc** cancels a directory prompt.
-A completion notification can remain visible while you continue reading.
+**Pause / save** preserves unfinished work; it does not record an outcome.
+The two Resume commands serve different study workflows. There is no general
+research-session restore command. Keep a next-step note in the working document
+for work outside these studies.
 
-## Use Codex or notebooks alongside MRW
+Ordinary files and MRW saved records have separate storage. Copying a document
+does not copy its linked retained sources or annotations. **MRW: Open Saved Work
+Directory…** connects this workspace to existing records; **MRW: Move Saved Work
+Directory…** transfers saved sources and associated records. Current-study and
+history data are not included in that move. See the storage guide below before
+moving or reconnecting work.
 
-For a proof study, use the combined **Copy handoff for Codex** action described
-above. For a standalone question or note outside that workflow, **MRW: Copy Source or Passage Link…** copies only the link: paste the quotation separately.
-To save a reply as a reader annotation, select **Supplied origin: ai proposal**,
-enter **Author / attribution: Codex**, and use **Save annotation**.
+## Use an existing Obsidian note
 
-MRW's **Ask AI about this passage…** uses a separate API connection with its own
-credentials. It prepares a request preview; **Send Exact Preview** sends it.
+Obsidian is optional. Its notes, IDs, YAML and attachments remain in place.
 
-VS Code's Jupyter extension owns `.ipynb` editing, kernel selection and cell
-execution. MRW does not start kernels or execute cells. SagePod setup is covered
-by the separate installation guide.
+1. In Obsidian, open the note and run **Copy Obsidian URL for current file**
+   from its Command Palette.
+2. In MRW's reader, choose **Link an Obsidian note…** under **Whole source** or
+   the passage's **This passage** group. Paste the URL and enter a label.
+   **Open linked note in Obsidian** returns to that note.
+3. For a link from the note to MRW, use **MRW: Copy Source or Passage Link…**
+   and paste the Markdown link into the note. This separate action does not
+   automatically set the return destination.
 
-Reopen this guide with **MRW: Open Tutorial**.
+**MRW: Import Markdown Text…** is optional: retain a source copy, add text to a
+passage annotation, or insert text into a Markdown document. It leaves the
+original note unchanged. Imported wiki links and embeds remain text; MRW does
+not synchronize or index the vault.
+
+## Other tools and detailed guides
+
+- **MRW: Open Study Example** offers an offline source and two questions.
+- **MRW: Prepare Proof Study…** selects retained passages for a Codex handoff
+  and an optional proof outline. Use the [proof-study guide](https://github.com/flengyel/MRW/blob/main/docs/PROOF_STUDY_WORKFLOW.md).
+- **MRW: Inspect Study History** and **MRW: Export Study History…** expose local
+  observations. Exports can include submitted work and replies. See the
+  [study guide](https://github.com/flengyel/MRW/blob/main/docs/ACTIVE_STUDY_WORKFLOW.md).
+- Notebook editing, kernel selection and execution belong to VS Code/Jupyter.
+  For optional SageMath computation, use the [SagePod setup guide](https://github.com/flengyel/MRW/blob/main/docs/GETTING_STARTED_WSL_SAGEPOD.md).
+- Further help: [documents and Contents](https://github.com/flengyel/MRW/blob/main/docs/READING_OUTLINE_WORKFLOW.md),
+  [Obsidian links and routing](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md),
+  and [saved-work storage](https://github.com/flengyel/MRW/blob/main/docs/ARTIFACT_STORAGE.md).
+
+Source retention, scheduling and proof-outline validation do not check the
+mathematical argument. Reopen this guide with **MRW: Open Tutorial**.

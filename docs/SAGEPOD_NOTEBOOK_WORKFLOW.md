@@ -4,13 +4,15 @@ For installation, [choose the reading or computation path](INSTALLATION.md).
 SagePod is MRW's optional computation companion. For a first notebook connection,
 follow [Install MRW and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
 This companion guide preserves the workflow boundaries and historical host
-evidence; the current MRW package version is 0.11.1.
+evidence. See [the installation guide](INSTALLATION.md) for the current MRW
+package and installation commands.
 
 Use an ordinary `.ipynb` for explanations, rendered mathematics, Sage code and
 saved outputs. VS Code and Microsoft's Jupyter extension provide the notebook
 editor and kernel interaction; SagePod provides SageMath in its existing
 container. MRW provides saved sources, exact retained passages, annotations
-and Markdown overviews. Its Python backend stays on the workspace host.
+and Contents for Markdown documents. Its Python backend stays on the workspace
+host.
 No new MRW runtime, notebook controller or container service is required.
 
 ## Open the existing environment
@@ -91,7 +93,7 @@ and [notebook operations](https://code.visualstudio.com/docs/datascience/jupyter
 | --- | --- |
 | Workspace host `~/Jupyter` | Existing persistent ordinary files edited and saved by VS Code |
 | SagePod `/home/sage/notebooks` | The same bind mount as seen by Sage/Jupyter inside the container |
-| Workspace-host MRW private extension storage | Retained sources, outlines and annotations; outside the notebook mount |
+| Workspace-host MRW private extension storage | Saved sources and annotations; outside the notebook mount |
 | Live Sage kernel | Variables and unsaved computation state; separate from `.ipynb` bytes |
 
 For example, host `~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb` corresponds
@@ -102,14 +104,16 @@ container path for Sage-side file access. A VS Code notebook save writes the
 host file. It does not require the server's Contents API to save that file.
 
 Use ordinary relative links in a Markdown cell, for example
-`[source overview](overview.md)`. Keep that overview in the study workspace;
+`[Working note](overview.md)`. Keep that Markdown document in the study workspace;
 it can contain references inserted using **MRW: Insert Source or Passage Link…**.
-Open the overview in the Markdown editor, put the cursor in an MRW reference,
+Open the note in the Markdown editor, put the cursor in an MRW reference,
 and run **MRW: Follow Source or Passage Link at Cursor**. This explicit action opens
-the reader and retained material. Return via a relative notebook link in the
-overview, an open tab, or Explorer. No notebook-cell bridge is needed for this
-movement. MRW reference commands operate on ordinary Markdown editors, not
-notebook cells or Markdown preview clicks.
+the reader and retained material. **MRW: Show Contents** offers heading and
+MRW-link navigation for a Markdown document in the workspace.
+Return to the notebook via an ordinary link in the working note, an open tab,
+or Explorer. No notebook-cell bridge is needed for this movement. MRW reference
+commands operate on ordinary Markdown editors, not notebook cells or Markdown
+preview clicks.
 
 Copying the notebook and its companion ordinary files preserves those files
 and relative links. **It does not transfer MRW's private targets.** MRW links

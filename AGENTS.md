@@ -1,11 +1,13 @@
 # Codex instructions
 
-## Current priority — document terminology and research workflow, 2026-11-06
+## Current priority — existing documents and tutorial, 2026-11-06
 
-Follow [CODEX_DOCUMENT_WORKFLOW_PROMPT](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
-for the immediate GUI nomenclature patch and
+Follow [CODEX_EXISTING_DOCUMENTS_PROMPT](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
+for opening existing files in place, scoped note links/backlinks, PDF host
+handoff and the matching task-first tutorial. The GUI terminology increment
+is delivered in 0.19.2; do not repeat it. Follow
 [RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) for the
-ordered integrations that follow. Document is the general term; Contents is
+ordered research integrations that follow. Document is the general term; Contents is
 its navigation view. Preserve Proof outline for a mathematical argument and
 use Saved source / Passage for retained reading material. Keep technical IDs,
 stored references and existing document bytes unchanged.

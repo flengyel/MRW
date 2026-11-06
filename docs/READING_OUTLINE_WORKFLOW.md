@@ -51,8 +51,11 @@ Obsidian notes keep their existing behavior. Proof Outline still names a
 mathematical argument. Studies remains the study-content view. No layout change,
 private-store move, new vault, provider request or compiler is required.
 
-Contents parses CommonMark ATX/Setext headings, ordinary/reference/autolinks and
-bare MRW links. Code, images and comments are excluded. Unicode, escaped labels,
+Contents parses CommonMark ATX/Setext headings and MRW destinations expressed
+as ordinary Markdown links, reference links, autolinks or bare MRW links. Other
+file links are not listed or resolved. Leading YAML front matter can currently
+appear as a false heading; correcting this is part of the next document task.
+Code, images and comments are excluded. Unicode, escaped labels,
 repeated headings and duplicate references retain their locations. Limits are
 4 MiB and 10,000 heading/reference entries. WikiLinks and embeds are not resolved.
 One document is selected per window. Copying Markdown transfers no private

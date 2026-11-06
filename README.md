@@ -14,12 +14,13 @@ Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally
 The technical extension identity remains `flengyel.theorem-terminal`.
 
 The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) starts with the delivered
-Document, Contents, Saved source and Passage terminology. The
-[implementation task](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md) specifies the map;
-the command instructions below name the 0.19.2 interface.
-Following increments connect existing documents and optional Zettel/Obsidian
-notes, make research questions resumable independently of an AI exchange, and
-join these tools in a complete argument-reconstruction session.
+Document, Contents, Saved source and Passage terminology; the command instructions
+below name the 0.19.2 interface. The next [implementation task](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
+connects existing documents and optional Zettel/Obsidian notes and updates the
+tutorial with that workflow. Later increments make research questions resumable
+independently of an AI exchange and join these tools in an argument-reconstruction
+session. The [tutorial source](vscode/media/first-steps.md) now starts with existing
+work; this documentation revision alone does not update an installed VSIX.
 
 ## What works
 

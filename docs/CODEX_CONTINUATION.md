@@ -1,5 +1,21 @@
 # Codex continuation: MRW documents and research work
 
+## Next task — existing documents and tutorial, 2026-11-06
+
+Implement [CODEX_EXISTING_DOCUMENTS_PROMPT](CODEX_EXISTING_DOCUMENTS_PROMPT.md)
+from the reviewed 0.19.2 baseline `42b465f`, reconciling any newer work first.
+The result is an existing note opened in place, another note/PDF followed,
+backlinks available, and return/reopen working without import or Obsidian.
+Keep the current storage and retained-reference contracts separate from ordinary
+external-document access. Fix the reproduced YAML-as-heading parser defect.
+
+The tutorial source has been reorganized around delivered capabilities; that
+edit has not been packaged or installed by GPTWork. Update it with the new
+opening/navigation behavior, display the active build version, and verify the
+packaged help and reopen path. Do not force a working-window reload or require
+a new human study session. General research resumption and integrated argument
+reconstruction follow this task; the terminology delivery below is complete.
+
 ## Current delivery — document terminology, 0.19.2
 
 The first increment of [CODEX_DOCUMENT_WORKFLOW_PROMPT](CODEX_DOCUMENT_WORKFLOW_PROMPT.md)

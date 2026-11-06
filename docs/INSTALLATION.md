@@ -1,6 +1,6 @@
 # Install Mathematical Research Workstation
 
-MRW 0.19.0 is installed from a VSIX. There is no published Marketplace listing or
+MRW 0.19.2 is installed from a VSIX. There is no published Marketplace listing or
 GitHub release. Obtain a maintainer package or [build from source](../vscode/README.md#package-and-install-a-vsix)
 with repository access. The extension identity is `flengyel.theorem-terminal`.
 
@@ -49,23 +49,23 @@ not establish acceptance of every SSH host or the current study interaction.
 ### 2. Install the VSIX in that workspace host
 
 Run **Extensions: Install from VSIX…** and select
-`theorem-terminal-0.19.0.vsix`. Alternatively, in the connected window's Linux
+`theorem-terminal-0.19.2.vsix`. Alternatively, in the connected window's Linux
 integrated terminal, substitute the actual package path:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.19.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.19.2.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.theorem-terminal@0.19.0` under the WSL/SSH host's installed
+Confirm `flengyel.theorem-terminal@0.19.2` under the WSL/SSH host's installed
 extensions. Installing only in the Windows/local interface is insufficient.
 Save ordinary files and checkpoint MRW forms before a requested reload. Upgrades retain
 the extension identity; do not delete workspace storage.
 
-### 3. Open a study
+### 3. Open existing work
 
-Run **MRW: Open Study Example** for an attributed offline example with two
-questions. It records practice separately and preserves other work.
+Open an existing document with VS Code's **File → Open File…**. Run
+**MRW: Open Tutorial** for the document, retained-passage and study walkthrough.
 
 For your own source, select saved UTF-8 text/Markdown/TeX and run **MRW: Study
 Current Material**, or use **Study current material** in a retained reader.
@@ -74,11 +74,16 @@ Submit work, retain help when needed, and use **Pause / save** followed by
 **MRW: Resume Study**. The [bundled tutorial](../vscode/media/first-steps.md) lists
 these controls; the [study workflow](ACTIVE_STUDY_WORKFLOW.md) explains their state.
 
-The **MRW** Activity Bar icon opens **Studies** and **Reading Outline**. Other
-commands remain in the views' **…** menus and Command Palette. **Open Saved Source
-Outline…** reopens retained reading material. For an ordinary Markdown overview,
-use **Open Reading Outline**. This navigator follows headings and explicit source
-links; it does not generate mathematical content.
+For an optional offline demonstration, run **MRW: Open Study Example**. Its two
+attributed questions record practice separately and preserve other work.
+
+The **MRW** Activity Bar icon opens **Studies** and **Contents**. Other commands
+remain in the views' **…** menus and Command Palette. **MRW: Open Saved Source…**
+reopens retained reading material. With an ordinary Markdown document active,
+run **MRW: Show Contents**.
+Contents follows headings and explicit MRW source links; it currently requires
+a saved Markdown file to belong to the workspace. It does not generate
+mathematical content.
 
 ## AI assistance for reviewing mathematics
 

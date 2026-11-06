@@ -3,14 +3,14 @@
 ## Current priority — documents and resumable research, 2026-11-06
 
 The [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) governs
-the next sequence. The [Codex task](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
-implements its first increment. Baseline reviewed: 0.19.1 at `82f310b`;
-preserve later work and all delivered repairs.
+the sequence. The active [Codex task](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
+implements its second increment and updates the packaged tutorial with it.
+Baseline reviewed: 0.19.2 at `42b465f`; preserve later work and all delivered repairs.
 
 | Order | Increment | Status |
 | --- | --- | --- |
 | 1 | Consistent Document / Contents / Saved source / Passage GUI labels and current help | Implemented in 0.19.2 |
-| 2 | Existing documents opened in place, ordinary links, optional Zettel links/backlinks and Obsidian, PDF host opening | Designed; not delivered by the label patch |
+| 2 | Existing documents opened in place, ordinary links, optional Zettel links/backlinks and Obsidian, PDF host opening, matching tutorial | Current implementation task; not yet delivered |
 | 3 | Research questions independent of model exchanges, linked work and checks, durable summary and next action | Designed; reuse existing persistence and navigation |
 | 4 | One compressed-argument reconstruction session with explanations, attempts, appropriate tool use and restart | Designed; joins existing components |
 
