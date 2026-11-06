@@ -1,5 +1,29 @@
 # Codex instructions
 
+## Current priority — document terminology and research workflow, 2026-11-06
+
+Follow [CODEX_DOCUMENT_WORKFLOW_PROMPT](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
+for the immediate GUI nomenclature patch and
+[RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) for the
+ordered integrations that follow. Document is the general term; Contents is
+its navigation view. Preserve Proof outline for a mathematical argument and
+use Saved source / Passage for retained reading material. Keep technical IDs,
+stored references and existing document bytes unchanged.
+
+MRW is a research workstation. Its purpose includes doing and resuming research,
+reconstructing compressed mathematical arguments, and learning while doing so.
+The existing Zettelkasten should be usable in place; Obsidian, Zettel conventions,
+AI, Lean and SageMath are optional integrations. General research questions must
+be resumable independently of a source passage or model exchange. Preserve the
+existing bounded R3 transaction and link it from research work rather than
+relaxing its contract. Durable research summaries must survive session ending.
+
+This priority supersedes older product-scope and task-ordering prose below,
+including study-only or corpus-specific priorities. Preserve existing safety,
+source, attribution and persistence contracts and the 0.19.1 repairs. The first
+GUI patch is terminology, not a claim of new PDF/vault/research capabilities.
+GPTWork maintains design and review; local Codex implements in VS Code/WSL2.
+
 ## Delivered repair — study continuity and evidence, 0.19.1
 
 The implemented handoff is [CODEX_STUDY_RELIABILITY_PROMPT](docs/CODEX_STUDY_RELIABILITY_PROMPT.md),
@@ -66,16 +90,18 @@ verification, non-factive derivability, and human judgment. This design principl
 creates no automatic truth or comprehension status and no new implementation
 claim.
 
-The primary use is gaining working access to existing mathematical literature
-and approaching chosen research questions. Prioritize orientation, needed
-prerequisites, connections between sources, and cumulative study. Preserve
+Uses include gaining access to mathematical literature, investigating questions,
+reconstructing arguments and resuming unfinished work. Connect orientation,
+needed prerequisites and cumulative study to calculations, proof attempts and
+research documents. Preserve
 source locations and distinguish source assertions, proposed dependencies,
 checked correspondences, and human synthesis. Do not promise complete
 prerequisite maps, effortless mastery, or a verified research frontier. Assess
 reduced search and reconstruction effort only from actual work; no summary or
-exercise quota demonstrates benefit. The current bounded study source is
-Marcus's *Number Fields*. This priority adds no implemented guidance capability
-and does not authorize general corpus ingestion or automatic source retrieval.
+exercise quota demonstrates benefit. Marcus's *Number Fields* was an earlier
+bounded study source, not a required starting point for current work. This
+purpose adds no implemented guidance capability and does not authorize general
+corpus ingestion or automatic source retrieval.
 
 The VS Code extension is the active frontend migration target, explicitly
 authorized on 2026-10-13. Its first increment lives in `vscode/`; read

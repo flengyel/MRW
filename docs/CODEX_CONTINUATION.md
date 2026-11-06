@@ -1,6 +1,29 @@
-# Codex continuation: MRW source work and companion notes
+# Codex continuation: MRW documents and research work
 
-## Current delivery — study reliability, 0.19.1
+## Next task — GUI nomenclature, 2026-11-06
+
+Read [CODEX_DOCUMENT_WORKFLOW_PROMPT](CODEX_DOCUMENT_WORKFLOW_PROMPT.md) and
+[RESEARCH_WORKSTATION_DESIGN](RESEARCH_WORKSTATION_DESIGN.md), then implement
+the visible-label patch in the current checkout. Use the current main; the
+reviewed 0.19.1 baseline `82f310b` is not a rollback target. Preserve later work,
+the current package and genuine records. Follow AGENTS.md and CODEX_PLAN.md.
+
+Use Document for ordinary work, Contents for the derived navigator, Saved
+source for retained source material, and Passage for a selection. The task
+contains the exact command map. Preserve IDs, reference formats and state.
+New/Choose actions must identify their current Markdown scope; Show Contents
+is not yet a general Open Document action. Studies remains named Studies until
+broader research-question content is implemented.
+
+Following increments open existing documents and optional vault notes in place,
+make research questions independently resumable, and connect the existing tools
+in one compressed-argument reconstruction session. Reading, testing
+comprehension and light review serve that research workflow. Do not build a
+new frontend or replace the bounded R3 model exchange with a project model.
+This handoff changes design and task priority; it does not claim a new VSIX or
+alter the delivered behavior described below.
+
+## Latest delivered release — study reliability, 0.19.1
 
 The clean checkout advanced from `6c7f227` to fetched `0f05cf4`; no local work
 was discarded. [CODEX_STUDY_RELIABILITY_PROMPT](CODEX_STUDY_RELIABILITY_PROMPT.md)

@@ -7,13 +7,28 @@ is implemented; see [workflow](docs/ACTIVE_STUDY_WORKFLOW.md). It establishes an
 instrumentation baseline. Learning benefit, an individual cognitive-load model
 and causal release comparisons remain hypotheses requiring observations.
 
-## Current product direction — 2026-11-05
+## Current product direction — 2026-11-06
 
-The next increment organizes MRW around the mathematics currently open:
-study, attempt, receive useful feedback, and return later. Frequent retrieval
-opportunities belong within study mode; a graph is one optional explanation.
-A small review budget and selective admission prevent old material from
-becoming an ever-expanding obligation.
+MRW is a hub for doing and resuming mathematical research. Connect ongoing
+questions to ordinary documents, notes, calculations, proofs, checking evidence
+and a next action. Reconstructing compressed arguments, including LLM-generated
+solutions, is a central workflow: expose assumptions and intermediate steps,
+locate cited results, develop examples, check claims, and preserve gaps and
+corrections. Research can start before a source passage or model response exists.
+
+Begin with the present GUI's nomenclature, then connect existing documents and
+optional integrations, research resumption, and a complete reconstruction
+session. [RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md)
+governs that sequence; [CODEX_DOCUMENT_WORKFLOW_PROMPT](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
+specifies the immediate label patch. Document is format-neutral. Contents names
+its navigation view. The existing Zettelkasten is a useful collection of work;
+Obsidian and the Zettel note convention remain optional.
+
+The rapid-learning-console idea supplies an interaction, not a feature quota:
+present mathematics, support an attempt, test comprehension where useful, and
+retain the work for continuation. Frequent local questions and light review
+belong within research and study. They do not turn every research question into
+a recall item or make a quiz the price of returning to work.
 
 Track cognitive load through task-linked reports of mental effort and separate
 observations of assistance, outcomes, interruptions and navigation. Record
@@ -21,12 +36,13 @@ enough meaningful interaction detail to adapt the present session and evaluate
 later MRW versions. Preserve the distinction between what was observed,
 reported, assessed or inferred. No single score establishes understanding.
 
-The [active design](docs/ACTIVE_STUDY_DESIGN.md) supplies the delivery scope;
+The [study design](docs/ACTIVE_STUDY_DESIGN.md) governs that component;
 the [research review](docs/LEARNING_RESEARCH.md) supplies its evidence and limits.
 Spacing has support in mathematics; retrieval findings are broader and less
 conclusive for mathematics specifically. CHREST informs questions about
 expertise and presentation without becoming a prerequisite for implementation.
-These supplied the design commitments; the 0.18.0 workflow distinguishes delivered behavior from unobserved benefits.
+The study workflow distinguishes delivered behavior from unobserved benefits.
+Preserve the 0.19.1 repairs while integrating the wider research workflow.
 
 Why Theorem Terminal exists. Companion to `DOMAIN_MODEL.md` (entities and
 invariants), `UX_SPEC.md` (the human workflow), and `CODEX_PLAN.md` (staged
@@ -59,14 +75,13 @@ Mathematical Research Workstation should help people work with mathematics whose
 justification exceeds their present understanding, while making further
 understanding possible wherever it can.
 
-Its primary use is gaining working access to the existing mathematical
-literature: entering unfamiliar subjects, recovering earlier studies, connecting
-sources, and progressively approaching the research questions of interest.
-Reducing the time and effort spent locating prerequisites, reconciling notation,
-and repeatedly reconstructing context is a central objective. Work with
-AI-generated mathematics is an additional application of this purpose. The
-distinctions between justification, appropriate use, and understanding apply to
-both.
+Its uses include gaining working access to the mathematical literature,
+investigating questions, reconstructing compressed solutions, and returning to
+unfinished work. Entering unfamiliar subjects and locating prerequisites belong
+alongside calculations, proof attempts, manuscripts and recorded checks.
+Reducing repeated reconstruction of research context is a central objective.
+The distinctions between justification, appropriate use, and understanding
+apply to both existing literature and human- or AI-generated work.
 
 * Learning a large body of mathematics requires orientation, mathematical work,
   integration, and retention.

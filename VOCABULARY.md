@@ -1,10 +1,59 @@
 # Vocabulary
 
-Terminology used throughout Theorem Terminal.
+Terminology used throughout Mathematical Research Workstation.
 
 These terms apply to the shared mathematical domain, independently of the
-frontend. Mathematical Research Workstation is the user-facing name; Theorem
-Terminal remains the repository, package, and CLI identity.
+frontend. The repository is `flengyel/MRW`. Theorem Terminal remains the
+technical package, extension and CLI identity.
+
+## Documents and research work
+
+These terms govern the next GUI patch and subsequent integrations in
+[RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md). They do not
+claim that every document format or integration is already supported.
+
+**Document:** material opened for work, such as a Markdown note, PDF paper,
+manuscript or notebook. Specify its format when the operation requires it.
+Reading overview is an earlier interface name for an ordinary Markdown
+document, not a distinct document type.
+
+**Contents:** navigation within the selected document. The current navigator
+derives headings and MRW links from Markdown, including unsaved edits. It is
+not a second authored document. Reading Outline is its earlier interface name;
+the built-in VS Code Outline view retains its own name.
+
+**Source:** material used as a reference for a particular question or claim.
+This is a role; a note, paper, manuscript or supplied solution can be a source.
+
+**Saved source:** an explicitly retained source revision, with its selected
+passages and reader annotations where present. Its original document may
+subsequently change. Ordinary file saving and MRW source retention are distinct.
+
+**Passage:** a selected part of a document or saved source. An exact retained
+reference identifies its source revision and range, independently of a mutable
+display title or later selection.
+
+**Note / Zettel:** a note is a document. A Zettel uses the existing
+[note convention](https://github.com/flengyel/Zettel), including a stable ID and
+editable title. It need not be opened in Obsidian; not every Markdown file in
+an Obsidian vault follows this convention.
+
+**Research question:** the mathematical question under investigation, with
+linked work and a place to resume. It can precede any source selection or model
+call. Its general resumption workflow is planned; the existing R3 investigation
+remains a bounded parent/child model exchange.
+
+**Study question:** a task used to test or develop comprehension of particular
+material. It becomes a scheduled review item only through explicit admission.
+Research questions are not automatically scheduled recall items.
+
+**Proof outline:** a condensed mathematical argument with its claims and
+intended inferences. A proof graph represents such claims and inferences;
+neither is the contents list of a document. Checking status remains separate.
+
+The visible-label changes preserve internal identifiers, record schemas and
+`mrw-outline:v1` links. Earlier technical documents may therefore retain the
+following source-region term.
 
 **Source-region outline:** a reader-selected view over exact retained source
 ranges, with reversible hiding of argument detail, separate exact statements
@@ -18,6 +67,9 @@ or repairs. It is not silently added to the source argument and does not inherit
 the checking status of source material or supplied evidence. A manual snapshot
 association describes a selection; recorded local context lists available
 assumptions, not necessarily required or jointly used premises.
+Reconstruction of a compressed LLM solution concerns its returned argument;
+it does not recover hidden model reasoning. An expansion can expose an error
+or an unresolved gap instead of justifying the proposed step.
 
 ## Frontend and editor host
 

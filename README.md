@@ -1,12 +1,25 @@
 # Mathematical Research Workstation
 
-MRW is an experimental VS Code extension for studying mathematics from retained
-source passages. Keep questions, attempted arguments, attributed help and a place
-to resume beside the source. Proof graphs are available when they help the work.
+MRW is an experimental mathematical research workstation in VS Code. Its purpose
+is to keep questions, documents, attempts, calculations and checking evidence
+connected so work can be resumed. Reconstructing compressed arguments, including
+LLM-generated solutions, and testing comprehension are central uses.
+
+The current release supplies source reading, study, attributed assistance and
+bounded resumption. The broader document and research workflow is being built
+in stages; the capability list below describes what is delivered.
 
 **Current version: 0.19.1.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity remains `flengyel.theorem-terminal`.
+
+The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) starts with clearer GUI
+names: Document, Contents, Saved source and Passage. The
+[next Codex task](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md) specifies that patch;
+the command instructions below still name the installed 0.19.1 interface.
+Following increments connect existing documents and optional Zettel/Obsidian
+notes, make research questions resumable independently of an AI exchange, and
+join these tools in a complete argument-reconstruction session.
 
 ## What works
 

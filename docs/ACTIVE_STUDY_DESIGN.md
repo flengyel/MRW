@@ -1,7 +1,19 @@
 # Active study, light review, and cognitive-load tracking
 
-Status: implemented through 0.19.0 within the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
-Updated 2026-11-05. Baseline: `db656402190c255afd6a296da6ef8e549cc0b293`.
+Status: implemented through 0.19.1 within the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
+Role clarified 2026-11-06. Original design baseline: `db656402190c255afd6a296da6ef8e549cc0b293`.
+
+## Role in the research workstation
+
+[RESEARCH_WORKSTATION_DESIGN](RESEARCH_WORKSTATION_DESIGN.md) now governs the
+overall interaction and next implementation order. This document governs the
+study component. Comprehension testing, reconstruction, light review and
+task-linked effort/history support ongoing research; research questions need
+not begin as source-bound study questions and do not automatically enter FSRS.
+Keep existing study behavior and 0.19.1 reliability repairs while connecting
+documents, research resumption and mathematical tool use. The delivery language
+below describes the original bounded study increment, not a new instruction to
+repeat it or make it the whole workstation.
 
 ## Purpose and next delivery
 

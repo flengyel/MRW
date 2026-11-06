@@ -1,5 +1,34 @@
 # UX_SPEC.md
 
+## Current design — documents and research continuity, 2026-11-06
+
+[RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) governs the
+next interaction changes; [CODEX_DOCUMENT_WORKFLOW_PROMPT](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
+specifies the first GUI label patch. Document is the general name for material
+opened for work, including Markdown and PDF; Contents is navigation within it.
+The current navigator remains Markdown-only until its implementation expands.
+Opening an existing file and retaining a source revision are separate actions.
+
+Organize MRW around research questions and their linked documents, calculations,
+attempts, evidence and next actions. Start and resume research without requiring
+a model call, source selection or study exercise. Keep the existing bounded R3
+exchange intact as one possible linked operation. The later Research view must
+show question/work entries, not a renamed studies-only list or command tree.
+
+The existing Zettelkasten is a working collection, not a replacement research
+model. Support its note identity and links in place, with optional Obsidian
+opening. Ordinary documents outside a vault receive the same basic workflow.
+Reconstruction of compressed solutions joins original passages, attributed
+expansions, attempts, corrections, checking evidence and unresolved gaps.
+Comprehension questions and light review remain available within this work.
+
+Implement terminology first, document/note integrations next, then general
+research resumption and a complete reconstruction session. Prefer existing VS
+Code editors and tools; keep views few and contextual, preserve saved placement,
+and show only supported capabilities. Delivered descriptions below retain the
+labels and behavior of the releases they describe. The new design does not
+claim those later integrations are installed.
+
 ## Delivered study reliability — 0.19.1
 
 The [0.19 review findings](docs/MRW_019_REVIEW.md) are repaired within the existing
@@ -43,9 +72,9 @@ and source-scoped short FSRS blocks are implemented. See
 The following design text remains rationale where it describes intentions;
 [validation](docs/ACTIVE_STUDY_VALIDATION.md) states the observed scope.
 
-## Active VS Code study design — 2026-11-05
+## Delivered VS Code study design — 2026-11-05
 
-The governing interaction is specified in [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md).
+The study interaction is specified in [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md).
 Its bounded implementation is described above. Start from current supported material;
 offer a few pertinent questions, feedback and light spaced revisits. Keep the
 source and unfinished work available. Graph creation is optional.
