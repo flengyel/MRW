@@ -5,6 +5,13 @@ This file preserves the earlier README as a historical account through 0.18.0.
 Versions, pending-status statements and installation commands below describe
 those earlier increments; they are not current instructions.
 
+## 0.19.1 — study reliability
+
+- Preserve scoped pending drafts and explicit source selections.
+- Recover partial snapshot writes and interrupted shared-question checkpoints.
+- Reconcile retired reviews, corrected offers and cross-release effort evidence.
+- Associate ambiguous companion replies explicitly, preserving attributed revisions.
+
 ## 0.19.0 — study feedback
 
 - Correct linked attempts and assessments before release comparisons and exports.

@@ -1,10 +1,13 @@
-# Study current material — 0.19.0
+# Study current material — 0.19.1
 
 Select a passage in the retained reader and choose **Study current material**.
 A graph claim with a retained citation has **Study this claim**. For an ordinary
 saved text, Markdown or TeX file, select text and run **MRW: Study Current
 Material**; MRW uses its existing exact retention path. Unsaved source changes,
-PDF extraction and notebook state are outside that path.
+PDF extraction and notebook state are outside that path. An explicit saved
+editor selection takes precedence over a previously remembered reader passage.
+The selection is captured before asynchronous work; ordinary focus changes leave
+the study's source fixed.
 
 The study opens without a question popup, subject questionnaire or graph.
 **Enter a question** creates a definition, hypothesis, missing-step, argument or
@@ -54,7 +57,12 @@ fixed. A deliberate source change saves the earlier attempt with its source.
 
 **Pause / save** checkpoints the attempt and form. **MRW: Resume Study**, or a
 study row in **Studies**, restores the question and draft. Draft checkpoints are
-batched; abrupt termination can lose characters not yet checkpointed. Native
+batched separately for each study; Pause/save, close and shutdown flush dirty
+studies rather than just the active one. Messages carry study, attempt and draft
+identities; valid delayed drafts stay with their source, and stale or unknown
+identities are rejected before mutation. Abrupt termination can still lose
+characters not yet checkpointed. A failed question save retains the draft;
+failed cancellation restores a checkpointed form. Native
 VS Code ordinary files, reader annotation drafts, earlier `.mrw-study.json`
 files and proof graphs retain their existing owners. The earlier proof-study
 view offers **Questions and attempts** to use its selected passages here.
@@ -73,7 +81,13 @@ ordinary mathematical prose and equations, correct attribution when needed and
 preserved; text edits default to Reader attribution, and **Edit response** creates
 a separately identifiable revision. Successive replies do not overwrite earlier
 ones. Request, attempt, source signatures and any originating adaptation choice
-remain associated. Manual association does not authenticate the reply’s origin.
+remain associated. With one request, association is automatic. With multiple
+requests for the attempt, choose the request/purpose or leave the reply
+unassociated; recency does not decide. An edited association creates an attributed
+revision retaining the original text and earlier association. Pending response
+drafts must be retained or discarded before Paste/Edit opens another response,
+even when the pending text is empty. Manual association does not authenticate
+the reply’s origin.
 
 Retained help appears beside the work and returns on Resume. Response drafts
 remain editable after a failed checkpoint. Up to 64 responses/revisions and 200
@@ -123,7 +137,9 @@ Only kept, current recall revisions with an explicit consultation report qualify
 Opening, rereading, skips, interruption, missing assessment, AI assessment and
 application tasks do not update recall. Each attempt maps once. A correction
 replays the unchanged question's observations and replaces its mapped review,
-without adding a second review. Reviews use the original submission time; late
+without adding a second review. Retired questions still reconstruct their
+historical reviews after corrections, while staying excluded from selection
+until Keep for review. Reviews use the original submission time; late
 assessments replay subsequent observations chronologically. Experienced delay is
 pinned to each submission and its preceding eligible review, never the correction
 clock. Earlier records without that evidence report unknown. Learning intervals are FSRS estimates, not
@@ -137,7 +153,10 @@ threshold 7–9) with repeated difficulty can offer a smaller step, prerequisite
 worked example or pause. High effort with success preserves the challenge.
 Missing ratings, long duration and focus changes imply no load diagnosis.
 Help proposals use the same explicit Codex clipboard handoff. Offers require reader-confirmed recall evidence and effort linked to that
-particular attempt; AI assessments, application work and unknown consultation
+particular attempt. Correcting an outcome withdraws or replaces any unsupported
+outstanding offer using that attempt's original effort response; the earlier
+offer and withdrawal remain events. Obsolete offer choices are rejected.
+AI assessments, application work and unknown consultation
 are kept separate. Offers and choices record their evidence; they do not change recall outcomes to force an interval.
 
 ## History and export
@@ -173,6 +192,22 @@ and keeps reading and live drafts usable. A failed study checkpoint is reported;
 keep the view open or copy the draft. A successful checkpoint uses atomic file
 replacement, with the latest completed checkpoint available on restart.
 
+Snapshot publication writes and synchronizes a complete operation-owned temporary
+file before linking its immutable digest name without overwrite. Partial-write
+failure leaves buffered events retryable; cleanup removes only the owned inode.
+Existing mismatched snapshots and unrecognized files remain intact and keep the
+history gap visible. A retry can record later events after successful recovery.
+
+A shared question may belong to another recent study. Before updating that
+owner, the active checkpoint retains the outcome and a bounded `pendingOwners`
+intent: owner/question/revision, preceding digest and exact derived question
+state. This checkpoint is authoritative for recovery. Retry, dirty flush and
+restart reconcile unchanged or already-applied owner state idempotently, then
+clear the intent. A conflicting owner checkpoint is preserved and reported;
+MRW does not overwrite it or invent another review. This is a single-writer
+workspace recovery boundary, not synchronization or a general transaction store.
+Event history remains separately buffered and may report a gap.
+
 **Inspect history** displays the current study's readable summary and latest
 100 events. **Export history…** selects recorded sessions (with dates/versions)
 and exports either a readable comparison or events plus submitted/request/help
@@ -195,3 +230,9 @@ assessment/correction dates and versions are listed separately. Attempt,
 submission-revision and assessment denominators are distinct and event IDs are
 deduplicated. Adaptation selections, copied requests, retained replies and display
 opportunities are named separately; none establishes help use or benefit.
+
+Effort offers and responses resolve globally by task and offer IDs before release
+or selected-session grouping. The observation belongs to the original task;
+response UTC/version are listed separately. Supporting-only earlier tasks resolve
+links without adding selected attempts, assessments or unsampled-effort counts.
+Missing links remain unknown rather than becoming a numerical sample.

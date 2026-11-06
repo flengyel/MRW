@@ -18,31 +18,54 @@ function request(s,purpose,text,recorder,adaptation=null,id=crypto.randomUUID())
   r.event=recorder.record('help.request',{...r,meaning:'Request copied; response, consultation and benefit are unobserved.'}).id;
   return r;
 }
+function assertReplaceable(s){
+  if(s.helpDraft)throw new Error('Retain or discard the response draft before opening another response.');
+}
+function requests(s,attempt){
+  const sources=JSON.stringify(model.signature(s.passages));
+  return (s.helpRequests||[]).filter(r=>r.attempt===attempt&&JSON.stringify(r.sources)===sources);
+}
+function associate(s,draft,requestId,method='manual'){
+  const selected=requestId===null?null:requests(s,draft.attempt).find(r=>r.id===requestId);
+  if(requestId!==null&&!selected)throw new Error('Choose a help request for this response’s attempt and sources, or leave it unassociated.');
+  draft.request=selected?.id||null;
+  draft.adaptation=selected?.adaptation||null;
+  draft.association={method:selected?method:'unassociated',author:'Reader',origin:'human'};
+  return draft;
+}
 function paste(s,text){
+  assertReplaceable(s);
   const original=content({text,author:'Codex companion',origin:'ai_proposal'});
-  const req=[...(s.helpRequests||[])].reverse().find(r=>r.attempt===(s.current?.id||null));
-  return {id:crypto.randomUUID(),...original,original,request:req?.id||null,attempt:s.current?.id||null,adaptation:req?.adaptation||null};
+  const draft={id:crypto.randomUUID(),...original,original,attempt:s.current?.id||null};
+  const available=requests(s,draft.attempt);
+  return associate(s,draft,available.length===1?available[0].id:null,'single_request');
 }
 function edit(s,id){
+  assertReplaceable(s);
   const old=s.help?.find(h=>h.id===id);if(!old)throw new Error('Retained help was not found.');
   return {...old,id:crypto.randomUUID(),previous:old.id,original:old.original};
 }
 function retain(s,value,recorder){
   const draft=s.helpDraft;if(!draft)throw new Error('Paste a response or edit retained help first.');
   const data=content(value),original=content(draft.original||draft);
+  if(Object.hasOwn(value,'request'))associate(s,draft,value.request,
+    value.request===draft.request?(draft.association?.method||'manual'):'manual');
+  // A legacy association is retained unless the reader explicitly changes it.
+  const association=draft.association?structuredClone(draft.association):{method:'legacy_manual',author:'Reader',origin:'human'};
   if((s.help||[]).length>=64&&!s.help.some(h=>h.id===draft.id))throw new Error('This study holds at most 64 help responses and revisions.');
   // Retry after an unconfirmed checkpoint keeps the same response identity.
   let response=s.help?.find(h=>h.id===draft.id);
   if(response){
-    if(JSON.stringify(content(response))===JSON.stringify(data))return response;
+    if(JSON.stringify(content(response))===JSON.stringify(data)&&response.request===(draft.request||null)&&response.adaptation===(draft.adaptation||null))return response;
     if(response.event)throw new Error('Edit retained help as a separately attributed revision.');
     // Only this draft's unconfirmed entry can change after a failed checkpoint.
     s.help=s.help.filter(h=>h!==response);
   }
-  response={id:draft.id,attempt:draft.attempt,request:draft.request||null,adaptation:draft.adaptation||null,
+  response={id:draft.id,attempt:draft.attempt,request:draft.request||null,adaptation:draft.adaptation||null,association,
     sources:model.signature(s.passages),original:{...original,snapshot:recorder.snapshot(original)},...data,
     previous:draft.previous||null,at:new Date().toISOString()};
-  response.snapshot=recorder.snapshot({...data,original:response.original,previous:response.previous});
+  response.snapshot=recorder.snapshot({...data,original:response.original,previous:response.previous,request:response.request,
+    attempt:response.attempt,adaptation:response.adaptation,association});
   (s.help||=[]).push(response);
   return response;
 }
@@ -58,4 +81,4 @@ function reveal(s,id,recorder){
 function archive(s){
   if(s.current){s.attempts||=[];if(!s.attempts.some(a=>a.id===s.current.id))s.attempts.push(structuredClone(s.current));}
 }
-module.exports={content,request,paste,edit,retain,reveal,archive,LIMIT};
+module.exports={content,request,requests,associate,assertReplaceable,paste,edit,retain,reveal,archive,LIMIT};

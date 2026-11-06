@@ -1,7 +1,9 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
 const {StudyHistory,summarize}=require('../src/studyHistory'),model=require('../src/studyModel'),scheduler=require('../src/studyScheduler');
-const {registerActiveStudy}=require('../src/activeStudy'),{runBridge}=require('../src/bridge');
+const {registerActiveStudy:registerStudy}=require('../src/activeStudy'),{runBridge}=require('../src/bridge');
+const {scopedController}=require('./study-message-fixture');
+const registerActiveStudy=options=>scopedController(registerStudy(options));
 const passage={reference:'mrw-outline:v1/exact-selected-reference',label:'Selected proof passage',text:'For every x, f(x) = x.',source_revision:'a'.repeat(64),authors:'Source author'};
 const value={activity:'missing_step',prompt:'Explain the missing step.',answer:{text:'Apply the hypothesis.',author:'Codex companion',origin:'ai_proposal'},hints:['Check the hypothesis.'],references:[passage.reference],author:'Codex companion',origin:'ai_proposal'};
 async function history(t,io){const directory=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-events-'));t.after(()=>fs.rm(directory,{recursive:true,force:true}));const h=new StudyHistory(directory,{version:'0.18.0',commit:'test'},{origin:'test',io});await h.init();t.after(()=>h.close());return h;}

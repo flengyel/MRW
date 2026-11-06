@@ -1,5 +1,17 @@
 # UX_SPEC.md
 
+## Delivered study reliability — 0.19.1
+
+The [0.19 review findings](docs/MRW_019_REVIEW.md) are repaired within the existing
+study view. Drafts retain source/attempt identities and per-study checkpoints;
+Paste/Edit cannot replace pending prose. Explicit saved-editor study selection
+beats remembered reader context. Failed snapshot publication and shared-owner
+schedule writes remain retryable with visible conflicts. Corrections preserve
+retired review history and withdraw stale offers. Effort resolves before version
+partitioning. Ambiguous help shows request/purpose selection or stays unassociated.
+The [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) states checkpoint/recovery limits;
+[validation](docs/ACTIVE_STUDY_VALIDATION.md) separates automated and host evidence.
+
 ## Delivered study feedback — 0.19.0
 
 An empty study shows its selected source and Enter a question / Request questions

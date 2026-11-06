@@ -1,7 +1,7 @@
 'use strict';
 const crypto = require('node:crypto');
 const { hash } = require('./studyHistory'), scheduler = require('./studyScheduler');
-const { projectAttempts, readerRecall, unaidedRecall } = require('./studyEvidence');
+const { projectAttempts, readerRecall, unaidedRecall, uniqueEvents } = require('./studyEvidence');
 const ACTIVITIES = ['definition','hypotheses','missing_step','argument','application'];
 const signature = passages => passages.map(p => ({ reference:p.reference, source_revision:p.source_revision, sha256:hash(p.text) }));
 const identity = s => ({ study:s.id, practice:!!s.practice, sources:signature(s.passages), question:s.current?{id:s.current.question.id,revision:s.current.question.revision,activity:s.current.question.activity}:null, attempt:s.current?.id });
@@ -67,28 +67,25 @@ function outcome(s, report, recorder, bank=s.questions) {
   if(!a.finished)s.block.completed++; a.finished=true;
   // Replay only this unchanged question's retained observations, in experienced
   // order. A delayed assessment can arrive after another study reviewed it.
-  const replay=reviews=>{
-    q.card=null;q.reviews=[];let mapped;
-    for(const r of reviews.sort((x,y)=>+new Date(x.at)-+new Date(y.at))){const result=scheduler.observe(q,r,new Date(r.at));if(r.attempt===a.id)mapped=result;}
-    return mapped;
-  };
-  if(q && report.correction && q.reviews.some(r=>r.attempt===a.id)) {
-    replay(q.reviews.map(r=>r.attempt===a.id?{...r,...observation}:r));
+  const history=q&&(q.reviewObservations||q.reviews||[]);
+  const replay=reviews=>scheduler.replay(q,reviews).get(a.id);
+  if(q && report.correction && history.some(r=>r.attempt===a.id)) {
+    replay(history.map(r=>r.attempt===a.id?{...r,...observation}:r));
     recorder.record('review.correction',{attempt:a.id,corrects:e.data.corrects,after:q.card,evidence:e.id,chronological_replay:true});
   } else if(q) {
     const when=new Date(submission.submitted_at||submission.at);
     const later=q.reviews?.some(r=>+new Date(r.at)>+when);
     let mapped;
     if(later&&q.kept&&!q.retired&&readerRecall(observation)){
-      mapped=replay([...q.reviews,{...observation,at:when.toISOString()}]);
+      mapped=replay([...history,{...observation,at:when.toISOString()}]);
       recorder.record('review.mapping',{attempt:a.id,...mapped,after:q.card,evidence:e.id,chronological_replay:true,reason:'Original submission predates a retained review; subsequent scheduler observations replayed.'},'derived_estimate');
     }else{mapped=scheduler.observe(q,observation,when);recorder.record('review.mapping',{attempt:a.id,...mapped,evidence:e.id},'derived_estimate');}
   }
   return e;
 }
-function adaptation(s, rating, events, attempt=s.current?.id) {
+function adaptation(s, rating, events, attempt=s.current?.id, effortID=null) {
   if(!attempt||!Number.isInteger(rating)||rating<1||rating>9)return null;
-  const effort=events.filter(e=>e.action==='effort.response'&&e.identity?.study===s.id&&e.data.attempt===attempt&&e.data.rating===rating&&e.evidence==='reader_report').at(-1);
+  const effort=events.filter(e=>e.action==='effort.response'&&e.identity?.study===s.id&&e.data.attempt===attempt&&e.data.rating===rating&&e.evidence==='reader_report'&&(!effortID||e.id===effortID)).at(-1);
   if(!effort)return null;
   const projected=projectAttempts(events).attempts.filter(a=>a.study===s.id&&a.origin===effort.origin&&a.anchor&&a.observation&&readerRecall(a.observation));
   const current=projected.find(a=>a.id===attempt);if(!current)return null;
@@ -100,6 +97,25 @@ function adaptation(s, rating, events, attempt=s.current?.id) {
   if(rating<=3&&last.outcome==='unresolved')return {reason:'Low reader-reported effort with unresolved recall; offer clarification without inferring fatigue.',choices:['clarification','prerequisite','continue'],evidence,attempt};
   if(rows.length>=2&&rows.slice(-2).every(a=>unaidedRecall(a.observation)))return {reason:'Repeated reader-confirmed unaided recall success.',choices:['less_guidance','changed_example','continue'],evidence,attempt};
   return null;
+}
+function refreshAdaptation(s, events, recorder) {
+  const a=s.current,previous=a?.adaptation;
+  if(!previous)return {changed:false,previous:null,adaptation:null};
+  const history=uniqueEvents(events);
+  const linked=history.filter(e=>e.action==='effort.response'&&e.identity?.study===s.id&&e.data.attempt===a.id&&e.evidence==='reader_report'&&
+    (previous.effort_response?e.id===previous.effort_response:previous.evidence?.includes(e.id)));
+  const effort=linked.length===1?linked[0]:null;
+  const next=effort?adaptation(s,effort.data.rating,history,a.id,effort.id):null;
+  const content=value=>value&&JSON.stringify({reason:value.reason,choices:value.choices,evidence:value.evidence,attempt:value.attempt});
+  if(content(previous)===content(next))return {changed:false,previous,adaptation:previous};
+  recorder.record('adaptation.withdrawal',{attempt:a.id,offer:previous.event,evidence:previous.evidence,
+    effort_response:effort?.id||null,replacement_evidence:next?.evidence||[],reason:effort?'Supporting assessment changed; recomputed with the original effort response.':'Original supporting effort response unavailable.'},'derived_estimate');
+  a.adaptation=null;
+  if(next){
+    next.supersedes=previous.event;next.effort_response=effort.id;
+    next.event=recorder.record('adaptation.offer',next,'derived_estimate').id;a.adaptation=next;
+  }
+  return {changed:true,previous,adaptation:a.adaptation};
 }
 function questionHandoff(s, purpose='questions', submitted=null) {
   const sources=signature(s.passages);
@@ -119,4 +135,4 @@ function questionHandoff(s, purpose='questions', submitted=null) {
 
   return parts.join('\n\n');
 }
-module.exports={createStudy,question,signature,identity,block,begin,submit,outcome,adaptation,questionHandoff,ACTIVITIES};
+module.exports={createStudy,question,signature,identity,block,begin,submit,outcome,adaptation,refreshAdaptation,questionHandoff,ACTIVITIES};

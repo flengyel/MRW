@@ -1,18 +1,17 @@
 # CODEX_PLAN.md
 
-## Current task — study continuity and evidence reliability
+## Implemented repair — study continuity and evidence, 0.19.1
 
-Implement [CODEX_STUDY_RELIABILITY_PROMPT](docs/CODEX_STUDY_RELIABILITY_PROMPT.md).
-The [0.19 code review](docs/MRW_019_REVIEW.md) reproduced nine defects involving
-pending drafts, explicit source selection, interrupted writes, shared schedule
-persistence, corrections, effort and manual reply associations. Existing focused
-tests pass; the new cases extend them. Preserve the delivered interaction and
-repair these cases before expanding scope.
-
-Local Codex in VS Code/WSL owns implementation, focused checks, package delivery
-and main-branch commits. GPTWork supplies the review and instructions. The
-previous 0.19 task is delivered; do not repeat its README/exposure campaign.
-The repository remains private and publication decisions remain separate.
+[CODEX_STUDY_RELIABILITY_PROMPT](docs/CODEX_STUDY_RELIABILITY_PROMPT.md) and all
+nine [review findings](docs/MRW_019_REVIEW.md) are implemented. Independent model,
+recorder and renderer workers used separate ownership; the root reconciled the
+controller and source-selection entry path. Pending work, partial-write retry,
+shared-owner reconciliation, retired review replay, corrected offers, cross-release
+effort and explicit reply associations now share focused regression coverage.
+See [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) for the authority/checkpoint boundary
+and [validation](docs/ACTIVE_STUDY_VALIDATION.md) for actual checks and delivery.
+No genuine study was used as a fixture. Preserve the working window and private
+visibility; no source-store migration or public-preparation campaign is repeated.
 
 ## Implemented increment — 0.19.0
 

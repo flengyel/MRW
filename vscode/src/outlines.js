@@ -657,8 +657,9 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!applied) throw new Error('The editor declined the note insertion.');
     vscode.window.setStatusBarMessage('MRW: Note inserted into the overview. Save with Ctrl+S.', 6000);
   }));
-  register('mrw.createOutline', () => locked(async () => {
-    const editor = ordinaryEditor(), document = editor.document, version = document.version, range = editor.selection;
+  async function createFromSelection(invocation){
+    const {editor,document,version,range}=invocation;
+    if(document.isClosed||document.version!==version)throw new Error('The selected source changed before retention.');
     if (document.isDirty) throw new Error('Save the source before creating an exact retained outline.');
     const source = await sourceSnapshot(document.uri.fsPath);
     if (document.version !== version || document.isDirty || normalize(source.text) !== normalize(document.getText())) {
@@ -675,7 +676,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       await send(c, added);
     }
     return c.result;
-  }));
+  }
+  register('mrw.createOutline', () => locked(async()=>{const editor=ordinaryEditor();return createFromSelection({editor,document:editor.document,version:editor.document.version,range:editor.selection});}));
   register('mrw.refreshSourceOutline', () => locked(() => refresh(current())));
   register('mrw.openOutline', () => locked(async () => {
     const { store, root } = await storage(vscode.window.activeTextEditor);
@@ -812,8 +814,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const target=await bridge({method:'outline_reference',store,project_root:root,id:result.outline.id,revision:result.revision,region:result.outline.regions[0].id});
     return {root,passage:{...await rows.studyPassage(target.reference,root),authors:'Codex companion (OpenAI)',license:'CC0-1.0'}};
   });
-  rows.captureStudySelection = async root => {
-    const result=await vscode.commands.executeCommand('mrw.createOutline');
+  rows.captureStudySelection = async (root,invocation) => {
+    const result=await locked(()=>createFromSelection(invocation));
     if(!result)return null;
     const store=path.join(context.storageUri.fsPath,`outlines-${digest(root)}`);
     const target=await bridge({method:'outline_reference',store,project_root:root,id:result.outline.id,revision:result.revision,region:result.outline.regions.at(-1)?.id||null});

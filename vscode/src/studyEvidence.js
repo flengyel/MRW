@@ -51,17 +51,53 @@ function projectAttempts(events) {
   }
   return {events:rows,attempts:[...attempts.values()],missing};
 }
+function projectEffort(events) {
+  const rows=uniqueEvents(events),offers=[],byOffer=new Map(),anchors=new Map(),missing=[];
+  const selected=e=>e?.export_context?.role!=='supporting';
+  const problem=(e,reason)=>missing.push({event:e.id,attempt:attemptID(e),study:e.identity?.study,reason});
+  for(const e of rows)if(['attempt.begin','attempt.submit'].includes(e.action)) {
+    const key=attemptKey(e),current=anchors.get(key);
+    if(key&&(!current||(e.action==='attempt.begin'&&current.action!=='attempt.begin')))anchors.set(key,e);
+  }
+  for(const offer of rows.filter(e=>e.action==='effort.offer')) {
+    const key=attemptKey(offer),anchor=anchors.get(key),record={offer,response:null,responses:[],anchor:anchor||null,key,attempt:attemptID(offer),study:offer.identity?.study,origin:offer.origin,
+      disposition:'no_response',rating:null,supported:!!anchor,missing:[],selected:selected(offer)};
+    if(!key||!anchor){const reason='Effort task context for offer '+offer.id+' unavailable.';record.missing.push(reason);problem(offer,reason);}
+    offers.push(record);byOffer.set(offer.id,record);
+  }
+  for(const response of rows.filter(e=>e.action==='effort.response')) {
+    const record=byOffer.get(response.data?.offer);
+    if(!record){problem(response,'Effort offer '+(response.data?.offer||'(unrecorded)')+' unavailable.');continue;}
+    if(!record.key||attemptKey(response)!==record.key||response.data?.attempt!==record.attempt||
+      (response.identity?.attempt&&response.identity.attempt!==record.attempt)) {
+      problem(response,'Effort response does not match its offer/task identity.');continue;
+    }
+    const numeric=response.evidence==='reader_report'&&Number.isInteger(response.data.rating)&&response.data.rating>=1&&response.data.rating<=9&&
+      ['answered',undefined].includes(response.data.disposition);
+    const declined=response.evidence==='reader_report'&&response.data.disposition==='declined'&&response.data.rating===null;
+    const absent=response.evidence==='observed_action'&&response.data.disposition==='no_response'&&response.data.rating===null;
+    if(!numeric&&!declined&&!absent){problem(response,'Effort disposition or reader-report evidence unavailable.');continue;}
+    record.responses.push(response);record.selected ||= selected(response);
+    // An explicit answer/decline resolves an earlier recorded nonresponse. Its
+    // own date and release remain on the response, not the task's attribution.
+    if(!record.response||response.evidence==='reader_report'||record.response.evidence!=='reader_report') {
+      record.response=response;record.disposition=numeric?'answered':declined?'declined':'no_response';record.rating=numeric?response.data.rating:null;
+    }
+  }
+  return {events:rows,offers,missing};
+}
 function selectHistoryContext(events, selectedSessions) {
   const rows=uniqueEvents(events),sessions=new Set(selectedSessions), selected=rows.filter(e=>sessions.has(e.session));
   const keys=new Set(selected.map(attemptKey).filter(Boolean)), wanted=new Set(selected.map(e=>e.id));
   // Include only linked attempt evidence, never whole supporting sessions/studies.
-  const actions=new Set(['attempt.begin','attempt.submit','attempt.outcome','attempt.correction','attempt.skip','attempt.continuation','effort.offer','effort.response','adaptation.offer','adaptation.choice','help.request','help.preview','help.retained','help.display']);
+  const actions=new Set(['attempt.begin','attempt.submit','attempt.outcome','attempt.correction','attempt.skip','attempt.continuation','effort.offer','effort.response','adaptation.offer','adaptation.withdrawal','adaptation.choice','help.request','help.preview','help.retained','help.display']);
   for(const e of rows)if(keys.has(attemptKey(e))&&actions.has(e.action))wanted.add(e.id);
   const byID=new Map(rows.map(e=>[e.id,e])),missing=[];
   const sameStudy=(a,b)=>a.origin===b.origin&&a.identity?.study===b.identity?.study;
   for(const id of wanted) {
     const e=byID.get(id),refs=['attempt.outcome','attempt.correction'].includes(e?.action)?[e.data.corrects,e.data.submission]:[];
     if(e?.action==='effort.response')refs.push(e.data.offer);
+    if(e?.action?.startsWith('adaptation.'))refs.push(e.data.offer,e.data.supersedes,e.data.effort_response,...(e.data.evidence||[]),...(e.data.replacement_evidence||[]));
     for(const ref of refs)if(ref) {
       const linked=byID.get(ref);if(linked&&sameStudy(linked,e))wanted.add(ref);else missing.push({event:id,reference:ref,reason:'Linked event unavailable.'});
     }
@@ -82,6 +118,6 @@ function selectHistoryContext(events, selectedSessions) {
     }
   }
   const result=rows.filter(e=>wanted.has(e.id)).map(e=>({...e,export_context:{role:sessions.has(e.session)?'selected':'supporting',reason:sessions.has(e.session)?'Selected session.':'Linked attempt context outside selected sessions.'}}));
-  const projection=projectAttempts(result);return {events:result,missing:[...missing,...projection.missing],selected_sessions:[...sessions]};
+  const projection=projectAttempts(result),effort=projectEffort(result);return {events:result,missing:[...missing,...projection.missing,...effort.missing],selected_sessions:[...sessions]};
 }
-module.exports={readerRecall,unaidedRecall,attemptID,attemptKey,uniqueEvents,projectAttempts,selectHistoryContext};
+module.exports={readerRecall,unaidedRecall,attemptID,attemptKey,uniqueEvents,projectAttempts,projectEffort,selectHistoryContext};

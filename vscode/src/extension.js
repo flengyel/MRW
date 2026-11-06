@@ -291,11 +291,11 @@ function activate(context) {
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });
   const studyController=registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge:rawBridge,changed,
     readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,selectPrerequisites:outlineRows.selectStudyPrerequisites,loadExample:outlineRows.loadStudyExample,
-    getCurrent:async root=>{
-      const editor=vscode.window.activeTextEditor;
+    getCurrent:async(root,invocation)=>{
+      const editor=invocation?.editor;
+      if(editor?.document.uri.scheme==='file'&&!invocation.range.isEmpty&&!editor.document.uri.fsPath.endsWith('.mrw-proof.json')&&!editor.document.uri.fsPath.endsWith('.mrw-study.json'))return outlineRows.captureStudySelection(root,invocation);
       if(currentMaterial?.root===root&&currentMaterial.reference)return outlineRows.studyPassage(currentMaterial.reference,root);
       if(currentMaterial?.root===root&&currentMaterial.outline)return outlineRows.currentStudyPassage(root);
-      if(editor?.document.uri.scheme==='file'&&!editor.selection.isEmpty&&!editor.document.uri.fsPath.endsWith('.mrw-proof.json')&&!editor.document.uri.fsPath.endsWith('.mrw-study.json'))return outlineRows.captureStudySelection(root);
       return null;
     }});
   deactivateAction=async()=>{await studyController.flush();await recorder.close();};

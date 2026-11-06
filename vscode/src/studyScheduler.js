@@ -6,6 +6,15 @@ const engine = fsrs({ enable_fuzz: false });
 // Default weights/retention. Deterministic fuzz setting is explicitly identified.
 function observe(item, observation, now = new Date()) {
   if (!item.kept || item.retired || !readerRecall(observation)) return { changed: false, reason: 'Not an eligible reader-reported recall observation.' };
+  const result = applyObservation(item, observation, now);
+  if (result.changed) {
+    item.reviewObservations ||= item.reviews.slice(0, -1);
+    item.reviewObservations.push({ ...observation, at: now.toISOString() });
+  }
+  return result;
+}
+function applyObservation(item, observation, now) {
+  if (!readerRecall(observation)) return { changed: false, reason: 'Not a reader-reported recall observation.' };
   if (item.reviews?.some(r => r.attempt === observation.attempt)) return { changed: false, reason: 'Attempt already scheduled.' };
   const unaided = unaidedRecall(observation);
   const rating = unaided ? Rating.Good : Rating.Again;
@@ -13,6 +22,17 @@ function observe(item, observation, now = new Date()) {
   item.card = result.card; item.reviews ||= []; item.reviews.push({ ...observation, at: now.toISOString(), rating, scheduler: IDENTITY });
   return { changed: true, rating: unaided ? 'Good' : 'Again', before, after: result.card,
     reason: unaided ? 'Reader-confirmed unaided recall.' : 'Reader-reported unresolved or help-dependent recall.' };
+}
+// Retirement controls future selection, not reconstruction of observations that
+// were admitted before retirement. Retain observations excluded by a correction
+// so a later linked correction can restore their mapping without a new review.
+function replay(item, observations) {
+  const retained = structuredClone(observations).sort((a,b) => +new Date(a.at)-+new Date(b.at));
+  item.reviewObservations = retained;
+  item.card = null; item.reviews = [];
+  const mapped = new Map();
+  for (const observation of retained) mapped.set(observation.attempt, applyObservation(item, observation, new Date(observation.at)));
+  return mapped;
 }
 function select(questions, block, now = Date.now()) {
   if (block.completed >= block.limit || now-block.started >= block.minutes*60000) return { question: null, reason: 'budget' };
@@ -22,4 +42,4 @@ function select(questions, block, now = Date.now()) {
   const fresh = ready.filter(q=>!q.reviews?.length).sort((a,b)=>a.id.localeCompare(b.id));
   return block.newCount < block.newLimit && fresh.length ? { question: fresh[0], reason: 'new' } : { question: null, reason: fresh.length?'new-budget':'none-due' };
 }
-module.exports = { observe, select, IDENTITY };
+module.exports = { observe, replay, select, IDENTITY };

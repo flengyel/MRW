@@ -106,7 +106,7 @@ async function harness(root, state = new Map(), options = {}) {
           webview: { html: '', messages: [], cspSource: 'vscode-webview:', asWebviewUri: uri => uri.toString(),
             onDidReceiveMessage(callback) { receive = callback; return disposable; },
             async postMessage(value) { this.messages.push(value); if (value.type === 'storageCheck') await receive({ type: 'storageStatus', dirty: !!this.dirty }); return true; } },
-          receive: value => receive(value) };
+          receive: value => {const state=panel.webview.messages.findLast(row=>row.type==='active_study')?.study;return receive(require('./study-message-fixture').message(state,value));} };
         panels.push(panel); return panel;
       },
       onDidChangeActiveTextEditor(callback) { activeListener = callback; return disposable; },
@@ -2072,4 +2072,19 @@ test('Open Study Example retains the bundled source explicitly and reuses the sa
  assert.match(s.passages[0].text,/Sums of odd integers/);assert.equal(s.passages[0].license,'CC0-1.0');assert.equal(h.panels.length,sourcePanels+1);
  await p.receive({type:'next'});await p.receive({type:'draft',study:s.id,attempt:p.webview.messages.findLast(m=>m.type==='active_study').study.current.id,text:'Saved example work',paper:false});
  await h.commands.get('mrw.openStudyExample')();await p.receive({type:'ready'});assert.equal(p.webview.messages.findLast(m=>m.type==='active_study').study.current.draft,'Saved example work');
+});
+
+test('R4 explicit editor selection wins over remembered reader and stays pinned when retention moves focus',async t=>{
+ const root=await temporary(t),h=await harness(root),{region}=await sourceReader(h,root),reader=h.panels[0];
+ const file=path.join(root,'selected-B.md'),text='Selected B λ.\nOther text.';await fs.writeFile(file,text);
+ const doc=h.document(file,text),ed=h.editor(doc);ed.selection=new Selection(new Position(0,0),new Position(0,13));h.focus(ed);
+ // The reader remembers A while saved B remains the active text editor.
+ await reader.receive({type:'select',region});
+ let moved=false;h.setService(async(...args)=>{if(args[2].method==='outline_create'&&!moved){moved=true;h.focus(undefined);}return runBridge(...args);});
+ await h.commands.get('mrw.studyCurrent')();assert.deepEqual(h.errors,[]);
+ const study=h.panels.at(-1),state=()=>study.webview.messages.findLast(m=>m.type==='active_study').study;
+ assert.equal(state().passages[0].text,'Selected B λ.');const b=state().id;
+ const count=h.requests.length;h.focus(undefined);assert.equal(state().id,b);assert.equal(h.requests.length,count);
+ // Reader action carries its own exact reference even with B selected in an editor.
+ h.focus(ed);await reader.receive({type:'study_current'});assert.notEqual(state().id,b);assert.notEqual(state().passages[0].text,'Selected B λ.');
 });

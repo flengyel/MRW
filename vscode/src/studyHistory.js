@@ -1,10 +1,11 @@
 'use strict';
 // One local recorder. No provider, source scanner, editor text listener or telemetry.
 const fs = require('node:fs/promises'), path = require('node:path'), crypto = require('node:crypto');
+const { constants } = require('node:fs');
 const { performance } = require('node:perf_hooks');
 const hash = text => crypto.createHash('sha256').update(text).digest('hex');
 const POLICY = 'study-feedback-2', SCHEMA = 1;
-const { projectAttempts, selectHistoryContext, readerRecall, unaidedRecall } = require('./studyEvidence');
+const { projectAttempts, projectEffort, selectHistoryContext, readerRecall, unaidedRecall, attemptKey } = require('./studyEvidence');
 class StudyHistory {
   constructor(directory, software, { io = fs, origin = 'production', onGap = () => {} } = {}) {
     this.directory = directory; this.software = software; this.io = io; this.origin = origin; this.onGap = onGap;
@@ -37,6 +38,57 @@ class StudyHistory {
   }
   schedule() { if (!this.timer) { this.timer = setTimeout(() => { this.timer = undefined; void this.flush(); }, 250); this.timer.unref?.(); } }
   failure(e) { this.gap = 'History gap: ' + e.message + '. Reading and drafts remain available.'; this.onGap(this.gap); }
+  async checkSnapshot(file, id, text, identity) {
+    let handle;
+    try {
+      handle = await this.io.open(file, constants.O_RDONLY | constants.O_NOFOLLOW);
+      const retainedIdentity = await handle.stat();
+      if (!retainedIdentity.isFile()) throw new Error('Immutable snapshot is not a regular file: ' + id);
+      if (identity && (retainedIdentity.dev !== identity.dev || retainedIdentity.ino !== identity.ino)) throw new Error('Published snapshot identity changed: ' + id);
+      const retained = await handle.readFile('utf8');
+      if (hash(retained) !== id || retained !== text) throw new Error('Immutable snapshot content differs: ' + id);
+      const namedIdentity = await this.io.lstat(file);
+      if (!namedIdentity.isFile() || namedIdentity.dev !== retainedIdentity.dev || namedIdentity.ino !== retainedIdentity.ino) throw new Error('Snapshot file identity changed: ' + id);
+    } finally { await handle?.close(); }
+  }
+  async removeOwnedTemporary(file, identity) {
+    if (!identity) return;
+    let current;
+    try { current = await this.io.lstat(file); }
+    catch (e) { if (e.code === 'ENOENT') return; throw e; }
+    // A replaced path belongs to somebody else, even though its name was ours.
+    if (current.isFile() && current.dev === identity.dev && current.ino === identity.ino) await this.io.unlink(file);
+  }
+  async publishSnapshot(id, text) {
+    if (hash(text) !== id) throw new Error('Snapshot digest differs from its content: ' + id);
+    const directory = path.join(this.directory, 'snapshots'), file = path.join(directory, id + '.json');
+    try { await this.checkSnapshot(file, id, text); return; }
+    catch (e) { if (e.code !== 'ENOENT') throw e; }
+    const temporary = path.join(directory, '.' + id + '-' + crypto.randomUUID() + '.pending');
+    let handle, identity;
+    try {
+      handle = await this.io.open(temporary, 'wx', 0o600);
+      identity = await handle.stat();
+      // A failed write can leave partial bytes here, never under the immutable name.
+      await this.io.writeFile(handle, text);
+      await handle.sync();
+      const current = await this.io.lstat(temporary);
+      if (!current.isFile() || current.dev !== identity.dev || current.ino !== identity.ino) throw new Error('Snapshot temporary file identity changed.');
+      await this.checkSnapshot(temporary, id, text);
+      try {
+        await this.io.link(temporary, file);
+        await this.checkSnapshot(file, id, text, identity);
+      }
+      catch (e) {
+        if (e.code !== 'EEXIST') throw e;
+        // An existing immutable file is accepted only when its complete bytes agree.
+        await this.checkSnapshot(file, id, text);
+      }
+    } finally {
+      try { await handle?.close(); }
+      finally { await this.removeOwnedTemporary(temporary, identity); }
+    }
+  }
   flush() {
     clearTimeout(this.timer); this.timer = undefined;
     this.tail = this.tail.then(async () => {
@@ -44,11 +96,7 @@ class StudyHistory {
       const events = this.pending.splice(0), snapshots = new Map(this.snapshots); this.snapshots.clear();
       try {
         await this.io.mkdir(path.join(this.directory, 'snapshots'), { recursive: true, mode: 0o700 });
-        for (const [id, text] of snapshots) {
-          const file = path.join(this.directory, 'snapshots', id + '.json');
-          try { await this.io.writeFile(file, text, { flag: 'wx', mode: 0o600 }); }
-          catch (e) { if (e.code !== 'EEXIST' || await this.io.readFile(file, 'utf8') !== text) throw e; }
-        }
+        for (const [id, text] of snapshots) await this.publishSnapshot(id, text);
         if (events.length) {
           const file = path.join(this.directory, this.session + '-' + events[0].sequence + '-' + events.at(-1).sequence + '.json');
           const text = JSON.stringify(events) + '\n', temporary = file + '.pending';
@@ -77,21 +125,24 @@ class StudyHistory {
   }
 }
 function summarize(events) {
-  const projection=projectAttempts(events),groups=new Map();
-  const group=e=>{const key=[e.origin,e.software?.version||'unknown version',e.software?.commit||'unknown commit'].join(' · ');if(!groups.has(key))groups.set(key,{events:[],attempts:[]});return groups.get(key);};
+  const projection=projectAttempts(events),effortProjection=projectEffort(events),groups=new Map();
+  const selectedAttemptKeys=new Set(projection.events.filter(e=>e.export_context?.role!=='supporting').map(attemptKey).filter(Boolean));
+  const group=e=>{const key=[e.origin,e.software?.version||'unknown version',e.software?.commit||'unknown commit'].join(' · ');if(!groups.has(key))groups.set(key,{events:[],attempts:[],effort:[]});return groups.get(key);};
   for(const e of projection.events)group(e).events.push(e);
   for(const a of projection.attempts)if(a.anchor)group(a.anchor).attempts.push(a);
+  for(const effort of effortProjection.offers)if(effort.supported&&effort.selected&&effort.anchor)group(effort.anchor).effort.push(effort);
   const lines=['# Local study comparison','','Descriptive only: tasks, revisions and prior exposure differ. Visibility records exposure opportunity, not reading. No causal learning effect is inferred from a version change.',
     'Attempts and submission revisions belong to the version of the original attempt. Assessments and linked corrections retain their own dates and software versions. Supporting export context is labeled and does not count as selected-session activity.',''];
   for(const [version,g] of groups) {
-    const rows=g.events.filter(e=>e.export_context?.role!=='supporting'),support=g.events.filter(e=>e.export_context?.role==='supporting'),attempts=g.attempts;
+    const rows=g.events.filter(e=>e.export_context?.role!=='supporting'),support=g.events.filter(e=>e.export_context?.role==='supporting');
+    const attempts=g.attempts.filter(a=>selectedAttemptKeys.has(a.key));
     const count=action=>rows.filter(e=>e.action===action).length;
     const submitted=attempts.flatMap(a=>a.submissions),assessed=attempts.filter(a=>a.observation&&a.observation.outcome!=='unassessed');
     const recall=assessed.filter(a=>readerRecall(a.observation)),application=assessed.filter(a=>a.observation.activity==='application');
     const delayed=recall.filter(a=>a.observation.delayed_days!==null&&a.observation.delayed_days>=1);
-    const offers=rows.filter(e=>e.action==='effort.offer'),offerMap=new Map(offers.map(e=>[e.id,e])),responseMap=new Map();
-    for(const e of rows.filter(e=>e.action==='effort.response'))if(offerMap.has(e.data.offer)&&e.data.attempt===offerMap.get(e.data.offer).data.attempt)responseMap.set(e.data.offer,e);
-    const responses=[...responseMap.values()],efforts=responses.filter(e=>Number.isInteger(e.data.rating)&&e.data.rating>=1&&e.data.rating<=9);
+    const offers=g.effort,efforts=offers.filter(e=>Number.isInteger(e.rating)&&e.rating>=1&&e.rating<=9);
+    const sampledAttempts=new Set(offers.map(e=>attemptKey(e.offer)));
+    const unsampled=attempts.filter(a=>a.submissions.length&&!sampledAttempts.has(a.key)).length;
     const revisions=new Set(attempts.filter(a=>a.anchor.identity?.question).map(a=>JSON.stringify([a.study,a.anchor.identity.question])));
     lines.push('## '+version,'',`Sessions: ${new Set(rows.map(e=>e.session)).size}; task revisions: ${revisions.size}. Selected events: ${rows.length}; supporting linked events: ${support.length}.`,
       `Attempts: ${attempts.length}; Submissions: ${submitted.length} (immutable submission revisions); assessed attempts: ${assessed.length}; submissions without an outcome: ${submitted.filter(e=>!attempts.some(a=>a.assessment?.data.submission===e.id&&a.observation?.outcome!=='unassessed')).length}.`,
@@ -100,16 +151,22 @@ function summarize(events) {
       `Delayed recall (≥1 day): ${delayed.length}; reported unaided successes: ${delayed.filter(a=>unaidedRecall(a.observation)).length}/${delayed.length}; recall timing unknown or first review: ${recall.filter(a=>a.observation.delayed_days===null).length}.`,
       `Help-dependent: ${assessed.filter(a=>a.observation.outcome==='help_dependent').length}/${assessed.length}; unresolved: ${assessed.filter(a=>a.observation.outcome==='unresolved').length}/${assessed.length}; skipped: ${count('attempt.skip')}.`,
       `Hints: ${count('attempt.hint')}; reference-answer reveals: ${count('attempt.answer')}; source exposures: ${rows.filter(e=>e.action==='source.visibility'&&e.data.visible===true).length}; retained-help display opportunities: ${count('help.display')}; pasted-help previews: ${count('help.preview')}.`,
-      `Effort: ${efforts.length}/${offers.length} offers answered numerically; mean ${efforts.length?(efforts.reduce((n,e)=>n+e.data.rating,0)/efforts.length).toFixed(1):'unavailable'} / 9. Declined: ${responses.filter(e=>e.data.disposition==='declined').length}; no response: ${responses.filter(e=>e.data.disposition==='no_response').length+offers.filter(e=>!responseMap.has(e.id)).length}; attempts not sampled: ${Math.max(0,attempts.filter(a=>a.submissions.length).length-new Set(offers.map(e=>e.data.attempt)).size)}.`,
+      `Effort: ${efforts.length}/${offers.length} offers answered numerically; mean ${efforts.length?(efforts.reduce((n,e)=>n+e.rating,0)/efforts.length).toFixed(1):'unavailable'} / 9. Declined: ${offers.filter(e=>e.disposition==='declined').length}; no response: ${offers.filter(e=>e.disposition==='no_response').length}; attempts not sampled: ${unsampled}.`,
       `Navigation actions: ${rows.filter(e=>e.action.startsWith('navigation.')||e.action==='source.change').length}; pauses: ${count('session.pause')}; resumes: ${count('study.resume')}; unclean endings inferred: ${count('session.unclean')}.`,
       `Review admissions: ${count('review.admit')}; retirements: ${count('review.retire')}; deferrals: ${count('review.defer')}; blocks stopped: ${count('block.stop')}.`,
       `Adaptation selections: ${count('adaptation.choice')}; selections to continue: ${rows.filter(e=>e.action==='adaptation.choice'&&e.data.choice==='continue').length}; companion requests copied: ${count('help.request')+rows.filter(e=>e.action==='handoff.copy'&&e.data.purpose!=='questions').length}; responses retained: ${count('help.retained')}. Selection or copying does not establish received help, consultation or benefit.`,
       `Errors: ${count('operation.error')}; logging recoveries: ${count('recorder.recovered')}; cancellations: ${count('operation.cancel')}.`,
       'Operation latency (wall time, not mental effort): '+(()=>{const a=rows.filter(e=>e.action==='operation.complete'&&Number.isFinite(e.data.duration_ms));return a.length?`${a.length} observations; mean ${(a.reduce((n,e)=>n+e.data.duration_ms,0)/a.length).toFixed(0)} ms.`:'unavailable.';})());
     for(const a of assessed)lines.push(`Latest assessment for attempt ${a.id}: ${a.observation.outcome}; ${a.assessment.at}; ${a.assessment.software?.version||'unknown version'} / ${a.assessment.software?.commit||'unknown commit'}; ${a.assessment.data.corrects?'linked correction':'original assessment'}.`);
+    for(const effort of offers) {
+      const observation=Number.isInteger(effort.rating)?`reader report ${effort.rating} / 9`:effort.disposition;
+      const response=effort.response?`${effort.response.at}; ${effort.response.software?.version||'unknown version'} / ${effort.response.software?.commit||'unknown commit'}`:'unavailable';
+      lines.push(`Effort for attempt ${effort.attempt}: ${observation}; offer ${effort.offer.id} at ${effort.offer.at}; response ${response}. Attributed to the original task above.`);
+    }
     lines.push('');
   }
-  if(projection.missing.length)lines.push('## Missing linked context','',...projection.missing.map(m=>`- ${m.reason}${m.attempt?' Attempt: '+m.attempt:''}${m.event?' Event: '+m.event:''}`),'Unsupported derived attempt values are excluded.','');
+  const missing=[...projection.missing,...effortProjection.missing];
+  if(missing.length)lines.push('## Missing linked context','',...missing.map(m=>`- ${m.reason}${m.attempt?' Attempt: '+m.attempt:''}${m.event?' Event: '+m.event:''}`),'Unsupported derived attempt and effort values are excluded.','');
   if(!groups.size)lines.push('No recorded sessions selected. No earlier release history has been fabricated.');
   return lines.join('\n');
 }

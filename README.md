@@ -4,7 +4,7 @@ MRW is an experimental VS Code extension for studying mathematics from retained
 source passages. Keep questions, attempted arguments, attributed help and a place
 to resume beside the source. Proof graphs are available when they help the work.
 
-**Current version: 0.19.0.** The repository remains private. There is no published
+**Current version: 0.19.1.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity remains `flengyel.theorem-terminal`.
 
@@ -40,7 +40,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `theorem-terminal-0.19.0.vsix`. Confirm installation under that workspace
+select `theorem-terminal-0.19.1.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -50,8 +50,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.0.vsix
-sha256sum vscode/theorem-terminal-0.19.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.1.vsix
+sha256sum vscode/theorem-terminal-0.19.1.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.
