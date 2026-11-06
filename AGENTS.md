@@ -1,5 +1,14 @@
 # Codex instructions
 
+## Current task — repair study continuity and evidence
+
+The active handoff is [CODEX_STUDY_RELIABILITY_PROMPT](docs/CODEX_STUDY_RELIABILITY_PROMPT.md),
+supported by [MRW_019_REVIEW](docs/MRW_019_REVIEW.md). Implement its reproduced
+0.19 defects while preserving the delivered interaction and shared source,
+attribution and persistence invariants. Older delivered priorities below remain
+context, not instructions to repeat completed work. GPTWork reviews and writes
+handoffs; local Codex implements in VS Code connected to WSL2.
+
 ## Delivered task — study feedback and public preparation
 
 Follow [CODEX_STUDY_FEEDBACK_PROMPT](docs/CODEX_STUDY_FEEDBACK_PROMPT.md) and the

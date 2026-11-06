@@ -1,5 +1,16 @@
 # Codex continuation: MRW source work and companion notes
 
+## Current assignment — repair 0.19 study continuity
+
+Implement [CODEX_STUDY_RELIABILITY_PROMPT](CODEX_STUDY_RELIABILITY_PROMPT.md),
+using [MRW_019_REVIEW](MRW_019_REVIEW.md) for reproduced failures and exact
+baseline locations. Reviewed HEAD: `6c7f227a3aec9861f0dc2112b83c77aa0e849b50`.
+Fetch/reconcile newer work first. The 0.19 feature assignment below is complete;
+this task addresses newly reproduced draft, selection, recording and evidence
+consistency defects. Preserve genuine work and continue through checked package
+delivery and commits to main. No publication or working-window reload is part
+of this assignment.
+
 ## Current delivery — study feedback, 0.19.0
 
 The fetched `origin/main` task at `923539a` is implemented after a clean
