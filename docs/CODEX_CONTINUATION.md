@@ -12,6 +12,14 @@ checks/package/commits. Do not repeat the completed feature or exposure campaign
 Preserve genuine sources, annotations, graphs, studies and history. No working
 window reload or switch is part of delivery. Use **MRW: Resume Study** for ordinary
 continuation; another example or learning-outcome exercise is not required.
+Delivery is installed as **0.19.1**, implementation `dd2dd1b`, clean build
+`8010ef6`. Package SHA-256:
+`64798986cd20b3aa68a702530afce9835a1010f6a42de6443df10e641f803668`.
+All 243 Node checks passed; Python ran 402 (335 passed, 67 explicit skips).
+Browser/controller/filesystem interaction passed; isolated native launch exited
+255 before its runner. Installed manifest and all 85 runtime files match; all
+64 inventoried genuine files remain unchanged. The window was not reloaded.
+
 Clipboard relay, outcome reports and review admission remain manual. Unsupported
 workspace/machine transfer and abrupt termination before checkpoint remain limits.
 Repository visibility stays private; publication/ownership decisions in

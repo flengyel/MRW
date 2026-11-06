@@ -1,0 +1,83 @@
+{
+  "baseline": "0f05cf4128524f68452de8dac28b807f502eb0ad",
+  "browser": {
+    "events": 115,
+    "math_errors": 0,
+    "missing_context": [],
+    "origin": "developer_fixture",
+    "rendered_math": 4,
+    "runtime_errors": 0,
+    "runtime_sources_match": true,
+    "scope": "isolated headless Chrome; actual renderer/controller/checkpoint/history; VS Code API facade, not native host",
+    "selected_export_events": 40,
+    "supporting_export_events": 15
+  },
+  "build": "8010ef658fb31c0e32a0ef0d62b788abd116675d",
+  "date": "2026-11-05",
+  "implementation": "dd2dd1bc88639508af672e75e23a80a0c6c89eac",
+  "installed": {
+    "manifest_matches": true,
+    "readme_license_match": true,
+    "registry_version": "0.19.1",
+    "runtime_files": 85,
+    "sha256": "64798986cd20b3aa68a702530afce9835a1010f6a42de6443df10e641f803668",
+    "version": "0.19.1",
+    "window_reloaded": false
+  },
+  "learning_benefit_claimed": false,
+  "mathematical_checking_claimed": false,
+  "native_host": {
+    "acceptance_claimed": false,
+    "exit_code": 255,
+    "runner_report": false,
+    "stderr": "",
+    "stdout": ""
+  },
+  "node": {
+    "command": "node --test --test-isolation=none --test-reporter=spec test/*.test.js",
+    "elapsed_s": 560.1482391357422,
+    "exit_code": 0,
+    "filesystem": "disposable persistent ext4 checkout",
+    "passed": 243,
+    "skipped": 0,
+    "tests": 243
+  },
+  "preservation": {
+    "baseline_files": 64,
+    "changed": []
+  },
+  "public_visibility_changed": false,
+  "python": {
+    "command": "PYTHONPATH=src python3 -m unittest discover -s tests -v",
+    "compileall_exit_code": 0,
+    "exit_code": 0,
+    "passed": 335,
+    "skip_reasons": {
+      "no_authorized_windows_project_parent": 1,
+      "opt_in_qt": 58,
+      "opt_in_tikz": 3,
+      "unbuilt_pinned_lean_checker": 5
+    },
+    "skipped": 67,
+    "tests": 402
+  },
+  "review_ids_fixed": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8",
+    "R9"
+  ],
+  "schema": 1,
+  "syntax_exit_code": 0,
+  "tools": {
+    "node": "24.22.1",
+    "npm": "11.13.0",
+    "python": "3.13.5"
+  },
+  "version": "0.19.1"
+}

@@ -1,4 +1,115 @@
-# Study feedback delivery — 0.19.0
+# Study reliability delivery — 0.19.1
+
+Date: 2026-11-05. Fetched origin and fast-forwarded the clean main checkout from
+`6c7f227a3aec9861f0dc2112b83c77aa0e849b50` to
+`0f05cf4128524f68452de8dac28b807f502eb0ad`. A final fetch found no newer main.
+No local changes were discarded. Independent model/evidence, recorder and
+renderer/help agents owned separate files; the root owned controller integration,
+source selection and delivery. This implements
+[CODEX_STUDY_RELIABILITY_PROMPT](CODEX_STUDY_RELIABILITY_PROMPT.md) against the
+[R1–R9 review](MRW_019_REVIEW.md).
+
+## Repairs and regression evidence
+
+| Review | Repair and checked boundary |
+| --- | --- |
+| R1 | Paste/Edit and continuation guard any pending response, including empty text. Original pasted bytes and attributed revisions survive. |
+| R2 | Explicit study/attempt/draft identities, per-study timers and dirty flush. Unknown/stale messages reject before mutation; delayed A and B persist to their original studies. Question save failure retains the form; failed cancellation restores a checkpointed form. Legacy renderer forms adopt identities without losing newer local text. |
+| R3 | Complete synchronized temporary snapshots precede atomic no-overwrite publication. Final inode/bytes/digest/name are checked. Real partial-byte ENOSPC is retried; event order and later events survive. Mismatched existing/final/substituted files are preserved with a visible gap. |
+| R4 | Invocation captures saved editor B before asynchronous work and prioritizes its selection over remembered reader A. Reader-supplied exact references remain authoritative; ordinary focus does not change an active study. |
+| R5 | The retained active outcome plus bounded `pendingOwners` intent is authoritative. Owner retry/restart reconciles the same derived state once. Dirty owners flush before subsequent changes; a changed owner checkpoint is preserved and reported. |
+| R6 | Historical scheduler replay works while retired and retains original review IDs/times, including corrections away from and back to assessed recall. Selection stays suspended until re-enrollment. |
+| R7 | Correction withdraws/recomputes outstanding offers with the exact earlier effort response; original/withdrawal/supersession events remain. Obsolete offer choices and effort responses reject before mutation. |
+| R8 | Global task/offer/response resolution precedes version/session grouping. Task attribution, response UTC/version and supporting context stay separate. Supporting-only tasks do not add selected assessment/sample denominators; missing evidence stays unknown. |
+| R9 | Multiple requests require an explicit request/purpose or unassociated reply. Reverse-order replies and attributed reassociation retain original text and their own attempt/source/adaptation links through reopen/export. |
+
+Baseline reproductions failed for pending-reply replacement, delayed drafts,
+owner-write recovery, stale offers, retired replay, snapshot partial publication,
+cross-release effort and supporting-context boundaries. The R4 baseline returned
+reader A instead of the explicitly selected B. Two publication-race tests also
+failed before final-inode verification. Existing 23 measurement/feedback/view
+checks remain in the suite; fixture envelopes now supply the production identity
+protocol instead of bypassing it.
+
+Recovery does not promise power-loss durability or multiwriter coordination.
+An irreconcilably changed owner or foreign immutable collision remains visible;
+MRW preserves it instead of inventing a review or overwriting data. Batched live
+drafts remain vulnerable before their checkpoint boundary.
+
+## Combined interaction and host limits
+
+An isolated headless Chrome session used the actual renderer, controller and
+filesystem with a VS Code API/clipboard/export facade and two disposable source
+passages. It held A's actual answer message, switched to B's pending question,
+then delivered A and verified both after shutdown/reopen. It retained A's reply,
+corrected pending B, verified replacement locks and pause/reopen, associated
+reverse-order replies with distinct request/adaptation links, and retained an
+unrelated reply unassociated. Independent attempts exercised effort, correction,
+withdrawal and obsolete-choice rejection. The selected-session JSON export has
+40 selected and 15 supporting events, no missing context, and resolves the
+original request. Exact submitted work stayed unchanged.
+
+The fixture recorded 115 `developer_fixture` events, rendered four equations,
+and had zero runtime or KaTeX errors. All seven used runtime file hashes match
+the final source. This is browser/controller/filesystem evidence, not a native
+VS Code result or human study observation.
+
+The isolated native Windows Code.exe attempt used a fresh profile and disposable
+WSL project. It exited **255** with empty stdout/stderr before creating a runner
+report. This is not native acceptance. The working VS Code/Codex window was not
+reloaded, switched or closed. No further launch campaign was run.
+
+## Broader checks and delivery
+
+The final broader Node run passed **243/243**, including the existing 23 focused
+cases and 37 new reliability regressions. It used `node --test
+--test-isolation=none --test-reporter=spec test/*.test.js` in a disposable
+persistent ext4 checkout. Shared Python discovery ran **402 tests: 335 passed,
+67 skipped**, exit 0. Skips: 58 opt-in Qt widget checks, five unavailable built
+Lean-checker cases, three opt-in isolated TikZ cases and one unauthorized `/mnt/c`
+project case. `compileall` and final `npm run check --prefix vscode` passed.
+No mathematical checker or provider was invoked. The 137 committed source/test
+file hashes used by the broad run match both main and the clean package checkout.
+
+Logs and exit-status records remain under `/tmp/mrw-0191-*`; compact committed
+[evidence](evidence/study-reliability-20261105/verification.json) records commands,
+counts, source hashes, browser/host scope and package verification.
+
+Implementation: `dd2dd1bc88639508af672e75e23a80a0c6c89eac`. Clean build checkout:
+`8010ef658fb31c0e32a0ef0d62b788abd116675d`. Node **24.22.1**, npm **11.13.0**, Python **3.13.5**;
+`npm ci --prefix vscode --ignore-scripts` installed all 127 pinned build packages.
+The documented package command ran with `TZ=UTC SOURCE_DATE_EPOCH=1792094267`.
+Build checkout stayed clean. The verifier accepted exactly 90 archive files,
+the production manifest, all runtime bytes and pinned dependency/license hashes;
+development tests, logs and personal history are excluded.
+
+VSIX SHA-256: `64798986cd20b3aa68a702530afce9835a1010f6a42de6443df10e641f803668`.
+It is retained at `vscode/theorem-terminal-0.19.1.vsix` (ignored by Git) and installed
+through the established WSL code-server route. Installed manifest, all **85 runtime
+files**, packaged README/license and extension registry version match. VSCE's
+normal README-link rewriting is retained. All **64 inventoried genuine files**
+remain byte-identical after installation. No reload/window switch was requested;
+the open session can activate the update when its reader elects to reload.
+
+## Interaction changes and remaining friction
+
+Removed: accidental replacement of pending help; loss of a delayed earlier study
+draft; manual repair after an owned partial snapshot write; lost shared-owner
+schedule changes after a recoverable checkpoint failure; stale correction offers;
+and recency-based guesses about which request a reply answers. An explicit saved
+selection no longer requires clearing remembered reader material.
+
+Still manual: clipboard relay to/from Codex, attribution review, ambiguous request
+selection, outcome/consultation reports, optional effort and review admission.
+Foreign-file/changed-owner conflicts require inspection; abrupt termination before
+checkpoint and workspace/machine transfer remain limits. No human learning,
+mathematical checking or causal release benefit is established by these tests.
+Use **MRW: Resume Study** to continue genuine work; no new exercise is required.
+Public-readiness decisions and private repository visibility are unchanged.
+
+---
+
+## Earlier study feedback delivery — 0.19.0
 
 Date: 2026-11-05. Baseline: `923539a` fetched from `origin/main` and fast-forwarded
 from clean `098f257`; no ongoing work was discarded. The assignment is

@@ -1,0 +1,37 @@
+{
+  "activeStudy.js": {
+    "used": "9b59bf41b09d820e4dbc273e243c580dd5c482e0662aef1c0fa6f13560b8c612",
+    "current": "9b59bf41b09d820e4dbc273e243c580dd5c482e0662aef1c0fa6f13560b8c612",
+    "matches": true
+  },
+  "activeStudyView.js": {
+    "used": "400fdce417089c33777eac19171512a037b62e7285f49be10b0cb56561ea1841",
+    "current": "400fdce417089c33777eac19171512a037b62e7285f49be10b0cb56561ea1841",
+    "matches": true
+  },
+  "studyHelp.js": {
+    "used": "cf3188eb3791b5ea4365e7357cafd8a9b054d8b41bbda27cdc775390bb9ad545",
+    "current": "cf3188eb3791b5ea4365e7357cafd8a9b054d8b41bbda27cdc775390bb9ad545",
+    "matches": true
+  },
+  "studyModel.js": {
+    "used": "29770cf777dfb4890da2ef7f6020602f340693109d8cdf9c1783fc27df77e314",
+    "current": "29770cf777dfb4890da2ef7f6020602f340693109d8cdf9c1783fc27df77e314",
+    "matches": true
+  },
+  "studyEvidence.js": {
+    "used": "022a8a890f48aa5e6a8310196da17ab2137f923fc9b82924c088a94474fcab6c",
+    "current": "022a8a890f48aa5e6a8310196da17ab2137f923fc9b82924c088a94474fcab6c",
+    "matches": true
+  },
+  "studyHistory.js": {
+    "used": "189e16902e7dc137ccf07e0b131943982d22d57001f07f46283e5c9221809233",
+    "current": "189e16902e7dc137ccf07e0b131943982d22d57001f07f46283e5c9221809233",
+    "matches": true
+  },
+  "studyScheduler.js": {
+    "used": "bdaae6a0b5b8d9c157a7bd5a8242b224c89918d8dd9d825ff96eb51e92acf260",
+    "current": "bdaae6a0b5b8d9c157a7bd5a8242b224c89918d8dd9d825ff96eb51e92acf260",
+    "matches": true
+  }
+}
