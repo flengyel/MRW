@@ -1631,7 +1631,8 @@ test('reading navigator derives live Markdown, follows two sources, pins returns
   assert.equal(restoredDoc.getText(restored.api.window.activeTextEditor.selection), references[2].markdown);
   const beforeWrong = restored.requests.length;
   restored.api.workspace.getWorkspaceFolder = () => undefined;
-  await restored.commands.get('mrw.returnToReadingOutline')(); assert.match(restored.errors.pop(), /workspace/);
+  restored.api.workspace.workspaceFolders = []; // No workspace or explicitly selected external scope remains.
+  await restored.commands.get('mrw.returnToReadingOutline')(); assert.match(restored.errors.pop(), /scope/);
   assert.equal(restored.requests.length, beforeWrong);
   assert.equal(await fs.readFile(file, 'utf8'), original);
   assert.deepEqual(h.errors, []); assert.deepEqual(restored.errors, []);
