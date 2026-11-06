@@ -10,7 +10,7 @@ PDF links, and supplies backlinks and return locations alongside source reading,
 study and attributed assistance. General research resumption and argument
 reconstruction remain later increments.
 
-**Current version: 0.20.0.** The repository remains private. There is no published
+**Current version: 0.21.0.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity remains `flengyel.theorem-terminal`.
 
@@ -26,6 +26,7 @@ session.
 - Open original notes and papers without importing them.
 - Follow note/PDF links, inspect backlinks and return within an explicitly chosen notes folder.
 - Retain a saved text passage with its exact reference and source revision.
+- Import a Stacks Project section or Kerodon section with source-qualified citations.
 - Enter questions manually or exchange one bounded handoff with the Codex companion.
 - Submit work, retain a returned explanation, revise the work and resume later.
 - Keep selected recall questions for short, source-scoped review using FSRS.
@@ -55,7 +56,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `theorem-terminal-0.20.0.vsix`. Confirm installation under that workspace
+select `theorem-terminal-0.21.0.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -65,8 +66,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.20.0.vsix
-sha256sum vscode/theorem-terminal-0.20.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.21.0.vsix
+sha256sum vscode/theorem-terminal-0.21.0.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.

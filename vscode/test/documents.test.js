@@ -37,7 +37,7 @@ function harness(f, state = new Map(), options = {}) {
   const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [];
   let documents, openHook, showHook, pickHook, infoResponse, externalResult = true;
   const api = {
-    Position, Range, Selection, Uri: { file: uri, parse: value => uri(fileURLToPath(value)) },
+    Position, Range, Selection, Uri: { file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: 'https', toString: () => value } },
     ProgressLocation: { Notification: 15 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 },
     extensions: { all: options.pdfReader === false ? [] : [{ packageJSON: { contributes: { customEditors: [
       { viewType: 'fixture.pdf', displayName: 'Fixture PDF reader', selector: [{ filenamePattern: '*.pdf' }] },
@@ -82,7 +82,7 @@ function harness(f, state = new Map(), options = {}) {
   const context = { workspaceState: {
     get: key => state.get(key), async update(key, value) { state.set(key, structuredClone(value)); },
   } };
-  documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name, callback), trackLocation,
+  documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name, callback), trackLocation, resolveReferences: options.resolveReferences,
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
     api, commands, state, documents, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external,
@@ -270,4 +270,35 @@ test('unrelated editor changes do not publish document navigation state', async 
   h.change(unrelated, 0, 0, 'An unrelated draft\n');
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(h.state.get('mrw.documents.v1'), before);
+});
+
+test('qualified canonical links and legacy retained backlinks keep prefixes without rewriting notes or replacing return pins', async t => {
+  const f = await fixture(t), requests = [];
+  const legacy = 'mrw-outline:v1/' + 'a'.repeat(64) + '/11111111-1111-1111-1111-111111111111/' + 'b'.repeat(64);
+  const legacyText = `[Retained proof](${legacy})\n[[kerodon:0004]]\n[Other corpus](https://stacks.math.columbia.edu/tag/0004)\n`;
+  await fs.writeFile(f.file('3c.md'), legacyText);
+  const h = harness(f, new Map(), { resolveReferences: async references => {
+    requests.push(references);
+    return { entries: references.map(reference => ({ reference, qualified_id: 'kerodon:0004', source_revision: 'b'.repeat(64) })) };
+  } });
+  await h.folder(); const a = await h.open('1a.md'); await h.follow(a, '2b');
+  const prior = structuredClone(h.state.get('mrw.documents.v1').origin);
+  await h.commands.get('mrw.showBacklinks')('kerodon:0004');
+  assert.deepEqual(requests, [[legacy]]);
+  assert.equal(h.picks.at(-1).choices.length, 2);
+  assert.ok(h.picks.at(-1).choices.every(c => c.hit.qualified_id === 'kerodon:0004'));
+  assert.equal(h.selected(), `[Retained proof](${legacy})`);
+  assert.deepEqual(h.state.get('mrw.documents.v1').origin, prior);
+  const c = h.api.window.activeTextEditor.document;
+  assert.equal(await h.follow(c, 'kerodon:0004'), true);
+  assert.equal(h.external.at(-1).toString(), 'https://kerodon.net/tag/0004');
+  await h.documents.returnToDocument(); assert.equal(h.selected(), '[[kerodon:0004]]');
+  const usable = structuredClone(h.state.get('mrw.documents.v1'));
+  h.setExternalResult(false);
+  await assert.rejects(() => h.follow(c, 'kerodon:0004'), /could not be opened/);
+  assert.deepEqual(h.state.get('mrw.documents.v1'), usable);
+  await h.commands.get('mrw.showBacklinks')('stacks-project:0004');
+  assert.equal(h.picks.at(-1).choices.length, 1);
+  assert.equal(h.picks.at(-1).choices[0].hit.qualified_id, 'stacks-project:0004');
+  assert.equal(await fs.readFile(f.file('3c.md'), 'utf8'), legacyText);
 });

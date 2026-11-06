@@ -253,7 +253,7 @@ def validate_state(value, root, identifier):
     if imported:
         acquisition = value['acquisition']
         fields(acquisition, {'kind', 'artifact'}, 'source acquisition')
-        if acquisition['kind'] != 'stacks-section':
+        if acquisition['kind'] not in ('stacks-section', 'kerodon-section'):
             raise ValueError('Unsupported source acquisition')
         identity(acquisition['artifact'])
         if not any(a['id'] == acquisition['artifact'] and a['kind'] == 'supporting_artifact'
@@ -398,6 +398,9 @@ class OutlineStore:
                 a['error'] = str(exc)
         if value.get('acquisition', {}).get('kind') == 'stacks-section':
             from .stacks_import import enrich
+            enrich(self, value)
+        elif value.get('acquisition', {}).get('kind') == 'kerodon-section':
+            from .kerodon_import import enrich
             enrich(self, value)
         from .reader_diagrams import enrich as diagram_view
         diagram_view(self, value)
@@ -636,7 +639,7 @@ def outline_action(request):
                 raise ValueError('Unknown passage')
             span = region['statement']['span'] if request['statement'] and region['statement'] else region['span']
         span_text(source, span)
-        if store.state.get('acquisition', {}).get('kind') == 'stacks-section':
+        if store.state.get('acquisition', {}).get('kind') in ('stacks-section', 'kerodon-section'):
             return {'retained': True, 'text': source.text, 'source_revision': source.revision,
                     'start': host_point(source, span, 'start'), 'end': host_point(source, span, 'end')}
         current = ordinary_source(str(source.path), source.revision)

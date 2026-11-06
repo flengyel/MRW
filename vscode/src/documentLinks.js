@@ -4,6 +4,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { TextDecoder } = require('node:util');
+const { qualifiedIdentifier } = require('./sourceIdentifiers');
 const { parseReadingMarkdown, frontMatterInfo } = require('./readingMarkdown');
 
 const DEFAULT_LIMITS = Object.freeze({ maxFiles: 2000, maxBytes: 32 * 1024 * 1024,
@@ -185,15 +186,20 @@ async function backlinks(index, targetPath) {
     complete: Boolean(index?.complete), cancelled: Boolean(index?.cancelled), errors: [...(index?.errors || [])] };
   if (!index?.root) return { ...result, complete: false, errors: [{ code: 'no_scope', message: 'Choose a notes folder to inspect backlinks.' }] };
   const io = index.io || fs;
+  const qualified = qualifiedIdentifier(targetPath);
   let target;
   try {
-    target = await io.realpath(targetPath);
-    if (!within(index.root, target) || !(await io.stat(target)).isFile()) throw new Error('The target is outside the selected notes folder or is not a document.');
+    target = qualified || await io.realpath(targetPath);
+    if (!qualified && (!within(index.root, target) || !(await io.stat(target)).isFile())) throw new Error('The target is outside the selected notes folder or is not a document.');
   } catch (error) { return { ...result, complete: false, errors: [...result.errors, { path: targetPath, code: 'invalid_target', message: error.message }] }; }
   for (const note of index.files.values()) {
     for (const node of note.parsed.all) {
       if (cancelled(index.token)) return { ...result, complete: false, cancelled: true };
-      if (node.kind !== 'document_link') continue;
+      if (qualified) {
+        if (node.qualified_id === qualified) result.occurrences.push({ sourcePath: note.path, sourceRevision: note.parsed.revision, sourceText: note.text.slice(node.start,node.end), node, targetPath: qualified, qualified_id: qualified, fragment: '' });
+        continue;
+      }
+      if (node.kind !== 'document_link' || node.qualified_id) continue;
       // Web citations and host-only URI handlers are not local note candidates.
       // Do not describe an ordinary bibliography as an incomplete local index.
       if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || node.target.startsWith('//'))) continue;

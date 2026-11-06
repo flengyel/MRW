@@ -35,6 +35,17 @@ planned until code is delivered. Publication and storage qualification are
 outside this sequence. Detailed labels, compatibility and acceptance scope are
 specified once in the linked task and design.
 
+## Published sources — 0.21.0
+
+The user-requested extension adds **Import Kerodon Section…** and spells out
+**Import Stacks Project Section…**. Both use qualified source identities and the
+existing retained-source reader. Kerodon retains one official HTML page snapshot;
+Stacks Project keeps its pinned Git/TeX acquisition. Source identity, immutable
+revision and exact passage remain separate. This bounded source-adapter increment
+does not replace the research-resumption sequence above. Subsequent work must
+preserve full prefixes through links, backlinks and research records; follow
+[SOURCE_IDENTIFIERS](docs/SOURCE_IDENTIFIERS.md). nLab remains a later adapter.
+
 ## Implemented repair — study continuity and evidence, 0.19.1
 
 [CODEX_STUDY_RELIABILITY_PROMPT](docs/CODEX_STUDY_RELIABILITY_PROMPT.md) and all

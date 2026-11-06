@@ -1714,7 +1714,7 @@ test('navigator opens exact published mathematics in an expanded reader, retaini
   await fs.writeFile(file, text);
   const doc = h.document(file, text); doc.languageId = 'markdown'; h.focus(h.editor(doc));
   let model = await h.commands.get('mrw.openReadingOutline')(); const node = model.all[1];
-  assert.equal(h.api.readingProvider.getTreeItem(node).label, 'Hausdorff spaces');
+  assert.equal(h.api.readingProvider.getTreeItem(node).label, 'stacks-project:08ZE');
   const rawViews = () => h.shown.filter(d => d.uri.scheme === 'mrw-record').length;
   const before = rawViews();
   assert.equal((await h.commands.get('mrw.selectReadingOutlineItem')(node)).status, 'unchanged');
@@ -2204,4 +2204,23 @@ test('Contents rejects a PDF picker result before any host text read', async t =
   await h.commands.get('mrw.chooseReadingOverview')();
   assert.match(h.errors.pop(), /Use Open Document for other formats/);
   assert.equal(h.reads.length, 0); assert.equal(h.state.size, 0);
+});
+
+test('Kerodon import confirms a source-qualified page snapshot and reopens its exact reader offline', async t => {
+  const root=await temporary(t),h=await harness(root);
+  h.setService((extension,executable,request,options)=>runBridge(extension,executable,request,{...options,
+    spawn:(command,args,settings)=>require('node:child_process').spawn(command,[args[0],path.join(extension,'test/kerodon_bridge.py')],settings)}));
+  h.inputs.push('kerodon:0004');h.endings.push('Import section');
+  const result=await h.commands.get('mrw.importKerodonSection')();assert.ok(result,h.errors.join('\n'));
+  const pub=result.outline.published;assert.equal(pub.qualified_tag,'kerodon:0004');assert.equal(pub.authors,'Jacob Lurie');assert.equal(pub.commit,null);
+  assert.ok(h.panels[0].webview.html.includes('MRWStacks'));assert.equal(h.requests.filter(r=>r.method==='outline_kerodon_prepare').length,1);
+  const statement=Object.values(pub.parts).find(p=>p.tag==='000A'&&p.role==='statement');
+  await h.panels[0].receive({type:'stacks_reference',tag:'kerodon:000A'});
+  assert.ok(h.panels[0].webview.messages.findLast(m=>m.type==='outline').reference.uri.startsWith('mrw-outline:v2/kerodon:000A/'));
+  await h.panels[0].receive({type:'stacks_citation',tag:'kerodon:ZZZZ'});
+  assert.equal(h.api.external.path,'https://kerodon.net/tag/ZZZZ');
+  await h.panels[0].receive({type:'stacks_citation',tag:'stacks-project:ZZZZ'});assert.match(h.errors.pop(),/identified citation/);
+  const again=await harness(root);await again.commands.get('mrw.openOutline')();
+  assert.equal(again.panels[0].webview.messages.findLast(m=>m.type==='outline').model.outline.published.qualified_tag,'kerodon:0004');
+  assert.deepEqual(h.errors,[]);assert.deepEqual(again.errors,[]);
 });

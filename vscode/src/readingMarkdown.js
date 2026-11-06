@@ -2,6 +2,7 @@
 // Parse Markdown as data. No renderer, plugins, URI handlers or source reads.
 const MarkdownIt = require('../media/markdown-it/markdown-it');
 const { digest } = require('./navigation');
+const { qualifiedIdentifier } = require('./sourceIdentifiers');
 const md = new MarkdownIt('commonmark');
 const textRule = md.inline.ruler.__rules__.find(r => r.name === 'text').fn;
 // A note ID is resolved by the selected-folder index, not by the Markdown
@@ -130,6 +131,8 @@ function parseReadingMarkdown(text) {
   function add(node, parent) {
     const key = `${parent?.id || ''}/${node.kind}/${digest(node.label)}`;
     const occurrence = counts.get(key) || 0; counts.set(key, occurrence + 1);
+    const identifier = qualifiedIdentifier(node.reference || node.target);
+    if (identifier) node.qualified_id = identifier;
     node.id = `${key}/${occurrence}`; node.children = [];
     (parent?.children || roots).push(node); all.push(node);
     if (all.length > 10000) throw new Error('Document exceeds the 10,000 heading/link limit.');

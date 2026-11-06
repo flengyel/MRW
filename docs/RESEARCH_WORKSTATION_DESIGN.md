@@ -1,5 +1,11 @@
 # Documents, research continuity, and argument reconstruction
 
+Published-source implementations must preserve the distinction between a stable
+qualified item ID, an immutable content revision and an exact passage. Document
+links, backlinks and research records carry the full source prefix. See
+[SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md); canonical links do not replace
+retained citations.
+
 Status: approved design direction, 2026-11-06. The terminology increment is
 implemented in 0.19.2; the following integrations remain staged below.
 Latest review: MRW 0.19.2, `42b465f2fbdab96445e4c59cc5c3818cb735b4e7`.

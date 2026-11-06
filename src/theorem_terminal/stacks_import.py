@@ -39,15 +39,8 @@ def digest(raw):
 
 
 def section_tag(value):
-    if not isinstance(value, str) or len(value) > 256:
-        raise ValueError('Enter a four-character Stacks section tag or its official HTTPS URL')
-    value = value.strip()
-    if re.fullmatch(r'[A-Za-z0-9]{4}', value):
-        return value.upper()
-    match = re.fullmatch(r'https://stacks\.math\.columbia\.edu/tag/([A-Za-z0-9]{4})/?', value)
-    if not match:
-        raise ValueError('Use an official https://stacks.math.columbia.edu/tag/XXXX section URL, without query or fragment')
-    return match[1].upper()
+    from .published_sources import local_tag
+    return local_tag('stacks-project', value)
 
 
 def canonical_url(tag):
@@ -346,6 +339,8 @@ def enrich(store, value):
             acquisition_artifacts=[a['id'] for a in value['artifacts'] if a['id'] == value['acquisition']['artifact']
                                    or any(r['artifact'] == a['id'] for r in manifest['files'].values())],
             source_file=manifest['source_file'], source_revision=source.revision, error=None)
+        from .published_sources import qualify_view
+        qualify_view(value['published'], 'stacks-project')
         value['source_status'] = 'retained upstream import'
     except (OSError, ValueError, KeyError, TypeError) as exc:
         value['published'] = {'error': 'Retained Stacks import unavailable: ' + str(exc)}
@@ -441,7 +436,7 @@ def retained_reference(request):
     if store.state.get('acquisition', {}).get('kind') != 'stacks-section':
         raise ValueError('This outline is not an imported Stacks section')
     manifest, _ = _manifest(store)
-    target = next((p for p in manifest['parts'] if p['tag'] == request['tag'] and p['role'] == 'statement'), None)
+    target = next((p for p in manifest['parts'] if p['tag'] == section_tag(request['tag']) and p['role'] == 'statement'), None)
     if target is None:
         raise ValueError('This reference is outside the retained section; use its canonical Stacks citation explicitly')
     from .outline_references import pinned_reference, reference_action

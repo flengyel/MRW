@@ -1,6 +1,26 @@
 # Codex continuation: MRW documents and research work
 
-## Current increment — existing documents, 0.20.0
+## Current increment — qualified published sources, 0.21.0
+
+The user requested uniform source IDs, the full Stacks Project command name and
+Kerodon import. [SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md) specifies the contract:
+a stable source item ID does not fix an immutable content revision. Preserve
+`stacks-project:` / `kerodon:` prefixes in document links, backlinks and research
+records, while retaining the content revision and exact passage separately.
+Never substitute today's canonical page for a retained quotation. Existing v1
+links remain readable without note rewrites; new published links use v2.
+
+Kerodon acquires one bounded official HTML page on explicit import, retaining its
+exact response, SHA-256 and acquisition time. It does not claim a Git revision or
+Stacks Project license. The source adapter feeds the existing inert reader;
+linked subsections and external citations are not automatically imported.
+nLab requires a separate inspected adapter. General research resumption and
+argument reconstruction follow; preserve the delivered document/study behavior.
+
+Package identity, checks and observation limits belong in
+[PUBLISHED_SOURCES_VALIDATION](PUBLISHED_SOURCES_VALIDATION.md).
+
+## Earlier increment — existing documents, 0.20.0
 
 [CODEX_EXISTING_DOCUMENTS_PROMPT](CODEX_EXISTING_DOCUMENTS_PROMPT.md) is implemented
 from fetched main `47e6275`, preserving the delivered 0.19.2 terminology patch.

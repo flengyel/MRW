@@ -26,11 +26,11 @@
       else if (value.kind === 'reference') {
         if (!value.tag) node('span', parent, value.label + ' [unresolved source reference]', 'warning');
         else {
-          const button = node('button', parent, value.tag + (value.retained ? '' : ' ↗'), 'source-reference');
-          button.type = 'button'; button.dataset.action = 'stacks-reference'; button.dataset.tag = value.tag;
+          const button = node('button', parent, (value.qualified_tag || value.tag) + (value.retained ? '' : ' ↗'), 'source-reference');
+          button.type = 'button'; button.dataset.action = 'stacks-reference'; button.dataset.tag = value.qualified_tag || value.tag;
           button.title = value.retained ? 'Follow this explicit citation to the exact retained statement; works offline.'
-            : 'External prerequisite: open its canonical Stacks citation in your browser.';
-          button.addEventListener('click', () => action(value.retained ? 'stacks_reference' : 'stacks_citation', value.tag));
+            : 'External prerequisite: open its canonical source citation in your browser.';
+          button.addEventListener('click', () => action(value.retained ? 'stacks_reference' : 'stacks_citation', value.qualified_tag || value.tag));
         }
       } else if (value.kind === 'list') {
         const list = node(value.ordered ? 'ol' : 'ul', parent);
@@ -46,22 +46,24 @@
   function part(parent, published, action) {
     const box = node('div', parent, undefined, 'published-content');
     box.dataset.publishedPart = published.region;
-    if (published.warning) node('p', box, 'Display limitation: ' + published.warning + '. Complete TeX is shown.', 'warning');
+    if (published.warning) node('p', box, 'Display limitation: ' + published.warning + '. Exact retained source is available below.', 'warning');
     tokens(box, published.tokens, action);
     const exact = node('details', parent);
-    node('summary', exact, 'Exact retained TeX for this passage');
+    node('summary', exact, published.format === 'html' ? 'Exact retained HTML for this passage' : 'Exact retained TeX for this passage');
     node('pre', exact, published.exact_text);
   }
   function header(parent, value, action) {
-    node('p', parent, value.authors + ' · ' + value.chapter + ' · Section ' + value.section_number + ' · Tag ' + value.tag);
+    node('p', parent, value.authors + ' · ' + value.chapter + ' · Section ' + value.section_number + ' · ' + (value.qualified_tag || value.tag));
     node('p', parent, 'Published source structure and explicit citations; no complete dependency graph or mathematical verification is asserted.', 'muted');
     if (value.limitation) node('p', parent, 'Source retained only: ' + value.limitation + '. No generated regions are presented.', 'warning');
-    const citation = node('button', parent, 'Open canonical Stacks citation ↗');
+    const citation = node('button', parent, 'Open canonical source citation ↗');
     citation.type = 'button'; citation.dataset.action = 'stacks-citation';
-    citation.addEventListener('click', () => action('stacks_citation', value.tag));
+    citation.addEventListener('click', () => action('stacks_citation', value.qualified_tag || value.tag));
+    const backlinks = node('button', parent, 'Show backlinks…');
+    backlinks.type = 'button'; backlinks.addEventListener('click', () => action('published_backlinks', value.qualified_tag));
     const details = node('details', parent);
     node('summary', details, 'Source revision, chapter context and license');
-    node('p', details, value.source_file + ' · Git ' + value.commit + ' · retrieved ' + value.retrieved_at);
+    node('p', details, value.source_file + (value.commit ? ' · Git ' + value.commit : ' · Page SHA-256 ' + value.source_revision) + ' · retrieved ' + value.retrieved_at);
     node('p', details, 'Retained SHA-256 ' + value.source_revision);
     node('p', details, value.citation);
     node('p', details, value.license + '. Rendering is a derived view; the exact retained source is available offline.');
@@ -70,14 +72,14 @@
       if (!entry) continue;
       node('span', details, label + ': ' + entry.title + ' ');
       if (entry.tag) {
-        const link = node('button', details, entry.tag + ' ↗'); link.type = 'button';
-        link.addEventListener('click', () => action('stacks_citation', entry.tag));
+        const link = node('button', details, (value.source_id ? value.source_id + ':' : '') + entry.tag + ' ↗'); link.type = 'button';
+        link.addEventListener('click', () => action('stacks_citation', (value.source_id ? value.source_id + ':' : '') + entry.tag));
       }
     }
     const navigation = node('nav', parent, undefined, 'published-toc');
     navigation.setAttribute('aria-label', 'Imported section statements and proofs');
     for (const item of Object.values(value.parts)) {
-      const jump = node('button', navigation, item.role === 'context' ? 'Opening context' : item.tag + ' · ' + item.role);
+      const jump = node('button', navigation, item.role === 'context' ? 'Opening context' : (item.qualified_tag || item.tag) + ' · ' + item.role);
       jump.type = 'button'; jump.dataset.action = 'stacks-jump'; jump.dataset.region = item.region;
       jump.addEventListener('click', () => action('stacks_jump', item.region));
     }

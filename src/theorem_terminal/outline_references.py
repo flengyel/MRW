@@ -12,9 +12,35 @@ COL = r'(?:0|[1-9][0-9]{0,6})'
 REFERENCE = re.compile(rf'mrw-outline:v1/({HEX})/({UUID})/({HEX})'
                        rf'(?:/({UUID})/({LINE})\.({COL})-({LINE})\.({COL}))?')
 
+QUALIFIED = re.compile(r'mrw-outline:v2/((?:stacks-project|kerodon):[A-Z0-9]{4})/(.*)')
+
+
+def published_identity(store, region=None, span=None):
+    kind = store.state.get('acquisition', {}).get('kind')
+    if kind == 'stacks-section':
+        from .stacks_import import _manifest
+        source_id = 'stacks-project'
+    elif kind == 'kerodon-section':
+        from .kerodon_import import _manifest
+        source_id = 'kerodon'
+    else:
+        return None
+    manifest = getattr(store, '_published_manifest', None)
+    if manifest is None:
+        manifest, _ = _manifest(store)
+        store._published_manifest = manifest
+    def contains(part):
+        original = part['span']
+        return (original['start_line'], original['start_col']) <= (span['start_line'], span['start_col']) and (span['end_line'], span['end_col']) <= (original['end_line'], original['end_col'])
+    part = next((p for p in manifest['parts'] if (contains(p) if span else region and p['region'] == region)), None)
+    from .published_sources import qualified_tag
+    return qualified_tag(source_id, part['tag'] if part else manifest['tag'])
+
 
 def parse_reference(value):
-    match = REFERENCE.fullmatch(value) if isinstance(value, str) and len(value) <= 512 else None
+    qualified = QUALIFIED.fullmatch(value) if isinstance(value, str) and len(value) <= 512 else None
+    legacy = 'mrw-outline:v1/' + qualified[2] if qualified else value
+    match = REFERENCE.fullmatch(legacy) if isinstance(legacy, str) and len(legacy) <= 512 else None
     if match is None:
         raise ValueError('Malformed MRW source or passage link; no target was opened')
     scope, outline, source, region, *points = match.groups()
@@ -24,7 +50,9 @@ def parse_reference(value):
         if (sl, sc) >= (el, ec):
             raise ValueError('Malformed MRW source or passage link range')
         span = dict(source_revision=source, start_line=sl, start_col=sc, end_line=el, end_col=ec)
-    return dict(scope=scope, outline=outline, source=source, region=region, span=span)
+    result = dict(scope=scope, outline=outline, source=source, region=region, span=span)
+    if qualified: result['qualified_id'] = qualified[1]
+    return result
 
 
 def scope(store):
@@ -50,7 +78,8 @@ def markdown_label(value):
 
 def short_label(store, source, span):
     bib = store.state['source']['bibliography']
-    parts = [(bib['title'] or source.path.name)[:100]]
+    published = published_identity(store, span=span)
+    parts = ([published] if published else []) + [(bib['title'] or source.path.name)[:100]]
     if bib['locator']:
         parts.append(bib['locator'][:60])
     parts.append(locator(span) if span else 'source outline')
@@ -59,7 +88,9 @@ def short_label(store, source, span):
 
 def pinned_reference(store, source, region=None, span=None):
     """One formatter for manual selections and retained published references."""
-    uri = f'mrw-outline:v1/{scope(store)}/{store.id}/{source.revision}'
+    published = published_identity(store, region, span)
+    prefix = 'mrw-outline:v2/' + published if published else 'mrw-outline:v1'
+    uri = f'{prefix}/{scope(store)}/{store.id}/{source.revision}'
     if region is not None:
         from .source_outlines import identity
         identity(region)
@@ -88,6 +119,8 @@ def reference_action(request):
     except (OSError, ValueError) as exc:
         raise ValueError('Retained source unavailable; no replacement was guessed: ' + str(exc)) from exc
     if following:
+        if ref.get('qualified_id') and ref['qualified_id'] != published_identity(store, ref['region'], ref['span']):
+            raise ValueError('The source-qualified identifier differs from the retained citation')
         if ref['source'] != source.revision:
             raise ValueError('Referenced source revision differs from the saved source; no replacement was guessed')
         region = item_by_id(store.state['regions'], ref['region']) if ref['region'] else None
@@ -105,6 +138,7 @@ def reference_action(request):
                    'Passage association changed or removed; the originally referenced retained passage is opened, not the current passage range.'))
         result['reference'] = dict(uri=request['reference'], label=short_label(store, source, ref['span']), status=status, notice=notice,
                                    region=ref['region'] if status == 'unchanged' else None)
+        result['reference'].update(qualified_id=published_identity(store, ref['region'], ref['span']), source_revision=source.revision, passage=ref['span'])
         result['document'] = document
         return result
     region = item_by_id(store.state['regions'], request['region']) if request['region'] is not None else None
@@ -112,7 +146,7 @@ def reference_action(request):
         raise ValueError('The selected passage is unavailable; choose it again')
     uri = pinned_reference(store, source, region['id'] if region else None, region['span'] if region else None)
     bib = store.state['source']['bibliography']
-    parts = [bib['title'] or source.path.name]
+    parts = ([published_identity(store, request['region'])] if published_identity(store, request['region']) else []) + [bib['title'] or source.path.name]
     parts.extend(f'{key}: {bib[key]}' for key in ('authors', 'edition', 'revision', 'locator', 'reference') if bib[key])
     parts.append('source: ' + str(source.path))
     parts.append(f"{region['title']}; {locator(region['span'])}" if region else 'whole saved source')
@@ -144,3 +178,30 @@ def assistance_context_action(request):
                   '; region association ' + followed['reference']['status'] +
                   '. Reader annotations and supplied evidence are not included.'),
     }}
+
+
+def reference_identities(request):
+    """Resolve bounded legacy links for explicit backlinks; never acquire or rewrite."""
+    values = request['references']
+    if not isinstance(values, list) or len(values) > 256:
+        raise ValueError('Resolve at most 256 retained references per backlink scan')
+    base = OutlineStore(request['store'], request['project_root'])
+    stores, entries = {}, []
+    for value in values:
+        try:
+            ref = parse_reference(value)
+            if not matches_scope(base, ref['scope']):
+                raise ValueError('Reference belongs to another workspace or private storage scope')
+            if ref['outline'] not in stores:
+                stores[ref['outline']] = OutlineStore(str(base.base), str(base.root), ref['outline'])
+            store = stores[ref['outline']]
+            if ref['source'] != store.source().revision:
+                raise ValueError('Retained source revision differs')
+            if ref['span']: span_text(store.source(), ref['span'])
+            qualified = published_identity(store, ref['region'], ref['span'])
+            if ref.get('qualified_id') and ref['qualified_id'] != qualified:
+                raise ValueError('Qualified source identity differs')
+            entries.append(dict(reference=value, qualified_id=qualified, source_revision=ref['source'], passage=ref['span']))
+        except (OSError, ValueError) as exc:
+            entries.append(dict(reference=value, error=str(exc)))
+    return dict(entries=entries)

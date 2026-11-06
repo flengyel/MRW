@@ -26,6 +26,30 @@ source, attribution and persistence contracts and the 0.19.1 repairs. The 0.19.2
 GUI patch implements terminology, without new PDF/vault/research capabilities.
 GPTWork maintains design and review; local Codex implements in VS Code/WSL2.
 
+## Published source identity and retained citations — 0.21.0
+
+Use the complete qualified identifier, for example `stacks-project:08ZH` or
+`kerodon:0004`, in document links, backlinks, reader navigation and new research
+records. The prefix identifies the source; a bare tag does not distinguish
+corpora. Preserve the prefix across parsing, display, copying, handoffs, saving
+and resumption. Do not derive authority from a link label or silently strip the
+prefix when passing through another component.
+
+**A stable source identifier does not identify an immutable revision of its
+contents.** A retained citation must also preserve the source revision and exact
+passage, including the retained bytes, SHA-256, scope, outline/region identity
+and scalar range. A canonical website URL or qualified tag alone cannot replace
+that citation. Stacks Project Git provenance and Kerodon page-snapshot provenance
+remain distinct. Updating either upstream item never redirects an earlier
+retained passage to current text.
+
+New published-source citations use qualified `mrw-outline:v2` links. Existing
+`mrw-outline:v1` links remain valid; qualify their identity from verified retained
+provenance when needed, without rewriting genuine notes or source records.
+The shared source registry does not make nLab acquisition implemented. Read
+[SOURCE_IDENTIFIERS](docs/SOURCE_IDENTIFIERS.md) and
+[the import workflow](docs/STACKS_WORKFLOW.md) before extending source adapters.
+
 ## Implemented document integration — 0.20.0
 
 The existing-document task is implemented in the native host frontend. See

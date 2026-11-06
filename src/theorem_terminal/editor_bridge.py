@@ -87,6 +87,7 @@ def _dispatch(request):
         'outline_import_note': ({'store', 'project_root', 'path', 'source_revision'}, set()),
         'outline_load': ({'store', 'project_root', 'id'}, set()),
         'outline_reference': ({'store', 'project_root', 'id', 'revision', 'region'}, set()),
+        'outline_reference_identities': ({'store', 'project_root', 'references'}, set()),
         'outline_parse_reference': ({'reference'}, set()),
         'outline_follow_reference': ({'store', 'project_root', 'reference'}, set()),
         'outline_assistance_context': ({'store', 'project_root', 'reference'}, set()),
@@ -98,6 +99,9 @@ def _dispatch(request):
                             'kind', 'label', 'region', 'selector'}, set()),
         'outline_document': ({'store', 'project_root', 'id', 'revision', 'artifact'}, set()),
         'outline_navigation': ({'store', 'project_root', 'id', 'revision', 'region', 'context', 'statement'}, set()),
+        'outline_kerodon_prepare': ({'store', 'project_root', 'input'}, set()),
+        'outline_kerodon_import': ({'store', 'project_root', 'ticket', 'packet'}, set()),
+        'outline_kerodon_reference': ({'store', 'project_root', 'id', 'revision', 'tag'}, set()),
         'outline_stacks_prepare': ({'store', 'project_root', 'input'}, set()),
         'outline_stacks_import': ({'store', 'project_root', 'ticket', 'packet'}, set()),
         'outline_stacks_reference': ({'store', 'project_root', 'id', 'revision', 'tag'}, set()),
@@ -126,6 +130,9 @@ def _dispatch(request):
         if not isinstance(raw, str) or len(raw.encode('utf-8')) > 256 * 1024:
             raise ValueError('Questions exceed 256 KiB')
         return validate_questions(strict_json(raw.encode('utf-8')), request['sources'])
+    if method == 'outline_reference_identities':
+        from .outline_references import reference_identities
+        return reference_identities(request)
     if method == 'outline_parse_reference':
         return parse_reference(request['reference'])
     if method in ('outline_reference', 'outline_follow_reference'):
@@ -134,6 +141,9 @@ def _dispatch(request):
         return assistance_context_action(request)
     if method in ('outline_notes', 'outline_update_note'):
         return note_action(request)
+    if method.startswith('outline_kerodon_'):
+        from .kerodon_import import kerodon_action
+        return kerodon_action(request)
     if method.startswith('outline_stacks_'):
         from .stacks_import import stacks_action
         return stacks_action(request)

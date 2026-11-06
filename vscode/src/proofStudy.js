@@ -8,7 +8,7 @@ function studyPassages(selected) {
   if (new Set(selected.map(p => p.reference)).size !== selected.length) throw new Error('A passage was selected twice.');
   return selected.map((p, i) => {
     if (typeof p.text !== 'string' || !p.text.trim() || Buffer.byteLength(p.text) > 128 * 1024 ||
-        typeof p.reference !== 'string' || !/^mrw-outline:v1\//.test(p.reference) || !/^[a-f0-9]{64}$/.test(p.source_revision) ||
+        typeof p.reference !== 'string' || !/^mrw-outline:v[12]\//.test(p.reference) || !/^[a-f0-9]{64}$/.test(p.source_revision) ||
         !['published','human_reviewed','awaiting_human_review'].includes(p.review) || typeof p.label !== 'string' || p.label.length > 240) throw new Error('Choose a nonempty exact retained passage.');
     const url = new URL(p.url);
     if (url.protocol !== 'https:' || url.username || url.password) throw new Error('The retained source needs an HTTPS bibliographic reference.');

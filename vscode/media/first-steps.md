@@ -72,6 +72,23 @@ state; it does not acquire a new original-file revision.
 a passage annotation or a Markdown document. It is not needed to open notes or
 follow their links, and it does not synchronize them.
 
+## Import a published section
+
+**MRW: Import Stacks Project Section…** accepts `stacks-project:08ZD`, a bare
+tag or its official URL. **MRW: Import Kerodon Section…** accepts
+`kerodon:0004`, a bare tag or its official URL. Confirm the source, revision and
+saved-work destination. Stacks Project uses pinned Git/TeX; Kerodon retains one
+section/subsection HTML page with its hash and acquisition time. It does not
+import linked subsections.
+
+The reader shows qualified IDs, local statement/proof links and an explicit
+**Open canonical source citation ↗** browser button. **Show backlinks** searches
+the chosen notes folder for that qualified item, including retained citations.
+A live link such as `[[kerodon:0004]]` opens today's page. A retained citation
+also fixes the content revision and exact passage; its prefix alone cannot do so.
+Reopen an imported section offline with **Open Saved Source…**. Reader notes stay
+separate from the source. See [published sections](../docs/STACKS_WORKFLOW.md).
+
 ## Work through a difficult step
 
 For a local explanation, add a reader annotation as above. For a question and

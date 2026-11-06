@@ -213,7 +213,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
         else if (value.type === 'stacks_reference') {
-          const result = await bridge(request(c, 'outline_stacks_reference', { tag: value.tag }));
+          const result = await bridge(request(c, c.result.outline.acquisition?.kind === 'kerodon-section' ? 'outline_kerodon_reference' : 'outline_stacks_reference', { tag: value.tag }));
           c.reference = result.reference; c.selected = result.reference.region;
           await send(c, result);
           await openDocument(c, null, result.document);
@@ -222,12 +222,20 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
           const source = c.result.outline.published;
           const allowed = new Set([source?.tag, source?.chapter_tag, source?.previous?.tag,
             source?.next?.tag, ...(source?.reference_tags || [])]);
-          if (typeof value.tag !== 'string' || !/^[A-Z0-9]{4}$/.test(value.tag) || !allowed.has(value.tag)) {
+          const sourceId = source?.source_id || 'stacks-project';
+          const qualified = require('./sourceIdentifiers').qualifiedIdentifier(value.tag) || (/^[A-Z0-9]{4}$/.test(value.tag) ? sourceId + ':' + value.tag : undefined);
+          if (!qualified || !qualified.startsWith(sourceId + ':') || !allowed.has(qualified.split(':')[1])) {
             throw new Error('This is not an identified citation in the retained section.');
           }
-          if (!await vscode.env.openExternal(vscode.Uri.parse('https://stacks.math.columbia.edu/tag/' + value.tag))) {
-            throw new Error('The canonical Stacks citation could not be opened.');
+          if (!await vscode.env.openExternal(vscode.Uri.parse(require('./sourceIdentifiers').canonicalCitation(qualified)))) {
+            throw new Error('The canonical source citation could not be opened.');
           }
+        }
+        else if (value.type === 'published_backlinks') {
+          const pub = c.result.outline.published;
+          const id = pub?.parts?.[c.selected]?.qualified_tag || pub?.qualified_tag;
+          if (!id) throw new Error('This source has no qualified identifier.');
+          await vscode.commands.executeCommand('mrw.showBacklinks', id);
         }
         else if (value.type === 'refresh') await refresh(c);
         else if (['copy_link', 'associate_note', 'open_note', 'manage_notes'].includes(value.type)) {
@@ -270,7 +278,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       for (const name of ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
         support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
       }
-      if (result.outline.acquisition?.kind === 'stacks-section') {
+      if (['stacks-section','kerodon-section'].includes(result.outline.acquisition?.kind)) {
         support.push(await fs.readFile(path.join(context.extensionPath, 'src/stacksView.js'), 'utf8'));
       }
       const diagramStyle = await fs.readFile(path.join(context.extensionPath, 'media', 'diagram-theme.css'), 'utf8');
@@ -543,16 +551,16 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   }
   register('mrw.importStacksSection', () => locked(async () => {
     const input = await vscode.window.showInputBox({ title: 'Import a Stacks Project section',
-      prompt: 'Official section URL or four-character tag. This explicit action downloads one pinned source revision.',
-      value: '08ZD', ignoreFocusOut: true,
-      validateInput: value => /^(?:[A-Za-z0-9]{4}|https:\/\/stacks\.math\.columbia\.edu\/tag\/[A-Za-z0-9]{4}\/?)$/.test(value.trim())
+      prompt: 'Section tag, stacks-project:TAG or official HTTPS URL. Downloads one pinned source revision.',
+      value: 'stacks-project:08ZD', ignoreFocusOut: true,
+      validateInput: value => /^(?:(?:stacks-project:)?[A-Za-z0-9]{4}|https:\/\/stacks\.math\.columbia\.edu\/tag\/[A-Za-z0-9]{4}\/?)$/.test(value.trim())
         ? undefined : 'Enter a section tag or its official HTTPS URL, without query or fragment.' });
     if (input === undefined) return;
     const { store, root } = await storage(); writable({ store });
     const download = () => bridge({ method: 'outline_stacks_prepare', store, project_root: root, input }, { timeout: 120000 });
     const prepared = vscode.window.withProgress
       ? await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification,
-        title: 'MRW: obtaining one Stacks section and its matching source metadata', cancellable: false }, download)
+        title: 'MRW: obtaining one Stacks Project section and its matching source metadata', cancellable: false }, download)
       : await download();
     const destination = await bridge({ method: 'artifact_status' });
     const section = prepared.section;
@@ -560,7 +568,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const statements = section.parts.filter(p => p.role === 'statement').length;
     const proofs = section.parts.filter(p => p.role === 'proof').length;
     const confirm = await vscode.window.showWarningMessage(
-      'Import The Stacks Project Authors — ' + section.title.slice(0, 200) + ' (' + section.tag + ')?\n'
+      'Import The Stacks Project Authors — ' + section.title.slice(0, 200) + ' (stacks-project:' + section.tag + ')?\n'
       + section.chapter.slice(0, 200) + ' · section ' + section.section_number + '\n'
       + 'Git revision: ' + prepared.packet.commit + '\n'
       + 'Destination: ' + destination.location + '\nProject: ' + root + '\n'
@@ -582,7 +590,29 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const controller = await display(result, store, root);
     await vscode.window.showInformationMessage(result.reused
       ? 'This section at this Git revision was already imported. Its saved annotations and links were kept.'
-      : 'Stacks section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source…');
+      : 'Stacks Project section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source…');
+    return controller.result;
+  }));
+  register('mrw.importKerodonSection', () => locked(async () => {
+    const input = await vscode.window.showInputBox({ title: 'Import a Kerodon section',
+      prompt: 'Section or subsection tag, kerodon:TAG or official HTTPS URL. Retains one page snapshot.',
+      value: 'kerodon:0004', ignoreFocusOut: true,
+      validateInput: value => /^(?:kerodon:)?[A-Za-z0-9]{4}$/.test(value.trim()) || /^https:\/\/kerodon\.net\/tag\/[A-Za-z0-9]{4}\/?$/.test(value.trim()) ? undefined : 'Enter a Kerodon section tag or its official URL.' });
+    if (input === undefined) return;
+    const { store, root } = await storage(); writable({ store });
+    const download = () => bridge({ method: 'outline_kerodon_prepare', store, project_root: root, input }, { timeout: 120000 });
+    const prepared = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Obtaining one Kerodon section', cancellable: false }, download);
+    const destination = await bridge({ method: 'artifact_status' }), section = prepared.section;
+    const confirm = await vscode.window.showWarningMessage('Import Jacob Lurie — ' + section.title + ' (kerodon:' + section.tag + ')?\n'
+      + 'Page SHA-256: ' + prepared.source_revision + '\nDestination: ' + destination.location
+      + '\nRetains this section page, not its linked subsections. Reading and annotations work offline.', { modal: true }, 'Import section');
+    if (confirm !== 'Import section') return;
+    let result;
+    try { result = await bridge({ method: 'outline_kerodon_import', store, project_root: root, ticket: prepared.ticket, packet: prepared.packet }); }
+    catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(store); throw error; }
+    if (result.blocked) { blockedStores.add(store); throw new Error('Kerodon import publication failed: ' + result.write_error + '. Existing work is preserved. Reload the host before retrying.'); }
+    const controller = await display(result, store, root);
+    await vscode.window.showInformationMessage(result.reused ? 'This Kerodon page snapshot is already retained. Its annotations and links were kept.' : 'Kerodon section retained. Reopen with Open Saved Source.');
     return controller.result;
   }));
   register('mrw.importObsidianNote', () => locked(async () => {
@@ -752,7 +782,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   const rows = () => [['Open document…', 'mrw.openDocument'], ['Choose notes folder…', 'mrw.chooseNotesFolder'],
     ['Follow document link', 'mrw.followDocumentLink'], ['Show backlinks…', 'mrw.showBacklinks'], ['Reopen document', 'mrw.reopenDocument'], ['New document…', 'mrw.newReadingOverview'], ['Show contents', 'mrw.openReadingOutline'],
     ['Open tutorial', 'mrw.openTutorial'],
-    ['Return to document', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
+    ['Return to document', 'mrw.returnToReadingOutline'], ['Import Stacks Project section…', 'mrw.importStacksSection'], ['Import Kerodon section…', 'mrw.importKerodonSection'],
     ['Import Markdown text…', 'mrw.importObsidianNote'],
     ['Retain document as source', 'mrw.createOutline'], ['Open saved source…', 'mrw.openOutline'],
     ['Copy source or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
@@ -762,6 +792,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       ['Add selected passage', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
       ['Replace selected passage range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
       ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
+  rows.resolveReferenceIdentities = async references => { const {store,root} = await storage(); return bridge({method:'outline_reference_identities',store,project_root:root,references}); };
   rows.studyPassage = async (reference, root) => {
     const store = path.join(context.storageUri.fsPath, `outlines-${digest(root)}`);
     const followed = await bridge({ method: 'outline_follow_reference', store, project_root: root, reference });
@@ -769,7 +800,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const pub = followed.outline.published, bib = followed.outline.source.bibliography;
     const url = pub && /^[a-f0-9]{40}$/.test(pub.commit) ? `https://github.com/stacks/stacks-project/blob/${pub.commit}/${pub.source_file}` : bib.reference;
     const part = pub?.parts?.[followed.reference.region];
-    return { reference, label: part ? `${part.tag} ${part.role} · ${bib.title}` : followed.reference.label, text: selected.text, source_revision: selected.source_revision,
+    return { reference, qualified_id: followed.reference.qualified_id || pub?.qualified_tag, label: part ? `${part.qualified_tag || part.tag} ${part.role} · ${bib.title}` : followed.reference.label, text: selected.text, source_revision: selected.source_revision,
       url, authors: pub?.authors || bib.authors || null, license: pub?.license || null, review: pub ? 'published' : 'awaiting_human_review' };
   };
   rows.selectStudyPassages = async root => {

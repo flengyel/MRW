@@ -5,10 +5,11 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
 const { digest } = require('./navigation');
+const { qualifiedIdentifier, canonicalCitation } = require('./sourceIdentifiers');
 const { parseReadingMarkdown } = require('./readingMarkdown');
 const { buildNoteIndex, resolveNoteLink, backlinks, within, markdown } = require('./documentLinks');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {} }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: vscode.workspace.workspaceFile?.toString(), folders: (vscode.workspace.workspaceFolders || []).map(f => f.uri.toString()) }));
   const remembered = context.workspaceState.get(KEY);
@@ -68,10 +69,26 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     }
     return result;
   }
-  async function index() {
+  async function index(qualifyPublished = false) {
     const root = await folderRoot();
     return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading selected notes folder', cancellable: true },
-      async (_progress, token) => buildNoteIndex(root, { token, overrides: await overlays(root) }));
+      async (_progress, token) => {
+        const result = await buildNoteIndex(root, { token, overrides: await overlays(root) });
+        if (qualifyPublished) {
+          const nodes = [...result.files.values()].flatMap(n => n.parsed.all).filter(n => n.kind === 'reference' && !n.qualified_id);
+          const references = [...new Set(nodes.map(n => n.reference))];
+          if (references.length && resolveReferences && !token?.isCancellationRequested) {
+            try {
+              const resolved = await resolveReferences(references.slice(0, 256));
+              const identities = new Map(resolved.entries.filter(e => e.qualified_id).map(e => [e.reference,e.qualified_id]));
+              for (const node of nodes) if (identities.has(node.reference)) node.qualified_id = identities.get(node.reference);
+              for (const entry of resolved.entries.filter(e => e.error)) { result.complete = false; result.errors.push({code:'legacy_reference',message:entry.error}); }
+            } catch (error) { result.complete = false; result.errors.push({code:'legacy_reference',message:error.message}); }
+          }
+          if (references.length > 256 || references.length && !resolveReferences) { result.complete = false; result.errors.push({code:'legacy_reference',message:'Some older references lack a verified source-qualified identity; their prefix was not guessed.'}); }
+        }
+        return result;
+      });
   }
   function snapshot(doc, start, end) {
     const revision = digest(doc.getText());
@@ -164,6 +181,14 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!current || (node.revision && node.revision !== parsed.revision)) throw new Error('The document link changed. Follow its current occurrence again.');
     const attempt = ++generation, candidate = { location: snapshot(doc, node.start, node.end) }; candidates.add(candidate);
     try {
+      if (current.qualified_id) {
+        await check(doc.uri);
+        const opened = await vscode.env.openExternal(vscode.Uri.parse(canonicalCitation(current.qualified_id)));
+        if (attempt !== generation) return;
+        if (candidate.location.invalid || digest(doc.getText()) !== candidate.location.revision) throw new Error('The originating link changed while opening. Follow its current occurrence again.');
+        if (opened) { origin = candidate.location; await persist(); await onNavigated(); return true; }
+        throw new Error('The canonical published citation could not be opened.');
+      }
       const resolved = await resolve(doc, node);
       if (attempt !== generation) return;
       if (!resolved.ok) throw new Error(resolved.error);
@@ -182,18 +207,20 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!node) throw new Error('Place the cursor on a Markdown file link or [[ID]] link.');
     return follow(doc, node);
   }
-  async function showBacklinks() {
+  async function showBacklinks(identifier) {
+    const qualified = qualifiedIdentifier(identifier);
+    if (identifier !== undefined && !qualified) throw new Error('Choose a complete source-qualified identifier.');
     const attempt = ++generation;
     const invocationEditor = vscode.window.activeTextEditor;
     const active = invocationEditor?.document?.uri;
     const uri = active?.scheme === 'file' ? active : last && vscode.Uri.parse(last);
-    if (!uri) throw new Error('Open a document before inspecting backlinks.');
+    if (!uri && !qualified) throw new Error('Open a document before inspecting backlinks.');
     const invocationDoc = active?.scheme === 'file' && markdown(active.fsPath) ? invocationEditor.document : undefined;
-    const pending = { location: invocationDoc ? snapshot(invocationDoc, invocationDoc.offsetAt(invocationEditor.selection.start), invocationDoc.offsetAt(invocationEditor.selection.end)) : { uri: uri.toString(), fileOnly: true } };
+    const pending = { location: invocationDoc ? snapshot(invocationDoc, invocationDoc.offsetAt(invocationEditor.selection.start), invocationDoc.offsetAt(invocationEditor.selection.end)) : { uri: uri?.toString(), fileOnly: true } };
     candidates.add(pending);
     try {
-      await check(uri);
-      const result = await backlinks(await index(), uri.fsPath);
+      if (!qualified) await check(uri);
+      const result = await backlinks(await index(!!qualified), qualified || uri.fsPath);
       if (attempt !== generation) return;
       const notice = !result.complete ? `Incomplete backlinks${result.cancelled ? ' (cancelled)' : ''}: ${result.errors[0]?.message || 'index limit or cancellation'}.` : '';
       if (!result.occurrences.length) { await vscode.window.showInformationMessage(notice || 'No backlinks in the selected notes folder.'); return; }
@@ -203,7 +230,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       const hit = choice.hit, source = await vscode.workspace.openTextDocument(vscode.Uri.file(hit.sourcePath));
       const node = parseReadingMarkdown(source.getText()).all.find(n => n.id === hit.node.id && n.start === hit.node.start && n.end === hit.node.end);
       if (!node || digest(source.getText()) !== hit.sourceRevision || source.getText().slice(node.start, node.end) !== hit.sourceText) throw new Error('The backlink changed. Inspect backlinks again.');
-        if (await display(source.uri, snapshot(source, node.start, node.end), attempt)) { origin = pending.location; last = source.uri.toString(); await persist(); await onNavigated(); }
+        if (await display(source.uri, snapshot(source, node.start, node.end), attempt)) { if (!qualified) origin = pending.location; last = source.uri.toString(); await persist(); await onNavigated(); }
     } finally { candidates.delete(pending); }
   }
   async function returnToDocument() {

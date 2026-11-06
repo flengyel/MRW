@@ -1,13 +1,19 @@
-# Reading a Stacks Project section in MRW
+# Reading Stacks Project and Kerodon sections in MRW
 
-MRW 0.8.0 adds one explicit section importer to the existing source reader.
+MRW 0.21.0 provides **Import Stacks Project Section…** and **Import Kerodon
+Section…** in the existing source reader. Published tags are source-qualified:
+`stacks-project:08ZH` and `kerodon:0004` name different sources. A stable ID does
+not fix an immutable content revision. Retained citations preserve that revision
+and exact passage separately. [Identity contract](SOURCE_IDENTIFIERS.md).
+
+## Stacks Project
 The initial example is [Topology, Hausdorff spaces (08ZD)](https://stacks.math.columbia.edu/tag/08ZD).
 Use Windows VS Code connected to WSL Debian, with Python 3.11+ on the workspace
 host. Keep the existing valid local artifact location. This feature changes no
 mount, synchronization setting, ordinary note or original source file.
 
-1. Open the intended VS Code workspace. Run **MRW: Import Stacks Section…**
-   from the Command Palette. Enter `08ZD` or
+1. Open the intended VS Code workspace. Run **MRW: Import Stacks Project Section…**
+   from the Command Palette. Enter `stacks-project:08ZD`, `08ZD` or
    `https://stacks.math.columbia.edu/tag/08ZD`.
 2. MRW explicitly downloads a pinned official Git revision. Review the section,
    revision, effective artifact destination and affected project. Click
@@ -17,10 +23,10 @@ mount, synchronization setting, ordinary note or original source file.
    through 08ZH, include their hypotheses and complete proofs. Expand
    **Exact retained TeX for this passage** or **Open retained source** to see
    the unchanged source behind the mathematical display.
-4. In the last three proofs, click **08ZE** to select the diagonal lemma's exact
+4. In the last three proofs, click **stacks-project:08ZE** to select the diagonal lemma's exact
    retained statement. MRW also focuses that statement in the reader. This is
    following a published citation, not a claim to have found every dependency.
-   **Open canonical Stacks citation ↗** opens the current website explicitly.
+   **Open canonical source citation ↗** opens the current website explicitly.
    Chapter, preceding/following section and external prerequisite citations are
    available under **Source revision, chapter context and license**.
 5. Expand **Add reader explanation / question / repair** on a passage, enter
@@ -36,12 +42,38 @@ mount, synchronization setting, ordinary note or original source file.
 
 Under **Outline links and Obsidian note** or a passage's **Passage links and
 Obsidian note**, existing copy-link and return-note controls remain available.
-See [the Obsidian workflow](OBSIDIAN_WORKFLOW.md). Ordinary overview insertion
-and `mrw-outline:v1` links work as before. Copying a Markdown note alone does not
+See [the Obsidian workflow](OBSIDIAN_WORKFLOW.md). Document insertion creates qualified `mrw-outline:v2` links for published
+items; existing `mrw-outline:v1` links still work. Copying a Markdown note alone does not
 transfer its retained sources/outlines. Handwritten work remains ordinary note
 attachments/references; no transcription is required.
 
-## Acquisition, fidelity and limits
+## Kerodon
+
+Run **MRW: Import Kerodon Section…** with `kerodon:0004` or
+`https://kerodon.net/tag/0004` (Section 1.1, Simplicial Sets). Review the page
+SHA-256 and saved-work destination before **Import section**. The adapter retains
+one official section/subsection page up to 1 MiB and 64 supported passages; it
+does not follow linked subsections. An individual result or unsupported layout
+produces an error without publishing a substitute outline.
+
+Kerodon is authored by Jacob Lurie. This acquisition records the exact HTML,
+SHA-256 and UTC time; no upstream Git revision or Stacks Project license is
+asserted. Display uses inert text, bundled mathematical rendering and explicit
+citations. Scripts and page comments are not reader passages; embedded media
+is shown as a warning with the exact retained HTML available. The original
+response is kept unchanged. Canonical links open the current website only on
+request. Offline reading and notes require no network.
+
+Reimporting identical bytes reopens the prior saved source and notes. Different
+bytes create a separate snapshot even though `kerodon:0004` remains the same
+item ID. Earlier citations retain the original source hash and passage.
+
+In either reader, **Show backlinks** scans the explicitly chosen notes folder
+for the selected qualified item. Canonical, qualified-ID and retained links may
+name that item at different revisions. Backlinks keep the complete references;
+they do not assert identical quotations or check mathematics.
+
+## Stacks Project acquisition, fidelity and limits
 
 The sole online route uses the official
 [stacks/stacks-project Git repository](https://github.com/stacks/stacks-project).
