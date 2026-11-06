@@ -913,7 +913,7 @@ test('external links refuse unrelated workspaces before private resolution and o
   const pending = wrong.commands.get('mrw.openLinkFromClipboard')();
   await displayed;
   await wrong.commands.get('mrw.copyOutlineLink')();
-  assert.match(wrong.errors.pop(), /No saved source outlines/);
+  assert.match(wrong.errors.pop(), /No saved sources/);
   finishWarning(undefined); await pending;
   assert.deepEqual(wrong.errors, []);
 });
@@ -1229,20 +1229,21 @@ test('new reading overview uses the native Save choice and host editing, then re
   const model = await h.commands.get('mrw.newReadingOverview')();
   assert.ok(model, h.errors.join('\n'));
   assert.equal(h.saveDialogs.length, 1);
+  assert.equal(h.saveDialogs[0].title, 'New Markdown document');
   assert.deepEqual(h.saveDialogs[0].filters, { Markdown: ['md', 'markdown'] });
   assert.equal(h.workspaceEdits.length, 1);
   assert.deepEqual(h.workspaceEdits[0].operations[0].options, { overwrite: false, ignoreIfExists: false });
   const doc = h.api.window.activeTextEditor.document;
   assert.equal(doc.uri.toString(), uri(file).toString());
   assert.equal(doc.languageId, 'markdown'); assert.equal(doc.isDirty, false);
-  assert.match(doc.getText(), /^# Reading overview\n/);
+  assert.match(doc.getText(), /^# Document\n/);
   assert.ok(model.all.some(node => node.label === 'Current question'));
   assert.equal(await fs.readFile(file, 'utf8'), doc.getText());
   assert.deepEqual(h.saves, [uri(file).toString()]);
   assert.equal(draft.getText(), 'Unfinished work α😀'); assert.equal(draft.isDirty, true);
   assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(file).toString());
   const restarted = await harness(root, h.state);
-  assert.equal((await restarted.commands.get('mrw.openReadingOutline')()).all[0].label, 'Reading overview');
+  assert.equal((await restarted.commands.get('mrw.openReadingOutline')()).all[0].label, 'Document');
   assert.equal(h.requests.length + restarted.requests.length, 0);
   assert.deepEqual([...h.errors, ...restarted.errors], []);
 });
@@ -1388,7 +1389,7 @@ test('Obsidian overview import offers a target picker when no overview is active
   await fs.writeFile(overview,'# Overview\n');await fs.writeFile(note,'Imported text');
   const h=await harness(root);h.picks.push({kind:'overview'});h.opens.push([uri(overview)],[uri(note)]);
   await h.commands.get('mrw.importObsidianNote')();
-  assert.equal(h.dialogs[0].title,'Choose the reading overview');assert.equal(h.dialogs[1].title,'Import Obsidian note');
+  assert.equal(h.dialogs[0].title,'Choose a Markdown document for insertion');assert.equal(h.dialogs[1].title,'Import Markdown text');
   assert.ok(h.api.window.activeTextEditor.document.getText().includes('Imported text'));
   assert.equal(h.requests.length,0);assert.deepEqual(h.errors,[]);
 });
@@ -1401,7 +1402,7 @@ test('Obsidian import cancellation, unsaved notes and annotation limits make no 
   assert.equal(noFile.requests.length,0);
   const dirty=await harness(root);const doc=dirty.document(note,'Changed buffer');doc.isDirty=true;dirty.api.workspace.textDocuments=[doc];
   dirty.picks.push({kind:'source'});dirty.opens.push([uri(note)]);await dirty.commands.get('mrw.importObsidianNote')();
-  assert.match(dirty.errors[0],/Save the Obsidian note/);assert.equal(dirty.requests.length,0);
+  assert.match(dirty.errors[0],/Save the Markdown document/);assert.equal(dirty.requests.length,0);
   await fs.writeFile(note,'x'.repeat(16385));const large=await harness(root);large.picks.push({kind:'annotation'});large.opens.push([uri(note)]);
   await large.commands.get('mrw.importObsidianNote')();assert.match(large.errors[0],/16 KiB/);assert.equal(large.requests.length,0);
 });
@@ -1416,7 +1417,7 @@ test('Obsidian overview import refuses a changed cursor or document without over
       else h.changeDocument(doc,0,0,'User edit\n');return[uri(note)];
     };
     await h.commands.get('mrw.importObsidianNote')();
-    assert.match(h.errors[0],/overview or cursor changed/);assert.ok(!doc.getText().includes('Imported text'));
+    assert.match(h.errors[0],/document or cursor changed/);assert.ok(!doc.getText().includes('Imported text'));
     if(!moved)assert.ok(doc.getText().startsWith('User edit'));
     assert.equal(h.requests.length,0);
   }
@@ -1593,10 +1594,10 @@ test('reading navigator derives live Markdown, follows two sources, pins returns
   model = await h.commands.get('mrw.refreshReadingOutline')();
   assert.equal(model.all[0].line, 2);
   await h.commands.get('mrw.selectReadingOutlineItem')(target);
-  assert.match(h.errors.pop(), /overview changed/);
+  assert.match(h.errors.pop(), /document changed/);
   target = model.all.find(n => n.reference === references[1].reference);
   h.changeDocument(doc, target.start + 2, 1, 'X');
-  await h.commands.get('mrw.returnToReadingOutline')(); assert.match(h.errors.pop(), /exact reading-outline location changed/);
+  await h.commands.get('mrw.returnToReadingOutline')(); assert.match(h.errors.pop(), /exact document location changed/);
   // Undo both edits to restore the exact original pin.
   h.changeDocument(doc, 0, doc.getText().length, original);
   await h.commands.get('mrw.returnToReadingOutline')();
@@ -1669,7 +1670,7 @@ test('pending source returns track outside edits and reject overlap until exact 
     else h.changeDocument(doc,0,0,'An unsaved question.\n\n');
     release();await following;await h.commands.get('mrw.returnToReadingOutline')();
     if(overlap){
-      assert.match(h.errors.pop(),/exact reading-outline location changed/);
+      assert.match(h.errors.pop(),/exact document location changed/);
       h.changeDocument(doc,0,doc.getText().length,original);
       await h.commands.get('mrw.returnToReadingOutline')();
     }
@@ -1800,7 +1801,7 @@ test('reader Return renders the exact source-link occurrence and rejects changed
   assert.equal(h.api.window.activeTextEditor,undefined);
   h.changeDocument(previews[0].doc,target.start+2,1,'X');
   await h.commands.get('mrw.returnToReadingOutline')();
-  assert.match(h.errors.pop(),/exact reading-outline location changed/);
+  assert.match(h.errors.pop(),/exact document location changed/);
   assert.equal(previews.length,1,'A failed exact return must not open a replacement preview');
   assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
 });
@@ -1855,7 +1856,7 @@ test('reader Return without an overview offers a choice and cancellation leaves 
   await fs.writeFile(file,'Source.');h.focus(h.editor(h.document(file,'Source.')));
   await h.commands.get('mrw.createOutline')();const panel=h.panels[0],before=h.requests.length;
   await panel.receive({type:'reading_return'});
-  assert.equal(h.dialogs.at(-1).title,'Choose a Markdown reading overview');
+  assert.equal(h.dialogs.at(-1).title,'Choose a Markdown document for Contents');
   assert.equal(panel.webview.messages.at(-1).type,'idle');
   assert.equal(h.requests.length,before);assert.equal(h.state.has('mrw.readingOutline.v1'),false);
   assert.equal(h.commandCalls.some(call=>call.name==='markdown.showPreview'),false);
@@ -1889,7 +1890,7 @@ test('failed reader Return releases controls while its error notification remain
   const pending=panel.receive({type:'reading_return'}).then(()=>{finished=true});
   try {
     await new Promise(resolve=>setTimeout(resolve,50));
-    assert.match(h.errors.at(-1),/exact reading-outline location changed/);
+    assert.match(h.errors.at(-1),/exact document location changed/);
     assert.equal(finished,true,'Dismissing an error notification is not part of Return');
     assert.equal(panel.webview.messages.at(-1).type,'idle');
     const refreshed=await h.commands.get('mrw.refreshSourceOutline')();

@@ -8,7 +8,7 @@ technical package, extension and CLI identity.
 
 ## Documents and research work
 
-These terms govern the next GUI patch and subsequent integrations in
+These terms govern the 0.19.2 GUI and subsequent integrations in
 [RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md). They do not
 claim that every document format or integration is already supported.
 

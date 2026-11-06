@@ -133,10 +133,10 @@ class OutlineReferenceTests(unittest.TestCase):
         blob.write_bytes(b'corrupt')
         with self.assertRaisesRegex(ValueError,'Retained source unavailable'):self.follow(ref)
         blob.write_bytes(raw); (state/'outline.json').unlink(); before=self.inventory()
-        with self.assertRaisesRegex(ValueError,'Saved outline unavailable'):self.follow(ref)
+        with self.assertRaisesRegex(ValueError,'Saved source unavailable'):self.follow(ref)
         self.assertEqual(self.inventory(),before)
         (state/'outline.json').mkdir()
-        with self.assertRaisesRegex(ValueError,'Saved outline unavailable'):self.follow(ref)
+        with self.assertRaisesRegex(ValueError,'Saved source unavailable'):self.follow(ref)
 
     def test_strict_grammar_scope_revision_and_range_reject_without_writes(self):
         ref=self.ref()['reference']; before=self.inventory()

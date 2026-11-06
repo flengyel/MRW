@@ -5,6 +5,12 @@ This file preserves the earlier README as a historical account through 0.18.0.
 Versions, pending-status statements and installation commands below describe
 those earlier increments; they are not current instructions.
 
+## 0.19.2 — document terminology
+
+- Use Document / Contents / Saved source / Passage consistently in the GUI.
+- Identify current Markdown creation/selection limits and retain Proof Outline / Studies.
+- Preserve technical identities, saved records, files, drafts and links.
+
 ## 0.19.1 — study reliability
 
 - Preserve scoped pending drafts and explicit source selections.

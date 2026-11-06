@@ -1,21 +1,21 @@
 # Obsidian notes and MRW retained passages
 
-MRW connects Obsidian notes to saved source outlines and exact retained passages.
+MRW connects Obsidian notes to saved sources and exact retained passages.
 It can also import the text of a Markdown note through the choices below. Obsidian owns note editing, mathematical rendering,
 links and attachments. MRW owns its source reader and retained material.
 Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
 references from the Obsidian note. No LaTeX transcription is required.
 
-## Import note text (0.14.0)
+## Import Markdown text
 
-Run **MRW: Import Obsidian Note…** from Research Tools or F1. Choose where its
+Run **MRW: Import Markdown Text…** from the Studies menu or F1. Choose where its
 text should go, then select the note’s `.md` or `.markdown` file:
 
 | Destination | Result |
 | --- | --- |
-| Open it as a saved source outline | Retains the file and opens its text for reading, passage links and annotations |
-| Add it as a reader annotation on a passage | Select a saved source and passage; its reader notes receive the note text |
-| Insert it into the reading overview | Inserts text at the active Markdown overview cursor, or offers an overview file picker |
+| Retain a source copy | Retains the file and opens its text for reading, passage links and annotations |
+| Add text to a passage annotation | Select a saved source and passage; its reader notes receive the note text |
+| Insert text into a Markdown document | Inserts text at the active Markdown document cursor, or offers an Markdown document picker |
 
 The source option saves its retained copy during import. Importing the same file
 at the same revision reopens that copy and preserves annotations. A changed file
@@ -24,9 +24,9 @@ at the reader’s 256 KiB range limit. The source remains readable after the vau
 file changes or disappears. The source title initially uses the filename.
 
 Annotation import saves up to 16 KiB of text, with origin and author initially
-unknown. Edit its attribution in the reader when known. Overview insertion
+unknown. Edit its attribution in the reader when known. Document insertion
 leaves an unsaved editor change: **Ctrl+S** saves it and ordinary Undo reverses
-it. The combined overview retains the 4 MiB navigation limit.
+it. The combined Markdown document retains the 4 MiB navigation limit.
 
 The original note stays unchanged. YAML, wiki links and embeds remain in the
 Markdown text; linked notes and attachments are not copied or resolved. The
@@ -34,14 +34,13 @@ source reader shows retained Markdown as text. Save open note-editor changes
 before importing. In WSL, select a Windows vault file through its `/mnt/c/…`
 path; no vault discovery or background synchronization runs.
 
-## Link a note to an outline or passage
+## Link a note to a source or passage
 
 1. In **Obsidian**, open the existing note you want to return to. Press **Ctrl+P**
    and run **Copy Obsidian URL for current file**. Here “current file” means the
    note open in Obsidian. Its URL is an address such as
    `obsidian://open?vault=Zettelkasten&file=NOTE_ID`; it contains no note prose.
-2. In **MRW's source reader**, click **Link an Obsidian note…** under **Whole
-   outline**, or in the desired passage card’s **This passage** group. Paste that
+2. In **MRW's source reader**, click **Link an Obsidian note…** under **Whole source**, or in the desired passage card’s **This passage** group. Paste that
    URL and enter a short
    note title or ID. This sets that note as the return destination from the
    selected MRW target.
@@ -62,10 +61,10 @@ companion conventions, not a location from which MRW discovers a private vault.
 
 ## Put an MRW link in the Obsidian note
 
-1. In MRW, click **Copy link to this outline** under **Whole outline**, or
+1. In MRW, click **Copy link to this source** under **Whole source**, or
    **Copy link to this passage** in the desired passage’s **This passage** group.
-   Alternatively run **MRW: Copy Outline or Passage Link…** from the Command
-   Palette and choose an existing saved outline and target. No Markdown editor
+   Alternatively run **MRW: Copy Source or Passage Link…** from the Command
+   Palette and choose an saved source and target. No Markdown editor
    or cursor position is required.
 2. Paste the ordinary Markdown link into your Obsidian note, for example under
    **References**, using Obsidian's normal editing and saving.
@@ -78,7 +77,7 @@ note** supplies the return destination from MRW. These are separate explicit
 actions; copying a link does not automatically link a note back. Both buttons
 have brief tooltips explaining this.
 
-**Whole outline** actions affect the whole source outline. A passage card’s
+**Whole source** actions affect the whole source. A passage card’s
 **This passage** actions use its current range. If a saved link points to an
 earlier range, **Earlier linked passage** keeps that original pinned target;
 the current passage’s actions stay separate. **All linked notes and earlier

@@ -147,19 +147,19 @@ function companionActions(parent, region = null, pinned = false) {
   const passage = pinned || region !== null;
   const box = el('section', undefined, parent, 'companion');
   box.dataset.linkScope = pinned ? 'pinned' : passage ? 'passage' : 'outline';
-  el('h3', pinned ? 'Earlier linked passage' : passage ? 'This passage' : 'Whole outline', box);
+  el('h3', pinned ? 'Earlier linked passage' : passage ? 'This passage' : 'Whole source', box);
   if (pinned) el('p', 'These actions keep the earlier range from the saved link. Passage actions below use the current range.', box, 'muted');
-  else el('p', passage ? 'Links here apply to this passage’s current range.' : 'Links here apply to the whole outline.', box, 'muted');
+  else el('p', passage ? 'Links here apply to this passage’s current range.' : 'Links here apply to the whole source.', box, 'muted');
   const directions = el('div', undefined, box, 'companion-directions');
   const into = el('div', undefined, directions);
   el('p', 'From your note to MRW', into);
-  button(into, passage ? 'Copy link to this passage' : 'Copy link to this outline', { type: 'copy_link', ...data }, 'copy-link').title =
+  button(into, passage ? 'Copy link to this passage' : 'Copy link to this source', { type: 'copy_link', ...data }, 'copy-link').title =
     'Copy an MRW destination to paste into an Obsidian note. This does not set a return note.';
   const back = el('div', undefined, directions);
   el('p', 'From MRW to your note', back);
   const linked = targetNotes(region, pinned);
-  if (noteError) el('p', 'Linked notes unavailable. Refresh the saved source outline to retry.', back, 'muted');
-  else if (!linked.length) el('p', `No Obsidian note linked to ${pinned ? 'this earlier range' : passage ? 'this passage' : 'this outline'} yet. Link a note to add the return destination.`, back, 'muted');
+  if (noteError) el('p', 'Linked notes unavailable. Refresh the saved source to retry.', back, 'muted');
+  else if (!linked.length) el('p', `No Obsidian note linked to ${pinned ? 'this earlier range' : passage ? 'this passage' : 'this source'} yet. Link a note to add the return destination.`, back, 'muted');
   else el('p', linked.length === 1 ? linked[0].label : `${linked.length} linked notes — choose when opening`, back, linked.length === 1 ? 'linked-note' : 'muted');
   const open = button(back, 'Open linked note in Obsidian', { type: 'open_note', ...data }, 'open-note');
   open.dataset.empty = String(!linked.length || !!noteError);
@@ -171,7 +171,7 @@ function companionActions(parent, region = null, pinned = false) {
 function noteScope(note) {
   const target = noteTargets[note.reference];
   if (!target) return 'Retained target';
-  if (!target.region) return 'Whole outline';
+  if (!target.region) return 'Whole source';
   const current = model.outline.regions.find(r => r.id === target.region);
   return `${sameSpan(target.span, current?.span) ? 'Current passage range' : 'Earlier passage range'} · ${spanLocation(target.span)}`;
 }
@@ -180,7 +180,7 @@ function evidence(parent, artifacts) {
     const box = el('details', undefined, parent, 'evidence'); box.open = a.kind === 'goal_context';
     box.dataset.artifact = a.id;
     el('summary', `${label(a.kind)}: ${a.label}`, box);
-    el('p', `Supplied artifact, unchanged; ${a.region ? 'manual association with this region' : 'retained outline-level reference; no region association'}. Not rechecked.`, box, 'muted');
+    el('p', `Supplied artifact, unchanged; ${a.region ? 'manual association with this passage' : 'whole-source reference; no passage association'}. Not rechecked.`, box, 'muted');
     el('p', `${a.path} · SHA-256 ${a.revision}`, box, 'muted');
     if (a.kind === 'goal_context') {
       el('p', 'Intermediate tactic goal and recorded local context. Context lists available assumptions and definitions; it does not identify necessary or joint premises.', box);
@@ -189,8 +189,8 @@ function evidence(parent, artifacts) {
     if (a.error) el('p', a.error, box, 'warning');
     button(box, 'Open retained artifact', { type: 'artifact', artifact: a.id }, 'artifact');
     const key = `evidence:${a.id}`, f = form(box, key, { region: a.region || '', selector: a.selector ?? '' });
-    const regions = field(f, 'region', 'Manual region association', []);
-    for (const [value, title] of [['', 'No region association (retain reference)'],
+    const regions = field(f, 'region', 'Manual passage association', []);
+    for (const [value, title] of [['', 'No passage association (retain reference)'],
       ...model.outline.regions.map(r => [r.id, r.title])]) {
       const option = el('option', title, regions); option.value = value;
     }
@@ -205,7 +205,7 @@ function evidence(parent, artifacts) {
       const v = f.read(); return { type: 'edit', draft: key, change: { kind: 'evidence_association', artifact: a.id,
         region: v.region || null, selector: a.kind === 'goal_context' && v.selector !== '' ? Number(v.selector) : null } };
     }, 'save-evidence', true);
-    if (a.region) button(f.node, 'Remove region association', { type: 'edit', draft: key,
+    if (a.region) button(f.node, 'Remove passage association', { type: 'edit', draft: key,
       change: { kind: 'remove_evidence_association', artifact: a.id } }, 'remove-evidence', true);
   }
 }
@@ -261,14 +261,16 @@ function render() {
   const o = model.outline;
   for (const node of root.querySelectorAll('details')) if (node.dataset.disclosure) openDetails.set(node.dataset.disclosure, !!node.open);
   feedbackNodes.clear(); root.replaceChildren();
-  el('h1', o.source.bibliography.title || 'Mathematical source outline');
+  el('h1', o.source.bibliography.title || 'Saved source');
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
-  button(readingBar, '← Return to reading outline', { type: 'reading_return' }, 'reading-return');
+  button(readingBar, '← Return to document', { type: 'reading_return' }, 'reading-return').title =
+    'Return to the selected Markdown document at its saved location.';
   button(readingBar, 'Study current material', { type: 'study_current' }, 'study-current');
   button(readingBar, 'Prepare proof study…', { type: 'proof_study' }, 'proof-study');
   button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');
-  button(readingBar, 'Refresh saved source outline', { type: 'refresh' }, 'refresh');
+  button(readingBar, 'Refresh saved source', { type: 'refresh' }, 'refresh').title =
+    'Reload saved reader state and annotations; this does not reacquire the original document.';
   if (Object.values(o.published?.parts || {}).some(p => p.role === 'proof' && o.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)))) {
     for (const hidden of [true, false]) {
       const control = el('button', hidden ? 'Hide proofs' : 'Show proofs', readingBar);
@@ -296,7 +298,7 @@ function render() {
   if (o.published?.error) el('p', o.published.error, root, 'warning');
   else if (o.published && window.MRWStacks) window.MRWStacks.header(tools, o.published, publishedAction);
   if (o.published) {
-    const links = el('details', undefined, tools); el('summary', 'Outline links and Obsidian note', links); companionActions(links);
+    const links = el('details', undefined, tools); el('summary', 'Source links and Obsidian notes', links); companionActions(links);
   } else companionActions(tools);
   if (reference?.status === 'changed or removed') {
     companionActions(tools, null, true);
@@ -311,7 +313,7 @@ function render() {
       button(row, 'Manage linked notes…', { type: 'manage_notes', note: note.id }, 'manage-notes', true);
     }
   }
-  el('p', 'Select text in the saved original or retained source, then use MRW: Add Selected Source Region, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', tools, 'muted');
+  el('p', 'Select text in the saved original or retained source, then use MRW: Add Selected Passage, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', tools, 'muted');
   const metadata = el('details', undefined, tools); el('summary', 'Bibliographic identity and source authorship', metadata);
   const f = form(metadata, 'metadata', { ...o.source.bibliography, authorship: o.source.authorship });
   f.node.className = 'metadata';
@@ -360,7 +362,7 @@ function render() {
   for (const key of ['', ...levels]) { const op = el('option', key ? label(key) : 'All levels', select); op.value = key; }
   select.value = filter; select.dataset.readingLevel = 'true';
   select.addEventListener('change', () => { filter = select.value; render(); });
-  if (!o.regions.length) el('p', 'Select a passage in the source and add a region. Formal evidence is optional.');
+  if (!o.regions.length) el('p', 'Select a passage in the source and add a passage. Formal evidence is optional.');
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
@@ -368,7 +370,7 @@ function render() {
     const compactProof = publishedPart?.role === 'proof' && !expanded;
     const box = el('section', undefined, root, `region${compactProof ? ' compact-proof' : ''}${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
     if (!compactProof) el('h2', r.title, box);
-    if (originalPart && !publishedPart) el('p', 'This region range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
+    if (originalPart && !publishedPart) el('p', 'This passage range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
     if (publishedPart && expanded && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
     if (r.statement && !publishedPart) {
       const statement = el('div', undefined, box, 'statement');
@@ -404,7 +406,7 @@ function render() {
     keepOpen(passageTools, `passage:${r.id}`);
     el('p', spanLocation(r.span), passageTools, 'muted');
     const actions = el('div', undefined, passageTools, 'toolbar');
-    const choose = button(actions, selected === r.id ? 'Selected for statement / evidence' : 'Select this region', { type: 'select', region: r.id }, 'select');
+    const choose = button(actions, selected === r.id ? 'Selected for statement / evidence' : 'Select this passage', { type: 'select', region: r.id }, 'select');
     // Selection is local view state, not a publication; it requires no idle reply.
     choose.addEventListener('click', () => { selected = r.id; busy = false; render(); });
     button(actions, r.collapsed ? (expanded ? 'Keep source expanded' : 'Expand exact source') : 'Hide argument detail', () => {
@@ -415,10 +417,10 @@ function render() {
       const links = el('details', undefined, passageTools); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
     } else companionActions(passageTools, r.id);
     evidence(passageTools, o.artifacts.filter(a => a.region === r.id));
-    const settings = el('details', undefined, passageTools); el('summary', 'Edit region title / reading level', settings);
+    const settings = el('details', undefined, passageTools); el('summary', 'Edit passage title / reading level', settings);
     const key = `region:${r.id}`, rf = form(settings, key, { title: r.title, level: r.level });
     field(rf, 'title', 'Region title'); field(rf, 'level', 'Reading level', levels);
-    button(rf.node, 'Save region description', () => ({ type: 'edit', draft: key, change: { kind: 'region', region: r.id,
+    button(rf.node, 'Save passage description', () => ({ type: 'edit', draft: key, change: { kind: 'region', region: r.id,
       title: rf.read().title, level: rf.read().level, collapsed: r.collapsed } }), 'save-region', true);
     for (const n of r.annotations) noteForm(passageTools, r.id, n);
     noteForm(passageTools, r.id, null);

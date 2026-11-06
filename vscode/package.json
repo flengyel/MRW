@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -210,7 +210,7 @@
       },
       {
         "command": "mrw.importObsidianNote",
-        "title": "Import Obsidian Note\u2026",
+        "title": "Import Markdown Text\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -222,31 +222,31 @@
       },
       {
         "command": "mrw.createOutline",
-        "title": "Create Outline from Saved Source",
+        "title": "Retain Document as Source",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.openOutline",
-        "title": "Open Saved Source Outline\u2026",
+        "title": "Open Saved Source\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.refreshSourceOutline",
-        "title": "Refresh Saved Source Outline",
+        "title": "Refresh Saved Source",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.addOutlineRegion",
-        "title": "Add Selected Source Region",
+        "title": "Add Selected Passage",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.replaceOutlineRegion",
-        "title": "Replace Selected Outline Region Range",
+        "title": "Replace Selected Passage Range",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -270,25 +270,25 @@
       },
       {
         "command": "mrw.attachOutlineEvidence",
-        "title": "Attach Recorded Outline Evidence\u2026",
+        "title": "Attach Recorded Evidence\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.insertOutlineReference",
-        "title": "Insert Outline Reference\u2026",
+        "title": "Insert Source or Passage Link\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.followOutlineReference",
-        "title": "Follow Outline Reference at Cursor",
+        "title": "Follow Source or Passage Link at Cursor",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.copyOutlineLink",
-        "title": "Copy Outline or Passage Link\u2026",
+        "title": "Copy Source or Passage Link\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -353,7 +353,7 @@
       },
       {
         "command": "mrw.newReadingOverview",
-        "title": "New Reading Overview\u2026",
+        "title": "New Document\u2026",
         "category": "MRW",
         "icon": "$(new-file)"
       },
@@ -365,30 +365,30 @@
       },
       {
         "command": "mrw.openReadingOutline",
-        "title": "Open Reading Outline",
+        "title": "Show Contents",
         "category": "MRW",
         "icon": "$(list-tree)"
       },
       {
         "command": "mrw.chooseReadingOverview",
-        "title": "Choose Reading Overview\u2026",
+        "title": "Choose Document\u2026",
         "category": "MRW"
       },
       {
         "command": "mrw.refreshReadingOutline",
-        "title": "Refresh Reading Outline",
+        "title": "Refresh Contents",
         "category": "MRW",
         "icon": "$(refresh)"
       },
       {
         "command": "mrw.returnToReadingOutline",
-        "title": "Return to Reading Outline",
+        "title": "Return to Document",
         "category": "MRW",
         "icon": "$(arrow-left)"
       },
       {
         "command": "mrw.selectReadingOutlineItem",
-        "title": "Open Reading Outline Location",
+        "title": "Go to Document Location",
         "category": "MRW"
       },
       {
@@ -445,7 +445,7 @@
       "mrw": [
         {
           "id": "mrw.readingOutline",
-          "name": "Reading Outline"
+          "name": "Contents"
         },
         {
           "id": "mrw.research",
@@ -742,7 +742,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.readingOutline",
-        "contents": "Start with your current mathematical question, a source passage, or notes from paper. A reading overview is your own editable page of notes and source references.\n[New Reading Overview](command:mrw.newReadingOverview)\n[Open Reading Outline](command:mrw.openReadingOutline)\n[Open Saved Source Outline\u2026](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
+        "contents": "Start from a document or mathematical question. Contents lists headings and MRW source links in the selected Markdown document, including unsaved edits. New Document creates a Markdown file.\n[New Document\u2026](command:mrw.newReadingOverview)\n[Show Contents](command:mrw.openReadingOutline)\n[Open Saved Source\u2026](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
       },
       {
         "view": "mrw.research",

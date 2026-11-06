@@ -35,7 +35,7 @@ const plain = tokens => tokens.map(t => t.type === 'softbreak' || t.type === 'ha
   ['text', 'code_inline', 'image', 'mrw_bare'].includes(t.type) ? t.content : '').join('');
 
 function parseReadingMarkdown(text) {
-  if (Buffer.byteLength(text, 'utf8') > 4 * 1024 * 1024) throw new Error('Reading overview exceeds the 4 MiB navigation limit.');
+  if (Buffer.byteLength(text, 'utf8') > 4 * 1024 * 1024) throw new Error('Document exceeds the 4 MiB navigation limit.');
   const lines = text.split(/\r\n|\r|\n/), starts = [];
   let pos = 0;
   for (const line of text.matchAll(/[^\r\n]*(?:\r\n|\r|\n|$)/g)) { starts.push(pos); pos += line[0].length; }
@@ -50,7 +50,7 @@ function parseReadingMarkdown(text) {
     const occurrence = counts.get(key) || 0; counts.set(key, occurrence + 1);
     node.id = `${key}/${occurrence}`; node.children = [];
     (parent?.children || roots).push(node); all.push(node);
-    if (all.length > 10000) throw new Error('Reading overview exceeds the 10,000 heading/reference limit.');
+    if (all.length > 10000) throw new Error('Document exceeds the 10,000 heading/reference limit.');
   }
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];

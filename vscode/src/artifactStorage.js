@@ -55,7 +55,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
     async function progress(action) {
       const controller = new AbortController();
       return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification,
-        title: 'MRW: moving saved sources, outlines and annotations', cancellable: true }, async (_progress, token) => {
+        title: 'MRW: moving saved sources and annotations', cancellable: true }, async (_progress, token) => {
         const disposable = token.onCancellationRequested(() => controller.abort());
         try { return await action({ timeout: 300000, signal: controller.signal }); }
         finally { disposable.dispose(); }
@@ -63,7 +63,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
     }
     register('mrw.artifactLocation', async () => {
       const s = await refresh();
-      void vscode.window.showInformationMessage(`MRW saved sources, outlines and annotations: ${s.location}. ${s.scope}.`
+      void vscode.window.showInformationMessage(`MRW saved sources and annotations: ${s.location}. ${s.scope}.`
         + (s.recovery_required ? ' A storage operation needs recovery: run MRW: Recover Artifact Move.' : ''));
       return s;
     });
@@ -145,7 +145,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const result = await control('artifact_adopt', { destination: hint.location, mapping: { [folders[0]]: original },
         store_id: inspected.store_id, head_hash: inspected.head_hash });
       return result;
-    }, () => 'Saved MRW study reconnected. Use MRW: Open Saved Source Outline… '
+    }, () => 'Saved MRW study reconnected. Use MRW: Open Saved Source… '
       + 'or MRW: Open Link from Clipboard for an earlier external passage link.'));
     register('mrw.moveArtifactDirectory', () => withCompletionNotice(async () => {
       const current = await refresh();
@@ -170,7 +170,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       + (result.cleanup_pending ? ' Run MRW: Recover Artifact Move to retry cleanup.' : '')));
     register('mrw.openArtifactDirectory', () => withCompletionNotice(async () => {
       const destination = await vscode.window.showInputBox({ title: 'Open Saved Work Directory',
-        prompt: 'Enter the directory containing your saved sources, outlines and annotations. This connects the workspace without moving files.', ignoreFocusOut: true });
+        prompt: 'Enter the directory containing your saved sources and annotations. This connects the workspace without moving files.', ignoreFocusOut: true });
       if (destination === undefined) return;
       const inspected = await control('artifact_inspect', { destination });
       const folders = await roots(), available = [...folders], mapping = {};

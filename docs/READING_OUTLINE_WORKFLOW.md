@@ -1,184 +1,66 @@
-# Reading with an ordinary Markdown outline
+# Documents, Contents and saved sources — 0.19.2
 
-For a first session, choose **New Reading Overview** in the MRW starting view
-or run **MRW: New Reading Overview…**. Choose a new Markdown filename in the
-native Save dialog; MRW opens the saved, editable starting page and selects its
-headings in the navigator. The headings are optional. Use **File → Save** for
-later edits. **MRW: Open Tutorial** opens the bundled
-[first steps guide](../vscode/media/first-steps.md), from work on paper to notes,
-source passages and optional computation. Both commands are available in the
-Reading Outline **…** menu. This is new in **0.13.0**.
+Open a Markdown document in the intended workspace. **MRW: Show Contents**
+focuses **Contents**, which lists its headings and MRW source links and updates
+as the document is edited, including unsaved text. It uses the active Markdown
+document, the last chosen document, or a native Markdown picker. It does not
+open arbitrary documents or derive PDF Contents. Other formats remain available
+through VS Code's ordinary Open File action and installed host readers.
 
-The navigator introduced in 0.9.0 is retained in **0.13.0**, including the MRW
-Activity Bar entry and later source-reader improvements. Run **MRW: Open Reading
-Outline**: use the active Markdown overview, reopen the remembered overview, or
-choose a Markdown file with VS Code's native picker when neither is available.
-A missing remembered file also offers the picker. Cancelling preserves the prior
-choice and navigator. **… → Choose Reading Overview…** (also in the command
-palette) always offers a new file choice. There is no import, prose copy or
-outline-generation step. Files remain scoped to the current workspace.
+**New Document…** opens a native **New Markdown document** Save dialog and
+creates a new `.md` or `.markdown` file with optional headings. It refuses to
+overwrite existing files. **Choose Document…** opens **Choose a Markdown document
+for Contents**; cancelling preserves the selected document and drafts. Selection
+is scoped to the workspace, including symlink checks. No existing file, heading
+or note is renamed. An untitled Markdown document works for the live session;
+VS Code owns its text, saving, undo and recovery.
 
-A live untitled overview stays selected while a reader or another view is active.
-MRW retains its pointer only for this session; VS Code owns its text and recovery.
-After it closes, MRW remembers the latest selected saved overview. Selecting or
-reopening an overview does not switch the VS Code workspace or reload Codex.
+## Follow and return
 
-Patch **0.14.3** opens the rendered Markdown overview on **Return to reading
-outline**. It recreates the native preview even after both the editor and preview
-tabs have been closed. The source location is checked and restored first;
-ordinary Markdown editing and unsaved text remain under VS Code ownership.
+1. Place the cursor in the Markdown document. **Insert Source or Passage Link…**
+   chooses a saved source and either its whole source or an exact passage.
+2. In Contents, select a heading to select its editor location. Select a source
+   link to open the saved source. A passage link identifies its exact retained
+   revision and range. Repeated citations have distinct return locations.
+3. **Return to Document** in the reader, Command Palette or view menu restores
+   the originating occurrence and rendered Markdown view, including after its
+   editor/preview tabs have closed. Without a source-link origin it returns to
+   the selected document, or offers a Markdown choice if unavailable.
+4. Continue editing and use ordinary Save/Undo. **Refresh Contents** refreshes
+   immediately; otherwise a short debounce updates the tree. Save a reader form
+   separately with **Save annotation**.
 
-Patch **0.14.2** also supports **Return to reading outline** after opening a
-saved source directly. With no source-link origin, Return reopens the selected
-live or remembered overview and restores a matching selection. If no overview
-is available, it offers a Markdown file choice; cancelling keeps the reader.
-An unrelated active Markdown editor does not replace the selected overview.
-An existing source-link origin still requires the exact text and workspace;
-an invalid origin never redirects to another location.
+Outside edits move an exact return pin; edits overlapping its captured syntax
+block return until exact undo restores it. A mismatching saved revision after
+restart never redirects to similar text. Failed follows preserve the preceding
+successful return. An unrelated active document or Untitled draft is preserved.
+Reopen the same document and Show Contents to restore matching selection and
+collapse preferences. MRW does not save ordinary document prose automatically.
 
-Patch 0.11.1 keeps the last successfully opened source's return location while
-another source resolves. If that follow fails during unsaved edits, Return
-still selects the earlier successful occurrence, adjusted for outside edits.
-Candidate locations also track edits during reader opening. An overlapping edit
-invalidates an exact return; restoring the original text with undo restores it.
+## Read retained material
 
-MRW 0.9.0 adds **MRW: Open Reading Outline**. Use the current Linux artifact
-store and Windows VS Code connected to WSL. No storage move, new vault, Lean,
-provider or prescribed reading sequence is required.
+**Retain Document as Source** uses a saved UTF-8 text document, preserving its
+selected passage. It does not import a PDF. **Open Saved Source…** reopens a
+retained revision independently of later changes to the original. **Refresh
+Saved Source** reloads saved reader state/annotations, without reacquiring a
+changed original. Add ranges with **Add Selected Passage**; reader controls
+use Passage while the existing record fields retain their technical names.
 
-Click the **MRW** book icon in the Activity Bar to open the reading navigator.
-Its **…** menu contains the reading and source commands. **Research Tools** is
-collapsed by default; the same commands remain available through F1. This is a
-native VS Code view container over the existing extension, with no new project
-or private-store setup.
+Statements, proof controls, reader notes, supplied evidence, diagrams and linked
+Obsidian notes keep their existing behavior. Proof Outline still names a
+mathematical argument. Studies remains the study-content view. No layout change,
+private-store move, new vault, provider request or compiler is required.
 
-1. Open an ordinary Markdown overview in the intended workspace. Write headings,
-   explanations, connections and questions in your own words. Existing notes
-   and Obsidian remain ordinary notes; MRW never scans the vault.
-2. Use **MRW: Insert Outline Reference…** to choose a saved source outline and
-   either its whole source or one exact retained region. Repeat for other
-   sources, or cite the same passage in several sections. This is the unchanged
-   [0.5.0 reference format](PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
-3. Run **MRW: Open Reading Outline**. The MRW sidebar's **Reading Outline** view derives
-   headings and MRW references from the selected overview. Use the section arrows
-   to collapse/expand. Select a heading to select its Markdown line visibly.
-4. Select a source reference to open its retained reader. A passage reference
-   additionally selects the exact original range in read-only retained text.
-   Changed or removed associations report the change and open the old pinned
-   passage, without selecting a replacement region.
-5. Use **MRW: Return to Reading Outline**, the view's back arrow, or the reader's
-   **Return to reading outline** button. It selects the originating occurrence,
-   even if another section cites the same passage. Continue inserting references
-   and editing the ordinary document. MRW never saves it automatically.
-6. Edit/reorganize headings with normal VS Code commands and undo/redo. The tree
-   updates after a short debounce, including unsaved edits. **Refresh Reading
-   Outline** refreshes immediately. A stale clicked entry asks you to select
-   its current replacement, instead of navigating stale offsets.
-7. Save and close normally. Reopen the overview and run **Open Reading Outline**.
-   It reconstructs from the document and restores collapse preferences and the
-   last selected location when the saved text matches. From a reader, the same
-   command can reopen the last saved overview for this window.
+Contents parses CommonMark ATX/Setext headings, ordinary/reference/autolinks and
+bare MRW links. Code, images and comments are excluded. Unicode, escaped labels,
+repeated headings and duplicate references retain their locations. Limits are
+4 MiB and 10,000 heading/reference entries. WikiLinks and embeds are not resolved.
+One document is selected per window. Copying Markdown transfers no private
+saved sources; exact references, workspace scope and `mrw-outline:v1` links
+remain unchanged. Links establish no checked dependency or mathematical status.
 
-Patch **0.9.1** improves the reading presentation observed in the first trial.
-Source entries use short titles in the navigator; their full citation labels
-remain in tooltips and the unchanged Markdown. Following an entry expands the
-reader and hides the side bars through VS Code's standard layout commands.
-Source content appears before its passage tools, and **Source details and tools**
-starts collapsed. The Return button stays visible while scrolling. Return
-expands the originating Markdown editor and opens Reading Outline again.
-
-A matching expanded published passage opens its rendered retained card directly.
-Its exact TeX is available by expanding the source disclosure on that card.
-Changed/removed region associations or an incompatible/collapsed current card
-still open the exact original pinned text. Source details, original-file/source
-controls, linked notes, bibliographic editing and evidence remain available;
-navigation does not rewrite them. **Source details and tools** also contains the
-section contents controls. The VS Code title-bar workspace name opens a menu;
-to focus the editor, click inside its text area. F1 opens the command palette.
-
-In **0.9.2**, use **Proof ↓** on a published statement to read its associated
-retained proof; **Statement ↑** returns to the statement. These links require
-explicit published roles and matching retained spans. Multiple proofs stay
-separate. A changed association is reported rather than redirecting the link.
-Opening a hidden proof for reading does not save a collapse-state change.
-
-In **0.9.3**, the sticky reading toolbar has **Hide proofs / Show proofs**.
-Statements stay visible, and each published proof has its own **Show proof /
-Hide proof** control. The workspace remembers whether to start with proofs
-hidden. Individual expansions last for the live view; following a proof link
-reveals that exact proof while other proofs can stay hidden. Source records and
-annotation drafts are preserved. Manual regions have visible Show/Hide details
-controls, retaining the existing saved expansion action when their text must be
-loaded. This lets a reader move from overview to detail while supplying or
-developing an outline; it requires no formalization or compulsory reading order.
-
-In **0.9.4**, hidden published proofs occupy one compact row, such as
-**▸ 08ZH — Proof**. Click the row to reveal it. **Reader notes (N)** starts
-collapsed; click its heading to open or close the saved notes. The live choice
-survives source refresh and save replies. Closing the display preserves the
-saved notes and any separate annotation-editor draft.
-
-Region editing forms now live under **Source details and tools → Notes and
-tools: REGION**, outside the statement/proof sequence. Opening an annotation
-form there cannot insert it between the statement and proof. Existing notes
-appear separately after the source text with their supplied attribution. Their
-text and saved records are unchanged. Manual sources retain manual region
-navigation; MRW does not infer which region proves another.
-
-When saving a note, look for **Saving annotation…** and then **Annotation saved.**
-The confirmation follows core publication; a status-bar message also identifies
-the submitted annotation. If you typed more during the save, the message says
-that the submitted version was saved and the newer edits remain unsaved. An
-unconfirmed or failed publication keeps the text and says **Save not confirmed**.
-The open editor stays open; the application does not retry or save newer text
-without another explicit action.
-
-Reader notes in **0.9.3** support typeset equations: write `\(x=s(f(x))\)`
-inline, or `\[s(Y)=G^{-1}(\Delta).\]` on a separate line. `$$ ... $$` also
-displays an equation. The saved text and editor retain those exact delimiters;
-**Exact annotation text** makes them available beside the rendered note.
-Plain Unicode remains supported. HTML, links and other prose stay literal;
-single dollar signs are ordinary text. Invalid TeX stays visible with a display
-warning. This uses the local bundled renderer without a compiler or network.
-
-For example, an overview might have `# Separation`, `## Statements to compare`,
-and `## Questions for later`. Insert a whole-source reference to the retained
-Stacks **Hausdorff spaces** section under the first heading, an exact **08ZE**
-statement link under the second, and a reference to another retained article or
-book under the third. Explanations and questions between links remain ordinary
-reader-authored prose. Repeating 08ZE under another heading creates another
-navigation occurrence; it creates no mathematical dependency.
-
-The bundled CommonMark parser recognizes ATX/Setext headings, normal inline and
-reference links, autolinks and bare MRW references. It excludes fenced/indented
-code, inline code, images and HTML comments. Unicode, escaped labels, repeated
-headings and duplicate references remain distinct. Custom Markdown plugins and
-Obsidian-specific syntax are not interpreted. The limit is 4 MiB and 10,000
-heading/reference entries; long display labels are bounded. Prose stays in its
-original document. There is one selected overview per window; switching to a
-different document resets its collapse preferences. Untitled documents work
-live, with no persistent MRW untitled pointer.
-
-Live return pins follow edits wholly outside the selected link. Editing or
-removing the selected syntax blocks return. Undo to the exact captured document
-restores the pin; MRW does not search for similar text. After close or restart,
-a mismatching text hash also blocks an old pin. Select a current navigator entry
-to establish a new destination. VS Code owns unsaved text and its recovery;
-MRW stores only document identity, hashes, offsets and navigation preferences
-in host-local workspace UI state. It creates no private copy of the prose.
-
-Changed/missing originals do not block valid retained material. Missing,
-incompatible or corrupt retained storage and unrelated workspace scope produce
-an error through the existing resolver, without creating replacements or looking
-in other workspaces. Copying Markdown alone transfers no retained sources or
-private outlines. Source/region/revision identity and pinned ranges keep their
-existing meaning. Opening, refreshing, following and restoring this view start
-no acquisition, provider request, compiler, notebook or container. Stacks import
-remains a separate explicit command.
-
-This is reading navigation. Links establish no necessary premise, checked
-dependency, proof correctness or understanding. Automatic outlines, AI
-explanations, prerequisite discovery, proof graphs, vertex elimination,
-PDF/OCR ingestion, source-revision comparison and whole-corpus ingestion remain
-pending. Windows-backed storage qualification is deferred. See
-[actual checks and remaining observations](READING_OUTLINE_VALIDATION.md).
+The [tutorial](../vscode/media/first-steps.md) and
+[Markdown import/Obsidian guide](OBSIDIAN_WORKFLOW.md) describe current actions.
+Dated observations retain their original labels in
+[earlier navigation validation](READING_OUTLINE_VALIDATION.md);
+[terminology validation](DOCUMENT_TERMINOLOGY_VALIDATION.md) records this patch.

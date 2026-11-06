@@ -1,8 +1,18 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.19.1 retains selected mathematical sources, questions, submitted work and
+MRW 0.19.2 retains selected mathematical sources, questions, submitted work and
 attributed help in a resumable study. Graphs, source annotations and Markdown
-reading outlines remain available. The extension is experimental.
+Contents remain available. The extension is experimental.
+
+## Documents and Contents
+
+A Document may be a note, PDF paper, manuscript or notebook. **Show Contents**
+currently lists headings and MRW source links from a selected Markdown document,
+including unsaved edits. **New Document…** creates Markdown; **Choose Document…**
+selects Markdown for Contents. Their dialogs identify that format. Other formats
+open through the host; this patch adds no PDF extraction or general document opener.
+**Retain Document as Source** retains saved text; **Open Saved Source…** reopens
+it. See [document navigation](../docs/READING_OUTLINE_WORKFLOW.md).
 
 ## First session
 
@@ -74,12 +84,12 @@ From a **repository-root checkout** with Python 3.11+, Linux Node.js 22+ and npm
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.1.vsix
-sha256sum vscode/theorem-terminal-0.19.1.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.2.vsix
+sha256sum vscode/theorem-terminal-0.19.2.vsix
 ```
 
 `npm run package` runs the Python bundling prepublish hook and pinned
-`@vscode/vsce` 4.0.0. It creates `vscode/theorem-terminal-0.19.1.vsix`; it does
+`@vscode/vsce` 4.0.0. It creates `vscode/theorem-terminal-0.19.2.vsix`; it does
 not publish it. The fixed epoch/UTC supplies stable archive timestamps. Record
 the hash of the actual archive and tool versions used; do not assume an older
 release's hash. Use Linux npm in WSL, not a Windows npm launcher.
@@ -92,11 +102,11 @@ VSIX archives are excluded. Python core copies and package files are Git-ignored
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…** or:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.19.1.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.19.2.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.theorem-terminal@0.19.1` is installed on the **workspace host**,
+Confirm `flengyel.theorem-terminal@0.19.2` is installed on the **workspace host**,
 not solely the Windows UI. Save documents/forms before a requested reload. Keep
 workspace storage and the existing extension identity when upgrading. The bridge
 uses the package's bundled core through `python3 -I`; it needs no editable Python
@@ -133,7 +143,7 @@ Never treat a failed launch or incomplete runner report as a pass.
 
 ## Data and history
 
-Native files retain VS Code save, undo and recovery. Source outlines/annotations
+Native files retain VS Code save, undo and recovery. Saved sources/annotations
 use the existing private source-store publication rules and explicit bindings.
 Current studies use `active-studies-v1/<study-id>.json`; the recorder uses
 `study-history-v1/`, both beneath the extension's `context.storageUri` (VS Code's
@@ -168,9 +178,9 @@ Windows-backed/synchronized storage remains unqualified.
 
 ## Workflows
 
-- **Open Saved Source Outline…** reopens a retained source offline. Statements,
+- **Open Saved Source…** reopens a retained source offline. Statements,
   proofs and reader notes have separate controls; annotation forms save explicitly.
-- **Open Reading Outline** navigates ordinary Markdown headings and exact source
+- **Show Contents** navigates ordinary Markdown headings and exact source
   links. [Markdown overview guide](../docs/READING_OUTLINE_WORKFLOW.md).
 - [Proof study with Codex](../docs/PROOF_STUDY_WORKFLOW.md) retains an unresolved
   question, explicit prerequisite passages and attributed proposed graph.
@@ -184,13 +194,12 @@ Windows-backed/synchronized storage remains unqualified.
 
 ### Manual Markdown overviews across sources
 
-Use **Insert Outline Reference…** in an ordinary note; **Follow Outline Reference
-at Cursor** opens the exact retained target. Copying a reference does not copy its
+Use **Insert Source or Passage Link…** in an ordinary note; **Follow Source or Passage Link at Cursor** opens the exact retained target. Copying a reference does not copy its
 private storage. VS Code owns the overview's editing, saving and recovery.
 
-### Offline source-region reader
+### Offline saved-source reader
 
-**Create Outline from Saved Source** retains UTF-8 source bytes and selected
+**Retain Document as Source** retains UTF-8 source bytes and selected
 scalar ranges. Original-file edits do not replace an earlier source revision.
 Source annotations and supplied evidence remain separately attributed. There is
 no PDF extractor, automatic corpus scan or inferred proof correspondence.

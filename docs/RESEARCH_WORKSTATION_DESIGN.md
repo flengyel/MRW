@@ -1,6 +1,7 @@
 # Documents, research continuity, and argument reconstruction
 
-Status: approved design direction, 2026-11-06; implementation is staged below.
+Status: approved design direction, 2026-11-06. The terminology increment is
+implemented in 0.19.2; the following integrations remain staged below.
 Reviewed baseline: MRW 0.19.1, `82f310bb8d0984af0535e296b2361d6cc38e5ce6`.
 This document governs the next product increments. Earlier delivery reports
 remain evidence of what was implemented and observed; they are not superseded

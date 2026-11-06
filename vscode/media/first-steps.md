@@ -1,5 +1,9 @@
 # Using MRW
 
+A document may be a note, paper, manuscript or notebook. The current **Contents**
+view uses Markdown headings and MRW source links. Opening an ordinary file and
+retaining a source revision are separate actions.
+
 ## Study current material
 
 Run **MRW: Open Study Example** for an attributed offline source and two
@@ -75,12 +79,12 @@ form. **Refresh** reads changes made in the ordinary backing document.
 
 ## Open a source
 
-Click the **MRW** book icon, then **Studies → … → Open Saved Source Outline…**. Select a source to open its retained text and annotations.
-**F1 → MRW: Open Saved Source Outline…** does the same thing.
+Click the **MRW** book icon, then **Studies → … → Open Saved Source…**. Select a source to open its retained text and annotations.
+**F1 → MRW: Open Saved Source…** does the same thing.
 
 In the reader:
 
-- **Refresh saved source outline** on the top toolbar reloads saved annotations
+- **Refresh saved source** on the top toolbar reloads saved annotations
   and source status. The same command remains in the Command Palette.
 
 - **Show proof** expands a published proof; **Hide proof** folds it.
@@ -102,22 +106,22 @@ Work Directory…** and enter the directory containing its saved MRW records.
 Confirm the mapping to the study folder now open in VS Code. This connects
 saved work without moving files or importing another copy of the source.
 
-## Import an Obsidian note
+## Import Markdown text
 
-Run **MRW: Import Obsidian Note…** from the Command Palette. Choose a destination:
+Run **MRW: Import Markdown Text…** from the Command Palette. Choose a destination:
 
-- **Open it as a saved source outline** retains a copy for reading and annotations.
-- **Add it as a reader annotation on a passage** saves the text on a chosen passage.
-- **Insert it into the reading overview** inserts text at the overview cursor.
+- **Retain a source copy** retains a copy for reading and annotations.
+- **Add text to a passage annotation** saves the text on a chosen passage.
+- **Insert text into a Markdown document** inserts text at the document cursor.
 
-Select the note’s Markdown file. The original stays in its vault. For an overview
-insertion, save with **Ctrl+S**. Imported wiki links and embeds remain text;
+Select the note’s Markdown file. The original file stays unchanged. For insertion into a Markdown document,
+save with **Ctrl+S**. Imported wiki links and embeds remain text;
 linked notes and attachments are not imported.
 
 ## Retain a passage from a file
 
 Open a saved UTF-8 text, Markdown or TeX file, select a passage, then run
-**MRW: Create Outline from Saved Source**. MRW retains that revision and selection;
+**MRW: Retain Document as Source**. MRW retains that revision and selection;
 later edits to the file do not replace the retained text. PDF text extraction
 is not supported.
 
@@ -130,27 +134,30 @@ The names in the interface mean:
 
 | Name | What it is |
 | --- | --- |
-| Reading overview | A Markdown file you edit in VS Code |
-| Reading Outline | The sidebar navigator for that file's headings and MRW links |
-| Source outline | A retained source and its selected passages |
+| Document | Material opened for work; its format determines available operations |
+| Contents | Headings and MRW source links from the selected Markdown document |
+| Saved source | An explicitly retained source revision with passages and annotations |
 
-**New Reading Overview…** creates a Markdown file with four headings. It does
-not add source content. Choose a filename in the Save dialog.
+**New Document…** opens **New Markdown document** and creates a `.md` or
+`.markdown` file with optional headings. Existing files and headings are unchanged.
 
-**Open Reading Outline** uses the active Markdown document, reopens the last
-chosen overview, or offers a file picker. **… → Choose Reading Overview…**
-selects a different document.
+**Show Contents** uses the active Markdown document, reopens the last
+chosen document, or offers a file picker. **… → Choose Document…**
+opens **Choose a Markdown document for Contents** to select a different file.
+**Show Contents** focuses the navigator; it does not open arbitrary documents.
+Use VS Code's ordinary Open File action for other formats, including PDFs with
+an available host reader. MRW does not extract PDF text or derive PDF Contents.
 
-Clicking a heading in Reading Outline selects its location in the editor.
+Clicking a heading in Contents selects its location in the editor.
 The arrows fold sections in the navigator. Editing Markdown headings updates
 the navigator, including before saving.
 
 To add a source link:
 
 1. Place the editor cursor where the link belongs.
-2. Run **MRW: Insert Outline Reference…** and choose a source or passage.
-3. Click the resulting entry in Reading Outline to open the retained text.
-4. Use **Return to reading outline** to reopen the rendered overview. It restores
+2. Run **MRW: Insert Source or Passage Link…** and choose a source or passage.
+3. Click the resulting entry in Contents to open the retained text.
+4. Use **Return to document** to reopen the rendered document. It restores
    the link's source location and recreates a closed preview tab.
 
 Save the Markdown file with **Ctrl+S**. Save reader forms with **Save annotation**.
@@ -164,7 +171,7 @@ Markdown file does not copy its linked retained sources or annotations.
 | --- | --- |
 | **Show Artifact Location** | Reports this workspace's record directory |
 | **Open Saved Work Directory…** | Connects this workspace to records at the specified directory; moves no files |
-| **Move Saved Work Directory…** | Transfers this workspace's saved sources, outlines and annotations to a new directory |
+| **Move Saved Work Directory…** | Transfers this workspace's saved sources and annotations to a new directory |
 
 Both Open and Move require confirmation. **Esc** cancels a directory prompt.
 A completion notification can remain visible while you continue reading.
@@ -172,8 +179,7 @@ A completion notification can remain visible while you continue reading.
 ## Use Codex or notebooks alongside MRW
 
 For a proof study, use the combined **Copy handoff for Codex** action described
-above. For a standalone question or note outside that workflow, **MRW: Copy
-Outline or Passage Link…** copies only the link: paste the quotation separately.
+above. For a standalone question or note outside that workflow, **MRW: Copy Source or Passage Link…** copies only the link: paste the quotation separately.
 To save a reply as a reader annotation, select **Supplied origin: ai proposal**,
 enter **Author / attribution: Codex**, and use **Save annotation**.
 

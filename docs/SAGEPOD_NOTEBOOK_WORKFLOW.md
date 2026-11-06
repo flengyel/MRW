@@ -9,7 +9,7 @@ evidence; the current MRW package version is 0.11.1.
 Use an ordinary `.ipynb` for explanations, rendered mathematics, Sage code and
 saved outputs. VS Code and Microsoft's Jupyter extension provide the notebook
 editor and kernel interaction; SagePod provides SageMath in its existing
-container. MRW provides source outlines, exact retained passages, annotations
+container. MRW provides saved sources, exact retained passages, annotations
 and Markdown overviews. Its Python backend stays on the workspace host.
 No new MRW runtime, notebook controller or container service is required.
 
@@ -103,9 +103,9 @@ host file. It does not require the server's Contents API to save that file.
 
 Use ordinary relative links in a Markdown cell, for example
 `[source overview](overview.md)`. Keep that overview in the study workspace;
-it can contain references inserted using **MRW: Insert Outline Reference…**.
+it can contain references inserted using **MRW: Insert Source or Passage Link…**.
 Open the overview in the Markdown editor, put the cursor in an MRW reference,
-and run **MRW: Follow Outline Reference at Cursor**. This explicit action opens
+and run **MRW: Follow Source or Passage Link at Cursor**. This explicit action opens
 the reader and retained material. Return via a relative notebook link in the
 overview, an open tab, or Explorer. No notebook-cell bridge is needed for this
 movement. MRW reference commands operate on ordinary Markdown editors, not

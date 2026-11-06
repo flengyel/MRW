@@ -10,12 +10,13 @@ const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n')
 const point = p => [p.line, p.character];
 
 function outlineHtml(script, support = [], diagramStyle = '', options = {}) {
+  const caption = ({ proof: 'Proof outline', proofStudy: 'Proof study', study: 'Study' })[options.kind] || 'Saved source';
   script = [...support, script].join('\n;\n');
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; ${options.stacksFrame ? 'frame-src https://stacks.math.columbia.edu; ' : ''}base-uri 'none'; form-action 'none'">
-<title>Mathematical source outline</title><style nonce="${nonce}">
+<title>${caption}</title><style nonce="${nonce}">
 body{font-family:var(--vscode-font-family);color:var(--vscode-editor-foreground);background:var(--vscode-editor-background);padding:12px;max-width:1000px;margin:auto;overflow-wrap:anywhere}
 h1{font-size:1.35em}h2{font-size:1.1em}h3{font-size:1em}button,input,select,textarea{font:inherit}
 button{color:var(--vscode-button-foreground);background:var(--vscode-button-background);border:0;padding:6px 9px;margin:3px;cursor:pointer}
@@ -32,7 +33,7 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
 .proof-map{overflow:auto;max-width:100%;margin:12px 0}.proof-map svg{display:block}.proof-map text{cursor:pointer}
 ${diagramStyle}
-</style></head><body><main id="reader" aria-live="polite">Opening recorded outline…</main>
+</style></head><body><main id="reader" aria-live="polite">Opening ${caption.toLowerCase()}…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
@@ -64,17 +65,17 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   });
   const current = () => {
     const controller = panels.get(active);
-    if (!controller) throw new Error('Create or open a source outline first.');
+    if (!controller) throw new Error('Retain a document as a source or open a saved source first.');
     return controller;
   };
   const request = (c, method, extra = {}) => ({ method, store: c.store, project_root: c.root,
     id: c.result.outline.id, revision: c.result.revision, ...extra });
   const writable = c => {
-    if (blockedStores.has(c.store)) throw new Error('Outline writes are blocked after a failed or uncertain publication. '
+    if (blockedStores.has(c.store)) throw new Error('Saved source writes are blocked after a failed or uncertain publication. '
       + 'Keep unsaved annotation text and reload the extension host before further private writes.');
   };
   async function locked(action) {
-    if (busy) throw new Error('Wait for the current outline action to finish.');
+    if (busy) throw new Error('Wait for the current saved source action to finish.');
     busy = true; changed.fire();
     try { await vscode.commands.executeCommand?.('setContext', 'mrw.outlineBusy', true); return await action(); }
     finally { busy = false; changed.fire(); await vscode.commands.executeCommand?.('setContext', 'mrw.outlineBusy', false); }
@@ -82,7 +83,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   async function send(c, result, clearDraft, annotationSaved = false, deletedAnnotation) {
     if (result.blocked) {
       blockedStores.add(c.store);
-      throw new Error(`Outline publication failed: ${result.write_error}. Retained sources remain unchanged. `
+      throw new Error(`Saved source publication failed: ${result.write_error}. Retained sources remain unchanged. `
         + 'The live view and unsaved annotation text are kept; reload before further private writes.');
     }
     c.result = result;
@@ -91,7 +92,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       c.noteError = null;
     } catch (error) { c.notes = null; c.noteError = error.message; }
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
-    c.panel.title = `Outline: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
+    c.panel.title = `Source: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
       diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v2', 'theme'),
@@ -116,10 +117,10 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   async function deleteAnnotation(c, value) {
     writable(c);
     const region = value.region === null ? null : c.result.outline.regions.find(r => r.id === value.region);
-    if (value.region !== null && !region) throw new Error('Unknown source region.');
+    if (value.region !== null && !region) throw new Error('Unknown passage.');
     const notes = region ? region.annotations : c.result.outline.annotations;
     const note = notes.find(n => n.id === value.annotation);
-    if (!note) throw new Error('Reader note changed; refresh the saved source outline.');
+    if (!note) throw new Error('Reader note changed; refresh the saved source.');
     const revision = c.result.revision;
     const excerpt = Array.from(note.text.replace(/\s+/gu, ' ').trim()).slice(0, 180).join('');
     const choice = await vscode.window.showWarningMessage(
@@ -127,7 +128,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       + (value.unsaved ? '\nUnsaved edits to this note will also be discarded.' : ''),
       { modal: true }, 'Delete note');
     if (choice !== 'Delete note') return;
-    if (c.result.revision !== revision) throw new Error('The outline changed while confirming deletion; refresh and choose the note again.');
+    if (c.result.revision !== revision) throw new Error('The saved source changed while confirming deletion; refresh and choose the note again.');
     return mutate(c, { kind: 'remove_annotation', region: value.region, id: note.id });
   }
   async function openDocument(c, artifact = null, pinned) {
@@ -153,7 +154,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const observed = await sourceSnapshot(result.path);
     if (document.isDirty || document.version !== version || observed.path !== result.path ||
         observed.revision !== result.source_revision || digest(normalize(document.getText())) !== result.text_revision) {
-      throw new Error('Original source or editor content changed. The retained outline was not remapped; open its retained source.');
+      throw new Error('Original source or editor content changed. The saved source was not remapped; open its retained source.');
     }
     const range = new vscode.Range(...result.start, ...result.end);
     if (!document.validateRange(range).isEqual(range)) throw new Error('The pinned source range is unavailable.');
@@ -183,7 +184,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       if (c.result.outline.regions.some(r => r.id === value.region)) c.selected = value.region;
       active = c.result.outline.id; onMaterial?.({ root:c.root, outline:c.result.outline.id, region:c.selected }); recorder?.record('navigation.reader_select',{outline:c.result.outline.id,region:c.selected,source_revision:c.result.outline.source.revision}); return;
     }
-    if (value.type === 'dirty') { c.panel.title = `${value.dirty ? '• ' : ''}Outline: ${c.result.outline.source.bibliography.title || path.basename(c.result.outline.source.path)}`; return; }
+    if (value.type === 'dirty') { c.panel.title = `${value.dirty ? '• ' : ''}Source: ${c.result.outline.source.bibliography.title || path.basename(c.result.outline.source.path)}`; return; }
     c.pending++;
     recorder?.record('navigation.reader_action',{action:value.type,outline:c.result.outline.id,region:c.selected,source_revision:c.result.outline.source.revision});
     try {
@@ -202,7 +203,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         }
         else if (value.type === 'toggle') {
           const region = c.result.outline.regions.find(r => r.id === value.region);
-          if (!region) throw new Error('Unknown source region.');
+          if (!region) throw new Error('Unknown passage.');
           await mutate(c, { kind: 'region', region: region.id, title: region.title, level: region.level, collapsed: !region.collapsed });
         } else if (value.type === 'source') await openDocument(c);
         else if (value.type === 'study_current') { const ref=await bridge(request(c,'outline_reference',{region:c.selected||null})); await vscode.commands.executeCommand('mrw.studyCurrent',{reference:ref.reference}); }
@@ -244,15 +245,15 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     }
   }
   async function display(result, store, root, reference = null, presentation = {}) {
-    if (result.blocked) { blockedStores.add(store); throw new Error(`Outline publication failed: ${result.write_error}. Reload before further private writes.`); }
+    if (result.blocked) { blockedStores.add(store); throw new Error(`Saved source publication failed: ${result.write_error}. Reload before further private writes.`); }
     const id = result.outline.id;
     let c = panels.get(id);
-    if (c && (c.store !== store || c.root !== root)) throw new Error('This outline identity is already open in a different private-storage scope. Close that reader before opening this reference.');
+    if (c && (c.store !== store || c.root !== root)) throw new Error('This saved source identity is already open in a different private-storage scope. Close that reader before opening this reference.');
     if (!c) {
       // Restart can leave a stale webview tab focused in the research group.
       // Beside would then keep creating additional empty editor groups.
       const column = [...panels.values()].find(p => p.panel.viewColumn)?.panel.viewColumn || vscode.ViewColumn.Two;
-      const panel = vscode.window.createWebviewPanel('mrw.sourceOutline', 'Mathematical source outline', column,
+      const panel = vscode.window.createWebviewPanel('mrw.sourceOutline', 'Saved source', column,
         { enableScripts: true, retainContextWhenHidden: true,
           localResourceRoots: [] });
       c = { panel, result, store, root, selected: result.outline.regions.at(-1)?.id, pending: 0 };
@@ -287,7 +288,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   }
   async function storage(editor) {
     const root = await projectRoot(editor);
-    if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for private outlines.');
+    if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for private saved sources.');
     return { root, store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`) };
   }
   async function readerTarget(c, value) {
@@ -322,15 +323,15 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   async function chooseTarget(passagesOnly = false, location) {
     const { root, store } = location || await storage();
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
-    if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
+    if (!listed.outlines.length) throw new Error('No saved sources exist for this project.');
     const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path), description: o.locator || o.path, detail: o.upstream_revision || undefined, id: o.id })),
-      { placeHolder: 'Choose an existing saved outline' });
+      { placeHolder: 'Choose a saved source' });
     if (!outline) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
-    if (passagesOnly && !loaded.outline.regions.length) throw new Error('This source has no passages. Add a source region before importing an annotation.');
-    const choice = await vscode.window.showQuickPick([...(passagesOnly ? [] : [{ label: 'Whole retained source outline', region: null }]),
+    if (passagesOnly && !loaded.outline.regions.length) throw new Error('This source has no passages. Add a passage before importing an annotation.');
+    const choice = await vscode.window.showQuickPick([...(passagesOnly ? [] : [{ label: 'Whole saved source', region: null }]),
       ...loaded.outline.regions.map(r => ({ label: r.title, description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col}`, region: r.id }))],
-    { placeHolder: passagesOnly ? 'Choose the passage for the imported annotation' : 'Choose outline or exact retained passage' });
+    { placeHolder: passagesOnly ? 'Choose the passage for the imported annotation' : 'Choose a saved source or exact retained passage' });
     if (!choice) return;
     const target = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id, revision: loaded.revision, region: choice.region });
     const c = await display(loaded, store, root);
@@ -466,15 +467,15 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const { editor, store, root } = await markdown();
     const document = editor.document, version = document.version, selection = editor.selection;
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
-    if (!listed.outlines.length) throw new Error('No saved source outlines exist for this project.');
+    if (!listed.outlines.length) throw new Error('No saved sources exist for this project.');
     const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path),
-      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a retained source outline' });
+      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a saved source' });
     if (!outline) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
-    const target = await vscode.window.showQuickPick([{ label: 'Whole retained source outline', region: null },
+    const target = await vscode.window.showQuickPick([{ label: 'Whole saved source', region: null },
       ...loaded.outline.regions.map(r => ({ label: r.title,
         description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col} (scalar columns)`, region: r.id }))],
-    { placeHolder: 'Choose the whole outline or an exact saved region' });
+    { placeHolder: 'Choose the whole source or an exact saved passage' });
     if (!target) return;
     const result = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id,
       revision: loaded.revision, region: target.region });
@@ -482,7 +483,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       throw new Error('Markdown or cursor changed during selection; no reference was inserted.');
     }
     if (!await editor.edit(edit => edit.insert(selection.active, result.markdown), { undoStopBefore: true, undoStopAfter: true })) {
-      throw new Error('VS Code could not insert the outline reference.');
+      throw new Error('VS Code could not insert the source or passage link.');
     }
     return result;
   }));
@@ -512,13 +513,13 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   });
   async function selection(c) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor || editor.selection.isEmpty) throw new Error('Select a nonempty source region in the original or retained text.');
+    if (!editor || editor.selection.isEmpty) throw new Error('Select a nonempty passage in the original or retained text.');
     const document = editor.document, version = document.version, range = editor.selection;
     const retained = retainedViews.get(document.uri.toString());
     if (retained) {
       if (retained.id !== c.result.outline.id || retained.revision !== c.result.outline.source.revision ||
           document.isDirty || digest(normalize(document.getText())) !== retained.textRevision) {
-        throw new Error('This view no longer supplies this outline’s exact retained text. Open its retained source again.');
+        throw new Error('This view no longer supplies this source’s exact retained text. Open its retained source again.');
       }
     } else {
       ordinaryEditor();
@@ -526,7 +527,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       const source = await sourceSnapshot(document.uri.fsPath);
       if (source.path !== c.result.outline.source.path || source.revision !== c.result.outline.source.revision ||
           normalize(source.text) !== normalize(document.getText())) {
-        throw new Error('Select from this outline’s exact original or retained source. Changed source is not remapped.');
+        throw new Error('Select from this source’s exact original or retained source. Changed source is not remapped.');
       }
     }
     if (document.version !== version || !editor.selection.isEqual(range)) throw new Error('Source selection changed during capture.');
@@ -535,8 +536,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   async function selectedRegion(c) {
     if (c.result.outline.regions.some(r => r.id === c.selected)) return c.selected;
     const region = await vscode.window.showQuickPick(c.result.outline.regions.map(r => ({ label: r.title, id: r.id })),
-      { placeHolder: 'Choose the region to annotate' });
-    if (!region) throw new Error('Select a source region first.');
+      { placeHolder: 'Choose the passage to annotate' });
+    if (!region) throw new Error('Select a passage first.');
     c.selected = region.id; return region.id;
   }
   register('mrw.importStacksSection', () => locked(async () => {
@@ -580,25 +581,25 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const controller = await display(result, store, root);
     await vscode.window.showInformationMessage(result.reused
       ? 'This section at this Git revision was already imported. Its saved annotations and links were kept.'
-      : 'Stacks section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source Outline…');
+      : 'Stacks section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source…');
     return controller.result;
   }));
   register('mrw.importObsidianNote', () => locked(async () => {
     const choice = await vscode.window.showQuickPick([
-      { label: 'Open it as a saved source outline', kind: 'source', description: 'Retain a copy for reading, passages and annotations' },
-      { label: 'Add it as a reader annotation on a passage', kind: 'annotation', description: 'Choose a saved passage; up to 16 KiB of note text' },
-      { label: 'Insert it into the reading overview', kind: 'overview', description: 'Insert Markdown at the overview cursor; save with Ctrl+S' },
-    ], { placeHolder: 'Where should the imported Obsidian note’s text go?' });
+      { label: 'Retain a source copy', kind: 'source', description: 'Retain a copy for reading, passages and annotations' },
+      { label: 'Add text to a passage annotation', kind: 'annotation', description: 'Choose a saved passage; up to 16 KiB of note text' },
+      { label: 'Insert text into a Markdown document', kind: 'overview', description: 'Insert Markdown at the document cursor; save with Ctrl+S' },
+    ], { placeHolder: 'Where should the imported Markdown text go?' });
     if (!choice) return;
     let overview;
     if (choice.kind === 'overview') {
       let editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== 'markdown' || !['file', 'untitled'].includes(editor.document.uri.scheme)
           || (editor.document.uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(editor.document.uri))) {
-        const selected = await vscode.window.showOpenDialog({ title: 'Choose the reading overview',
+        const selected = await vscode.window.showOpenDialog({ title: 'Choose a Markdown document for insertion',
           canSelectFiles: true, canSelectFolders: false, canSelectMany: false, filters: { Markdown: ['md', 'markdown'] } });
         if (!selected?.length) return;
-        if (selected[0].scheme !== 'file' || !/\.(md|markdown)$/i.test(selected[0].path)) throw new Error('Choose a Markdown overview in this workspace.');
+        if (selected[0].scheme !== 'file' || !/\.(md|markdown)$/i.test(selected[0].path)) throw new Error('Choose a Markdown document in this workspace.');
         await markdown({ document: { uri: selected[0], languageId: 'markdown' } });
         const doc = await vscode.workspace.openTextDocument(selected[0]);
         await markdown({ document: doc });
@@ -608,14 +609,14 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       overview = { editor, document: editor.document, version: editor.document.version, selection: editor.selection };
     }
     const destination = choice.kind === 'overview' ? null : await storage(vscode.window.activeTextEditor);
-    const selected = await vscode.window.showOpenDialog({ title: 'Import Obsidian note', openLabel: 'Import Note',
+    const selected = await vscode.window.showOpenDialog({ title: 'Import Markdown text', openLabel: 'Import Text',
       canSelectFiles: true, canSelectFolders: false, canSelectMany: false, filters: { Markdown: ['md', 'markdown'] } });
     if (!selected?.length) return;
     const uri = selected[0];
     if (uri.scheme !== 'file' || !/\.(md|markdown)$/i.test(uri.path)) throw new Error('Choose a .md or .markdown note on this workspace host.');
     const savedNote = canonical => {
       if ((vscode.workspace.textDocuments || []).some(d => d.isDirty && d.uri.scheme === 'file'
-          && [uri.fsPath, canonical].includes(d.uri.fsPath))) throw new Error('Save the Obsidian note’s editor changes before importing it.');
+          && [uri.fsPath, canonical].includes(d.uri.fsPath))) throw new Error('Save the Markdown document’s editor changes before importing its text.');
     };
     savedNote(uri.fsPath);
     const note = await sourceSnapshot(uri.fsPath);
@@ -633,11 +634,11 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         path: note.path, source_revision: note.revision }); }
       catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(destination.store); throw error; }
       await display(result, destination.store, destination.root);
-      vscode.window.setStatusBarMessage(result.reused ? 'MRW: Opened the saved copy of this note.' : 'MRW: Note imported as a saved source outline.', 6000);
+      vscode.window.setStatusBarMessage(result.reused ? 'MRW: Opened the saved copy of this note.' : 'MRW: Note imported as a saved source.', 6000);
       return result;
     }
     if (choice.kind === 'annotation') {
-      if (Buffer.byteLength(note.text, 'utf8') > 16384) throw new Error('A reader annotation holds up to 16 KiB. Import this note as a saved source outline or into the overview.');
+      if (Buffer.byteLength(note.text, 'utf8') > 16384) throw new Error('A reader annotation holds up to 16 KiB. Import this note as a saved source or into the document.');
       const picked = await chooseTarget(true, destination);
       if (!picked) return;
       await unchanged();
@@ -650,17 +651,17 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     await unchanged();
     const { editor, document, version, selection } = overview;
     if (document.isClosed || document.version !== version || vscode.window.activeTextEditor !== editor || !editor.selection.isEqual(selection)) {
-      throw new Error('The overview or cursor changed during import. Run import again at the intended location.');
+      throw new Error('The document or cursor changed during import. Run import again at the intended location.');
     }
-    if (Buffer.byteLength(document.getText(), 'utf8') + Buffer.byteLength(note.text, 'utf8') > 4 * 1024 * 1024) throw new Error('The combined overview exceeds the 4 MiB navigation limit.');
+    if (Buffer.byteLength(document.getText(), 'utf8') + Buffer.byteLength(note.text, 'utf8') > 4 * 1024 * 1024) throw new Error('The combined Markdown document exceeds the 4 MiB navigation limit.');
     const applied = await editor.edit(edit => edit.insert(selection.active, note.text), { undoStopBefore: true, undoStopAfter: true });
     if (!applied) throw new Error('The editor declined the note insertion.');
-    vscode.window.setStatusBarMessage('MRW: Note inserted into the overview. Save with Ctrl+S.', 6000);
+    vscode.window.setStatusBarMessage('MRW: Note inserted into the document. Save with Ctrl+S.', 6000);
   }));
   async function createFromSelection(invocation){
     const {editor,document,version,range}=invocation;
     if(document.isClosed||document.version!==version)throw new Error('The selected source changed before retention.');
-    if (document.isDirty) throw new Error('Save the source before creating an exact retained outline.');
+    if (document.isDirty) throw new Error('Save the source before creating an exact saved source.');
     const source = await sourceSnapshot(document.uri.fsPath);
     if (document.version !== version || document.isDirty || normalize(source.text) !== normalize(document.getText())) {
       throw new Error('Source changed during capture; save/reload and select it again.');
@@ -682,9 +683,9 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   register('mrw.openOutline', () => locked(async () => {
     const { store, root } = await storage(vscode.window.activeTextEditor);
     const result = await bridge({ method: 'outline_list', store, project_root: root });
-    if (!result.outlines.length) throw new Error('No saved source outlines exist for this project.');
+    if (!result.outlines.length) throw new Error('No saved sources exist for this project.');
     const picked = await vscode.window.showQuickPick(result.outlines.map(o => ({ label: o.title || path.basename(o.path),
-      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a retained source outline' });
+      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a saved source' });
     if (!picked) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: picked.id });
     return (await display(loaded, store, root)).result;
@@ -714,7 +715,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const c = current(), editor = vscode.window.activeTextEditor;
     const version = editor?.document.version, range = editor?.selection;
     const selected = await selection(c);
-    if (!c.result.outline.contexts.length) throw new Error('This outline has no shared context to replace.');
+    if (!c.result.outline.contexts.length) throw new Error('This source has no shared context to replace.');
     const choice = await vscode.window.showQuickPick(c.result.outline.contexts.map(item => ({
       label: item.label, description: item.kind.replace(/_/g, ' '), id: item.id
     })), { placeHolder: 'Replace the range of this shared context with the source selection' });
@@ -747,17 +748,17 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
-  const rows = () => [['New reading overview…', 'mrw.newReadingOverview'], ['Open reading outline', 'mrw.openReadingOutline'],
+  const rows = () => [['New document…', 'mrw.newReadingOverview'], ['Show contents', 'mrw.openReadingOutline'],
     ['Open tutorial', 'mrw.openTutorial'],
-    ['Return to reading outline', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
-    ['Import Obsidian note…', 'mrw.importObsidianNote'],
-    ['Create outline from saved source', 'mrw.createOutline'], ['Open saved source outline…', 'mrw.openOutline'],
-    ['Copy outline or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
+    ['Return to document', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
+    ['Import Markdown text…', 'mrw.importObsidianNote'],
+    ['Retain document as source', 'mrw.createOutline'], ['Open saved source…', 'mrw.openOutline'],
+    ['Copy source or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
     ['Link an Obsidian note…', 'mrw.associateObsidianNote'],
-    ['Insert outline reference…', 'mrw.insertOutlineReference'], ['Follow outline reference at cursor', 'mrw.followOutlineReference'],
-    ...(panels.has(active) ? [['Refresh saved source outline', 'mrw.refreshSourceOutline'],
-      ['Add selected source region', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
-      ['Replace selected region range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
+    ['Insert source or passage link…', 'mrw.insertOutlineReference'], ['Follow source or passage link at cursor', 'mrw.followOutlineReference'],
+    ...(panels.has(active) ? [['Refresh saved source', 'mrw.refreshSourceOutline'],
+      ['Add selected passage', 'mrw.addOutlineRegion'], ['Use selection as exact statement', 'mrw.setOutlineStatement'],
+      ['Replace selected passage range', 'mrw.replaceOutlineRegion'], ['Keep selected hypothesis / cited result', 'mrw.addOutlineContext'],
       ['Replace shared context with selection…', 'mrw.replaceOutlineContext'], ['Attach recorded evidence…', 'mrw.attachOutlineEvidence']] : [])];
   rows.studyPassage = async (reference, root) => {
     const store = path.join(context.storageUri.fsPath, `outlines-${digest(root)}`);

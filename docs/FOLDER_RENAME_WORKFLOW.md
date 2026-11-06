@@ -33,9 +33,9 @@ place; this is not a procedure for moving VS Code's storage or the Linux home.
 1. Run **MRW: Reconnect Saved Work After Folder Rename…**.
 2. Choose the prepared study using its previous folder and saved-work location.
    Review the old-to-current folder mapping and select **Reconnect saved work**.
-3. Run **MRW: Open Saved Source Outline…**. The same retained source, exact ranges
+3. Run **MRW: Open Saved Source…**. The same retained source, exact ranges
    and attributed notes remain available. Reopen your ordinary Markdown overview
-   and run **MRW: Open Reading Outline** when wanted.
+   and run **MRW: Show Contents** when wanted.
 4. Existing inline MRW references keep their exact targets. For an older external
    link whose workspace address names the old folder, copy it and use **MRW: Open
    Link from Clipboard** in the reconnected window. The verified store identity

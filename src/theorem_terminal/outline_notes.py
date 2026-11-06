@@ -80,7 +80,7 @@ def note_action(request):
                                   project_root=str(store.root),reference=request['reference']))
             selected=parse_reference(request['reference'])
             if selected['outline']!=store.id:
-                raise ValueError('Selected note target belongs to another outline')
+                raise ValueError('Selected note target belongs to another saved source')
             result['selected_links']=[item for item in value['links']
                 if targets[item['reference']]==dict(region=selected['region'],span=selected['span'])]
         return result
@@ -106,7 +106,7 @@ def note_action(request):
         reference_action(dict(method='outline_follow_reference', store=str(store.base),
                               project_root=str(store.root), reference=change['reference']))
         if parse_reference(change['reference'])['outline'] != store.id:
-            raise ValueError('Note association belongs to another outline')
+            raise ValueError('Note association belongs to another saved source')
         label = text(change['label'], 'note label', 640)
         if not label.strip() or len(label) > 160 or any(not c.isprintable() for c in label):
             raise ValueError('Use a readable note label of at most 160 characters')
@@ -117,7 +117,7 @@ def note_action(request):
         else:
             value['links'].append(item)
         if len(value['links']) > 64:
-            raise ValueError('At most 64 note associations per outline are supported')
+            raise ValueError('At most 64 note associations per saved source are supported')
     candidate = encoded(value)
     if len(candidate) > MAX_BYTES:
         raise ValueError('Obsidian associations exceed the 128 KiB limit')

@@ -20,8 +20,8 @@ relaxing its contract. Durable research summaries must survive session ending.
 
 This priority supersedes older product-scope and task-ordering prose below,
 including study-only or corpus-specific priorities. Preserve existing safety,
-source, attribution and persistence contracts and the 0.19.1 repairs. The first
-GUI patch is terminology, not a claim of new PDF/vault/research capabilities.
+source, attribution and persistence contracts and the 0.19.1 repairs. The 0.19.2
+GUI patch implements terminology, without new PDF/vault/research capabilities.
 GPTWork maintains design and review; local Codex implements in VS Code/WSL2.
 
 ## Delivered repair — study continuity and evidence, 0.19.1

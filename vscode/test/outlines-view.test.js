@@ -105,7 +105,7 @@ test('copy and return-note actions explain opposite directions and preserve expl
   value.notes.push({id:'d',reference:'current',label:'Second linked note'});
   h.send(value);
   const [whole,,changed,current] = h.scopes();
-  assert.equal(h.button(whole,'copy-link').textContent, 'Copy link to this outline');
+  assert.equal(h.button(whole,'copy-link').textContent, 'Copy link to this source');
   assert.equal(h.button(current,'copy-link').textContent, 'Copy link to this passage');
   assert.match(current.text(), /2 linked notes — choose when opening/);
   assert.match(h.button(whole,'copy-link').title, /paste into an Obsidian note.*does not set a return note/);

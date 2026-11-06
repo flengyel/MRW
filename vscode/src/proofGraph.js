@@ -234,7 +234,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     const support = await Promise.all(['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/stacksView.js', 'src/proofGraphMap.js'].map(f => fs.readFile(path.join(context.extensionPath, f), 'utf8')));
     const script = await fs.readFile(path.join(context.extensionPath, 'src/proofGraphView.js'), 'utf8');
     const style = await fs.readFile(path.join(context.extensionPath, 'media/proof-graph.css'), 'utf8');
-    panel.webview.html = outlineHtml(script, support, style, { stacksFrame: true });
+    panel.webview.html = outlineHtml(script, support, style, { stacksFrame: true, kind: 'proof' });
     context.subscriptions.push(panel);
   });
 }

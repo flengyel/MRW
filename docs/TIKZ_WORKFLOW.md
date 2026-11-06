@@ -7,7 +7,7 @@ reading aid, separate from source statements and checking evidence.
 
 ## Write, save and render
 
-1. Open a saved source outline and its existing annotation editor under
+1. Open a saved source and its existing annotation editor under
    **Source details and tools**. Keep the appropriate author and supplied origin.
 2. Put a `tikz` fenced block in the annotation. For example:
 

@@ -9,14 +9,14 @@ The current release supplies source reading, study, attributed assistance and
 bounded resumption. The broader document and research workflow is being built
 in stages; the capability list below describes what is delivered.
 
-**Current version: 0.19.1.** The repository remains private. There is no published
+**Current version: 0.19.2.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity remains `flengyel.theorem-terminal`.
 
-The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) starts with clearer GUI
-names: Document, Contents, Saved source and Passage. The
-[next Codex task](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md) specifies that patch;
-the command instructions below still name the installed 0.19.1 interface.
+The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) starts with the delivered
+Document, Contents, Saved source and Passage terminology. The
+[implementation task](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md) specifies the map;
+the command instructions below name the 0.19.2 interface.
 Following increments connect existing documents and optional Zettel/Obsidian
 notes, make research questions resumable independently of an AI exchange, and
 join these tools in a complete argument-reconstruction session.
@@ -28,7 +28,7 @@ join these tools in a complete argument-reconstruction session.
 - Submit work, retain a returned explanation, revise the work and resume later.
 - Keep selected recall questions for short, source-scoped review using FSRS.
 - Inspect and explicitly export local interaction history and its source snapshots.
-- Read and annotate sources, navigate Markdown overviews and inspect proof graphs.
+- Read and annotate sources, navigate Markdown documents and inspect proof graphs.
 
 Source retention and graph validation check structure and identity. They do not
 check a mathematical argument. Reader reports, AI proposals and external checking
@@ -53,7 +53,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `theorem-terminal-0.19.1.vsix`. Confirm installation under that workspace
+select `theorem-terminal-0.19.2.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -63,8 +63,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.1.vsix
-sha256sum vscode/theorem-terminal-0.19.1.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.2.vsix
+sha256sum vscode/theorem-terminal-0.19.2.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.
@@ -105,6 +105,17 @@ with adjustable limits and no interrupted attempt.
 [Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
 [offline tutorial](vscode/media/first-steps.md) ·
 [proof-study handoff](docs/PROOF_STUDY_WORKFLOW.md).
+
+## Documents and Contents
+
+**Show Contents** lists headings and MRW source links in the selected Markdown
+document, including unsaved edits. **New Document…** creates Markdown;
+**Choose Document…** selects Markdown for Contents. Document is a general term;
+other formats use the host's available editors/readers. This patch adds no PDF
+extraction or general document opener. **Retain Document as Source** and **Open
+Saved Source…** preserve the existing retention path. Proof Outline and Studies
+keep their meanings. [Guide](docs/READING_OUTLINE_WORKFLOW.md) ·
+[Patch validation](docs/DOCUMENT_TERMINOLOGY_VALIDATION.md).
 
 ## Data and transfers
 

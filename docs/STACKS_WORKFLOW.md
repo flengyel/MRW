@@ -13,7 +13,7 @@ mount, synchronization setting, ordinary note or original source file.
    revision, effective artifact destination and affected project. Click
    **Import section**. Cancel leaves saved work unchanged.
 3. The reader opens **Hausdorff spaces**. Its opening-context and statement/proof
-   buttons jump directly to the nine source regions. All four lemmas, 08ZE
+   buttons jump directly to the nine passages. All four lemmas, 08ZE
    through 08ZH, include their hypotheses and complete proofs. Expand
    **Exact retained TeX for this passage** or **Open retained source** to see
    the unchanged source behind the mathematical display.
@@ -27,7 +27,7 @@ mount, synchronization setting, ordinary note or original source file.
    your annotation and attribution, and click **Save annotation**. Annotations
    are separate from the authors' text. Save before closing; unsaved reader
    drafts are not ordinary editor documents.
-6. Reopen the same workspace, then **MRW: Open Saved Source Outline…** and
+6. Reopen the same workspace, then **MRW: Open Saved Source…** and
    choose **Hausdorff spaces**. Retained reading, mathematical display,
    annotation and the local 08ZE citations need no download. Importing the same
    section at the same Git commit reopens its existing outline and annotations.

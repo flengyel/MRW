@@ -10,7 +10,7 @@ function referenceAt(text, offset) {
   for (const match of text.matchAll(/mrw-outline:[^\s)<>]*/g)) {
     if (match.index <= offset && offset <= match.index + match[0].length) return match[0];
   }
-  throw new Error('Place the cursor in an MRW outline reference in the Markdown editor.');
+  throw new Error('Place the cursor in an MRW source or passage link in the Markdown editor.');
 }
 
 module.exports = { referenceAt };

@@ -26,7 +26,7 @@ its [authentication guide](https://learn.chatgpt.com/docs/auth).
 1. In MRW, choose the saved passage you want to discuss. For the retained Stacks
    source, use the section contents to choose a statement or proof; **Show proof**
    reveals a hidden proof.
-2. Run **F1 → MRW: Copy Outline or Passage Link…**, choose the saved outline and
+2. Run **F1 → MRW: Copy Source or Passage Link…**, choose the saved outline and
    the exact passage, and paste the complete copied Markdown link into an unsent
    Codex question. It carries the existing scoped MRW reference, source revision,
    region identity and pinned range. The reader's **Copy link to this passage**
@@ -82,8 +82,7 @@ environment. MRW does not edit this script or store your credential.
 
 ## Ask, preview and send
 
-1. Open the intended workspace and its retained source reader with **MRW: Open
-   Saved Source Outline…**, or follow an existing reading-outline reference.
+1. Open the intended workspace and its retained source reader with **MRW: Open Saved Source…**, or follow an existing reading-outline reference.
 2. Beside the passage you want to review, click **Ask AI about this passage…**.
    Alternatively use **Ask AI about a passage…** in the reading toolbar or
    **F1 → MRW: Ask About Reader Passage…**, then choose a saved region. Expand a

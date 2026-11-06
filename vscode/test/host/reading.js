@@ -123,7 +123,7 @@ async function run(context) {
         await command('selectReadingOutlineItem', node); await command('returnToReadingOutline');
         ed = vscode.window.activeTextEditor;
         await ed.edit(b => b.replace(new vscode.Range(doc.positionAt(node.start + 2), doc.positionAt(node.start + 3)), 'X'));
-        await command('returnToReadingOutline'); assert.match(report.errors.pop(), /exact reading-outline location changed/);
+        await command('returnToReadingOutline'); assert.match(report.errors.pop(), /exact document location changed/);
         await vscode.commands.executeCommand('undo'); await pause(300);
         await command('returnToReadingOutline');
       });

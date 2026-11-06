@@ -9,7 +9,7 @@ preserve later work and all delivered repairs.
 
 | Order | Increment | Status |
 | --- | --- | --- |
-| 1 | Consistent Document / Contents / Saved source / Passage GUI labels and current help | Next implementation task |
+| 1 | Consistent Document / Contents / Saved source / Passage GUI labels and current help | Implemented in 0.19.2 |
 | 2 | Existing documents opened in place, ordinary links, optional Zettel links/backlinks and Obsidian, PDF host opening | Designed; not delivered by the label patch |
 | 3 | Research questions independent of model exchanges, linked work and checks, durable summary and next action | Designed; reuse existing persistence and navigation |
 | 4 | One compressed-argument reconstruction session with explanations, attempts, appropriate tool use and restart | Designed; joins existing components |

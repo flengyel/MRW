@@ -57,7 +57,7 @@ def text(value, label, limit=16384, *, optional=False):
 
 def identity(value):
     if not isinstance(value, str) or re.fullmatch(r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}', value) is None:
-        raise ValueError('Invalid outline item identity')
+        raise ValueError('Invalid saved source item identity')
     return value
 
 
@@ -81,11 +81,11 @@ def now():
 def ordinary_source(path, expected):
     path = local_path(path)
     if path.suffix.lower() not in TEXT_FORMATS:
-        raise ValueError('Outline sources support saved UTF-8 .txt, .md, .tex, .rst, .org and .lean text. '
+        raise ValueError('Saved sources support saved UTF-8 .txt, .md, .tex, .rst, .org and .lean text. '
                          'PDF regions, OCR, notebooks and binary formats are unsupported.')
     source = SourceDocument.from_bytes(path, read_bounded(path, MAX_SOURCE, 'outline source'))
     if '\0' in source.text:
-        raise ValueError('Outline sources require ordinary UTF-8 text without NUL')
+        raise ValueError('Saved sources require ordinary UTF-8 text without NUL')
     if source.revision != revision(expected):
         raise ValueError('Source changed; save/reload and select it again')
     return source
@@ -121,7 +121,7 @@ def select_span(source, start, end):
             raise ValueError('Source selection splits a Unicode character') from exc
         converted.append((line + 1, len(prefix)))
     if converted[0] >= converted[1]:
-        raise ValueError('Select a nonempty forward source region')
+        raise ValueError('Select a nonempty forward passage')
     a, b = converted
     return dict(source_revision=source.revision, start_line=a[0], start_col=a[1], end_line=b[0], end_col=b[1])
 
@@ -139,10 +139,10 @@ def span_text(source, span, limit=MAX_REGION):
             raise ValueError('Saved selection is outside the retained source')
         offsets.append(starts[line - 1] + column)
     if offsets[0] >= offsets[1]:
-        raise ValueError('Select a nonempty forward source region')
+        raise ValueError('Select a nonempty forward passage')
     selected = value[offsets[0]:offsets[1]]
     if len(selected.encode('utf-8')) > limit:
-        raise ValueError(f'Selected source region exceeds its {limit}-byte limit')
+        raise ValueError(f'Selected passage exceeds its {limit}-byte limit')
     return selected
 
 
@@ -155,7 +155,7 @@ def host_point(source, span, side):
 def directory(path):
     """Create private storage with durable new directory entries, outside sources."""
     if os.name != 'posix':
-        raise ValueError('Crash-durable outline writes require Linux/WSL')
+        raise ValueError('Crash-durable saved source writes require Linux/WSL')
     absent = []
     current = path
     while not current.exists():
@@ -188,7 +188,7 @@ def validate_state(value, root, identifier):
     fields(value, names | ({'acquisition'} if imported else set()), 'source outline')
     if (value['schema'] != SCHEMA or type(value['version']) is not int or value['version'] not in (1, 2)
             or value['id'] != identifier or value['project_root'] != str(root)):
-        raise ValueError('Outline schema, project or identity differs')
+        raise ValueError('Saved source schema, project or identity differs')
     identity(identifier)
     text(value['created_at'], 'recording time', 128)
     s = value['source']
@@ -203,11 +203,11 @@ def validate_state(value, root, identifier):
     def unique(item):
         key = identity(item['id'])
         if key in ids:
-            raise ValueError('Duplicate outline item identity')
+            raise ValueError('Duplicate saved source item identity')
         ids.add(key)
     def notes(items):
         if not isinstance(items, list) or len(items) > 32:
-            raise ValueError('At most 32 annotations per region or overview')
+            raise ValueError('At most 32 annotations per passage or whole source')
         for item in items:
             unique(item); note(item)
     def span(item):
@@ -221,12 +221,12 @@ def validate_state(value, root, identifier):
             raise ValueError('Invalid source range order')
     for key, limit in [('regions', 64), ('contexts', 32), ('artifacts', 16)]:
         if not isinstance(value[key], list) or len(value[key]) > limit:
-            raise ValueError(f'At most {limit} {key} per outline')
+            raise ValueError(f'At most {limit} {key} per saved source')
     for region in value['regions']:
-        fields(region, {'id', 'title', 'level', 'span', 'statement', 'collapsed', 'annotations'}, 'source region')
-        unique(region); text(region['title'], 'region title', 1024); span(region['span'])
+        fields(region, {'id', 'title', 'level', 'span', 'statement', 'collapsed', 'annotations'}, 'passage')
+        unique(region); text(region['title'], 'passage title', 1024); span(region['span'])
         if region['level'] not in LEVELS or type(region['collapsed']) is not bool:
-            raise ValueError('Invalid region reading level or visibility')
+            raise ValueError('Invalid passage reading level or visibility')
         if region['statement'] is not None:
             fields(region['statement'], {'kind', 'span'}, 'selected statement')
             if region['statement']['kind'] not in ('source_statement', 'declaration_statement'):
@@ -247,7 +247,7 @@ def validate_state(value, root, identifier):
         if item['kind'] not in ('goal_context', 'supporting_artifact', 'declaration_statement'):
             raise ValueError('Invalid supplied artifact kind')
         if item['region'] is not None and item['region'] not in region_ids:
-            raise ValueError('Artifact refers to an unknown region')
+            raise ValueError('Artifact refers to an unknown passage')
         if item['selector'] is not None and (type(item['selector']) is not int or not 0 <= item['selector'] < 256):
             raise ValueError('Invalid recorded snapshot selector')
     if imported:
@@ -290,13 +290,13 @@ class OutlineStore:
         managed=CURRENT.get() is not None and CURRENT.get().identity is not None
         if (self.root.resolve() != self.root or self.base.resolve() != self.base
                 or (self.base.is_relative_to(self.root) and not managed)):
-            raise ValueError('Outline storage requires a canonical private directory outside the project')
+            raise ValueError('Saved source storage requires a canonical private directory outside the project')
         self.id = identity(identifier) if identifier is not None else None
         self.directory = self.base / self.id if self.id else None
         self.raw, self.state = None, None
         if self.id:
             if self.directory.resolve() != self.directory:
-                raise ValueError('Private outline directory was redirected')
+                raise ValueError('Private saved source directory was redirected')
             self.raw = read_bounded(self.directory / 'outline.json', MAX_STATE, 'private source outline')
             self.state = validate_state(strict_json(self.raw), self.root, self.id)
 
@@ -306,7 +306,7 @@ class OutlineStore:
 
     def expect(self, expected):
         if revision(expected) != self.revision:
-            raise ValueError('Outline changed; reopen it before editing')
+            raise ValueError('Saved source changed; reopen it before editing')
 
     def blob(self, digest, *, source=False):
         return self.directory / (('source-' if source else 'artifact-') + revision(digest) + '.bin')
@@ -340,7 +340,7 @@ class OutlineStore:
         validate_state(value, self.root, self.id)
         raw = encoded(value)
         if len(raw) > MAX_STATE:
-            raise ValueError('Outline annotations and selections exceed the 512 KiB state limit')
+            raise ValueError('Saved source annotations and selections exceed the 512 KiB state limit')
         try:
             save_mutable(self.directory / 'outline.json', raw, previous=self.raw, lock_root=self.base / 'locks')
         except (OSError, ValueError) as exc:
@@ -419,17 +419,17 @@ def mutate(store, change):
     def region():
         item = item_by_id(value['regions'], change['region'])
         if item is None:
-            raise ValueError('Select an existing source region')
+            raise ValueError('Select an existing passage')
         return item
     def existing(collection, key):
         item = item_by_id(value[collection], change[key])
         if item is None:
-            raise ValueError('Selected association changed; reopen the outline')
+            raise ValueError('Selected association changed; reopen the saved source')
         return item
     if kind == 'add_region':
         fields(change, {'kind', 'start', 'end'}, 'region selection')
         span = selection()
-        value['regions'].append(dict(id=str(uuid4()), title=f'Region {len(value["regions"]) + 1}',
+        value['regions'].append(dict(id=str(uuid4()), title=f'Passage {len(value["regions"]) + 1}',
             level='argument', span=span, statement=None, collapsed=False, annotations=[]))
     elif kind == 'statement':
         fields(change, {'kind', 'region', 'statement_kind', 'start', 'end'}, 'statement selection')
@@ -493,7 +493,7 @@ def mutate(store, change):
         value['source']['bibliography'] = change['bibliography']
         value['source']['authorship'] = change['authorship']
     else:
-        raise ValueError('Unknown outline edit')
+        raise ValueError('Unknown saved source edit')
     store.check_spans(value)
     return store.publish(value)
 
@@ -509,7 +509,7 @@ def import_note(store, source):
     if (store.directory / 'outline.json').exists():
         saved = OutlineStore(str(store.base), str(store.root), store.id)
         if saved.state['source']['path'] != str(source.path) or saved.state['source']['revision'] != source.revision:
-            raise ValueError('Saved note identity differs; no outline was replaced')
+            raise ValueError('Saved document identity differs; no saved source was replaced')
         return dict(**saved.view(), reused=True)
     regions = []
     offset = 0
@@ -565,7 +565,7 @@ def outline_action(request):
             if re.fullmatch(r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}', entry.name) is None:
                 continue
             if len(result) >= 100:
-                raise ValueError('Outline list exceeds its 100-outline limit')
+                raise ValueError('Saved source list exceeds its 100-source limit')
             try:
                 saved = OutlineStore(str(store.base), str(store.root), entry.name)
             except FileNotFoundError:
@@ -633,7 +633,7 @@ def outline_action(request):
         else:
             region = item_by_id(store.state['regions'], request['region'])
             if region is None:
-                raise ValueError('Unknown source region')
+                raise ValueError('Unknown passage')
             span = region['statement']['span'] if request['statement'] and region['statement'] else region['span']
         span_text(source, span)
         if store.state.get('acquisition', {}).get('kind') == 'stacks-section':
@@ -646,4 +646,4 @@ def outline_action(request):
         return {'path': str(source.path), 'source_revision': source.revision,
                 'text_revision': sha256(normalized.encode('utf-8')).hexdigest(),
                 'start': host_point(source, span, 'start'), 'end': host_point(source, span, 'end')}
-    raise ValueError('Unknown outline action')
+    raise ValueError('Unknown saved source action')

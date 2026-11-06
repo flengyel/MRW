@@ -162,7 +162,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
       } catch (error) { recorder?.record('operation.error',{operation:'proof-study.'+m.type,message:error.message});await panel.webview.postMessage({ type: 'error', message: error.message }); }
       finally { c.busy = false; await panel.webview.postMessage({ type: 'idle' }); }
     });
-    panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src/proofStudyView.js'), 'utf8'));
+    panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src/proofStudyView.js'), 'utf8'), [], '', { kind: 'proofStudy' });
     context.subscriptions.push(panel);
   }
   register('mrw.prepareProofStudy', async () => {

@@ -29,6 +29,18 @@ and show only supported capabilities. Delivered descriptions below retain the
 labels and behavior of the releases they describe. The new design does not
 claim those later integrations are installed.
 
+## Delivered terminology — 0.19.2
+
+Document, Contents, Saved source and Passage are implemented across commands,
+reader controls, prompts, welcome text and the tutorial. New/Choose dialogs say
+Markdown; Show Contents focuses the existing navigator. Proof Outline and Studies
+remain unchanged. IDs, settings, serialized fields, reference links, existing
+files and note bytes retain their meanings. See
+[workflow](docs/READING_OUTLINE_WORKFLOW.md) and
+[validation](docs/DOCUMENT_TERMINOLOGY_VALIDATION.md). General document opening,
+optional Zettel/PDF integrations, independent research resumption and the complete
+reconstruction workflow remain the subsequent increments in the committed design.
+
 ## Delivered study reliability — 0.19.1
 
 The [0.19 review findings](docs/MRW_019_REVIEW.md) are repaired within the existing

@@ -16,13 +16,13 @@ REFERENCE = re.compile(rf'mrw-outline:v1/({HEX})/({UUID})/({HEX})'
 def parse_reference(value):
     match = REFERENCE.fullmatch(value) if isinstance(value, str) and len(value) <= 512 else None
     if match is None:
-        raise ValueError('Malformed MRW outline reference; no target was opened')
+        raise ValueError('Malformed MRW source or passage link; no target was opened')
     scope, outline, source, region, *points = match.groups()
     span = None
     if region:
         sl, sc, el, ec = map(int, points)
         if (sl, sc) >= (el, ec):
-            raise ValueError('Malformed MRW outline reference range')
+            raise ValueError('Malformed MRW source or passage link range')
         span = dict(source_revision=source, start_line=sl, start_col=sc, end_line=el, end_col=ec)
     return dict(scope=scope, outline=outline, source=source, region=region, span=span)
 
@@ -79,7 +79,7 @@ def reference_action(request):
     try:
         store = OutlineStore(str(store.base), str(store.root), ref['outline'] if following else request['id'])
     except (OSError, ValueError) as exc:
-        raise ValueError('Saved outline unavailable in this workspace’s private storage; '
+        raise ValueError('Saved source unavailable in this workspace’s private storage; '
                          'no replacement was guessed: ' + str(exc)) from exc
     if not following:
         store.expect(request['revision'])  # The chooser's saved range, not newer private state.
@@ -89,7 +89,7 @@ def reference_action(request):
         raise ValueError('Retained source unavailable; no replacement was guessed: ' + str(exc)) from exc
     if following:
         if ref['source'] != source.revision:
-            raise ValueError('Referenced source revision differs from the retained outline; no replacement was guessed')
+            raise ValueError('Referenced source revision differs from the saved source; no replacement was guessed')
         region = item_by_id(store.state['regions'], ref['region']) if ref['region'] else None
         status = 'whole outline'
         document = None
@@ -99,23 +99,23 @@ def reference_action(request):
             document = dict(text=source.text, source_revision=source.revision,
                             start=host_point(source, ref['span'], 'start'), end=host_point(source, ref['span'], 'end'))
         result = store.view()
-        notice = ('Overview reference: whole retained source outline.' if not ref['span'] else
-                  f"Overview reference: {locator(ref['span'])}. " +
-                  ('Region association unchanged; exact retained passage opened.' if status == 'unchanged' else
-                   'Region association changed or removed; the originally referenced retained passage is opened, not the current region range.'))
+        notice = ('Source link: whole saved source.' if not ref['span'] else
+                  f"Passage link: {locator(ref['span'])}. " +
+                  ('Passage association unchanged; exact retained passage opened.' if status == 'unchanged' else
+                   'Passage association changed or removed; the originally referenced retained passage is opened, not the current passage range.'))
         result['reference'] = dict(uri=request['reference'], label=short_label(store, source, ref['span']), status=status, notice=notice,
                                    region=ref['region'] if status == 'unchanged' else None)
         result['document'] = document
         return result
     region = item_by_id(store.state['regions'], request['region']) if request['region'] is not None else None
     if request['region'] is not None and region is None:
-        raise ValueError('The selected source region is unavailable; choose it again')
+        raise ValueError('The selected passage is unavailable; choose it again')
     uri = pinned_reference(store, source, region['id'] if region else None, region['span'] if region else None)
     bib = store.state['source']['bibliography']
     parts = [bib['title'] or source.path.name]
     parts.extend(f'{key}: {bib[key]}' for key in ('authors', 'edition', 'revision', 'locator', 'reference') if bib[key])
     parts.append('source: ' + str(source.path))
-    parts.append(f"{region['title']}; {locator(region['span'])}" if region else 'whole retained source outline')
+    parts.append(f"{region['title']}; {locator(region['span'])}" if region else 'whole saved source')
     parts.append('retained SHA-256 ' + source.revision[:12])
     label = short_label(store, source, region['span'] if region else None)
     return dict(reference=uri, label=label, markdown=f"[{markdown_label(' · '.join(parts))}]({uri})")
