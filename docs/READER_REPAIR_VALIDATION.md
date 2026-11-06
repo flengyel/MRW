@@ -56,3 +56,20 @@ The browser observation is separate from native VS Code acceptance. The working
 window is preserved during installation; the user activates the completed update
 with one normal reload. Existing retained sources then use the repaired display
 without importing again.
+
+## Installed package
+
+Implementation: `7338c76`. Pinned build: `7aa3d12`.
+Package: `vscode/theorem-terminal-0.21.1.vsix`, 547,972 bytes, 96 archive entries.
+SHA-256: `82b4dd2d8bf3bc6e48dafa55bd9f8226e3f4dee22b1b9b84f33b0bbb89b057bc`.
+
+The existing WSL extension installation succeeded. All 94 installed package
+files match the verified archive (installer-only manifest metadata excluded).
+Its isolated installed bridge reopened the real retained Kerodon source offline:
+27 passages and zero parser warnings. The final preservation check confirms all
+49 baseline study/source/checkpoint files unchanged. The working window was not
+reloaded, switched or closed; native activation remains the user's normal reload.
+
+After reload, **MRW: Open Saved Source… → Simplicial Sets** reopens the existing
+snapshot. No repeat import or migration is needed. Original-source browser access
+is explicit, and the current Document / Contents labels remain unchanged.

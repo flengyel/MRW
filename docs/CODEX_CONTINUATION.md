@@ -22,6 +22,15 @@ Preserve the current Document / Contents terminology. The checkout is already
 its existing source store is explicitly bound; do not repeat the relocation.
 See [delivery checks and actual-host limits](READER_REPAIR_VALIDATION.md).
 
+**0.21.1 is installed in WSL**, with all 94 installed package files verified.
+Implementation `7338c76`, pinned build `7aa3d12`; VSIX SHA-256
+`82b4dd2d8bf3bc6e48dafa55bd9f8226e3f4dee22b1b9b84f33b0bbb89b057bc`.
+Broader Node 284/284, final rebundled command regressions 5/5, final Python
+412 run (350 passed, 62 explicit skips) and isolated Chrome rendering pass.
+All 49 baseline genuine files remain unchanged. The active window is preserved;
+a normal user reload adopts the repair. Reopen the existing Simplicial Sets saved
+source afterward, without re-importing or repeating the storage relocation.
+
 ## Earlier increment — qualified published sources, 0.21.0
 
 The user requested uniform source IDs, the full Stacks Project command name and
