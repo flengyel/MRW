@@ -3,9 +3,10 @@
 ## Current priority — documents and resumable research, 2026-11-06
 
 The [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) governs
-the sequence. The active [Codex task](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
-implements its second increment and updates the packaged tutorial with it.
-Baseline reviewed: 0.19.2 at `42b465f`; preserve later work and all delivered repairs.
+the sequence. The [existing-document task](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md) is delivered
+in 0.20.0. The user-requested published-source extension is delivered in 0.21.0
+with matching help and the identity/revision contract below. Preserve later
+work and all delivered repairs; continue with general research resumption.
 
 | Order | Increment | Status |
 | --- | --- | --- |

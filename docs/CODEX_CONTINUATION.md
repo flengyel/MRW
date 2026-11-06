@@ -17,8 +17,17 @@ linked subsections and external citations are not automatically imported.
 nLab requires a separate inspected adapter. General research resumption and
 argument reconstruction follow; preserve the delivered document/study behavior.
 
-Package identity, checks and observation limits belong in
-[PUBLISHED_SOURCES_VALIDATION](PUBLISHED_SOURCES_VALIDATION.md).
+Installed: **0.21.0**, implementation `e14f6c4`, clean build
+`44fd233`. VSIX SHA-256:
+`c9edc2a386f628b2ab0b6f867764bf102d1ad4698071aa6f55059f8e72907588`.
+Checks: 281 Node passes plus six final focused passes; Python 342 passes and
+67 explicit skips. Syntax, VSIX, extracted tutorial and installed-byte checks
+passed. Public Kerodon 0004 was reopened offline; isolated Chrome rendered the
+actual reader. Native command interaction/adoption was not observed, and the
+working window was not reloaded. Retained notes/sources are unchanged; a live
+study checkpoint changed before installation and was left intact.
+[PUBLISHED_SOURCES_VALIDATION](PUBLISHED_SOURCES_VALIDATION.md) records the exact
+source/package identities, evidence and remaining limits.
 
 ## Earlier increment — existing documents, 0.20.0
 

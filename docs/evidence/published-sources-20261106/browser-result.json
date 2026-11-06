@@ -1,0 +1,10 @@
+{
+  "scope": "isolated headless Chrome with actual renderer and API facade; not native VS Code",
+  "public_page": "kerodon:0004",
+  "qualified_citation_payloads": true,
+  "qualified_backlink_payload": true,
+  "rendered_math": 164,
+  "remote_media_elements": 0,
+  "draft_survives_refresh": true,
+  "runtime_errors": 0
+}
