@@ -588,7 +588,9 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         + '. Existing work is preserved. Reload the host before retrying.');
     }
     const controller = await display(result, store, root);
-    await vscode.window.showInformationMessage(result.reused
+    // Completion notifications can remain unresolved in the notification tray.
+    // They must not retain the reader-action lock after a completed import.
+    void vscode.window.showInformationMessage(result.reused
       ? 'This section at this Git revision was already imported. Its saved annotations and links were kept.'
       : 'Stacks Project section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source…');
     return controller.result;
@@ -612,7 +614,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(store); throw error; }
     if (result.blocked) { blockedStores.add(store); throw new Error('Kerodon import publication failed: ' + result.write_error + '. Existing work is preserved. Reload the host before retrying.'); }
     const controller = await display(result, store, root);
-    await vscode.window.showInformationMessage(result.reused ? 'This Kerodon page snapshot is already retained. Its annotations and links were kept.' : 'Kerodon section retained. Reopen with Open Saved Source.');
+    void vscode.window.showInformationMessage(result.reused ? 'This Kerodon page snapshot is already retained. Its annotations and links were kept.' : 'Kerodon section retained. Reopen with Open Saved Source.');
     return controller.result;
   }));
   register('mrw.importObsidianNote', () => locked(async () => {

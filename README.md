@@ -10,7 +10,7 @@ PDF links, and supplies backlinks and return locations alongside source reading,
 study and attributed assistance. General research resumption and argument
 reconstruction remain later increments.
 
-**Current version: 0.21.0.** The repository remains private. There is no published
+**Current version: 0.21.1.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity remains `flengyel.theorem-terminal`.
 
@@ -38,6 +38,12 @@ check a mathematical argument. Reader reports, AI proposals and external checkin
 remain separate. Scheduling and optional mental-effort reports establish no
 learning benefit or causal comparison between releases.
 
+Patch **0.21.1** repairs Kerodon equations split by HTML parsing and prevents
+completed source imports from blocking Return, refresh and other reader actions.
+The reader's **Open original source ↗** button opens the current published page;
+offline reading keeps the exact retained revision. Existing sources, citations
+and annotations are unchanged. [Repair and checks](docs/READER_REPAIR_VALIDATION.md).
+
 ## Host and installation
 
 The extension and Python run on a **Linux workspace host**, including WSL2 or
@@ -56,7 +62,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `theorem-terminal-0.21.0.vsix`. Confirm installation under that workspace
+select `theorem-terminal-0.21.1.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -66,8 +72,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.21.0.vsix
-sha256sum vscode/theorem-terminal-0.21.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.21.1.vsix
+sha256sum vscode/theorem-terminal-0.21.1.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.

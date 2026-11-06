@@ -266,6 +266,11 @@ function render() {
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
   button(readingBar, '← Return to document', { type: 'reading_return' }, 'reading-return').title =
     'Return to the selected Markdown document at its saved location.';
+  if (o.published && !o.published.error) {
+    button(readingBar, 'Open original source ↗',
+      { type: 'stacks_citation', tag: o.published.qualified_tag || o.published.tag }, 'original-source').title =
+      'Open the current published page in your browser. The retained source revision and annotations stay unchanged.';
+  }
   button(readingBar, 'Study current material', { type: 'study_current' }, 'study-current');
   button(readingBar, 'Prepare proof study…', { type: 'proof_study' }, 'proof-study');
   button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');

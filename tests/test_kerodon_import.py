@@ -141,6 +141,64 @@ class KerodonImportTests(unittest.TestCase):
         self.assertIn('Embedded media', parts[0]['warning'])
         self.assertIn('https://evil.invalid/diagram', span_text(SourceDocument.from_bytes('/page.html', media_only.encode()), parts[0]['span']))
 
+    def test_html_parser_fragments_render_as_whole_formulas_without_rewriting_old_manifests(self):
+        formula = r'$\{0 < 1 < 2 < \cdots < n\}$'
+        self.raw = PAGE.replace('For every $x$, the chosen map satisfies $f(x)=x$.',
+                                'For every $n$, use ' + formula + r' and $a &lt; b &amp; c$.').encode()
+        loaded = self.load()
+        store = OutlineStore(str(self.store), str(self.root), loaded['outline']['id'])
+        manifest, legacy = k._manifest(store)
+        legacy_part = next(p for p in legacy['parts'] if p['tag'] == '000A' and p['role'] == 'statement')
+        self.assertIn('Unclosed mathematical delimiter', legacy_part['warning'])
+        artifact = next(a for a in store.state['artifacts'] if a['id'] == store.state['acquisition']['artifact'])
+        before = {p.name: p.read_bytes() for p in store.directory.iterdir() if p.is_file()}
+        part = next(p for p in loaded['outline']['published']['parts'].values() if p['tag'] == '000A' and p['role'] == 'statement')
+        self.assertIsNone(part['warning'])
+        def math_tokens(tokens):
+            for token in tokens:
+                if token['kind'] == 'math': yield token['text']
+                yield from math_tokens(token.get('children', []))
+                for item in token.get('items', []): yield from math_tokens(item)
+        self.assertIn(formula[1:-1], list(math_tokens(part['tokens'])))
+        self.assertIn('a < b & c', list(math_tokens(part['tokens'])))
+        self.assertEqual(part['span'], legacy_part['span'])
+        self.assertIn(formula, part['exact_text'])
+        reference = self.call('outline_reference', id=store.id, revision=loaded['revision'], region=part['region'])['reference']
+        with patch.object(k, 'fetch', side_effect=AssertionError('offline')):
+            reopened = self.call('outline_load', id=store.id)
+            followed = self.call('outline_follow_reference', reference=reference)
+        self.assertEqual(reopened['revision'], loaded['revision'])
+        self.assertEqual(followed['reference']['status'], 'unchanged')
+        self.assertEqual({p.name: p.read_bytes() for p in store.directory.iterdir() if p.is_file()}, before)
+        self.assertIn('Unclosed mathematical delimiter', str(store.artifact(artifact)))
+
+    def test_bare_equation_arrays_have_a_math_display_and_keep_the_exact_source(self):
+        for environment in ('eqnarray', 'eqnarray*'):
+            with self.subTest(environment=environment):
+                raw = (r'\begin{' + environment + r'}\label{equation:fixture} a & = & b \\ c & = & d\end{' + environment + '}')
+                page = PAGE.replace('<p>Complete initial hypotheses: all objects are nonempty.</p>', '<div class="equation"><div>' + raw + '</div></div>')
+                source = SourceDocument.from_bytes('/page.html', page.encode())
+                legacy = k.extract(source, '0004')['parts'][0]
+                displayed = k.extract(source, '0004', coalesce_text=True)['parts'][0]
+                self.assertIn('Unsupported display environment', legacy['warning'])
+                self.assertIsNone(displayed['warning'])
+                math = next(t for t in displayed['tokens'] if t['kind'] == 'math')
+                self.assertTrue(math['display'])
+                self.assertIn(r'a & = & b \\ c & = & d', math['text'])
+                self.assertNotIn(r'\label', math['text'])
+                self.assertEqual(displayed['span'], legacy['span'])
+                self.assertIn(raw, span_text(source, displayed['span']))
+
+    def test_html_block_nesting_does_not_create_empty_paragraphs(self):
+        raw = PAGE.replace('<p>Complete initial hypotheses: all objects are nonempty.</p>',
+                           '<div><p>First paragraph.</p>\n<p>Second paragraph.</p></div>')
+        source = SourceDocument.from_bytes('/page.html', raw.encode())
+        part = k.extract(source, '0004', coalesce_text=True)['parts'][0]
+        self.assertEqual([t['kind'] for t in part['tokens']], ['text', 'paragraph', 'text'])
+        self.assertIn('First paragraph.', part['tokens'][0]['text'])
+        self.assertIn('Second paragraph.', part['tokens'][-1]['text'])
+        self.assertIn('<div><p>', span_text(source, part['span']))
+
     def test_namespace_and_endpoint_bounds(self):
         self.assertNotEqual(qualified_tag('kerodon','0004'),qualified_tag('stacks-project','0004'))
         self.assertEqual(local_tag('kerodon','https://kerodon.net/tag/0004'),'0004')

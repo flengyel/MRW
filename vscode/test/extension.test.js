@@ -2224,3 +2224,37 @@ test('Kerodon import confirms a source-qualified page snapshot and reopens its e
   assert.equal(again.panels[0].webview.messages.findLast(m=>m.type==='outline').model.outline.published.qualified_tag,'kerodon:0004');
   assert.deepEqual(h.errors,[]);assert.deepEqual(again.errors,[]);
 });
+
+
+test('import completion notifications do not hold the reader lock or block Return and refresh', async t => {
+  for (const source of ['stacks', 'kerodon']) await t.test(source, async t => {
+    const root = await temporary(t, true), file = path.join(root, 'overview.md');
+    await fs.writeFile(file, '# Existing document\n\n## Question\n');
+    const h = await harness(root, new Map([['mrw.readingOutline.v1', { uri: uri(file).toString() }]]));
+    h.setService((extension, executable, request, options) => runBridge(extension, executable, request, {
+      ...options, spawn: (command, args, settings) => require('node:child_process').spawn(command,
+        [args[0], path.join(extension, `test/${source}_bridge.py`)], settings),
+    }));
+    const notifications = [];
+    h.api.window.showInformationMessage = () => new Promise(resolve => notifications.push(resolve));
+    t.after(() => notifications.forEach(resolve => resolve()));
+    const command = source === 'stacks' ? 'mrw.importStacksSection' : 'mrw.importKerodonSection';
+    for (let repeat = 0; repeat < 2; repeat++) {
+      h.inputs.push(source === 'stacks' ? 'stacks-project:08ZD' : 'kerodon:0004');
+      h.endings.push('Import section');
+      let timer;
+      const result = await Promise.race([h.commands.get(command)(), new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Completed import is waiting for a notification dismissal')), 10000);
+      })]).finally(() => clearTimeout(timer));
+      assert.ok(result, h.errors.join('\n'));
+      assert.equal(!!result.reused, !!repeat);
+      const panel = h.panels[0];
+      await panel.receive({ type: 'reading_return' });
+      assert.equal(h.api.window.activeTextEditor.document.uri.fsPath, file);
+      assert.equal(panel.webview.messages.at(-1).type, 'idle');
+      assert.ok(await h.commands.get('mrw.refreshSourceOutline')());
+      assert.deepEqual(h.errors, []);
+    }
+    assert.equal(notifications.length, 2, 'Both new and reused imports leave success notifications open');
+  });
+});

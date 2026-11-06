@@ -122,6 +122,12 @@ purpose in `VISION.md`.
 
 ## Frontend scope and immediate delivery
 
+The demonstrated reader blockers are repaired in **0.21.1**: Kerodon formulas
+split by HTML callbacks, bare equation-array display, and import success
+notifications holding the source-action lock. Original-source browser access is
+visible in the reader toolbar. Existing retained identities/bytes are preserved.
+See [repair evidence and limits](docs/READER_REPAIR_VALIDATION.md).
+
 **0.17.0** completes the requested retained-proof → selected prerequisites →
 Codex handoff → imported proposal → summary correction → saved-question cycle.
 08ZG exercises the same path beyond the prepared 08ZH graph. The handoff includes

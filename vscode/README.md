@@ -1,6 +1,6 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.21.0 opens existing mathematical documents in place and connects scoped
+MRW 0.21.1 opens existing mathematical documents in place and connects scoped
 note links, backlinks and return locations with retained sources, annotations
 and resumable study. The extension is experimental.
 
@@ -36,6 +36,20 @@ guide and reopening refreshes the virtual document. A newer package on disk is
 not presented as active before adoption. Guide links work from the virtual URI.
 See [document navigation and limits](../docs/READING_OUTLINE_WORKFLOW.md) and
 [optional Obsidian associations](../docs/OBSIDIAN_WORKFLOW.md).
+
+## Source display and Return repair (0.21.1)
+
+Kerodon mathematical expressions remain whole across HTML parser callbacks,
+including literal comparison signs and entities. Bare equation arrays have an
+inert MathML display. The original retained HTML, source hashes, passage ranges,
+annotations and historical manifest remain unchanged; reopening existing imports
+uses the repaired display without importing again.
+
+Successful Kerodon and Stacks Project import notifications no longer retain the
+reader-action lock while hidden in Notifications. Return to Document and refresh
+remain usable after new and repeated imports. **Open original source ↗** is visible
+in the reader toolbar and opens today's canonical page in the external browser;
+the reader continues to show its retained revision. [Checks and limits](../docs/READER_REPAIR_VALIDATION.md).
 
 ## Study a difficult passage
 
@@ -107,12 +121,12 @@ From a **repository-root checkout** with Python 3.11+, Linux Node.js 22+ and npm
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.21.0.vsix
-sha256sum vscode/theorem-terminal-0.21.0.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.21.1.vsix
+sha256sum vscode/theorem-terminal-0.21.1.vsix
 ```
 
 `npm run package` runs the Python bundling prepublish hook and pinned
-`@vscode/vsce` 4.0.0. It creates `vscode/theorem-terminal-0.21.0.vsix`; it does
+`@vscode/vsce` 4.0.0. It creates `vscode/theorem-terminal-0.21.1.vsix`; it does
 not publish it. The fixed epoch/UTC supplies stable archive timestamps. Record
 the hash of the actual archive and tool versions used; do not assume an older
 release's hash. Use Linux npm in WSL, not a Windows npm launcher.
@@ -125,11 +139,11 @@ VSIX archives are excluded. Python core copies and package files are Git-ignored
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…** or:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.21.0.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.21.1.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.theorem-terminal@0.21.0` is installed on the **workspace host**,
+Confirm `flengyel.theorem-terminal@0.21.1` is installed on the **workspace host**,
 not solely the Windows UI. Save documents/forms before a requested reload. Keep
 workspace storage and the existing extension identity when upgrading. The bridge
 uses the package's bundled core through `python3 -I`; it needs no editable Python

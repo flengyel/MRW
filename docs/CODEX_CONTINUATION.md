@@ -1,6 +1,28 @@
 # Codex continuation: MRW documents and research work
 
-## Current increment — qualified published sources, 0.21.0
+## Current repair — source display and Return, 0.21.1
+
+The user reported degraded Kerodon display and Return failing with “Wait for the
+current saved source action to finish.” Their production history shows the
+Kerodon import completed record/display work but never released its command lock:
+it awaited dismissal of its success notification. Both published-source imports
+now issue nonblocking completion feedback. Regressions leave those notifications
+unresolved across new/repeated imports and exercise Return and refresh.
+
+HTMLParser splits literal `<` and entity text into separate callbacks. Kerodon
+display now coalesces these before math parsing and displays bounded equation
+arrays. Legacy manifests still validate through their original projection; the
+new display derives from exactly the same source and spans without rewriting
+them. The reading toolbar exposes **Open original source ↗** for the current
+canonical page in the external browser.
+
+The user explicitly withdrew the Overview Markdown / Reading Navigator rename.
+Preserve the current Document / Contents terminology. The checkout is already
+`/home/flengyel/MRW`, the active study is `/home/flengyel/Mathematics/Stacks`, and
+its existing source store is explicitly bound; do not repeat the relocation.
+See [delivery checks and actual-host limits](READER_REPAIR_VALIDATION.md).
+
+## Earlier increment — qualified published sources, 0.21.0
 
 The user requested uniform source IDs, the full Stacks Project command name and
 Kerodon import. [SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md) specifies the contract:

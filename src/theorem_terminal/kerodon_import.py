@@ -65,7 +65,8 @@ def fetch(url, limit):
 class Page(HTMLParser):
     VOID = {'br', 'hr', 'img', 'meta', 'link', 'input', 'wbr', 'source'}
 
-    def __init__(self, text):
+    def __init__(self, text, *, coalesce_text=False):
+        self.coalesce_text = coalesce_text
         super().__init__(convert_charrefs=False)
         self.text = text
         self.starts = [0] + [m.end() for m in re.finditer('\n', text)]
@@ -111,7 +112,13 @@ class Page(HTMLParser):
                 return
 
     def handle_data(self, data):
-        self.stack[-1]['children'].append(data)
+        children = self.stack[-1]['children']
+        # HTMLParser may split one text node at a literal '<' or an entity.
+        # Rejoin those callbacks before interpreting mathematical delimiters.
+        if self.coalesce_text and children and isinstance(children[-1], str):
+            children[-1] += data
+        else:
+            children.append(data)
 
     def handle_entityref(self, name):
         self.handle_data(unescape('&' + name + ';'))
@@ -128,8 +135,15 @@ def plain(node):
     return ''.join(plain(c) for c in node['children'])
 
 
-def recipe(node, targets, refs, warnings):
+def recipe(node, targets, refs, warnings, *, render_math=False):
     if isinstance(node, str):
+        # Gerby emits bare equation environments outside dollar delimiters.
+        # This bounded display projection uses an inert three-column array;
+        # labels remain in the exact HTML and are not mathematical content.
+        equation = re.fullmatch(r'\s*\\begin\{(eqnarray\*?)\}(.*?)\\end\{\1\}\s*', node, re.S) if render_math else None
+        if equation and len(node) <= 65536:
+            body = re.sub(r'\\label\{[^{}]{1,200}\}', '', equation[2])
+            return [dict(kind='math', text=r'\begin{array}{rcl}' + body + r'\end{array}', display=True)]
         result, warning = display_tokens(node, {})
         if warning:
             warnings.add(warning)
@@ -137,7 +151,7 @@ def recipe(node, targets, refs, warnings):
     name, attrs = node['name'], node['attrs']
     if name in ('script', 'style', 'template'):
         return []
-    children = lambda: [t for c in node['children'] for t in recipe(c, targets, refs, warnings)]
+    children = lambda: [t for c in node['children'] for t in recipe(c, targets, refs, warnings, render_math=render_math)]
     if name == 'a':
         match = re.fullmatch(r'(?:https://kerodon\.net)?/tag/([A-Z0-9]{4})', attrs.get('href', ''))
         if match:
@@ -147,7 +161,7 @@ def recipe(node, targets, refs, warnings):
             refs.add(tag)
             return [dict(kind='reference', label=plain(node), tag=tag, retained=tag in targets)]
     if name in ('ul', 'ol'):
-        return [dict(kind='list', ordered=name == 'ol', items=[recipe(c, targets, refs, warnings)
+        return [dict(kind='list', ordered=name == 'ol', items=[recipe(c, targets, refs, warnings, render_math=render_math)
                      for c in node['children'] if isinstance(c, dict) and c['name'] == 'li'])]
     if name in ('em', 'strong', 'code'):
         return [dict(kind=name, children=children())]
@@ -160,8 +174,35 @@ def recipe(node, targets, refs, warnings):
     return result
 
 
-def extract(source, tag):
-    page = Page(source.text.removeprefix('\ufeff'))
+def compact_paragraphs(tokens):
+    """Nested HTML blocks contribute one visual paragraph boundary, not many."""
+    result = []
+    for token in tokens:
+        token = dict(token)
+        if 'children' in token:
+            token['children'] = compact_paragraphs(token['children'])
+        if 'items' in token:
+            token['items'] = [compact_paragraphs(item) for item in token['items']]
+        if token['kind'] == 'paragraph':
+            while result and result[-1]['kind'] == 'text' and not result[-1]['text'].strip():
+                result.pop()
+            if result and result[-1]['kind'] != 'paragraph':
+                result.append(token)
+        elif token['kind'] == 'text' and not token['text'].strip():
+            if result and result[-1]['kind'] != 'paragraph':
+                result.append(dict(kind='text', text=' '))
+        else:
+            result.append(token)
+    while result and (result[-1]['kind'] == 'paragraph' or
+                      result[-1]['kind'] == 'text' and not result[-1]['text'].strip()):
+        result.pop()
+    return result
+
+
+def extract(source, tag, *, coalesce_text=False):
+    # The original token recipe remains the validation format for retained v1
+    # manifests. Display can improve without rewriting that historical payload.
+    page = Page(source.text.removeprefix('\ufeff'), coalesce_text=coalesce_text)
     mains = [n for n in page.nodes if n['name'] == 'section' and n['attrs'].get('id') == 'main']
     if len(mains) != 1 or not mains[0]['end']:
         raise ValueError('Kerodon page has no complete unique mathematical body')
@@ -225,7 +266,9 @@ def extract(source, tag):
         if not node['end']:
             raise ValueError('Incomplete Kerodon mathematical content')
         own_warnings = set()
-        tokens = recipe(node, targets, refs, own_warnings)
+        tokens = recipe(node, targets, refs, own_warnings, render_math=coalesce_text)
+        if coalesce_text:
+            tokens = compact_paragraphs(tokens)
         parts.append(dict(tag=key, role=role, title=qualified_tag(SOURCE_ID, key) + ' — ' + label,
                           span=_span(source, node['start'], node['end']), tokens=tokens,
                           warning='; '.join(sorted(own_warnings)) or None))
@@ -298,8 +341,14 @@ def _manifest(store):
 
 def enrich(store, value):
     try:
-        manifest, section = _manifest(store)
-        parts = {p['region']: dict(**p, exact_text=span_text(store.source(), p['span']), format='html') for p in manifest['parts']}
+        manifest, _ = _manifest(store)
+        section = extract(store.source(), manifest['tag'], coalesce_text=True)
+        parts = {}
+        for retained, displayed in zip(manifest['parts'], section['parts'], strict=True):
+            if any(retained[key] != displayed[key] for key in ('tag', 'role', 'title', 'span')):
+                raise ValueError('Display projection differs from the exact retained passage')
+            parts[retained['region']] = {**retained, 'tokens': displayed['tokens'],
+                'warning': displayed['warning'], 'exact_text': span_text(store.source(), retained['span']), 'format': 'html'}
         value['published'] = qualify_view(dict(**{k: v for k, v in section.items() if k != 'parts'},
             parts=parts, source_file='kerodon-' + manifest['tag'] + '.html', source_revision=manifest['source_revision'],
             citation=citation(SOURCE_ID, manifest['tag']), authors='Jacob Lurie', commit=None,

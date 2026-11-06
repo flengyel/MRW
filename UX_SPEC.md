@@ -251,6 +251,21 @@ platform-dependent; they are not permanent workflow invariants.
 
 ## VS Code frontend migration — 2026-10-13
 
+### Retained source display and completed-import navigation — 2026-11-06
+
+Patch **0.21.1** keeps each Kerodon text node together across parser callbacks
+before reading mathematical delimiters. Display bare equation arrays without
+executing source HTML or TeX. Validate the historical acquisition manifest first;
+derive the repaired display from the same retained bytes and exact spans without
+republishing the source, annotations or links.
+
+An import success notification is feedback, not a reader-action boundary. Release
+the source-action lock when display/publication finishes, independently of whether
+that notification is dismissed. New and repeated Stacks Project/Kerodon imports
+must allow Return and refresh while the notification remains open. Keep original
+source access visible in the reading toolbar; its browser action opens the current
+canonical page and does not replace the retained quotation.
+
 ### New work and tutorial — 2026-11-04
 
 Extension **0.13.0** makes starting visible: **New Reading Overview**, **Open
