@@ -2,7 +2,7 @@
   "name": "theorem-terminal",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.19.2",
+  "version": "0.20.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -439,6 +439,36 @@
         "command": "mrw.openStudyExample",
         "title": "Open Study Example",
         "category": "MRW"
+      },
+      {
+        "command": "mrw.openDocument",
+        "title": "Open Document\u2026",
+        "category": "MRW",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "mrw.chooseNotesFolder",
+        "title": "Choose Notes Folder\u2026",
+        "category": "MRW",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "mrw.followDocumentLink",
+        "title": "Follow Document Link",
+        "category": "MRW",
+        "icon": "$(link)"
+      },
+      {
+        "command": "mrw.showBacklinks",
+        "title": "Show Backlinks\u2026",
+        "category": "MRW",
+        "icon": "$(references)"
+      },
+      {
+        "command": "mrw.reopenDocument",
+        "title": "Reopen Document",
+        "category": "MRW",
+        "icon": "$(history)"
       }
     ],
     "views": {
@@ -591,6 +621,31 @@
           "command": "mrw.openStudyExample",
           "when": "view == mrw.research",
           "group": "4_help@1"
+        },
+        {
+          "command": "mrw.openDocument",
+          "when": "view == mrw.readingOutline",
+          "group": "0_documents@0"
+        },
+        {
+          "command": "mrw.chooseNotesFolder",
+          "when": "view == mrw.readingOutline",
+          "group": "0_documents@1"
+        },
+        {
+          "command": "mrw.followDocumentLink",
+          "when": "view == mrw.readingOutline",
+          "group": "0_documents@2"
+        },
+        {
+          "command": "mrw.showBacklinks",
+          "when": "view == mrw.readingOutline",
+          "group": "0_documents@3"
+        },
+        {
+          "command": "mrw.reopenDocument",
+          "when": "view == mrw.readingOutline",
+          "group": "0_documents@4"
         }
       ],
       "editor/context": [
@@ -652,6 +707,16 @@
         {
           "command": "mrw.openReadingOutline",
           "when": "editorLangId == markdown && (resourceScheme == file || resourceScheme == untitled)",
+          "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.followDocumentLink",
+          "when": "editorLangId == markdown && resourceScheme == file",
+          "group": "mrw-outline"
+        },
+        {
+          "command": "mrw.showBacklinks",
+          "when": "editorLangId == markdown && resourceScheme == file",
           "group": "mrw-outline"
         }
       ],
@@ -742,7 +807,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.readingOutline",
-        "contents": "Start from a document or mathematical question. Contents lists headings and MRW source links in the selected Markdown document, including unsaved edits. New Document creates a Markdown file.\n[New Document\u2026](command:mrw.newReadingOverview)\n[Show Contents](command:mrw.openReadingOutline)\n[Open Saved Source\u2026](command:mrw.openOutline)\n[Tutorial: First Steps with MRW](command:mrw.openTutorial)"
+        "contents": "Open a document in place. Contents shows headings and links in Markdown, including unsaved edits. Select a notes folder for ID links and backlinks.\n[Open Document\u2026](command:mrw.openDocument)\n[Choose Notes Folder\u2026](command:mrw.chooseNotesFolder)\n[Reopen Document](command:mrw.reopenDocument)\n[Show Contents](command:mrw.openReadingOutline)\n[New Document\u2026](command:mrw.newReadingOverview)\n[Tutorial](command:mrw.openTutorial)"
       },
       {
         "view": "mrw.research",
@@ -763,7 +828,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },

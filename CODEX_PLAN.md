@@ -10,9 +10,17 @@ Baseline reviewed: 0.19.2 at `42b465f`; preserve later work and all delivered re
 | Order | Increment | Status |
 | --- | --- | --- |
 | 1 | Consistent Document / Contents / Saved source / Passage GUI labels and current help | Implemented in 0.19.2 |
-| 2 | Existing documents opened in place, ordinary links, optional Zettel links/backlinks and Obsidian, PDF host opening, matching tutorial | Current implementation task; not yet delivered |
+| 2 | Existing documents opened in place, ordinary links, optional Zettel links/backlinks and Obsidian, PDF host opening, matching tutorial | Implemented in 0.20.0; see existing-document validation |
 | 3 | Research questions independent of model exchanges, linked work and checks, durable summary and next action | Designed; reuse existing persistence and navigation |
 | 4 | One compressed-argument reconstruction session with explanations, attempts, appropriate tool use and restart | Designed; joins existing components |
+
+The 0.20.0 implementation opens originals in place, scopes optional external
+notes, follows Markdown/ID links, opens PDFs through host readers, and supports
+backlinks, exact return and explicit reopen. Tutorial, command entry points and
+current guides match that route. See
+[validation](docs/EXISTING_DOCUMENTS_VALIDATION.md) for checks, package identity,
+installation and actual host limits. Continue with increment 3 after delivery;
+do not repeat the terminology or ordinary-document increments.
 
 Research continuity organizes the sequence. Study, comprehension questions,
 light rescheduling and task-linked effort/history remain components. Start from

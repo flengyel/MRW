@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseReadingMarkdown } = require('../src/readingMarkdown');
+const { parseReadingMarkdown, frontMatterInfo } = require('../src/readingMarkdown');
 const { trackLocation } = require('../src/readingOutline');
 
 test('Markdown syntax organizes headings and duplicate references, excluding code, comments and images', () => {
@@ -30,4 +30,82 @@ test('return pins follow external edits, reject overlap and recover only exact o
   p = trackLocation(p, [{ rangeOffset: 25, rangeLength: 2, text: '' }], 'c'); assert.ok(p.invalid);
   p = trackLocation(p, [], 'a'); assert.deepEqual([p.start, p.end, p.invalid], [20, 40, false]);
   assert.throws(() => parseReadingMarkdown('x'.repeat(4 * 1024 * 1024 + 1)), /4 MiB/);
+});
+
+test('leading YAML is excluded without shifting BOM, CRLF or Unicode navigation positions', () => {
+  const text = '\uFEFF---\r\nid: 0a1.2\r\ntitle: "A \\"quoted\\" α😀 title"\r\n' +
+    'tags: [logic, proof]\r\nlink: "[not prose](hidden.md) [[hidden]]"\r\n---\r\n' +
+    '# A α😀 title\r\n\r\n[Next](./β.md#main-result) and [[0a1.2]] Title\r\n';
+  const parsed = parseReadingMarkdown(text);
+  assert.equal(parsed.frontMatter.id, '0a1.2');
+  assert.equal(parsed.frontMatter.title, 'A "quoted" α😀 title');
+  assert.deepEqual(parsed.frontMatter.conflicts, []);
+  assert.deepEqual(parsed.all.map(n => n.label), ['A α😀 title', 'Next', '0a1.2']);
+  const [heading, markdown, zettel] = parsed.all;
+  assert.equal(heading.line, 6); assert.equal(heading.start, text.indexOf('# A'));
+  assert.equal(markdown.line, 8);
+  assert.equal(markdown.target, './%CE%B2.md#main-result');
+  assert.equal(text.slice(markdown.start, markdown.end), '[Next](./β.md#main-result)');
+  assert.equal(text.slice(zettel.start, zettel.end), '[[0a1.2]]');
+  assert.equal(markdown.kind, 'document_link'); assert.equal(markdown.syntax, 'markdown');
+  assert.equal(zettel.kind, 'document_link'); assert.equal(zettel.syntax, 'zettel');
+});
+
+test('an unterminated front-matter block is reported and does not become document prose', () => {
+  const text = '---\nid: 1a\ntitle: Broken\n# Not a heading\n[not a link](other.md)\n[[1b]]';
+  const parsed = parseReadingMarkdown(text);
+  assert.equal(parsed.frontMatter.present, true); assert.equal(parsed.frontMatter.closed, false);
+  assert.equal(parsed.frontMatter.malformed, true); assert.match(parsed.frontMatter.conflicts[0], /closing delimiter/);
+  assert.equal(parsed.frontMatter.end, text.length); assert.deepEqual(parsed.all, []);
+  const closed = parseReadingMarkdown('---\nid: 1a\n...\n# Visible\n');
+  assert.equal(closed.frontMatter.closed, true); assert.equal(closed.all[0].line, 3);
+  const ordinary = parseReadingMarkdown('Prose\n---\n\n[visible](next.md)');
+  assert.equal(ordinary.frontMatter.present, false);
+  assert.deepEqual(ordinary.all.map(n => n.label), ['Prose', 'visible']);
+});
+
+test('front-matter identity metadata is bounded, non-executable and conflicting fields remain explicit', () => {
+  const valid = frontMatterInfo("---\nid: '0a1.2' # immutable\ntitle: 'Gentzen''s proof'\ntags:\n  - logic\n---\n");
+  assert.equal(valid.id, '0a1.2'); assert.equal(valid.title, "Gentzen's proof");
+  assert.deepEqual(valid.conflicts, []);
+  for (const fields of ['id: a\nid: b', 'id: *alias', 'id: !!js/function x', 'id: |\n  a',
+    'id: # absent', 'id: ""', 'title: "\\u0000"', `id: ${'a'.repeat(4097)}`]) {
+    const info = frontMatterInfo(`---\n${fields}\n---\n# Still visible\n`);
+    assert.equal(info.malformed, true, fields.slice(0, 50)); assert.ok(info.conflicts.length);
+    assert.equal(info.id, null);
+    assert.equal(parseReadingMarkdown(`---\n${fields}\n---\n# Still visible\n`).all[0].label, 'Still visible');
+  }
+  assert.equal(frontMatterInfo('# Ordinary note\n').id, null);
+});
+
+test('ordinary and Zettel links preserve repeated and multiline source occurrences', () => {
+  const text = '# Heading\n\n- [local **note**](../notes/one.md#proof)\n\n' +
+    '> [two\n> lines](paper.pdf)\n\n[[1a.2]] label; [[1a.2]] repeated\n\n' +
+    '[defined][n]\n\n[n]: ./note.md#heading "Title"\n\n[same place](#heading)\n';
+  const nodes = parseReadingMarkdown(text).all.filter(n => n.kind === 'document_link');
+  assert.deepEqual(nodes.map(n => n.target), ['../notes/one.md#proof', 'paper.pdf', '1a.2', '1a.2', './note.md#heading', '#heading']);
+  assert.deepEqual(nodes.map(n => text.slice(n.start, n.end)), ['[local **note**](../notes/one.md#proof)',
+    '[two\n> lines](paper.pdf)', '[[1a.2]]', '[[1a.2]]', '[defined][n]', '[same place](#heading)']);
+  assert.equal(nodes[0].label, 'local note'); assert.equal(nodes[1].label, 'two lines');
+  assert.equal(new Set(nodes.map(n => n.id)).size, nodes.length);
+});
+
+test('note discovery excludes fenced and inline code, HTML comments, images and embeds', () => {
+  const text = '# Links\n\n`[[inline]] [inline](inline.md)`\n\n```md\n[[fenced]]\n[fenced](fenced.md)\n```\n\n' +
+    '    [[indented]]\n    [indented](indented.md)\n\n<!-- [[comment]] [comment](comment.md) -->\n\n' +
+    'before <!-- [[inline-comment]] [comment](comment.md) --> after\n\n' +
+    '![image](image.md) ![alt [[image-alt]]](image.png) ![[embedded]] \\[[escaped]]\n\n' +
+    '[visible](visible.md) [[visible]]\n';
+  assert.deepEqual(parseReadingMarkdown(text).all.filter(n => n.kind === 'document_link').map(n => n.target), ['visible.md', 'visible']);
+});
+
+test('heading fragments have distinct anchors and unsupported note selectors remain explicit links', () => {
+  const text = '# The **main** result: α\n\n# The main result: α\n\n## A `term`\n\n' +
+    '[[1a#Heading]] [[1a|Alias]] [[1a^block]] [PDF page](paper.pdf#page=3)\n' +
+    '[exact](mrw-outline:v1/exact)\n';
+  const parsed = parseReadingMarkdown(text);
+  assert.deepEqual(parsed.all.filter(n => n.kind === 'heading').map(n => n.anchor), ['the-main-result-α', 'the-main-result-α-1', 'a-term']);
+  assert.deepEqual(parsed.all.filter(n => n.kind === 'document_link').map(n => n.target), ['1a#Heading', '1a|Alias', '1a^block', 'paper.pdf#page=3']);
+  assert.equal(parsed.all.at(-1).kind, 'reference');
+  assert.equal(parsed.all.at(-1).reference, 'mrw-outline:v1/exact');
 });

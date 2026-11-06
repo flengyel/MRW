@@ -5,25 +5,26 @@ is to keep questions, documents, attempts, calculations and checking evidence
 connected so work can be resumed. Reconstructing compressed arguments, including
 LLM-generated solutions, and testing comprehension are central uses.
 
-The current release supplies source reading, study, attributed assistance and
-bounded resumption. The broader document and research workflow is being built
-in stages; the capability list below describes what is delivered.
+The current release opens existing documents in place, follows scoped note and
+PDF links, and supplies backlinks and return locations alongside source reading,
+study and attributed assistance. General research resumption and argument
+reconstruction remain later increments.
 
-**Current version: 0.19.2.** The repository remains private. There is no published
+**Current version: 0.20.0.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity remains `flengyel.theorem-terminal`.
 
-The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) starts with the delivered
-Document, Contents, Saved source and Passage terminology; the command instructions
-below name the 0.19.2 interface. The next [implementation task](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
-connects existing documents and optional Zettel/Obsidian notes and updates the
-tutorial with that workflow. Later increments make research questions resumable
+The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) distinguishes Document,
+Contents, Saved source and Passage. This increment delivers existing-file and
+selected-folder navigation, plus a task-first tutorial whose header identifies
+the active extension build. Later increments make research questions resumable
 independently of an AI exchange and join these tools in an argument-reconstruction
-session. The [tutorial source](vscode/media/first-steps.md) now starts with existing
-work; this documentation revision alone does not update an installed VSIX.
+session.
 
 ## What works
 
+- Open original notes and papers without importing them.
+- Follow note/PDF links, inspect backlinks and return within an explicitly chosen notes folder.
 - Retain a saved text passage with its exact reference and source revision.
 - Enter questions manually or exchange one bounded handoff with the Codex companion.
 - Submit work, retain a returned explanation, revise the work and resume later.
@@ -54,7 +55,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `theorem-terminal-0.19.2.vsix`. Confirm installation under that workspace
+select `theorem-terminal-0.20.0.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -64,13 +65,35 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.2.vsix
-sha256sum vscode/theorem-terminal-0.19.2.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.20.0.vsix
+sha256sum vscode/theorem-terminal-0.20.0.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.
 [Development and checks](vscode/README.md#run-from-this-checkout) describe F5,
 regressions and package verification.
+
+## Open existing work
+
+Run **MRW: Open Document…** and select the original note or paper. Markdown opens
+in the editor with **Contents**. Choose an external or workspace notes folder
+with **MRW: Choose Notes Folder…** for `[[ID]]` lookup and backlinks; Obsidian
+is optional. Existing notes, IDs, YAML and attachments stay in place.
+
+Follow a note or PDF from Contents, or use **MRW: Follow Document Link** at its
+link in the editor. **MRW: Show Backlinks…** opens incoming source occurrences;
+**MRW: Return to Document** returns to the origin. The selected document/folder
+and matching return pin survive an ordinary restart in this workspace.
+**MRW: Reopen Document** opens the last opened/followed file explicitly; activation
+does not open it automatically. VS Code owns dirty buffers, Save, Undo and recovery.
+
+A PDF uses an available host reader; if none is registered, MRW offers an explicit
+**Open with system reader** handoff. MRW supplies file-level opening and return,
+without extraction, PDF Contents or page restoration. **Show Contents**
+and **Choose Document…** select Markdown for navigation; **New Document…**
+creates Markdown. Retaining a source revision and importing text remain separate,
+optional operations. Start with **MRW: Open Tutorial** or the
+[document workflow](docs/READING_OUTLINE_WORKFLOW.md).
 
 ## One short study
 
@@ -107,16 +130,6 @@ with adjustable limits and no interrupted attempt.
 [offline tutorial](vscode/media/first-steps.md) ·
 [proof-study handoff](docs/PROOF_STUDY_WORKFLOW.md).
 
-## Documents and Contents
-
-**Show Contents** lists headings and MRW source links in the selected Markdown
-document, including unsaved edits. **New Document…** creates Markdown;
-**Choose Document…** selects Markdown for Contents. Document is a general term;
-other formats use the host's available editors/readers. This patch adds no PDF
-extraction or general document opener. **Retain Document as Source** and **Open
-Saved Source…** preserve the existing retention path. Proof Outline and Studies
-keep their meanings. [Guide](docs/READING_OUTLINE_WORKFLOW.md) ·
-[Patch validation](docs/DOCUMENT_TERMINOLOGY_VALIDATION.md).
 
 ## Data and transfers
 
@@ -151,12 +164,14 @@ nor study state. Keep the original workspace/storage when continuing work.
 
 - [Source reader and Stacks import](docs/STACKS_WORKFLOW.md): retain a bounded
   section at a pinned official revision; reopen it offline.
-- [Markdown overviews](docs/READING_OUTLINE_WORKFLOW.md): headings and exact source
-  links become a navigator. Return reopens the originating overview.
+- [Documents and Contents](docs/READING_OUTLINE_WORKFLOW.md): headings, local note
+  links and exact saved references become a navigator. Backlinks and Return keep
+  their originating occurrences.
 - [Proof graphs](docs/PROOF_GRAPH_WORKFLOW.md): select claims, inspect linked
   sources, correct summaries and reversibly omit intermediate displayed vertices.
-- [Obsidian](docs/OBSIDIAN_WORKFLOW.md): import a note or link it without converting
-  the vault. [TikZ](docs/TIKZ_WORKFLOW.md) rendering is explicit and isolated.
+- [Notes and Obsidian](docs/OBSIDIAN_WORKFLOW.md): navigate an explicitly selected
+  folder in place, or supply an optional Obsidian association without converting
+  a vault. [TikZ](docs/TIKZ_WORKFLOW.md) rendering is explicit and isolated.
 - [SagePod notebooks](docs/GETTING_STARTED_WSL_SAGEPOD.md) use Jupyter separately;
   computation is optional and opening MRW starts no container.
 

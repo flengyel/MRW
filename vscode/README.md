@@ -1,25 +1,48 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.19.2 retains selected mathematical sources, questions, submitted work and
-attributed help in a resumable study. Graphs, source annotations and Markdown
-Contents remain available. The extension is experimental.
+MRW 0.20.0 opens existing mathematical documents in place and connects scoped
+note links, backlinks and return locations with retained sources, annotations
+and resumable study. The extension is experimental.
 
-## Documents and Contents
+## Open existing work
 
-A Document may be a note, PDF paper, manuscript or notebook. **Show Contents**
-currently lists headings and MRW source links from a selected Markdown document,
-including unsaved edits. **New Document…** creates Markdown; **Choose Document…**
-selects Markdown for Contents. Their dialogs identify that format. Other formats
-open through the host; this patch adds no PDF extraction or general document opener.
-**Retain Document as Source** retains saved text; **Open Saved Source…** reopens
-it. See [document navigation](../docs/READING_OUTLINE_WORKFLOW.md).
+Run **MRW: Open Document…** to display the original note or paper. Markdown opens
+in the editor and supplies **Contents** without import. Explicitly select a
+notes folder with **MRW: Choose Notes Folder…** for bounded note lookup and
+backlinks. It can be outside the workspace, including `/mnt/c/…` in WSL; it is
+ordinary document storage, not a request to relocate MRW private records.
 
-## First session
+Follow ordinary relative Markdown links or exact Zettel `[[ID]]` links from
+Contents, or use **MRW: Follow Document Link** at the cursor. **Show Backlinks…**
+opens incoming occurrences and **Return to Document** restores the origin. The
+selected folder/document and matching return pin persist in the workspace.
+**Reopen Document** explicitly opens the last opened/followed file after restart;
+activation does not open it automatically. Contents and backlinks respect dirty editor text; VS Code owns Save and Undo.
+Obsidian, Zettel metadata and text import are optional.
 
-Run **MRW: Open Study Example** for the bundled original CC0 source and two
-questions. This explicit example records `practice_demo` history separately.
+A Document may be a note, PDF paper, manuscript or notebook. Other formats use
+registered host editors/readers; a PDF uses a registered custom reader or an
+explicit **Open with system reader** handoff when none is registered. MRW does
+not extract PDF text, derive PDF Contents or supply PDF page restoration. It
+does not drop an unsupported exact selector to open a different target.
+**Show Contents** and **Choose Document…** select Markdown; **New Document…**
+creates Markdown. Leading delimited YAML is excluded from Contents without
+changing offsets. **Retain Document as Source** and **Import Markdown Text…**
+remain explicit text-copy operations, separate from opening a file.
+
+Start with **MRW: Open Tutorial**. Its header reports the active extension
+version and available build identity; each activation snapshots its packaged
+guide and reopening refreshes the virtual document. A newer package on disk is
+not presented as active before adoption. Guide links work from the virtual URI.
+See [document navigation and limits](../docs/READING_OUTLINE_WORKFLOW.md) and
+[optional Obsidian associations](../docs/OBSIDIAN_WORKFLOW.md).
+
+## Study a difficult passage
+
 For your own work, select saved ordinary text and run **MRW: Study Current
-Material**, or choose **Study current material** in a retained reader. A graph
+Material**, or choose **Study current material** in a retained reader.
+**MRW: Open Study Example** is an optional offline demonstration with two
+questions and separately marked `practice_demo` history. A graph
 claim with a source citation also has **Study this claim**.
 
 An empty study shows the source, **Enter a question** and **Request questions
@@ -84,12 +107,12 @@ From a **repository-root checkout** with Python 3.11+, Linux Node.js 22+ and npm
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.2.vsix
-sha256sum vscode/theorem-terminal-0.19.2.vsix
+npm run verify-vsix --prefix vscode -- theorem-terminal-0.20.0.vsix
+sha256sum vscode/theorem-terminal-0.20.0.vsix
 ```
 
 `npm run package` runs the Python bundling prepublish hook and pinned
-`@vscode/vsce` 4.0.0. It creates `vscode/theorem-terminal-0.19.2.vsix`; it does
+`@vscode/vsce` 4.0.0. It creates `vscode/theorem-terminal-0.20.0.vsix`; it does
 not publish it. The fixed epoch/UTC supplies stable archive timestamps. Record
 the hash of the actual archive and tool versions used; do not assume an older
 release's hash. Use Linux npm in WSL, not a Windows npm launcher.
@@ -102,11 +125,11 @@ VSIX archives are excluded. Python core copies and package files are Git-ignored
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…** or:
 
 ```sh
-code --install-extension /absolute/path/to/theorem-terminal-0.19.2.vsix
+code --install-extension /absolute/path/to/theorem-terminal-0.20.0.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.theorem-terminal@0.19.2` is installed on the **workspace host**,
+Confirm `flengyel.theorem-terminal@0.20.0` is installed on the **workspace host**,
 not solely the Windows UI. Save documents/forms before a requested reload. Keep
 workspace storage and the existing extension identity when upgrading. The bridge
 uses the package's bundled core through `python3 -I`; it needs no editable Python
@@ -180,8 +203,9 @@ Windows-backed/synchronized storage remains unqualified.
 
 - **Open Saved Source…** reopens a retained source offline. Statements,
   proofs and reader notes have separate controls; annotation forms save explicitly.
-- **Show Contents** navigates ordinary Markdown headings and exact source
-  links. [Markdown overview guide](../docs/READING_OUTLINE_WORKFLOW.md).
+- **Show Contents** navigates Markdown headings, note links and exact saved
+  references. **Show Backlinks…** and **Return to Document** keep source-note
+  occurrences. [Document guide](../docs/READING_OUTLINE_WORKFLOW.md).
 - [Proof study with Codex](../docs/PROOF_STUDY_WORKFLOW.md) retains an unresolved
   question, explicit prerequisite passages and attributed proposed graph.
 - [Proof graphs](../docs/PROOF_GRAPH_WORKFLOW.md) support source selection,
@@ -220,8 +244,10 @@ in [the original contract](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#investigation-
 
 ### Obsidian companion notes
 
-Use [the Obsidian guide](../docs/OBSIDIAN_WORKFLOW.md) for explicit note/passage
-links and import destinations. MRW does not index or synchronize a vault.
+Use [the Obsidian guide](../docs/OBSIDIAN_WORKFLOW.md) for optional supplied
+note/passage associations and import destinations. An explicitly selected notes
+folder has a bounded link/backlink index. MRW does not discover vaults,
+synchronize notes or infer an Obsidian mapping from the folder name.
 
 ### Reproduce the bounded outline host checks
 

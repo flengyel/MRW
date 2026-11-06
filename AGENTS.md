@@ -26,6 +26,17 @@ source, attribution and persistence contracts and the 0.19.1 repairs. The 0.19.2
 GUI patch implements terminology, without new PDF/vault/research capabilities.
 GPTWork maintains design and review; local Codex implements in VS Code/WSL2.
 
+## Implemented document integration — 0.20.0
+
+The existing-document task is implemented in the native host frontend. See
+[workflow](docs/READING_OUTLINE_WORKFLOW.md) and
+[validation](docs/EXISTING_DOCUMENTS_VALIDATION.md) for selected scopes, exact
+ordinary-return pins, PDF delegation, backlink bounds and delivery evidence.
+Continue with general research resumption after this delivery, then argument
+reconstruction. Do not repeat the terminology or existing-document increments.
+Retained-source authority and private-store qualification remain independent of
+ordinary external-file access. Preserve the working window and genuine data.
+
 ## Delivered repair — study continuity and evidence, 0.19.1
 
 The implemented handoff is [CODEX_STUDY_RELIABILITY_PROMPT](docs/CODEX_STUDY_RELIABILITY_PROMPT.md),

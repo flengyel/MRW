@@ -29,6 +29,33 @@ and show only supported capabilities. Delivered descriptions below retain the
 labels and behavior of the releases they describe. The new design does not
 claim those later integrations are installed.
 
+## Existing documents — 0.20.0
+
+**Open Document…** opens the original through the host, with Markdown in its
+existing editor and Contents available alongside it. **Choose Document…** selects
+Markdown for Contents. **Choose Notes Folder…** grants one explicit, remembered
+folder scope for note navigation and a bounded, cancellable backlink index.
+External files can instead be selected individually; their parents are not indexed.
+Ordinary Windows-mounted notes are files, not an MRW private store.
+
+Contents and **Follow Document Link** support relative Markdown links, exact
+heading fragments, and `[[ID]]` links within the selected notes folder. Front
+matter is excluded without shifting source locations. Ambiguous IDs, conflicting
+identity fields and unsupported selectors receive local errors. **Show Backlinks…**
+opens exact occurrences and distinguishes incomplete indexing from no backlinks.
+**Return to Document** restores an exact tracked occurrence; **Reopen Document**
+uses the remembered original file after restart. Ordinary origins remain separate
+from retained-reader origins. Missing or redirected files require a new choice.
+
+PDF files use a registered host custom reader. With no reader, an explicit
+**Open with system reader** action is offered; PDF bytes are never read as text.
+File-level opening and return are delivered, not PDF page restoration or extraction.
+The tutorial identifies its active version/build and refreshes the current
+activation's packaged text on reopen. Installing does not reload the working window.
+See [document workflow](docs/READING_OUTLINE_WORKFLOW.md) and
+[validation](docs/EXISTING_DOCUMENTS_VALIDATION.md). Research-question resumption
+and argument reconstruction remain later increments.
+
 ## Delivered terminology — 0.19.2
 
 Document, Contents, Saved source and Passage are implemented across commands,

@@ -1,20 +1,26 @@
 # Codex continuation: MRW documents and research work
 
-## Next task — existing documents and tutorial, 2026-11-06
+## Current increment — existing documents, 0.20.0
 
-Implement [CODEX_EXISTING_DOCUMENTS_PROMPT](CODEX_EXISTING_DOCUMENTS_PROMPT.md)
-from the reviewed 0.19.2 baseline `42b465f`, reconciling any newer work first.
-The result is an existing note opened in place, another note/PDF followed,
-backlinks available, and return/reopen working without import or Obsidian.
-Keep the current storage and retained-reference contracts separate from ordinary
-external-document access. Fix the reproduced YAML-as-heading parser defect.
+[CODEX_EXISTING_DOCUMENTS_PROMPT](CODEX_EXISTING_DOCUMENTS_PROMPT.md) is implemented
+from fetched main `47e6275`, preserving the delivered 0.19.2 terminology patch.
+Open Document opens originals; Choose Notes Folder supplies explicit scope for
+ID links/backlinks. Contents supports ordinary links and exact Markdown headings;
+Return tracks ordinary occurrences separately from retained-reader origins.
+Reopen Document restores the last opened/followed file after restart. Front matter
+is excluded without shifting original offsets. PDFs delegate to host readers,
+with an explicit system-reader fallback when none is registered.
 
-The tutorial source has been reorganized around delivered capabilities; that
-edit has not been packaged or installed by GPTWork. Update it with the new
-opening/navigation behavior, display the active build version, and verify the
-packaged help and reopen path. Do not force a working-window reload or require
-a new human study session. General research resumption and integrated argument
-reconstruction follow this task; the terminology delivery below is complete.
+[Workflow](READING_OUTLINE_WORKFLOW.md) describes scope, error and restart bounds.
+[Validation](EXISTING_DOCUMENTS_VALIDATION.md) records the exact delivered package,
+checks and host observations. The tutorial displays active runtime identity and
+refreshes on reopen. Installation preserves the working window; no forced reload,
+manual study session, source import or Obsidian requirement belongs to this patch.
+
+General research resumption and integrated argument reconstruction follow as
+increments 3 and 4. Preserve genuine notes, annotations, studies, history, unsent
+requests, private-store checks and bounded R3 semantics. Do not repeat completed
+increments or infer mathematical/comprehension checking from navigation tests.
 
 ## Current delivery — document terminology, 0.19.2
 

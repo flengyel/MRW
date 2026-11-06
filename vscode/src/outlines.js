@@ -37,7 +37,7 @@ ${diagramStyle}
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial }) {
+function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -208,7 +208,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         } else if (value.type === 'source') await openDocument(c);
         else if (value.type === 'study_current') { const ref=await bridge(request(c,'outline_reference',{region:c.selected||null})); await vscode.commands.executeCommand('mrw.studyCurrent',{reference:ref.reference}); }
         else if (value.type === 'proof_study') await vscode.commands.executeCommand('mrw.prepareProofStudy');
-        else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline');
+        else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline', { retained: true });
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
@@ -451,11 +451,12 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!document || document.languageId !== 'markdown' || !['file', 'untitled'].includes(document.uri.scheme)) {
       throw new Error('Focus an ordinary Markdown document in this workspace.');
     }
-    if (document.uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(document.uri)) {
+    if (!checkDocument && document.uri.scheme === 'file' && !vscode.workspace.getWorkspaceFolder(document.uri)) {
       throw new Error('The Markdown document must belong to the current workspace.');
     }
+    if (document.uri.scheme === 'file' && checkDocument) await checkDocument(document.uri);
     const location = await storage(editor);
-    if (document.uri.scheme === 'file') {
+    if (!checkDocument && document.uri.scheme === 'file') {
       const relative = path.relative(location.root, await fs.realpath(document.uri.fsPath));
       if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
         throw new Error('The Markdown document resolves outside this workspace.');
@@ -748,7 +749,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
-  const rows = () => [['New document…', 'mrw.newReadingOverview'], ['Show contents', 'mrw.openReadingOutline'],
+  const rows = () => [['Open document…', 'mrw.openDocument'], ['Choose notes folder…', 'mrw.chooseNotesFolder'],
+    ['Follow document link', 'mrw.followDocumentLink'], ['Show backlinks…', 'mrw.showBacklinks'], ['Reopen document', 'mrw.reopenDocument'], ['New document…', 'mrw.newReadingOverview'], ['Show contents', 'mrw.openReadingOutline'],
     ['Open tutorial', 'mrw.openTutorial'],
     ['Return to document', 'mrw.returnToReadingOutline'], ['Import Stacks section…', 'mrw.importStacksSection'],
     ['Import Markdown text…', 'mrw.importObsidianNote'],

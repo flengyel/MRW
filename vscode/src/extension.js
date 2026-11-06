@@ -282,8 +282,8 @@ function activate(context) {
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
   const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
-    askRetained: assistanceRows.askRetained, recorder, onMaterial });
-  registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference });
+    askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri) });
+  const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference });
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });

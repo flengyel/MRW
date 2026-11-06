@@ -1,10 +1,41 @@
-# Obsidian notes and MRW retained passages
+# Notes in place and optional Obsidian associations — 0.20.0
 
-MRW connects Obsidian notes to saved sources and exact retained passages.
-It can also import the text of a Markdown note through the choices below. Obsidian owns note editing, mathematical rendering,
-links and attachments. MRW owns its source reader and retained material.
+MRW opens ordinary notes in place and provides scoped note links and backlinks
+without Obsidian or text import. It separately connects supplied Obsidian note
+URLs to saved sources and exact retained passages. Obsidian owns its note
+editing and rendering; VS Code owns ordinary files opened in MRW. MRW owns its
+saved-source reader and retained material.
 Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
 references from the Obsidian note. No LaTeX transcription is required.
+
+## Open a notes folder without import
+
+Run **MRW: Open Document…** and choose the original note. **Choose Notes
+Folder…** explicitly selects the folder for `[[ID]]` lookup and **Show
+Backlinks…**. A vault is just one possible folder: ordinary Markdown works
+without Zettel metadata or Obsidian. In WSL, a Windows folder may be selected
+through `/mnt/c/…`; reading it does not move MRW private storage there.
+
+Use Contents or **Follow Document Link** at the cursor to follow relative
+Markdown note/file links and exact `[[ID]]` links. Heading fragments work for
+Markdown; PDF links open the whole file through an available host reader.
+PDF page/block selectors are not silently replaced by whole-file targets.
+Backlinks open source-note occurrences; **Return to Document** restores the
+origin. The selected folder, document and matching return pin survive normal
+restart in the same workspace. **Reopen Document** explicitly opens the last
+opened/followed file; activation does not reopen it automatically. Dirty buffers
+stay under VS Code's save/undo and recovery controls.
+
+The bounded index is rebuilt explicitly from the chosen folder, using dirty
+editor text where available. It does not discover a vault, scan ancestors or
+follow directory symlinks outside scope. Missing, duplicate and conflicting IDs,
+unsupported selectors and incomplete scans receive local explanations. IDs
+remain filename stems; editable titles and `[[ID]] Title` prose do not rename
+notes. Leading delimited YAML stays metadata rather than Contents. See
+[the document workflow](READING_OUTLINE_WORKFLOW.md) for exact limits.
+
+This ordinary-folder route does not infer an Obsidian vault mapping. To open an
+Obsidian note from a saved reader, supply its validated association below.
 
 ## Import Markdown text
 
@@ -15,7 +46,7 @@ text should go, then select the note’s `.md` or `.markdown` file:
 | --- | --- |
 | Retain a source copy | Retains the file and opens its text for reading, passage links and annotations |
 | Add text to a passage annotation | Select a saved source and passage; its reader notes receive the note text |
-| Insert text into a Markdown document | Inserts text at the active Markdown document cursor, or offers an Markdown document picker |
+| Insert text into a Markdown document | Inserts text at the active Markdown document cursor, or offers a Markdown document picker |
 
 The source option saves its retained copy during import. Importing the same file
 at the same revision reopens that copy and preserves annotations. A changed file
@@ -28,9 +59,9 @@ unknown. Edit its attribution in the reader when known. Document insertion
 leaves an unsaved editor change: **Ctrl+S** saves it and ordinary Undo reverses
 it. The combined Markdown document retains the 4 MiB navigation limit.
 
-The original note stays unchanged. YAML, wiki links and embeds remain in the
-Markdown text; linked notes and attachments are not copied or resolved. The
-source reader shows retained Markdown as text. Save open note-editor changes
+The original note stays unchanged. In the imported copy, YAML, wiki links and
+embeds remain in the Markdown text; linked notes and attachments are not copied
+or resolved by the saved-source reader. That reader shows retained Markdown as text. Save open note-editor changes
 before importing. In WSL, select a Windows vault file through its `/mnt/c/…`
 path; no vault discovery or background synchronization runs.
 
@@ -64,7 +95,7 @@ companion conventions, not a location from which MRW discovers a private vault.
 1. In MRW, click **Copy link to this source** under **Whole source**, or
    **Copy link to this passage** in the desired passage’s **This passage** group.
    Alternatively run **MRW: Copy Source or Passage Link…** from the Command
-   Palette and choose an saved source and target. No Markdown editor
+   Palette and choose a saved source and target. No Markdown editor
    or cursor position is required.
 2. Paste the ordinary Markdown link into your Obsidian note, for example under
    **References**, using Obsidian's normal editing and saving.
@@ -142,8 +173,10 @@ No new Obsidian vault is required. **MRW: Move Saved Work Directory…** separat
 moves this workspace's complete saved material; **MRW: Open Saved Work
 Directory…** verifies a complete synchronized copy on another installation.
 See [storage scope, commands and recovery](ARTIFACT_STORAGE.md). The current
-`/mnt/c` mount cannot preserve MRW's private modes and is rejected. This feature
-does not automatically add anything to Syncthing or copy a vault.
+`/mnt/c` mount cannot preserve MRW's private modes and is rejected for MRW
+saved-work storage. That restriction does not forbid ordinary note/PDF opening
+from a selected Windows folder. No action automatically adds anything to
+Syncthing or copies a vault.
 The [scoped Windows-backed setup trial](WSL_ARTIFACT_STORAGE_SETUP.md) was
 separately approved and configured. A disposable move/save/reopen and local
 Windows-created receiving-copy checks passed, but nested replacement denials
@@ -180,8 +213,9 @@ The normal recovery button retains the original saved workspace address; it
 cannot guess another computer's corresponding path. Exact stored identity and
 scope checks still apply.
 
- There is no vault indexing, automatic rewriting, content
-synchronization, Obsidian plugin or background server. The existing extension
+ There is no automatic vault discovery, note rewriting, content
+synchronization, Obsidian plugin or background server. The explicit bounded
+notes-folder index above supplies ordinary link lookup and backlinks only. The existing extension
 identity/storage and legacy `mrw-outline:v1` links remain compatible. Native
 Windows backend portability remains deferred. Navigation initiates no model,
 compiler, notebook, container or mathematical analysis.

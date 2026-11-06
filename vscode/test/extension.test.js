@@ -178,7 +178,14 @@ async function temporary(t, persistent = false) {
   await fs.mkdir(parent, {recursive:true});
   const directory = await fs.mkdtemp(path.join(parent, 'mrw-command-'));
   const root = path.join(directory, 'project'); await fs.mkdir(root);
-  t.after(async() => {for(const close of shutdowns.get(root)||[])await close();shutdowns.delete(root);await fs.rm(directory, { recursive: true, force: true });});
+  t.after(async() => {
+    // A rename fixture can start hosts under a new root inside this directory.
+    // Drain every fixture host before removing storage that its history uses.
+    for (const [key, closes] of [...shutdowns]) if (key === root || key.startsWith(directory + path.sep)) {
+      for (const close of closes) await close(); shutdowns.delete(key);
+    }
+    await fs.rm(directory, { recursive: true, force: true });
+  });
   return root;
 }
 
@@ -842,8 +849,10 @@ test('Markdown reference insertion respects cancellation, editor changes, worksp
   await h.commands.get('mrw.followOutlineReference')(); assert.match(h.errors.pop(), /Malformed/); assert.equal(h.panels.length, 1);
   doc.languageId = 'plaintext'; const calls = h.requests.length;
   await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /Markdown/); assert.equal(h.requests.length, calls);
-  doc.languageId = 'markdown'; h.api.workspace.getWorkspaceFolder = () => undefined;
-  await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /current workspace/);
+  const foreign = path.join(root, '..', 'unselected.md'); await fs.writeFile(foreign, '# Unselected\n');
+  const external = h.document(foreign, '# Unselected\n'); external.languageId = 'markdown'; h.focus(h.editor(external));
+  h.api.workspace.getWorkspaceFolder = () => undefined;
+  await h.commands.get('mrw.insertOutlineReference')(); assert.match(h.errors.pop(), /outside the selected scope/);
 });
 
 
@@ -1271,7 +1280,7 @@ test('new overview refuses an existing filename, a non-Markdown name and a symli
   const outside = path.join(root, '..', 'outside'); await fs.mkdir(outside);
   await fs.symlink(outside, path.join(root, 'escape'));
   h.saveChoices.push(uri(path.join(root, 'escape', 'new.md')));
-  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /outside this workspace/);
+  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /outside the selected scope/);
   assert.deepEqual(await fs.readdir(outside), []);
   assert.equal(h.workspaceEdits.length, 0); assert.equal(h.saves.length, 0); assert.equal(h.state.size, 0);
 });
@@ -1327,7 +1336,9 @@ test('the offline tutorial opens a read-only Markdown preview without creating f
   assert.ok(call); assert.equal(call.args[0].scheme, 'mrw-help');
   const doc = await h.api.workspace.openTextDocument(call.args[0]);
   const exact = await fs.readFile(path.resolve(__dirname, '../media/first-steps.md'), 'utf8');
-  assert.equal(doc.getText(), exact);
+  assert.ok(doc.getText().includes('Active extension: **MRW'));
+  assert.ok(doc.getText().includes('Open Document'));
+  assert.ok(doc.getText().includes('https://github.com/flengyel/MRW/blob/main/docs/'));
   assert.equal(h.workspaceEdits.length, 0); assert.equal(h.requests.length, 0);
   assert.deepEqual(await fs.readdir(root), []);
 });
@@ -1427,7 +1438,7 @@ test('the MRW starting view offers New, Open, saved sources and tutorial as regi
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.readingOutline').contents;
-  for (const command of ['mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openOutline', 'mrw.openTutorial']) {
+  for (const command of ['mrw.openDocument', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
     assert.ok(welcome.includes('(command:' + command + ')')); assert.ok(h.commands.has(command));
   }
   for (const command of ['mrw.newReadingOverview', 'mrw.openTutorial']) {
@@ -1533,16 +1544,23 @@ test('a missing remembered overview offers a replacement choice and cancellation
   assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
 });
 
-test('reading overview choices reject foreign paths and escaping symlinks before opening their contents', async t => {
+test('Contents rejects unselected external documents but remembers an explicit external choice without importing it', async t => {
   const root = await temporary(t), h = await harness(root), foreign = path.join(root, '..', 'foreign.md');
   await fs.writeFile(foreign, '# Foreign\n');
-  h.api.workspace.getWorkspaceFolder = location => location.fsPath.startsWith(root + path.sep) ? { uri: uri(root) } : undefined;
-  h.opens.push([uri(foreign)]); await h.commands.get('mrw.openReadingOutline')();
-  assert.match(h.errors.pop(), /current workspace/);
+  const unselected = h.document(foreign, '# Foreign\n'); unselected.languageId = 'markdown';
+  h.focus(h.editor(unselected)); await h.commands.get('mrw.openReadingOutline')();
+  assert.match(h.errors.pop(), /outside the selected scope/); assert.equal(h.reads.length, 0);
+  h.focus(undefined); h.opens.push([uri(foreign)]);
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(model.all[0].label, 'Foreign');
+  const restarted = await harness(root, h.state);
+  assert.equal((await restarted.commands.get('mrw.openReadingOutline')()).all[0].label, 'Foreign');
   const link = path.join(root, 'escape.md'); await fs.symlink(foreign, link);
-  h.opens.push([uri(link)]); await h.commands.get('mrw.openReadingOutline')();
-  assert.match(h.errors.pop(), /outside this workspace/);
-  assert.equal(h.reads.length, 0); assert.equal(h.state.size, 0); assert.equal(h.requests.length, 0);
+  const unselectedLink = h.document(link, '# Foreign\n'); unselectedLink.languageId = 'markdown';
+  h.focus(h.editor(unselectedLink)); await h.commands.get('mrw.openReadingOutline')();
+  assert.match(h.errors.pop(), /outside the selected scope/);
+  assert.equal(await fs.readFile(foreign, 'utf8'), '# Foreign\n');
+  assert.equal(h.requests.length + restarted.requests.length, 0); assert.deepEqual(h.errors, []);
 });
 
 test('a delayed reading overview picker cannot replace a newer selected overview', async t => {
@@ -1873,7 +1891,7 @@ test('Return without a source-link origin checks the remembered overview workspa
   const root=await temporary(t),file=path.join(root,'..','outside.md');await fs.writeFile(file,'# Outside\n');
   const state=new Map([['mrw.readingOutline.v1',{uri:uri(file).toString()}]]),h=await harness(root,state);
   await h.commands.get('mrw.returnToReadingOutline')();
-  assert.match(h.errors.at(-1),/outside this workspace/);
+  assert.match(h.errors.at(-1),/outside the selected scope/);
   assert.equal(h.reads.includes(uri(file).toString()),false);assert.equal(h.shown.length,0);
   assert.equal(h.state.get('mrw.readingOutline.v1').origin,undefined);
 });
@@ -2088,4 +2106,101 @@ test('R4 explicit editor selection wins over remembered reader and stays pinned 
  const count=h.requests.length;h.focus(undefined);assert.equal(state().id,b);assert.equal(h.requests.length,count);
  // Reader action carries its own exact reference even with B selected in an editor.
  h.focus(ed);await reader.receive({type:'study_current'});assert.notEqual(state().id,b);assert.notEqual(state().passages[0].text,'Selected B λ.');
+});
+
+test('ordinary document follows and cursor commands keep the retained reader return occurrence isolated', async t => {
+  const root = await temporary(t), h = await harness(root), { saved, region, panel } = await sourceReader(h, root);
+  const reference = (await runBridge(path.resolve(__dirname, '..'), 'python3', {
+    method: 'outline_reference', store: path.join(root, '..', 'private-state', `outlines-${navigation.digest(root)}`),
+    project_root: root, id: saved.outline.id, revision: saved.revision, region,
+  })).reference;
+  const retained = `[Retained passage](${reference})`, ordinary = '[Note](other.md)';
+  const original = `# Document\n\n${retained}\n\n${ordinary}\n`, file = path.join(root, 'overview.md'), other = path.join(root, 'other.md');
+  await fs.writeFile(file, original); await fs.writeFile(other, '# Other note\nA separate argument.\n');
+  const doc = h.document(file, original); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  doc.offsetAt = point => doc.getText().split('\n').slice(0, point.line).reduce((offset, line) => offset + line.length + 1, 0) + point.character;
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  const retainedNode = model.all.find(n => n.kind === 'reference'), ordinaryNode = model.all.find(n => n.kind === 'document_link');
+  const draft = h.document('Untitled research', 'Unsent research work', 'untitled'); draft.isDirty = true;
+  await h.commands.get('mrw.selectReadingOutlineItem')(retainedNode);
+  const retainedOrigin = structuredClone(h.state.get('mrw.readingOutline.v1').origin);
+  assert.equal(retainedOrigin.start, retainedNode.start); assert.equal(retainedOrigin.end, retainedNode.end);
+
+  // Selecting an ordinary tree link establishes a separate generic Return route.
+  await h.commands.get('mrw.selectReadingOutlineItem')(ordinaryNode);
+  assert.equal(h.api.window.activeTextEditor.document.uri.fsPath, other);
+  assert.equal(h.state.get('mrw.readingOutline.v1').route, 'ordinary');
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1').origin, retainedOrigin);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(h.api.window.activeTextEditor.document, doc);
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), ordinary);
+
+  // The retained reader's own Return restores its original exact occurrence.
+  await panel.receive({ type: 'reading_return' });
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), retained);
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1').origin, retainedOrigin);
+  assert.equal(panel.webview.messages.at(-1).type, 'idle');
+
+  // The command-palette/cursor path must use the same ordinary route wiring.
+  const editor = h.api.window.activeTextEditor, cursor = doc.positionAt(ordinaryNode.start + 2);
+  editor.selection = new Selection(cursor, cursor); h.focus(editor);
+  await h.commands.get('mrw.followDocumentLink')();
+  assert.equal(h.api.window.activeTextEditor.document.uri.fsPath, other);
+  await h.commands.get('mrw.returnToReadingOutline')();
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), ordinary);
+  await panel.receive({ type: 'reading_return' });
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), retained);
+  assert.deepEqual(h.state.get('mrw.readingOutline.v1').origin, retainedOrigin);
+  assert.equal(await fs.readFile(file, 'utf8'), original); assert.equal(h.saves.length, 0);
+  assert.equal(draft.getText(), 'Unsent research work'); assert.equal(draft.isDirty, true); assert.equal(draft.isClosed, false);
+  assert.deepEqual(h.errors, []);
+});
+
+test('an explicitly chosen external document follows its current-workspace retained reference and returns without widening authority', async t => {
+  const root = await temporary(t), h = await harness(root), { saved, region, panel } = await sourceReader(h, root);
+  const artifactHome = path.join(root, '..', 'private-state');
+  const before = await runBridge(path.resolve(__dirname, '..'), 'python3', { method: 'artifact_status', artifact_home: artifactHome });
+  const reference = (await runBridge(path.resolve(__dirname, '..'), 'python3', {
+    method: 'outline_reference', store: path.join(artifactHome, `outlines-${navigation.digest(root)}`),
+    project_root: root, id: saved.outline.id, revision: saved.revision, region,
+  })).reference;
+  const foreign = path.join(root, '..', 'external-note.md'), neighbor = path.join(root, '..', 'neighbor.md');
+  const link = `[Retained proof](${reference})`, text = `# External document\n\n${link}\n\n[Neighbor](neighbor.md)\n`;
+  await fs.writeFile(foreign, text); await fs.writeFile(neighbor, '# Unselected neighbor\n');
+  // Unlike the general legacy fixture, this facade models real workspace membership.
+  h.api.workspace.getWorkspaceFolder = candidate => {
+    const relative = path.relative(root, candidate.fsPath);
+    return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative) ? { uri: uri(root) } : undefined;
+  };
+  assert.equal(h.api.workspace.getWorkspaceFolder(uri(foreign)), undefined);
+  h.opens.push([uri(foreign)]);
+  const model = await h.commands.get('mrw.chooseReadingOverview')();
+  assert.ok(model); const retained = model.all.find(n => n.kind === 'reference');
+  const selectedScope = structuredClone(h.state.get('mrw.documents.v1'));
+  assert.deepEqual(selectedScope.grants.map(g => g.uri), [uri(foreign).toString()]);
+  assert.equal(selectedScope.folder, undefined);
+  const followed = await h.commands.get('mrw.selectReadingOutlineItem')(retained);
+  assert.ok(followed, h.errors.join('\n'));
+  assert.equal(followed.status, 'unchanged');
+  const foreignDoc = h.shown.find(doc => doc.uri.fsPath === foreign);
+  h.closeDocument(foreignDoc); h.focus(undefined);
+  await panel.receive({ type: 'reading_return' });
+  const editor = h.api.window.activeTextEditor;
+  assert.equal(editor.document.uri.fsPath, foreign); assert.equal(editor.document.getText(editor.selection), link);
+  assert.deepEqual(h.state.get('mrw.documents.v1').grants, selectedScope.grants);
+  assert.equal(h.state.get('mrw.documents.v1').folder, undefined);
+  assert.ok(h.requests.filter(r => r.method === 'outline_follow_reference').every(r => r.project_root === root));
+  const after = await runBridge(path.resolve(__dirname, '..'), 'python3', { method: 'artifact_status', artifact_home: artifactHome });
+  assert.deepEqual(after, before);
+  assert.equal(await fs.readFile(foreign, 'utf8'), text); assert.equal(await fs.readFile(neighbor, 'utf8'), '# Unselected neighbor\n');
+  assert.equal(h.saves.length, 0); assert.deepEqual(h.errors, []);
+});
+
+
+test('Contents rejects a PDF picker result before any host text read', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'paper.pdf');
+  await fs.writeFile(file, '%PDF-1.4\n'); h.opens.push([uri(file)]);
+  await h.commands.get('mrw.chooseReadingOverview')();
+  assert.match(h.errors.pop(), /Use Open Document for other formats/);
+  assert.equal(h.reads.length, 0); assert.equal(h.state.size, 0);
 });
