@@ -1,0 +1,19 @@
+{
+  "manifest_nonlabel_fields_unchanged": true,
+  "command_ids_views_settings_menus_unchanged": true,
+  "legacy_whole_outline_status_unchanged": true,
+  "source_reference_format": "mrw-outline:v1",
+  "proof_outline_name_unchanged": true,
+  "studies_name_unchanged": true,
+  "mapped_commands": 16,
+  "only_mapped_command_titles_changed": true,
+  "after_broader_checkout_capture": {
+    "display_only_changes": {
+      "vscode/src/artifactStorage.js": {
+        "broader_sha256": "e9f600bf36efd0bae8b71986c99440fb320c81666d7976b7bfc4137b8055ca0a",
+        "final_sha256": "3f1b841b23cdac451fbe9fc3dc7b1835a961cd06c51b6ff79ba8aa8f1c292920"
+      }
+    },
+    "check": "Existing move-completion-notice reader-availability scenario passed on final source (1/1)."
+  }
+}

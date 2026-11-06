@@ -1,0 +1,69 @@
+{
+  "browser": {
+    "annotation_draft_survives_refresh_return_proof_controls": true,
+    "origin": "developer_fixture",
+    "passage_labels": true,
+    "proof_controls_preserved": true,
+    "refresh_tooltip_scope": true,
+    "return_payload_unchanged": true,
+    "runtime_errors": 0,
+    "saved_source_labels": true,
+    "scope": "isolated headless Chrome, actual source renderer and DOM, host API facade; not native VS Code"
+  },
+  "build": "f1d27f248a2fc82f8ed64b2cc13af439a2a4ceae",
+  "build_checks": {
+    "package": 0,
+    "syntax": 0,
+    "verify": 0
+  },
+  "date": "2026-11-06",
+  "design": "a87d5473b3d9d574c2adbec86be5e9c754c2dafd",
+  "focused": {
+    "commands": 13,
+    "final_storage_notification": 1,
+    "python_outline_services": 40,
+    "renderer_parser_links": 24
+  },
+  "historical_validation_reports_changed": false,
+  "implementation": "6b65a02eede188fa49e5d5e9d273af9181e5690a",
+  "installed": {
+    "manifest_matches": true,
+    "readme_license_match": true,
+    "registry_version": "0.19.2",
+    "runtime_bytes_match": true,
+    "runtime_files": 85,
+    "version": "0.19.2",
+    "window_reloaded": false
+  },
+  "native": {
+    "exit_code": 255,
+    "runner_report": false,
+    "stderr": "",
+    "stdout": ""
+  },
+  "new_document_pdf_capability_claimed": false,
+  "node": {
+    "command": "node --test --test-isolation=none --test-reporter=spec test/*.test.js",
+    "elapsed_s": 375.73368310928345,
+    "exit_code": 0,
+    "filesystem": "disposable persistent ext4 checkout",
+    "passed": 243,
+    "skipped": 0
+  },
+  "preservation": {
+    "baseline_files": 69,
+    "changed": []
+  },
+  "public_visibility_changed": false,
+  "python": {
+    "command": "PYTHONPATH=src python3 -m unittest discover -s tests -v",
+    "compileall": 0,
+    "elapsed_s": 94.0668032169342,
+    "passed": 335,
+    "python": 0,
+    "run": 402,
+    "skipped": 67
+  },
+  "schema": 1,
+  "version": "0.19.2"
+}

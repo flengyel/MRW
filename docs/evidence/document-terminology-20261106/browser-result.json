@@ -1,0 +1,11 @@
+{
+  "origin": "developer_fixture",
+  "scope": "isolated headless Chrome, actual source renderer and DOM, host API facade; not native VS Code",
+  "saved_source_labels": true,
+  "passage_labels": true,
+  "refresh_tooltip_scope": true,
+  "return_payload_unchanged": true,
+  "annotation_draft_survives_refresh_return_proof_controls": true,
+  "proof_controls_preserved": true,
+  "runtime_errors": 0
+}

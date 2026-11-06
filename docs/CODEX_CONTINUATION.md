@@ -10,6 +10,13 @@ Markdown scope. Show Contents focuses the navigator; it is not a general opener.
 Technical IDs, settings, serialized fields, existing filenames and stored links
 are unchanged. No migration, note rewrite or working-window reload is required.
 
+Installed package: **0.19.2**, implementation `6b65a02`, clean build `f1d27f2`.
+VSIX SHA-256: `11760d7d2e216e13361018d5de9bb81a326c870a8a1106b385d9691903bfda99`.
+Checks: 243 broader Node passes; Python 335 passes and 67 explicit skips;
+Chrome reader observation passed. Native host exited 255 before its runner.
+All 85 installed runtime files match; all 69 inventoried genuine files remain
+unchanged. The working window was not reloaded. Labels activate on its next reload.
+
 Read [workflow](READING_OUTLINE_WORKFLOW.md) and
 [validation](DOCUMENT_TERMINOLOGY_VALIDATION.md) for delivery checks and limits.
 Continue next with existing-document opening and optional Zettel/PDF integrations,
