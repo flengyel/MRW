@@ -1,10 +1,10 @@
 # Codex instructions
 
-## Current priority — existing documents and tutorial, 2026-11-06
+## Current priority — continue after document integration, 2026-11-06
 
-Follow [CODEX_EXISTING_DOCUMENTS_PROMPT](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
-for opening existing files in place, scoped note links/backlinks, PDF host
-handoff and the matching task-first tutorial. The GUI terminology increment
+The [existing-document increment](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
+is delivered in 0.20.0: opening files in place, scoped note links/backlinks,
+PDF host handoff and matching tutorial. Do not repeat it. The GUI terminology increment
 is delivered in 0.19.2; do not repeat it. Follow
 [RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) for the
 ordered research integrations that follow. Document is the general term; Contents is

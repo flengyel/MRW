@@ -56,9 +56,20 @@ the old running activation as the new build.
 
 ## Checks
 
-Focused parser/link/controller/tutorial checks and retained-reference integration checks pass.
-Python: 402 run, 335 passed, 67 explicit skips; compileall passed.
-The final complete Node pass and package/install checks are in progress.
+- Final complete Node suite: **277/277 passed**, no skips or failures,
+  against `5ae3a28bbb492f2c69ad61fe71402bf46748f9dc`.
+- Python: **402 run, 335 passed, 67 explicit skips**; exit 0. Production Python
+  sources are unchanged from the tested broader batch. Skips are 58 opt-in Qt,
+  five unbuilt pinned Lean checker, three opt-in TikZ and one unavailable
+  authorized Windows-project fixture. No mathematical-checking result is claimed.
+- JavaScript syntax and Python compileall passed, both exit 0.
+- Clean pinned `npm ci --ignore-scripts`: 127 packages; package build and VSIX
+  verifier passed. All 93 archive entries were checked, with development files
+  excluded. The extracted packaged tutorial passed its active-version/build,
+  first-use entry, two reopen/refresh and guide-link checks.
+- Logs/exit records retained locally under `/tmp/mrw-0200-*`, including
+  `node-acceptance.log`, `acceptance-exit.json`, `python.log`, `verify-vsix.log`,
+  `packaged-help.json` and `install-verification.json`.
 
 The focused controller route uses disposable external notes with genuine
 front-matter conventions: note A → ID/heading in note B → registered PDF reader
@@ -75,7 +86,9 @@ not observations of a visible VS Code window or mathematical checking.
 The initial extension-only run in `/tmp` encountered the existing intentional
 volatile-storage rejection in artifact-move fixtures. Those fixtures were run
 in the final persistent-filesystem regression copy without weakening storage
-qualification. Old assertions requiring rejection after deliberate external-file
+qualification. A broader run exposed a rename-fixture teardown race: hosts
+under the renamed root were not closed before their history directory was
+removed. Teardown now drains every fixture host first. Old assertions requiring rejection after deliberate external-file
 selection were updated for the authorized scope behavior; unauthorized active
 files and remembered foreign paths still fail before host reads.
 
@@ -96,8 +109,25 @@ inspection are reported separately from native acceptance.
 
 ## Package, installation and preservation
 
-Implementation is committed separately from the final package marker and delivery report.
-Final package identity and installation verification will be recorded after completion.
+Implementation: `c049c681ad69e3d0fd5e27c30093b0f16bf01862`. Clean package build: `9ffd99a5b8b08e0ac61725f94bb6927f745997c3`.
+The later test-only scope assertion correction is `5ae3a28bbb492f2c69ad61fe71402bf46748f9dc`; all packaged
+runtime sources match it byte for byte.
+
+Package: `vscode/theorem-terminal-0.20.0.vsix` (535,887 bytes).
+SHA-256: `eda39e9282ee3d25f34ca96efadbac0233df2f5c86d965355a42672e57e9194e`.
+
+Installed with the existing WSL `code-server --install-extension … --force`
+route. The installed registry selects 0.20.0; its manifest matches after
+removing installer metadata. All **88 runtime files** and
+all **91 installed package files** match the verified VSIX.
+All **82 inventoried genuine study files** retain their starting hashes.
+No study was used as a fixture. Existing drafts, documents, sources, private
+storage, associations and history were not reset or migrated.
+
+The working window was preserved. No reload was requested or performed by this
+delivery. Adoption of 0.20.0 and visible tutorial/PDF behavior in that window
+were not observed; the update is available at its next ordinary activation.
+The same WSL server and extension-host processes remained running across installation.
 
 ## Removed steps and remaining friction
 

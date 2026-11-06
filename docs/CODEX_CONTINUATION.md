@@ -11,6 +11,13 @@ Reopen Document restores the last opened/followed file after restart. Front matt
 is excluded without shifting original offsets. PDFs delegate to host readers,
 with an explicit system-reader fallback when none is registered.
 
+Installed delivery: **0.20.0**; implementation `c049c68`, package build `9ffd99a`.
+VSIX SHA-256: `eda39e9282ee3d25f34ca96efadbac0233df2f5c86d965355a42672e57e9194e`.
+Checks: 277 Node passes; Python 335 passes/67 explicit skips; syntax, compileall,
+VSIX and packaged tutorial verification passed. Installed manifest and all
+88 runtime files match; 82 inventoried study files are unchanged.
+The working window was preserved; new native UI behavior/adoption was not observed.
+
 [Workflow](READING_OUTLINE_WORKFLOW.md) describes scope, error and restart bounds.
 [Validation](EXISTING_DOCUMENTS_VALIDATION.md) records the exact delivered package,
 checks and host observations. The tutorial displays active runtime identity and
