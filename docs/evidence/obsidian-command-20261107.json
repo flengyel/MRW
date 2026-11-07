@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-07",
+  "runtimeSourceCommit": "61f12049d0cc87b4e243c53860323be33447720e",
+  "zettelCommit": "7b33e537663b802ae439cf92ee8077d48877417a",
+  "version": "0.22.5",
+  "command": "Templater: Open in MRW",
+  "shortcut": "Alt+/",
+  "startupRegistrationExplicitlyAuthorized": true,
+  "commandInsertsText": false,
+  "package": {
+    "version": "0.22.5",
+    "installedFilesMatch": 101,
+    "packageSha256": "7403d36e3308cda99cb9e825ccbb462424ff4583f6da2c09e1d8a41a05cfe118",
+    "packageBytes": 565683
+  },
+  "checks": {
+    "extensionRegression": {
+      "passed": 319,
+      "exit": 0,
+      "filesystem": "ext4"
+    },
+    "finalCommittedFocused": {
+      "passed": 67,
+      "exit": 0
+    },
+    "zettelTemplate": {
+      "passed": 4,
+      "exit": 0
+    },
+    "zettelPython": {
+      "passed": 46,
+      "exit": 0
+    },
+    "nativeHandler": {
+      "passed": 3,
+      "vscode": "1.144.1",
+      "remote": "wsl"
+    },
+    "liveObsidianCommandRegistered": true,
+    "liveObsidianActionDispatchCaptured": true,
+    "liveEditorAndSavedBytesUnchanged": true,
+    "sixGenuineNotesUnchanged": true,
+    "existingKeyboardShortcutsPreserved": true,
+    "windowsGlobalShortcutAvailabilityChecked": true
+  },
+  "limits": {
+    "physicalObsidianToVscodeRouterClickObserved": false,
+    "workingWindowReloaded": false,
+    "packageIncludesPreservedReaderRepair": true,
+    "generatedBuildMetadataOnlyInDelivery": true
+  }
+}
