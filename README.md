@@ -100,6 +100,12 @@ has not yet been observed. Keep an existing working previewer or PDF reader.
 See [the companion guide](docs/RECOMMENDED_EXTENSIONS.md) for setup, host placement
 and the distinction between Markdown previews and MRW's saved-source reader.
 
+Obsidian can edit the same Markdown files opened in MRW. Select the vault root
+with **MRW: Choose Notes Folder…**; see [Obsidian configuration](docs/OBSIDIAN_WORKFLOW.md#configure-obsidian-with-mrw)
+for settings and the Windows/WSL setup. [flengyel/Zettel](https://github.com/flengyel/Zettel)
+and its [wiki](https://github.com/flengyel/Zettel/wiki) document the maintainer's
+Zettelkasten format and Obsidian configuration. Those conventions are optional.
+
 ## Open existing work
 
 Run **MRW: Open Document…** and select the original note or paper. Markdown opens

@@ -8,23 +8,47 @@ saved-source reader and retained material.
 Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
 references from the Obsidian note. No LaTeX transcription is required.
 
+## Configure Obsidian with MRW
+
+Install Obsidian on the desktop and open the vault there. In MRW, run **Choose
+Notes Folder…** and select the same vault root: the folder containing `.obsidian`
+and the notes, rather than the `.obsidian` folder itself. The picker stores
+`mrw.notesFolder` for the current workspace. Both settings below can also be
+configured in VS Code Settings.
+
+| Setting | Value |
+| --- | --- |
+| `mrw.notesFolder` | Absolute vault-root path on the extension host. A Windows vault at `C:\Users\<user>\Zettelkasten` is `/mnt/c/Users/<user>/Zettelkasten` in WSL. |
+| `mrw.obsidianVault` | Optional Obsidian vault name or ID. Empty uses the selected folder's name, such as `Zettelkasten`. This is not a directory path. |
+
+Open a note through MRW, then use **Open in Obsidian** above its Markdown
+preview or **MRW: Open Note in Obsidian**. Obsidian's URI handler must be
+registered with the desktop. MRW uses that handler and does not require the
+Obsidian CLI to be enabled. If several vaults have the same name, configure
+the intended vault's ID.
+
+Save edits in Obsidian and return to the note's MRW preview. While VS Code is
+focused, MRW checks the displayed note about every two seconds and refreshes
+a clean document. Unsaved VS Code changes prevent replacement; MRW does not
+save or merge them. Both applications must address the same files. An Obsidian
+link does not synchronize a separate Linux or SSH copy.
+
+The maintainer's [flengyel/Zettel repository](https://github.com/flengyel/Zettel)
+documents the Zettelkasten note format, templates and supporting scripts; the
+[Zettel wiki](https://github.com/flengyel/Zettel/wiki) documents Obsidian
+configuration, software and workflow conventions. Use these as companion
+references, rather than MRW requirements. MRW does not install those plugins,
+run those scripts or change the vault's configuration.
+
+MRW's native Markdown preview does not render TikZ blocks or Obsidian embeds,
+and does not apply LaTeX preambles from YAML. Keep using Obsidian's renderer
+for notes that depend on those features. MRW's separate
+[annotation diagram renderer](TIKZ_WORKFLOW.md) does not render vault-note TikZ.
+
 ## Open a notes folder without import
 
 The preview and Contents show a note’s YAML title beside its filename. The
 filename remains its immutable ID; metadata differences do not rename files.
-Use **Open in Obsidian** in the preview or **MRW: Open Note in Obsidian** to open
-that original in Obsidian. The selected notes folder must be the vault root.
-**MRW: Obsidian Vault** can supply a vault name or ID; the folder name is the
-default. This action uses the registered URI handler and needs no CLI.
-
-For Windows Obsidian with WSL, select the same vault under `/mnt/c/…`.
-After saving in Obsidian, return to MRW: it checks the displayed note and
-updates a clean open document through VS Code’s file model. Windows-to-WSL
-refresh does not depend on receiving native file events.
-Unsaved VS Code changes stay labelled and are never discarded, saved or merged
-by MRW. Other-host vaults need their own shared-file arrangement; an application
-link alone does not synchronize files.
-
 
 Use **Open a note or paper…** in the MRW sidebar to choose the original note.
 **Choose notes folder…** selects the folder for `[[ID]]` lookup and **Show
