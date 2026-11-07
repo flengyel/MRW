@@ -98,21 +98,21 @@ source or passage associations.
 
 ## Open the current note from Obsidian
 
-Run **Templater: Insert OpenInMRW** while working in the note. MRW opens its
+Run **Templater: Open in MRW** while working in the note. MRW opens its
 current file in Markdown preview and selects it for Contents. The command
 uses Obsidian's current filename and a vault-local MRW workspace setting;
 no per-note link or clipboard transfer is needed.
 
 The [OpenInMRW template and setup](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
 are maintained in `flengyel/Zettel`, alongside the configured Timestamp,
-NewFileTemplate and WikilinkTitle commands. Enable Insert only, with Create
-disabled. The local `.obsidian/mrw.json` selects the MRW workspace and the same
+NewFileTemplate and WikilinkTitle commands. A startup template registers this
+named navigation action; it does not open MRW automatically or insert text.
+The local `.obsidian/mrw.json` selects the MRW workspace and the same
 notes root used by **Choose Notes Folder…**. The command requires MRW 0.22.5
 or later to be active; it uses neither the Obsidian CLI nor a note-import step.
 
-Templater's Insert action needs an editor. Ordinary selected prose is preserved;
-multiple cursors and selected YAML are refused because Templater would replace
-multiple ranges or reinterpret front matter as a metadata edit.
+The action works in reading view or editing view. It reads the current
+filename; editor selections, cursor positions and YAML are not processed.
 
 ### Keep a note link
 

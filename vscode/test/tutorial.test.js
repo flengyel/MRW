@@ -76,7 +76,10 @@ test('the bundled task-first help resolves every advanced guide from its virtual
   assert.match(rendered, /Pause \/ save/);
   const targets = [...rendered.matchAll(/\]\(([^)]+)\)/g)].map(match => match[1]);
   assert.ok(targets.length >= 6);
+  const zettelGuide = 'https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md';
+  assert.equal(targets.filter(target => target === zettelGuide).length, 1, 'the companion template guide keeps its explicit external repository address');
   for (const target of targets) {
+    if (target === zettelGuide) continue;
     assert.match(target, /^https:\/\/github\.com\/flengyel\/MRW\/blob\/main\/docs\/[A-Z_]+\.md$/);
     await fs.access(path.resolve(__dirname, '../../docs', target.split('/').at(-1)));
   }
