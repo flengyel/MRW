@@ -10,9 +10,12 @@ references from the Obsidian note. No LaTeX transcription is required.
 
 ## Open a notes folder without import
 
-Run **MRW: Open Document…** and choose the original note. **Choose Notes
-Folder…** explicitly selects the folder for `[[ID]]` lookup and **Show
-Backlinks…**. A vault is just one possible folder: ordinary Markdown works
+Use **Open a note or paper…** in the MRW sidebar to choose the original note.
+**Choose notes folder…** selects the folder for `[[ID]]` lookup and **Show
+Backlinks…**. Both actions remain visible when saved studies are listed. After
+folder selection, the document picker starts in that folder, including after
+restart. The equivalent commands are **MRW: Open Document…** and **MRW: Choose
+Notes Folder…**. A vault is just one possible folder: ordinary Markdown works
 without Zettel metadata or Obsidian. In WSL, a Windows folder may be selected
 through `/mnt/c/…`; reading it does not move MRW private storage there.
 

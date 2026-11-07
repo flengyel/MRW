@@ -1,12 +1,10 @@
 # Using MRW
 
-Begin with a document already in use. Open the Command Palette with **F1**
-to run the commands below. The version above identifies the extension active
-in this window; installing an update does not activate it until a later reload.
-
-MRW now uses the extension ID `flengyel.mrw`. It starts with fresh extension
-state. Earlier `vscode://flengyel.theorem-terminal/…` URLs are not forwarded.
-Saved-source references still preserve their source ID, revision and passage.
+Choose **Open a note or paper…** in the MRW sidebar, or **Open saved source…**
+for retained reading and annotations. **Choose notes folder…** selects an
+Obsidian vault or another notes folder for note links and backlinks. These
+actions stay visible above saved studies, including the optional example.
+Commands are also available through **F1**.
 
 ## Open existing work
 
@@ -29,6 +27,8 @@ use **MRW: New Document…**; its initial headings can be edited or removed.
 1. Run **MRW: Choose Notes Folder…** and explicitly select the folder containing
    the notes to navigate. It can be outside the workspace, including a Windows
    folder reached through `/mnt/c/…` in WSL. It need not be an Obsidian vault.
+   For example, `C:\Users\you\Notes` is `/mnt/c/Users/you/Notes`. After folder
+   selection, **Open a note or paper…** starts there, including after restart.
 2. In a Markdown note, use its **Contents** link entry, or place the cursor on
    a link and run **MRW: Follow Document Link**. Relative Markdown links can
    target another note, a heading or a PDF. Zettel links such as `[[ID]]` resolve

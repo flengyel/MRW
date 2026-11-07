@@ -827,7 +827,7 @@
       },
       {
         "view": "mrw.research",
-        "contents": "Select a source passage, a cited graph claim, or ordinary saved text.\n[Study Current Material](command:mrw.studyCurrent)\n[Resume Study](command:mrw.resumeStudy)\n[Open Study Example](command:mrw.openStudyExample)"
+        "contents": "Open your own note or paper, or return to retained reading.\n[Open a note or paper\u2026](command:mrw.openDocument)\n[Choose notes folder\u2026](command:mrw.chooseNotesFolder)\n[Open saved source\u2026](command:mrw.openOutline)\n[Tutorial](command:mrw.openTutorial)"
       }
     ],
     "viewsContainers": {

@@ -140,16 +140,21 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     latestDisplay = { uri, location: location ? { ...location, uri: uri.toString() } : undefined };
     return true;
   }
+  async function pickerFolder() {
+    if (!folder) return undefined;
+    try { return vscode.Uri.file(await folderRoot()); }
+    catch (_) { return undefined; } // A moved folder must not prevent choosing a new document.
+  }
   async function open() {
     const attempt = ++generation;
-    const choices = await vscode.window.showOpenDialog({ title: 'Open document in place', openLabel: 'Open Document', canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
+    const choices = await vscode.window.showOpenDialog({ title: 'Open document in place', openLabel: 'Open Document', defaultUri: await pickerFolder(), canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
     if (!choices?.length || attempt !== generation) return;
     await grant(choices[0]);
     if (await display(choices[0], undefined, attempt)) { last = choices[0].toString(); await persist(); await onNavigated(); }
   }
   async function chooseFolder() {
     const attempt = ++generation;
-    const choices = await vscode.window.showOpenDialog({ title: 'Choose notes folder (read in place)', openLabel: 'Use Notes Folder', canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
+    const choices = await vscode.window.showOpenDialog({ title: 'Choose notes folder (Obsidian vault or ordinary folder)', openLabel: 'Use Notes Folder', defaultUri: await pickerFolder(), canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
     if (!choices?.length || attempt !== generation) return;
     const actual = await fs.realpath(choices[0].fsPath);
     if (!(await fs.stat(actual)).isDirectory()) throw new Error('Choose a notes folder.');

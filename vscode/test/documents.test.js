@@ -302,3 +302,22 @@ test('qualified canonical links and legacy retained backlinks keep prefixes with
   assert.equal(h.picks.at(-1).choices[0].hit.qualified_id, 'stacks-project:0004');
   assert.equal(await fs.readFile(f.file('3c.md'), 'utf8'), legacyText);
 });
+
+
+test('document picker starts in the selected notes folder across restart, while cancellation and moved folders preserve state', async t => {
+  const f=await fixture(t),state=new Map(),h=harness(f,state);
+  h.openChoices.push(undefined);await h.commands.get('mrw.openDocument')();
+  assert.equal(h.dialogs.at(-1).defaultUri,undefined);
+  await h.folder();const selected=structuredClone(state.get('mrw.documents.v1'));
+  h.openChoices.push(undefined);await h.commands.get('mrw.openDocument')();
+  assert.equal(h.dialogs.at(-1).defaultUri.fsPath,f.notes);
+  assert.deepEqual(state.get('mrw.documents.v1'),selected);assert.equal(h.shown.length,0);
+  const restarted=harness(f,state);
+  restarted.openChoices.push(undefined);await restarted.commands.get('mrw.openDocument')();
+  assert.equal(restarted.dialogs.at(-1).defaultUri.fsPath,f.notes);
+  assert.deepEqual(state.get('mrw.documents.v1'),selected);assert.equal(restarted.shown.length,0);
+  await fs.rename(f.notes,path.join(f.base,'moved-notes'));
+  restarted.openChoices.push(undefined);await restarted.commands.get('mrw.openDocument')();
+  assert.equal(restarted.dialogs.at(-1).defaultUri,undefined);
+  assert.deepEqual(state.get('mrw.documents.v1'),selected);
+});
