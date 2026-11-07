@@ -1,4 +1,4 @@
-# Notes in place and optional Obsidian associations — 0.22.4
+# Notes in place and optional Obsidian associations — 0.22.5
 
 MRW opens ordinary notes in place and provides scoped note links and backlinks
 without Obsidian or text import. It separately connects supplied Obsidian note
@@ -95,6 +95,36 @@ The ordinary-note action uses the explicitly selected vault root and vault
 setting. A saved-source reader still uses its separately supplied, validated
 Obsidian association below; opening an ordinary note does not rewrite retained
 source or passage associations.
+
+## Open an ordinary note from Obsidian
+
+1. In the note's MRW Markdown preview, click **Copy MRW link**, or run
+   **MRW: Copy Note Link for Obsidian**. The copied Markdown link includes the
+   title and filename as its label.
+2. Paste the link into an Obsidian note and save it normally. MRW does not
+   insert it into the vault or change the note for you.
+3. Click it in Obsidian's reading view, or Ctrl+click while editing. Allow
+   Windows to open VS Code if prompted. MRW opens the original note in Markdown
+   preview and selects it for Contents.
+
+The link survives an extension restart. It records the workspace address,
+selected notes folder and relative filename, and opens the file's **current
+contents**. It does not pin a source revision or passage. Unsaved VS Code text
+stays in the native editor; following the link does not save or replace it.
+Moving or renaming the file requires a new link; no title or filename substitute
+is guessed. The title is a label, not the destination.
+
+The intended workspace and selected notes folder must match. A link cannot
+select another vault or grant access to a file. If VS Code delivers it to a
+different workspace, **Copy Link and Open Workspace** opens the intended one
+in a separate window. Run **MRW: Open Link from Clipboard** there; that command
+accepts either the Markdown link or its complete URL. No working window is
+reloaded or replaced. WSL routes use the distribution name; SSH requires
+**MRW: Navigation Workspace URI**, as described under routing below.
+
+Existing **Copy Source or Passage Link…** actions still open retained reading.
+Those links preserve immutable source references separately from ordinary-note
+links. Neither kind depends on an Obsidian plugin or CLI.
 
 ## Import Markdown text
 

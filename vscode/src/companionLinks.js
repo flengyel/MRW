@@ -67,4 +67,4 @@ function obsidianTarget(vscode, value) {
   const params = new URL(value).searchParams;
   return vscode.Uri.from({ scheme: 'obsidian', authority: 'vault', path: `/${params.get('vault')}/${params.get('file')}` });
 }
-module.exports = { makeExternal, parseExternal, workspaceRoute, obsidianTarget };
+module.exports = { makeExternal, parseExternal, workspaceRoute, obsidianTarget, validateWorkspaceRoute: route };

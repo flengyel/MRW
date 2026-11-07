@@ -443,7 +443,9 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   register('mrw.openLinkFromClipboard', async () => {
     const value = (await vscode.env.clipboard.readText()).trim();
     const match = /^\[(?:\\.|[^\\\]])*\]\(([^\s)]+)\)$/u.exec(value);
-    return followExternalLink(match ? match[1] : value);
+    const link = match ? match[1] : value;
+    if (await handleDocumentUri?.(vscode.Uri.parse(link))) return;
+    return followExternalLink(link);
   });
   context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: async uri => {
     try {

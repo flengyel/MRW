@@ -12,6 +12,9 @@ const { showMarkdownPreview, documentColumn } = require('./documentPresentation'
 const { windowsNoteFiles } = require('./noteFiles');
 const { createNoteRefresh } = require('./noteRefresh');
 const { DEFAULT_LIMITS } = require('./documentLinks');
+const { workspaceRoute } = require('./companionLinks');
+const { makeNoteLink, parseNoteLink } = require('./noteLinks');
+const { noteIdentity } = require('./noteIdentity');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
@@ -308,12 +311,57 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!await vscode.env.openExternal(target)) throw new Error('Obsidian could not be opened. Check that it is installed and its URI handler is registered.');
     return true;
   }
+  async function noteWorkspace() {
+    const folders = vscode.workspace.workspaceFolders || [];
+    if (!vscode.workspace.workspaceFile && (folders.length !== 1 || folders[0].uri.scheme !== 'file')) {
+      throw new Error('Open a folder or save the workspace before copying a note link.');
+    }
+    const root = folders[0]?.uri.scheme === 'file' ? await fs.realpath(folders[0].uri.fsPath) : undefined;
+    return workspaceRoute(vscode, root);
+  }
+  async function copyLink(value) {
+    const selected = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri || vscode.window.activeTextEditor?.document?.uri;
+    const uri = value?.scheme ? value : selected || (last && vscode.Uri.parse(last));
+    if (!uri || !isNote(uri)) throw new Error('Open a Markdown note in the selected notes folder before copying its MRW link.');
+    await check(uri);
+    const notes = await folderRoot(), actual = await canonical(uri);
+    if (!within(notes, actual)) throw new Error('This note is outside the selected notes folder.');
+    const link = makeNoteLink({ workspace: await noteWorkspace(), notes, file: path.relative(notes, actual).split(path.sep).join('/') }, vscode.env.uriScheme || 'vscode');
+    const doc = await vscode.workspace.openTextDocument(uri);
+    const label = `${noteIdentity(doc).label} — MRW`.replace(/\s+/gu, ' ').replace(/[\\[\]]/gu, '\\$&');
+    await vscode.env.clipboard.writeText(`[${label}](${link})`);
+    void vscode.window.showInformationMessage('MRW note link copied. Paste it into Obsidian.');
+    return link;
+  }
+  async function handleUri(uri) {
+    if (uri.path !== '/note') return false;
+    if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following the MRW note link.');
+    const value = uri.toString(true), target = parseNoteLink(value, vscode.env.uriScheme || 'vscode');
+    const attempt = ++generation;
+    const here = await noteWorkspace().catch(() => undefined);
+    if (here !== target.workspace) {
+      const choice = await vscode.window.showWarningMessage(`This note link belongs to ${target.workspace}. Open that workspace in a separate window, then run MRW: Open Link from Clipboard.`, 'Copy Link and Open Workspace');
+      if (choice === 'Copy Link and Open Workspace' && attempt === generation) {
+        await vscode.env.clipboard.writeText(value);
+        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(target.workspace), { forceNewWindow: true });
+      }
+      return true;
+    }
+    const notes = await folderRoot();
+    if (notes !== target.notes) throw new Error('This note link belongs to a different notes folder. Select its vault root with MRW: Choose Notes Folder, then open the link again.');
+    const destination = vscode.Uri.file(path.join(notes, target.file));
+    await check(destination);
+    if (!within(notes, await canonical(destination))) throw new Error('This note resolves outside its linked notes folder.');
+    if (await display(destination, undefined, attempt)) { last = destination.toString(); await persist(); await onNavigated(); }
+    return true;
+  }
+  register('mrw.copyDocumentLink', copyLink);
   register('mrw.openDocumentInObsidian', openInObsidian);
   register('mrw.openDocument', open);
   register('mrw.chooseNotesFolder', chooseFolder);
   register('mrw.followDocumentLink', followAtCursor);
   register('mrw.showBacklinks', showBacklinks);
   register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), undefined, ++generation); });
-  return { check, grant, follow, changed, isNote, openInObsidian, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede: () => { generation++; } };
+  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede: () => { generation++; } };
 }
 module.exports = { createDocuments };

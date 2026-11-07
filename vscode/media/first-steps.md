@@ -36,6 +36,14 @@ defaults to that folder’s name; **MRW: Obsidian Vault** can specify a differen
 name or vault ID. In WSL, choose the Windows vault through `/mnt/c/…` so both
 applications edit the same files. This handoff does not require the Obsidian CLI.
 
+To open this note from Obsidian, click **Copy MRW link** above the preview,
+or run **MRW: Copy Note Link for Obsidian**. Paste the Markdown link into an
+Obsidian note. Clicking it opens this file's current contents in MRW's preview,
+including after restarting MRW. It is a live file link, not a retained citation.
+If VS Code sends it to another workspace, use **Copy Link and Open Workspace**
+to open the intended workspace in a separate window, then run **MRW: Open Link
+from Clipboard** there. The original working window stays open.
+
 Save changes in Obsidian, then return to MRW: its clean note and preview update
 within a few seconds. Unsaved
 VS Code text remains the current draft and is labelled **Unsaved VS Code

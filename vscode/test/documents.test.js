@@ -8,6 +8,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { pathToFileURL, fileURLToPath } = require('node:url');
 const { createDocuments } = require('../src/documents');
+const { makeNoteLink, parseNoteLink } = require('../src/noteLinks');
 const { registerWikiLinks } = require('../src/wikiLinks');
 const MarkdownIt = require('../media/markdown-it/markdown-it');
 const { parseReadingMarkdown } = require('../src/readingMarkdown');
@@ -48,7 +49,7 @@ function harness(f, state = new Map(), options = {}) {
     extensions: { getExtension: () => options.preview ? { packageJSON: { contributes: { customEditors: [{ viewType: 'vscode.markdown.preview.editor' }] } } } : undefined, all: options.pdfReader === false ? [] : [{ packageJSON: { contributes: { customEditors: [
       { viewType: 'fixture.pdf', displayName: 'Fixture PDF reader', selector: [{ filenamePattern: '*.pdf' }] },
     ] } } }] },
-    env: { remoteName: 'wsl', async openExternal(value) { external.push(value); return externalResult; } },
+    env: { remoteName: options.remoteName || undefined, clipboard: { async writeText(value) { apiHarness.clipboard = value; } }, async openExternal(value) { external.push(value); return externalResult; } },
     commands: { async executeCommand(name, ...args) {
       hostCalls.push({ name, args });
       if (name === 'vscode.openWith' || name === 'vscode.open') {
@@ -88,6 +89,7 @@ function harness(f, state = new Map(), options = {}) {
       async showQuickPick(choices, settings) { picks.push({ choices, settings }); return pickHook ? pickHook(choices) : choices[0]; },
       async showInformationMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
       async showErrorMessage(message) { errors.push(message); },
+      async showWarningMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
     },
   };
   const context = { subscriptions: [], workspaceState: {
@@ -442,8 +444,63 @@ test('preview identity uses YAML title alongside the immutable filename and upda
  const wiki=registerWikiLinks({vscode:h.api,context:h.context,register:(key,callback)=>h.commands.set(key,callback),documents:h.documents});
  const md=wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
  let html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/<strong[^>]*>A changed title<\/strong>/);assert.match(html,/<code>1a.md<\/code>/);
- const actions=[...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]);assert.equal(actions.length,2);
+ const actions=[...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]);assert.equal(actions.length,3);
  const obsidian=actions.find(href=>JSON.parse(Buffer.from(new URL(href).searchParams.get('target'),'base64url')).action==='obsidian');await wiki.handleUri(h.api.Uri.parse(obsidian));assert.equal(h.external.at(-1).path,'/external-notes/1a.md');
  const at=doc.getText().indexOf('A changed title');h.change(doc,at,'A changed title'.length,'Revised title <&>');
  html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/Revised title &lt;&amp;&gt;/);assert.match(html,/<code>1a.md<\/code>/);assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),f.contents['1a.md']);
+});
+
+
+test('copied note link opens from the external URI after restart without importing or overwriting a draft', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes, preview: true });
+  const a = await h.doc('1a.md'); await h.focus(a);
+  const link = await h.commands.get('mrw.copyDocumentLink')();
+  assert.equal(parseNoteLink(link).file, '1a.md');
+  assert.match(h.clipboard, /^\[A changed title · 1a\.md — MRW\]\(vscode:/);
+  const state = h.state, restarted = harness(f, state, { notesFolder: f.notes, preview: true });
+  const draft = await restarted.doc('1a.md'); restarted.change(draft, draft.getText().length, 0, 'Unsent draft α😀');
+  const wiki = registerWikiLinks({ vscode: restarted.api, context: restarted.context, register: (k,v) => restarted.commands.set(k,v), documents: restarted.documents });
+  const before = new Map(state);
+  assert.equal(await wiki.handleUri(restarted.api.Uri.parse(link)), true);
+  assert.equal(restarted.markdownSelections.at(-1).uri, draft.uri.toString());
+  assert.match(draft.getText(), /Unsent draft α😀$/); assert.equal(draft.isDirty, true);
+  assert.equal(await fs.readFile(f.file('1a.md'), 'utf8'), f.contents['1a.md']);
+  assert.equal(restarted.hostCalls.at(-1).args[1], 'vscode.markdown.preview.editor');
+  assert.equal(restarted.state.get('mrw.documents.v1').last, draft.uri.toString());
+  assert.deepEqual(restarted.state.get('mrw.documents.v1').grants, before.get('mrw.documents.v1').grants);
+  assert.ok(!restarted.hostCalls.some(c => /openFolder|revert|save|close/.test(c.name)));
+});
+
+test('note URI checks workspace and vault, does not grant files or redirect a missing note', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes });
+  const a = await h.doc('1a.md'); await h.focus(a);
+  const link = await h.documents.copyLink(), target = parseNoteLink(link);
+  const previous = h.shown.length;
+  await assert.rejects(h.documents.handleUri(h.api.Uri.parse(makeNoteLink({ ...target, notes: f.outside }))), /different notes folder/);
+  await assert.rejects(h.documents.handleUri(h.api.Uri.parse(makeNoteLink({ ...target, file: 'absent.md' }))), /ENOENT/);
+  await fs.writeFile(path.join(f.outside,'secret.md'),'Never open');
+  await fs.symlink(path.join(f.outside,'secret.md'),f.file('escape.md'));
+  await assert.rejects(h.documents.handleUri(h.api.Uri.parse(makeNoteLink({ ...target, file: 'escape.md' }))), /outside the selected scope|outside its linked/);
+  assert.equal(h.shown.length, previous);
+  const other = makeNoteLink({ ...target, workspace: 'file:///different/workspace' });
+  await h.documents.handleUri(h.api.Uri.parse(other));
+  assert.ok(!h.hostCalls.some(c => c.name==='vscode.openFolder'), 'no automatic workspace switch');
+  h.setInfoResponse('Copy Link and Open Workspace'); await h.documents.handleUri(h.api.Uri.parse(other));
+  assert.equal(h.clipboard, other);
+  assert.deepEqual(h.hostCalls.at(-1).args[1], { forceNewWindow: true });
+  h.api.workspace.isTrusted = false;
+  await assert.rejects(h.documents.handleUri(h.api.Uri.parse(link)), /trust/);
+});
+
+test('preview copy action copies the explicit note instead of an unrelated active editor', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes });
+  const doc = await h.doc('1a.md'), other = await h.doc('2b.md'); await h.focus(other);
+  const wiki = registerWikiLinks({ vscode:h.api, context:h.context, register:(k,v)=>h.commands.set(k,v), documents:h.documents });
+  const md = wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
+  const html = md.render(doc.getText(), { currentDocument:doc.uri });
+  const action = [...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]).find(href=>JSON.parse(Buffer.from(new URL(href).searchParams.get('target'),'base64url')).action==='copy');
+  assert.ok(action); await wiki.handleUri(h.api.Uri.parse(action));
+  const href = /\]\(([^)]+)\)$/.exec(h.clipboard)[1];
+  assert.equal(parseNoteLink(href).file,'1a.md');
+  assert.equal(h.api.window.activeTextEditor.document, other);
 });
