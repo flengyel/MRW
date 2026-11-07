@@ -36,7 +36,12 @@ defaults to that folder’s name; **MRW: Obsidian Vault** can specify a differen
 name or vault ID. In WSL, choose the Windows vault through `/mnt/c/…` so both
 applications edit the same files. This handoff does not require the Obsidian CLI.
 
-To open this note from Obsidian, click **Copy MRW link** above the preview,
+From Obsidian, run **Templater: Insert OpenInMRW** on the note you are working
+in. It opens the current filename in MRW's preview and Contents, with no per-note
+link or clipboard transfer. The [Zettel template guide](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
+describes the vault-local workspace setting and Insert-only registration.
+
+To keep a link to a particular note, click **Copy MRW link** above the preview,
 or run **MRW: Copy Note Link for Obsidian**. Paste the Markdown link into an
 Obsidian note. Clicking it opens this file's current contents in MRW's preview,
 including after restarting MRW. It is a live file link, not a retained citation.

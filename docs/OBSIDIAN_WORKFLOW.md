@@ -96,7 +96,27 @@ setting. A saved-source reader still uses its separately supplied, validated
 Obsidian association below; opening an ordinary note does not rewrite retained
 source or passage associations.
 
-## Open an ordinary note from Obsidian
+## Open the current note from Obsidian
+
+Run **Templater: Insert OpenInMRW** while working in the note. MRW opens its
+current file in Markdown preview and selects it for Contents. The command
+uses Obsidian's current filename and a vault-local MRW workspace setting;
+no per-note link or clipboard transfer is needed.
+
+The [OpenInMRW template and setup](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
+are maintained in `flengyel/Zettel`, alongside the configured Timestamp,
+NewFileTemplate and WikilinkTitle commands. Enable Insert only, with Create
+disabled. The local `.obsidian/mrw.json` selects the MRW workspace and the same
+notes root used by **Choose Notes Folder…**. The command requires MRW 0.22.5
+or later to be active; it uses neither the Obsidian CLI nor a note-import step.
+
+Templater's Insert action needs an editor. Ordinary selected prose is preserved;
+multiple cursors and selected YAML are refused because Templater would replace
+multiple ranges or reinterpret front matter as a metadata edit.
+
+### Keep a note link
+
+A saved Markdown link is an optional route to a particular note:
 
 1. In the note's MRW Markdown preview, click **Copy MRW link**, or run
    **MRW: Copy Note Link for Obsidian**. The copied Markdown link includes the
