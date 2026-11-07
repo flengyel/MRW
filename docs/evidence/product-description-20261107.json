@@ -1,0 +1,24 @@
+{
+  "version": "0.22.1",
+  "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
+  "changed_files": [
+    "extension.vsixmanifest",
+    "extension/package.json"
+  ],
+  "runtime_unchanged": true,
+  "previous_sha256": "c470f71ef6923880530985bc384ba26fc6b243ca777312de820d9ba292c2a214",
+  "sha256": "28640cfcb10a1ee3e4b44ef2da5dd1c41332dd58cd00831070653ef9bf6f71a3",
+  "bytes": 551413,
+  "installed": true,
+  "installed_package_files_checked": 94,
+  "installer_metadata_excluded": true,
+  "window_reload_requested": false,
+  "verification": "Existing VSIX verifier passed; archive comparison and installed-file comparison passed. No runtime change; no additional runtime regression run.",
+  "description_commit": "8709dcf",
+  "runtime_build_identity": {
+    "version": "0.22.1",
+    "commit": "1efa68e94f5e5e375848976c02abc98bdb930d06",
+    "localChanges": true
+  },
+  "user_observation": "User reports version 0.22.1 and reader notes present. This is not a broader native-window acceptance result."
+}
