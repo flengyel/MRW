@@ -272,7 +272,7 @@ function render() {
       'Open the current published page in your browser. The retained source revision and annotations stay unchanged.';
   }
   button(readingBar, 'Study current material', { type: 'study_current' }, 'study-current');
-  button(readingBar, 'Prepare proof study…', { type: 'proof_study' }, 'proof-study');
+  button(readingBar, 'Work through a proof…', { type: 'proof_study' }, 'proof-study');
   button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');
   button(readingBar, 'Refresh saved source', { type: 'refresh' }, 'refresh').title =
     'Reload saved reader state and annotations; this does not reacquire the original document.';

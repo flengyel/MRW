@@ -10,7 +10,7 @@ const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n')
 const point = p => [p.line, p.character];
 
 function outlineHtml(script, support = [], diagramStyle = '', options = {}) {
-  const caption = ({ proof: 'Proof outline', proofStudy: 'Proof study', study: 'Study' })[options.kind] || 'Saved source';
+  const caption = ({ proof: 'Proof outline', proofStudy: 'Proof work', study: 'Study' })[options.kind] || 'Saved source';
   script = [...support, script].join('\n;\n');
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">

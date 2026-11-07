@@ -399,12 +399,12 @@
       },
       {
         "command": "mrw.prepareProofStudy",
-        "title": "Prepare Proof Study\u2026",
+        "title": "Work through a proof\u2026",
         "category": "MRW"
       },
       {
         "command": "mrw.resumeProofStudy",
-        "title": "Resume Proof Study",
+        "title": "Continue proof work",
         "category": "MRW",
         "icon": "$(book)"
       },

@@ -145,7 +145,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
     if (sessions.has(file)) {
       const c = sessions.get(file); c.doc = doc; c.raw = raw; c.study = study; c.panel.reveal(); await send(c); return;
     }
-    const panel = vscode.window.createWebviewPanel('mrw.proofStudy', 'Study: ' + study.title, vscode.ViewColumn.Active,
+    const panel = vscode.window.createWebviewPanel('mrw.proofStudy', 'Proof work: ' + study.title, vscode.ViewColumn.Active,
       { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] });
     const c = { file, root, study, doc, raw, panel, busy: false }; sessions.set(file, c);
     panel.onDidDispose(() => sessions.delete(file));
@@ -171,7 +171,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
     const passages = studyPassages(selected), question = await vscode.window.showInputBox({ prompt: 'Question to investigate' });
     if (question === undefined) return;
     const study = validateStudy({ version: 1, title: passages[0].label.slice(0, 240), question, passages, outline: null });
-    const uri = await vscode.window.showSaveDialog({ title: 'Save proof study', defaultUri: vscode.Uri.file(path.join(root, 'proof-study.mrw-study.json')), filters: { 'MRW proof study': ['mrw-study.json'] } });
+    const uri = await vscode.window.showSaveDialog({ title: 'Save proof work', defaultUri: vscode.Uri.file(path.join(root, 'proof-study.mrw-study.json')), filters: { 'MRW proof work': ['mrw-study.json'] } });
     if (!uri) return;
     if (uri.scheme !== 'file') throw new Error('Choose a local study file.');
     const file = await scoped(uri.fsPath, root, '.mrw-study.json'); await create(file, encoded(study)); await open(file, root);
@@ -179,7 +179,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
   register('mrw.resumeProofStudy', async uri => {
     const root = await projectRoot(uri?.scheme === 'file' ? { document: { uri } } : vscode.window.activeTextEditor), active = vscode.window.activeTextEditor?.document;
     const file = uri?.scheme === 'file' ? uri.fsPath : active?.uri.scheme === 'file' && active.uri.fsPath.endsWith('.mrw-study.json') ? active.uri.fsPath
-      : context.workspaceState.get(last) || await choosePath('Resume proof study (.mrw-study.json)');
+      : context.workspaceState.get(last) || await choosePath('Continue proof work (.mrw-study.json)');
     if (file) await open(await scoped(file, root, '.mrw-study.json'), root);
   });
 }

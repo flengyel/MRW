@@ -120,6 +120,14 @@ reports, not mathematical checking. **Keep for review** opts a question into
 later source-scoped review; saving it alone does not enroll it. Effort reports
 are optional. No study example or comprehension test is required to read a note.
 
+## Work through a proof
+
+For a question about a proof, **MRW: Work through a proof…** collects the saved
+proof, prerequisite passages you select, and your question. **Copy handoff for
+Codex** includes their exact text and references. Import a returned outline to
+inspect its proof graph and edit claim summaries. **Continue proof work** reopens
+the saved question and linked outline. See [the proof workflow](../docs/PROOF_STUDY_WORKFLOW.md).
+
 ## Save and resume
 
 | Work | Save | Resume |
@@ -127,10 +135,10 @@ are optional. No study example or comprehension test is required to read a note.
 | Original document | **Ctrl+S** in its editor | **Reopen Document**, or **Open Document…** for another file |
 | Reader annotation | **Save annotation** | **Open Saved Source…**, then **Reader notes** |
 | Current study question and attempt | **Pause / save** | **Resume Study** or its row in **Studies** |
-| Proof-study question | **Save question** in its study tab | **Resume Proof Study** |
+| Question about a proof | **Save question** in its **Proof work** tab | **Continue proof work** |
 
-**Pause / save** keeps unfinished work without recording an outcome. The two
-Resume commands serve different study workflows. There is no general research
+**Pause / save** keeps unfinished work without recording an outcome. **Resume Study**
+restores attempts; **Continue proof work** restores a question and its outline. There is no general research
 session restore command yet; keep the next step in the working document.
 
 Ordinary notes and MRW private records have separate storage. An external notes
@@ -147,7 +155,7 @@ infer a vault from the selected folder. See [note links and Obsidian](../docs/OB
 
 - [Documents, Contents and backlinks](../docs/READING_OUTLINE_WORKFLOW.md)
 - [Questions, attempts, history and review](../docs/ACTIVE_STUDY_WORKFLOW.md)
-- [Proof-study handoff and Proof Outline](../docs/PROOF_STUDY_WORKFLOW.md)
+- [Work through a proof and Proof Outline](../docs/PROOF_STUDY_WORKFLOW.md)
 - [Reader Ask, exact preview and Send](../docs/READER_AI_WORKFLOW.md)
 - [Saved-work storage and recovery](../docs/ARTIFACT_STORAGE.md)
 - [Optional SagePod computation](../docs/GETTING_STARTED_WSL_SAGEPOD.md)

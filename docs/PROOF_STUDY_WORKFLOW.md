@@ -1,8 +1,10 @@
-# Proof study with the Codex companion
+# Work through a proof with the Codex companion
 
-Run **MRW: Prepare Proof Study…** from Research Tools or **Prepare proof study…**
+Run **MRW: Work through a proof…** from Research Tools or **Work through a proof…**
 in the retained reader. Choose the proof, then select its prerequisite passages.
-Enter the question and save the study. No passages are added automatically.
+Enter the question you want to pursue and save the work. The saved question,
+selected passages and any imported outline can be reopened with **Continue proof
+work**. No passages are added automatically.
 
 In the study view:
 
@@ -16,7 +18,7 @@ In the study view:
    identify the author and choose Reader correction or AI proposal. **Save
    summary** applies an ordinary document edit and save. The editor owns undo.
 4. Return to the study tab, write the unresolved question and choose **Save
-   question**. **MRW: Resume Proof Study** reopens the remembered study. An active
+   question**. **MRW: Continue proof work** reopens the remembered study. An active
    `.mrw-study.json` file takes precedence; its editor title also has a study icon.
 
 The `.mrw-study.json` file contains the selected quotation bytes, references,

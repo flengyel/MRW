@@ -103,8 +103,8 @@ rendered Markdown view. Existing `mrw-outline:v1` references and record fields
 remain unchanged. Copying Markdown does not copy its private saved targets.
 
 Reader annotations use **Save annotation**. Current studies use **Pause / save**
-and **Resume Study**; the separate proof-study handoff uses **Save question**
-and **Resume Proof Study**. Proof Outline still names a mathematical argument.
+and **Resume Study**; work on a proof uses **Save question**
+and **Continue proof work**. Proof Outline still names a mathematical argument.
 There is no general research-session restore or automatic argument
 reconstruction yet. Links and structural graph checks establish no mathematical
 correctness or comprehension status.
