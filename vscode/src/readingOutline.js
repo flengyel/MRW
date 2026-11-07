@@ -5,6 +5,7 @@ const { digest } = require('./navigation');
 const { parseReadingMarkdown } = require('./readingMarkdown');
 const { createDocuments } = require('./documents');
 const { registerWikiLinks } = require('./wikiLinks');
+const { noteIdentity } = require('./noteIdentity');
 const { showMarkdownPreview, documentColumn: readingDocumentColumn } = require('./documentPresentation');
 const { registerTutorial } = require('./tutorial');
 const KEY = 'mrw.readingOutline.v1';
@@ -74,7 +75,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     try {
       model = parseReadingMarkdown(document.getText());
       for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
-      tree.description = `${path.basename(document.uri.path)}${document.isDirty ? ' •' : ''}`;
+      tree.description = `${noteIdentity(document).label}${document.isDirty ? ' •' : ''}`;
       tree.message = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? undefined : 'Add Markdown headings or file, note, or MRW passage links.';
     } catch (error) { model = undefined; tree.message = error.message; }
     changed.fire();
@@ -165,6 +166,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       if (node) await tree.reveal(node, { select: true, focus: false });
     }
     await persist();
+    documents.watchNotes();
     return model;
   }
   const documents = createDocuments({ vscode, context, register, trackLocation, resolveReferences,
@@ -172,7 +174,9 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     onMarkdown: async doc => {
       generation++;
       if (document !== doc) { collapsed = new Set(); selected = undefined; }
-      document = doc; refresh(); await persist();
+      document = doc; refresh();
+      tree.description = `${noteIdentity(doc).label}${doc.isDirty ? ' •' : ''}`;
+      await persist();
     } });
   const wikiLinks = registerWikiLinks({ vscode, context, register, documents });
   register('mrw.openReadingOutline', () => openReadingOutline());

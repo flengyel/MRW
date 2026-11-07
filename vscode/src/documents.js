@@ -9,6 +9,9 @@ const { qualifiedIdentifier, canonicalCitation } = require('./sourceIdentifiers'
 const { parseReadingMarkdown, zettelLinkParts } = require('./readingMarkdown');
 const { buildNoteIndex, resolveNoteLink, backlinks, within, markdown } = require('./documentLinks');
 const { showMarkdownPreview, documentColumn } = require('./documentPresentation');
+const { windowsNoteFiles } = require('./noteFiles');
+const { createNoteRefresh } = require('./noteRefresh');
+const { DEFAULT_LIMITS } = require('./documentLinks');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
@@ -23,6 +26,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   let latestDisplay;
   let generation = 0, publication = Promise.resolve();
   const candidates = new Set();
+  const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
   function persist() {
     const value = { workspace, grants: [...grants], folder, last, origin };
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
@@ -87,7 +91,8 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     const root = await folderRoot();
     return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: lookupId === undefined ? 'Reading selected notes folder' : 'Finding linked note', cancellable: true },
       async (_progress, token) => {
-        const result = await buildNoteIndex(root, { token, overrides: await overlays(root), lookupId });
+        const catalogue = lookupId === undefined ? undefined : await windowsNoteFiles(root, { token, limits: DEFAULT_LIMITS, remoteName: vscode.env.remoteName });
+        const result = await buildNoteIndex(root, { token, overrides: await overlays(root), lookupId, catalogue });
         if (qualifyPublished) {
           const nodes = [...result.files.values()].flatMap(n => n.parsed.all).filter(n => n.kind === 'reference' && !n.qualified_id);
           const references = [...new Set(nodes.map(n => n.reference))];
@@ -136,6 +141,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       await onMarkdown(doc);
       if (attempt !== generation) return repairSupersededDisplay();
       await showMarkdownPreview(vscode, doc, editor.viewColumn);
+      noteRefresh.start();
       if (version !== doc.version || doc.isClosed) throw new Error('The document changed while opening. Follow its current link again.');
     } else if (/\.pdf$/i.test(uri.fsPath)) {
       const readers = [];
@@ -280,11 +286,34 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     for (const pending of candidates) if (pending.location.uri === uri && !pending.location.fileOnly) pending.location = trackLocation(pending.location, e.contentChanges, revision);
     void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
   }
+  function isNote(uri) {
+    const root = configuredFolder() || folder?.canonical;
+    return uri?.scheme === 'file' && markdown(uri.fsPath || '') && typeof root === 'string' && path.isAbsolute(root) && within(root, uri.fsPath);
+  }
+  async function openInObsidian(value) {
+    const selected = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri || vscode.window.activeTextEditor?.document?.uri;
+    const uri = value?.scheme ? value : selected || (last && vscode.Uri.parse(last));
+    if (!uri || !isNote(uri)) throw new Error('Open a Markdown note in the selected notes folder before opening it in Obsidian.');
+    await check(uri);
+    const root = await folderRoot(), actual = await canonical(uri);
+    if (!within(root, actual)) throw new Error('This note is outside the selected notes folder.');
+    if (!(await fs.stat(path.join(root, '.obsidian')).catch(() => undefined))?.isDirectory()) throw new Error('The selected notes folder is not an Obsidian vault. Choose its root folder.');
+    const configured = vscode.workspace.getConfiguration?.('mrw').get('obsidianVault', '') || '';
+    const vault = configured || path.basename(root);
+    if (typeof vault !== 'string' || vault.includes('/') || vault.includes('\\') || [...vault].some(c => c.charCodeAt(0) < 32)) throw new Error('MRW: Obsidian Vault must be its name or vault ID.');
+    const relative = path.relative(root, actual).split(path.sep).join('/');
+    const target = vscode.Uri.from({ scheme: 'obsidian', authority: 'vault', path: `/${vault}/${relative}` });
+    const doc = vscode.workspace.textDocuments?.find(d => d.uri.toString() === uri.toString());
+    if (doc?.isDirty) void vscode.window.showInformationMessage('This note has unsaved VS Code changes. Obsidian will open the saved file; the VS Code draft is preserved.');
+    if (!await vscode.env.openExternal(target)) throw new Error('Obsidian could not be opened. Check that it is installed and its URI handler is registered.');
+    return true;
+  }
+  register('mrw.openDocumentInObsidian', openInObsidian);
   register('mrw.openDocument', open);
   register('mrw.chooseNotesFolder', chooseFolder);
   register('mrw.followDocumentLink', followAtCursor);
   register('mrw.showBacklinks', showBacklinks);
   register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), undefined, ++generation); });
-  return { check, grant, follow, changed, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede: () => { generation++; } };
+  return { check, grant, follow, changed, isNote, openInObsidian, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede: () => { generation++; } };
 }
 module.exports = { createDocuments };

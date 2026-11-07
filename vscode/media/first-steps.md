@@ -25,6 +25,23 @@ use **MRW: New Document…**; its initial headings can be edited or removed.
 
 ## Follow another note or paper
 
+A note’s preview and Contents show its YAML title alongside its filename.
+The filename remains its ID; titles do not rename notes. VS Code’s tab retains
+its filename. **Open in Obsidian** is available at the top of the preview and
+as **MRW: Open Note in Obsidian**. **Show Contents** returns to MRW’s reading
+controls.
+
+Select the vault root with **Choose Notes Folder…**. The Obsidian vault name
+defaults to that folder’s name; **MRW: Obsidian Vault** can specify a different
+name or vault ID. In WSL, choose the Windows vault through `/mnt/c/…` so both
+applications edit the same files. This handoff does not require the Obsidian CLI.
+
+Save changes in Obsidian, then return to MRW: its clean note and preview update
+within a few seconds. Unsaved
+VS Code text remains the current draft and is labelled **Unsaved VS Code
+changes**. MRW does not save, discard or merge that draft when opening Obsidian.
+
+
 1. Run **MRW: Choose Notes Folder…** and explicitly select the folder containing
    the notes to navigate. It can be outside the workspace, including a Windows
    folder reached through `/mnt/c/…` in WSL. It need not be an Obsidian vault.
@@ -45,7 +62,10 @@ use **MRW: New Document…**; its initial headings can be edited or removed.
 4. Use **MRW: Return to Document** to return to the originating occurrence.
    A failed follow preserves the preceding successful return location.
 
-ID lookup searches filenames and reads only matching notes. Backlink search
+ID lookup searches filenames and reads only matching notes. In WSL, a Windows
+notes folder uses one bounded Windows filename enumeration to avoid repeated
+filesystem calls across the mount. Failed enumeration falls back to the normal
+lookup; an incomplete enumeration remains incomplete. Backlink search
 reads note text separately and reports partial results when a limit is reached.
 The entry budget counts candidate notes, directories and symlinks; ordinary
 non-Markdown attachments do not consume it.

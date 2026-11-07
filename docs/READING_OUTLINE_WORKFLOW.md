@@ -1,4 +1,4 @@
-# Existing documents, Contents and saved sources — 0.22.3
+# Existing documents, Contents and saved sources — 0.22.4
 
 **MRW: Open Document…** displays an existing file in place. Markdown opens in
 VS Code's Markdown preview and supplies **Contents**. **Edit Document Source**
@@ -28,6 +28,28 @@ openers. **New Document…** creates a `.md` or `.markdown` file through the hos
 Save dialog and refuses to overwrite a file. An untitled Markdown document
 works for the current session. VS Code owns editing, saving, undo and recovery.
 
+## Note title and Obsidian handoff
+
+The preview header and Contents display the YAML title with the immutable
+filename. A repeated filename ID at the start of the title is omitted from its
+presentation; the complete property remains in the tooltip. No metadata, note
+text or filename is rewritten. Native editor tabs keep their filenames.
+
+**Open in Obsidian** in the preview, or **MRW: Open Note in Obsidian**, opens the
+same vault-relative file through Obsidian’s registered URI handler. The selected
+notes folder must be its vault root. **MRW: Obsidian Vault** accepts a vault name
+or ID; an empty value uses the selected folder name. Under WSL, select the
+Windows vault through `/mnt/c/…`. Opening a client application does not copy or
+synchronize a separate SSH/Linux file tree.
+
+After explicit MRW navigation, the displayed note is checked while VS Code is
+focused. Saved external changes re-resolve a clean file through VS Code’s file
+model and refresh its preview, links and Contents. This covers Windows saves
+that do not produce WSL file events; it checks one displayed file, not the vault. Dirty VS Code text remains a labelled
+draft. MRW never forces a reload, saves it or merges external changes into it.
+Obsidian opens the saved file and receives no unsent VS Code text. The CLI is
+optional and is not required by this handoff.
+
 ## Follow notes and files
 
 1. Open the original note and choose its notes folder. Select a heading in
@@ -45,7 +67,13 @@ works for the current session. VS Code owns editing, saving, undo and recovery.
    Opening a backlink also supplies its own usable return location. Ordinary
    note navigation keeps its return pin separate from a saved-reader citation.
 
-ID lookup searches filenames and reads only matching notes. Backlink search
+ID lookup searches filenames and reads only matching notes. Windows-mounted
+folders under WSL use a bounded read-only Windows enumeration to avoid a
+filesystem round trip per directory. It passes only relative filenames into
+the ordinary resolver, which still checks scope, duplicate IDs and current
+matching-note bytes. There is no persistent or stale filename cache. Partial
+results remain incomplete; unavailable enumeration falls back to the existing
+filesystem scan. Backlink search
 reads note text separately and reports partial results when a limit is reached.
 The text search admits at most 4,096 notes and 32 MiB; larger searches remain
 explicitly partial.
@@ -61,8 +89,9 @@ its ancestors or another folder. `[[ID]]` resolves an exact filename stem in
 that folder. Older dotted IDs and index-note IDs are supported. Editable titles
 and prose following `[[ID]]` do not change identity. Obsidian display aliases
 such as `[[ID|Label]]` show the label while resolving the ID; backlinks retain
-the complete original link syntax. Duplicate IDs or conflicting
-identity metadata are reported. Ordinary Markdown files need not adopt Zettel
+the complete original link syntax. Duplicate filename IDs are reported.
+YAML `id` and `title` values are metadata; a differing YAML ID does not select
+a substitute file or block navigation to its immutable filename. Ordinary Markdown files need not adopt Zettel
 metadata. Missing targets and unsupported wiki heading/block selectors or paths
 produce local explanations rather than guessed replacements.
 

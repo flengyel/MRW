@@ -1,5 +1,7 @@
 'use strict';
 const { randomUUID } = require('node:crypto');
+const { noteIdentity } = require('./noteIdentity');
+const { documentColumn } = require('./documentPresentation');
 const { parseReadingMarkdown, zettelLinkParts, frontMatterInfo } = require('./readingMarkdown');
 
 // Discovery/rendering only uses the host's already-open text, never a folder
@@ -68,6 +70,14 @@ function registerWikiLinks({ vscode, context, register, documents }) {
         token.meta = { occurrence }; counts.set(token.content, occurrence + 1);
       }
     });
+    md.core.ruler.push('mrw_note_heading', state => { state.tokens.unshift(new state.Token('mrw_note_heading', '', 0)); });
+    md.renderer.rules.mrw_note_heading = (_tokens, _at, _options, env) => {
+      const doc = vscode.workspace.textDocuments?.find(d => d.uri.toString() === env.currentDocument?.toString());
+      if (!doc || !documents.isNote(doc.uri) || vscode.workspace.isTrusted === false) return '';
+      const identity = noteIdentity(doc), escape = md.utils.escapeHtml;
+      const action = kind => `${scheme}://flengyel.mrw/document-action?target=${Buffer.from(JSON.stringify({ session, uri: doc.uri.toString(), action: kind }), 'utf8').toString('base64url')}`;
+      return `<aside class="mrw-note-heading" aria-label="Note identity"><strong title="${escape(identity.rawTitle)}">${escape(identity.title || identity.id)}</strong> · <code>${escape(identity.filename)}</code>${doc.isDirty ? ' · Unsaved VS Code changes' : ''}<p><a href="${escape(action('obsidian'))}">Open in Obsidian</a> · <a href="${escape(action('contents'))}">Show Contents</a></p></aside>\n`;
+    };
     md.renderer.rules.mrw_wikilink = (tokens, at, _options, env) => {
       const token = tokens[at], escape = md.utils.escapeHtml;
       const source = env.currentDocument?.toString();
@@ -83,13 +93,25 @@ function registerWikiLinks({ vscode, context, register, documents }) {
   }
   async function handleUri(uri) {
     const value = uri.toString(true);
-    if (uri.path !== '/document-link') return false;
+    if (!['/document-link', '/document-action'].includes(uri.path)) return false;
+    if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following a note action.');
     if (value.length > 20000) throw new Error('Invalid MRW WikiLink.');
     const parsed = new URL(value), pairs = [...parsed.searchParams];
     if (parsed.protocol !== `${scheme}:` || parsed.host !== 'flengyel.mrw' || parsed.hash ||
         pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid MRW WikiLink.');
     const data = JSON.parse(Buffer.from(pairs[0][1], 'base64url').toString('utf8'));
-    await follow(data); return true;
+    if (uri.path === '/document-action') {
+      if (data?.session !== session || typeof data.uri !== 'string' || data.uri.length > 8192 || !['obsidian', 'contents'].includes(data.action)) throw new Error('This note action is unavailable. Reopen the preview.');
+      const source = vscode.Uri.parse(data.uri);
+      await documents.check(source);
+      if (data.action === 'obsidian') await documents.openInObsidian(source);
+      else {
+        const doc = await vscode.workspace.openTextDocument(source);
+        await vscode.window.showTextDocument(doc, { preview: false, viewColumn: documentColumn(vscode, doc) });
+        await vscode.commands.executeCommand('mrw.openReadingOutline');
+      }
+    } else await follow(data);
+    return true;
   }
   return { extendMarkdownIt, handleUri };
 }

@@ -32,13 +32,13 @@ test('ordinary notes, dotted and index IDs produce exact repeated backlink occur
   assert.equal(await fs.readFile(path.join(root, '1.2a.md'), 'utf8'), source);
 });
 
-test('duplicate filenames and conflicting YAML identity are explained; editable titles never select a substitute', async t => {
+test('duplicate filenames are explained and YAML titles or IDs never replace filename identity', async t => {
   const root = await fixture(t, { 'start.md': '# Start\n', 'a/12a.md': '---\nid: 12a\ntitle: Any title\n---\n# First\n',
     'b/12a.md': '# Second\n', '13b.md': '---\nid: somebody-else\ntitle: 13b A title\n---\n# Heading\n', '14c.md': '# 15d\n' });
   const index = await buildNoteIndex(root), source = path.join(root, 'start.md');
   assert.equal((await resolveNoteLink(index, source, '12a', 'zettel')).code, 'ambiguous_id');
   const conflict = await resolveNoteLink(index, source, '13b', 'zettel');
-  assert.equal(conflict.code, 'identity_conflict'); assert.match(conflict.error, /filename ID/);
+  assert.equal(conflict.ok, true); assert.match(index.files.get(conflict.path).identityErrors[0], /filename ID/);
   assert.equal((await resolveNoteLink(index, source, 'somebody-else', 'zettel')).code, 'missing_id');
   assert.equal((await resolveNoteLink(index, source, '15d', 'zettel')).code, 'missing_id');
   assert.equal((await resolveNoteLink(index, source, '14c', 'zettel')).ok, true);
@@ -179,7 +179,7 @@ test('Obsidian aliases resolve by filename ID and retain exact repeated backlink
   const ambiguous=await fixture(t,{'source.md':'# Source\n','a/1a.md':'# A\n','b/1a.md':'# B\n','bad.md':'---\nid: other\n---\n# Bad\n'});
   const duplicates=await buildNoteIndex(ambiguous),start=path.join(ambiguous,'source.md');
   assert.equal((await resolveNoteLink(duplicates,start,'1a|Choose first','zettel')).code,'ambiguous_id');
-  assert.equal((await resolveNoteLink(duplicates,start,'bad|other','zettel')).code,'identity_conflict');
+  assert.equal((await resolveNoteLink(duplicates,start,'bad|other','zettel')).ok,true);
 });
 
 
@@ -235,4 +235,22 @@ test('a vault exceeding two thousand notes still resolves alias backlinks within
   assert.equal(index.complete,true);assert.equal(index.files.size,2102);
   const found=await backlinks(index,path.join(root,'target.md'));
   assert.equal(found.complete,true);assert.deepEqual(found.occurrences.map(hit=>hit.sourceText),['[[target|Readable]]']);
+});
+
+
+test('filename catalogues preserve duplicate checks, scope, dirty text, partial results and current file contents',async t=>{
+ const root=await fixture(t,{'source.md':'# Source\n','a/1a.md':'---\nid: older-metadata\ntitle: Useful title\n---\n# Target\n'});
+ const outside=await fixture(t,{'secret.md':'# Outside\n'}),target=path.join(root,'a/1a.md');
+ const catalogue={root,paths:[path.join(root,'source.md'),target],complete:true,errors:[],provider:'fixture'};
+ const source=path.join(root,'source.md');
+ const first=await buildNoteIndex(root,{lookupId:'1a',catalogue});assert.equal(first.provider,'fixture');
+ assert.equal((await resolveNoteLink(first,source,'1a|Useful title','zettel')).path,target);
+ await fs.writeFile(target,'# Changed externally\n');
+ const second=await buildNoteIndex(root,{lookupId:'1a',catalogue});assert.equal(second.files.get(target).text,'# Changed externally\n');
+ const dirty=await buildNoteIndex(root,{lookupId:'1a',catalogue,overrides:new Map([[target,'# Unsent draft\n']])});assert.equal(dirty.files.get(target).text,'# Unsent draft\n');assert.equal(await fs.readFile(target,'utf8'),'# Changed externally\n');
+ await fs.mkdir(path.join(root,'b'));const duplicate=path.join(root,'b/1a.md');await fs.writeFile(duplicate,'# Duplicate\n');
+ const ambiguous=await buildNoteIndex(root,{lookupId:'1a',catalogue:{...catalogue,paths:[...catalogue.paths,duplicate]}});assert.equal((await resolveNoteLink(ambiguous,source,'1a','zettel')).code,'ambiguous_id');
+ const partial=await buildNoteIndex(root,{lookupId:'1a',catalogue:{...catalogue,complete:false,errors:['entry limit']}});assert.equal((await resolveNoteLink(partial,source,'1a','zettel')).code,'incomplete_index');
+ await fs.unlink(target);await fs.symlink(path.join(outside,'secret.md'),target);
+ const escaped=await buildNoteIndex(root,{lookupId:'1a',catalogue});assert.equal(escaped.complete,false);assert.equal(escaped.files.size,0);assert.equal(escaped.errors[0].code,'outside_scope');
 });

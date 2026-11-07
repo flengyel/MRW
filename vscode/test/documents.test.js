@@ -41,7 +41,7 @@ function harness(f, state = new Map(), options = {}) {
   const configuration = { notesFolder: options.notesFolder || '' }, configurationWrites = [];
   let linkProvider;
   const api = {
-    Position, Range, Selection, Uri: { file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
+    Position, Range, Selection, Uri: { from: fields => ({...fields,toString:()=>fields.scheme+'://'+(fields.authority||'')+fields.path.split('/').map(encodeURIComponent).join('/')}), file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
     ConfigurationTarget: { Workspace: 2 }, DocumentLink: class { constructor(range, target) { Object.assign(this, { range, target }); } },
     languages: { registerDocumentLinkProvider(_selector, provider) { linkProvider = provider; return { dispose() {} }; } },
     ProgressLocation: { Notification: 15 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 },
@@ -395,7 +395,7 @@ test('WikiLinks are clickable without an active source editor and preserve exact
   const md = wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
   assert.equal(wiki.extendMarkdownIt(md), md, 'plugin installation is idempotent');
   const html = md.render(a.getText(), { currentDocument: a.uri });
-  const hrefs = [...html.matchAll(/href="(vscode:[^"]+)"/g)].map(match => match[1]);
+  const hrefs = [...html.matchAll(/href="(vscode:[^"]+\/document-link[^\"]*)"/g)].map(match => match[1]);
   assert.equal(hrefs.length, 2);
   assert.match(html, />Second &amp; &lt;note&gt;<\/a>/);
   assert.notEqual(hrefs[0], hrefs[1], 'repeated links keep their distinct occurrences');
@@ -420,4 +420,30 @@ test('backlinks from a Markdown preview return to that document instead of an un
   assert.equal(h.state.get('mrw.documents.v1').origin.uri, uri(f.file('2b.md')).toString());
   await h.documents.returnToDocument();
   assert.equal(h.hostCalls.findLast(call => call.name === 'vscode.openWith').args[0].fsPath, f.file('2b.md'));
+});
+
+
+test('Open Note in Obsidian targets the same saved file and preserves an unsent editor draft',async t=>{
+ const f=await fixture(t),h=harness(f,new Map(),{notesFolder:f.notes});await fs.mkdir(path.join(f.notes,'.obsidian'));
+ h.configuration.obsidianVault='Notes & research';
+ const doc=await h.doc('1a.md');await h.focus(doc);h.change(doc,0,0,'Unsent work.\n');
+ const draft=doc.getText(),before=await fs.readFile(f.file('1a.md'),'utf8');
+ assert.equal(await h.commands.get('mrw.openDocumentInObsidian')(),true);
+ const target=h.external.at(-1);assert.equal(target.scheme,'obsidian');assert.equal(target.authority,'vault');assert.equal(target.path,'/Notes & research/1a.md');assert.match(target.toString(),/Notes%20%26%20research/);
+ assert.equal(doc.getText(),draft);assert.equal(doc.isDirty,true);assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),before);assert.match(h.informations.at(-1).message,/unsaved VS Code changes/);
+ h.setExternalResult(false);await assert.rejects(h.commands.get('mrw.openDocumentInObsidian')(),/could not be opened/);
+ h.configuration.obsidianVault='../../wrong';await assert.rejects(h.commands.get('mrw.openDocumentInObsidian')(),/vault ID/);
+ h.configuration.obsidianVault='Notes';const unscoped=uri(path.join(f.outside,'private.md'));await fs.writeFile(unscoped.fsPath,'# Private\n');await assert.rejects(h.documents.openInObsidian(unscoped),/selected notes folder/);
+});
+
+test('preview identity uses YAML title alongside the immutable filename and updates when editor text changes',async t=>{
+ const f=await fixture(t),h=harness(f,new Map(),{notesFolder:f.notes});await fs.mkdir(path.join(f.notes,'.obsidian'));
+ const doc=await h.doc('1a.md');await h.focus(doc);
+ const wiki=registerWikiLinks({vscode:h.api,context:h.context,register:(key,callback)=>h.commands.set(key,callback),documents:h.documents});
+ const md=wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
+ let html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/<strong[^>]*>A changed title<\/strong>/);assert.match(html,/<code>1a.md<\/code>/);
+ const actions=[...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]);assert.equal(actions.length,2);
+ const obsidian=actions.find(href=>JSON.parse(Buffer.from(new URL(href).searchParams.get('target'),'base64url')).action==='obsidian');await wiki.handleUri(h.api.Uri.parse(obsidian));assert.equal(h.external.at(-1).path,'/external-notes/1a.md');
+ const at=doc.getText().indexOf('A changed title');h.change(doc,at,'A changed title'.length,'Revised title <&>');
+ html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/Revised title &lt;&amp;&gt;/);assert.match(html,/<code>1a.md<\/code>/);assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),f.contents['1a.md']);
 });

@@ -43,7 +43,7 @@ async function readBounded(io, file, maximum) {
   } finally { await handle.close(); }
 }
 
-async function buildNoteIndex(folder, { overrides = new Map(), token, limits: suppliedLimits, io = fs, lookupId } = {}) {
+async function buildNoteIndex(folder, { overrides = new Map(), token, limits: suppliedLimits, io = fs, lookupId, catalogue } = {}) {
   if (lookupId !== undefined && !idSyntax(lookupId)) throw new Error('Use [[ID]] or [[ID|label]] for a note filename ID.');
   const limits = limitsFor(suppliedLimits), root = await io.realpath(folder);
   if (!(await io.stat(root)).isDirectory()) throw new Error('Choose a notes folder, rather than a file.');
@@ -60,6 +60,54 @@ async function buildNoteIndex(folder, { overrides = new Map(), token, limits: su
   }
   const pending = [{ directory: root, depth: 0 }];
   let exhausted = false;
+  async function readCandidate(candidate) {
+      let file;
+      try {
+        file = await io.realpath(candidate);
+        if (!within(root, file)) { issue(candidate, 'outside_scope', 'Note moved outside the selected notes folder.'); return; }
+        if (!markdown(file) || index.files.has(file)) return;
+        if (lookupId !== undefined && path.basename(file, path.extname(file)) !== lookupId) return;
+        const fileStatus = await io.stat(file);
+        if (!fileStatus.isFile()) return;
+        if (index.stats.files >= limits.maxFiles) {
+          issue(file, 'file_limit', `Stopped at the ${limits.maxFiles}-note limit.`); exhausted = true; return;
+        }
+        const override = overrides.get(file);
+        let text;
+        if (override != null) {
+          if (typeof override !== 'string') throw new Error('Dirty note text must be a string.');
+          if (Buffer.byteLength(override, 'utf8') > limits.maxFileBytes) throw new Error(`Note exceeds the ${limits.maxFileBytes}-byte file limit.`);
+          text = override;
+        } else {
+          if (fileStatus.size > limits.maxFileBytes) throw new Error(`Note exceeds the ${limits.maxFileBytes}-byte file limit.`);
+          text = await readBounded(io, file, limits.maxFileBytes);
+        }
+        const bytes = Buffer.byteLength(text, 'utf8');
+        if (index.stats.bytes + bytes > limits.maxBytes) {
+          issue(file, 'byte_limit', `Stopped at the ${limits.maxBytes}-byte folder limit.`); exhausted = true; return;
+        }
+        const parsed = parseReadingMarkdown(text), frontMatter = frontMatterInfo(text);
+        const stem = path.basename(file, path.extname(file)), identityErrors = [...(frontMatter.conflicts || [])];
+        if (frontMatter.id != null && frontMatter.id !== stem) identityErrors.push(`YAML id ${JSON.stringify(frontMatter.id)} differs from filename ID ${JSON.stringify(stem)}.`);
+        if (frontMatter.malformed) identityErrors.push('The leading front matter has malformed identity metadata or no closing delimiter.');
+        const note = { path: file, relative: path.relative(root, file), stem, text, parsed, frontMatter, identityErrors };
+        index.files.set(file, note); index.stats.files++; index.stats.bytes += bytes;
+        if (idSyntax(stem)) {
+          const matches = index.ids.get(stem) || []; matches.push(note); index.ids.set(stem, matches);
+        }
+      } catch (error) { issue(file || candidate, 'read_error', error.message); }
+  }
+  if (catalogue && lookupId !== undefined && catalogue.root === root) {
+    index.provider = catalogue.provider;
+    index.complete = catalogue.complete; index.cancelled = !!catalogue.cancelled;
+    Object.assign(index.stats, catalogue.stats);
+    for (const message of catalogue.errors) index.errors.push({ path: root, code: 'catalogue', message });
+    for (const candidate of catalogue.paths) {
+      if (stop() || exhausted) break;
+      if (path.basename(candidate, path.extname(candidate)) === lookupId) await readCandidate(candidate);
+    }
+    stop(); return index;
+  }
   while (pending.length && !exhausted && !stop()) {
     const { directory, depth } = pending.pop();
     let entries;
@@ -98,41 +146,7 @@ async function buildNoteIndex(folder, { overrides = new Map(), token, limits: su
         continue;
       } else if (!status.isFile()) continue;
       if (!markdown(candidate)) continue;
-      let file;
-      try {
-        file = await io.realpath(candidate);
-        if (!within(root, file)) { issue(candidate, 'outside_scope', 'Note moved outside the selected notes folder.'); continue; }
-        if (!markdown(file) || index.files.has(file)) continue;
-        if (lookupId !== undefined && path.basename(file, path.extname(file)) !== lookupId) continue;
-        const fileStatus = await io.stat(file);
-        if (!fileStatus.isFile()) continue;
-        if (index.stats.files >= limits.maxFiles) {
-          issue(file, 'file_limit', `Stopped at the ${limits.maxFiles}-note limit.`); exhausted = true; break;
-        }
-        const override = overrides.get(file);
-        let text;
-        if (override != null) {
-          if (typeof override !== 'string') throw new Error('Dirty note text must be a string.');
-          if (Buffer.byteLength(override, 'utf8') > limits.maxFileBytes) throw new Error(`Note exceeds the ${limits.maxFileBytes}-byte file limit.`);
-          text = override;
-        } else {
-          if (fileStatus.size > limits.maxFileBytes) throw new Error(`Note exceeds the ${limits.maxFileBytes}-byte file limit.`);
-          text = await readBounded(io, file, limits.maxFileBytes);
-        }
-        const bytes = Buffer.byteLength(text, 'utf8');
-        if (index.stats.bytes + bytes > limits.maxBytes) {
-          issue(file, 'byte_limit', `Stopped at the ${limits.maxBytes}-byte folder limit.`); exhausted = true; break;
-        }
-        const parsed = parseReadingMarkdown(text), frontMatter = frontMatterInfo(text);
-        const stem = path.basename(file, path.extname(file)), identityErrors = [...(frontMatter.conflicts || [])];
-        if (frontMatter.id != null && frontMatter.id !== stem) identityErrors.push(`YAML id ${JSON.stringify(frontMatter.id)} differs from filename ID ${JSON.stringify(stem)}.`);
-        if (frontMatter.malformed) identityErrors.push('The leading front matter has malformed identity metadata or no closing delimiter.');
-        const note = { path: file, relative: path.relative(root, file), stem, text, parsed, frontMatter, identityErrors };
-        index.files.set(file, note); index.stats.files++; index.stats.bytes += bytes;
-        if (idSyntax(stem)) {
-          const matches = index.ids.get(stem) || []; matches.push(note); index.ids.set(stem, matches);
-        }
-      } catch (error) { issue(file || candidate, 'read_error', error.message); }
+      await readCandidate(candidate);
     }
   }
   stop();
@@ -160,7 +174,6 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
       `The notes index is incomplete; it cannot establish a unique target for ${JSON.stringify(target)}.`);
     if (!index.complete) return failure('incomplete_index', `The notes index is incomplete; it cannot establish a unique target for ${JSON.stringify(target)}.`);
     const note = matches[0];
-    if (note.identityErrors.length) return failure('identity_conflict', `Note ID ${JSON.stringify(target)} has conflicting identity metadata: ${note.identityErrors.join(' ')}`);
     destination = note.path;
   } else if (syntax === 'markdown') {
     if (/^[a-z][a-z0-9+.-]*:/i.test(target) || /^[/\\]/u.test(target)) return failure('unsupported_scheme', 'MRW note navigation supports relative local file links; this link needs the host or an explicit file choice.');

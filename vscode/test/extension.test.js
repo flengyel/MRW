@@ -111,7 +111,7 @@ async function harness(root, state = new Map(), options = {}) {
       },
       onDidChangeActiveTextEditor(callback) { activeListener = callback; return disposable; },
       registerTreeDataProvider() { return disposable; },
-      createTreeView(_id, options) { api.readingProvider = options.treeDataProvider; return {
+      createTreeView(_id, options) { api.readingProvider = options.treeDataProvider; return api.readingTree = {
         dispose() {}, onDidCollapseElement(fn) { api.collapseReading = fn; return disposable; },
         onDidExpandElement(fn) { api.expandReading = fn; return disposable; }, async reveal() {} }; },
       registerUriHandler(handler) { api.uriHandler = handler; return disposable; },
@@ -2257,4 +2257,14 @@ test('import completion notifications do not hold the reader lock or block Retur
     }
     assert.equal(notifications.length, 2, 'Both new and reused imports leave success notifications open');
   });
+});
+
+
+test('Contents displays the YAML title with filename identity and updates it after unsaved edits',async t=>{
+ const root=await temporary(t),h=await harness(root),file=path.join(root,'immutable-id.md');
+ const text='---\nid: metadata-id\ntitle: immutable-id The EFG Theorem\n---\n# The EFG Theorem\n';await fs.writeFile(file,text);
+ const doc=h.document(file,text);doc.languageId='markdown';h.focus(h.editor(doc));await h.commands.get('mrw.openReadingOutline')();
+ assert.match(h.api.readingTree.description,/The EFG Theorem.*immutable-id\.md/);
+ h.changeDocument(doc,text.indexOf('The EFG Theorem'),'The EFG Theorem'.length,'Fields and groups');await new Promise(resolve=>setTimeout(resolve,200));
+ assert.match(h.api.readingTree.description,/Fields and groups.*immutable-id\.md/);assert.equal(doc.isDirty,true);assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
 });

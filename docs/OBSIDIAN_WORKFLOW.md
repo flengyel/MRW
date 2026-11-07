@@ -1,4 +1,4 @@
-# Notes in place and optional Obsidian associations — 0.22.2
+# Notes in place and optional Obsidian associations — 0.22.4
 
 MRW opens ordinary notes in place and provides scoped note links and backlinks
 without Obsidian or text import. It separately connects supplied Obsidian note
@@ -9,6 +9,22 @@ Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
 references from the Obsidian note. No LaTeX transcription is required.
 
 ## Open a notes folder without import
+
+The preview and Contents show a note’s YAML title beside its filename. The
+filename remains its immutable ID; metadata differences do not rename files.
+Use **Open in Obsidian** in the preview or **MRW: Open Note in Obsidian** to open
+that original in Obsidian. The selected notes folder must be the vault root.
+**MRW: Obsidian Vault** can supply a vault name or ID; the folder name is the
+default. This action uses the registered URI handler and needs no CLI.
+
+For Windows Obsidian with WSL, select the same vault under `/mnt/c/…`.
+After saving in Obsidian, return to MRW: it checks the displayed note and
+updates a clean open document through VS Code’s file model. Windows-to-WSL
+refresh does not depend on receiving native file events.
+Unsaved VS Code changes stay labelled and are never discarded, saved or merged
+by MRW. Other-host vaults need their own shared-file arrangement; an application
+link alone does not synchronize files.
+
 
 Use **Open a note or paper…** in the MRW sidebar to choose the original note.
 **Choose notes folder…** selects the folder for `[[ID]]` lookup and **Show
@@ -44,14 +60,17 @@ limits still apply to the remaining folder.
 
 The bounded index is rebuilt explicitly from the chosen folder, using dirty
 editor text where available. It does not discover a vault, scan ancestors or
-follow directory symlinks outside scope. Missing, duplicate and conflicting IDs,
-unsupported selectors and incomplete scans receive local explanations. IDs
+follow directory symlinks outside scope. Missing or duplicate filename IDs, unsupported selectors and incomplete scans
+receive local explanations. YAML identity differences remain metadata and do
+not redirect links or prevent opening the exact filename. IDs
 remain filename stems; editable titles and `[[ID]] Title` prose do not rename
 notes. Leading delimited YAML stays metadata rather than Contents. See
 [the document workflow](READING_OUTLINE_WORKFLOW.md) for exact limits.
 
-This ordinary-folder route does not infer an Obsidian vault mapping. To open an
-Obsidian note from a saved reader, supply its validated association below.
+The ordinary-note action uses the explicitly selected vault root and vault
+setting. A saved-source reader still uses its separately supplied, validated
+Obsidian association below; opening an ordinary note does not rewrite retained
+source or passage associations.
 
 ## Import Markdown text
 
