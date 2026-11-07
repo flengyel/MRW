@@ -1,0 +1,54 @@
+{
+  "version": "0.22.2",
+  "implementation_commits": [
+    "16b815d8c192e4d018fdaf850983f188e8082fb5",
+    "41df9f711702d2ac26f13996d9f2ebcace49b8d8"
+  ],
+  "runtime_build_identity": {
+    "version": "0.22.2",
+    "commit": "41df9f711702d2ac26f13996d9f2ebcace49b8d8",
+    "localChanges": true
+  },
+  "archive": "vscode/mrw-0.22.2.vsix",
+  "sha256": "a30d0f87f0c385a9ab20aa2c566e8221f0f4d1119e1e5227027a3de3e0031333",
+  "bytes": 552912,
+  "archive_changed_files": [
+    "extension.vsixmanifest",
+    "extension/media/build-info.json",
+    "extension/media/first-steps.md",
+    "extension/package.json",
+    "extension/src/documentLinks.js",
+    "extension/src/documents.js",
+    "extension/src/readingMarkdown.js"
+  ],
+  "checks": {
+    "focused_cases_passed": 43,
+    "focused_exit": 0,
+    "javascript_syntax_exit": 0,
+    "vsix_verifier_exit": 0
+  },
+  "real_note": {
+    "headings": 11,
+    "outgoing_alias_links_verified": 2,
+    "target_body_reads_per_lookup": 1,
+    "full_text_index_complete": true,
+    "full_text_index_stats": {
+      "files": 2098,
+      "bytes": 15173034,
+      "entries": 3330,
+      "skippedDirectorySymlinks": 0,
+      "skippedMetadataDirectories": 36,
+      "skippedNonNoteFiles": 16378
+    },
+    "backlinks_found": 1,
+    "backlink_results_complete": false,
+    "unresolved_vault_links": 863,
+    "selected_files_byte_identical": 3
+  },
+  "native_observation": "VS Code remote CLI accepted opening the supplied note in the existing window (exit 0). No visible sidebar or link-click observation was performed; the working window was not reloaded.",
+  "preservation": "No note, source, citation, annotation, study or history rewriting or migration. The package preserves the separate uncommitted reader-orientation repair. Private note contents, paths and link text are excluded from this report.",
+  "installed": true,
+  "installed_files_checked": 94,
+  "installer_metadata_excluded": true,
+  "window_reload_requested": false
+}
