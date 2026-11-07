@@ -321,3 +321,17 @@ test('document picker starts in the selected notes folder across restart, while 
   assert.equal(restarted.dialogs.at(-1).defaultUri,undefined);
   assert.deepEqual(state.get('mrw.documents.v1'),selected);
 });
+
+
+test('an Obsidian alias follows its ID and Return restores the full original syntax after restart', async t => {
+  const f=await fixture(t),file=f.file('1a.md');
+  const text=(await fs.readFile(file,'utf8')).replace('[[2b]] Second again','[[2b|A readable name]]');
+  await fs.writeFile(file,text);
+  const state=new Map(),h=harness(f,state);await h.folder();const source=await h.open('1a.md');
+  await h.follow(source,'2b|A readable name');
+  assert.equal(h.api.window.activeTextEditor.document.uri.fsPath,f.file('2b.md'));
+  const restarted=harness(f,state);await restarted.commands.get('mrw.reopenDocument')();
+  assert.equal(restarted.api.window.activeTextEditor.document.uri.fsPath,f.file('2b.md'));
+  await restarted.documents.returnToDocument();assert.equal(restarted.selected(),'[[2b|A readable name]]');
+  assert.equal(await fs.readFile(file,'utf8'),text);
+});

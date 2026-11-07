@@ -96,7 +96,7 @@ test('no directory symlink is traversed and file symlinks cannot expand the expl
 test('unsupported selectors and schemes are inert data and never become approximate note matches', async t => {
   const root = await fixture(t, { 'a.md': '# A\n', '1a.md': '# Target\n' });
   const index = await buildNoteIndex(root), source = path.join(root, 'a.md');
-  for (const target of ['1a#Target', '1a|Title', '1a^block', '../1a', '1 a']) {
+  for (const target of ['1a#Target', '1a^block', '../1a', '1 a', '1a#Target|Alias', '../1a|Safe label', '|1a']) {
     assert.equal((await resolveNoteLink(index, source, target, 'zettel')).code, 'unsupported_selector', target);
   }
   for (const target of ['command:workbench.action.closeWindow', 'https://example.test/', 'file:///tmp/a.md', '//example/a.md', '/tmp/a.md']) {
@@ -159,4 +159,68 @@ test('backlink hits retain exact indexed revision and syntax when a same-label t
   assert.equal(node.start, hit.node.start); assert.equal(node.end, hit.node.end);
   assert.notEqual(current.parsed.revision, hit.sourceRevision);
   assert.notEqual(current.text.slice(node.start, node.end), hit.sourceText);
+});
+
+
+test('Obsidian aliases resolve by filename ID and retain exact repeated backlink occurrences', async t => {
+  const source='# Source\n[[1a|Readable target]] and [[1a|Another title]].\n[[2b|1a]]\n';
+  const root=await fixture(t,{'source.md':source,'1a.md':'# First\n','2b.md':'# Second\n'});
+  const index=await buildNoteIndex(root),from=path.join(root,'source.md');
+  for(const target of ['1a|Readable target','1a|Another title'])
+    assert.equal((await resolveNoteLink(index,from,target,'zettel')).path,path.join(root,'1a.md'));
+  assert.equal((await resolveNoteLink(index,from,'2b|1a','zettel')).path,path.join(root,'2b.md'));
+  const found=await backlinks(index,path.join(root,'1a.md'));
+  assert.equal(found.complete,true);assert.equal(found.occurrences.length,2);
+  assert.deepEqual(found.occurrences.map(hit=>hit.sourceText),['[[1a|Readable target]]','[[1a|Another title]]']);
+  assert.equal((await resolveNoteLink(index,from,'absent|1a','zettel')).code,'missing_id');
+  index.complete=false;
+  assert.equal((await resolveNoteLink(index,from,'1a|Readable target','zettel')).code,'incomplete_index');
+  assert.equal(await fs.readFile(from,'utf8'),source);
+  const ambiguous=await fixture(t,{'source.md':'# Source\n','a/1a.md':'# A\n','b/1a.md':'# B\n','bad.md':'---\nid: other\n---\n# Bad\n'});
+  const duplicates=await buildNoteIndex(ambiguous),start=path.join(ambiguous,'source.md');
+  assert.equal((await resolveNoteLink(duplicates,start,'1a|Choose first','zettel')).code,'ambiguous_id');
+  assert.equal((await resolveNoteLink(duplicates,start,'bad|other','zettel')).code,'identity_conflict');
+});
+
+
+test('note scope excludes metadata, deleted notes and dependencies without spending its entry budget on them', async t => {
+  const root=await fixture(t,{'source.md':'# Source\n[[1a|Target]]\n','1a.md':'# Real note\n',
+    '.obsidian/plugins/helper/README.md':'# Plugin\n','.trash/1a.md':'# Deleted duplicate\n',
+    '.git/objects/data':'generated','project/node_modules/pkg/1a.md':'# Dependency duplicate\n',
+    'project/.lake/packages/pkg/1a.md':'# Dependency duplicate\n'});
+  const index=await buildNoteIndex(root,{limits:{maxEntries:6}});
+  assert.equal(index.complete,true);assert.equal(index.files.size,2);
+  assert.equal(index.stats.skippedMetadataDirectories,5);
+  assert.equal((await resolveNoteLink(index,path.join(root,'source.md'),'1a|Target','zettel')).path,path.join(root,'1a.md'));
+});
+
+test('backlink metadata is reused within one scan and checked again on the next scan', async t => {
+  const root=await fixture(t,{'source.md':'# Source\n'+Array(12).fill('[[1a|Target]]').join('\n'),'1a.md':'# Target\n'});
+  const paths=new Map(),stats=new Map(),io=Object.create(fs);
+  io.realpath=async file=>{paths.set(file,(paths.get(file)||0)+1);return fs.realpath(file);};
+  io.stat=async file=>{stats.set(file,(stats.get(file)||0)+1);return fs.stat(file);};
+  const index=await buildNoteIndex(root,{io}),target=path.join(root,'1a.md');paths.clear();stats.clear();
+  const first=await backlinks(index,target);assert.equal(first.occurrences.length,12);assert.equal(first.complete,true);
+  assert.equal(paths.get(target),1);assert.equal(stats.get(target),1);
+  await fs.unlink(target);const second=await backlinks(index,target);
+  assert.equal(second.complete,false);assert.equal(second.errors.at(-1).code,'invalid_target');
+  assert.equal(paths.get(target),2);
+});
+
+
+test('filename lookup establishes ID uniqueness without reading unrelated notes or claiming complete backlinks', async t => {
+  const root=await fixture(t,{'source.md':'# Source\n','1a.md':'---\nid: 1a\n---\n# Target\n',
+    'other.md':'# Unrelated\n','media/image.bin':'binary','media/another.bin':'binary'});
+  const opened=[],io=Object.create(fs);io.open=async(...args)=>{opened.push(args[0]);return fs.open(...args);};
+  const index=await buildNoteIndex(root,{lookupId:'1a',io,limits:{maxFiles:1,maxEntries:5}});
+  assert.equal(index.complete,true);assert.deepEqual(opened,[path.join(root,'1a.md')]);
+  assert.equal((await resolveNoteLink(index,path.join(root,'source.md'),'1a|Target','zettel')).ok,true);
+  assert.equal((await resolveNoteLink(index,path.join(root,'source.md'),'other','zettel')).code,'incomplete_index');
+  assert.equal((await backlinks(index,path.join(root,'1a.md'))).errors[0].code,'lookup_only');
+  await fs.mkdir(path.join(root,'nested'));await fs.writeFile(path.join(root,'nested/1a.md'),'# Duplicate\n');
+  const duplicate=await buildNoteIndex(root,{lookupId:'1a'});
+  assert.equal((await resolveNoteLink(duplicate,path.join(root,'source.md'),'1a|Target','zettel')).code,'ambiguous_id');
+  const partial=await buildNoteIndex(root,{lookupId:'1a',limits:{maxEntries:1}});
+  assert.equal(partial.complete,false);
+  assert.equal((await resolveNoteLink(partial,path.join(root,'source.md'),'1a|Target','zettel')).code,'incomplete_index');
 });

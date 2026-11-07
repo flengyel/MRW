@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { digest } = require('./navigation');
 const { qualifiedIdentifier, canonicalCitation } = require('./sourceIdentifiers');
-const { parseReadingMarkdown } = require('./readingMarkdown');
+const { parseReadingMarkdown, zettelLinkParts } = require('./readingMarkdown');
 const { buildNoteIndex, resolveNoteLink, backlinks, within, markdown } = require('./documentLinks');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
@@ -69,11 +69,11 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     }
     return result;
   }
-  async function index(qualifyPublished = false) {
+  async function index(qualifyPublished = false, lookupId) {
     const root = await folderRoot();
-    return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading selected notes folder', cancellable: true },
+    return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: lookupId === undefined ? 'Reading selected notes folder' : 'Finding linked note', cancellable: true },
       async (_progress, token) => {
-        const result = await buildNoteIndex(root, { token, overrides: await overlays(root) });
+        const result = await buildNoteIndex(root, { token, overrides: await overlays(root), lookupId });
         if (qualifyPublished) {
           const nodes = [...result.files.values()].flatMap(n => n.parsed.all).filter(n => n.kind === 'reference' && !n.qualified_id);
           const references = [...new Set(nodes.map(n => n.reference))];
@@ -164,7 +164,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   async function resolve(doc, node) {
     await check(doc.uri);
     if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || /^[/\\]/u.test(node.target))) throw new Error('MRW follows relative local file links here. Open other targets explicitly through the host.');
-    if (node.syntax === 'zettel') return resolveNoteLink(await index(), doc.uri.fsPath, node.target, node.syntax);
+    if (node.syntax === 'zettel') return resolveNoteLink(await index(false, zettelLinkParts(node.target).target), doc.uri.fsPath, node.target, node.syntax);
     // Relative-file navigation need not scan any directory. This temporary map
     // supplies heading text only; final scope is independently checked below.
     const source = await canonical(doc.uri), files = new Map();

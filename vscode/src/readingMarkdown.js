@@ -48,8 +48,14 @@ for (const name of ['link', 'autolink']) {
     return found;
   });
 }
+function zettelLinkParts(value) {
+  const separator = value.indexOf('|');
+  const target = separator < 0 ? value : value.slice(0, separator);
+  return { target, label: separator < 0 ? target : value.slice(separator + 1) || target };
+}
 const plain = tokens => tokens.map(t => t.type === 'softbreak' || t.type === 'hardbreak' ? ' ' :
-  ['text', 'code_inline', 'image', 'mrw_bare', 'zettel_link'].includes(t.type) ? t.content : '').join('');
+  t.type === 'zettel_link' ? zettelLinkParts(t.content).label :
+  ['text', 'code_inline', 'image', 'mrw_bare'].includes(t.type) ? t.content : '').join('');
 
 // Only leading, delimited front matter is excluded. An unterminated opening
 // delimiter excludes the rest of the document and reports malformed=true;
@@ -131,8 +137,9 @@ function parseReadingMarkdown(text) {
   function add(node, parent) {
     const key = `${parent?.id || ''}/${node.kind}/${digest(node.label)}`;
     const occurrence = counts.get(key) || 0; counts.set(key, occurrence + 1);
-    const identifier = qualifiedIdentifier(node.reference || node.target);
-    if (identifier) node.qualified_id = identifier;
+    const target = node.syntax === 'zettel' ? zettelLinkParts(node.target).target : node.reference || node.target;
+    const identifier = qualifiedIdentifier(target);
+    if (identifier && (node.syntax !== 'zettel' || identifier === target)) node.qualified_id = identifier;
     node.id = `${key}/${occurrence}`; node.children = [];
     (parent?.children || roots).push(node); all.push(node);
     if (all.length > 10000) throw new Error('Document exceeds the 10,000 heading/link limit.');
@@ -169,7 +176,7 @@ function parseReadingMarkdown(text) {
       const endIndex = token.children.findIndex((t, n) => n > j && t.type === 'link_close');
       const start = absolute(link.meta.start), end = absolute(link.meta.end);
       if (start == null || end == null) throw new Error(`Cannot locate a Markdown link exactly at line ${line + 1}. Use an ordinary paragraph for this link.`);
-      const label = ['mrw_bare', 'zettel_link'].includes(link.type) ? href : plain(token.children.slice(j + 1, endIndex)) || href;
+      const label = link.type === 'zettel_link' ? zettelLinkParts(href).label : link.type === 'mrw_bare' ? href : plain(token.children.slice(j + 1, endIndex)) || href;
       if (href.startsWith('mrw-outline:') && link.type !== 'zettel_link') {
         add({ kind: 'reference', label, reference: href, start, end, line: lineAt(start) }, stack.at(-1));
       } else {
@@ -180,4 +187,4 @@ function parseReadingMarkdown(text) {
   }
   return { roots, all, revision: digest(text), frontMatter };
 }
-module.exports = { parseReadingMarkdown, frontMatterInfo };
+module.exports = { parseReadingMarkdown, frontMatterInfo, zettelLinkParts };

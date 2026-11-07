@@ -1,4 +1,4 @@
-# Existing documents, Contents and saved sources — 0.20.0
+# Existing documents, Contents and saved sources — 0.22.2
 
 **MRW: Open Document…** displays an existing file in place. Markdown opens in
 VS Code's editor and supplies **Contents** without hiding the document. Other
@@ -37,13 +37,24 @@ works for the current session. VS Code owns editing, saving, undo and recovery.
    Opening a backlink also supplies its own usable return location. Ordinary
    note navigation keeps its return pin separate from a saved-reader citation.
 
+ID lookup searches filenames and reads only matching notes. Backlink search
+reads note text separately and reports partial results when a limit is reached.
+The entry budget counts candidate notes, directories and symlinks; ordinary
+non-Markdown attachments do not consume it.
+
+Note lookup excludes `.obsidian`, `.trash`, `.git`, `.lake`, `node_modules`,
+`.venv` and `__pycache__` directories. These are not indexed as notes; the scan
+limits still apply to the remaining folder.
+
 The chosen folder bounds recursive note lookup; following a link does not index
 its ancestors or another folder. `[[ID]]` resolves an exact filename stem in
 that folder. Older dotted IDs and index-note IDs are supported. Editable titles
-and prose following `[[ID]]` do not change identity. Duplicate IDs or conflicting
+and prose following `[[ID]]` do not change identity. Obsidian display aliases
+such as `[[ID|Label]]` show the label while resolving the ID; backlinks retain
+the complete original link syntax. Duplicate IDs or conflicting
 identity metadata are reported. Ordinary Markdown files need not adopt Zettel
-metadata. Missing targets and unsupported wiki aliases, heading or block
-selectors produce local explanations rather than guessed replacements.
+metadata. Missing targets and unsupported wiki heading/block selectors or paths
+produce local explanations rather than guessed replacements.
 
 Ordinary Markdown heading fragments use the parser's heading anchors, including
 duplicate suffixes. Non-Markdown fragments, such as a PDF `#page=…`, are not

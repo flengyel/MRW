@@ -109,3 +109,17 @@ test('heading fragments have distinct anchors and unsupported note selectors rem
   assert.equal(parsed.all.at(-1).kind, 'reference');
   assert.equal(parsed.all.at(-1).reference, 'mrw-outline:v1/exact');
 });
+
+
+test('Obsidian aliases display labels while preserving raw links, source ranges and qualified source authority', () => {
+  const text='# See [[a1|A readable title]]\n\n[[a1|Second title]] [[kerodon:0004|A definition]] [[a1|stacks-project:08ZH]]\n' +
+    '[[mrw-outline:v2/kerodon:0004/snapshot|Retained]]\n';
+  const parsed=parseReadingMarkdown(text),links=parsed.all.filter(node=>node.kind==='document_link');
+  assert.equal(parsed.all[0].label,'See A readable title');
+  assert.equal(links[0].label,'A readable title');assert.equal(links[0].target,'a1|A readable title');
+  assert.equal(text.slice(links[0].start,links[0].end),'[[a1|A readable title]]');
+  assert.equal(links[2].qualified_id,'kerodon:0004');assert.equal(links[2].target,'kerodon:0004|A definition');
+  assert.equal(links[3].qualified_id,undefined,'a display label cannot supply source authority');
+  assert.equal(links[4].qualified_id,undefined,'a retained reference inside wiki syntax must not become a current web citation');
+  assert.equal(text.slice(links[4].start,links[4].end),'[[mrw-outline:v2/kerodon:0004/snapshot|Retained]]');
+});

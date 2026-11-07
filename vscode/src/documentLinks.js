@@ -5,10 +5,12 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { TextDecoder } = require('node:util');
 const { qualifiedIdentifier } = require('./sourceIdentifiers');
-const { parseReadingMarkdown, frontMatterInfo } = require('./readingMarkdown');
+const { parseReadingMarkdown, frontMatterInfo, zettelLinkParts } = require('./readingMarkdown');
 
 const DEFAULT_LIMITS = Object.freeze({ maxFiles: 2000, maxBytes: 32 * 1024 * 1024,
   maxFileBytes: 4 * 1024 * 1024, maxDepth: 32, maxEntries: 20000 });
+// Application metadata, deleted notes and generated dependencies are not note destinations.
+const excludedDirectories = new Set(['.obsidian', '.trash', '.git', '.lake', 'node_modules', '.venv', '__pycache__']);
 const markdown = file => /\.(md|markdown)$/i.test(file);
 const within = (root, file) => { const p = path.relative(root, file); return p === '' || (!p.startsWith(`..${path.sep}`) && p !== '..' && !path.isAbsolute(p)); };
 const cancelled = token => Boolean(token?.isCancellationRequested || token?.aborted);
@@ -41,11 +43,12 @@ async function readBounded(io, file, maximum) {
   } finally { await handle.close(); }
 }
 
-async function buildNoteIndex(folder, { overrides = new Map(), token, limits: suppliedLimits, io = fs } = {}) {
+async function buildNoteIndex(folder, { overrides = new Map(), token, limits: suppliedLimits, io = fs, lookupId } = {}) {
+  if (lookupId !== undefined && !idSyntax(lookupId)) throw new Error('Use [[ID]] or [[ID|label]] for a note filename ID.');
   const limits = limitsFor(suppliedLimits), root = await io.realpath(folder);
   if (!(await io.stat(root)).isDirectory()) throw new Error('Choose a notes folder, rather than a file.');
   const index = { root, files: new Map(), ids: new Map(), complete: true, cancelled: false,
-    errors: [], stats: { files: 0, bytes: 0, entries: 0, skippedDirectorySymlinks: 0 }, limits };
+    errors: [], stats: { files: 0, bytes: 0, entries: 0, skippedDirectorySymlinks: 0, skippedMetadataDirectories: 0, skippedNonNoteFiles: 0 }, limits, lookupId };
   // The filesystem adapter/token are operation-local and are not serialized.
   Object.defineProperties(index, { io: { value: io }, token: { value: token } });
   function issue(file, code, message) {
@@ -68,9 +71,14 @@ async function buildNoteIndex(folder, { overrides = new Map(), token, limits: su
     entries.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
     for (const entry of entries) {
       if (stop()) break;
+      if (entry.isDirectory() && excludedDirectories.has(entry.name)) { index.stats.skippedMetadataDirectories++; continue; }
+      if (entry.isFile() && !markdown(entry.name)) { index.stats.skippedNonNoteFiles++; continue; }
       if (++index.stats.entries > limits.maxEntries) {
         issue(directory, 'entry_limit', `Stopped at the ${limits.maxEntries}-entry folder limit.`); exhausted = true; break;
       }
+      // ID lookup catalogs eligible filenames but reads only matching notes.
+      // Uniqueness still requires completing the bounded directory walk.
+      if (lookupId !== undefined && entry.isFile() && path.basename(entry.name, path.extname(entry.name)) !== lookupId) continue;
       const candidate = path.join(directory, entry.name);
       let status;
       try { status = await io.lstat(candidate); }
@@ -95,6 +103,7 @@ async function buildNoteIndex(folder, { overrides = new Map(), token, limits: su
         file = await io.realpath(candidate);
         if (!within(root, file)) { issue(candidate, 'outside_scope', 'Note moved outside the selected notes folder.'); continue; }
         if (!markdown(file) || index.files.has(file)) continue;
+        if (lookupId !== undefined && path.basename(file, path.extname(file)) !== lookupId) continue;
         const fileStatus = await io.stat(file);
         if (!fileStatus.isFile()) continue;
         if (index.stats.files >= limits.maxFiles) {
@@ -141,7 +150,9 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
   if (!within(index.root, source)) return failure('outside_scope', 'The source document is outside the selected notes folder.');
   let destination, fragment = '';
   if (syntax === 'zettel') {
-    if (!idSyntax(target)) return failure('unsupported_selector', 'Use [[ID]] for an exact note ID. Aliases, heading/block selectors and paths are not supported in Zettel links.');
+    target = zettelLinkParts(target).target;
+    if (index.lookupId !== undefined && index.lookupId !== target) return failure('incomplete_index', 'This filename lookup covers a different note ID.');
+    if (!idSyntax(target)) return failure('unsupported_selector', 'Use [[ID]] or [[ID|label]] for an exact note ID. Heading/block selectors and paths are not supported in wiki links.');
     const matches = index.ids.get(target) || [];
     if (matches.length > 1) return failure('ambiguous_id', `Note ID ${JSON.stringify(target)} matches more than one filename in the selected folder.`);
     if (!matches.length) return failure(index.complete ? 'missing_id' : 'incomplete_index', index.complete ?
@@ -185,7 +196,17 @@ async function backlinks(index, targetPath) {
   const result = { occurrences: [], unresolved: [], unresolvedCount: 0,
     complete: Boolean(index?.complete), cancelled: Boolean(index?.cancelled), errors: [...(index?.errors || [])] };
   if (!index?.root) return { ...result, complete: false, errors: [{ code: 'no_scope', message: 'Choose a notes folder to inspect backlinks.' }] };
-  const io = index.io || fs;
+  if (index.lookupId !== undefined) return { ...result, complete: false, errors: [{ code: 'lookup_only', message: 'A filename lookup cannot establish backlinks. Run a full note-text search.' }] };
+  const sourceIO = index.io || fs, realpaths = new Map(), statuses = new Map();
+  const memo = (cache, file, read) => {
+    if (!cache.has(file)) cache.set(file, Promise.resolve().then(() => read(file)));
+    return cache.get(file);
+  };
+  // A backlink list belongs to one indexed snapshot. Reuse path metadata only
+  // during this list; opening a hit still checks its current scope and text.
+  const io = { realpath: file => memo(realpaths, file, p => sourceIO.realpath(p)),
+    stat: file => memo(statuses, file, p => sourceIO.stat(p)) };
+  const snapshotIndex = { ...index, io, token: index.token };
   const qualified = qualifiedIdentifier(targetPath);
   let target;
   try {
@@ -203,7 +224,7 @@ async function backlinks(index, targetPath) {
       // Web citations and host-only URI handlers are not local note candidates.
       // Do not describe an ordinary bibliography as an incomplete local index.
       if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || node.target.startsWith('//'))) continue;
-      const resolved = await resolveNoteLink(index, note.path, node.target, node.syntax);
+      const resolved = await resolveNoteLink(snapshotIndex, note.path, node.target, node.syntax);
       if (resolved.ok && resolved.path === target) result.occurrences.push({ sourcePath: note.path,
         sourceRevision: note.parsed.revision, sourceText: note.text.slice(node.start, node.end),
         node, targetPath: target, fragment: resolved.fragment });

@@ -1,4 +1,4 @@
-# Notes in place and optional Obsidian associations — 0.20.0
+# Notes in place and optional Obsidian associations — 0.22.2
 
 MRW opens ordinary notes in place and provides scoped note links and backlinks
 without Obsidian or text import. It separately connects supplied Obsidian note
@@ -20,7 +20,9 @@ without Zettel metadata or Obsidian. In WSL, a Windows folder may be selected
 through `/mnt/c/…`; reading it does not move MRW private storage there.
 
 Use Contents or **Follow Document Link** at the cursor to follow relative
-Markdown note/file links and exact `[[ID]]` links. Heading fragments work for
+Markdown note/file links, `[[ID]]` and Obsidian `[[ID|label]]` display aliases.
+The label changes what Contents displays; the filename ID still selects the
+note. Backlinks preserve each exact link occurrence. Heading fragments work for
 Markdown; PDF links open the whole file through an available host reader.
 PDF page/block selectors are not silently replaced by whole-file targets.
 Backlinks open source-note occurrences; **Return to Document** restores the
@@ -28,6 +30,15 @@ origin. The selected folder, document and matching return pin survive normal
 restart in the same workspace. **Reopen Document** explicitly opens the last
 opened/followed file; activation does not reopen it automatically. Dirty buffers
 stay under VS Code's save/undo and recovery controls.
+
+ID lookup searches filenames and reads only matching notes. Backlink search
+reads note text separately and reports partial results when a limit is reached.
+The entry budget counts candidate notes, directories and symlinks; ordinary
+non-Markdown attachments do not consume it.
+
+Note lookup excludes `.obsidian`, `.trash`, `.git`, `.lake`, `node_modules`,
+`.venv` and `__pycache__` directories. These are not indexed as notes; the scan
+limits still apply to the remaining folder.
 
 The bounded index is rebuilt explicitly from the chosen folder, using dirty
 editor text where available. It does not discover a vault, scan ancestors or

@@ -32,12 +32,22 @@ use **MRW: New Document…**; its initial headings can be edited or removed.
 2. In a Markdown note, use its **Contents** link entry, or place the cursor on
    a link and run **MRW: Follow Document Link**. Relative Markdown links can
    target another note, a heading or a PDF. Zettel links such as `[[ID]]` resolve
-   within the selected notes folder; a title after the ID is descriptive.
+   within the selected notes folder. Obsidian `[[ID|label]]` links display the
+   label and follow the ID; a title after `[[ID]]` is also descriptive.
 3. Run **MRW: Show Backlinks…** in the destination. Choose an incoming occurrence
    to open the note that contains it. The picker reports incomplete searches
    separately from a completed search with no links.
 4. Use **MRW: Return to Document** to return to the originating occurrence.
    A failed follow preserves the preceding successful return location.
+
+ID lookup searches filenames and reads only matching notes. Backlink search
+reads note text separately and reports partial results when a limit is reached.
+The entry budget counts candidate notes, directories and symlinks; ordinary
+non-Markdown attachments do not consume it.
+
+Note lookup excludes `.obsidian`, `.trash`, `.git`, `.lake`, `node_modules`,
+`.venv` and `__pycache__` directories. These are not indexed as notes; the scan
+limits still apply to the remaining folder.
 
 The selected folder bounds the note lookup and backlink search. Following a link
 does not authorize indexing another folder. Missing or ambiguous IDs and
