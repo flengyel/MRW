@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.22.2",
+  "version": "0.22.3",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -30,10 +30,22 @@
     }
   },
   "contributes": {
+    "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
       "./media/diagram-theme.css"
     ],
     "commands": [
+      {
+        "command": "mrw.editDocumentSource",
+        "title": "Edit Document Source",
+        "category": "MRW",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "mrw.followWikiLink",
+        "title": "Follow WikiLink",
+        "category": "MRW"
+      },
       {
         "command": "mrw.askReader",
         "title": "Ask About Reader Passage\u2026",
@@ -494,6 +506,16 @@
     "menus": {
       "view/title": [
         {
+          "command": "mrw.openReadingOutline",
+          "when": "view == mrw.research",
+          "group": "navigation@0"
+        },
+        {
+          "command": "mrw.editDocumentSource",
+          "when": "view == mrw.readingOutline",
+          "group": "0_documents@5"
+        },
+        {
           "command": "mrw.mark",
           "when": "view == mrw.research",
           "group": "navigation"
@@ -738,6 +760,10 @@
       ],
       "commandPalette": [
         {
+          "command": "mrw.followWikiLink",
+          "when": "false"
+        },
+        {
           "command": "mrw.selectReadingOutlineItem",
           "when": "false"
         },
@@ -747,6 +773,11 @@
         }
       ],
       "editor/title": [
+        {
+          "command": "mrw.editDocumentSource",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "navigation"
+        },
         {
           "command": "mrw.openProofOutline",
           "when": "resourceFilename =~ /\\.mrw-proof\\.json$/",
@@ -767,6 +798,12 @@
     "configuration": {
       "title": "Mathematical Research Workstation",
       "properties": {
+        "mrw.notesFolder": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "Notes folder for WikiLinks and backlinks. Use an absolute path on the extension host; in WSL use /mnt/c/Users/… for a Windows folder. Obsidian is optional. Choose Notes Folder updates this workspace setting."
+        },
         "mrw.pythonExecutable": {
           "type": "string",
           "default": "python3",
@@ -844,7 +881,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },
@@ -855,6 +892,7 @@
     "ts-fsrs": "5.4.2"
   },
   "activationEvents": [
-    "onUri"
+    "onUri",
+    "onLanguage:markdown"
   ]
 }

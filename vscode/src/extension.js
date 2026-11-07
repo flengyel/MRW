@@ -282,7 +282,8 @@ function activate(context) {
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
   const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
-    askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri) });
+    askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
+    handleDocumentUri: uri => readingController.handleDocumentUri(uri) });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference, resolveReferences: outlineRows.resolveReferenceIdentities });
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });
@@ -301,6 +302,7 @@ function activate(context) {
   deactivateAction=async()=>{await studyController.flush();await recorder.close();};
   context.subscriptions.push(changed);
   // Activation registers UI only: no source reads, writes, subprocess or network.
+  return { extendMarkdownIt: readingController.extendMarkdownIt };
 }
 
 module.exports = { activate, deactivate:()=>deactivateAction() };

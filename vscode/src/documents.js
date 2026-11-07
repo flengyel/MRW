@@ -8,6 +8,7 @@ const { digest } = require('./navigation');
 const { qualifiedIdentifier, canonicalCitation } = require('./sourceIdentifiers');
 const { parseReadingMarkdown, zettelLinkParts } = require('./readingMarkdown');
 const { buildNoteIndex, resolveNoteLink, backlinks, within, markdown } = require('./documentLinks');
+const { showMarkdownPreview, documentColumn } = require('./documentPresentation');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
@@ -33,7 +34,20 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!(await fs.stat(actual)).isFile()) throw new Error('Choose a document file.');
     return actual;
   }
+  function configuredFolder() {
+    return vscode.workspace.getConfiguration?.('mrw').get('notesFolder', '') || '';
+  }
   async function folderRoot() {
+    const configured = configuredFolder();
+    if (configured) {
+      if (typeof configured !== 'string' || !path.isAbsolute(configured)) throw new Error('MRW: Notes Folder must be an absolute path on this extension host. In WSL use /mnt/c/… for a Windows folder.');
+      const uri = vscode.Uri.file(configured);
+      if (folder?.uri !== uri.toString()) {
+        const actual = await fs.realpath(configured);
+        if (!(await fs.stat(actual)).isDirectory()) throw new Error('MRW: Notes Folder must name a folder.');
+        folder = { uri: uri.toString(), canonical: actual }; await persist();
+      }
+    }
     if (!folder?.uri || !folder?.canonical) throw new Error('Choose a notes folder with MRW: Choose Notes Folder. No parent folder is indexed automatically.');
     const uri = vscode.Uri.parse(folder.uri);
     if (uri.scheme !== 'file') throw new Error('Choose the notes folder on this extension host again.');
@@ -52,7 +66,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       if (grant.canonical !== actual) throw new Error('This selected document now resolves to a different file. Choose its current location.');
       return actual;
     }
-    if (folder && within(await folderRoot(), actual)) return actual;
+    if ((folder || configuredFolder()) && within(await folderRoot(), actual)) return actual;
     throw new Error('This document is outside the selected scope. Use Open Document or Choose Notes Folder explicitly.');
   }
   async function grant(uri) {
@@ -111,7 +125,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
         throw new Error('The exact document location changed. Restore its text or select the intended location again.');
       }
       const version = doc.version;
-      const editor = await vscode.window.showTextDocument(doc, { preview: false });
+      const editor = await vscode.window.showTextDocument(doc, { preview: false, viewColumn: documentColumn(vscode, doc) });
       if (attempt !== generation) return repairSupersededDisplay();
       if (version !== doc.version || doc.isClosed) throw new Error('The document changed while opening. Follow its current link again.');
       if (location) {
@@ -120,6 +134,9 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
         editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
       }
       await onMarkdown(doc);
+      if (attempt !== generation) return repairSupersededDisplay();
+      await showMarkdownPreview(vscode, doc, editor.viewColumn);
+      if (version !== doc.version || doc.isClosed) throw new Error('The document changed while opening. Follow its current link again.');
     } else if (/\.pdf$/i.test(uri.fsPath)) {
       const readers = [];
       for (const extension of vscode.extensions?.all || []) for (const editor of extension.packageJSON?.contributes?.customEditors || []) {
@@ -141,7 +158,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     return true;
   }
   async function pickerFolder() {
-    if (!folder) return undefined;
+    if (!folder && !configuredFolder()) return undefined;
     try { return vscode.Uri.file(await folderRoot()); }
     catch (_) { return undefined; } // A moved folder must not prevent choosing a new document.
   }
@@ -159,6 +176,11 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     const actual = await fs.realpath(choices[0].fsPath);
     if (!(await fs.stat(actual)).isDirectory()) throw new Error('Choose a notes folder.');
     if (attempt !== generation) return;
+    const configuration = vscode.workspace.getConfiguration?.('mrw');
+    if (configuration?.update) {
+      await configuration.update('notesFolder', choices[0].fsPath, vscode.ConfigurationTarget.Workspace);
+      if (attempt !== generation) return;
+    }
     folder = { uri: choices[0].toString(), canonical: actual }; await persist();
   }
   async function resolve(doc, node) {
@@ -217,10 +239,13 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (identifier !== undefined && !qualified) throw new Error('Choose a complete source-qualified identifier.');
     const attempt = ++generation;
     const invocationEditor = vscode.window.activeTextEditor;
-    const active = invocationEditor?.document?.uri;
+    // A rendered Markdown custom editor has no activeTextEditor. Use its URI,
+    // not an unrelated text editor left visible in another group.
+    const previewUri = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+    const active = previewUri || invocationEditor?.document?.uri;
     const uri = active?.scheme === 'file' ? active : last && vscode.Uri.parse(last);
     if (!uri && !qualified) throw new Error('Open a document before inspecting backlinks.');
-    const invocationDoc = active?.scheme === 'file' && markdown(active.fsPath) ? invocationEditor.document : undefined;
+    const invocationDoc = active?.scheme === 'file' && markdown(active.fsPath) && invocationEditor?.document.uri.toString() === active.toString() ? invocationEditor.document : undefined;
     const pending = { location: invocationDoc ? snapshot(invocationDoc, invocationDoc.offsetAt(invocationEditor.selection.start), invocationDoc.offsetAt(invocationEditor.selection.end)) : { uri: uri?.toString(), fileOnly: true } };
     candidates.add(pending);
     try {

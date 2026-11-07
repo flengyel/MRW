@@ -8,6 +8,8 @@ const path = require('node:path');
 const os = require('node:os');
 const { pathToFileURL, fileURLToPath } = require('node:url');
 const { createDocuments } = require('../src/documents');
+const { registerWikiLinks } = require('../src/wikiLinks');
+const MarkdownIt = require('../media/markdown-it/markdown-it');
 const { parseReadingMarkdown } = require('../src/readingMarkdown');
 const { trackLocation } = require('../src/readingOutline');
 
@@ -36,18 +38,27 @@ function harness(f, state = new Map(), options = {}) {
   const commands = new Map(), stored = new Map(), openChoices = [], dialogs = [], picks = [], informations = [], errors = [];
   const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [];
   let documents, openHook, showHook, pickHook, infoResponse, externalResult = true;
+  const configuration = { notesFolder: options.notesFolder || '' }, configurationWrites = [];
+  let linkProvider;
   const api = {
-    Position, Range, Selection, Uri: { file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: 'https', toString: () => value } },
+    Position, Range, Selection, Uri: { file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
+    ConfigurationTarget: { Workspace: 2 }, DocumentLink: class { constructor(range, target) { Object.assign(this, { range, target }); } },
+    languages: { registerDocumentLinkProvider(_selector, provider) { linkProvider = provider; return { dispose() {} }; } },
     ProgressLocation: { Notification: 15 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 },
-    extensions: { all: options.pdfReader === false ? [] : [{ packageJSON: { contributes: { customEditors: [
+    extensions: { getExtension: () => options.preview ? { packageJSON: { contributes: { customEditors: [{ viewType: 'vscode.markdown.preview.editor' }] } } } : undefined, all: options.pdfReader === false ? [] : [{ packageJSON: { contributes: { customEditors: [
       { viewType: 'fixture.pdf', displayName: 'Fixture PDF reader', selector: [{ filenamePattern: '*.pdf' }] },
     ] } } }] },
     env: { remoteName: 'wsl', async openExternal(value) { external.push(value); return externalResult; } },
     commands: { async executeCommand(name, ...args) {
       hostCalls.push({ name, args });
-      if (name === 'vscode.openWith' || name === 'vscode.open') api.window.activeTextEditor = undefined;
+      if (name === 'vscode.openWith' || name === 'vscode.open') {
+        api.window.activeTextEditor = undefined;
+        if (options.preview) api.window.tabGroups = { activeTabGroup: { activeTab: { input: { uri: args[0] } } } };
+      }
     } },
     workspace: {
+      isTrusted: true,
+      getConfiguration: () => ({ get: (name, fallback) => configuration[name] ?? fallback, async update(name, value, target) { configurationWrites.push({ name, value, target }); configuration[name] = value; } }),
       workspaceFolders: [{ uri: uri(f.root) }],
       get textDocuments() { return [...stored.values()]; },
       async openTextDocument(location) {
@@ -79,13 +90,13 @@ function harness(f, state = new Map(), options = {}) {
       async showErrorMessage(message) { errors.push(message); },
     },
   };
-  const context = { workspaceState: {
+  const context = { subscriptions: [], workspaceState: {
     get: key => state.get(key), async update(key, value) { state.set(key, structuredClone(value)); },
   } };
   documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name, callback), trackLocation, resolveReferences: options.resolveReferences,
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
-    api, commands, state, documents, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external,
+    api, context, commands, state, documents, configuration, configurationWrites, get linkProvider() { return linkProvider; }, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external,
     setOpenHook(value) { openHook = value; }, setShowHook(value) { showHook = value; }, setPickHook(value) { pickHook = value; },
     setInfoResponse(value) { infoResponse = value; }, setExternalResult(value) { externalResult = value; },
     async open(name) { openChoices.push([uri(f.file(name))]); await commands.get('mrw.openDocument')(); return api.window.activeTextEditor?.document; },
@@ -334,4 +345,79 @@ test('an Obsidian alias follows its ID and Return restores the full original syn
   assert.equal(restarted.api.window.activeTextEditor.document.uri.fsPath,f.file('2b.md'));
   await restarted.documents.returnToDocument();assert.equal(restarted.selected(),'[[2b|A readable name]]');
   assert.equal(await fs.readFile(file,'utf8'),text);
+});
+
+
+test('Notes Folder setting is configurable, picker updates it, and navigation validates scope lazily', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes });
+  assert.equal(h.state.size, 0, 'activation does not resolve or index the configured folder');
+  const a = await h.doc('1a.md');
+  assert.equal(await h.follow(a, '2b'), true, 'configured folder works without a picker or import');
+  assert.equal(h.state.get('mrw.documents.v1').folder.canonical, f.notes);
+  h.configuration.notesFolder = f.outside;
+  await assert.rejects(h.follow(a, '2b'), /outside the selected scope/);
+  await h.folder();
+  assert.deepEqual(h.configurationWrites.at(-1), { name: 'notesFolder', value: f.notes, target: 2 });
+  const before = structuredClone(h.state.get('mrw.documents.v1'));
+  await h.commands.get('mrw.chooseNotesFolder')();
+  assert.deepEqual(h.state.get('mrw.documents.v1'), before, 'cancel preserves the selected folder');
+  h.configuration.notesFolder = 'C:\\Users\\somebody\\Notes';
+  await assert.rejects(h.documents.check(uri(f.file('3c.md'))), /absolute path on this extension host/);
+});
+
+test('WikiLinks are clickable without an active source editor and preserve exact alias return locations', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes, preview: true });
+  const text = '---\nid: 1a\ntitle: "[[2b]]"\n---\n# Notes α😀\n`[[2b]]`\n<!-- [[hidden]] -->\n![[2b]]\n[[2b|Second & <note>]] then [[2b|Second & <note>]]\n';
+  await fs.writeFile(f.file('1a.md'), text);
+  const a = await h.doc('1a.md');
+  a.isDirty = true;
+  const wiki = registerWikiLinks({ vscode: h.api, context: h.context, register: (key, callback) => h.commands.set(key, callback), documents: h.documents });
+  assert.equal(h.reads.length, 1);
+  const links = h.linkProvider.provideDocumentLinks(a);
+  assert.equal(links.length, 2, 'code, metadata, comments and embeds are not links');
+  assert.equal(h.reads.length, 1, 'link discovery does not read the vault');
+  const value = JSON.parse(decodeURIComponent(new URL(links[1].target.toString()).search.slice(1)))[0];
+  assert.equal(text.slice(value.start, value.end), '[[2b|Second & <note>]]');
+  assert.equal(value.start, text.lastIndexOf('[[2b|Second & <note>]]'));
+  h.api.window.activeTextEditor = undefined;
+  await h.commands.get('mrw.followWikiLink')(value);
+  const preview = h.hostCalls.findLast(call => call.name === 'vscode.openWith');
+  assert.equal(preview.args[0].fsPath, f.file('2b.md'));
+  assert.equal(preview.args[1], 'vscode.markdown.preview.editor');
+  assert.equal(h.api.window.activeTextEditor, undefined);
+  await h.documents.returnToDocument();
+  const returned = h.shown.at(-1);
+  assert.equal(returned.doc, a);
+  assert.equal(a.offsetAt(returned.editor.selection.start), value.start);
+  assert.equal(a.offsetAt(returned.editor.selection.end), value.end);
+  assert.equal(a.isDirty, true, 'opening preview never saves the source');
+  assert.equal(await fs.readFile(f.file('1a.md'), 'utf8'), text);
+  const md = wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
+  assert.equal(wiki.extendMarkdownIt(md), md, 'plugin installation is idempotent');
+  const html = md.render(a.getText(), { currentDocument: a.uri });
+  const hrefs = [...html.matchAll(/href="(vscode:[^"]+)"/g)].map(match => match[1]);
+  assert.equal(hrefs.length, 2);
+  assert.match(html, />Second &amp; &lt;note&gt;<\/a>/);
+  assert.notEqual(hrefs[0], hrefs[1], 'repeated links keep their distinct occurrences');
+  assert.equal(await wiki.handleUri(h.api.Uri.parse(hrefs[0])), true);
+  h.change(a, value.start + 2, 2, '3c');
+  await h.documents.check(a.uri); // Allow the tracked-location checkpoint to finish.
+  const previous = structuredClone(h.state.get('mrw.documents.v1').origin);
+  await assert.rejects(h.commands.get('mrw.followWikiLink')(value), /WikiLink changed/);
+  assert.deepEqual(h.state.get('mrw.documents.v1').origin, previous, 'stale click preserves preceding origin');
+  await assert.rejects(wiki.handleUri(h.api.Uri.parse(hrefs[0] + '&extra=x')), /Invalid MRW/);
+  h.api.workspace.isTrusted = false;
+  assert.deepEqual(h.linkProvider.provideDocumentLinks(a), []);
+  await assert.rejects(h.commands.get('mrw.followWikiLink')(value), /trust the intended workspace/);
+});
+
+test('backlinks from a Markdown preview return to that document instead of an unrelated editor', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes, preview: true });
+  const a = await h.doc('1a.md'); await h.follow(a, '2b');
+  const unrelated = await h.doc('3c.md');
+  h.api.window.activeTextEditor = { document: unrelated, selection: new Selection(unrelated.positionAt(0), unrelated.positionAt(0)) };
+  await h.commands.get('mrw.showBacklinks')();
+  assert.equal(h.state.get('mrw.documents.v1').origin.uri, uri(f.file('2b.md')).toString());
+  await h.documents.returnToDocument();
+  assert.equal(h.hostCalls.findLast(call => call.name === 'vscode.openWith').args[0].fsPath, f.file('2b.md'));
 });

@@ -1,7 +1,9 @@
-# Existing documents, Contents and saved sources — 0.22.2
+# Existing documents, Contents and saved sources — 0.22.3
 
 **MRW: Open Document…** displays an existing file in place. Markdown opens in
-VS Code's editor and supplies **Contents** without hiding the document. Other
+VS Code's Markdown preview and supplies **Contents**. **Edit Document Source**
+opens its source for editing without saving a dirty buffer. **Show Contents**
+is available directly from Studies to reach the document navigator. Other
 formats use their registered host editor. A PDF requires an available PDF
 reader. If none is registered, MRW offers **Open with system reader** as an
 explicit external handoff; failure is reported locally. It never shows binary
@@ -10,7 +12,11 @@ PDF Contents, page restoration and bookmarks are not supplied by MRW.
 
 An explicitly selected file may be outside the workspace. **Choose Notes
 Folder…** explicitly selects the folder used for note lookup and backlinks;
-that folder may also be external, including `/mnt/c/…` in WSL. It remains
+that folder may also be external, including `/mnt/c/…` in WSL.
+The picker updates **MRW: Notes Folder** in workspace settings. That setting
+accepts an absolute extension-host path and can also be edited directly. No
+folder is inferred from an open note. Configuration is read on explicit navigation;
+activation and editor link discovery do not scan the folder. It remains
 ordinary document storage, separate from MRW's private saved-work store. Opening
 and indexing do not rewrite files, retain a source copy or qualify a private
 store. Obsidian is optional.
@@ -26,7 +32,9 @@ works for the current session. VS Code owns editing, saving, undo and recovery.
 
 1. Open the original note and choose its notes folder. Select a heading in
    Contents to reach its editor position.
-2. Select an ordinary link in Contents, or place the cursor on the link and use
+2. Click a WikiLink in preview or Ctrl+click it in the source editor (subject
+   to VS Code’s configured link modifier). Select an ordinary link in Contents,
+   or place the cursor on the link and use
    **Follow Document Link**. Relative Markdown links can open another note, a
    supported heading or another local file such as a PDF. Repeated links retain
    distinct source occurrences.
@@ -67,7 +75,7 @@ subject to the explicit local-file boundary checks.
 
 ## Backlinks, edits and restart
 
-The selected folder index is rebuilt on explicit operations. Limits are 2,000
+The selected folder index is rebuilt on explicit operations. Limits are 4,096
 Markdown files, 32 MiB total text, 4 MiB per file, 32 directory levels and 20,000
 entries. Cancellation, unreadable files and exceeded limits are reported as
 incomplete, not as a complete empty result. No database, background sync or

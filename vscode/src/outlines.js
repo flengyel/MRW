@@ -37,7 +37,7 @@ ${diagramStyle}
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument }) {
+function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, handleDocumentUri }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -448,6 +448,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
   context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: async uri => {
     try {
       if (!vscode.workspace.isTrusted) throw new Error('Open and trust the intended workspace before following the MRW link.');
+      if (await handleDocumentUri?.(uri)) return;
       // VS Code's default serializer escapes the whole query, including its
       // '=' and '&' delimiters. Our payload is already restricted to base64url;
       // preserve those delimiters when passing it to the strict URL parser.

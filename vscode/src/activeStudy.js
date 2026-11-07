@@ -361,6 +361,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   registerQueued('mrw.openStudyItem',async item=>{await load();const s=studies.get(item.study);if(!s)return;await open(s,'resume');if(item.reference)await followPassage(item.reference,s.root);if(item.revision){const q=eligible(s).find(q=>q.revision===item.revision);if(q){if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected question row');await persist(s);await send();}}});
   function registerQueued(name,fn){register(name,(...args)=>enqueue(()=>fn(...args)));}
   const startActions=[
+    {kind:'action',label:'Show Contents',command:'mrw.openReadingOutline',help:'Return to the document navigator and reading controls. Studies are optional.'},
     {kind:'action',label:'Open a note or paper…',command:'mrw.openDocument',help:'Open the original document in place without importing it.'},
     {kind:'action',label:'Choose notes folder…',command:'mrw.chooseNotesFolder',help:'Select an Obsidian vault or another notes folder for note links and backlinks. Notes stay in place.'},
     {kind:'action',label:'Open saved source…',command:'mrw.openOutline',help:'Reopen retained reading and its annotations from the saved store.'},

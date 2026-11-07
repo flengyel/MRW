@@ -132,6 +132,9 @@ test('document entry actions remain usable above an empty or populated Studies t
  const h=await host(t),tree=h.c.tree;
  const empty=await tree.getChildren();
  const open=empty.find(item=>item.command==='mrw.openDocument');
+ const contents=empty.find(item=>item.command==='mrw.openReadingOutline');
+ assert.equal(empty[0],contents);assert.equal(tree.getTreeItem(contents).label,'Show Contents');
+ assert.equal(tree.getTreeItem(contents).command.command,'mrw.openReadingOutline');
  const choose=empty.find(item=>item.command==='mrw.chooseNotesFolder');
  assert.ok(open);assert.ok(choose);
  assert.equal(tree.getTreeItem(open).command.command,'mrw.openDocument');

@@ -4,13 +4,14 @@ Choose **Open a note or paper…** in the MRW sidebar, or **Open saved source…
 for retained reading and annotations. **Choose notes folder…** selects an
 Obsidian vault or another notes folder for note links and backlinks. These
 actions stay visible above saved studies, including the optional example.
+**Show Contents** returns from Studies to the document navigator and reading controls.
 Commands are also available through **F1**.
 
 ## Open existing work
 
 Run **MRW: Open Document…** and select a note, paper or manuscript. MRW opens
 the original in place. It neither imports the file nor creates a saved source.
-Markdown opens in the editor and supplies **Contents**: headings, note links
+Markdown opens in preview and supplies **Contents**: headings, note links
 and MRW source links. **MRW: Show Contents** selects Markdown for that navigator;
 **MRW: Choose Document…** chooses another Markdown document for Contents.
 
@@ -29,7 +30,11 @@ use **MRW: New Document…**; its initial headings can be edited or removed.
    folder reached through `/mnt/c/…` in WSL. It need not be an Obsidian vault.
    For example, `C:\Users\you\Notes` is `/mnt/c/Users/you/Notes`. After folder
    selection, **Open a note or paper…** starts there, including after restart.
-2. In a Markdown note, use its **Contents** link entry, or place the cursor on
+   The picker sets **MRW: Notes Folder** in workspace settings. You can edit that
+   setting directly; it is an absolute path on the extension host.
+2. Click a WikiLink in Markdown preview, or **Ctrl+click** it in the source
+   editor (use the modifier shown by VS Code). You can also use its **Contents**
+   link entry, or place the cursor on
    a link and run **MRW: Follow Document Link**. Relative Markdown links can
    target another note, a heading or a PDF. Zettel links such as `[[ID]]` resolve
    within the selected notes folder. Obsidian `[[ID|label]]` links display the
@@ -56,7 +61,8 @@ Leading delimited YAML is metadata, not Contents. Notes, filenames, IDs, titles
 and existing links stay unchanged. Embeds and executable link destinations are
 not evaluated.
 
-Keep editing normally. Contents and backlinks use dirty editor text. **Ctrl+S**
+**Edit Document Source** opens the Markdown for editing. Contents and backlinks
+use dirty editor text; opening preview does not save a draft. **Ctrl+S**
 saves the note; MRW does not save it merely by opening, indexing or following.
 The selected document, notes folder and usable return pin survive an ordinary
 restart in this workspace. Run **MRW: Reopen Document** to reopen the last opened

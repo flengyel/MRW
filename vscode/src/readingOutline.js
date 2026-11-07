@@ -4,6 +4,8 @@ const path = require('node:path');
 const { digest } = require('./navigation');
 const { parseReadingMarkdown } = require('./readingMarkdown');
 const { createDocuments } = require('./documents');
+const { registerWikiLinks } = require('./wikiLinks');
+const { showMarkdownPreview, documentColumn: readingDocumentColumn } = require('./documentPresentation');
 const { registerTutorial } = require('./tutorial');
 const KEY = 'mrw.readingOutline.v1';
 const STARTER = '# Document\n\n## Current question\n\n## Sources and passages\n\n## Working notes\n\n## Next step\n';
@@ -102,21 +104,20 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     return editor;
   }
-  async function showReadingView(doc) {
-    // The source editor supplies the checked selection and scroll position.
-    // Reopen the native rendered view even when its previous tab was closed.
-    const commands = await vscode.commands.getCommands?.(true);
-    if (doc.uri.scheme === 'file' && commands?.includes('markdown.reopenAsPreview') && vscode.window.activeTextEditor?.document === doc) {
-      await vscode.commands.executeCommand('markdown.reopenAsPreview');
-    } else await vscode.commands.executeCommand('markdown.showPreview', doc.uri);
-    await vscode.commands.executeCommand('workbench.action.minimizeOtherEditors');
-    await vscode.commands.executeCommand('mrw.readingOutline.focus');
+  async function showReadingView(doc, column) {
+    return showMarkdownPreview(vscode, doc, column);
   }
   async function openReadingOutline(choose = false, fromReader = false) {
     const attempt = ++generation; documents.supersede();
     // Return prefers the selected document, including after restart. A text
     // editor left active behind a reader need not be that overview.
     let doc = choose ? undefined : fromReader ? document : vscode.window.activeTextEditor?.document;
+    const previewUri = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+    if (!choose && !fromReader && !isOverview(doc) && previewUri?.scheme === 'file' && /\.(md|markdown)$/i.test(previewUri.path)) {
+      await checkFile(previewUri);
+      if (attempt !== generation) return;
+      doc = await vscode.workspace.openTextDocument(previewUri);
+    }
     if (!choose && !isOverview(doc) && isOverview(document)) doc = document;
     if (!choose && !isOverview(doc) && overviewUri) {
       const uri = vscode.Uri.parse(overviewUri);
@@ -145,7 +146,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       doc = await vscode.workspace.openTextDocument(choices[0]);
     }
     const opened = await selectOverview(doc, attempt, fromReader);
-    if (fromReader && opened && attempt === generation) {
+    if (opened && attempt === generation) {
       await showReadingView(doc);
     }
     return opened;
@@ -156,7 +157,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     const previous = document?.uri.toString() || overviewUri;
     if (previous && previous !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
     document = doc; refresh();
-    if (showEditor) await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.One });
+    await vscode.window.showTextDocument(doc, { preview: false, viewColumn: readingDocumentColumn(vscode, doc) });
     await vscode.commands.executeCommand('mrw.readingOutline.focus');
     if (selected?.uri === doc.uri.toString() && model && selected.revision === model.revision) {
       await showLocation(doc, selected);
@@ -173,7 +174,15 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       if (document !== doc) { collapsed = new Set(); selected = undefined; }
       document = doc; refresh(); await persist();
     } });
+  const wikiLinks = registerWikiLinks({ vscode, context, register, documents });
   register('mrw.openReadingOutline', () => openReadingOutline());
+  register('mrw.editDocumentSource', async () => {
+    const active = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+    const doc = active?.scheme === 'file' && /\.(md|markdown)$/i.test(active.path)
+      ? await vscode.workspace.openTextDocument(active) : document || vscode.window.activeTextEditor?.document;
+    await checkDocument(doc);
+    await vscode.window.showTextDocument(doc, { preview: false, viewColumn: readingDocumentColumn(vscode, doc) });
+  });
   register('mrw.chooseReadingOverview', () => openReadingOutline(true));
   register('mrw.newReadingOverview', async () => {
     const attempt = ++generation; documents.supersede();
@@ -231,6 +240,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       }
       finally { pendingOrigins.delete(pending); }
     }
+    await showMarkdownPreview(vscode, source, editor.viewColumn);
     await persist();
   });
   register('mrw.returnToReadingOutline', async options => {
@@ -271,6 +281,6 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     }),
     vscode.workspace.onDidCloseTextDocument(doc => { if (doc === document && doc.isClosed) refresh(); }),
     { dispose() { clearTimeout(timer); } });
-  return { provider, refresh, checkFile };
+  return { provider, refresh, checkFile, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
 }
 module.exports = { registerReadingOutline, trackLocation };
