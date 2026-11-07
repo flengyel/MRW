@@ -1,0 +1,38 @@
+{
+  "version": "0.22.1",
+  "labels": {
+    "mrw.prepareProofStudy": "Work through a proof\u2026",
+    "mrw.resumeProofStudy": "Continue proof work"
+  },
+  "implementation_commit": "7a880a3fe4b4016c0d1f7f5cd8de85cc8cf65db2",
+  "runtime_build_identity": {
+    "version": "0.22.1",
+    "commit": "7a880a3fe4b4016c0d1f7f5cd8de85cc8cf65db2",
+    "localChanges": true
+  },
+  "archive_changed_files": [
+    "extension/media/build-info.json",
+    "extension/media/first-steps.md",
+    "extension/package.json",
+    "extension/src/outlines.js",
+    "extension/src/outlineView.js",
+    "extension/src/proofStudy.js"
+  ],
+  "command_ids_preserved": true,
+  "previous_sha256": "28640cfcb10a1ee3e4b44ef2da5dd1c41332dd58cd00831070653ef9bf6f71a3",
+  "sha256": "cbd99421e041512c04569f80bdb6581798e76273938949da02085759c23e3d76",
+  "bytes": 551566,
+  "checks": {
+    "focused_existing_test_files": 3,
+    "focused_existing_test_files_passed": 3,
+    "javascript_syntax_exit": 0,
+    "vsix_verifier_exit": 0,
+    "packaged_labels_and_help": "passed"
+  },
+  "installed": true,
+  "installed_files_checked": 94,
+  "installer_metadata_excluded": true,
+  "native_observation": "No native menu/button observation was performed. The working window was not reloaded. A later activation adopts the new runtime and tutorial.",
+  "preservation": "No source, annotation, study or history migration or rewrite. Existing command IDs and saved-file fields preserved. The package includes the existing uncommitted reader-orientation repair; that repair remains separate from this commit.",
+  "archive": "vscode/mrw-0.22.1.vsix"
+}
