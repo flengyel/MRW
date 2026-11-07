@@ -41,7 +41,22 @@
     "liveEditorAndSavedBytesUnchanged": true,
     "sixGenuineNotesUnchanged": true,
     "existingKeyboardShortcutsPreserved": true,
-    "windowsGlobalShortcutAvailabilityChecked": true
+    "windowsGlobalShortcutAvailabilityChecked": true,
+    "vscodeKeybindings": {
+      "vscode": "1.144.1",
+      "remote": "wsl",
+      "defaultBindingCount": 1265,
+      "exactAltSlashMatches": [],
+      "userProfileAltSlashBindings": 0,
+      "installedExtensionConditionalBinding": {
+        "extension": "eamodio.gitlens",
+        "command": "gitlens.gitCommands",
+        "when": "config.gitlens.keymap == alternate && !gitlens:disabled",
+        "activeInCheckedWslHost": false,
+        "configuredAlternateKeymap": false
+      },
+      "workingWindowChanged": false
+    }
   },
   "limits": {
     "physicalObsidianToVscodeRouterClickObserved": false,

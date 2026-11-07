@@ -41,7 +41,13 @@ window only after its explicit action; it leaves the working window open.
   hotkeys were checked unchanged. **Alt+M** remains Insert math block,
   **Alt+W** WikilinkTitle, **Alt+T** Timestamp. Windows reported Ctrl+Alt+M
   already registered (error 1409); it was removed after the reported MobaXTerm
-  collision. Windows and Obsidian both reported Alt+/ available before binding.
+  collision. Windows and Obsidian reported Alt+/ available before binding.
+  The follow-up third check used the native VS Code 1.144.1/WSL generated
+  keybindings: 1,265 default entries and no exact Alt+/ binding. User/profile
+  overrides and 215 installed extension contributions were also checked.
+  GitLens declares Alt+/ only under its optional alternate keymap; that binding
+  was inactive in this configuration. These are three separate scopes:
+  Windows global shortcuts, VS Code (including extensions), and Obsidian.
 
 ## Package and preservation
 
