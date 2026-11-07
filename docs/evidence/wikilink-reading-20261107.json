@@ -1,0 +1,110 @@
+{
+  "implementationCommit": "efc0d61a0d3ffea2d2fa8541a9f33ffa92d68543",
+  "version": "0.22.3",
+  "checks": {
+    "focusedWorkingTree": {
+      "passed": 63,
+      "failed": 0
+    },
+    "focusedCommittedSource": {
+      "passed": 63,
+      "failed": 0
+    },
+    "extensionIntegrationWorkingTree": {
+      "passed": 11,
+      "failed": 0
+    },
+    "syntax": true,
+    "diffCheck": true
+  },
+  "nativeHost": {
+    "checks": [
+      "configured notes folder is available without a picker",
+      "native editor link provider finds both WikiLinks and aliases",
+      "native Markdown engine renders MRW WikiLinks with alias text",
+      "native editor follow opens the linked note in Markdown preview",
+      "Return opens the original preview without rewriting it",
+      "preview link dispatch uses the registered native MRW URI handler",
+      "Edit Document Source returns to the current Markdown text"
+    ],
+    "kind": "isolated native API; no pointer-click observation",
+    "vscode": "1.144.1",
+    "remote": "wsl",
+    "complete": true
+  },
+  "package": {
+    "file": "vscode/mrw-0.22.3.vsix",
+    "bytes": 556926,
+    "sha256": "d20e80b3e29827a491cf6ca1c63dc72a32f43e2e380788bcf30a598a77a82e28",
+    "archiveEntries": 98,
+    "installedFilesMatchingArchive": 96,
+    "runtimeBytesMatchCheckout": true,
+    "localReaderChangesIncluded": true,
+    "runtimeDigests": {
+      "extension/media/build-info.json": "db7a89e8df6da90efffc5f3616f741743de656c9bb3f340e63461b31fd668ac4",
+      "extension/media/diagram-theme.css": "090944732e861d1277e3a9c96d346ccf0282f0859b4cfb78672afac14686f399",
+      "extension/media/first-steps.md": "948870a619e2786fe5dd45c867d693c2959320e63ca1cf61c036b433e0cd62d3",
+      "extension/media/fsrs/LICENSE": "8b83a73dd2894ff553d6de6113064b3ad9dfad3f839837b61f3b183881131d01",
+      "extension/media/fsrs/NOTICE.json": "4e9f1c7e9e5c8ae20103982304e6a051e84f122bc00dfd1d373a91b9973b83f9",
+      "extension/media/fsrs/index.cjs": "abf2062dd8218357662d4dbe7cb39bc7c0e9b0be8760a5d74bb515c75321f533",
+      "extension/media/katex/LICENSE": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3",
+      "extension/media/katex/NOTICE.json": "9341416853c069b4626722a813936cb85d60f091ce265a8db1938cdcd9cda6f1",
+      "extension/media/katex/auto-render.min.js": "e5372d199bcdae8b4de71d0f7ceba72a4ba12774a27c60a6f1f77d03b3228ee4",
+      "extension/media/katex/katex.min.js": "103a53763cc033bba8d175bf3f0ba597c3505c9b6747dd3f2c7bc2a6bfcc8ae7",
+      "extension/media/markdown-it/LICENSE": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473",
+      "extension/media/markdown-it/NOTICE.json": "c06e115725a60bd5f30727125d68106d4965cbf64d63ea878c5a27b8328682fc",
+      "extension/media/markdown-it/THIRD_PARTY_LICENSES.txt": "62237ec17e3c398a065d9a56e73d263be234352103a1f5336daee9071f252435",
+      "extension/media/markdown-it/markdown-it.js": "433ba2a6946e8200c464d8845b98d826022a1836b4a713f01fa2830477c381e8",
+      "extension/media/mrw.svg": "472a8b1cb3e160cbca9831aeae9e4e0042426a38a71d6ef675ee3e21f355be3e",
+      "extension/media/proof-graph.css": "8951ba912a66e387972f5d12e97f5697bf899e5e005c1c84118f3d7152f95988",
+      "extension/media/proof-outline.schema.json": "37a8f410a27fdb85e7fabc9f806267fcd9b000e86708547702c2a1d45d406912",
+      "extension/media/study-example.md": "33e6686e2dc37838e2b13d8fb8e929ff52435ddc21edb7601ca608a2776820cc",
+      "extension/src/activeStudy.js": "7b3dc536aea11e59f1f08b04b35871f8a58c1f551fb7570d8491cbbe2ba72ff9",
+      "extension/src/activeStudyView.js": "400fdce417089c33777eac19171512a037b62e7285f49be10b0cb56561ea1841",
+      "extension/src/annotationView.js": "0751a0f163dee75a18be5dfc321f29488cd627e3a36754e9051b23a088e08c4d",
+      "extension/src/artifactStorage.js": "3f1b841b23cdac451fbe9fc3dc7b1835a961cd06c51b6ff79ba8aa8f1c292920",
+      "extension/src/assistance.js": "73d8fe4448641026e1a93b2baf57403c530af5f747a901e7a62c7da3f8ee5412",
+      "extension/src/bridge.js": "42665e06885ac7f38b33774b5b46a5ff76082b5707308c06f5726727ec1b20fd",
+      "extension/src/companionLinks.js": "e4c98bbd3994e98619c244452dd18dff15f5140f5006a1bd5e95bda128f64d59",
+      "extension/src/documentLinks.js": "ab0661a1c10e6beeacd68fbfd115e7d0d0685cf7d376eea6a7c457d6d5090759",
+      "extension/src/documentPresentation.js": "168e05f46bff4b030c609847eff2ebe2a4281beb5c3f95fe2ea87e40d4539920",
+      "extension/src/documents.js": "428b35b55445e962675768ff8cc7c65ee57279a6716f70e076a55c29b15d881a",
+      "extension/src/extension.js": "bb6503d53a71fc19926708bee64d601a0cb0f3b9fdd28d46c4a2af97e17b92cd",
+      "extension/src/investigation.js": "84df3a651904f7a017b00c7ca5a060e35e753cf75f3d54383cb5dd70fb29d5b8",
+      "extension/src/navigation.js": "deed67feb1026aeb46cc070ebad33cc2c08b21a1573e928f27daf99cf258970a",
+      "extension/src/outlineReferences.js": "cc5d5e3ad5dfb0ca80fb081b8d5b8698e1443bf6ffd374b039818c20332bd44b",
+      "extension/src/outlineView.js": "e3da3f944c9ad907c479a041527f6e968190cf7b15b4aac0e202cb5d94e5a95a",
+      "extension/src/outlines.js": "7baa8fe32022ceb7d5b6699c5ad30b886e4021e2fa23880e8e5c7c054a4450c8",
+      "extension/src/proofGraph.js": "f120965622970de09443ca73e7502266311fb261e4afebedefffb685689815ba",
+      "extension/src/proofGraphMap.js": "c0e1aad33b4337ce69c769b14d9004df27ed620ef57adcedf4d4b0b5e4ed2f41",
+      "extension/src/proofGraphView.js": "eb39a57ca69e3d245f8cb5b1d2fd99d8222af62d75d64fc63a7d27370165895e",
+      "extension/src/proofStudy.js": "8ee97ff8bc6c9f6ad3de2518f5da14431ffb0dd91c6290dfee2f80725f233d95",
+      "extension/src/proofStudyView.js": "e3af5a764e52f0449f23c8ca4da712ff63a321bc098ec24913350c5dea8f36d7",
+      "extension/src/readingMarkdown.js": "06e2230ebde737e62dbd335ae225a772acc6055449efda4a681b645eaf7161eb",
+      "extension/src/readingOutline.js": "90d1d20be58c4fd29c983018cb706c48c6cd5d7779d6c997efca5061ea7bfd3d",
+      "extension/src/sourceIdentifiers.js": "8f46115b1492f8c204a4396223f0743536a8762a83f14a9e3dfce553970f8ef9",
+      "extension/src/stacksView.js": "5e2b2642d68deab893fcdbf36c0af8b3b258061f2f6f21aff5d9dfeeec8db960",
+      "extension/src/studyEvidence.js": "022a8a890f48aa5e6a8310196da17ab2137f923fc9b82924c088a94474fcab6c",
+      "extension/src/studyExample.js": "29f812b611b6f5f24535dd579f8ef1eaab0db2670fa726110b340d987bbcd766",
+      "extension/src/studyHelp.js": "cf3188eb3791b5ea4365e7357cafd8a9b054d8b41bbda27cdc775390bb9ad545",
+      "extension/src/studyHistory.js": "189e16902e7dc137ccf07e0b131943982d22d57001f07f46283e5c9221809233",
+      "extension/src/studyModel.js": "29770cf777dfb4890da2ef7f6020602f340693109d8cdf9c1783fc27df77e314",
+      "extension/src/studyScheduler.js": "bdaae6a0b5b8d9c157a7bd5a8242b224c89918d8dd9d825ff96eb51e92acf260",
+      "extension/src/tutorial.js": "ad5ae6e604e21b4f483f9c4d08d9339e9f9671de46dbc4a0d0ea41b2534deb0f",
+      "extension/src/wikiLinks.js": "d08f4b3e1b3a80bd09cda9dcafd3f18d527a7b57cecdd99993356a185cab1079"
+    }
+  },
+  "preservation": {
+    "userSuppliedNoteUnchanged": true,
+    "notesFolderConfiguredInWorkspace": true,
+    "privateNotesCopiedOrImported": false,
+    "workingWindowReloaded": false,
+    "priorReaderWorkPreserved": true
+  },
+  "limits": [
+    "Native checks exercise the real API and Markdown renderer; no pointer click or visual sidebar observation was recorded.",
+    "The working window keeps its active extension until its next normal reload.",
+    "Wiki note IDs and aliases use the bounded selected-folder resolver. Wiki path, heading/block and embed syntax is not added.",
+    "The package retains separate pending reader-orientation changes and declares localChanges:true."
+  ]
+}
