@@ -1,0 +1,42 @@
+{
+  "version": "0.22.1",
+  "implementation_commit": "196beafeabe7c2c92714e65a3122650767202fc4",
+  "runtime_build_identity": {
+    "version": "0.22.1",
+    "commit": "196beafeabe7c2c92714e65a3122650767202fc4",
+    "localChanges": true
+  },
+  "bytes": 551847,
+  "sha256": "f6ab170697c131e94a6e2f58a76bc3607d15eed8e6025032fe0bb7c98981d36b",
+  "previous_sha256": "cbd99421e041512c04569f80bdb6581798e76273938949da02085759c23e3d76",
+  "archive_changed_files": [
+    "extension/media/build-info.json",
+    "extension/media/first-steps.md",
+    "extension/package.json",
+    "extension/src/activeStudy.js",
+    "extension/src/documents.js"
+  ],
+  "command_and_view_ids_preserved": true,
+  "settings_preserved": true,
+  "package_verifier_exit": 0,
+  "focused_existing_test_files_passed": 4,
+  "javascript_syntax_exit": 0,
+  "vault_preflight": {
+    "vault_directory_accessible": true,
+    "obsidian_directory_present": true,
+    "selected_folder_picker_verified": true,
+    "note_contents_read": false,
+    "real_vault_writes": false,
+    "native_window_observation": false
+  },
+  "specific_note_check": "Awaiting the requested note filename or Obsidian link; no particular note was inspected.",
+  "installed": true,
+  "installed_files_checked": 94,
+  "installer_metadata_excluded": true,
+  "focused_command_cases_passed": 5,
+  "focused_command_exit": 0,
+  "broad_runs": "Initial full command run and verbose diagnostic were intentionally stopped (exit 1); diagnostic showed progressing cases. No full command-suite pass is claimed. Logs retained in /tmp/mrw-start-actions-20261107.",
+  "native_observation": "No native sidebar/button observation or forced window reload. A later activation adopts the new runtime and tutorial.",
+  "preservation": "Existing command IDs, view IDs, settings, note files, source citations, annotations, studies and history preserved. The package retains the separate uncommitted reader-orientation repair.",
+  "archive": "vscode/mrw-0.22.1.vsix"
+}
