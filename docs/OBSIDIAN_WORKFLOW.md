@@ -33,6 +33,8 @@ stay under VS Code's save/undo and recovery controls.
 
 ID lookup searches filenames and reads only matching notes. Backlink search
 reads note text separately and reports partial results when a limit is reached.
+The text search admits at most 4,096 notes and 32 MiB; larger searches remain
+explicitly partial.
 The entry budget counts candidate notes, directories and symlinks; ordinary
 non-Markdown attachments do not consume it.
 

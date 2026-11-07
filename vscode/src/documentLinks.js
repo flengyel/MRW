@@ -7,7 +7,7 @@ const { TextDecoder } = require('node:util');
 const { qualifiedIdentifier } = require('./sourceIdentifiers');
 const { parseReadingMarkdown, frontMatterInfo, zettelLinkParts } = require('./readingMarkdown');
 
-const DEFAULT_LIMITS = Object.freeze({ maxFiles: 2000, maxBytes: 32 * 1024 * 1024,
+const DEFAULT_LIMITS = Object.freeze({ maxFiles: 4096, maxBytes: 32 * 1024 * 1024,
   maxFileBytes: 4 * 1024 * 1024, maxDepth: 32, maxEntries: 20000 });
 // Application metadata, deleted notes and generated dependencies are not note destinations.
 const excludedDirectories = new Set(['.obsidian', '.trash', '.git', '.lake', 'node_modules', '.venv', '__pycache__']);

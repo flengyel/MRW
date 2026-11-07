@@ -224,3 +224,15 @@ test('filename lookup establishes ID uniqueness without reading unrelated notes 
   assert.equal(partial.complete,false);
   assert.equal((await resolveNoteLink(partial,path.join(root,'source.md'),'1a|Target','zettel')).code,'incomplete_index');
 });
+
+
+test('a vault exceeding two thousand notes still resolves alias backlinks within the text-byte budget', async t => {
+  const root=await fixture(t,{'source.md':'# Source\n[[target|Readable]]\n','target.md':'# Target\n'});
+  const folder=path.join(root,'project-notes');await fs.mkdir(folder);
+  for(let batch=0;batch<21;batch++)await Promise.all(Array.from({length:100},(_,i)=>
+    fs.writeFile(path.join(folder,'note-'+String(batch*100+i).padStart(4,'0')+'.md'),'# Ordinary note\n')));
+  const index=await buildNoteIndex(root);
+  assert.equal(index.complete,true);assert.equal(index.files.size,2102);
+  const found=await backlinks(index,path.join(root,'target.md'));
+  assert.equal(found.complete,true);assert.deepEqual(found.occurrences.map(hit=>hit.sourceText),['[[target|Readable]]']);
+});
