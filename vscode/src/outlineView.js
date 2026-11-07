@@ -10,6 +10,30 @@ const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 let notes = [], noteTargets = {}, noteError, lastReadingFocus;
 let storageFrozen = false;
+let returnDestination;
+let toolbarObserver;
+const helpText = {
+  'study-current': 'Start or resume study of the selected retained passage. No questions or model requests are sent automatically.',
+  'proof-study': 'Prepare an exact proof-passage handoff for study; this does not check a proof.',
+  'ask-ai': 'Choose a retained passage and prepare a question with an exact preview. Send is a separate action.',
+  'ask-ai-passage': 'Prepare an AI question about this exact retained passage. Review the preview before sending.',
+  'ask-ai-pinned': 'Prepare a question about the earlier range pinned by the citation, even if the current passage changed.',
+  'hide-proofs': 'Fold published proofs in this reader. Source text and annotation drafts are kept.',
+  'show-proofs': 'Reveal published proofs in this reader without changing the saved source.',
+  source: 'Open the exact retained source as text. This does not open today’s upstream revision.',
+  navigate: 'Open this exact source range as text; changed associations keep the earlier cited range.',
+  'navigate-context': 'Open the exact retained range for this shared context.',
+  'save-note': 'Save the submitted annotation with its supplied attribution; newer typing remains unsaved.',
+  'save-metadata': 'Save this reader-supplied source description without changing retained source bytes.',
+  'save-region': 'Save this passage’s label and reading level without changing its exact range.',
+  'save-context': 'Save this context label without changing its quoted range.',
+  'remove-context': 'Remove the shared reading association. The retained original remains available.',
+  artifact: 'Open a retained supporting file as text; no checker or compiler runs.',
+  'open-note': 'Open the explicitly linked Obsidian note; choose a destination when several are linked.',
+  'manage-notes': 'Inspect or remove explicit note associations for this source range.',
+  select: 'Select this passage for source, statement and evidence actions. This records no mathematical assessment.',
+  toggle: 'Save the default expanded or folded state of this exact source passage; annotation drafts are kept.'
+};
 let deletingDraft;
 const drafts = new Map();
 const submittedDrafts = new Map();
@@ -61,6 +85,7 @@ function controls() {
 function button(parent, title, value, action, write = false) {
   const node = el('button', title, parent); node.type = 'button';
   node.dataset.action = action; node.dataset.write = String(write);
+  if (helpText[action]) node.title = helpText[action];
   node.addEventListener('click', () => post(typeof value === 'function' ? value() : value));
   return node;
 }
@@ -256,16 +281,31 @@ function publishedAction(type, target) {
   if (type === 'stacks_jump') return jumpPublished(target);
   post({ type, tag: target });
 }
+function updateReturnDestination() {
+  const control = [...root.querySelectorAll('button')].find(node => node.dataset.action === 'reading-return');
+  if (!control) return;
+  control.textContent = returnDestination?.label || 'Choose a document…';
+  control.title = [returnDestination?.detail || 'Choose Markdown for Contents before returning.', returnDestination?.path].filter(Boolean).join('\n');
+  control.setAttribute('aria-description', control.title);
+  const context = [...root.querySelectorAll('p')].find(node => node.className === 'return-context');
+  if (context) context.textContent = returnDestination?.detail || 'Opened independently. Choose a document for Contents.';
+}
 function render() {
   if (!model) return;
+  toolbarObserver?.disconnect();
   const o = model.outline;
   for (const node of root.querySelectorAll('details')) if (node.dataset.disclosure) openDetails.set(node.dataset.disclosure, !!node.open);
   feedbackNodes.clear(); root.replaceChildren();
   el('h1', o.source.bibliography.title || 'Saved source');
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
-  button(readingBar, '← Return to document', { type: 'reading_return' }, 'reading-return').title =
-    'Return to the selected Markdown document at its saved location.';
+  const published = o.published;
+  const collection = ({ 'stacks-project': 'The Stacks Project', kerodon: 'Kerodon' })[published?.source_id || (o.acquisition?.kind === 'stacks-section' ? 'stacks-project' : o.acquisition?.kind === 'kerodon-section' ? 'kerodon' : '')];
+  const location = published && !published.error ? [collection, published.chapter,
+    published.section_number != null ? `Section ${published.section_number}: ${published.title || o.source.bibliography.title || ''}` : published.title,
+    published.qualified_tag].filter(Boolean).join(' · ') : o.source.bibliography.locator || o.source.bibliography.title || 'Retained source';
+  el('p', location, readingBar, 'source-location');
+  button(readingBar, 'Choose a document…', { type: 'reading_return' }, 'reading-return');
   if (o.published && !o.published.error) {
     button(readingBar, 'Open original source ↗',
       { type: 'stacks_citation', tag: o.published.qualified_tag || o.published.tag }, 'original-source').title =
@@ -280,9 +320,12 @@ function render() {
     for (const hidden of [true, false]) {
       const control = el('button', hidden ? 'Hide proofs' : 'Show proofs', readingBar);
       control.type = 'button'; control.dataset.action = hidden ? 'hide-proofs' : 'show-proofs';
+      control.title = helpText[control.dataset.action];
       control.addEventListener('click', () => proofViews(hidden));
     }
   }
+  el('p', '', root, 'return-context');
+  updateReturnDestination();
   if (reference?.status === 'changed or removed') {
     el('p', reference.notice, root, 'warning').dataset.reference = 'true';
     button(root, 'Ask AI about the earlier linked passage…', { type: 'ask_ai', pinned: true }, 'ask-ai-pinned');
@@ -390,7 +433,7 @@ function render() {
       const control = el('button', compactProof ? `▸ ${r.title}` : (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box,
         compactProof ? 'proof-disclosure' : undefined);
       control.type = 'button'; control.dataset.action = (expanded ? 'hide-' : 'show-') + (proof ? 'proof' : 'details');
-      if (compactProof) control.title = 'Show proof';
+      control.title = `${expanded ? 'Fold' : 'Reveal'} this ${proof ? 'published proof' : 'source passage'} in the reader. Its exact text and annotation drafts are kept.`;
       control.dataset.write = String(!expanded && !publishedPart && r.argument_text === null);
       control.setAttribute('aria-expanded', String(expanded));
       control.addEventListener('click', () => {
@@ -430,10 +473,32 @@ function render() {
     for (const n of r.annotations) noteForm(passageTools, r.id, n);
     noteForm(passageTools, r.id, null);
   }
+  const help = el('p', '', root, 'control-help');
+  help.id = 'reader-control-help'; help.hidden = true; help.setAttribute('role', 'status');
+  let focusedHelp, hoveredHelp;
+  const describe = () => {
+    const control = focusedHelp || hoveredHelp;
+    help.textContent = control?.title || ''; help.hidden = !control;
+  };
+  for (const control of root.querySelectorAll('button')) {
+    if (!control.title) continue;
+    control.setAttribute('aria-description', control.title);
+    control.setAttribute('aria-describedby', help.id);
+    control.addEventListener('focus', () => { focusedHelp = control; describe(); });
+    control.addEventListener('blur', () => { if (focusedHelp === control) focusedHelp = undefined; describe(); });
+    control.addEventListener('mouseenter', () => { hoveredHelp = control; describe(); });
+    control.addEventListener('mouseleave', () => { if (hoveredHelp === control) hoveredHelp = undefined; describe(); });
+    control.addEventListener('keydown', event => { if (event.key === 'Escape') help.hidden = true; });
+  }
+  if (typeof ResizeObserver === 'function') {
+    const measureToolbar = () => root.style.setProperty('--reader-toolbar-height', `${readingBar.getBoundingClientRect().height + 12}px`);
+    toolbarObserver = new ResizeObserver(measureToolbar); toolbarObserver.observe(readingBar); measureToolbar();
+  }
   controls();
 }
 window.addEventListener('message', event => {
   const value = event.data;
+  if (value.type === 'return_destination') { returnDestination = value.destination; updateReturnDestination(); return; }
   if (value.type === 'storageCheck') {
     storageFrozen = true; controls(); api.postMessage({ type: 'storageStatus', dirty: drafts.size > 0 }); return;
   }
@@ -441,6 +506,7 @@ window.addEventListener('message', event => {
   if (value.type === 'outline') {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
+    returnDestination = value.returnDestination;
     if (!proofPreferenceLoaded) { proofsHidden = value.proofsHidden === true; proofPreferenceLoaded = true; }
     if (!diagramPreferenceLoaded) { diagramAppearance = ['paper', 'dark'].includes(value.diagramAppearance) ? value.diagramAppearance : 'theme'; diagramPreferenceLoaded = true; }
     if (value.readingFocus && value.readingFocus.serial !== lastReadingFocus) {

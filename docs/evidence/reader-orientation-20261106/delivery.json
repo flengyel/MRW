@@ -1,0 +1,63 @@
+{
+  "version": "0.22.1",
+  "reviewed_baseline": "8bd87432ad988288f4659708fc4f68752f2ec39f",
+  "synchronized_main": "1efa68e94f5e5e375848976c02abc98bdb930d06",
+  "local_changes": true,
+  "package": "vscode/mrw-0.22.1.vsix",
+  "package_bytes": 551408,
+  "package_sha256": "c470f71ef6923880530985bc384ba26fc6b243ca777312de820d9ba292c2a214",
+  "archive_entries": 96,
+  "installed_files_matched": 94,
+  "installed_runtime_files_matched": 91,
+  "install_exit": 0,
+  "forced_working_window_reload": false,
+  "readmes_and_recommended_extension_guide_unchanged": true,
+  "node_broad": {
+    "tests": 288,
+    "passed": 287,
+    "failed": 1,
+    "failure": "ENOTEMPTY in unchanged active-study fixture cleanup hook",
+    "isolated_file_recheck": { "tests": 16, "passed": 16 },
+    "precedes_final_focus_and_preview_adjustments": true
+  },
+  "final_navigation": { "tests": 23, "passed": 23 },
+  "final_preview_and_delayed_focus": { "tests": 4, "passed": 4 },
+  "final_renderer_parser_tutorial": { "tests": 34, "passed": 34 },
+  "python": { "run": 413, "passed": 351, "skipped": 62, "exit": 0 },
+  "browser": {
+    "scope": "isolated headless Chrome with actual reader renderer",
+    "widths": [1280, 960, 480],
+    "pointer_help": true,
+    "keyboard_tab_help": true,
+    "escape_dismisses_help": true,
+    "help_invokes_no_action": true,
+    "source_location_visible": true,
+    "technical_details_collapsed": true,
+    "destination_update_preserves_existing_draft_form": true,
+    "focused_passage_clears_sticky_toolbar": true,
+    "runtime_errors": 0,
+    "native_vscode": false
+  },
+  "native": {
+    "vscode": "1.144.1",
+    "remote": "wsl",
+    "picker_answers_injected": true,
+    "acquisition": "offline synthetic fixture",
+    "observed_markdown_and_contents": true,
+    "observed_hausdorff_location_and_focus_help": true,
+    "observed_exact_return_in_prior_fixture": true,
+    "observed_both_sidebars_and_three_editor_groups": true,
+    "final_visible_editor_acceptance_passed": false,
+    "remaining": "Final strengthened fixture cannot establish the unrelated editor as active initially; reports Untitled-1 and stops before navigation."
+  },
+  "preservation": {
+    "genuine_installed_bridge_readonly_load": true,
+    "hausdorff_files_matched": 8,
+    "hausdorff_passages": 9,
+    "hausdorff_annotations": 2,
+    "stacks_document_source_files_unchanged": 26,
+    "current_store_head_preserved": true,
+    "preservation_copy_repeated": false,
+    "archived_state_restored": false
+  }
+}

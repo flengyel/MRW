@@ -1,5 +1,25 @@
 # CODEX_PLAN.md
 
+## Current repair — reader orientation, 0.22.1
+
+Repair reader orientation before the next feature. Implementation follows the
+reviewed `8bd8743` / 0.22.0 baseline after fast-forwarding to `1efa68e`, preserving
+the concurrent README/recommended-extension changes. Ordinary navigation and
+Return now leave layout control to VS Code; this supersedes all expanded-reading
+requirements in earlier entries. Contents opens/reveals its selected Markdown,
+keeps filename/path visible and provides an explicit reveal action. Initial
+saved-source access reuses the bound store. The reader shows essential source
+location, names its Return destination, separates citation and independent
+opening, and supplies hover/focus help. Preserve the completed rename, prior
+reader repairs, exact references and Hausdorff annotations; repeat no source
+copy or archived-state restoration. Deliver through the existing local
+build/verify/install route without reloading the working window.
+
+See [validation and native-observation limits](docs/READER_ORIENTATION_VALIDATION.md).
+Local 0.22.1 is installed and verified. Complete the remaining native
+visible-editor acceptance described there before the research-continuity
+increment below; the final fixture currently stops during initial focus setup.
+
 ## Current priority — documents and resumable research, 2026-11-06
 
 The [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) governs

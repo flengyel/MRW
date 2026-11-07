@@ -173,6 +173,53 @@ function publishedModel() {
   return value;
 }
 
+test('source collection, section and qualified identity stay visible above text while hashes remain collapsed', () => {
+  for (const [source, collection, chapter, section, tag] of [
+    ['stacks-project', 'The Stacks Project', 'Topology', 3, '08ZD'],
+    ['kerodon', 'Kerodon', 'Kerodon', '1.1', '0004']
+  ]) {
+    const h = reader(true), value = publishedModel();
+    Object.assign(value.model.outline.published, { source_id: source, chapter, section_number: section,
+      title: 'Hausdorff spaces', qualified_tag: `${source}:${tag}`, source_revision: 'secret-hash' });
+    value.returnDestination = { kind: 'citation', label: '← Return to reading-overview.md',
+      path: '/notes/reading-overview.md', detail: 'From a document citation. Return to its exact occurrence in reading-overview.md.' };
+    h.send(value);
+    const bar = h.root.children.find(node => node.className === 'toolbar reading-bar');
+    const location = bar.children.find(node => node.className === 'source-location');
+    assert.ok(location.text().includes(collection)); assert.ok(location.text().includes(chapter));
+    assert.ok(location.text().includes(`Section ${section}`)); assert.ok(location.text().includes(`${source}:${tag}`));
+    assert.equal(bar.text().includes('secret-hash'), false);
+    assert.equal(h.root.children.find(node => node.className === 'reader-tools').open, false);
+    assert.match(h.button(h.root, 'reading-return').text(), /Return to reading-overview.md/);
+    assert.match(h.root.children.find(node => node.className === 'return-context').text(), /exact occurrence/);
+  }
+});
+
+test('hover and keyboard focus explain controls without an action; destination updates preserve reader drafts', () => {
+  const h = reader(true), value = publishedModel(); h.send(value);
+  const note = h.root.all().find(node => node.dataset.draft === 'note:statement:new' && node.tag === 'form');
+  note.all().find(node => node.tag === 'textarea').value = 'Keep my unsaved explanation'; note.listeners.input();
+  const before = h.messages.length;
+  const help = h.root.children.find(node => node.className === 'control-help');
+  const ask = h.button(h.root, 'ask-ai'), refresh = h.button(h.root, 'refresh');
+  assert.equal(help.hidden, true);
+  ask.listeners.mouseenter(); assert.equal(help.hidden, false); assert.match(help.text(), /Send is a separate action/);
+  ask.listeners.focus(); ask.listeners.mouseleave(); assert.equal(help.hidden, false);
+  refresh.listeners.mouseenter(); refresh.listeners.mouseleave(); assert.match(help.text(), /Send is a separate action/);
+  assert.equal(ask['aria-description'], ask.title); assert.equal(ask['aria-describedby'], help.id);
+  ask.listeners.keydown({ key: 'Escape' }); assert.equal(help.hidden, true);
+  ask.listeners.blur(); refresh.listeners.focus(); assert.match(help.text(), /does not reacquire/);
+  refresh.listeners.blur(); assert.equal(help.hidden, true);
+  assert.equal(h.messages.length, before);
+  h.send({ type: 'return_destination', destination: { kind: 'selected', label: '← Open reading-overview.md',
+    path: '/notes/reading-overview.md', detail: 'Opened independently. Open the selected Contents document; no citation occurrence was followed.' } });
+  assert.match(h.button(h.root, 'reading-return').text(), /Open reading-overview.md/);
+  assert.match(h.root.children.find(node => node.className === 'return-context').text(), /Opened independently/);
+  assert.ok(h.button(h.root, 'reading-return').title.includes('/notes/reading-overview.md'));
+  assert.equal(note.all().find(node => node.tag === 'textarea').value, 'Keep my unsaved explanation');
+  assert.equal(h.root.all().find(node => node.dataset.draft === 'note:statement:new' && node.tag === 'form'), note);
+});
+
 test('statement has a direct Proof link; reading a collapsed proof changes no saved state', () => {
   const h = reader(true), value = publishedModel(), before = JSON.stringify(value.model);
   h.send(value);

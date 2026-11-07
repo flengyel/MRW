@@ -31,7 +31,9 @@ function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file,
 async function harness(root, state = new Map(), options = {}) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map(), executed = [];
   const opens = [], dialogs = [], saveChoices = [], saveDialogs = [], workspaceEdits = [], saves = [], commandCalls = [], inputs = [], picks = [], endings = [], panels = [];
-  let activeListener = () => {}, closeListener = () => {}, openListener = () => {}, changeListener = () => {}, service = runBridge;
+  const activeListeners = new Set();
+  const activeListener = editor => { for (const listener of activeListeners) listener(editor); };
+  let closeListener = () => {}, openListener = () => {}, changeListener = () => {}, service = runBridge;
   const storedDocuments = new Map();
   const disposable = { dispose() {} };
   const offset = (text, point) => text.split('\n').slice(0, point.line).reduce((n, line) => n + line.length + 1, 0) + point.character;
@@ -61,6 +63,7 @@ async function harness(root, state = new Map(), options = {}) {
       } };
   }
   const api = {
+    extensions: { getExtension: () => undefined },
     Position, Range, Selection, WorkspaceEdit, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => x.startsWith('file:') ? uri(x.slice(5)) : uri(x, 'https') },
     ProgressLocation: { Notification: 15 },
     ViewColumn: { One: 1, Two: 2, Beside: -2 }, TextEditorRevealType: { InCenter: 1, InCenterIfOutsideViewport: 2 },
@@ -109,7 +112,7 @@ async function harness(root, state = new Map(), options = {}) {
           receive: value => {const state=panel.webview.messages.findLast(row=>row.type==='active_study')?.study;return receive(require('./study-message-fixture').message(state,value));} };
         panels.push(panel); return panel;
       },
-      onDidChangeActiveTextEditor(callback) { activeListener = callback; return disposable; },
+      onDidChangeActiveTextEditor(callback) { activeListeners.add(callback); return { dispose() { activeListeners.delete(callback); } }; },
       registerTreeDataProvider() { return disposable; },
       createTreeView(_id, options) { api.readingProvider = options.treeDataProvider; return api.readingTree = {
         dispose() {}, onDidCollapseElement(fn) { api.collapseReading = fn; return disposable; },
@@ -1622,7 +1625,7 @@ test('reading navigator derives live Markdown, follows two sources, pins returns
   assert.equal(doc.getText(h.api.window.activeTextEditor.selection), references[1].markdown);
   model = await h.commands.get('mrw.refreshReadingOutline')();
   await h.commands.get('mrw.selectReadingOutlineItem')(model.all.at(-1));
-  assert.equal(h.panels.at(-1).webview.messages.at(-1).reference.status, 'whole outline');
+  assert.equal(h.panels.at(-1).webview.messages.findLast(message => message.type === 'outline').reference.status, 'whole outline');
   await h.commands.get('mrw.returnToReadingOutline')();
   const restored = await harness(root, h.state);
   const restoredDoc = restored.document(file, original); restoredDoc.languageId = 'markdown'; restored.focus(restored.editor(restoredDoc));
@@ -1698,7 +1701,7 @@ test('pending source returns track outside edits and reject overlap until exact 
   });
 });
 
-test('navigator opens exact published mathematics in an expanded reader, retaining changed-range fallback and Return', async t => {
+test('navigator opens exact published mathematics without changing surrounding layout, retaining changed-range fallback and Return', async t => {
   const root = await temporary(t, true), h = await harness(root);
   h.setService((extension, executable, request, options) => runBridge(extension, executable, request, {
     ...options, spawn: (command, args, settings) => require('node:child_process').spawn(command,
@@ -1712,18 +1715,51 @@ test('navigator opens exact published mathematics in an expanded reader, retaini
     project_root: root, id, revision: imported.revision, region: region.id });
   const file = path.join(root, 'overview.md'), text = '# Reading\n\n' + ref.markdown + '\n';
   await fs.writeFile(file, text);
-  const doc = h.document(file, text); doc.languageId = 'markdown'; h.focus(h.editor(doc));
-  let model = await h.commands.get('mrw.openReadingOutline')(); const node = model.all[1];
+  const doc = h.document(file, text); doc.languageId = 'markdown';
+  const unrelated = h.editor(h.document(path.join(root, 'unrelated.txt'), 'Unsaved surrounding work'));
+  unrelated.viewColumn = 3; unrelated.document.isDirty = true;
+  const draft = h.editor(h.document('Untitled-1', 'Keep this draft', 'untitled'));
+  draft.viewColumn = 4; draft.document.isDirty = true;
+  h.api.window.visibleTextEditors = [unrelated, draft]; h.focus(unrelated);
+  h.api.window.tabGroups = { all: [{ viewColumn: 1, tabs: [{ input: { uri: doc.uri } }] }] };
+  h.opens.push([doc.uri]);
+  let model = await h.commands.get('mrw.chooseReadingOverview')();
+  assert.equal(h.shown.at(-1), doc);
+  assert.equal(h.api.window.activeTextEditor.viewColumn, 1);
+  assert.equal(h.api.readingTree.description, 'overview.md');
+  assert.ok(h.api.readingTree.message.includes(file));
+  h.focus(unrelated);
+  await h.commands.get('mrw.revealReadingDocument')();
+  assert.equal(h.api.window.activeTextEditor.document, doc);
+  const selectedBeforeCancel = JSON.stringify(h.state.get('mrw.readingOutline.v1'));
+  const shownBeforeCancel = h.shown.length;
+  await h.commands.get('mrw.chooseReadingOverview')();
+  assert.equal(h.shown.length, shownBeforeCancel);
+  assert.equal(JSON.stringify(h.state.get('mrw.readingOutline.v1')), selectedBeforeCancel);
+  assert.ok(h.api.readingTree.message.includes(file));
+  h.changeDocument(doc, 0, 0, 'Unsaved notes\n\n');
+  model = await h.commands.get('mrw.refreshReadingOutline')();
+  const node = model.all[1];
   assert.equal(h.api.readingProvider.getTreeItem(node).label, 'stacks-project:08ZE');
   const rawViews = () => h.shown.filter(d => d.uri.scheme === 'mrw-record').length;
   const before = rawViews();
   assert.equal((await h.commands.get('mrw.selectReadingOutlineItem')(node)).status, 'unchanged');
   assert.equal(rawViews(), before, 'an exact rendered region does not open a TeX editor automatically');
   assert.equal(h.panels[0].webview.messages.findLast(v => v.type === 'outline').readingFocus.region, region.id);
-  assert.ok(h.executed.includes('workbench.action.maximizeEditorHideSidebar'));
+  const destination = h.panels[0].webview.messages.findLast(v => v.type === 'outline').returnDestination;
+  assert.equal(destination.kind, 'citation'); assert.equal(destination.path, file);
+  assert.match(destination.label, /Return to overview.md/);
+  assert.equal(h.executed.some(command => /maximize|minimize|Sidebar|sideBar/i.test(command)), false);
   await h.commands.get('mrw.returnToReadingOutline')();
   assert.equal(doc.getText(h.api.window.activeTextEditor.selection), ref.markdown);
-  assert.ok(h.executed.includes('workbench.action.minimizeOtherEditors'));
+  for (const editor of [unrelated, draft]) {
+    assert.ok(h.api.window.visibleTextEditors.includes(editor));
+    assert.equal(editor.document.isDirty, true); assert.equal(editor.document.isClosed, false);
+  }
+  assert.equal(unrelated.document.getText(), 'Unsaved surrounding work');
+  assert.equal(draft.document.getText(), 'Keep this draft');
+  assert.equal(doc.isDirty, true); assert.equal(h.saves.length, 0);
+  assert.equal(h.executed.some(command => /maximize|minimize|Sidebar|sideBar/i.test(command)), false);
   await h.panels[0].receive({ type: 'edit', change: { kind: 'replace_region', region: region.id, start: [0, 0], end: [0, 3] } });
   model = await h.commands.get('mrw.refreshReadingOutline')();
   assert.equal((await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1])).status, 'changed or removed');
@@ -1731,6 +1767,49 @@ test('navigator opens exact published mathematics in an expanded reader, retaini
   assert.equal(h.api.window.activeTextEditor.document.getText(h.api.window.activeTextEditor.selection), region.argument_text);
   assert.equal(h.panels[0].webview.messages.findLast(v => v.type === 'outline').selected, null);
   assert.equal(await fs.readFile(file, 'utf8'), text); assert.deepEqual(h.errors, []);
+});
+
+test('Contents navigation waits for native focus acknowledgement before using its exact selection', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'orientation.md');
+  await fs.writeFile(file, '# Heading\n');
+  const doc = h.document(file, '# Heading\n'); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  const unrelated = h.editor(h.document('Untitled-1', 'Keep this draft', 'untitled'));
+  unrelated.document.isDirty = true; h.focus(unrelated);
+  h.api.window.showTextDocument = async document => {
+    const target = h.editor(document);
+    setTimeout(() => h.focus(target), 20);
+    return target;
+  };
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[0]);
+  assert.equal(h.api.window.activeTextEditor.document, doc);
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), '# Heading');
+  assert.equal(unrelated.document.getText(), 'Keep this draft'); assert.equal(unrelated.document.isDirty, true);
+  assert.deepEqual(h.errors, []);
+});
+
+test('saved-source opening is discoverable and independent of an earlier citation return', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const { saved, panel } = await sourceReader(h, root);
+  const store = path.join(root, '..', 'private-state', `outlines-${navigation.digest(root)}`);
+  const ref = await runBridge(path.resolve(__dirname, '..'), 'python3', { method: 'outline_reference', store,
+    project_root: root, id: saved.outline.id, revision: saved.revision, region: null });
+  const file = path.join(root, 'citation.md'), text = '# Citation\n' + ref.markdown + '\n';
+  await fs.writeFile(file, text); const doc = h.document(file, text); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  const model = await h.commands.get('mrw.openReadingOutline')();
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1]);
+  assert.equal(panel.webview.messages.findLast(message => message.type === 'outline').returnDestination.kind, 'citation');
+  h.changeDocument(doc, 0, 0, 'Unsaved prefix\n');
+  await panel.receive({ type: 'reading_return' });
+  assert.equal(doc.getText(h.api.window.activeTextEditor.selection), ref.markdown);
+  await h.commands.get('mrw.openOutline')();
+  const independent = panel.webview.messages.findLast(message => message.type === 'outline').returnDestination;
+  assert.equal(independent.kind, 'selected'); assert.match(independent.detail, /Opened independently/);
+  assert.equal(independent.path, file);
+  const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
+  assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.readingOutline').contents.includes('[Open Saved Source…](command:mrw.openOutline)'));
+  assert.ok(manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.openOutline' && item.group.startsWith('navigation')));
+  assert.equal(doc.isDirty, true); assert.equal(h.saves.length, 0); assert.deepEqual(h.errors, []);
 });
 
 test('annotation success feedback follows core publication and is absent after rejection', async t => {
@@ -1766,8 +1845,12 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.research']);
   assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
   const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
-  for(const command of ['mrw.chooseReadingOverview','mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.openOutline','mrw.importStacksSection','mrw.artifactLocation']){
+  for(const command of ['mrw.chooseReadingOverview','mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.importStacksSection','mrw.artifactLocation']){
     assert.ok(overflow.some(v=>v.command===command));assert.ok(h.commands.has(command));
+  }
+  for(const command of ['mrw.openOutline','mrw.revealReadingDocument']){
+    assert.ok(c.menus['view/title'].some(item=>item.command===command&&item.when==='view == mrw.readingOutline'&&item.group?.startsWith('navigation')));
+    assert.ok(h.commands.has(command));
   }
   assert.equal(h.requests.length,0,'registering the icon, views and menus launches no service');
 });
@@ -1845,8 +1928,8 @@ test('reader Return without a source-link origin reopens the selected overview a
   assert.equal(editor.document.uri.fsPath,file);
   assert.equal(editor.document.getText(editor.selection),'## Current question');
   assert.equal(restored.api.readingProvider.getChildren()[0].label,'Reading');
-  assert.ok(restored.executed.includes('workbench.action.minimizeOtherEditors'));
-  assert.ok(restored.executed.includes('mrw.readingOutline.focus'));
+  assert.equal(restored.executed.some(command => /maximize|minimize|Sidebar|sideBar/i.test(command)), false);
+  assert.equal(restored.executed.includes('mrw.readingOutline.focus'), false);
   assert.equal(panel.webview.messages.at(-1).type,'idle');
   assert.equal(restored.requests.length,before,'Returning without a link does not read or change source records');
   assert.equal(restored.state.get('mrw.readingOutline.v1').origin,undefined,'An overview return is not a source-link occurrence');
@@ -1899,11 +1982,16 @@ test('Return without a source-link origin checks the remembered overview workspa
 
 test('failed reader Return releases controls while its error notification remains open', async t => {
   const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
-  const overview=path.join(root,'overview.md');await fs.writeFile(overview,'# Reading\n');
-  const state=new Map([['mrw.readingOutline.v1',{uri:uri(overview).toString(),
-    origin:{uri:uri(overview).toString(),revision:'0'.repeat(64),start:0,end:1}}]]);
-  const h=await harness(root,state);h.focus(h.editor(h.document(file,'Source.')));
-  await h.commands.get('mrw.createOutline')();const panel=h.panels[0];
+  const overview=path.join(root,'overview.md');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+  const saved=await h.commands.get('mrw.createOutline')(),panel=h.panels[0];
+  const store=path.join(root,'..','private-state',`outlines-${navigation.digest(root)}`);
+  const ref=await runBridge(path.resolve(__dirname,'..'),'python3',{method:'outline_reference',store,project_root:root,id:saved.outline.id,revision:saved.revision,region:null});
+  await fs.writeFile(overview,'# Reading\n'+ref.markdown+'\n');
+  const doc=h.document(overview,'# Reading\n'+ref.markdown+'\n');doc.languageId='markdown';h.focus(h.editor(doc));
+  const model=await h.commands.get('mrw.openReadingOutline')();
+  await h.commands.get('mrw.selectReadingOutlineItem')(model.all[1]);
+  h.changeDocument(doc,model.all[1].start+2,1,'X');
   let dismiss,finished=false;
   h.api.window.showErrorMessage=message=>{h.errors.push(message);return new Promise(resolve=>{dismiss=resolve})};
   const pending=panel.receive({type:'reading_return'}).then(()=>{finished=true});
@@ -2044,30 +2132,47 @@ test('diagram Theme default supersedes the legacy fixed mode and persists explic
   assert.equal(reopened.requests.some(r=>r.method==='outline_render_diagram'),false);
 });
 
-test('Return reopens the active overview as one preview when VS Code supports it and preserves an unrelated Untitled draft', async t => {
+test('Return explicitly opens the overview preview in its group and preserves an unrelated Untitled draft', async t => {
   const root=await temporary(t),h=await harness(root),file=path.join(root,'overview.md');await fs.writeFile(file,'# Reading\n');
   const doc=h.document(file,'# Reading\n');doc.languageId='markdown';h.focus(h.editor(doc));
   await h.commands.get('mrw.openReadingOutline')();
+  const returnCallsStart=h.commandCalls.length;
   const draft=h.document('Untitled-1','Unsaved reader work','untitled');draft.isDirty=true;
   h.api.commands.getCommands=async()=>['markdown.reopenAsPreview'];
   let rendered;
-  h.commands.set('markdown.reopenAsPreview',()=>{rendered=h.api.window.activeTextEditor.document;h.focus(undefined)});
+  h.commands.set('vscode.openWith',(resource,viewType,options)=>{rendered=resource;assert.equal(viewType,'vscode.markdown.preview.editor');assert.equal(options.viewColumn,1);h.focus(undefined)});
   await h.commands.get('mrw.returnToReadingOutline')();
-  assert.equal(rendered,doc);assert.equal(h.commandCalls.some(c=>c.name==='markdown.showPreview'),false);
+  assert.equal(rendered,doc.uri);assert.equal(h.commandCalls.slice(returnCallsStart).some(c=>c.name==='markdown.showPreview'),false);
   assert.equal(draft.getText(),'Unsaved reader work');assert.equal(draft.isDirty,true);assert.equal(draft.isClosed,false);
   assert.equal(h.requests.length,0);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
 });
 
-test('Return never reopens an unrelated Untitled draft as a preview when editor focus changes', async t => {
+test('Return keeps its explicit document and group when editor focus changes before preview', async t => {
   const root=await temporary(t),h=await harness(root),file=path.join(root,'overview.md');await fs.writeFile(file,'# Reading\n');
-  const doc=h.document(file,'# Reading\n');doc.languageId='markdown';h.focus(h.editor(doc));
+  const doc=h.document(file,'# Reading\n');doc.languageId='markdown';
+  const editor=h.editor(doc);editor.viewColumn=2;h.api.window.visibleTextEditors=[editor];h.focus(editor);
   await h.commands.get('mrw.openReadingOutline')();
   const draft=h.document('Untitled-1','Keep my draft','untitled');draft.isDirty=true;
   h.api.commands.getCommands=async()=>{h.focus(h.editor(draft));return ['markdown.reopenAsPreview']};
   await h.commands.get('mrw.returnToReadingOutline')();
   assert.equal(h.commandCalls.some(c=>c.name==='markdown.reopenAsPreview'),false);
-  assert.equal(h.commandCalls.findLast(c=>c.name==='markdown.showPreview').args[0].fsPath,file);
+  const preview=h.commandCalls.findLast(call=>call.name==='vscode.openWith');
+  assert.equal(preview.args[0].fsPath,file);assert.equal(preview.args[2].viewColumn,2);
   assert.equal(draft.getText(),'Keep my draft');assert.equal(draft.isDirty,true);assert.equal(draft.isClosed,false);
+  assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('Return discovers the native preview before its commands have activated', async t => {
+  const root=await temporary(t),h=await harness(root),file=path.join(root,'overview.md');await fs.writeFile(file,'# Reading\n');
+  const doc=h.document(file,'# Reading\n');doc.languageId='markdown';h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  const returnCallsStart=h.commandCalls.length;
+  h.api.extensions.getExtension=()=>({packageJSON:{contributes:{customEditors:[{viewType:'vscode.markdown.preview.editor'}]}}});
+  h.api.commands.getCommands=async()=>[];
+  await h.commands.get('mrw.returnToReadingOutline')();
+  const preview=h.commandCalls.findLast(call=>call.name==='vscode.openWith');
+  assert.equal(preview.args[0],doc.uri);assert.equal(preview.args[1],'vscode.markdown.preview.editor');assert.equal(preview.args[2].viewColumn,1);
+  assert.equal(h.commandCalls.slice(returnCallsStart).some(call=>call.name==='markdown.showPreview'),false);
   assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
 });
 

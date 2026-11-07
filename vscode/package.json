@@ -254,6 +254,7 @@
         "command": "mrw.openOutline",
         "title": "Open Saved Source\u2026",
         "category": "MRW",
+        "icon": "$(book)",
         "enablement": "!mrw.outlineBusy"
       },
       {
@@ -397,6 +398,12 @@
         "command": "mrw.chooseReadingOverview",
         "title": "Choose Document\u2026",
         "category": "MRW"
+      },
+      {
+        "command": "mrw.revealReadingDocument",
+        "title": "Reveal Contents Document",
+        "category": "MRW",
+        "icon": "$(go-to-file)"
       },
       {
         "command": "mrw.refreshReadingOutline",
@@ -548,7 +555,7 @@
           "group": "navigation"
         },
         {
-          "command": "mrw.openReadingOutline",
+          "command": "mrw.revealReadingDocument",
           "when": "view == mrw.readingOutline",
           "group": "navigation"
         },
@@ -590,7 +597,7 @@
         {
           "command": "mrw.openOutline",
           "when": "view == mrw.readingOutline",
-          "group": "2_sources@1"
+          "group": "navigation@1"
         },
         {
           "command": "mrw.createOutline",
@@ -898,7 +905,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.readingOutline",
-        "contents": "Open a document in place. Contents shows headings and links in Markdown, including unsaved edits. Select a notes folder for ID links and backlinks.\n[Open Document\u2026](command:mrw.openDocument)\n[Choose Notes Folder\u2026](command:mrw.chooseNotesFolder)\n[Reopen Document](command:mrw.reopenDocument)\n[Show Contents](command:mrw.openReadingOutline)\n[New Document\u2026](command:mrw.newReadingOverview)\n[Tutorial](command:mrw.openTutorial)"
+        "contents": "Open a document in place, or reopen retained reading from the saved store. Contents shows Markdown headings and links, including unsaved edits.\n[Open Document\u2026](command:mrw.openDocument)\n[Open Saved Source\u2026](command:mrw.openOutline)\n[Choose Notes Folder\u2026](command:mrw.chooseNotesFolder)\n[Reopen Document](command:mrw.reopenDocument)\n[Show Contents](command:mrw.openReadingOutline)\n[New Document\u2026](command:mrw.newReadingOverview)\n[Tutorial](command:mrw.openTutorial)"
       },
       {
         "view": "mrw.research",

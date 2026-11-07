@@ -1,5 +1,10 @@
 # Existing documents, Contents and saved sources — 0.22.4
 
+Ordinary navigation preserves VS Code's layout: MRW does not automatically
+maximize, hide either sidebar or minimize other editors. Keep MRW, Codex,
+other editor groups and drafts available. This supersedes the older automatic
+expanded-reading requirement.
+
 **MRW: Open Document…** displays an existing file in place. Markdown opens in
 VS Code's Markdown preview and supplies **Contents**. **Edit Document Source**
 opens its source for editing without saving a dirty buffer. **Show Contents**
@@ -23,8 +28,12 @@ store. Obsidian is optional.
 
 **Show Contents** selects Markdown for the navigator; it uses the active
 Markdown document, the remembered selection or a Markdown picker. **Choose
-Document…** chooses Markdown for Contents. These actions are not general file
-openers. **New Document…** creates a `.md` or `.markdown` file through the host
+Document…** chooses Markdown for Contents. Both visibly open or reveal the
+selected Markdown in its existing group when available. The Contents header
+identifies its filename and full path, including unsaved status; **Reveal
+Contents Document** brings it back even with an unrelated editor active.
+Cancellation leaves the current document, Contents and drafts unchanged.
+These actions are not general file openers. **New Document…** creates a `.md` or `.markdown` file through the host
 Save dialog and refuses to overwrite a file. An untitled Markdown document
 works for the current session. VS Code owns editing, saving, undo and recovery.
 
@@ -143,14 +152,30 @@ selected per window. No headings, IDs, filenames or note contents are renamed.
 
 **Retain Document as Source** keeps a saved UTF-8 text document and its selected
 passage. It does not import a PDF. **Open Saved Source…** reopens that retained
-revision even after the original changes or disappears. **Refresh Saved Source**
+revision even after the original changes or disappears. It is visible in the
+initial Contents interface and its title toolbar. In the Stacks workspace,
+choose **Hausdorff spaces** from the existing saved store; no re-import or
+preservation copy is needed. **Refresh Saved Source**
 reloads saved state and annotations without acquiring a new original revision.
 
 Use **Insert Source or Passage Link…** in a working Markdown document to insert
 an exact saved reference. Following it from Contents opens that saved source;
 **Return to Document** restores that citation's originating occurrence and
-rendered Markdown view. Existing `mrw-outline:v1` references and record fields
+rendered Markdown view. The reader names **Return to filename** for a citation;
+independent saved-source opening instead offers **Open filename** for the
+selected Contents document, or **Choose a document…** when none is selected.
+Each live reader tracks its own citation occurrence, including nonoverlapping
+unsaved edits. No Return saves text or changes surrounding groups/sidebar choices.
+The rendered preview opens in the document's group; an unrelated editor remains
+visible in its own group.
+Existing `mrw-outline:v1` references and record fields
 remain unchanged. Copying Markdown does not copy its private saved targets.
+
+The reader's sticky location line shows source collection, chapter/section when
+available and qualified identifier. Hashes and storage details stay collapsed.
+Hover or Tab-focus reader controls for concise help; Escape dismisses it.
+The location and destination remain visible without hovering. Host tree and
+title tooltips use VS Code's own help presentation.
 
 Reader annotations use **Save annotation**. Current studies use **Pause / save**
 and **Resume Study**; work on a proof uses **Save question**

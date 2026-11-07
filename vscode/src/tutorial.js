@@ -21,7 +21,7 @@ function rewriteGuideLinks(text) {
 
 function renderTutorial(text, identity) {
   const version = identity.version || 'unknown';
-  const build = identity.commit ? ` · build \`${identity.commit}\`` : ' · build identity unavailable';
+  const build = identity.commit ? ` · build \`${identity.commit}\`${identity.localChanges ? ' with local changes' : ''}` : ' · build identity unavailable';
   const heading = /^# [^\r\n]+(?:\r?\n|$)/;
   const banner = `\nActive extension: **MRW ${version}**${build}.\n`;
   const source = rewriteGuideLinks(text);
@@ -35,7 +35,10 @@ function registerTutorial({ vscode, context, register }) {
     const marker = JSON.parse(fs.readFileSync(path.join(context.extensionPath, 'media', 'build-info.json'), 'utf8'));
     // A newer package may have reached disk before this activation's metadata.
     // Its commit must not be presented as the identity of the running code.
-    if (marker.version === identity.version && /^[0-9a-f]{7,64}$/i.test(marker.commit || '')) identity.commit = marker.commit;
+    if (marker.version === identity.version && /^[0-9a-f]{7,64}$/i.test(marker.commit || '')) {
+      identity.commit = marker.commit;
+      identity.localChanges = marker.localChanges === true;
+    }
   } catch (_) { /* Unavailable build identity does not make help unavailable. */ }
 
   // Snapshot the active package once. A later on-disk install does not change

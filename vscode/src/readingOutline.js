@@ -29,7 +29,7 @@ function validPin(pin) {
     Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start;
 }
 
-function registerReadingOutline({ vscode, context, register, followReference, resolveReferences }) {
+function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged }) {
   const saved = context.workspaceState.get(KEY) || {};
   let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
@@ -47,7 +47,18 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     if (document?.uri.scheme === 'file') overviewUri = document.uri.toString();
     const value = state();
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
+    onReturnChanged?.();
     return publication;
+  }
+  function returnDestination(location = origin) {
+    const citation = validPin(location);
+    const target = citation ? location.uri : document?.uri.toString() || overviewUri;
+    if (!target) return { kind: 'choose', label: 'Choose a document…', detail: 'Opened independently. Choose Markdown for Contents before returning.' };
+    const uri = vscode.Uri.parse(target);
+    const filename = path.basename(uri.path);
+    return { kind: citation ? 'citation' : 'selected', label: `← ${citation ? 'Return to' : 'Open'} ${filename}`,
+      path: uri.fsPath || target,
+      detail: citation ? `From a document citation. Return to its exact occurrence in ${filename}.` : `Opened independently. Open the selected Contents document ${filename}; no citation occurrence was followed.` };
   }
   const provider = {
     onDidChangeTreeData: changed.event,
@@ -67,17 +78,25 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     getParent: node => model?.all.find(candidate => candidate.children.includes(node)),
   };
   const tree = vscode.window.createTreeView('mrw.readingOutline', { treeDataProvider: provider, showCollapseAll: true });
+  function identifyDocument() {
+    const uri = document?.uri || (overviewUri && vscode.Uri.parse(overviewUri));
+    tree.description = uri ? `${path.basename(uri.path)}${document?.isDirty ? ' •' : ''}` : undefined;
+    tree.message = uri ? `Contents: ${uri.fsPath || uri.toString()}` : undefined;
+  }
+  identifyDocument();
   // Leave the initial view empty so VS Code displays the contributed welcome
   // content and its labelled Show Contents button.
   function refresh() {
     clearTimeout(timer);
+    identifyDocument();
     if (!document || document.isClosed) { model = undefined; changed.fire(); return; }
     try {
       model = parseReadingMarkdown(document.getText());
-      for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
       tree.description = `${noteIdentity(document).label}${document.isDirty ? ' •' : ''}`;
-      tree.message = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? undefined : 'Add Markdown headings or file, note, or MRW passage links.';
-    } catch (error) { model = undefined; tree.message = error.message; }
+      for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
+      const notice = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? '' : 'Add Markdown headings or file, note, or MRW passage links.';
+      if (notice) tree.message += `\n${notice}`;
+    } catch (error) { model = undefined; tree.message += `\n${error.message}`; }
     changed.fire();
   }
   const isOverview = doc => doc && !doc.isClosed && doc.languageId === 'markdown' && ['file', 'untitled'].includes(doc.uri.scheme);
@@ -92,29 +111,55 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     const revision = digest(doc.getText());
     return { uri: doc.uri.toString(), revision, start, end, initial: { revision, start, end } };
   }
+  function documentColumn(doc) {
+    return vscode.window.visibleTextEditors?.find(editor => editor.document === doc)?.viewColumn ||
+      vscode.window.tabGroups?.all.find(group => group.tabs.some(tab => tab.input?.uri?.toString() === doc.uri.toString()))?.viewColumn ||
+      vscode.window.activeTextEditor?.viewColumn;
+  }
   async function showLocation(doc, location) {
     await checkDocument(doc);
     if (location.invalid || digest(doc.getText()) !== location.revision || location.end > doc.getText().length) {
       throw new Error('The exact document location changed or is unavailable. No replacement was guessed; select the intended location in the document again.');
     }
     const version = doc.version;
-    const editor = await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.One });
+    const editor = await vscode.window.showTextDocument(doc, { preview: false, viewColumn: documentColumn(doc) });
     if (doc.version !== version || doc.isClosed) throw new Error('The document changed while opening. Select its location again.');
     const range = new vscode.Range(doc.positionAt(location.start), doc.positionAt(location.end));
     editor.selection = new vscode.Selection(range.start, range.end);
     editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-    return editor;
+    const focused = () => {
+      const active = vscode.window.activeTextEditor;
+      return active?.document === doc && active.viewColumn === editor.viewColumn && active.selection.isEqual(range) ? active : undefined;
+    };
+    if (focused()) return focused();
+    return new Promise((resolve, reject) => {
+      const listeners = [];
+      let timer;
+      const finish = error => {
+        clearTimeout(timer); for (const listener of listeners) listener.dispose();
+        if (error) reject(error); else resolve(focused());
+      };
+      const check = () => {
+        if (doc.isClosed || doc.version !== version) finish(new Error('The document changed while opening. Select its location again.'));
+        else if (focused()) finish();
+      };
+      listeners.push(vscode.window.onDidChangeActiveTextEditor(check));
+      const selectionListener = vscode.window.onDidChangeTextEditorSelection?.(check);
+      if (selectionListener) listeners.push(selectionListener);
+      timer = setTimeout(() => finish(new Error('The selected document did not receive focus. Reveal it and select the location again.')), 2000);
+      check();
+    });
   }
   async function showReadingView(doc, column) {
     return showMarkdownPreview(vscode, doc, column);
   }
-  async function openReadingOutline(choose = false, fromReader = false) {
+  async function openReadingOutline(choose = false, fromReader = false, revealSelected = false) {
     const attempt = ++generation; documents.supersede();
     // Return prefers the selected document, including after restart. A text
     // editor left active behind a reader need not be that overview.
-    let doc = choose ? undefined : fromReader ? document : vscode.window.activeTextEditor?.document;
+    let doc = choose ? undefined : fromReader || revealSelected ? document : vscode.window.activeTextEditor?.document;
     const previewUri = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
-    if (!choose && !fromReader && !isOverview(doc) && previewUri?.scheme === 'file' && /\.(md|markdown)$/i.test(previewUri.path)) {
+    if (!choose && !fromReader && !revealSelected && !isOverview(doc) && previewUri?.scheme === 'file' && /\.(md|markdown)$/i.test(previewUri.path)) {
       await checkFile(previewUri);
       if (attempt !== generation) return;
       doc = await vscode.workspace.openTextDocument(previewUri);
@@ -146,20 +191,22 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       if (attempt !== generation) return;
       doc = await vscode.workspace.openTextDocument(choices[0]);
     }
+    const column = documentColumn(doc);
     const opened = await selectOverview(doc, attempt, fromReader);
     if (opened && attempt === generation) {
-      await showReadingView(doc);
+      await showReadingView(doc, column);
     }
     return opened;
   }
-  async function selectOverview(doc, attempt, showEditor = false) {
+  async function selectOverview(doc, attempt, fromReader = false) {
     await checkDocument(doc);
+    if (attempt !== generation) return;
+    await vscode.window.showTextDocument(doc, { preview: false, viewColumn: documentColumn(doc) });
     if (attempt !== generation) return;
     const previous = document?.uri.toString() || overviewUri;
     if (previous && previous !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
     document = doc; refresh();
-    await vscode.window.showTextDocument(doc, { preview: false, viewColumn: readingDocumentColumn(vscode, doc) });
-    await vscode.commands.executeCommand('mrw.readingOutline.focus');
+    if (!fromReader) await vscode.commands.executeCommand('mrw.readingOutline.focus');
     if (selected?.uri === doc.uri.toString() && model && selected.revision === model.revision) {
       await showLocation(doc, selected);
       const node = model.all.find(n => n.start === selected.start && n.end === selected.end);
@@ -188,6 +235,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     await vscode.window.showTextDocument(doc, { preview: false, viewColumn: readingDocumentColumn(vscode, doc) });
   });
   register('mrw.chooseReadingOverview', () => openReadingOutline(true));
+  register('mrw.revealReadingDocument', () => openReadingOutline(false, false, true));
   register('mrw.newReadingOverview', async () => {
     const attempt = ++generation; documents.supersede();
     const root = vscode.workspace.workspaceFolders?.[0]?.uri;
@@ -235,14 +283,16 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       // return pin. Both locations follow intervening edits; commit only once
       // the retained target has actually opened.
       const pending = { location }; pendingOrigins.add(pending);
+      pending.release = () => pendingOrigins.delete(pending);
+      let committed = false;
       try {
-        const result = await followReference(current.reference, editor, { reading: true });
+        const result = await followReference(current.reference, editor, { reading: true, returnContext: pending });
         if (attempt !== generation) return result;
+        committed = true;
         origin = pending.location; route = 'retained';
-        await vscode.commands.executeCommand('workbench.action.maximizeEditorHideSidebar');
         await persist(); return result;
       }
-      finally { pendingOrigins.delete(pending); }
+      finally { if (!committed) pending.release(); }
     }
     await showMarkdownPreview(vscode, source, editor.viewColumn);
     await persist();
@@ -250,19 +300,20 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   register('mrw.returnToReadingOutline', async options => {
     if (!options?.retained && route === 'ordinary' && await documents.returnToDocument()) return;
     documents.supersede();
-    if (!validPin(origin)) return openReadingOutline(false, true);
-    const uri = vscode.Uri.parse(origin.uri);
+    const destination = options && Object.hasOwn(options, 'location') ? options.location : origin;
+    if (!validPin(destination)) return openReadingOutline(false, true);
+    const uri = vscode.Uri.parse(destination.uri);
     if (!['file', 'untitled'].includes(uri.scheme)) {
       throw new Error('The originating document is unavailable in this workspace.');
     }
     if (uri.scheme === 'file') await checkFile(uri);
     const doc = await vscode.workspace.openTextDocument(uri);
-    await showLocation(doc, origin);
-    selected = origin;
+    const editor = await showLocation(doc, destination);
+    selected = destination;
     if (document !== doc) { document = doc; collapsed = new Set(); }
     refresh();
-    await showReadingView(doc);
-    const node = model?.all.find(n => n.start === origin.start && n.end === origin.end);
+    await showReadingView(doc, editor.viewColumn);
+    const node = model?.all.find(n => n.start === destination.start && n.end === destination.end);
     if (node) await tree.reveal(node, { select: true, focus: false });
     await persist();
   });
@@ -285,6 +336,6 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     }),
     vscode.workspace.onDidCloseTextDocument(doc => { if (doc === document && doc.isClosed) refresh(); }),
     { dispose() { clearTimeout(timer); } });
-  return { provider, refresh, checkFile, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
+  return { provider, refresh, checkFile, returnDestination, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
 }
 module.exports = { registerReadingOutline, trackLocation };

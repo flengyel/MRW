@@ -25,7 +25,7 @@ function probe() {
 }
 async function run(context) {
  const cfg=JSON.parse(await fs.readFile(path.join(context.extensionPath,'host-test.json'),'utf8'));
- const report={version:'0.9.1',vscode:vscode.version,remote:vscode.env.remoteName,checks:[],requests:[],errors:[]};
+ const report={version:'0.22.1',vscode:vscode.version,remote:vscode.env.remoteName,checks:[],requests:[],errors:[],nativeSidebarObservation:'requires visible window observation; editor API does not expose sidebar visibility'};
  const output=path.join(cfg.artifacts,'host-presentation.json'), save=()=>fs.writeFile(output,JSON.stringify(report,null,2));
  const native={tree:vscode.window.createTreeView,panel:vscode.window.createWebviewPanel,error:vscode.window.showErrorMessage,bridge:bridge.runBridge};
  let tree,provider,controller;
@@ -67,14 +67,19 @@ async function run(context) {
   assert.equal(vscode.window.activeTextEditor?.document,doc,'Overview editor becomes active before navigation');
   const model=await command('openReadingOutline');const passage=model.all.find(n=>n.reference===old.seed.passage.reference);
   await check('concise source labels retain original citation tooltips',async()=>{const item=provider.getTreeItem(passage);assert.equal(item.label,'Hausdorff spaces');assert.ok(item.tooltip.includes('The Stacks Project Authors'))});
-  await check('exact published passage opens rendered mathematics in a full editor group',async()=>{
+  await check('exact published passage renders without changing surrounding editor groups',async()=>{
+   const layout=await vscode.commands.executeCommand('vscode.getEditorLayout');
+   const dirty=vscode.workspace.textDocuments.filter(doc=>doc.isDirty).map(doc=>({doc,text:doc.getText()}));
    await command('selectReadingOutlineItem',passage);
    for(let i=0;i<80&&!controller?.ready;i++)await pause(100);
    assert.ok(controller.ready);await pause(700);
    const view=await controller.inspect();report.passage=view;
-   assert.ok(view.innerWidth>=900,JSON.stringify(view));assert.ok(view.toolsClosed);
-   assert.ok(view.selectedMath.length);assert.ok(view.selectedBox.top>=0&&view.selectedBox.top<180);
-   assert.ok(view.selectedBox.width>=700);assert.equal(view.visibleEditingButtons.length,0);
+   assert.ok(view.innerWidth>0,JSON.stringify(view));assert.ok(view.toolsClosed);
+   assert.ok(view.selectedMath.length);assert.ok(view.selectedBox.top>=0&&view.selectedBox.top<view.innerHeight);
+   const after=await vscode.commands.executeCommand('vscode.getEditorLayout');
+   if(layout.groups.length>1)assert.deepEqual(after,layout);
+   else assert.ok(after.groups.length>=layout.groups.length);
+   for(const item of dirty){assert.equal(item.doc.getText(),item.text);assert.ok(item.doc.isDirty);assert.ok(!item.doc.isClosed)}
    assert.ok(controller.panel.active);assert.ok(!vscode.window.visibleTextEditors.some(e=>e.document.uri.scheme==='mrw-record'));
   });
   await check('Return restores the originating Markdown occurrence and navigation',async()=>{
@@ -83,7 +88,7 @@ async function run(context) {
   });
   await check('whole-source reading starts at source content with tools collapsed',async()=>{
    const whole=model.all.find(n=>n.reference===old.seed.whole.reference);await command('selectReadingOutlineItem',whole);await pause(600);
-   const view=await controller.inspect();report.whole=view;assert.ok(view.toolsClosed);assert.ok(view.innerWidth>=900);assert.ok(view.allMath>40);
+   const view=await controller.inspect();report.whole=view;assert.ok(view.toolsClosed);assert.ok(view.innerWidth>0);assert.ok(view.allMath>40);
    await command('returnToReadingOutline');assert.equal(doc.offsetAt(vscode.window.activeTextEditor.selection.start),whole.start);
   });
   await check('note and all retained record bytes remain unchanged',async()=>{assert.equal(digest(await fs.readFile(note)),before);assert.deepEqual(await inventory(),storeBefore);assert.ok(!doc.isDirty)});

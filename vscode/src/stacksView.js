@@ -58,8 +58,10 @@
     if (value.limitation) node('p', parent, 'Source retained only: ' + value.limitation + '. No generated regions are presented.', 'warning');
     const citation = node('button', parent, 'Open canonical source citation ↗');
     citation.type = 'button'; citation.dataset.action = 'stacks-citation';
+    citation.title = 'Open today’s canonical page in the browser; the reader keeps its retained revision.';
     citation.addEventListener('click', () => action('stacks_citation', value.qualified_tag || value.tag));
     const backlinks = node('button', parent, 'Show backlinks…');
+    backlinks.title = 'Find explicit citations to this qualified source in the selected notes folder.';
     backlinks.type = 'button'; backlinks.addEventListener('click', () => action('published_backlinks', value.qualified_tag));
     const details = node('details', parent);
     node('summary', details, 'Source revision, chapter context and license');
@@ -73,6 +75,7 @@
       node('span', details, label + ': ' + entry.title + ' ');
       if (entry.tag) {
         const link = node('button', details, (value.source_id ? value.source_id + ':' : '') + entry.tag + ' ↗'); link.type = 'button';
+        link.title = `Open the current ${label.toLowerCase()} page in your browser.`;
         link.addEventListener('click', () => action('stacks_citation', (value.source_id ? value.source_id + ':' : '') + entry.tag));
       }
     }
@@ -81,6 +84,7 @@
     for (const item of Object.values(value.parts)) {
       const jump = node('button', navigation, item.role === 'context' ? 'Opening context' : (item.qualified_tag || item.tag) + ' · ' + item.role);
       jump.type = 'button'; jump.dataset.action = 'stacks-jump'; jump.dataset.region = item.region;
+      jump.title = `Read this ${item.role} in the retained section; no network request.`;
       jump.addEventListener('click', () => action('stacks_jump', item.region));
     }
   }

@@ -14,6 +14,15 @@ the original in place. It neither imports the file nor creates a saved source.
 Markdown opens in preview and supplies **Contents**: headings, note links
 and MRW source links. **MRW: Show Contents** selects Markdown for that navigator;
 **MRW: Choose Document…** chooses another Markdown document for Contents.
+Choosing Markdown visibly opens or reveals it. Contents keeps its filename and
+path visible; **MRW: Reveal Contents Document** brings that same document back.
+Cancelling a choice preserves the current view and drafts. Ordinary navigation
+and Return leave both sidebars and editor groups under VS Code's layout control,
+so MRW, Codex and other work stay available.
+
+To resume saved reading immediately, use **Open Saved Source…** in the initial
+Contents interface or its title toolbar. In the Stacks workspace select
+**Hausdorff spaces** from the existing saved store; no import is needed.
 
 A PDF uses an available registered VS Code reader. If none is available, MRW
 offers **Open with system reader**. That explicit handoff can also fail if the
@@ -120,6 +129,14 @@ passage's **Notes and tools**, choose **Add reader explanation / question /
 repair**, enter the text and attribution, then **Save annotation**. **Reader
 notes** displays the saved annotation. **Refresh saved source** reloads its saved
 state; it does not acquire a new original-file revision.
+
+The reader shows collection, chapter/section when available and the qualified
+source identifier above the text. Storage and hash details stay collapsed.
+**Return to filename** restores the exact citation occurrence. For an
+independently opened source, **Open filename** opens the selected Contents
+document instead; **Choose a document…** appears when none is selected.
+Hover or Tab-focus controls to read their help; Escape dismisses it. Location
+and destination remain visible without hover. Return never saves your document.
 
 **MRW: Import Markdown Text…** is optional. It copies text into a saved source,
 a passage annotation or a Markdown document. It is not needed to open notes or

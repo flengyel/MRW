@@ -28,6 +28,7 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .reading-bar{position:sticky;top:0;z-index:2;background:var(--vscode-editor-background);padding:4px 0}.reading-bar button{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground);padding:5px 8px}.reader-tools{margin:10px 0 20px}.reader-tools>summary,.passage-tools>summary{cursor:pointer;font-size:.9em;opacity:.8}.region{scroll-margin-top:60px;border:0;border-top:1px solid var(--vscode-panel-border);padding:12px 0;margin:18px 0}.region>h2{font-size:1.15em}.passage-tools{margin:12px 0}.published-content{font-size:1.15em;line-height:1.75}
 .proof-navigation{display:flex;gap:12px;margin:10px 0}.proof-navigation button{background:none;color:var(--vscode-textLink-foreground);padding:3px 0;margin:0;text-decoration:underline}.reader-note-text{white-space:pre-wrap;line-height:1.6}
 .save-feedback{min-height:1.2em}.save-confirmation{color:var(--vscode-testing-iconPassed,var(--vscode-foreground))}
+.source-location{flex-basis:100%;margin:3px 0;font-size:.9em}.return-context{font-size:.9em}.region,[data-reference]{scroll-margin-top:var(--reader-toolbar-height,60px)}.control-help{position:fixed;bottom:8px;left:12px;right:12px;z-index:5;margin:0;padding:8px;border:1px solid var(--vscode-focusBorder);background:var(--vscode-editorHoverWidget-background,var(--vscode-editor-background));color:var(--vscode-editorHoverWidget-foreground,var(--vscode-editor-foreground));pointer-events:none;white-space:pre-wrap}button:focus-visible,summary:focus-visible{outline:2px solid var(--vscode-focusBorder);outline-offset:2px}
 .region.compact-proof{border:0;margin:0;padding:2px 0}.proof-disclosure{background:none;color:var(--vscode-textLink-foreground);padding:2px 0;margin:0;text-align:left}.reader-notes{margin:14px 0}.reader-notes>summary{cursor:pointer;font-weight:600;padding:4px 0}
 .reader-diagram{margin:14px 0}.reader-diagram img{max-width:100%;height:auto;background:white;padding:6px;box-sizing:border-box}.reader-diagram figcaption{margin:4px 0}
 .reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
@@ -37,7 +38,7 @@ ${diagramStyle}
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, handleDocumentUri }) {
+function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -96,6 +97,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
       diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v2', 'theme'),
+      returnDestination: readingDestination?.(c.returnContext?.location || null),
       reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
@@ -208,7 +210,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         } else if (value.type === 'source') await openDocument(c);
         else if (value.type === 'study_current') { const ref=await bridge(request(c,'outline_reference',{region:c.selected||null})); await vscode.commands.executeCommand('mrw.studyCurrent',{reference:ref.reference}); }
         else if (value.type === 'proof_study') await vscode.commands.executeCommand('mrw.prepareProofStudy');
-        else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline', { retained: true });
+        else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline', { retained: true, location: c.returnContext?.location || null });
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
@@ -271,7 +273,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
           if (event.webviewPanel.active) active = id;
           if (event.webviewPanel.visible && !c.pending) void panel.webview.postMessage({ type: 'idle' });
         }),
-        panel.onDidDispose(() => { panels.delete(id); if (active === id) active = undefined; changed.fire(); }));
+        panel.onDidDispose(() => { c.returnContext?.release(); panels.delete(id); if (active === id) active = undefined; changed.fire(); }));
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
       const support = [];
@@ -284,6 +286,8 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       const diagramStyle = await fs.readFile(path.join(context.extensionPath, 'media', 'diagram-theme.css'), 'utf8');
       panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support, diagramStyle);
     } else c.panel.reveal(c.panel.viewColumn);
+    c.returnContext?.release();
+    c.returnContext = presentation.returnContext;
     c.reference = reference;
     if (reference) c.selected = reference.region;
     c.readingFocus = presentation.reading ? { serial: ++focusSerial,
@@ -861,6 +865,10 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     return rows.studyPassage(target.reference,root);
   };
   rows.followReference = followReference;
+  rows.updateReturnDestinations = () => {
+    for (const controller of panels.values()) void controller.panel.webview.postMessage({ type: 'return_destination',
+      destination: readingDestination?.(controller.returnContext?.location || null) });
+  };
   rows.readPinned = (reference, root) => bridge({ method: 'outline_follow_reference',
     store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`), project_root: root, reference });
   rows.followPinned = (reference, root) => locked(async () => {

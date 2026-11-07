@@ -1,5 +1,42 @@
 # UX_SPEC.md
 
+## Current reader orientation — 0.22.1
+
+VS Code owns the workspace layout. Ordinary document/source opening and Return
+preserve both sidebar choices, editor groups and unsaved work. MRW issues no
+automatic maximize, hide-sidebar or minimize-other-editors commands. This
+supersedes historical expanded-reading behavior throughout this specification.
+
+Choosing Markdown for Contents visibly opens or reveals that same document,
+using its existing editor group when available. Contents persistently identifies
+the filename and path, including when its text editor closes. **Reveal Contents
+Document** reopens the selected document even with an unrelated editor active.
+Cancellation changes neither the selected Contents nor the visible document.
+
+The initial Contents interface and its title toolbar expose **Open Saved
+Source…** through the existing saved store. Hausdorff spaces reopens there
+offline. No acquisition or restoration of archived application state is needed.
+Above retained reading text, a sticky location line identifies the collection,
+chapter/section when supplied and complete qualified identifier. Hashes, storage
+paths and provenance details remain inside collapsed tools.
+
+The reader names its destination: **Return to filename** follows the citation's
+exact tracked occurrence; **Open filename** identifies an independently opened
+source's selected Contents document. Without a selected document it offers a
+Markdown choice. Each live reader keeps its own citation origin, follows
+nonoverlapping edits and refuses changed occurrences. Return opens the native
+rendered Markdown view without saving the document or changing other groups.
+Ordinary-file navigation keeps its separate Return pin. The native preview opens
+in the document's group explicitly, so a delayed focus notification cannot
+replace an unrelated group's visible editor. Exact navigation waits for the
+requested editor and selection to receive focus before following a citation.
+
+Ambiguous reader controls explain their effects on hover and keyboard focus,
+with accessible descriptions, a visible focus outline and Escape-dismissable
+help. Help itself invokes no action. Location, filename and destination remain
+visible without hovering. Native tree/view-title help remains host-owned;
+browser and controller checks do not establish native-window acceptance.
+
 ## Current design — documents and research continuity, 2026-11-06
 
 [RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) governs the
@@ -525,8 +562,8 @@ text and the existing write block.
 The first installed trial exposed a reading blocker: a selected long Markdown
 citation dominated the middle editor, while metadata and controls crowded the
 mathematics into a narrow reader. Patch 0.9.1 gives navigator references concise
-view labels without rewriting Markdown. Source navigation expands the reader
-with standard VS Code layout commands. Source text precedes passage actions;
+view labels without rewriting Markdown. Its former automatic layout expansion
+is superseded by the 0.22.1 layout-preservation contract. Source text precedes passage actions;
 source details and editing controls start collapsed. A sticky Return action
 brings back the originating overview and navigator. A matching published passage
 is shown as rendered retained source at its exact card. Earlier/changed ranges

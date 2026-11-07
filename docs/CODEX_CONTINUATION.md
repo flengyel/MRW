@@ -1,5 +1,48 @@
 # Codex continuation: MRW documents and research work
 
+## Current repair — reader orientation, 0.22.1
+
+The user's navigation correction supersedes historical automatic expanded-reading
+requirements in this file and the older 0.9.1 guidance. Leave both sidebars,
+editor groups, Codex and drafts available; VS Code owns layout. No maximize,
+hide-sidebar or minimize-other-editors call belongs in opening or Return.
+
+Contents must visibly open/reveal the chosen Markdown, identify its filename
+and path persistently, and offer **Reveal Contents Document**. Cancellation
+preserves the previous view. **Open Saved Source…** is available immediately
+and in the Contents title toolbar; **Hausdorff spaces** uses its existing bound
+store without a repeat import or preservation copy. Keep collection,
+chapter/section and qualified ID visible above reading text. Keep technical
+details collapsed. **Return to filename** means a citation's exact tracked
+occurrence; **Open filename** means independently opening the selected Contents
+document. Hover and keyboard focus explain ambiguous controls.
+Wait for native editor/selection focus acknowledgement before checking a
+programmatically selected citation. Use the registered native Markdown custom
+editor with an explicit document group for Return; the historical preference
+for the active-editor-only `markdown.reopenAsPreview` command is superseded.
+An older preview fallback must not replace an unrelated focused editor.
+
+The checkout was clean at the reviewed baseline `8bd8743`, then fast-forwarded
+to `1efa68e` at the user's request before implementation. Both READMEs and the
+concurrent recommended-extension guide remain untouched. Preserve all completed
+identity/source-display repairs and current Hausdorff annotations. Restore no
+archived studies/history/state. Install the verified local 0.22.1 VSIX without
+forcing a working-window reload. A package on disk is not proof of adoption.
+The tutorial identifies the active version and labels the local source changes.
+
+[Validation](READER_ORIENTATION_VALIDATION.md) separates controller checks,
+browser rendering and observed native behavior. The required sequence starts
+with an unrelated editor active: choose Markdown for Contents, follow its
+Hausdorff citation, Return to the same occurrence. Check both sidebar states,
+group layout, dirty text, cancellation and hover/focus help. Once delivered,
+complete the remaining native visible-editor acceptance before general research
+resumption. Local **0.22.1 is installed**, with package/runtime bytes verified.
+The final native fixture stops during initial unrelated-editor focus setup;
+do not weaken its assertion or describe it as passing. Earlier native
+source/Return/focus-help observations and final controller/browser checks are
+separate evidence. Preserve the installed repair while resolving this last
+acceptance check; do not repeat preservation or archived-state restoration.
+
 ## Current identity increment — 0.22.0
 
 The user chose a fresh `flengyel.mrw` installation and rejected forwarding or a

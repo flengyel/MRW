@@ -1,4 +1,5 @@
 {
-  "version": "0.22.0",
-  "commit": "5ba7abaeda2006f66e2ad0a8fcc7bb88dd23210b"
+  "version": "0.22.4",
+  "commit": "b7245ca62b5660faba8f83c041cc50870adc7b3d",
+  "localChanges": true
 }

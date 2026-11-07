@@ -1,5 +1,29 @@
 # Codex instructions
 
+## Current repair — reader orientation, 0.22.1
+
+The navigation repair supersedes all historical automatic expanded-reading
+requirements, including 0.9.1 instructions below. Ordinary document/source
+opening and Return must not maximize, hide either sidebar, minimize other
+editors, close groups or discard drafts. VS Code owns layout. Selecting Markdown
+for Contents visibly opens/reveals it, identifies its filename and path, and
+offers Reveal Contents Document. Cancellation preserves the current view.
+Open Saved Source is available in the initial Contents interface and title
+toolbar; use the existing store to reopen Hausdorff spaces without importing.
+Source collection, chapter/section and qualified ID stay visible above reading
+text; technical storage/revision details stay collapsed. Name the Return target
+and distinguish a document citation's exact occurrence from independent opening.
+Provide hover and keyboard-focus explanations. Keep controller/browser checks
+separate from observed native sidebar/editor behavior. See
+[reader orientation validation](docs/READER_ORIENTATION_VALIDATION.md).
+
+Synchronized with main `1efa68e` before implementation. The user's README and
+recommended-extensions work is concurrent: leave both READMEs and that guide
+unchanged. Preserve the completed rename, source fixes, exact references and
+current Hausdorff annotations. Do not repeat the preservation copy, restore
+archived application state or force a reload of the working window. Finish this
+repair before starting general research resumption or another feature.
+
 ## Current priority — continue after document integration, 2026-11-06
 
 The [existing-document increment](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
