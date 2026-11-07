@@ -1,7 +1,7 @@
 'use strict';
 const path = require('node:path');
 
-const extensionId = 'flengyel.theorem-terminal';
+const extensionId = 'flengyel.mrw';
 function route(value) {
   if (typeof value !== 'string' || value.length > 4096 || /[\x00-\x20\x7f\\]/u.test(value) || /%(?![\da-f]{2})/iu.test(value)) {
     throw new Error('Invalid workspace URI. Use an encoded file: or vscode-remote: workspace URI.');

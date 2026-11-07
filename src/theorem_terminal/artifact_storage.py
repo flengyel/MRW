@@ -216,7 +216,7 @@ class ArtifactStorage:
         self.binding_path = self.runtime / 'active-store.json'
         self.journal = self.runtime / 'transaction.json'
         user=next((p for p in self.home.parents if p.name=='User'),None)
-        self.coordination=(user/'globalStorage'/'flengyel.theorem-terminal'/'artifact-coordination' if user else self.home.parent/'artifact-coordination')
+        self.coordination=(user/'globalStorage'/'flengyel.mrw'/'artifact-coordination' if user else self.home.parent/'artifact-coordination')
         self.held_store=None
         self.checkpoint = checkpoint or (lambda phase: None)
 

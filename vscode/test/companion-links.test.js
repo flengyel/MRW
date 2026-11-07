@@ -14,7 +14,7 @@ test('durable external URI encodes Unicode, spaces, percent and Markdown punctua
 });
 test('external URI rejects other schemes, actions, repeated/unknown parameters and invalid encoding', () => {
   const good = makeExternal(target);
-  for (const value of [good.replace('vscode:', 'command:'), good.replace('/outline?', '/run?'), good+'#fragment', good+'&v=1',
+  for (const value of [good.replace('flengyel.mrw', 'flengyel.theorem-terminal'), good.replace('vscode:', 'command:'), good.replace('/outline?', '/run?'), good+'#fragment', good+'&v=1',
     good+'&append=yes', good.replace('target=', 'target=%ZZ'), good+' ', good.replace('target=', 'target=é'),
     'vscode://evil.extension/outline?v=1&target=e30', good.replace('v=1', 'v=2')]) assert.throws(() => parseExternal(value));
   for (const workspace of ['command:evil', 'https://example.com', 'file:///tmp/folder?x=1', 'vscode-remote://evil/tmp',
@@ -39,4 +39,12 @@ test('Obsidian dispatch preserves Unicode, spaces and encoded query punctuation 
   const opened = new URL(encodeURI(`obsidian://${uri.authority}${uri.path}`));
   assert.equal(opened.search, ''); assert.equal(opened.hash, '');
   assert.equal(decodeURIComponent(opened.pathname), uri.path);
+});
+
+test('new extension URLs retain qualified source identity, revision and passage under the MRW authority', () => {
+  const reference = 'mrw-outline:v2/stacks-project:08ZH/' + 'a'.repeat(64) + '/12345678-1234-1234-1234-123456789abc/' + 'b'.repeat(64) + '/22345678-1234-1234-1234-123456789abc/10.2-14.6';
+  const link = makeExternal({...target, reference});
+  assert.match(link, /^vscode:\/\/flengyel\.mrw\//);
+  assert.equal(parseExternal(link).reference, reference);
+  assert.throws(() => parseExternal(link.replace('flengyel.mrw', 'flengyel.theorem-terminal')), /Unsupported/);
 });

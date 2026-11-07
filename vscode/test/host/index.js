@@ -91,7 +91,7 @@ async function run() {
       assert.equal(process.platform, 'linux'); assert.equal(vscode.env.remoteName, 'wsl');
       assert.equal(vscode.workspace.isTrusted, true);
       assert.equal(vscode.workspace.workspaceFolders[0].uri.fsPath, root);
-      await vscode.extensions.getExtension('flengyel.theorem-terminal').activate();
+      await vscode.extensions.getExtension('flengyel.mrw').activate();
       assert.equal(requests.length, 0);
     });
     const note = await vscode.workspace.openTextDocument(vscode.Uri.file(notePath));

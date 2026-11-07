@@ -26,6 +26,23 @@ source, attribution and persistence contracts and the 0.19.1 repairs. The 0.19.2
 GUI patch implements terminology, without new PDF/vault/research capabilities.
 GPTWork maintains design and review; local Codex implements in VS Code/WSL2.
 
+## Extension identity — 0.22.0
+
+The workstation extension is `flengyel.mrw`, packaged as `mrw-0.22.0.vsix`.
+The user explicitly chose a fresh extension namespace. Do not add a compatibility
+extension, URL forwarding, automatic old-state adoption or dual installations.
+New `vscode://flengyel.mrw/…` links use the current authority; old extension URLs
+are not redirected. Existing command/view IDs, settings, Python implementation
+names, record schemas and source-qualified identifiers remain unchanged.
+
+The user separately requested preservation of the annotated Hausdorff source.
+Carry that source and its annotations/diagrams into the new workspace using a
+one-time verified data copy and the existing saved-store binding machinery.
+Do not copy old studies/history, mutate mathematical prose or require live
+compatibility code. Keep original notes available on disk. Preserve the working
+window; install without forcing a reload. Future migration work needs its own
+explicit requirement. [Identity task](docs/EXTENSION_IDENTITY.md).
+
 ## Published source identity and retained citations — 0.21.0
 
 Use the complete qualified identifier, for example `stacks-project:08ZH` or

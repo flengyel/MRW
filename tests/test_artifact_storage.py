@@ -287,6 +287,19 @@ class ArtifactStorageTests(unittest.TestCase):
         with other.exclusive():
             self.assertEqual(other.status()['store_id'],self.manager.status()['store_id'])
 
+    def test_new_extension_workspace_homes_share_the_mrw_coordination_namespace(self):
+        first = ArtifactStorage(str(self.base / 'User/workspaceStorage/one/flengyel.mrw'))
+        second = ArtifactStorage(str(self.base / 'User/workspaceStorage/two/flengyel.mrw'))
+        self.assertEqual(first.coordination, second.coordination)
+        self.assertEqual(first.coordination, self.base / 'User/globalStorage/flengyel.mrw/artifact-coordination')
+        from uuid import uuid4
+        store = str(uuid4())
+        with first.store_exclusion(store), self.assertRaisesRegex(ValueError, 'Another process'):
+            with second.store_exclusion(store):
+                self.fail('Two workspace homes acquired the same MRW source store')
+        with second.store_exclusion(store):
+            pass
+
     def test_required_external_model_call_dependencies_resume_without_originals(self):
         from theorem_terminal.editor_assistance import assistance_action
         from theorem_terminal.openai_response import TransportResult

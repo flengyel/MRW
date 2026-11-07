@@ -1,8 +1,8 @@
 {
-  "name": "theorem-terminal",
+  "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Research continuity and retained mathematical evidence alongside Lean, LaTeX, and ordinary notes.",
-  "version": "0.21.1",
+  "version": "0.22.0",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {

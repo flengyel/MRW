@@ -10,9 +10,9 @@ PDF links, and supplies backlinks and return locations alongside source reading,
 study and attributed assistance. General research resumption and argument
 reconstruction remain later increments.
 
-**Current version: 0.21.1.** The repository remains private. There is no published
+**Current version: 0.22.0.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
-The technical extension identity remains `flengyel.theorem-terminal`.
+The technical extension identity is `flengyel.mrw`.
 
 The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) distinguishes Document,
 Contents, Saved source and Passage. This increment delivers existing-file and
@@ -62,7 +62,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `theorem-terminal-0.21.1.vsix`. Confirm installation under that workspace
+select `mrw-0.22.0.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -72,8 +72,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.21.1.vsix
-sha256sum vscode/theorem-terminal-0.21.1.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.22.0.vsix
+sha256sum vscode/mrw-0.22.0.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.

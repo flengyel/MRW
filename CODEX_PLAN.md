@@ -36,6 +36,13 @@ planned until code is delivered. Publication and storage qualification are
 outside this sequence. Detailed labels, compatibility and acceptance scope are
 specified once in the linked task and design.
 
+## Extension identity — 0.22.0
+
+Use `flengyel.mrw` with fresh host state, as requested. The annotated Hausdorff
+source is preserved by a one-time data copy; there is no compatibility extension
+or URL forwarding. Source IDs, revision/passage pins and implementation schema
+names are independent of the application ID. [Delivery](docs/EXTENSION_IDENTITY.md).
+
 ## Published sources — 0.21.0
 
 The user-requested extension adds **Import Kerodon Section…** and spells out

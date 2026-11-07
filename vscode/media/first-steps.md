@@ -4,6 +4,10 @@ Begin with a document already in use. Open the Command Palette with **F1**
 to run the commands below. The version above identifies the extension active
 in this window; installing an update does not activate it until a later reload.
 
+MRW now uses the extension ID `flengyel.mrw`. It starts with fresh extension
+state. Earlier `vscode://flengyel.theorem-terminal/…` URLs are not forwarded.
+Saved-source references still preserve their source ID, revision and passage.
+
 ## Open existing work
 
 Run **MRW: Open Document…** and select a note, paper or manuscript. MRW opens

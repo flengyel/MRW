@@ -54,7 +54,7 @@ async function run(context) {
       region = kind === 'region' ? seed.regionId : null;
       const markdown = await vscode.commands.executeCommand('mrw.copyOutlineLink');
       assert.equal(await vscode.env.clipboard.readText(), markdown);
-      assert.ok(markdown.includes('vscode://flengyel.theorem-terminal/outline?'));
+      assert.ok(markdown.includes('vscode://flengyel.mrw/outline?'));
       if (config.phase !== 'seed') assert.equal(markdown, seed[kind]);
       seed[kind] = markdown;
       report.checks.push({ name: `${kind} copied with no Markdown editor`, passed: true });

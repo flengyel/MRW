@@ -1,6 +1,16 @@
 # Codex continuation: MRW documents and research work
 
-## Current repair — source display and Return, 0.21.1
+## Current identity increment — 0.22.0
+
+The user chose a fresh `flengyel.mrw` installation and rejected forwarding or a
+compatibility extension. Preserve the completed 0.21.1 reader repairs. Keep
+command/view IDs and source formats; generate only new MRW-authority URLs.
+The annotated Hausdorff source is a separate preservation requirement: use a
+one-time verified copy, with no automatic old-study/history restoration.
+[Identity and delivery evidence](EXTENSION_IDENTITY.md) records the resulting
+package, checks and actual installation. General research resumption follows.
+
+## Earlier repair — source display and Return, 0.21.1
 
 The user reported degraded Kerodon display and Return failing with “Wait for the
 current saved source action to finish.” Their production history shows the

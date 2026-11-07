@@ -863,7 +863,7 @@ test('companion commands work without an editor, preserve pins, and keep associa
   const created = await h.commands.get('mrw.createOutline')();
   h.focus(undefined);
   const markdown = await h.commands.get('mrw.copyOutlineLink')();
-  assert.match(markdown, /vscode:\/\/flengyel.theorem-terminal\/outline/);
+  assert.match(markdown, /vscode:\/\/flengyel.mrw\/outline/);
   assert.ok(!markdown.includes('SHA')); assert.ok(!markdown.includes('source\\:'));
   h.inputs.push('obsidian://open?vault=Notes%20α&file=Math202610170001', 'Existing mathematical note');
   await h.commands.get('mrw.associateObsidianNote')();
