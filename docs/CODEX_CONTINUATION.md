@@ -7,8 +7,17 @@ compatibility extension. Preserve the completed 0.21.1 reader repairs. Keep
 command/view IDs and source formats; generate only new MRW-authority URLs.
 The annotated Hausdorff source is a separate preservation requirement: use a
 one-time verified copy, with no automatic old-study/history restoration.
-[Identity and delivery evidence](EXTENSION_IDENTITY.md) records the resulting
-package, checks and actual installation. General research resumption follows.
+Installed: **flengyel.mrw 0.22.0**, implementation `5ba7aba`, build
+`f98eedb`. Old extension unregistered; no compatibility extension is installed.
+VSIX SHA-256: `818fe026dbd27c952ced9d1de28988d7fdd5b03dc399eb9626055355329c87f1`.
+Checks: 285 Node passed; Python 346 passed / 67 explicit skips; package, installed
+bytes and packaged help passed. The installed bridge verified Hausdorff's two
+annotations and rendered diagram in the new namespace. Only that source was
+restored; studies/history start fresh and old records are archived separately.
+The window was not reloaded and native adoption was not observed.
+[Identity and delivery evidence](EXTENSION_IDENTITY.md) records source/package
+identities and observation limits. Do not repeat the data copy or overwrite
+new work from old storage. General research resumption follows.
 
 ## Earlier repair — source display and Return, 0.21.1
 

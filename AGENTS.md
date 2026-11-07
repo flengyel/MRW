@@ -36,8 +36,9 @@ are not redirected. Existing command/view IDs, settings, Python implementation
 names, record schemas and source-qualified identifiers remain unchanged.
 
 The user separately requested preservation of the annotated Hausdorff source.
-Carry that source and its annotations/diagrams into the new workspace using a
-one-time verified data copy and the existing saved-store binding machinery.
+That source, its two annotations and rendered diagram are restored in the new
+workspace through a completed one-time verified copy and existing store binding.
+Do not repeat the copy or replace later edits with the old source store.
 Do not copy old studies/history, mutate mathematical prose or require live
 compatibility code. Keep original notes available on disk. Preserve the working
 window; install without forcing a reload. Future migration work needs its own
