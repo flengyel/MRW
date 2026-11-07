@@ -122,6 +122,10 @@ Keep login URLs private. Opening MRW starts no container or notebook execution.
 
 ## Optional reading tools and data
 
+See [Recommended extensions](RECOMMENDED_EXTENSIONS.md) for LaTeX Workshop,
+Markdown previews, PDF reading, SagePod notebooks and Lean, with extension IDs
+and WSL installation guidance. Install only the companions needed for the task.
+
 [Obsidian](OBSIDIAN_WORKFLOW.md) links or imports notes without converting a vault.
 [TikZ](TIKZ_WORKFLOW.md) rendering needs separate Linux tools and is explicit;
 reading saved diagrams works offline. [Folder-rename preparation](FOLDER_RENAME_WORKFLOW.md)

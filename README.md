@@ -80,6 +80,26 @@ Packaging copies the shared Python core into the VSIX. It publishes nothing.
 [Development and checks](vscode/README.md#run-from-this-checkout) describe F5,
 regressions and package verification.
 
+## Recommended extensions
+
+Start with VS Code's built-in Markdown preview, which already renders mathematics.
+For other tasks, install only the relevant companions:
+
+| Task | Recommended extension | Extension identifier |
+| --- | --- | --- |
+| Write LaTeX manuscripts, build and view PDFs | [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) | `James-Yu.latex-workshop` |
+| Richer Markdown previews, diagrams and export | [Markdown Preview Enhanced](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced) | `shd101wyy.markdown-preview-enhanced` |
+| Work in SagePod notebooks | [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) | `ms-toolsai.jupyter` |
+| SageMath language support for the documented notebook setup | [SageMath Enhanced](https://marketplace.visualstudio.com/items?itemName=Lov3.sagemath-enhanced) | `Lov3.sagemath-enhanced` |
+| Edit and check Lean proofs | [Lean 4](https://marketplace.visualstudio.com/items?itemName=leanprover.lean4) | `leanprover.lean4` |
+| Read standalone PDFs if no suitable viewer is already installed | [vscode-pdf](https://marketplace.visualstudio.com/items?itemName=tomoki1207.pdf) | `tomoki1207.pdf` |
+
+These companions are optional. LaTeX Workshop needs a TeX distribution; Jupyter
+connects to a separate kernel. The PDF viewer's MRW handoff across WSL/local hosts
+has not yet been observed. Keep an existing working previewer or PDF reader.
+See [the companion guide](docs/RECOMMENDED_EXTENSIONS.md) for setup, host placement
+and the distinction between Markdown previews and MRW's saved-source reader.
+
 ## Open existing work
 
 Run **MRW: Open Document…** and select the original note or paper. Markdown opens
