@@ -178,8 +178,6 @@
     "vscode/test/document-picker.test.js": "0150828cf8cbd08cc129aaf9182e6c4e2ea12677dad93f0a4ebaa12e845d6a9a",
     "vscode/test/documents.test.js": "41f3a3df6477eb22338ca4a19fe7376853168e12b6b081e58ff47d9601f19e88",
     "vscode/test/extension.test.js": "47eac9e48998c800009bb275c61110e56ea39613154d7ec19b58038ec595ac57",
-    "vscode/test/host/__pycache__/deterministic_bridge.cpython-313.pyc": "e2273ba71097fbc02b04f04217d6a6b514e7089b5c263446dc7c5169ca7560f3",
-    "vscode/test/host/__pycache__/offline_outline_bridge.cpython-313.pyc": "c33be305abd1793df7bc67e7afd6bd5382ea463e96c493756a3a2224ea8bd007",
     "vscode/test/host/companion.js": "8f721bd3b1ec1c992aa551ebbe5e253cece8cc1507b2aacd38d79680f072c37b",
     "vscode/test/host/deterministic_bridge.py": "644df0d6918c5ec90a76c5ab2356e3c7bfb15b7a21dcafded55522f5e675db6f",
     "vscode/test/host/diagrams.js": "5a29bcda232f37b0cf93d597b43761e00e70813b377c91bcf8e1784de5c59293",
