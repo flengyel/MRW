@@ -1,4 +1,9 @@
-# Existing documents, Contents and saved sources — 0.22.4
+# Existing documents, Contents and saved sources — 0.22.6
+
+With a notes folder selected, **Open Document…** lists Markdown notes by YAML
+title and filename, falling back to the first H1. Search by title, filename or
+path. **Browse for another document…** opens the file dialog for PDFs and files
+elsewhere. Cancelling preserves the current view and drafts.
 
 Ordinary navigation preserves VS Code's layout: MRW does not automatically
 maximize, hide either sidebar or minimize other editors. Keep MRW, Codex,

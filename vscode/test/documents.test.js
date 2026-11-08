@@ -86,7 +86,7 @@ function harness(f, state = new Map(), options = {}) {
         this.activeTextEditor = editor; shown.push({ doc, settings, editor }); return editor;
       },
       async withProgress(settings, callback) { return callback({}, { isCancellationRequested: !!options.cancelIndex }); },
-      async showQuickPick(choices, settings) { picks.push({ choices, settings }); return pickHook ? pickHook(choices) : choices[0]; },
+      async showQuickPick(choices, settings) { choices = await choices; picks.push({ choices, settings }); return pickHook ? pickHook(choices) : choices[0]; },
       async showInformationMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
       async showErrorMessage(message) { errors.push(message); },
       async showWarningMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
@@ -249,10 +249,10 @@ test('backlink return point is captured before asynchronous picker focus changes
 test('cancelled backlinks are reported as incomplete and preserve the last usable location', async t => {
   const f = await fixture(t), h = harness(f, new Map(), { cancelIndex: true }); await h.folder();
   const a = await h.open('1a.md'); await h.follow(a, '2b.md#target');
-  const before = structuredClone(h.state.get('mrw.documents.v1'));
+  const before = structuredClone(h.state.get('mrw.documents.v1')), priorPicks = h.picks.length;
   await h.commands.get('mrw.showBacklinks')();
   assert.match(h.informations.at(-1).message, /Incomplete backlinks \(cancelled\)/);
-  assert.equal(h.picks.length, 0); assert.deepEqual(h.state.get('mrw.documents.v1'), before);
+  assert.equal(h.picks.length, priorPicks); assert.deepEqual(h.state.get('mrw.documents.v1'), before);
   await h.documents.returnToDocument(); assert.equal(h.selected(), '[Second](2b.md#target)');
 });
 
@@ -503,4 +503,44 @@ test('preview copy action copies the explicit note instead of an unrelated activ
   const href = /\]\(([^)]+)\)$/.exec(h.clipboard)[1];
   assert.equal(parseNoteLink(href).file,'1a.md');
   assert.equal(h.api.window.activeTextEditor.document, other);
+});
+
+
+test('Open Document lists YAML titles with filename IDs, uses H1 fallback and preserves dirty text', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder();
+  const doc = await h.doc('2b.md');
+  h.change(doc, 0, doc.getText().length, '---\nid: 2b\ntitle: 2b Unsaved title\n---\n# Body title\n');
+  h.setPickHook(items => {
+    assert.ok(items.find(x => x.file === f.file('1a.md')).label.includes('A changed title · 1a.md'));
+    assert.equal(items.find(x => x.file === f.file('3c.md')).label, 'Third · 3c.md');
+    assert.equal(items.find(x => x.file === f.file('2b.md')).label, 'Unsaved title · 2b.md');
+    return items.find(x => x.file === f.file('2b.md'));
+  });
+  await h.commands.get('mrw.openDocument')();
+  assert.equal(h.dialogs.length, 1, 'a note selection needs no filename-only dialog');
+  assert.equal(h.api.window.activeTextEditor.document, doc); assert.equal(doc.isDirty, true);
+  assert.match(await fs.readFile(f.file('2b.md'), 'utf8'), /title: 2b Second/);
+  assert.equal(h.picks.at(-1).settings.matchOnDescription, true);
+  assert.equal(h.picks.at(-1).settings.matchOnDetail, true);
+});
+
+test('cancelling the titled note chooser preserves the current document and remembered destination', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const doc = await h.open('1a.md');
+  const state = structuredClone(h.state.get('mrw.documents.v1')), shown = h.shown.length;
+  h.setPickHook(() => undefined); await h.commands.get('mrw.openDocument')();
+  assert.equal(h.shown.length, shown); assert.equal(h.api.window.activeTextEditor.document, doc);
+  assert.deepEqual(h.state.get('mrw.documents.v1'), state);
+});
+
+test('a note replaced by an outside symlink after title selection is rejected before granting it', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder();
+  await fs.writeFile(path.join(f.outside, 'secret.md'), '# Outside secret\n');
+  h.setPickHook(async items => {
+    const choice = items.find(x => x.file === f.file('2b.md'));
+    await fs.unlink(f.file('2b.md')); await fs.symlink(path.join(f.outside, 'secret.md'), f.file('2b.md'));
+    return choice;
+  });
+  await assert.rejects(() => h.commands.get('mrw.openDocument')(), /moved outside/);
+  assert.equal(h.shown.length, 0);
+  assert.equal(h.state.get('mrw.documents.v1').grants.length, 0);
 });

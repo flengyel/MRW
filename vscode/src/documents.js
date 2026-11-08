@@ -15,6 +15,7 @@ const { DEFAULT_LIMITS } = require('./documentLinks');
 const { workspaceRoute } = require('./companionLinks');
 const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
+const { documentChoices } = require('./documentPicker');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
@@ -173,7 +174,27 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   }
   async function open() {
     const attempt = ++generation;
-    const choices = await vscode.window.showOpenDialog({ title: 'Open document in place', openLabel: 'Open Document', defaultUri: await pickerFolder(), canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
+    const defaultUri = await pickerFolder();
+    let choices;
+    if (defaultUri) {
+      const source = vscode.CancellationTokenSource ? new vscode.CancellationTokenSource() : { token: { isCancellationRequested: false }, cancel() { this.token.isCancellationRequested = true; }, dispose() {} };
+      let chosen;
+      try {
+        const items = documentChoices(defaultUri.fsPath, { remoteName: vscode.env.remoteName, token: source.token, overrides: await overlays(defaultUri.fsPath) })
+          .then(result => [{ label: 'Browse for another document…', browse: true,
+            detail: result.complete ? 'Choose a PDF or a file elsewhere.' : 'Some notes could not be listed. Browse for any document.' }, ...result.items]);
+        chosen = await vscode.window.showQuickPick(items, { title: 'Open document in place',
+          placeHolder: 'Search note title, filename or path', matchOnDescription: true, matchOnDetail: true }, source.token);
+      } finally { source.cancel(); source.dispose(); }
+      if (!chosen || attempt !== generation) return;
+      if (!chosen.browse) {
+        const uri = vscode.Uri.file(chosen.file);
+        if (!within(defaultUri.fsPath, await canonical(uri))) throw new Error('The chosen note moved outside the selected notes folder. Browse for its current location.');
+        choices = [uri];
+      }
+    }
+    if (attempt !== generation) return;
+    if (!choices) choices = await vscode.window.showOpenDialog({ title: 'Open document in place', openLabel: 'Open Document', defaultUri, canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
     if (!choices?.length || attempt !== generation) return;
     await grant(choices[0]);
     if (await display(choices[0], undefined, attempt)) { last = choices[0].toString(); await persist(); await onNavigated(); }

@@ -1,5 +1,10 @@
 # Using MRW
 
+With a notes folder selected, **Open Document…** lists Markdown notes by YAML
+title and filename, falling back to the first H1. Search by title, filename or
+path. **Browse for another document…** opens the file dialog for PDFs and files
+elsewhere. Cancelling preserves the current view and drafts.
+
 Choose **Open a note or paper…** in the MRW sidebar, or **Open saved source…**
 for retained reading and annotations. **Choose notes folder…** selects an
 Obsidian vault or another notes folder for note links and backlinks. These

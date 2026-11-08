@@ -1,5 +1,9 @@
 # Codex continuation: MRW documents and research work
 
+## Document chooser repair — 0.22.6
+
+Open Document now offers title/filename selection within the configured notes folder, with YAML title preferred and the first H1 as fallback. Browse retains the general file/PDF picker. WSL reads bounded headers in one read-only Windows process; title labels confer no scope or retained-source authority. Preserve dirty buffers and the working window. See [validation](DOCUMENT_CHOOSER_VALIDATION.md) for native observations and package delivery.
+
 ## Current repair — reader orientation, 0.22.1
 
 The user's navigation correction supersedes historical automatic expanded-reading

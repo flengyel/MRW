@@ -1,0 +1,48 @@
+{
+  "version": "0.22.6",
+  "tested_base_commit": "0436a966b881f61ccd2e7be8fc36dc6a924772d3",
+  "local_changes": true,
+  "node": {
+    "tests": 325,
+    "passed": 325,
+    "failed": 0
+  },
+  "focused": {
+    "tests": 33,
+    "passed": 33
+  },
+  "native": {
+    "vscode": "1.144.1",
+    "remote": "wsl",
+    "checks": [
+      "native chooser displays titles and opens the selected H1 note in place",
+      "native YAML-title selection preserves the unsaved buffer and saved bytes",
+      "native chooser cancellation preserves navigation",
+      "Browse keeps the general file-opening route (file-dialog answer injected)"
+    ],
+    "complete": true,
+    "fixture_initial_row_order_controlled": true,
+    "general_file_dialog_answer_injected": true,
+    "resource_auto_save": "off",
+    "dirty_buffer_and_saved_bytes_preserved": true,
+    "working_window_reloaded": false
+  },
+  "metadata_scan": {
+    "markdown_files": 2099,
+    "milliseconds": 6707,
+    "read_only": true
+  },
+  "package": {
+    "path": "vscode/mrw-0.22.6.vsix",
+    "bytes": 567893,
+    "sha256": "93125a3c3b22c9d49dd63734c22d231bad990122a892501268586cd2f0a734d1",
+    "verifier_passed": true,
+    "checkout_runtime_matches_except_generated_marker": true
+  },
+  "installation": {
+    "extension": "flengyel.mrw",
+    "version": "0.22.6",
+    "files_matched": 102,
+    "forced_reload": false
+  }
+}

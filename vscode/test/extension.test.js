@@ -124,7 +124,7 @@ async function harness(root, state = new Map(), options = {}) {
       async showOpenDialog(options) { dialogs.push(options); return opens.shift(); },
       async showSaveDialog(options) { saveDialogs.push(options); return saveChoices.shift(); },
       async showInputBox() { return inputs.shift(); },
-      async showQuickPick(options) { return picks.length ? picks.shift() : options[0]; },
+      async showQuickPick(options) { options = await options; return picks.length ? picks.shift() : options[0]; },
       async showWarningMessage() { return endings.shift(); },
       async showTextDocument(doc, options = {}) {
         shown.push(doc); const next = editor(doc);
