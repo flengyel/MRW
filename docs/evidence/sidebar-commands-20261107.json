@@ -1,0 +1,86 @@
+{
+  "version": "0.22.7",
+  "base_commit": "7fea38ed90abda08443237e396a40e71e833692b",
+  "syntax": {
+    "exit": 0
+  },
+  "focused": {
+    "passed": 4,
+    "failed": 0,
+    "exit": 0
+  },
+  "regression": {
+    "passed": 324,
+    "failed": 1,
+    "exit": 1,
+    "failure": "Old assertion expected the saved-source welcome button in Contents.",
+    "resolution": "Updated only that test assertion to the Commands view; affected test passed in the focused rerun. Production code unchanged.",
+    "full_pass_repeated": false
+  },
+  "shared_python": {
+    "study_questions_passed": 2,
+    "editor_bridge_passed": 11,
+    "exit": 0
+  },
+  "native": {
+    "vscode": "1.144.1",
+    "remote": "wsl",
+    "checks": [
+      "two production Open Document actions completed",
+      "saved example populated native Studies",
+      "dirty buffer and saved Markdown bytes preserved"
+    ],
+    "errors": [],
+    "complete": true,
+    "stage": "study",
+    "theme": "Default High Contrast",
+    "production_runtime_matches_final_package": true,
+    "observations": [
+      "native welcome button borders visible before document loading",
+      "bordered commands visible with populated Contents after two documents opened",
+      "bordered commands visible with populated Studies; native height required scrolling for lower buttons"
+    ],
+    "file_dialog_answers_injected": true,
+    "working_window_used": false,
+    "captures": {
+      "empty": "85f813b1d0df048a4ad6778acb1f9aa2fbdb8a589147770600911c7b0b4ebe30",
+      "documents": "a8001458e08716d23ea3e7f88ad5fad1aee8c47195fd84d0ceb68f88ba934094",
+      "study": "bf221ed6d3f1b2538046b3c676f3e2422094d02b94754a120fb2ae94a79326c1"
+    }
+  },
+  "package": {
+    "archive": "vscode/mrw-0.22.7.vsix",
+    "bytes": 567895,
+    "sha256": "2b236a1deb7c622b552d6d0347e04b31e66cba75c659a97b6385b3181d67f28e",
+    "files": 104,
+    "production_manifest_matches": true,
+    "runtime_bytes_match": true,
+    "development_files_excluded": true,
+    "build_marker": {
+      "version": "0.22.7",
+      "commit": "7fea38ed90abda08443237e396a40e71e833692b",
+      "localChanges": true
+    }
+  },
+  "installed": {
+    "extension": "flengyel.mrw",
+    "version": "0.22.7",
+    "payload_files_matched": 102,
+    "installer_manifest_metadata_excluded": true,
+    "registry_entry_verified": true
+  },
+  "working_window_reloaded": false,
+  "limits": [
+    "Other themes were not visually checked.",
+    "Earlier reader-orientation acceptance remains separate."
+  ],
+  "logs": {
+    "syntax": "8b759fe8855df4b5fc4a7951452b42dfb17e7ddc81b2d7792eec4b04433661bf",
+    "regression": "a33dc2f7bc7d0c04ee69346b08bed8e28c46060eaf38f882cb928428f4eab2f6",
+    "focused": "c6ef2b7e09e6f6100443781d47783c5aa60518b48cd255a11badd54b824672b7",
+    "python-study": "e11ae8704f386f962e8672a97e8314a68826ba403a64b4eda2cc969660b89f0c",
+    "python-bridge": "781193ce179b4b0478cac12bfe9036f765b002dc5d2ab857294ed2bf36200091",
+    "package": "c28f5088b5eac2f6581f9dc347cb2ee91e2414640f07405ec30050f383401641",
+    "install": "ca2969da4c0b783ca730d4c0e8a690d1ac6af0dacdcc6c22d29978be8593a78c"
+  }
+}

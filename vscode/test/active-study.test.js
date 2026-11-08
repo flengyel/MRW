@@ -128,22 +128,12 @@ test('a missing recent-study locator never replaces a saved study or unfinished 
 });
 
 
-test('document entry actions remain usable above an empty or populated Studies tree without loading a study',async t=>{
+test('Studies lists only saved work without creating or loading a study',async t=>{
  const h=await host(t),tree=h.c.tree;
- const empty=await tree.getChildren();
- const open=empty.find(item=>item.command==='mrw.openDocument');
- const contents=empty.find(item=>item.command==='mrw.openReadingOutline');
- assert.equal(empty[0],contents);assert.equal(tree.getTreeItem(contents).label,'Show Contents');
- assert.equal(tree.getTreeItem(contents).command.command,'mrw.openReadingOutline');
- const choose=empty.find(item=>item.command==='mrw.chooseNotesFolder');
- assert.ok(open);assert.ok(choose);
- assert.equal(tree.getTreeItem(open).command.command,'mrw.openDocument');
- assert.equal(tree.getTreeItem(choose).command.command,'mrw.chooseNotesFolder');
- const ids=empty.map(item=>tree.getTreeItem(item).id);assert.equal(new Set(ids).size,ids.length);
- assert.deepEqual(await tree.getChildren(open),[]);
+ assert.deepEqual(await tree.getChildren(),[]);
  h.state.set('mrw.lightStudy.recent.v1',[{id:'a'.repeat(64),title:'Example: sums of odd integers',sources:1}]);
- const populated=await tree.getChildren(),saved=populated.find(item=>item.kind==='study');
- assert.deepEqual(populated.filter(item=>item.kind==='action').map(item=>tree.getTreeItem(item).id),ids);
+ const populated=await tree.getChildren();assert.equal(populated.length,1);
+ const saved=populated[0];assert.equal(saved.kind,'study');
  assert.equal(tree.getTreeItem(saved).command.command,'mrw.openStudyItem');
  assert.equal(tree.getTreeItem(saved).command.arguments[0].study,'a'.repeat(64));
  assert.equal(h.c.active,undefined);assert.equal(h.panels.length,0);

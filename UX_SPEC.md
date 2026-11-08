@@ -1,5 +1,13 @@
 # UX_SPEC.md
 
+## Sidebar command buttons — 0.22.7
+
+The native **Commands** section keeps its buttons when a document opens or a
+study is saved. Contents and Studies contain navigation and saved work; they
+no longer replace command buttons with tree rows. Commands retain their IDs,
+tooltips and palette access. Preserve user view placement, notes, drafts and
+the working window. [Validation](docs/SIDEBAR_COMMANDS_VALIDATION.md).
+
 ## Document choice — 0.22.6
 
 With a notes folder selected, Open Document presents a searchable Markdown list whose labels include the YAML title and filename ID, falling back to the first H1. Duplicate labels retain their relative paths. Dirty open text supplies its current title without saving it. Browse for another document retains the native dialog for PDFs and other locations. Cancel leaves the document and navigation state unchanged. Selection rechecks the actual file scope before granting or displaying it.

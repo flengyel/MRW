@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.22.6",
+  "version": "0.22.7",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -515,6 +515,10 @@
           "name": "Contents"
         },
         {
+          "id": "mrw.commands",
+          "name": "Commands"
+        },
+        {
           "id": "mrw.research",
           "name": "Studies",
           "visibility": "collapsed",
@@ -904,12 +908,16 @@
     },
     "viewsWelcome": [
       {
+        "view": "mrw.commands",
+        "contents": "[Choose notes folder\u2026](command:mrw.chooseNotesFolder \"Select a notes folder for note links and backlinks. Files stay in place.\")\n[New document\u2026](command:mrw.newReadingOverview \"Create an editable Markdown document.\")\n[Open a note or paper\u2026](command:mrw.openDocument \"Open the original document in place without importing it.\")\n[Open saved source\u2026](command:mrw.openOutline \"Reopen retained reading and its annotations from the saved store.\")\n[Reopen document](command:mrw.reopenDocument \"Open the last document used in this workspace.\")\n[Show Contents](command:mrw.openReadingOutline \"Show the document navigator. Choose Markdown if none is selected.\")\n[Tutorial](command:mrw.openTutorial \"Open instructions for the active MRW build.\")"
+      },
+      {
         "view": "mrw.readingOutline",
-        "contents": "Open a document in place, or reopen retained reading from the saved store. Contents shows Markdown headings and links, including unsaved edits.\n[Open Document\u2026](command:mrw.openDocument)\n[Open Saved Source\u2026](command:mrw.openOutline)\n[Choose Notes Folder\u2026](command:mrw.chooseNotesFolder)\n[Reopen Document](command:mrw.reopenDocument)\n[Show Contents](command:mrw.openReadingOutline)\n[New Document\u2026](command:mrw.newReadingOverview)\n[Tutorial](command:mrw.openTutorial)"
+        "contents": "Open a Markdown document using Commands below. Contents shows its headings and links, including unsaved edits."
       },
       {
         "view": "mrw.research",
-        "contents": "Open your own note or paper, or return to retained reading.\n[Open a note or paper\u2026](command:mrw.openDocument)\n[Choose notes folder\u2026](command:mrw.chooseNotesFolder)\n[Open saved source\u2026](command:mrw.openOutline)\n[Tutorial](command:mrw.openTutorial)"
+        "contents": "Saved studies appear here. To start one, select a passage and run [Study Current Material](command:mrw.studyCurrent)."
       }
     ],
     "viewsContainers": {

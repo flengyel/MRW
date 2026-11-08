@@ -360,24 +360,11 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   registerQueued('mrw.inspectStudyHistory',inspect);registerQueued('mrw.exportStudyHistory',exportHistory);
   registerQueued('mrw.openStudyItem',async item=>{await load();const s=studies.get(item.study);if(!s)return;await open(s,'resume');if(item.reference)await followPassage(item.reference,s.root);if(item.revision){const q=eligible(s).find(q=>q.revision===item.revision);if(q){if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected question row');await persist(s);await send();}}});
   function registerQueued(name,fn){register(name,(...args)=>enqueue(()=>fn(...args)));}
-  const startActions=[
-    {kind:'action',label:'Show Contents',command:'mrw.openReadingOutline',help:'Return to the document navigator and reading controls. Studies are optional.'},
-    {kind:'action',label:'Open a note or paper…',command:'mrw.openDocument',help:'Open the original document in place without importing it.'},
-    {kind:'action',label:'Choose notes folder…',command:'mrw.chooseNotesFolder',help:'Select an Obsidian vault or another notes folder for note links and backlinks. Notes stay in place.'},
-    {kind:'action',label:'Open saved source…',command:'mrw.openOutline',help:'Reopen retained reading and its annotations from the saved store.'},
-    {kind:'action',label:'Tutorial',command:'mrw.openTutorial',help:'Open instructions for the active MRW build.'}
-  ];
   const tree={onDidChangeTreeData:changed.event,getChildren:async item=>{
-    if(!item)return [...startActions,...recent().sort((a,b)=>Number(b.id===active?.id)-Number(a.id===active?.id)).map(r=>({...r,study:r.id,kind:'study'}))];
-    if(item.kind==='action')return[];
+    if(!item)return recent().sort((a,b)=>Number(b.id===active?.id)-Number(a.id===active?.id)).map(r=>({...r,study:r.id,kind:'study'}));
     await load();const s=studies.get(item.study);
     if(item.kind==='study')return [...(s?.passages||[]).map(p=>({label:p.label,reference:p.reference,study:item.study,kind:'source'})),...(s?eligible(s):[]).filter(q=>!q.retired).slice(-10).map(q=>({label:q.prompt,study:item.study,revision:q.revision,kind:'question',description:q.kept?'kept for review':'available'}))];return[];
   },getTreeItem:item=>{
-    if(item.kind==='action'){
-      const row=new vscode.TreeItem(item.label,vscode.TreeItemCollapsibleState.None);
-      row.id='start:'+item.command;row.contextValue='mrw.documentAction';row.tooltip=item.help;
-      row.command={command:item.command,title:item.label};return row;
-    }
     const row=new vscode.TreeItem(item.title||item.label,item.kind==='study'?vscode.TreeItemCollapsibleState.Collapsed:vscode.TreeItemCollapsibleState.None);
     row.id=item.kind+':'+item.study+':'+(item.reference||item.revision||'');row.contextValue='mrw.'+item.kind;row.description=item.kind==='study'?[active?.id===item.study?'Current':null,item.sources?item.sources+' passages':null,item.unfinished?'unfinished':null].filter(Boolean).join(' · '):item.description;
     row.tooltip=item.reference||item.label||item.title;row.command={command:'mrw.openStudyItem',title:'Open '+item.kind,arguments:[item]};return row;}};

@@ -28,6 +28,11 @@ function activate(context) {
       recorder?.record(result===undefined?'operation.cancel':'operation.complete',{operation:'dialog.'+key,duration_ms:Date.now()-started});return result;};
   }});
   const vscode={...hostVscode,window:windowFacade};
+  // Welcome buttons disappear when a tree gains rows or a message. Keep this
+  // native command view empty so document/study updates never replace buttons.
+  context.subscriptions.push(vscode.window.registerTreeDataProvider('mrw.commands', {
+    getChildren: () => [], getTreeItem: item => item,
+  }));
   const documents = new Map();
   const reviewDocuments = new Map();
   const changed = new vscode.EventEmitter();

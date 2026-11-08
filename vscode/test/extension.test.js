@@ -113,7 +113,7 @@ async function harness(root, state = new Map(), options = {}) {
         panels.push(panel); return panel;
       },
       onDidChangeActiveTextEditor(callback) { activeListeners.add(callback); return { dispose() { activeListeners.delete(callback); } }; },
-      registerTreeDataProvider() { return disposable; },
+      registerTreeDataProvider(id, provider) { (api.treeProviders ||= {})[id] = provider; return disposable; },
       createTreeView(_id, options) { api.readingProvider = options.treeDataProvider; return api.readingTree = {
         dispose() {}, onDidCollapseElement(fn) { api.collapseReading = fn; return disposable; },
         onDidExpandElement(fn) { api.expandReading = fn; return disposable; }, async reveal() {} }; },
@@ -1440,14 +1440,25 @@ test('Obsidian overview import refuses a changed cursor or document without over
 test('the MRW starting view offers New, Open, saved sources and tutorial as registered commands', async t => {
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
-  const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.readingOutline').contents;
-  for (const command of ['mrw.openDocument', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
-    assert.ok(welcome.includes('(command:' + command + ')')); assert.ok(h.commands.has(command));
+  const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents;
+  for (const command of ['mrw.openDocument', 'mrw.openOutline', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
+    assert.ok(welcome.includes('(command:' + command + ' ')); assert.ok(h.commands.has(command));
   }
   for (const command of ['mrw.newReadingOverview', 'mrw.openTutorial']) {
     assert.ok(manifest.contributes.menus['view/title'].some(item => item.when === 'view == mrw.readingOutline' && item.command === command));
   }
   assert.equal(h.requests.length, 0); assert.equal(h.reads.length, 0);
+  const buttons = h.api.treeProviders['mrw.commands'];
+  assert.deepEqual(await buttons.getChildren(), []);
+  const file = path.join(root, 'active.md'); await fs.writeFile(file, '# Active document\n');
+  const doc = await h.api.workspace.openTextDocument(uri(file)); doc.languageId = 'markdown';
+  h.focus(h.editor(doc));
+  await h.commands.get('mrw.openReadingOutline')();
+  assert.equal(h.errors.length, 0); assert.equal(h.api.readingProvider.getChildren()[0].label, 'Active document');
+  h.state.set('mrw.lightStudy.recent.v1', [{id:'a'.repeat(64),title:'Saved study',sources:1}]);
+  assert.deepEqual(await buttons.getChildren(), []);
+  assert.equal((await h.api.treeProviders['mrw.research'].getChildren()).length, 1);
+  assert.equal(h.requests.length, 0);
 });
 
 test('reading outline offers a native Markdown file choice and remembers it without an active editor', async t => {
@@ -1807,7 +1818,7 @@ test('saved-source opening is discoverable and independent of an earlier citatio
   assert.equal(independent.kind, 'selected'); assert.match(independent.detail, /Opened independently/);
   assert.equal(independent.path, file);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
-  assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.readingOutline').contents.includes('[Open Saved Source…](command:mrw.openOutline)'));
+  assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('[Open saved source…](command:mrw.openOutline '));
   assert.ok(manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.openOutline' && item.group.startsWith('navigation')));
   assert.equal(doc.isDirty, true); assert.equal(h.saves.length, 0); assert.deepEqual(h.errors, []);
 });
@@ -1842,7 +1853,7 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   const svg=await fs.readFile(path.resolve(__dirname,'..',container.icon),'utf8');
   assert.match(svg,/<svg[^>]*viewBox="0 0 24 24"/);
   assert.doesNotMatch(svg,/<script|<image|href=/i);
-  assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.research']);
+  assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.commands','mrw.research']);
   assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
   const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
   for(const command of ['mrw.chooseReadingOverview','mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.importStacksSection','mrw.artifactLocation']){

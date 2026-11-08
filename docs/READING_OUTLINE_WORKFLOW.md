@@ -1,4 +1,4 @@
-# Existing documents, Contents and saved sources — 0.22.6
+# Existing documents, Contents and saved sources — 0.22.7
 
 With a notes folder selected, **Open Document…** lists Markdown notes by YAML
 title and filename, falling back to the first H1. Search by title, filename or
@@ -13,8 +13,8 @@ expanded-reading requirement.
 **MRW: Open Document…** displays an existing file in place. Markdown opens in
 VS Code's Markdown preview and supplies **Contents**. **Edit Document Source**
 opens its source for editing without saving a dirty buffer. **Show Contents**
-is available directly from Studies to reach the document navigator. Other
-formats use their registered host editor. A PDF requires an available PDF
+is available in the persistent **Commands** section to reach the document
+navigator. Other formats use their registered host editor. A PDF requires an available PDF
 reader. If none is registered, MRW offers **Open with system reader** as an
 explicit external handoff; failure is reported locally. It never shows binary
 PDF bytes as text or installs a reader. PDF extraction,
@@ -158,7 +158,7 @@ selected per window. No headings, IDs, filenames or note contents are renamed.
 **Retain Document as Source** keeps a saved UTF-8 text document and its selected
 passage. It does not import a PDF. **Open Saved Source…** reopens that retained
 revision even after the original changes or disappears. It is visible in the
-initial Contents interface and its title toolbar. In the Stacks workspace,
+Commands section and the Contents title toolbar. In the Stacks workspace,
 choose **Hausdorff spaces** from the existing saved store; no re-import or
 preservation copy is needed. **Refresh Saved Source**
 reloads saved state and annotations without acquiring a new original revision.

@@ -8,8 +8,9 @@ elsewhere. Cancelling preserves the current view and drafts.
 Choose **Open a note or paper…** in the MRW sidebar, or **Open saved source…**
 for retained reading and annotations. **Choose notes folder…** selects an
 Obsidian vault or another notes folder for note links and backlinks. These
-actions stay visible above saved studies, including the optional example.
-**Show Contents** returns from Studies to the document navigator and reading controls.
+actions stay in the **Commands** section as native buttons while documents
+and studies open. **Contents** lists document locations; **Studies** lists saved work.
+**Show Contents** returns to the document navigator and reading controls.
 Commands are also available through **F1**.
 
 ## Open existing work
@@ -25,8 +26,8 @@ Cancelling a choice preserves the current view and drafts. Ordinary navigation
 and Return leave both sidebars and editor groups under VS Code's layout control,
 so MRW, Codex and other work stay available.
 
-To resume saved reading immediately, use **Open Saved Source…** in the initial
-Contents interface or its title toolbar. In the Stacks workspace select
+To resume saved reading immediately, use **Open Saved Source…** in the
+Commands section or the Contents title toolbar. In the Stacks workspace select
 **Hausdorff spaces** from the existing saved store; no import is needed.
 
 A PDF uses an available registered VS Code reader. If none is available, MRW

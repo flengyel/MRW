@@ -1,5 +1,13 @@
 # Codex continuation: MRW documents and research work
 
+## Sidebar commands repair — 0.22.7
+
+The native **Commands** section keeps its buttons when a document opens or a
+study is saved. Contents and Studies contain navigation and saved work; they
+no longer replace command buttons with tree rows. Commands retain their IDs,
+tooltips and palette access. Preserve user view placement, notes, drafts and
+the working window. [Validation](SIDEBAR_COMMANDS_VALIDATION.md).
+
 ## Document chooser repair — 0.22.6
 
 Open Document now offers title/filename selection within the configured notes folder, with YAML title preferred and the first H1 as fallback. Browse retains the general file/PDF picker. WSL reads bounded headers in one read-only Windows process; title labels confer no scope or retained-source authority. Preserve dirty buffers and the working window. See [validation](DOCUMENT_CHOOSER_VALIDATION.md) for native observations and package delivery.

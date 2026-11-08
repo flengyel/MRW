@@ -84,8 +84,8 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     tree.message = uri ? `Contents: ${uri.fsPath || uri.toString()}` : undefined;
   }
   identifyDocument();
-  // Leave the initial view empty so VS Code displays the contributed welcome
-  // content and its labelled Show Contents button.
+  // The initial empty view shows Contents guidance. Commands live in their
+  // own native welcome view, independent of this tree and its document message.
   function refresh() {
     clearTimeout(timer);
     identifyDocument();
