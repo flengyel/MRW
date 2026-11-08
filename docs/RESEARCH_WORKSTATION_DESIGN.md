@@ -6,14 +6,14 @@ links, backlinks and research records carry the full source prefix. See
 [SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md); canonical links do not replace
 retained citations.
 
-Status: approved design direction. Document learning and its 0.23.1 navigation
-repairs are delivered. The current **0.23.2 document-opening repair** precedes
-another feature increment: immediate native Browse, shallow navigation, optional
-recursive search, asynchronous titles and unified original/saved choices.
-See [the task](CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md),
-[workflow](READING_OUTLINE_WORKFLOW.md) and [evidence](DOCUMENT_OPENING_REPAIR.md).
-General research resumption and argument reconstruction remain later work.
-Historical reports retain their observations and limits.
+Status: the user withdrew the document Problems interface in 0.23.3. Its commands
+and creation path are removed; saved work and pending drafts remain readable.
+Opening/following notes stays ordinary reading. Preserve the 0.23.1 navigation
+and 0.23.2 opening repairs. General research resumption and argument
+reconstruction remain later work, guided by a concrete research task.
+See [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md),
+[reading workflow](READING_OUTLINE_WORKFLOW.md) and
+[opening evidence](DOCUMENT_OPENING_REPAIR.md).
 
 ## Purpose
 
@@ -75,7 +75,7 @@ and focus the tree; they do not constitute a general file-opening action.
 The 0.19.2 patch does not supply PDF contents, vault WikiLink resolution or
 opening an arbitrary external file through MRW. Its picker/help states the
 Markdown support plainly. Existing **File: Open File…** remains
-available through the host. General document opening and document learning are delivered; opening reliability is the current repair.
+available through the host. General document opening is delivered. The later document Problems interface was withdrawn; do not reinstate it.
 
 ## Existing documents and optional integrations
 
@@ -211,15 +211,14 @@ distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 | --- | --- | --- |
 | 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | Existing create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
 | 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
-| 3. Document learning | Markdown section → associated problem → Attempt or independent Review solution → exact Return; existing light recall remains explicit | Save/reopen work and review context, handle changed/missing origins, offer relevant due questions without fabricated grades. |
+| 3. Document Problems | Withdrawn at the user’s request in 0.23.3 | Creation routes removed; earlier records and drafts remain readable. |
 | 4. Research resumption | Saved questions independent of ModelCall, linked documents/calculations/checks, persistent conclusion/gap/next action | Stop one investigation and resume its documents and unfinished work; ending the session preserves the summary. |
 | 5. Integrated reconstruction | One compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
 
 Deliver coherent increments in that order; do not combine a naming patch with
 a storage rewrite. A discovered data-loss defect takes priority. The broad
-design is authorized; increments 1 and 2 are delivered. The current task
-completes increment 3, using existing study/question records and FSRS. General
-research resumption and integrated reconstruction follow. Do not add another
+design is authorized; increments 1 and 2 are delivered. Increment 3 is withdrawn; it is not a prerequisite for research.
+General research resumption and integrated reconstruction remain planned. Do not add another
 outline format, scheduler or dashboard.
 
 Evaluate practical continuity, explanatory help and learning separately. Extend

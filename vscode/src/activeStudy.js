@@ -4,7 +4,7 @@ const model=require('./studyModel'),scheduler=require('./studyScheduler'),help=r
 const documentStudy=require('./studyDocument'),{trackLocation}=require('./readingOutline');
 const {outlineHtml}=require('./outlines');
 const {hash,summarize,selectHistoryContext}=require('./studyHistory');
-function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,changed,getCurrent,readPassage,followPassage,selectPrerequisites,loadExample,documentContext,returnToDocument,io=fs}){
+function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,changed,getCurrent,readPassage,followPassage,selectPrerequisites,loadExample,returnToDocument,io=fs}){
   let active,panel,loaded=false,loading,queue=Promise.resolve(),saveTail=Promise.resolve();
   const dirty=new Set(),draftTimers=new Map(),durable=new Map();
   const studies=new Map(),recentKey='mrw.lightStudy.recent.v1';
@@ -107,9 +107,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   }
   async function send(notice=''){
     if(!panel||!active)return;syncContext();
-    const due=active.document?scheduler.dueQuestions(eligible(active),settings().questions):[];
-    const dueKey=hash(JSON.stringify(due.map(q=>[q.id,q.revision,q.card?.due||null])));
-    await panel.webview.postMessage({type:'active_study',study:{...active,returnOrigin:problemReturn(active),passages:passagesFor(active),questions:eligible(active),due:active.dueDismissed===dueKey?[]:due.map(q=>q.revision),dueKey},gap:recorder.gap,notice,scheduler:scheduler.IDENTITY});
+    await panel.webview.postMessage({type:'active_study',study:{...active,returnOrigin:problemReturn(active),passages:passagesFor(active),questions:eligible(active)},gap:recorder.gap,notice,scheduler:scheduler.IDENTITY});
   }
   async function open(s,reason){
     if(active&&active.id!==s.id){await persist(active);recorder.record('source.change',{from:active.id,to:s.id,unfinished:!!active.current&&!active.current.finished});}
@@ -122,7 +120,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       panel.webview.html=outlineHtml(await io.readFile(path.join(context.extensionPath,'src/activeStudyView.js'),'utf8'),support,'',{kind:'study'});
       context.subscriptions.push(panel);
     }else panel.reveal();
-    panel.title=(s.document?'Problems: ':'Study: ')+s.title;await send();
+    panel.title=(s.document?'Saved work: ':'Study: ')+s.title;await send();
   }
   async function startStudy(passages,root,title){await load();const created=model.createStudy(passages,root,title);let s=studies.get(created.id);
     if(!s){try{s=JSON.parse(await io.readFile(path.join(home,created.id+'.json'),'utf8'));
@@ -232,6 +230,19 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     }
     if(s!==active)throw new Error('This study changed. Earlier work remains with its source.');
     checkAttempt(s,m);checkForm(s,m);checkHelp(s,m);
+    // Retired document forms remain readable. Accept late draft checkpoints,
+    // but never let a stale webview create questions, attempts or schedules.
+    if(s.document&&!['pause','source','history','export','document_return','document_open'].includes(m.type)){
+      // A previous renderer can bundle its latest prose with Save after cancelling
+      // its debounce timer. Checkpoint that prose without performing the action.
+      if(m.form||m.helpDraft||m.reportDraft||typeof m.draft==='string'||typeof m.unresolvedDraft==='string'){
+        keepControls(s,m);
+        if(m.form&&Buffer.byteLength(JSON.stringify(m.form))<=64*1024)s.formDraft=structuredClone(m.form);
+        if(typeof m.draft==='string'&&s.current&&!s.current.finished&&Buffer.byteLength(m.draft)<=64*1024)s.current.draft=m.draft;
+        await persist(s);
+      }
+      throw new Error('Document problem forms have been removed. Saved work remains available.');
+    }
     if(['outcome','admit','retire','question_save','solution_save','problem_later','problem_unkeep'].includes(m.type))await reconcilePending();
     if(m.type==='adaptation'&&m.offer!==s.current?.adaptation?.event)throw new Error('This adaptation offer changed; the obsolete choice was rejected.');
     if(m.type==='effort_response'&&m.offer!==s.current?.effortOffer?.id)throw new Error('This effort offer changed; the response was not recorded.');
@@ -244,15 +255,15 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       if(s.current&&!s.current.finished)throw new Error('Finish or skip the attempt before revising a question.');
       const previous=m.previous?eligible(s).find(q=>q.revision===m.previous):null;
       const q=model.question(m.question,passagesFor(s),previous);
-      prepareDocumentQuestion(s,q,previous);if(previous&&previous.revision===q.revision){await finishForm(s,()=>persistOwners(s));await send('Question unchanged.');return;}
+      if(previous&&previous.revision===q.revision){await finishForm(s,()=>persistOwners(s));await send('Question unchanged.');return;}
       if(s.questions.some(old=>!old.retired&&old.revision===q.revision)){await finishForm(s,()=>persistOwners(s));await send('Question saved.');return;}
       if(s.questions.length>=200)throw new Error('This study holds at most 200 question revisions. Retain a separate study for further questions.');
-      if(previous)replacePrevious(s,previous,q);
+      if(previous)previous.retired=true;
       s.questions.push(q);s.problemRevision=q.revision;recorder.record(previous?'question.revise':'question.save',{id:q.id,revision:q.revision,previous:previous?.revision||null,snapshot:recorder.snapshot(q)});await finishForm(s,()=>persistOwners(s));await send('Question saved. Keep for review is a separate choice.');
     }else if(m.type==='import_questions'){
       let text=(await vscode.env.clipboard.readText()).trim();if(text.startsWith(String.fromCharCode(96).repeat(3))){const found=/^\x60{3}(?:json)?\s*\n([\s\S]*?)\n\x60{3}\s*$/i.exec(text);if(!found)throw new Error('Copy the complete question JSON object or code block.');text=found[1];}
       const value=await bridge({method:'study_questions_parse',text,sources:model.signature(passagesFor(s))});
-      const added=value.questions.map(value=>{const q=model.question(value,passagesFor(s));prepareDocumentQuestion(s,q);return q;});if(s.questions.length+added.length>200)throw new Error('This study holds at most 200 question revisions.');
+      const added=value.questions.map(value=>{const q=model.question(value,passagesFor(s));return q;});if(s.questions.length+added.length>200)throw new Error('This study holds at most 200 question revisions.');
       s.questions.push(...added);recorder.record('question.import',{count:added.length,snapshot:recorder.snapshot(added)});await persist(s);await send('Questions imported. Choose one to begin; review admission stays optional.');
     }else if(await documentAction(s,m)){}
     else if(m.type==='prerequisites'){
@@ -365,40 +376,9 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       if(!owner.questions.some(q=>q.id===link.question&&q.revision===link.revision))throw Error('Associated problem revision is unavailable.');
     }catch(e){s.missingProblems.push({owner:link.owner,question:link.question,message:e.message});recorder.record('operation.error',{operation:'problem.restore',message:e.message});}
   }
-  function replacePrevious(s,previous,q){
-    if(s.document&&!s.questions.includes(previous)){
-      for(const link of s.problemLinks||[])if(link.revision===previous.revision)link.supersededBy=q.revision;
-    }else previous.retired=true;
-  }
   function passagesFor(s){
     const pending=s.documentContext?.passage;
     return pending&&!s.passages.some(p=>p.reference===pending.reference)?[pending,...s.passages]:s.passages;
-  }
-  function prepareDocumentQuestion(s,q,previous){
-    if(!s.document)return;
-    q.documentOrigin=structuredClone(s.problemLinks?.find(l=>l.revision===previous?.revision)?.origin||previous?.documentOrigin||
-      passagesFor(s).find(p=>q.references.includes(p.reference)&&p.kind==='document_context')?.documentOrigin||s.documentContext.origin);
-    if(previous?.problemLater)q.problemLater=structuredClone(previous.problemLater);
-    if(previous?.answer)q.originalAnswer=structuredClone(previous.originalAnswer||previous.answer);
-    const pending=s.documentContext?.passage;
-    if(pending&&q.references.includes(pending.reference)&&!s.passages.some(p=>p.reference===pending.reference)){
-      if(s.passages.length>=16)throw Error('This document study already retains sixteen contexts. Existing problems and work remain available.');
-      s.passages.push(structuredClone(pending));
-    }
-  }
-  async function startDocument(captured,root){
-    await load();const id=documentStudy.studyID(root,captured.uri);let s=studies.get(id);
-    if(!s)try{s=JSON.parse(await io.readFile(path.join(home,id+'.json'),'utf8'));
-      if(s.id!==id||s.version!==2||s.root!==root||s.document?.uri!==captured.uri)throw Error('Saved document-study identity differs.');
-    }catch(e){if(e.code!=='ENOENT')throw e;s={...model.createStudy([captured.passage],root,captured.label),id,document:{uri:captured.uri,label:captured.label}};}
-    normalizeDrafts(s);studies.set(id,s);
-    await loadProblemOwners(s);
-    s.documentContext=structuredClone(captured);s.returnError=null;s.title=captured.label;s.document.label=captured.label;
-    // An explicit section invocation chooses a new return pin; Resume preserves the saved one.
-    if(s.current?.documentReturn)s.current.documentReturn=structuredClone(captured.origin);
-    if(s.solutionReview?.origin)s.solutionReview.origin=structuredClone(captured.origin);
-    recorder.record('document.problems',{uri:captured.uri,section:captured.origin.section,revision:captured.origin.revision},'observed_action',model.identity(s));
-    await persist(s);await open(s,'open');return s;
   }
   function documentChanged(e){
     if(!e.contentChanges.length)return;
@@ -418,15 +398,13 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(m.type==='solution_review'){
       const q=eligible(s).find(q=>q.revision===m.revision);if(!q)throw Error('Problem revision is unavailable.');
       documentStudy.review(s,q,recorder);await persist(s);await send(q.answer?'Solution review opened. No attempt or grade was created.':'No solution is attached. Choose Attach solution.');
-    }else if(m.type==='context_visibility'){s.contextVisible=!!m.visible;recorder.record('document.context_display',{visible:!!m.visible,meaning:'Exposure opportunity; no recall grade.'});await persist(s);await send();}
-    else if(m.type==='solution_hide'){s.solutionReview=null;await persist(s);await send();}
+    }else if(m.type==='solution_hide'){s.solutionReview=null;await persist(s);await send();}
     else if(m.type==='solution_save'){
       const previous=eligible(s).find(q=>q.revision===m.previous);if(!previous)throw Error('The solution’s problem revision is unavailable.');
       const q=model.question({...previous,answer:m.answer},passagesFor(s),previous);
-      prepareDocumentQuestion(s,q,previous);
       if(q.revision!==previous.revision&&!s.questions.some(old=>old.revision===q.revision)){
         if(s.questions.length>=200)throw Error('This study holds at most 200 question revisions.');
-        q.originalAnswer=structuredClone(previous.originalAnswer||previous.answer);replacePrevious(s,previous,q);s.questions.push(q);
+        q.originalAnswer=structuredClone(previous.originalAnswer||previous.answer);previous.retired=true;s.questions.push(q);
         recorder.record('solution.save',{question:q.id,revision:q.revision,previous:previous.revision,snapshot:recorder.snapshot(q)});
       }
       const saved=eligible(s).find(old=>old.revision===q.revision)||previous;
@@ -436,40 +414,10 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       await persist(s);await recorder.flush();
       try{await returnToDocument(problemReturn(s),m.type==='document_open');s.returnError=null;
         recorder.record('navigation.problem_return',{uri:s.document.uri,section:s.documentContext.origin.section,exact:m.type==='document_return'});await persist(s);
-      }catch(e){s.returnError='The originating location is changed or missing: '+e.message;await persist(s);await send(s.returnError+' Work is saved. Select a current Contents section and choose Problems for Contents Section to set a new return location.');}
-    }else if(m.type==='problem_later'||m.type==='problem_unkeep'){
-      const q=eligible(s).find(q=>q.revision===m.revision);if(!q)throw Error('Problem revision is unavailable.');
-      if(m.type==='problem_unkeep')q.problemLater={kept:false,date:null};else documentStudy.keepForLater(q,m.date??null);
-      recorder.record('problem.later',{question:q.id,revision:q.revision,...q.problemLater,meaning:'Later problem work; no recall grade or FSRS change.'});await persistOwners(s);await send('Problem work saved separately from recall review.');
-    }else if(m.type==='due_dismiss'){
-      const key=hash(JSON.stringify(scheduler.dueQuestions(eligible(s),settings().questions).map(q=>[q.id,q.revision,q.card?.due||null])));
-      if(m.key!==key)throw Error('These due questions changed. Show Due review again.');
-      s.dueDismissed=key;recorder.record('review.offer_dismiss',{document:s.document?.uri});await persist(s);await send();
-    }else if(m.type==='due_show'){s.dueDismissed=null;await persist(s);await send();}
-    else if(m.type==='associate_problem'){
-      if(!s.documentContext)throw Error('Open problems from a document section first.');
-      const choices=[];
-      for(const owner of studies.values())for(const q of owner.questions)if(owner!==s&&owner.root===s.root&&!q.retired&&!eligible(s).some(old=>documentStudy.sameQuestion(q,old)))
-        choices.push({label:q.prompt,description:owner.title,owner:owner.id,question:q.id,revision:q.revision});
-      if(!choices.length){await send('No other saved problems are available. Enter a problem here.');return true;}
-      const choice=await vscode.window.showQuickPick(choices,{placeHolder:'Associate an explicitly selected saved problem with this section',matchOnDescription:true});if(!choice)return true;
-      const owner=studies.get(choice.owner),q=owner?.questions.find(q=>q.id===choice.question&&q.revision===choice.revision&&!q.retired);
-      if(!q)throw Error('The selected problem changed. Choose it again.');
-      const sources=owner.passages.filter(p=>q.references.includes(p.reference)&&!s.passages.some(old=>old.reference===p.reference));
-      if(s.passages.length+sources.length>16)throw Error('Keep at most sixteen explicitly associated source contexts.');
-      s.passages.push(...structuredClone(sources));s.problemLinks||=[];
-      if(s.problemLinks.length>=200)throw Error('This study holds at most 200 problem associations.');
-      s.problemLinks.push({...choice,origin:structuredClone(s.documentContext.origin)});s.problemRevision=q.revision;
-      recorder.record('problem.associate',{...choice,document:s.document.uri,section:s.documentContext.origin.section});await persist(s);await send('Problem associated. Its source references and review history are preserved.');
+      }catch(e){s.returnError='The originating location is changed or missing: '+e.message;await persist(s);await send(s.returnError+' Saved work is preserved. Open the document without an exact location to navigate manually.');}
     }else return false;
     return true;
   }
-  for(const [command,contents]of [['mrw.documentProblems',false],['mrw.sectionProblems',true]])register(command,async value=>{
-    if(!documentContext)throw Error('Document problem navigation is unavailable in this host.');
-    const captured=await documentContext(value,contents);
-    const root=await projectRoot({document:{uri:vscode.Uri.parse(captured.uri)}});
-    return enqueue(()=>startDocument(captured,root));
-  });
   register('mrw.studyCurrent',async supplied=>{const editor=vscode.window.activeTextEditor;
     const invocation=editor&&{editor,document:editor.document,version:editor.document.version,range:editor.selection};
     const root=await projectRoot(editor);
@@ -496,7 +444,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(item.reference){const p=s.passages.find(p=>p.reference===item.reference);
       if(p?.kind==='document_context')await returnToDocument(p.documentOrigin);else await followPassage(item.reference,s.root);}
     if(item.revision){const q=eligible(s).find(q=>q.revision===item.revision);if(q){
-      if(s.document){s.problemRevision=q.revision;s.solutionReview=null;await persist(s);await send();}
+      if(s.document){await send();}
       else{if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected question row');await persist(s);await send();}
     }}
   });

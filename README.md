@@ -5,24 +5,21 @@ is to keep questions, documents, attempts, calculations and checking evidence
 connected so work can be resumed. Reconstructing compressed arguments, including
 LLM-generated solutions, and testing comprehension are central uses.
 
-The current release opens existing documents in place, follows scoped note and
-PDF links, and connects Markdown sections to associated problems. Attempt a
-problem or review its attributed solution directly, save work, return to the
-originating section and resume later. Explicit light recall review uses FSRS. General research resumption and argument
-reconstruction remain later increments.
+The current release opens existing notes and papers in place, follows note and
+PDF links, and provides Contents, backlinks and Return. Reading requires no
+problem record. The document Problems interface introduced in 0.23.0 is removed;
+earlier saved work and drafts remain readable.
 
-**Current version: 0.23.2.** [Opening repair checks](docs/DOCUMENT_OPENING_REPAIR.md).
-The repository remains private. There is no published
-Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
-The technical extension identity is `flengyel.mrw`.
+**Current version: 0.23.3.** [Removal and preservation checks](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
+The repository remains private. There is no published Marketplace listing or
+GitHub release; obtain a maintainer VSIX or build locally. The technical
+extension identity is `flengyel.mrw`.
 
 The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) distinguishes Document,
-Contents, Saved source and Passage. From a Markdown section, use **MRW: Problems
-for Contents Section**, or **Problems for Document** from preview. The
-[learning workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md) explains problem entry,
-solution review, later work and explicit recall admission. The tutorial header
-identifies the active extension build. General research resumption and an
-integrated argument-reconstruction session remain later increments.
+Contents, Saved source and Passage. Use **Open Document…**, follow links and use
+**Return to Document** to continue reading. The tutorial identifies the active
+extension build. General research resumption and integrated argument
+reconstruction remain later increments.
 
 Navigation repair **0.23.1** preserves the last usable Return destination when
 a note link or backlink changes during opening, and rechecks a backlink's
@@ -30,8 +27,6 @@ current folder scope before loading it. New notes use the active preview group
 without displacing an unrelated text pane. [Checks and limits](docs/DOCUMENT_NAVIGATION_REPAIR.md).
 
 ## What works
-
-- Work from a Markdown section through a problem, independent solution review, exact Return and saved resumption.
 
 - Open original notes and papers without importing them.
 - Follow note/PDF links, inspect backlinks and return within an explicitly chosen notes folder.

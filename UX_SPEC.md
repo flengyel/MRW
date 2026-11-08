@@ -1,6 +1,6 @@
 # UX_SPEC.md
 
-## Current workflow — document opening and section work, 0.23.2
+## Current workflow — document reading, 0.23.3
 
 **Open Document…** offers **Original file** (current contents in place) and
 **Saved copy** (a retained revision with MRW annotations) in one native picker.
@@ -20,44 +20,22 @@ Command Palette. Opening an original does not import it; opening a saved copy
 does not refresh its source or replace annotations. PDFs use the existing host
 reader handoff. Shared backlink and note-ID completeness rules are unchanged.
 
-From Markdown preview/editor use **Problems for Document**; from a Contents
-heading or link use **Problems for Contents Section**. Capture that URI and
-occurrence before asynchronous work, independently of the last retained source.
-The existing study viewer identifies document/problem and named Return target.
-Enter a problem, find one in this document or explicitly associate saved work.
+Opening or following a note displays the note in place. Contents navigates its
+headings and links. The document Problems commands, preview link, Contents
+question actions and sidebar/editor entry points are removed at the user’s
+request. They must not return under another name.
 
-Offer **Attempt** and **Review solution** together. Direct review creates no
-attempt, outcome or FSRS change. Attach/correct a missing solution with explicit
-attribution; preserve originals and keep reader work and unresolved steps
-separate. Consultation during an attempt preserves its draft and is carried
-into subsequent submission evidence. Earlier snapshots stay unchanged. Later
-independent recall remains possible. Saving, pausing, reopening and exact Return
-preserve ongoing work; changed or missing locations are reported without guesses.
+Earlier document-linked records remain readable in the existing saved-work view.
+It shows statements, attributed solutions, pending drafts and unresolved text,
+with Return and history/export. It offers no problem entry, attempts, grading,
+association or scheduling forms. No data migration or deletion is performed.
+Late checkpoints from older views are preserved; stale mutation actions are rejected.
 
-Document associations survive incidental revisions. Editor-context snapshots
-are separate from `mrw-outline` retained citations and confer no source-store
-authority. Explicit links preserve source prefixes, revisions and passage text.
-Keep eligible recall questions for FSRS explicitly; separately keep/date a whole
-problem for later work. Application work, solution viewing, rereading and skips
-create no recall grades. Offer a small dismissible set of relevant admitted
-questions using existing short-block settings. Optional effort and adaptation
-remain task-linked, without a dwell-time comprehension model.
-
-Preserve native **Commands** buttons, tooltips/focus help and title/filename
-document choice, Browse and cancellation. **Contents** remains Markdown navigation;
-**Studies** remains saved study work. VS Code owns both sidebars, editor groups,
-ordinary documents, Save and Undo. No action automatically hides, maximizes or
-rearranges work. Tutorial identity reports the active package; installation does
-not force reload. The 0.23.1 [navigation repair](docs/DOCUMENT_NAVIGATION_REPAIR.md)
-keeps the previous Return when an origin changes during opening, rechecks
-backlink scope before loading, and uses the active preview group for new notes. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md) and
-[validation](docs/DOCUMENT_LEARNING_VALIDATION.md) record the delivered scope.
-
-The [research design](docs/RESEARCH_WORKSTATION_DESIGN.md) now orders document
-learning before general research resumption and integrated reconstruction.
-Those broader research goals remain planned; the existing bounded R3 exchange
-retains its contract. The document/note integrations are delivered, not a
-remaining prerequisite. Historical sections below describe earlier releases.
+Keep native Commands buttons, title/filename choice and cancellation. VS Code
+owns ordinary documents, Save, Undo, editor groups and both sidebars. Preserve
+0.23.1 Return/scope/presentation and 0.23.2 opening repairs. Installation does not
+reload the working window. General research resumption and integrated argument
+reconstruction remain later work. The sections below describe earlier releases.
 
 ## Existing documents — 0.20.0
 

@@ -1,9 +1,9 @@
-# Study and document problems — 0.23.0
+# Optional source study
 
-For Markdown sections, use **Problems for Contents Section** or **Problems for
-Document**. The [document-learning workflow](DOCUMENT_LEARNING_WORKFLOW.md) adds
-associated problems, independent solution review and a saved named Return.
-The retained-passage path below remains available separately.
+Document Problems was removed in 0.23.3. Opening and following notes remains ordinary
+reading. Earlier document-linked work is readable without its forms; see
+[the preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md). The explicitly invoked
+source-study tools below remain separate from document navigation.
 
 Select a passage in the retained reader and choose **Study current material**.
 A graph claim with a retained citation has **Study this claim**. For an ordinary

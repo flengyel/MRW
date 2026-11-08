@@ -1,5 +1,6 @@
 'use strict';
-// One native workflow over disposable Markdown, real views and the production controller.
+// Historical 0.23.0 fixture, retained for its validation report.
+// Document Problems was withdrawn in 0.23.3; this is not current host acceptance.
 const vscode=require('vscode'),fs=require('node:fs/promises'),path=require('node:path'),assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
 function probe(){

@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.2",
+  "version": "0.23.3",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -506,18 +506,6 @@
         "title": "Import Kerodon Section\u2026",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
-      },
-      {
-        "command": "mrw.documentProblems",
-        "title": "Problems for Document",
-        "category": "MRW",
-        "icon": "$(question)"
-      },
-      {
-        "command": "mrw.sectionProblems",
-        "title": "Problems for Contents Section",
-        "category": "MRW",
-        "icon": "$(question)"
       }
     ],
     "views": {
@@ -729,11 +717,6 @@
           "command": "mrw.importKerodonSection",
           "when": "view == mrw.research",
           "group": "1_reading@3"
-        },
-        {
-          "command": "mrw.sectionProblems",
-          "when": "view == mrw.readingOutline",
-          "group": "navigation@3"
         }
       ],
       "editor/context": [
@@ -852,20 +835,9 @@
           "command": "mrw.studyCurrent",
           "when": "editorHasSelection && resourceScheme == file && !(resourceFilename =~ /\\.mrw-(proof|study)\\.json$/)",
           "group": "navigation"
-        },
-        {
-          "command": "mrw.documentProblems",
-          "when": "resourceExtname == .md || resourceExtname == .markdown",
-          "group": "navigation@7"
         }
       ],
-      "view/item/context": [
-        {
-          "command": "mrw.sectionProblems",
-          "when": "view == mrw.readingOutline && viewItem == mrw.documentSection",
-          "group": "inline@1"
-        }
-      ]
+      "view/item/context": []
     },
     "configuration": {
       "title": "Mathematical Research Workstation",
@@ -938,7 +910,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Choose notes folder\u2026](command:mrw.chooseNotesFolder \"Select a notes folder for note links and backlinks. Files stay in place.\")\n[New document\u2026](command:mrw.newReadingOverview \"Create an editable Markdown document.\")\n[Open Document\u2026](command:mrw.openDocument \"Browse original files in place or choose a saved copy with its retained revision and annotations.\")\n[Problems for document](command:mrw.documentProblems \"Find, associate or enter a problem for the active Markdown document.\")\n[Reopen document](command:mrw.reopenDocument \"Open the last document used in this workspace.\")\n[Show Contents](command:mrw.openReadingOutline \"Show the document navigator. Choose Markdown if none is selected.\")\n[Tutorial](command:mrw.openTutorial \"Open instructions for the active MRW build.\")"
+        "contents": "[Choose notes folder\u2026](command:mrw.chooseNotesFolder \"Select a notes folder for note links and backlinks. Files stay in place.\")\n[New document\u2026](command:mrw.newReadingOverview \"Create an editable Markdown document.\")\n[Open Document\u2026](command:mrw.openDocument \"Browse original files in place or choose a saved copy with its retained revision and annotations.\")\n[Reopen document](command:mrw.reopenDocument \"Open the last document used in this workspace.\")\n[Show Contents](command:mrw.openReadingOutline \"Show the document navigator. Choose Markdown if none is selected.\")\n[Tutorial](command:mrw.openTutorial \"Open instructions for the active MRW build.\")"
       },
       {
         "view": "mrw.readingOutline",

@@ -1,28 +1,24 @@
 # Codex instructions
 
-## Current delivery — document-opening reliability, 0.23.2
+## Current delivery — remove document Problems, 0.23.3
 
-The [opening repair task](docs/CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md) is
-implemented; preserve the behavior below and follow consolidated CODEX_PLAN.md.
-Document learning is delivered; do not repeat it
-or require another manual problem session. The unified native **Open Document…**
-picker must show usable Browse before any I/O, list only the current folder,
-and enrich bounded titles asynchronously. Folder navigation and explicit recursive
-search must cancel stale work without changing notes-folder scope. Saved-copy
-discovery is independent and cannot prompt for a project in the background.
-Keep specialized command IDs, retained revisions/annotations, original files,
-dirty titles, queries and selection. No full-index fallback or shared-limit change.
+The user rejected the document Problems interface. Its commands, preview,
+toolbar, Contents and welcome entry points and document-study creation path
+are removed. Opening/following a note displays that note. Do not restore
+these forms under a different label or make a problem record a reading requirement.
 
-Preserve the 0.23.1 Return-origin, scope and presentation checks, native Commands,
-source-qualified references, drafts and studies. Verify actual rendered Markdown
-in a disposable native window, including rename/restore; command completion alone
-is insufficient. Preserve both sidebars and unrelated work. Deliver the solution
-exposure/export repair separately, with legacy-record and cross-session checks.
-Update current help/design, run applicable regressions, verify/install the VSIX,
-and commit/push main without reloading the working window. Record observations
-and limits in [the repair report](docs/DOCUMENT_OPENING_REPAIR.md). General research
-resumption and argument reconstruction remain subsequent work. No migration,
-archive restoration, preservation recopy or recommended-extension guide change.
+Preserve existing saved records, linked owners, drafts, source references and
+history. Earlier document-linked work reopens read-only in the existing viewer,
+with Return and history/export available. Accept late draft checkpoints and
+failed-save retries; reject stale creation/grading/scheduling actions. No storage
+migration or deletion. Other explicitly invoked study/proof tools remain separate.
+
+Preserve the delivered opening, title, scope, Return and pane-placement repairs,
+native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
+VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
+reloading the working window. General research resumption and argument
+reconstruction remain later work; they must start from an observed task, without
+adding another registration form. [Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Extension identity — 0.22.0
 

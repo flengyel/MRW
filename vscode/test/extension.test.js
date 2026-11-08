@@ -2397,39 +2397,15 @@ test('Contents displays the YAML title with filename identity and updates it aft
  assert.match(h.api.readingTree.description,/Fields and groups.*immutable-id\.md/);assert.equal(doc.isDirty,true);assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
 });
 
-test('document problems capture a preview section after an unrelated reader without substituting remembered material',async t=>{
-  const root=await temporary(t),h=await harness(root);
-  await sourceReader(h,root);
-  const file=path.join(root,'learning.md'),text='# Learning\n\n## Selected section\nExact document context.\n\n## Other section\nOther context.\n';
-  await fs.writeFile(file,text);const doc=h.document(file,text);doc.languageId='markdown';
-  h.focus(h.editor(doc));const model=await h.commands.get('mrw.openReadingOutline')();
-  h.api.window.activeTextEditor=undefined;
-  h.api.window.tabGroups={activeTabGroup:{activeTab:{input:{uri:uri(file)}}},all:[]};
-  const node=model.all.find(n=>n.label==='Selected section');
-  const s=await h.commands.get('mrw.sectionProblems')(node);
-  assert.deepEqual(h.errors,[]);assert.equal(s.document.uri,doc.uri.toString());
-  assert.match(s.passages[0].text,/Exact document context/);assert.doesNotMatch(s.passages[0].text,/Other context|Source line/);
-  assert.equal(s.documentContext.origin.start,node.start);assert.equal(s.documentContext.origin.end,node.end);
-  assert.equal(s.current,null);
-  const note=await h.commands.get('mrw.documentProblems')();assert.equal(note.id,s.id);
+test('reading and Contents have no document Problems entry points or automatic study creation',async t=>{
+ const root=await temporary(t),h=await harness(root),a=path.join(root,'a.md'),b=path.join(root,'b.md');
+ const text='# Original note\n\n[Related note](b.md)\n';await fs.writeFile(a,text);await fs.writeFile(b,'# Related note\n\nExisting solution text.\n');
+ const doc=h.document(a,text);doc.languageId='markdown';h.focus(h.editor(doc));const nav=await h.commands.get('mrw.openReadingOutline')();
+ for(const command of ['mrw.documentProblems','mrw.sectionProblems'])assert.equal(h.commands.has(command),false);
+ assert.equal(h.panels.length,0);const follow=nav.all.find(n=>n.kind==='document_link');assert.ok(follow);
+ await h.commands.get('mrw.selectReadingOutlineItem')(follow);assert.equal(h.panels.length,0);assert.deepEqual(h.errors,[]);
+ assert.equal(h.requests.some(r=>/^study/.test(r.method)),false);assert.equal(h.saves.length,0);assert.equal(await fs.readFile(a,'utf8'),text);
 });
-
-test('document problem return tracks outside edits, reports overlap and missing files, and never saves dirty Markdown',async t=>{
-  const root=await temporary(t),h=await harness(root),file=path.join(root,'learning.md'),text='# Learning\n\n## Problem section\nOriginal prose.\n';
-  await fs.writeFile(file,text);const doc=h.document(file,text);doc.languageId='markdown';h.focus(h.editor(doc));
-  const nav=await h.commands.get('mrw.openReadingOutline')(),node=nav.all.find(n=>n.label==='Problem section');
-  const s=await h.commands.get('mrw.sectionProblems')(node),panel=h.panels.at(-1);
-  const post=async m=>{const state=panel.webview.messages.findLast(m=>m.type==='active_study').study;await panel.receive({study:s.id,attempt:state.current?.id||null,formEpoch:state.formEpoch,formDraftId:null,helpDraftId:null,...m});};
-  h.changeDocument(doc,0,0,'Unsaved preface\n');
-  await post({type:'document_return'});assert.equal(doc.getText(h.api.window.activeTextEditor.selection),'## Problem section');
-  assert.equal(doc.isDirty,true);assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);
-  h.changeDocument(doc,s.documentContext.origin.start,3,'Changed ');await post({type:'document_return'});
-  let view=panel.webview.messages.findLast(m=>m.type==='active_study');assert.match(view.study.returnError,/changed or missing/);
-  await post({type:'document_open'});assert.equal(h.saves.length,0);
-  await fs.unlink(file);await post({type:'document_return'});view=panel.webview.messages.findLast(m=>m.type==='active_study');assert.match(view.study.returnError,/changed or missing/);
-  assert.equal(s.document.uri,doc.uri.toString());assert.deepEqual(h.errors,[]);
-});
-
 
 test('background saved-copy discovery never prompts for a project in an ambiguous workspace', async t => {
   const root=await temporary(t),h=await harness(root);

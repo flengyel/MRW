@@ -1,4 +1,18 @@
-# Problems from Markdown sections — MRW 0.23.0
+# Document Problems — withdrawn in MRW 0.23.3
+
+The user rejected this interface. Its commands and document creation path are
+removed. Open notes with **Open Document…**, follow links and use Contents and
+Return. Earlier saved work and pending drafts remain readable through Studies
+or Resume Study. The saved-work view retains Return and history/export without
+problem entry, grading or scheduling controls.
+[Current reading workflow](READING_OUTLINE_WORKFLOW.md) ·
+[Removal and preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md).
+
+The account below describes the historical 0.23.0 implementation, not current
+instructions or a requirement to restore it.
+
+## Historical workflow — MRW 0.23.0
+
 
 Use **Open Document…** for an original file or saved copy; see the
 [opening workflow](READING_OUTLINE_WORKFLOW.md) for folder navigation and scope.

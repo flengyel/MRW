@@ -37,9 +37,7 @@
     document_open:'Open the associated Markdown file without claiming that the old occurrence still exists.',
     solution_review:'Display the attributed solution without creating an attempt or recall grade. Consultation during an attempt is retained.',
     choose_question:'Begin work on this problem. Prior solution viewing remains in history; this attempt starts with its solution concealed.',
-    problem_later:'Keep or date this whole problem for later work, separately from FSRS recall scheduling.',
     admit:'Explicitly keep an eligible recall question for spaced review. Merely reading or saving a problem does not admit it.',
-    due_dismiss:'Dismiss these due questions. Reading, saved work and recall state remain available.'
   };
   let focusedControl,hoveredControl;
   function showControlHelp(){const text=(focusedControl||hoveredControl)?.title||'';const help=Array.from(root.querySelectorAll('p')).find(n=>n.dataset.help==='control');if(help){help.textContent=text;help.hidden=!text;}}
@@ -64,7 +62,7 @@
   }
   function edit(q){
     if(local.form){notice='Save or cancel the question draft before editing another question.';render();return;}
-    form=q?{...copy(q),author:'Reader',origin:'human'}:{activity:state.document?'application':'missing_step',prompt:'',answer:null,hints:[],references:[state.passages[0].reference],author:'Reader',origin:'human'};
+    form=q?{...copy(q),author:'Reader',origin:'human'}:{activity:'missing_step',prompt:'',answer:null,hints:[],references:[state.passages[0].reference],author:'Reader',origin:'human'};
     form.draftId=crypto.randomUUID();local.form=form;saveLocal();render();
     Array.from(root.querySelectorAll('textarea')).find(n=>n.dataset.field==='Question')?.focus?.();
   }
@@ -87,7 +85,7 @@
       localButton(box,'Cancel solution edit',()=>{const formDraftId=form.draftId;form=null;local.form=null;saveLocal();post('form_cancel',{formDraftId});},'form_cancel');return;
     }
     if(!form||(state.current&&!state.current.finished))return;
-    const box=el('section');box.className='region';el('h2',state.document?(form.revision?'Revise problem':'Enter a problem'):(form.revision?'Revise question':'Enter a question'),box);
+    const box=el('section');box.className='region';el('h2',form.revision?'Revise question':'Enter a question',box);
     select(box,'Activity',[['definition','Definition'],['hypotheses','Hypotheses'],['missing_step','Missing step'],['argument','Argument reconstruction'],['application','Application / new example']],form.activity,v=>form.activity=v);
     field(box,'Question',form.prompt,'prompt',form);
     const meta=details(box,'Attribution, hints and sources','question-metadata');field(meta,'Question author',form.author,'author',form,'input');
@@ -193,26 +191,54 @@
       button(formBox,'Discard response draft','help_cancel');
     }
   }
-  function renderDocument(){
-    if(!state.documentContext)return;
-    const context=el('section');context.className='region';context.dataset.document='context';
-    el('p','Document: '+state.document.label,context);
-    if(state.missingProblems?.length)el('p','An associated saved problem is unavailable. Its link and this document’s work are preserved.',context);el('p',state.document.uri,context);
-    const origin=state.returnOrigin||state.documentContext.origin;
-    const back=button(context,'← Return to '+origin.filename+' › '+origin.section,'document_return');
-    back.title='Save work and return to the exact originating Markdown occurrence. Changed or missing locations are reported.';
-    button(context,'Open document without exact location','document_open');
-    if(origin.invalid||state.returnError)el('p',state.returnError||'The originating occurrence changed. Choose its current Contents section and open its problems to set a new return location.',context);
-    const actions=el('div',undefined,context);actions.className='toolbar';
-    localButton(actions,'Enter a problem',()=>edit(),'enter_problem',!!local.form||!!state.current&&!state.current.finished);
-    button(actions,'Associate saved problem…','associate_problem');button(actions,'Due review','due_show');
-    if(state.due?.length){
-      const due=el('section',undefined,context);due.dataset.review='due';el('h2','Due here ('+state.due.length+')',due);
-      el('p','Only explicitly associated, admitted recall questions. Reading remains available.',due);
-      for(const revision of state.due){const q=state.questions.find(q=>q.revision===revision);if(q){math(due,q.prompt);button(due,'Attempt','choose_question',{revision},!!state.current&&!state.current.finished);}}
-      button(due,'Begin short review block','next',{},!!state.current&&!state.current.finished);
-      button(due,'Dismiss due questions','due_dismiss',{key:state.dueKey});
+  function renderSavedDocument(){
+    if(state.current&&local.attempt!==state.current.id){local.attempt=state.current.id;local.answer=state.current.draft;local.paper=state.current.paper;}
+    el('p','Document problem forms have been removed. Earlier saved work remains available here.');
+    const bar=el('div');bar.className='toolbar';
+    const origin=state.returnOrigin||state.documentContext?.origin;
+    if(origin){button(bar,'← Return to '+origin.filename+' › '+origin.section,'document_return');button(bar,'Open document without exact location','document_open');}
+    button(bar,'Save pending work','pause');button(bar,'Inspect history','history');button(bar,'Export history…','export');
+    if(origin?.invalid||state.returnError)el('p',state.returnError||'The original location changed. Open the document to navigate manually.');
+    if(state.missingProblems?.length)el('p','An associated saved record is unavailable. Its reference is preserved.');
+    const prose=(parent,title,value)=>{if(value?.text){el('h3',title,parent);el('p',value.author+' · '+label(value.origin),parent);math(parent,value.text);}};
+    const refs=(parent,values)=>{for(const ref of values||[])el('pre',ref,parent);};
+    const bank=details(root,'Saved statements and solutions ('+state.questions.length+')','saved-questions',true);
+    for(const q of state.questions){
+      const row=el('section',undefined,bank);math(row,q.prompt);el('p',q.author+' · '+label(q.origin)+(q.retired?' · Earlier revision':''),row);
+      prose(row,'Solution',q.answer);prose(row,'Original solution',q.originalAnswer);refs(row,q.references);
     }
+    const attempts=[...(state.attempts||[])];
+    if(state.current&&!attempts.some(a=>a.id===state.current.id))attempts.push(state.current);
+    for(const a of attempts){
+      const box=details(root,'Saved work · '+a.question.prompt,'saved-attempt:'+a.id,true);
+      const draft=local.attempt===a.id?local.answer??a.draft:a.draft;el('pre',draft||'(No typed work)',box);
+      if(a.paper)el('p','Work on paper was recorded.',box);
+      if(a.outcome)el('p','Recorded outcome: '+label(a.outcome.outcome),box);
+      const report=local.reports?.[a.id]||a.reportDraft;
+      if(report)el('p','Pending report: '+label(report.outcome)+' · consultation: '+String(report.consulted),box);
+      for(const submitted of a.submissions||[])el('p','Submitted snapshot: '+submitted.snapshot+' · '+submitted.at,box);
+    }
+    const draft=local.form||state.formDraft;
+    if(draft){
+      const box=details(root,'Pending draft','saved-form',true);
+      if(draft.prompt)el('pre',draft.prompt,box);
+      if(draft.author)el('p',draft.author+' · '+label(draft.origin),box);
+      prose(box,'Solution draft',draft.answerDraft||draft.answer);
+      if(draft.hintsDraft?.text)el('pre',draft.hintsDraft.text,box);
+      else for(const hint of draft.hints||[])el('pre',hint,box);
+      refs(box,draft.references);
+    }
+    const responses=[...(state.help||[])];
+    for(const draft of [state.helpDraft,local.helpDraft])if(draft&&!responses.some(r=>r.id===draft.id&&r.text===draft.text))responses.push(draft);
+    for(const response of responses){
+      const box=details(root,[state.helpDraft?.id,local.helpDraft?.id].includes(response.id)?'Pending companion response':'Saved companion response','saved-help:'+response.id,true);
+      prose(box,'Response',response);prose(box,'Original response',response.original);
+    }
+    const unresolved=local.unresolved??state.unresolved;
+    if(unresolved){const box=details(root,'Unresolved question','saved-unresolved',true);el('pre',unresolved,box);}
+    const sources=details(root,'Saved document context','saved-context');
+    for(const p of state.passages){el('h3',p.label,sources);el('pre',p.text,sources);refs(sources,[p.reference]);}
+    disableBusy();
   }
   function renderSolution(questions,a){
     const q=questions.find(q=>q.revision===state.problemRevision)||(!a&&questions.length===1?questions[0]:null);
@@ -240,10 +266,11 @@
     const focus=document.activeElement,focusKey=focus?.dataset?.field,selection=focusKey?[focus.selectionStart,focus.selectionEnd]:null;
     focusedControl=null;hoveredControl=null;root.replaceChildren();el('h1',state.title);
     const status=el('p',notice);status.setAttribute('role','status');if(state.gap){const gap=el('p',state.gap);gap.className='warning';}
+    if(state.document){renderSavedDocument();return;}
     const bar=el('div');bar.className='toolbar';button(bar,'Pause / save','pause');
     const options=details(bar,'Study actions','study-actions');button(options,'Add prerequisites…','prerequisites');button(options,'Inspect history','history');button(options,'Export history…','export');
     const a=state.current,questions=state.questions.filter(q=>!q.retired);
-    renderDocument();renderSolution(questions,a);
+    renderSolution(questions,a);
     if(a){
       el('h2',a.finished?'Completed question':'Current question');math(root,a.question.prompt);el('p',label(a.question.activity));
       const attribution=details(root,'Question attribution','current-question-attribution');el('p',label(a.question.origin)+' · '+a.question.author,attribution);
@@ -284,23 +311,13 @@
       if(local.helpDraft||(state.help||[]).length)renderHelp(null);
     }
     renderForm();
-    const qbox=details(root,(state.document?'Problems':'Questions')+' ('+questions.length+')','question-bank',!!state.document);
+    const qbox=details(root,('Questions')+' ('+questions.length+')','question-bank',!!state.document);
     const tools=el('div',undefined,qbox);tools.className='toolbar';localButton(tools,'Enter a question',()=>edit(),'enter_question',!!local.form||!!a&&!a.finished);
     button(tools,'Request questions from Codex','handoff',{purpose:'questions'});button(tools,'Import questions from clipboard','import_questions');
-    if(state.document){const search=field(qbox,'Find problem',local.problemSearch||'','text',{},'input');search.oninput=()=>{local.problemSearch=search.value;saveLocal();render();};}
-    for(const q of questions.filter(q=>!state.document||!local.problemSearch||q.prompt.toLowerCase().includes(local.problemSearch.toLowerCase()))){
+    for(const q of questions){
       const row=el('section',undefined,qbox);math(row,q.prompt);el('p',label(q.activity)+' · '+(q.kept?'Kept for review':'Available; outside continuing review')+(q.card?' · due '+new Date(q.card.due).toLocaleString():''),row);
       button(row,'Attempt','choose_question',{revision:q.revision},!!a&&!a.finished);button(row,'Review solution','solution_review',{revision:q.revision});localButton(row,'Edit',()=>edit(q),'question_edit',!!local.form||!!a&&!a.finished);
       if(q.activity!=='application'||q.kept)button(row,q.kept?'Retire':'Keep for spaced review',q.kept?'retire':'admit',{revision:q.revision});
-      if(state.document){
-        const origin=state.problemLinks?.find(l=>l.revision===q.revision)?.origin||q.documentOrigin;
-        if(origin)el('p','Associated section: '+origin.section,row);
-        el('p',q.problemLater?.kept?'Problem kept for later'+(q.problemLater.date?' · '+q.problemLater.date:''):'Problem work is separate from recall scheduling.',row);
-        button(row,q.problemLater?.kept?'Remove later-work reminder':'Keep problem for later',q.problemLater?.kept?'problem_unkeep':'problem_later',{revision:q.revision});
-        const schedule=details(row,'Schedule problem work','schedule:'+q.revision);local.laterDates||={};
-        const draft=local.laterDates[q.revision]||={date:q.problemLater?.date||''};const date=field(schedule,'Work on date',draft.date,'date',draft,'input',q.revision+':');date.type='date';
-        button(schedule,'Save problem date','problem_later',()=>({revision:q.revision,date:draft.date}));
-      }
     }
     const unresolved=details(root,'Unresolved question','unresolved',!!state.document);
     if(state.unresolvedProblem)el('p','Saved question relates to: '+(state.questions.find(q=>q.revision===state.unresolvedProblem)?.prompt||state.unresolvedProblem),unresolved);const value={text:local.unresolved??state.unresolved};
@@ -322,7 +339,8 @@
     if(m?.type==='active_study'){
       const changed=state?.id!==m.study.id;
       restoreForm(m.study,changed);
-      if(changed){if(m.study.helpDraft||!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}
+      if(m.study.document){if(!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}
+      else if(changed){if(m.study.helpDraft||!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}
       else if(JSON.stringify(state?.helpDraft||null)!==JSON.stringify(m.study.helpDraft||null))local.helpDraft=copy(m.study.helpDraft||null);
       state={...m.study,gap:m.gap};notice=m.notice||'';busy=false;
       if(notice.startsWith('Question saved.')||notice.startsWith('Questions imported.')||notice==='Question unchanged.'||notice.startsWith('Solution saved.')){form=null;local.form=null;}

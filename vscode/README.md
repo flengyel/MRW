@@ -1,18 +1,14 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.2 opens existing mathematical documents in place and connects scoped
+MRW 0.23.3 opens existing mathematical documents in place and connects scoped
 note links, backlinks and return locations with retained sources, annotations
 and resumable study. The extension is experimental.
 [Opening repair checks](../docs/DOCUMENT_OPENING_REPAIR.md).
 
-## Work from a Markdown section
-
-Choose its **Problems for Contents Section** action, or run **Problems for
-Document** from preview. Enter/associate a problem, then choose **Attempt** or
-**Review solution**. Direct review creates no attempt or recall grade. Save a
-difficult step, pause and resume the work, then use the named Return button.
-Explicit recall admission and later-problem dates are separate.
-[Workflow and example](../docs/DOCUMENT_LEARNING_WORKFLOW.md).
+The document Problems commands and forms are removed. Earlier document-linked
+work remains readable with its drafts, attributed text, Return and history/export.
+Reading a note requires no problem record. See
+[the removal checks](../docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Open existing work
 

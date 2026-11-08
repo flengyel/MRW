@@ -1,38 +1,36 @@
 # CODEX_PLAN.md
 
-## Delivered repair — document opening, 0.23.2
+## Delivered correction — remove document Problems, 0.23.3
 
-The [document-opening repair](docs/CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md) is implemented.
-The native **Open Document…** picker unifies original files and saved revisions,
-shows Browse before I/O, lists one folder at a time and enriches bounded titles.
-Only **Search subfolders…** descends recursively. Browsing location never grants
-notes-folder indexing scope. Saved-copy loading cannot block ordinary browsing.
-Cancel stale workers, preserve query/selection and revalidate scope before open.
-The separate solution-export repair resolves review events and exact snapshots,
-including legacy records, without altering assistance classification.
-[Workflow](docs/READING_OUTLINE_WORKFLOW.md) and [repair evidence](docs/DOCUMENT_OPENING_REPAIR.md)
-record delivered behavior, timings, native observations and limits.
+The user rejected the document Problems interface. Its commands, preview,
+toolbar, Contents and welcome entry points and document-study creation path
+are removed. Opening/following a note displays that note. Do not restore
+these forms under a different label or make a problem record a reading requirement.
 
-Document learning and the 0.23.1 navigation repairs are delivered. Preserve
-Markdown → Contents section → problem → Attempt or Review solution → named Return,
-independent original/solution attribution and explicit FSRS admission. No manual
-problem session is a delivery gate. Source retention/graph validation establishes
-structure and identity, not mathematical correctness or learning benefit.
-Keep command/view IDs, private storage, notes, studies and history. VS Code owns
-sidebars, groups, dirty buffers and recovery. Verified installation must not
-reload the working window. General research resumption follows this repair.
+Preserve existing saved records, linked owners, drafts, source references and
+history. Earlier document-linked work reopens read-only in the existing viewer,
+with Return and history/export available. Accept late draft checkpoints and
+failed-save retries; reject stale creation/grading/scheduling actions. No storage
+migration or deletion. Other explicitly invoked study/proof tools remain separate.
+
+Preserve the delivered opening, title, scope, Return and pane-placement repairs,
+native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
+VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
+reloading the working window. General research resumption and argument
+reconstruction remain later work; they must start from an observed task, without
+adding another registration form. [Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 | Order | Increment | Status |
 | --- | --- | --- |
 | 1 | Document / Contents / Saved source / Passage terminology | Delivered 0.19.2 |
 | 2 | Existing documents, optional notes folder, links/backlinks, PDF host opening | Delivered 0.20.0; later title/source/navigation repairs preserved |
-| 3 | Section-linked problems, independent solution review, return/resume and explicit light recall | Implemented 0.23.0; delivery checks in linked validation |
+| 3 | Document Problems | Withdrawn 0.23.3 at the user’s request; saved work remains readable |
 | 4 | General research questions with linked work, durable summary and next action | Planned; reuse existing persistence and preserve bounded R3 |
 | 5 | Integrated reconstruction of a compressed mathematical argument | Planned; join existing components |
 
 The broader [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md)
 remains in force. Studies keep their name; a general research-question model
-is not implemented by this learning increment. Obsidian, Codex, Lean and Sage
+remains planned. Obsidian, Codex, Lean and Sage
 remain optional. Current workflow and packaged tutorial change together.
 
 The 0.22.7 [persistent Commands repair](docs/SIDEBAR_COMMANDS_VALIDATION.md),

@@ -1,28 +1,24 @@
-# Codex continuation: document learning and research
+# Codex continuation: reading and research
 
-## Current delivery — document-opening repair, 0.23.2
+## Current delivery — remove document Problems, 0.23.3
 
-The [opening task](CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md) repairs reviewed main
-`828bc8c` without repeating delivered document learning. Use the unified native
-**Open Document…** flow for originals and saved copies. Browse precedes I/O;
-initial enumeration is strictly shallow. Bounded asynchronous titles preserve
-dirty text, selection and query. Folder/parent navigation and explicit recursive
-search are separate from notes-folder permission. Cancel superseded work and
-never fall back to a full content index. Background saved-copy discovery must
-not ask the user to choose a project. Saved opening preserves retained revisions.
+The user rejected the document Problems interface. Its commands, preview,
+toolbar, Contents and welcome entry points and document-study creation path
+are removed. Opening/following a note displays that note. Do not restore
+these forms under a different label or make a problem record a reading requirement.
 
-The separate solution-export correction follows recorded review-event/snapshot
-identity and supports legacy revision markers. Preserve assistance classification.
-[Repair report](DOCUMENT_OPENING_REPAIR.md) records regression/package identity,
-representative timings and native rendered open/follow/Return/rename observations.
-Preserve the 0.23.1 origin/scope/pane repairs and the document-learning workflow.
-No manual study exercise, new dashboard, scheduler or layout policy belongs here.
+Preserve existing saved records, linked owners, drafts, source references and
+history. Earlier document-linked work reopens read-only in the existing viewer,
+with Return and history/export available. Accept late draft checkpoints and
+failed-save retries; reject stale creation/grading/scheduling actions. No storage
+migration or deletion. Other explicitly invoked study/proof tools remain separate.
 
-General research resumption and argument reconstruction remain subsequent work.
-Existing source IDs, exact revisions, notes, drafts, studies and history remain
-intact. VS Code owns ordinary documents, Save, Undo, sidebars and dirty recovery.
-Install through the verified WSL route without reloading the working window.
-Historical reports retain their original observations and limits.
+Preserve the delivered opening, title, scope, Return and pane-placement repairs,
+native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
+VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
+reloading the working window. General research resumption and argument
+reconstruction remain later work; they must start from an observed task, without
+adding another registration form. [Delivery](DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Earlier repair — source display and Return, 0.21.1
 

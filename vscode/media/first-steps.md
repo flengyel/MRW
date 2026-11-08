@@ -26,39 +26,10 @@ occurrence again. The previous Return destination remains available. New notes
 open in the active preview group; already-open notes retain their group.
 Commands are also available through **F1**.
 
-## Work on a problem from a document
-
-Choose a heading in **Contents**, then its question icon or **Problems for
-Contents Section** action. From Markdown preview, use **MRW: Problems for
-Document**; a note preview also has **Problems** beside Show Contents.
-
-**Enter a problem**, or **Associate saved problem…**. Enter the statement in
-**Question** and optionally a **Reference answer**; authors and origins are
-under **Attribution, hints and sources**. Find saved statements with **Find problem**.
-
-**Attempt** and **Review solution** are separate choices. Review creates no
-attempt or recall grade. Use **Attach solution** when absent, or **Correct
-solution** while preserving earlier versions. Consultation during an attempt
-keeps its draft and marks subsequent submissions as assisted. The displayed
-solution is attributed text, not a correctness verdict.
-
-**Save question** keeps an unresolved step; **Copy help request for Codex** is
-optional. **Pause / save**, then reopen the row in **Studies** or **Resume
-Study**. **Return to filename › section** restores the originating occurrence.
-Changed/missing locations are reported; work stays saved. Select a current
-Contents section and open its problems again to set a new return location.
-
-**Keep for spaced review** explicitly admits a recall question to FSRS.
-**Due here** is small and dismissible. **Keep problem for later** or **Schedule
-problem work** stores a separate flag/date, without recall grading or a background
-notification. Applications, solution viewing, skipping and rereading do not
-generate recall grades. Reading never requires completing due questions.
-
-For a short example, use a Markdown section **Parity** and the problem “For a
-nonnegative integer n, show n(n+1) is even.” The solution “One of two consecutive
-integers is even” is supplied here by **Codex companion (OpenAI)**, origin **AI
-proposal**. Save it, review directly, Return, then try the Attempt route. For
-your own reading, substitute a problem worth working on.
+Opening or following a note displays the note. Contents navigates its headings
+and links; no problem record is required. Earlier work saved through the removed
+document Problems feature remains readable from Studies or Resume Study, with
+pending drafts and history preserved.
 
 ## Open existing work
 
@@ -273,7 +244,6 @@ folder without converting or importing it. **Open linked note in Obsidian** in
 a saved reader requires a supplied, validated note association; MRW does not
 infer a vault from the selected folder. See [note links and Obsidian](../docs/OBSIDIAN_WORKFLOW.md).
 
-- [Document problems and solution review](../docs/DOCUMENT_LEARNING_WORKFLOW.md)
 - [Documents, Contents and backlinks](../docs/READING_OUTLINE_WORKFLOW.md)
 - [Questions, attempts, history and review](../docs/ACTIVE_STUDY_WORKFLOW.md)
 - [Work through a proof and Proof Outline](../docs/PROOF_STUDY_WORKFLOW.md)

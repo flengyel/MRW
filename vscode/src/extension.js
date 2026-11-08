@@ -299,7 +299,6 @@ function activate(context) {
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });
   const studyController=registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge:rawBridge,changed,
     readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,
-    documentContext: (value, contents) => readingController.studyContext(value, contents),
     returnToDocument: (origin, fileOnly) => readingController.returnToStudy(origin, fileOnly),selectPrerequisites:outlineRows.selectStudyPrerequisites,loadExample:outlineRows.loadStudyExample,
     getCurrent:async(root,invocation)=>{
       const editor=invocation?.editor;

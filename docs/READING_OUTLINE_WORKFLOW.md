@@ -1,8 +1,8 @@
-# Existing documents, Contents and saved sources — 0.23.2
+# Existing documents, Contents and saved sources — 0.23.3
 
-**Problems for Contents Section** connects a heading or link occurrence to saved
-problems, independent solution review and named Return. **Problems for Document**
-works from the active Markdown preview/editor. See the [learning workflow](DOCUMENT_LEARNING_WORKFLOW.md).
+Opening/following a note displays the original in place. The document Problems
+entry points and creation path are removed. Earlier saved work and drafts remain
+readable; see [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md).
 
 **Open Document…** offers **Original file** (current contents in place) and
 **Saved copy** (a retained revision with MRW annotations) in one native picker.

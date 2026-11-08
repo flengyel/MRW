@@ -76,7 +76,7 @@ function registerWikiLinks({ vscode, context, register, documents }) {
       if (!doc || !documents.isNote(doc.uri) || vscode.workspace.isTrusted === false) return '';
       const identity = noteIdentity(doc), escape = md.utils.escapeHtml;
       const action = kind => `${scheme}://flengyel.mrw/document-action?target=${Buffer.from(JSON.stringify({ session, uri: doc.uri.toString(), action: kind }), 'utf8').toString('base64url')}`;
-      return `<aside class="mrw-note-heading" aria-label="Note identity"><strong title="${escape(identity.rawTitle)}">${escape(identity.title || identity.id)}</strong> · <code>${escape(identity.filename)}</code>${doc.isDirty ? ' · Unsaved VS Code changes' : ''}<p><a href="${escape(action('obsidian'))}">Open in Obsidian</a> · <a href="${escape(action('contents'))}">Show Contents</a> · <a href="${escape(action('problems'))}" title="Find, associate or enter a problem for this Markdown document">Problems</a> · <a href="${escape(action('copy'))}" title="Copy a note link to paste into Obsidian; opens this file in MRW after restart">Copy MRW link</a></p></aside>\n`;
+      return `<aside class="mrw-note-heading" aria-label="Note identity"><strong title="${escape(identity.rawTitle)}">${escape(identity.title || identity.id)}</strong> · <code>${escape(identity.filename)}</code>${doc.isDirty ? ' · Unsaved VS Code changes' : ''}<p><a href="${escape(action('obsidian'))}">Open in Obsidian</a> · <a href="${escape(action('contents'))}">Show Contents</a> · <a href="${escape(action('copy'))}" title="Copy a note link to paste into Obsidian; opens this file in MRW after restart">Copy MRW link</a></p></aside>\n`;
     };
     md.renderer.rules.mrw_wikilink = (tokens, at, _options, env) => {
       const token = tokens[at], escape = md.utils.escapeHtml;
@@ -102,12 +102,11 @@ function registerWikiLinks({ vscode, context, register, documents }) {
         pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid MRW WikiLink.');
     const data = JSON.parse(Buffer.from(pairs[0][1], 'base64url').toString('utf8'));
     if (uri.path === '/document-action') {
-      if (data?.session !== session || typeof data.uri !== 'string' || data.uri.length > 8192 || !['obsidian', 'contents', 'copy', 'problems'].includes(data.action)) throw new Error('This note action is unavailable. Reopen the preview.');
+      if (data?.session !== session || typeof data.uri !== 'string' || data.uri.length > 8192 || !['obsidian', 'contents', 'copy'].includes(data.action)) throw new Error('This note action is unavailable. Reopen the preview.');
       const source = vscode.Uri.parse(data.uri);
       await documents.check(source);
       if (data.action === 'obsidian') await documents.openInObsidian(source);
       else if (data.action === 'copy') await documents.copyLink(source);
-      else if (data.action === 'problems') await vscode.commands.executeCommand('mrw.documentProblems', { uri: source.toString() });
       else {
         const doc = await vscode.workspace.openTextDocument(source);
         await vscode.window.showTextDocument(doc, { preview: false, viewColumn: documentColumn(vscode, doc) });

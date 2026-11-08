@@ -133,15 +133,28 @@ test('legacy local draft without a host checkpoint receives one stable identity 
   h.button('question_save').onclick();assert.equal(h.messages.at(-1).formDraftId,id);assert.equal(h.messages.at(-1).question.prompt,'Unsaved local question.');
 });
 
-test('document problem exposes Attempt and direct Review together without creating a local attempt, with keyboard help',()=>{
- const h=view(),s=study(),q=question();s.questions=[q];s.document={uri:'file:///project/note.md',label:'Note · note.md'};
- s.documentContext={uri:s.document.uri,origin:{filename:'note.md',section:'Chosen section'}};s.problemRevision=q.revision;s.due=[];
- h.send(s);assert.match(h.root.text(),/Return to note.md › Chosen section/);assert.ok(h.button('choose_question'));assert.ok(h.button('solution_review'));
- assert.doesNotMatch(h.root.text(),/Exact reference answer/);assert.equal(h.button('next'),undefined);
- h.button('solution_review').onfocus();h.button('solution_review').onmouseenter();h.button('solution_review').onmouseleave();assert.match(h.root.text(),/without creating an attempt or recall grade/);
- h.button('solution_review').onclick();assert.equal(h.messages.at(-1).type,'solution_review');assert.equal(h.messages.at(-1).attempt,null);
- s.solutionReview={revision:q.revision,open:true};h.send(s);assert.match(h.root.text(),/Exact reference answer/);assert.match(h.root.text(),/Reviewing creates no attempt/);assert.equal(h.field('Your attempt'),undefined);
- h.button('handoff').onclick();assert.equal(h.messages.at(-1).purpose,'explain this step or give a hint');
+test('legacy document records show saved text and exact drafts without problem forms or study controls',()=>{
+ const s=study(),q=question();s.questions=[q];s.document={uri:'file:///project/note.md',label:'Note · note.md'};
+ s.documentContext={origin:{filename:'note.md',section:'Chosen section'}};s.current=attempt();s.formDraft={draftId:'saved-draft',prompt:'Unfinished statement.',author:'Reader',origin:'human',answerDraft:{text:'Unfinished solution λ',author:'Reader',origin:'human'}};
+ s.helpDraft={id:'draft-help',text:'Edited response.',author:'Reader',origin:'human',original:{text:'Original response.',author:'Codex',origin:'ai_proposal'}};
+ s.unresolved='Unresolved mathematical question.';s.due=[q.revision];
+ const h=view();h.send(s);assert.match(h.root.text(),/Return to note.md › Chosen section/);
+ for(const text of ['Exact reference answer.','My original work','Unfinished statement.','Unfinished solution λ','Edited response.','Original response.','Unresolved mathematical question.','Fixture writer'])assert.ok(h.root.text().includes(text),text);
+ assert.equal(h.root.querySelectorAll('input,textarea,select').length,0);
+ for(const action of ['choose_question','enter_problem','enter_question','associate_problem','solution_review','admit','next','due_dismiss','handoff'])assert.equal(h.button(action),undefined,action);
+ assert.deepEqual(h.messages.map(m=>m.type),['ready']);
+ h.button('pause').onclick();const sent=h.messages.at(-1);assert.equal(sent.form.answerDraft.text,s.formDraft.answerDraft.text);assert.equal(sent.helpDraft.original.text,'Original response.');assert.equal(sent.unresolvedDraft,s.unresolved);
+ const reopened=view(h.stored());reopened.send(s);assert.match(reopened.root.text(),/Unfinished solution λ/);assert.equal(reopened.root.querySelectorAll('input,textarea,select').length,0);
+});
+
+test('retired document display preserves newer local drafts on return and reports missing origins without offering new forms',()=>{
+ const s=study();s.document={uri:'file:///project/note.md'};s.documentContext={origin:{filename:'note.md',section:'Section',invalid:true}};
+ s.formDraft={draftId:'host-id',prompt:'Older checkpoint.',author:'Reader',origin:'human'};
+ s.current=attempt();s.helpDraft={id:'help-id',text:'Older reply.',author:'Codex',origin:'ai_proposal'};
+ const local={study:s.id,attempt:s.current.id,answer:'Newer local work.',form:{...s.formDraft,prompt:'Newer local statement.'},unresolved:'Newer local question.',helpDraft:{...s.helpDraft,text:'Newer local reply.'}};
+ const h=view({studies:{[s.id]:local}});h.send(s);assert.match(h.root.text(),/Newer local statement/);assert.match(h.root.text(),/Newer local question/);assert.doesNotMatch(h.root.text(),/Older checkpoint/);
+ h.button('document_return').onclick();assert.equal(h.messages.at(-1).form.prompt,local.form.prompt);assert.equal(h.messages.at(-1).draft,local.answer);assert.equal(h.messages.at(-1).helpDraft.text,local.helpDraft.text);h.error('The original location changed.');assert.match(h.root.text(),/original location changed/);
+ const b=study();b.id='other';h.send(b);h.send(s);assert.match(h.root.text(),/Newer local statement/);assert.equal(h.root.querySelectorAll('input,textarea,select').length,0);
 });
 
 test('missing-solution form is distinct from an attempt and preserves attribution and text across a failed save',()=>{
@@ -150,10 +163,4 @@ test('missing-solution form is distinct from an attempt and preserves attributio
  h.field('Solution author').value='Named source author';h.field('Solution author').oninput();h.button('solution_save').onclick();
  const sent=h.messages.at(-1);assert.equal(sent.answer.text,'Exact pasted solution λ');assert.equal(sent.answer.author,'Named source author');assert.equal(sent.attempt,null);
  h.error('Save rejected');assert.equal(h.field('Solution').value,'Exact pasted solution λ');assert.equal(h.field('Your attempt'),undefined);
-});
-
-test('document due offer is dismissible and general problems have separate later-work controls',()=>{
- const h=view(),s=study(),q=question();q.activity='application';s.questions=[q];s.document={uri:'file:///project/note.md',label:'Note'};s.documentContext={origin:{filename:'note.md',section:'Section'}};s.due=[q.revision];s.dueKey='offer-key';h.send(s);
- h.button('due_dismiss').onclick();assert.equal(h.messages.at(-1).key,'offer-key');h.idle();
- assert.equal(h.button('admit'),undefined);assert.equal(h.button('problem_later').textContent,'Keep problem for later');assert.ok(h.button('document_return'));
 });

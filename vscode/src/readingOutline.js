@@ -335,27 +335,6 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     }),
     vscode.workspace.onDidCloseTextDocument(doc => { if (doc === document && doc.isClosed) refresh(); }),
     { dispose() { clearTimeout(timer); } });
-  async function studyContext(value = {}, contents = false) {
-    // Capture before any await: previews need not have an active text editor.
-    const activeEditor = vscode.window.activeTextEditor;
-    const preview = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
-    const supplied = value?.id && value?.uri ? value : undefined;
-    const target = supplied?.uri || value?.uri || (contents ? document?.uri.toString() || overviewUri :
-      preview?.scheme === 'file' && /\.(md|markdown)$/i.test(preview.path) ? preview.toString() :
-      isOverview(activeEditor?.document) ? activeEditor.document.uri.toString() : undefined);
-    if (typeof target !== 'string') throw Error('Open a Markdown preview or select a section in Contents, then choose Problems for Section.');
-    const uri = vscode.Uri.parse(target); await checkFile(uri);
-    const doc = await vscode.workspace.openTextDocument(uri); await checkDocument(doc);
-    const parsed = parseReadingMarkdown(doc.getText()); let occurrence;
-    if (supplied) {
-      occurrence = parsed.all.find(n => n.id === supplied.id && n.start === supplied.start && n.end === supplied.end);
-      if (!occurrence || supplied.revision !== parsed.revision) throw Error('Contents changed. Choose its current section again.');
-    } else if (selected?.uri === target && !selected.invalid && selected.revision === parsed.revision) {
-      occurrence = parsed.all.find(n => n.start === selected.start && n.end === selected.end);
-    }
-    const offset = activeEditor?.document === doc ? doc.offsetAt(activeEditor.selection.start) : 0;
-    return require('./studyDocument').capture(doc, offset, occurrence);
-  }
   async function returnToStudy(origin, fileOnly = false) {
     if (!validPin(origin) || vscode.Uri.parse(origin.uri).scheme !== 'file') throw Error('The saved document destination is unavailable.');
     await checkFile(vscode.Uri.parse(origin.uri));
@@ -363,6 +342,6 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     const doc = await vscode.workspace.openTextDocument(vscode.Uri.parse(origin.uri));
     await checkDocument(doc); selected = undefined; await selectOverview(doc, ++generation, true); await showReadingView(doc, documentColumn(doc));
   }
-  return { provider, refresh, checkFile, returnDestination, studyContext, returnToStudy, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
+  return { provider, refresh, checkFile, returnDestination, returnToStudy, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
 }
 module.exports = { registerReadingOutline, trackLocation };
