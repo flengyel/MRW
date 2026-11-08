@@ -1,0 +1,262 @@
+{
+  "baseline": "2503d0e0734a219ae05d6dec4c132915cbf5729a",
+  "checks": {
+    "node_final_focused": {
+      "passed": 29
+    },
+    "node_full": {
+      "failed": 0,
+      "passed": 339,
+      "skipped": 0
+    },
+    "python_editor_bridge": {
+      "passed": 11
+    },
+    "python_study_questions": {
+      "passed": 2
+    }
+  },
+  "date": "2026-11-07",
+  "installation": {
+    "archive": "/home/flengyel/MRW/vscode/mrw-0.23.0.vsix",
+    "exitStatus": 0,
+    "extension": "flengyel.mrw",
+    "installedBytesMatch": true,
+    "installedPayloadFiles": 104,
+    "registryVersion": "0.23.0",
+    "sha256": "2e40ae362a9c9090a1260fdfcc23746008890060d95fdf7b6b73d0a4391f4195",
+    "size": 577432,
+    "version": "0.23.0",
+    "workingWindowReloaded": false
+  },
+  "limits": [
+    "No mathematical correctness or learning-benefit inference",
+    "Other themes/platforms/PDF not observed in this increment",
+    "Live AI, Obsidian, Lean and Sage not exercised",
+    "Working-window adoption waits for normal activation"
+  ],
+  "local_evidence_directory": "/home/flengyel/MRW/.codex-work/vscode-host-document-learning/evidence",
+  "logs": {
+    "final-focused": {
+      "bytes": 3645,
+      "exit": 0,
+      "sha256": "032b5aec73d78ec3a5fbb0c30244e1b92da29ac68bcdc60ff42c30295bf47ae9"
+    },
+    "install": {
+      "bytes": 81,
+      "exit": 0,
+      "sha256": "1cd9468df2f7f24087c014bc85a111d04cd9efdcd070094e5e92436ef68fd8a5"
+    },
+    "package-final": {
+      "bytes": 834,
+      "exit": 0,
+      "sha256": "664f9d6579b18f21fc2463ec6603c0e8e78630c435765a0156f7345436b5ced8"
+    },
+    "python-bridge": {
+      "bytes": 1845,
+      "exit": 0,
+      "sha256": "e4db802185749a66d5741c30c650010e640b98d3e5f9e4938f73d32bb0012763"
+    },
+    "python-study": {
+      "bytes": 430,
+      "exit": 0,
+      "sha256": "e11ae8704f386f962e8672a97e8314a68826ba403a64b4eda2cc969660b89f0c"
+    },
+    "regression-final": {
+      "bytes": 37345,
+      "exit": 0,
+      "sha256": "1a14a6ff417b4d8f9547d9dd05e8ebc4bd29174d2f8a6c76742c43b424e80711"
+    },
+    "syntax-final": {
+      "bytes": 1423,
+      "exit": 0,
+      "sha256": "fed322c0e95abd6308317737f172390f394dbac29f2061f5362d858731c235f5"
+    }
+  },
+  "native": {
+    "final": {
+      "checks": [
+        "choosing Markdown reveals its native preview and matching Contents while preserving an unrelated dirty pane",
+        "cancelled document choice preserves native tabs",
+        "section problems launch from preview without substituting the unrelated retained source",
+        "direct attributed solution review creates no attempt or FSRS grade and supplies keyboard-focus help",
+        "native close/reopen restores problem, direct-review context and unresolved question",
+        "consulted attempt preserves draft and submission exposure without grading an application as recall",
+        "whole-problem later work and dismissible admitted recall remain separate",
+        "exact Return tracks outside edits and preserves dirty Markdown, unrelated work and groups",
+        "retained reader focus help and exact repeated-citation Return remain operational",
+        "ordinary note links and their exact Return remain operational",
+        "changed/missing origins are visible, explicit relocation works, and problem work remains saved",
+        "fresh native extension host reopens saved work, solution review and exact document Return while preserving multiple editor groups and an unrelated dirty pane"
+      ],
+      "coldEditorGroupCount": 2,
+      "coldLayout": {
+        "groups": [
+          {
+            "size": 327
+          },
+          {
+            "size": 327
+          }
+        ],
+        "orientation": 0
+      },
+      "coldPid": 1216473,
+      "complete": true,
+      "errors": [],
+      "phase": "cold reopen",
+      "remote": "wsl",
+      "scope": "Real VS Code views and production JS; injected file-dialog answers, DOM input/click probes and offline Stacks acquisition. Working window not used.",
+      "stage": "cold",
+      "version": "1.144.1"
+    },
+    "fixture_sha256": "7b8faa4d369ccdb7c7eac73bf5e081b32e66cc37e996b19b00ebe336b8942310",
+    "genuine_data_used_as_fixture": false,
+    "injections": [
+      "file-dialog answers",
+      "DOM field/click probes",
+      "offline Stacks acquisition"
+    ],
+    "main_phase_before_observation_timeout": {
+      "checks": [
+        "choosing Markdown reveals its native preview and matching Contents while preserving an unrelated dirty pane",
+        "cancelled document choice preserves native tabs",
+        "section problems launch from preview without substituting the unrelated retained source",
+        "direct attributed solution review creates no attempt or FSRS grade and supplies keyboard-focus help",
+        "native close/reopen restores problem, direct-review context and unresolved question",
+        "consulted attempt preserves draft and submission exposure without grading an application as recall",
+        "whole-problem later work and dismissible admitted recall remain separate",
+        "exact Return tracks outside edits and preserves dirty Markdown, unrelated work and groups",
+        "retained reader focus help and exact repeated-citation Return remain operational",
+        "ordinary note links and their exact Return remain operational",
+        "changed/missing origins are visible, explicit relocation works, and problem work remains saved"
+      ],
+      "complete": false,
+      "errors": [],
+      "failure": "Error: Timed out: window observation workflow\n\tat wait (/tmp/mrw-document-learning-20261107/native5/extension/test/host/documentLearning.js:35:112)\n\tat async stage (/tmp/mrw-document-learning-20261107/native5/extension/test/host/documentLearning.js:45:60)\n\tat async run (/tmp/mrw-document-learning-20261107/native5/extension/test/host/documentLearning.js:126:67)",
+      "focusDiagnostic": {
+        "active": true,
+        "disabled": false,
+        "frameFocused": true,
+        "help": "Display the attributed solution without creating an attempt or recall grade. Consultation during an attempt is retained.",
+        "helpVisible": true
+      },
+      "layoutCalls": [],
+      "remote": "wsl",
+      "scope": "Real VS Code views and production JS; injected file-dialog answers, DOM input/click probes and offline Stacks acquisition. Working window not used.",
+      "stage": "workflow",
+      "studyId": "d8c60374087ed81777a28689c77771c0fd2e3686e306a65fbcca01d7582538fc",
+      "version": "1.144.1"
+    },
+    "production_javascript_matches_package": true,
+    "screenshots": {
+      "cold": {
+        "bytes": 349532,
+        "filename": "mrw-learning-cold.png",
+        "sha256": "afa85bd6c945706228e448f9f433c58868dbf1da9fb8539410df7addde462303"
+      },
+      "workflow": {
+        "bytes": 338158,
+        "filename": "mrw-learning-workflow.png",
+        "sha256": "440c08b69b4e7d903fc990e01b5848554c88114aba09428382cdaad172e6efb1"
+      }
+    },
+    "working_window_used_or_reloaded": false
+  },
+  "package": {
+    "archive": "/tmp/mrw-document-learning-20261107/build-final/vscode/mrw-0.23.0.vsix",
+    "archiveFiles": 106,
+    "currentCheckoutRuntimeAndGuideFiles": 59,
+    "expectedHistoricalMarkerDifference": true,
+    "nativeRuntimeMatches": true,
+    "sha256": "2e40ae362a9c9090a1260fdfcc23746008890060d95fdf7b6b73d0a4391f4195",
+    "size": 577432
+  },
+  "source_state": {
+    "base_plus_local_changes": true,
+    "production_unchanged_after_final_regression": true,
+    "runtime_files": {
+      "src/theorem_terminal/__init__.py": "bdd79794edff7ba0aca54566f42e7b7f0238343c474fdc6e0f1474a6fc1ae45d",
+      "src/theorem_terminal/__main__.py": "3b84e4dfc8117d89df08481050dc7a16fcdb8c021d59ea4229152b37098e1572",
+      "src/theorem_terminal/appendix_a.py": "f7b6a4e11612d1bc02ce459c2c9e19a99b4cdd278cc5df2b92308a6bc4550366",
+      "src/theorem_terminal/appendix_a_warrant.py": "2ee1d3ac18898f44bbbbff5354d3d0fb5b4168c5a15856beef06ca7a98dcd925",
+      "src/theorem_terminal/artifact_context.py": "4c8bdb2e3e047d1b766b0b902d1090e69adcd2a31bea05befcce6b740015a887",
+      "src/theorem_terminal/artifact_storage.py": "468f83b52005fecc0004df5760858c7bfa5615e06b5b8d22d3fb20020782edba",
+      "src/theorem_terminal/assistance_actions.py": "98c13847e140beb175648e3401784aa7e1f6b5d5cabe751632123c891c2e413c",
+      "src/theorem_terminal/cli.py": "3d1018488168b1527833ab885a7893764e8fdf82669158dd8eb42b17a1b34eed",
+      "src/theorem_terminal/documentary_warrant.py": "9822ad1faeec6cc47622c2ee31614ed65b614e0317de1d4bedd12bb03be37315",
+      "src/theorem_terminal/editor_assistance.py": "be9d4ad00a24a32ee922f2eeb0799a037d4a38ba00d946c85e7d1a1119398f4b",
+      "src/theorem_terminal/editor_bridge.py": "039f1f6b458216c09f9defacecc8d639059a92d21b445af747a84f5671da8e0a",
+      "src/theorem_terminal/editor_investigation.py": "c42deddc2ff2b2facc06bd88cd0bbe3030ef6eb14ea9aac352ed62c4e7082fc3",
+      "src/theorem_terminal/gui.py": "87370132634f68741e9987128e4024cbdf7171abe6e1cdeeb64abc04bd3a3482",
+      "src/theorem_terminal/investigation_actions.py": "d2fad91432ab1cb183c20c06c1850389fd054b2793148116c0c7dcfc1d5910fb",
+      "src/theorem_terminal/justification.py": "b57b7fa94bda02d77ad79c8cba90ad5228ccec8dec94dd082fa7a4f12c8fd329",
+      "src/theorem_terminal/kerodon_import.py": "a9b96f48f8883267cdfdb80156ef7cb26e7e939ed35c68701f9090d865c93041",
+      "src/theorem_terminal/latex.py": "49e2fdd15dedddc9aef81ecf43254116e1fc060a4b8e48eceac411ffd99ed4af",
+      "src/theorem_terminal/latex_build.py": "392cea4a1d388323b314c456807a3f23c61187523adcfff65fb6c41dfd96a6c5",
+      "src/theorem_terminal/local_files.py": "30c2f2676a4779aeca04a47c59050edecf244d48d63b56b4b021a88fb0742661",
+      "src/theorem_terminal/model_projection.py": "875b19535b97c76881e1848fbeb5521f2ef2886e19036d19439af858f8f6537c",
+      "src/theorem_terminal/mutable_files.py": "1d625b45421633bb716bcbd5a2d3814396b21e77ead20ed948ae7d43234b3e24",
+      "src/theorem_terminal/openai_response.py": "f9e6ade3fe443c12c4deb60d882c987bbc2979295072853c884347ae52763350",
+      "src/theorem_terminal/outline_notes.py": "73a062099a4fa8c40e1ef814aad1711ba3a341f93f172ededa7b30151b911c8f",
+      "src/theorem_terminal/outline_references.py": "5af4849e71fea82948bc79318ab10ca0e3546271025fa4d7cfc05e544483fc2a",
+      "src/theorem_terminal/private_persistence.py": "76e8a8c301248ef5b70f0a11392aba17fe9aa5320ca54060207d2fad6b7c85f6",
+      "src/theorem_terminal/proof_graph.py": "bf11e8cbd48595551b7f91cf9475044973ccadf3fd093777d6ae6afe7e35beac",
+      "src/theorem_terminal/published_sources.py": "6b0fc26b93de4f28bb5bfa6bd0b7d581e92a7b7ee97481b8c38bbe6774d4dac9",
+      "src/theorem_terminal/reader_diagrams.py": "310c59ec223c9dcc8d9053ceee8004732a6c3271c27c4a8d5710f2ad1c1df367",
+      "src/theorem_terminal/record_actions.py": "210d10c53e48826a5c88335a5d8d8a141964860c74dd9b21640011316580ad54",
+      "src/theorem_terminal/record_views.py": "f6c711dd18af7fe3178798aec25948eb10242f8494bf78e0d42cce3d86263e01",
+      "src/theorem_terminal/response_review.py": "2c3dee7a336fc44890dea8fab26923b8d63127daa54af43e3e8020456ea47fa5",
+      "src/theorem_terminal/source.py": "3a79d456b41e4b9847e24e6c7dae47f90815cc3681e049455d5e71bbbac34f68",
+      "src/theorem_terminal/source_outlines.py": "6c7e0ea0942fb9f7d5d345463d1429327f129a1df7f87680f3733d825af9ed13",
+      "src/theorem_terminal/stacks_import.py": "b72a20667f0b41030a3c1342156cc0d888a393880ae1f370d216c1d988d5420d",
+      "src/theorem_terminal/stacks_tex.py": "f316ac63113b189e5e2d1e8a3402739ccef33c0df6fc273a9f208dbf3740336a",
+      "src/theorem_terminal/study_questions.py": "a9ebc44db57c85093282d86ca5202e4f8247a16a17601146046f57a00b7d4442",
+      "src/theorem_terminal/tool_settings.py": "e9a42c5bb9c43c506474a1a5b2a01bf8ea89178bef3a73098dc893557ad7e64f",
+      "src/theorem_terminal/workspace.py": "9a7ec2fe8d781096f3b5981a24d87eac2d91ca8aa76752018a6b9ea0ea192e6f",
+      "src/theorem_terminal/workstation.py": "35b99f2b5321ff3849a26185b67e716eea3fbf368eb016a14b36905b99e56233",
+      "vscode/package-lock.json": "e9728ce0c4e4b5aea97ea7023cdc49a9f9ec576ac28d83c3c2484789446ddf1b",
+      "vscode/package.json": "69eb6f75b38a63bd45bcbb85048f54f4d92bcc54383d86bb827ed9270fd82de4",
+      "vscode/src/activeStudy.js": "7e1cc3105985bfd0696f474dbd137e0996b1db538b9da793b33646051626eea4",
+      "vscode/src/activeStudyView.js": "fcfed5c9f933b0911955a4d07432add5b3f5cf0f0b433f7c24fb7080093ab2c8",
+      "vscode/src/annotationView.js": "0751a0f163dee75a18be5dfc321f29488cd627e3a36754e9051b23a088e08c4d",
+      "vscode/src/artifactStorage.js": "3f1b841b23cdac451fbe9fc3dc7b1835a961cd06c51b6ff79ba8aa8f1c292920",
+      "vscode/src/assistance.js": "73d8fe4448641026e1a93b2baf57403c530af5f747a901e7a62c7da3f8ee5412",
+      "vscode/src/bridge.js": "42665e06885ac7f38b33774b5b46a5ff76082b5707308c06f5726727ec1b20fd",
+      "vscode/src/companionLinks.js": "e58d9bdf388a796dfe6233239288d74804912032cc7a928080995bbf41bb731d",
+      "vscode/src/documentLinks.js": "22d4bb8c1914b54aea351e8a48b5b8faeca6796abaae0343680aa86b3e6478a8",
+      "vscode/src/documentPicker.js": "55c16a9b014b04276e8fe90350dae325744ca3b30d6b5e351c33deb8c96b2a50",
+      "vscode/src/documentPresentation.js": "168e05f46bff4b030c609847eff2ebe2a4281beb5c3f95fe2ea87e40d4539920",
+      "vscode/src/documents.js": "94587be5a69f460f78a119ed0cea57740891e550fafee61ac8bc5e15647e0726",
+      "vscode/src/extension.js": "23802184ec2271bd87e030a6e751599f3928e19c2f1e308fd6f3159fede279e1",
+      "vscode/src/investigation.js": "84df3a651904f7a017b00c7ca5a060e35e753cf75f3d54383cb5dd70fb29d5b8",
+      "vscode/src/navigation.js": "deed67feb1026aeb46cc070ebad33cc2c08b21a1573e928f27daf99cf258970a",
+      "vscode/src/noteFiles.js": "631894752c4eec2f368749aafe83082d7cf3101b5f956914d3aedcb33014409a",
+      "vscode/src/noteIdentity.js": "d5a088e0abaf197f9949506beca5898ee92151e2d6b49c33ce6f9bfa32b086c8",
+      "vscode/src/noteLinks.js": "431997da22f0db87ab9b2147c97990f1dffff4bc113655d84f0acd537c448ecb",
+      "vscode/src/noteRefresh.js": "02771166c6a48fa53260d7ac9cc5bfe4ab27ebb0696c76bd3a7ddf9470b70e13",
+      "vscode/src/outlineReferences.js": "cc5d5e3ad5dfb0ca80fb081b8d5b8698e1443bf6ffd374b039818c20332bd44b",
+      "vscode/src/outlineView.js": "e3da3f944c9ad907c479a041527f6e968190cf7b15b4aac0e202cb5d94e5a95a",
+      "vscode/src/outlines.js": "7155eecb603aa267635817f222dc8f21260a806445385b01d9bee3dac58c27af",
+      "vscode/src/proofGraph.js": "f120965622970de09443ca73e7502266311fb261e4afebedefffb685689815ba",
+      "vscode/src/proofGraphMap.js": "c0e1aad33b4337ce69c769b14d9004df27ed620ef57adcedf4d4b0b5e4ed2f41",
+      "vscode/src/proofGraphView.js": "eb39a57ca69e3d245f8cb5b1d2fd99d8222af62d75d64fc63a7d27370165895e",
+      "vscode/src/proofStudy.js": "8ee97ff8bc6c9f6ad3de2518f5da14431ffb0dd91c6290dfee2f80725f233d95",
+      "vscode/src/proofStudyView.js": "e3af5a764e52f0449f23c8ca4da712ff63a321bc098ec24913350c5dea8f36d7",
+      "vscode/src/readingMarkdown.js": "06e2230ebde737e62dbd335ae225a772acc6055449efda4a681b645eaf7161eb",
+      "vscode/src/readingOutline.js": "3585deb57e655bd7ba01cce65745a49801c45c12a32d29725adfaa420943092b",
+      "vscode/src/sourceIdentifiers.js": "8f46115b1492f8c204a4396223f0743536a8762a83f14a9e3dfce553970f8ef9",
+      "vscode/src/stacksView.js": "5e2b2642d68deab893fcdbf36c0af8b3b258061f2f6f21aff5d9dfeeec8db960",
+      "vscode/src/studyDocument.js": "1b5f7d29c33d3cf352e53039a3ba69a31c5968f0cc4f805444a4871d7a2f778e",
+      "vscode/src/studyEvidence.js": "b045d8870b94c7b90e1ecb8d35cbaad1ac3469296c309b15e6b796cc7dfe1ec4",
+      "vscode/src/studyExample.js": "29f812b611b6f5f24535dd579f8ef1eaab0db2670fa726110b340d987bbcd766",
+      "vscode/src/studyHelp.js": "304d966d6c9fefbe184c5344f78077e849c269e1fa8ded1319dd23a94e3ff810",
+      "vscode/src/studyHistory.js": "2f79315544bea4ed066c8748180a0132276b39df7cab792f9cbd45a154a010fa",
+      "vscode/src/studyModel.js": "9c4f34b49912c75b0cb9301fd2dbe311fc49429462dfc0afcd1685037bd542d4",
+      "vscode/src/studyScheduler.js": "5457ea5c2527fa418b243005668361c0fd0d627de5a7027ef38699f6fefd8024",
+      "vscode/src/tutorial.js": "f191de706c10c387f3d674b6ad0243a060ddc2fcf3fe46f287eaf118d01e123d",
+      "vscode/src/wikiLinks.js": "b507f492e7d212306acd2bff2bb5116aa3fb8fe9f9dfa8b8d75bca96255873e8"
+    }
+  },
+  "version": "0.23.0"
+}

@@ -32,9 +32,20 @@
     api.postMessage({type,...identities(),form:local.form||null,draft:local.answer,
       reportDraft:reportDraft(),helpDraft:local.helpDraft||null,unresolvedDraft:local.unresolved??state.unresolved,...extra});
   }
+  const controlHelp={
+    document_return:'Save work and return to the exact originating Markdown occurrence. Changed or missing locations are reported.',
+    document_open:'Open the associated Markdown file without claiming that the old occurrence still exists.',
+    solution_review:'Display the attributed solution without creating an attempt or recall grade. Consultation during an attempt is retained.',
+    choose_question:'Begin work on this problem. Prior solution viewing remains in history; this attempt starts with its solution concealed.',
+    problem_later:'Keep or date this whole problem for later work, separately from FSRS recall scheduling.',
+    admit:'Explicitly keep an eligible recall question for spaced review. Merely reading or saving a problem does not admit it.',
+    due_dismiss:'Dismiss these due questions. Reading, saved work and recall state remain available.'
+  };
+  let focusedControl,hoveredControl;
+  function showControlHelp(){const text=(focusedControl||hoveredControl)?.title||'';const help=Array.from(root.querySelectorAll('p')).find(n=>n.dataset.help==='control');if(help){help.textContent=text;help.hidden=!text;}}
   function button(p,text,type,extra={},locked=false){
     const b=el('button',text,p);b.type='button';b.dataset.action=type;b.dataset.locked=String(locked);b.disabled=busy||locked;
-    b.onclick=()=>{if(!locked)post(type,typeof extra==='function'?extra():extra);};return b;
+    b.title=controlHelp[type]||text; b.setAttribute('aria-description',b.title); b.onfocus=()=>{focusedControl=b;showControlHelp();};b.onblur=()=>{if(focusedControl===b)focusedControl=null;showControlHelp();};b.onmouseenter=()=>{hoveredControl=b;showControlHelp();};b.onmouseleave=()=>{if(hoveredControl===b)hoveredControl=null;showControlHelp();}; b.onclick=()=>{if(!locked)post(type,typeof extra==='function'?extra():extra);};return b;
   }
   function localButton(p,text,fn,key,locked=false){
     const b=el('button',text,p);b.type='button';if(key)b.dataset.action=key;b.dataset.locked=String(locked);b.disabled=busy||locked;b.onclick=()=>{if(!busy&&!locked)fn();};return b;
@@ -53,13 +64,30 @@
   }
   function edit(q){
     if(local.form){notice='Save or cancel the question draft before editing another question.';render();return;}
-    form=q?{...copy(q),author:'Reader',origin:'human'}:{activity:'missing_step',prompt:'',answer:null,hints:[],references:[state.passages[0].reference],author:'Reader',origin:'human'};
+    form=q?{...copy(q),author:'Reader',origin:'human'}:{activity:state.document?'application':'missing_step',prompt:'',answer:null,hints:[],references:[state.passages[0].reference],author:'Reader',origin:'human'};
     form.draftId=crypto.randomUUID();local.form=form;saveLocal();render();
     Array.from(root.querySelectorAll('textarea')).find(n=>n.dataset.field==='Question')?.focus?.();
   }
+  function editSolution(q){
+    if(local.form){notice='Save or cancel the pending form first.';render();return;}
+    form={kind:'solution',draftId:crypto.randomUUID(),revision:q.revision,
+      answerDraft:{text:q.answer?.text||'',author:q.answer?'Reader':'',origin:'human'}};
+    local.form=form;saveLocal();render();
+    Array.from(root.querySelectorAll('textarea')).find(n=>n.dataset.field==='Solution')?.focus?.();
+  }
   function renderForm(){
+    if(form?.kind==='solution'){
+      const box=el('section');box.className='region';el('h2','Attach or correct solution',box);
+      const answer=form.answerDraft;
+      field(box,'Solution',answer.text,'text',answer);
+      field(box,'Solution author',answer.author,'author',answer,'input');
+      select(box,'Solution origin',[['human','Reader / cited author'],['ai_proposal','AI proposal']],answer.origin,v=>answer.origin=v);
+      el('p','Earlier statement and solution revisions remain saved. Attribution does not establish correctness.',box);
+      button(box,'Save solution','solution_save',()=>({previous:form.revision,answer}));
+      localButton(box,'Cancel solution edit',()=>{const formDraftId=form.draftId;form=null;local.form=null;saveLocal();post('form_cancel',{formDraftId});},'form_cancel');return;
+    }
     if(!form||(state.current&&!state.current.finished))return;
-    const box=el('section');box.className='region';el('h2',form.revision?'Revise question':'Enter a question',box);
+    const box=el('section');box.className='region';el('h2',state.document?(form.revision?'Revise problem':'Enter a problem'):(form.revision?'Revise question':'Enter a question'),box);
     select(box,'Activity',[['definition','Definition'],['hypotheses','Hypotheses'],['missing_step','Missing step'],['argument','Argument reconstruction'],['application','Application / new example']],form.activity,v=>form.activity=v);
     field(box,'Question',form.prompt,'prompt',form);
     const meta=details(box,'Attribution, hints and sources','question-metadata');field(meta,'Question author',form.author,'author',form,'input');
@@ -80,12 +108,12 @@
   }
   function renderSource(a){
     const source=el('details');source.dataset.source='context';el('summary',(a&&!a.sourceVisible?'Reveal source context':'Selected source context')+' ('+state.passages.length+')',source);
-    source.open=a?!!a.sourceVisible:true;
-    source.ontoggle=()=>{if(a&&source.open!==!!a.sourceVisible)post('source_visibility',{visible:source.open});};
+    source.open=a?!!a.sourceVisible:state.document?!!state.contextVisible:true;
+    source.ontoggle=()=>{if(a&&source.open!==!!a.sourceVisible)post('source_visibility',{visible:source.open});else if(!a&&state.document&&source.open!==!!state.contextVisible)post('context_visibility',{visible:source.open});};
     // Concealed source text is not inserted until an explicit reveal succeeds.
     if(!source.open)return;
     for(const p of state.passages){
-      el('h2',p.label,source);math(source,p.text);button(source,'Open retained passage','source',{reference:p.reference});
+      el('h2',p.label,source);math(source,p.text);button(source,p.kind==='document_context'?'Return to document location':'Open retained passage','source',{reference:p.reference});
       const meta=details(source,'Source reference','source:'+p.reference);el('pre',p.reference,meta);el('p','Revision: '+p.source_revision,meta);
       if(p.authors)el('p','Author: '+p.authors,meta);
     }
@@ -126,7 +154,7 @@
   function renderHelp(a){
     const box=el('section');box.className='region';box.dataset.help='companion';el('h2','Help',box);
     const controls=el('div',undefined,box);controls.className='toolbar';
-    if(a)button(controls,'Copy help request for Codex','handoff',{purpose:'explain this step or give a hint'});
+    if(a||state.problemRevision)button(controls,'Copy help request for Codex','handoff',{purpose:'explain this step or give a hint'});
     const pending=!!local.helpDraft;
     button(controls,'Paste companion response…','help_paste',{},pending);
     if(pending)el('p','Retain or discard the response draft before opening another response.',box);
@@ -165,13 +193,57 @@
       button(formBox,'Discard response draft','help_cancel');
     }
   }
+  function renderDocument(){
+    if(!state.documentContext)return;
+    const context=el('section');context.className='region';context.dataset.document='context';
+    el('p','Document: '+state.document.label,context);
+    if(state.missingProblems?.length)el('p','An associated saved problem is unavailable. Its link and this document’s work are preserved.',context);el('p',state.document.uri,context);
+    const origin=state.returnOrigin||state.documentContext.origin;
+    const back=button(context,'← Return to '+origin.filename+' › '+origin.section,'document_return');
+    back.title='Save work and return to the exact originating Markdown occurrence. Changed or missing locations are reported.';
+    button(context,'Open document without exact location','document_open');
+    if(origin.invalid||state.returnError)el('p',state.returnError||'The originating occurrence changed. Choose its current Contents section and open its problems to set a new return location.',context);
+    const actions=el('div',undefined,context);actions.className='toolbar';
+    localButton(actions,'Enter a problem',()=>edit(),'enter_problem',!!local.form||!!state.current&&!state.current.finished);
+    button(actions,'Associate saved problem…','associate_problem');button(actions,'Due review','due_show');
+    if(state.due?.length){
+      const due=el('section',undefined,context);due.dataset.review='due';el('h2','Due here ('+state.due.length+')',due);
+      el('p','Only explicitly associated, admitted recall questions. Reading remains available.',due);
+      for(const revision of state.due){const q=state.questions.find(q=>q.revision===revision);if(q){math(due,q.prompt);button(due,'Attempt','choose_question',{revision},!!state.current&&!state.current.finished);}}
+      button(due,'Begin short review block','next',{},!!state.current&&!state.current.finished);
+      button(due,'Dismiss due questions','due_dismiss',{key:state.dueKey});
+    }
+  }
+  function renderSolution(questions,a){
+    const q=questions.find(q=>q.revision===state.problemRevision)||(!a&&questions.length===1?questions[0]:null);
+    if(!q)return;
+    const box=el('section');box.className='region';box.dataset.problem=q.revision;
+    if(!a||a.question.revision!==q.revision){el('h2','Problem',box);math(box,q.prompt);}
+    el('p','Statement: '+q.author+' · '+label(q.origin),box);
+    const actions=el('div',undefined,box);actions.className='toolbar';
+    button(actions,'Attempt','choose_question',{revision:q.revision},!!a&&!a.finished);
+    button(actions,'Review solution','solution_review',{revision:q.revision});
+    if(state.solutionReview?.open&&state.solutionReview.revision===q.revision){
+      el('h2','Solution',box);
+      if(q.answer){
+        el('p',q.answer.author+' · '+label(q.answer.origin)+' · Correctness not established',box);math(box,q.answer.text);
+        localButton(box,'Correct solution',()=>editSolution(q),'solution_edit',!!local.form);
+        if(q.originalAnswer){const original=details(box,'Original solution and attribution','solution-original:'+q.revision);el('p',q.originalAnswer.author+' · '+label(q.originalAnswer.origin),original);math(original,q.originalAnswer.text);}
+      }else{el('p','No solution is attached.',box);localButton(box,'Attach solution',()=>editSolution(q),'solution_edit',!!local.form);}
+      button(box,'Close solution review','solution_hide');
+      if(a&&!a.finished)el('p','Solution consultation is recorded separately. Subsequent submissions retain this exposure; earlier submitted snapshots stay unchanged.',box);
+      else el('p','Reviewing creates no attempt, outcome or recall grade.',box);
+      renderHelp(null);
+    }
+  }
   function render(){
     const focus=document.activeElement,focusKey=focus?.dataset?.field,selection=focusKey?[focus.selectionStart,focus.selectionEnd]:null;
-    root.replaceChildren();el('h1',state.title);
+    focusedControl=null;hoveredControl=null;root.replaceChildren();el('h1',state.title);
     const status=el('p',notice);status.setAttribute('role','status');if(state.gap){const gap=el('p',state.gap);gap.className='warning';}
     const bar=el('div');bar.className='toolbar';button(bar,'Pause / save','pause');
     const options=details(bar,'Study actions','study-actions');button(options,'Add prerequisites…','prerequisites');button(options,'Inspect history','history');button(options,'Export history…','export');
     const a=state.current,questions=state.questions.filter(q=>!q.retired);
+    renderDocument();renderSolution(questions,a);
     if(a){
       el('h2',a.finished?'Completed question':'Current question');math(root,a.question.prompt);el('p',label(a.question.activity));
       const attribution=details(root,'Question attribution','current-question-attribution');el('p',label(a.question.origin)+' · '+a.question.author,attribution);
@@ -191,7 +263,7 @@
       renderReport(a);
       const help=el('div');help.className='toolbar';
       a.question.hints.forEach((hint,index)=>{if(a.hints.includes(index))math(root,'Hint '+(index+1)+': '+hint);else button(help,'Hint '+(index+1),'hint',{index});});
-      if(a.question.answer){if(a.answerVisible){el('h3','Reference answer');el('p',label(a.question.answer.origin)+' · '+a.question.answer.author);math(root,a.question.answer.text);}else button(help,'Reveal reference answer','answer');}
+      if(a.question.answer&&(!state.document||a.answerVisible)){if(a.answerVisible){el('h3','Reference answer');el('p',label(a.question.answer.origin)+' · '+a.question.answer.author);math(root,a.question.answer.text);}else button(help,'Reveal reference answer','answer');}
       renderSource(a);renderHelp(a);
       if(a.finished){
         const actions=el('div');actions.className='toolbar';button(actions,'Next question','next');button(actions,'Start another block','continue_block');button(actions,'Report effort','effort_offer');
@@ -203,8 +275,8 @@
       if(a.adaptation){el('p',a.adaptation.reason);for(const choice of a.adaptation.choices)button(root,choice.replaceAll('_',' '),'adaptation',{choice,offer:a.adaptation.event});}
     }else{
       renderSource(null);
-      if(questions.length)button(root,'Begin short block','next');
-      else{
+      if(questions.length&&!state.document)button(root,'Begin short block','next');
+      else if(!state.document){
         el('h2','Study this passage');const actions=el('div');actions.className='toolbar';
         localButton(actions,'Enter a question',()=>edit(),'enter_question',!!local.form);button(actions,'Request questions from Codex','handoff',{purpose:'questions'});
         button(actions,'Import questions from clipboard','import_questions');
@@ -212,17 +284,29 @@
       if(local.helpDraft||(state.help||[]).length)renderHelp(null);
     }
     renderForm();
-    const qbox=details(root,'Questions ('+questions.length+')','question-bank');
+    const qbox=details(root,(state.document?'Problems':'Questions')+' ('+questions.length+')','question-bank',!!state.document);
     const tools=el('div',undefined,qbox);tools.className='toolbar';localButton(tools,'Enter a question',()=>edit(),'enter_question',!!local.form||!!a&&!a.finished);
     button(tools,'Request questions from Codex','handoff',{purpose:'questions'});button(tools,'Import questions from clipboard','import_questions');
-    for(const q of questions){
+    if(state.document){const search=field(qbox,'Find problem',local.problemSearch||'','text',{},'input');search.oninput=()=>{local.problemSearch=search.value;saveLocal();render();};}
+    for(const q of questions.filter(q=>!state.document||!local.problemSearch||q.prompt.toLowerCase().includes(local.problemSearch.toLowerCase()))){
       const row=el('section',undefined,qbox);math(row,q.prompt);el('p',label(q.activity)+' · '+(q.kept?'Kept for review':'Available; outside continuing review')+(q.card?' · due '+new Date(q.card.due).toLocaleString():''),row);
-      button(row,'Attempt','choose_question',{revision:q.revision},!!a&&!a.finished);localButton(row,'Edit',()=>edit(q),'question_edit',!!local.form||!!a&&!a.finished);
-      button(row,q.kept?'Retire':'Keep for review',q.kept?'retire':'admit',{revision:q.revision});
+      button(row,'Attempt','choose_question',{revision:q.revision},!!a&&!a.finished);button(row,'Review solution','solution_review',{revision:q.revision});localButton(row,'Edit',()=>edit(q),'question_edit',!!local.form||!!a&&!a.finished);
+      if(q.activity!=='application'||q.kept)button(row,q.kept?'Retire':'Keep for spaced review',q.kept?'retire':'admit',{revision:q.revision});
+      if(state.document){
+        const origin=state.problemLinks?.find(l=>l.revision===q.revision)?.origin||q.documentOrigin;
+        if(origin)el('p','Associated section: '+origin.section,row);
+        el('p',q.problemLater?.kept?'Problem kept for later'+(q.problemLater.date?' · '+q.problemLater.date:''):'Problem work is separate from recall scheduling.',row);
+        button(row,q.problemLater?.kept?'Remove later-work reminder':'Keep problem for later',q.problemLater?.kept?'problem_unkeep':'problem_later',{revision:q.revision});
+        const schedule=details(row,'Schedule problem work','schedule:'+q.revision);local.laterDates||={};
+        const draft=local.laterDates[q.revision]||={date:q.problemLater?.date||''};const date=field(schedule,'Work on date',draft.date,'date',draft,'input',q.revision+':');date.type='date';
+        button(schedule,'Save problem date','problem_later',()=>({revision:q.revision,date:draft.date}));
+      }
     }
-    const unresolved=details(root,'Unresolved question','unresolved');const value={text:local.unresolved??state.unresolved};
+    const unresolved=details(root,'Unresolved question','unresolved',!!state.document);
+    if(state.unresolvedProblem)el('p','Saved question relates to: '+(state.questions.find(q=>q.revision===state.unresolvedProblem)?.prompt||state.unresolvedProblem),unresolved);const value={text:local.unresolved??state.unresolved};
     const input=field(unresolved,'Save for later',value.text,'text',value);input.oninput=()=>{value.text=input.value;local.unresolved=value.text;saveLocal();};
     button(unresolved,'Save question','unresolved',()=>({text:value.text}));
+    const helpText=el('p','');helpText.dataset.help='control';helpText.className='control-help';helpText.hidden=true;helpText.setAttribute('role','status');
     disableBusy();
     if(focusKey){const target=Array.from(root.querySelectorAll('input,textarea,select')).find(n=>n.dataset.field===focusKey);target?.focus?.();if(selection?.every(Number.isInteger))target?.setSelectionRange?.(...selection);}
   }
@@ -241,7 +325,7 @@
       if(changed){if(m.study.helpDraft||!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}
       else if(JSON.stringify(state?.helpDraft||null)!==JSON.stringify(m.study.helpDraft||null))local.helpDraft=copy(m.study.helpDraft||null);
       state={...m.study,gap:m.gap};notice=m.notice||'';busy=false;
-      if(notice.startsWith('Question saved.')||notice.startsWith('Questions imported.')||notice==='Question unchanged.'){form=null;local.form=null;}
+      if(notice.startsWith('Question saved.')||notice.startsWith('Questions imported.')||notice==='Question unchanged.'||notice.startsWith('Solution saved.')){form=null;local.form=null;}
       if(notice==='Help retained.'||notice==='Help draft discarded.')local.helpDraft=null;
       if(notice==='Outcome recorded.'&&state.current){delete local.reports?.[state.current.id];delete local.reportVersions?.[state.current.id];}
       saved.studies[state.id]=local;api.setState?.(saved);render();

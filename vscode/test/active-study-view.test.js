@@ -132,3 +132,28 @@ test('legacy local draft without a host checkpoint receives one stable identity 
   assert.equal(h.field('Question').value,'Unsaved local question.');assert.equal(h.stored().studies[s.id].form.draftId,id);
   h.button('question_save').onclick();assert.equal(h.messages.at(-1).formDraftId,id);assert.equal(h.messages.at(-1).question.prompt,'Unsaved local question.');
 });
+
+test('document problem exposes Attempt and direct Review together without creating a local attempt, with keyboard help',()=>{
+ const h=view(),s=study(),q=question();s.questions=[q];s.document={uri:'file:///project/note.md',label:'Note · note.md'};
+ s.documentContext={uri:s.document.uri,origin:{filename:'note.md',section:'Chosen section'}};s.problemRevision=q.revision;s.due=[];
+ h.send(s);assert.match(h.root.text(),/Return to note.md › Chosen section/);assert.ok(h.button('choose_question'));assert.ok(h.button('solution_review'));
+ assert.doesNotMatch(h.root.text(),/Exact reference answer/);assert.equal(h.button('next'),undefined);
+ h.button('solution_review').onfocus();h.button('solution_review').onmouseenter();h.button('solution_review').onmouseleave();assert.match(h.root.text(),/without creating an attempt or recall grade/);
+ h.button('solution_review').onclick();assert.equal(h.messages.at(-1).type,'solution_review');assert.equal(h.messages.at(-1).attempt,null);
+ s.solutionReview={revision:q.revision,open:true};h.send(s);assert.match(h.root.text(),/Exact reference answer/);assert.match(h.root.text(),/Reviewing creates no attempt/);assert.equal(h.field('Your attempt'),undefined);
+ h.button('handoff').onclick();assert.equal(h.messages.at(-1).purpose,'explain this step or give a hint');
+});
+
+test('missing-solution form is distinct from an attempt and preserves attribution and text across a failed save',()=>{
+ const h=view(),s=study(),q=question();q.answer=null;s.questions=[q];s.problemRevision=q.revision;s.solutionReview={revision:q.revision,open:true};h.send(s);
+ assert.match(h.root.text(),/No solution is attached/);h.button('solution_edit').onclick();h.field('Solution').value='Exact pasted solution λ';h.field('Solution').oninput();
+ h.field('Solution author').value='Named source author';h.field('Solution author').oninput();h.button('solution_save').onclick();
+ const sent=h.messages.at(-1);assert.equal(sent.answer.text,'Exact pasted solution λ');assert.equal(sent.answer.author,'Named source author');assert.equal(sent.attempt,null);
+ h.error('Save rejected');assert.equal(h.field('Solution').value,'Exact pasted solution λ');assert.equal(h.field('Your attempt'),undefined);
+});
+
+test('document due offer is dismissible and general problems have separate later-work controls',()=>{
+ const h=view(),s=study(),q=question();q.activity='application';s.questions=[q];s.document={uri:'file:///project/note.md',label:'Note'};s.documentContext={origin:{filename:'note.md',section:'Section'}};s.due=[q.revision];s.dueKey='offer-key';h.send(s);
+ h.button('due_dismiss').onclick();assert.equal(h.messages.at(-1).key,'offer-key');h.idle();
+ assert.equal(h.button('admit'),undefined);assert.equal(h.button('problem_later').textContent,'Keep problem for later');assert.ok(h.button('document_return'));
+});

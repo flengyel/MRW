@@ -90,7 +90,7 @@ function selectHistoryContext(events, selectedSessions) {
   const rows=uniqueEvents(events),sessions=new Set(selectedSessions), selected=rows.filter(e=>sessions.has(e.session));
   const keys=new Set(selected.map(attemptKey).filter(Boolean)), wanted=new Set(selected.map(e=>e.id));
   // Include only linked attempt evidence, never whole supporting sessions/studies.
-  const actions=new Set(['attempt.begin','attempt.submit','attempt.outcome','attempt.correction','attempt.skip','attempt.continuation','effort.offer','effort.response','adaptation.offer','adaptation.withdrawal','adaptation.choice','help.request','help.preview','help.retained','help.display']);
+  const actions=new Set(['attempt.begin','attempt.submit','attempt.outcome','attempt.correction','attempt.skip','attempt.continuation','effort.offer','effort.response','adaptation.offer','adaptation.withdrawal','adaptation.choice','help.request','help.preview','help.retained','help.display','solution.review']);
   for(const e of rows)if(keys.has(attemptKey(e))&&actions.has(e.action))wanted.add(e.id);
   const byID=new Map(rows.map(e=>[e.id,e])),missing=[];
   const sameStudy=(a,b)=>a.origin===b.origin&&a.identity?.study===b.identity?.study;

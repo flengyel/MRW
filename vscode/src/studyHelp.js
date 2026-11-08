@@ -10,8 +10,8 @@ function content(value){
 }
 function request(s,purpose,text,recorder,adaptation=null,id=crypto.randomUUID()){
   if((s.helpRequests||[]).length>=200)throw new Error('This study holds at most 200 help requests.');
-  const a=s.current,latest=a?.submissions.at(-1);
-  const r={id,purpose,attempt:a?.id||null,question:a?{id:a.question.id,revision:a.question.revision}:null,
+  const a=s.current,latest=a?.submissions.at(-1),q=s.reviewedProblem||a?.question;
+  const r={id,purpose,attempt:a?.id||null,question:q?{id:q.id,revision:q.revision}:null,
     sources:model.signature(s.passages),submission:latest?.event||null,adaptation,
     snapshot:recorder.snapshot({text}),at:new Date().toISOString()};
   (s.helpRequests||=[]).push(r);
@@ -23,7 +23,9 @@ function assertReplaceable(s){
 }
 function requests(s,attempt){
   const sources=JSON.stringify(model.signature(s.passages));
-  return (s.helpRequests||[]).filter(r=>r.attempt===attempt&&JSON.stringify(r.sources)===sources);
+  const available=model.signature(s.passages);
+  return (s.helpRequests||[]).filter(r=>r.attempt===attempt&&(s.document?
+    r.sources.every(pin=>available.some(p=>JSON.stringify(p)===JSON.stringify(pin)))&&(!r.question||r.question.revision===s.problemRevision):JSON.stringify(r.sources)===sources));
 }
 function associate(s,draft,requestId,method='manual'){
   const selected=requestId===null?null:requests(s,draft.attempt).find(r=>r.id===requestId);

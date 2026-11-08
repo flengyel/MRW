@@ -6,22 +6,26 @@ connected so work can be resumed. Reconstructing compressed arguments, including
 LLM-generated solutions, and testing comprehension are central uses.
 
 The current release opens existing documents in place, follows scoped note and
-PDF links, and supplies backlinks and return locations alongside source reading,
-study and attributed assistance. General research resumption and argument
+PDF links, and connects Markdown sections to associated problems. Attempt a
+problem or review its attributed solution directly, save work, return to the
+originating section and resume later. Explicit light recall review uses FSRS. General research resumption and argument
 reconstruction remain later increments.
 
-**Current version: 0.22.0.** The repository remains private. There is no published
+**Current version: 0.23.0.** The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity is `flengyel.mrw`.
 
 The [current design](docs/RESEARCH_WORKSTATION_DESIGN.md) distinguishes Document,
-Contents, Saved source and Passage. This increment delivers existing-file and
-selected-folder navigation, plus a task-first tutorial whose header identifies
-the active extension build. Later increments make research questions resumable
-independently of an AI exchange and join these tools in an argument-reconstruction
-session.
+Contents, Saved source and Passage. From a Markdown section, use **MRW: Problems
+for Contents Section**, or **Problems for Document** from preview. The
+[learning workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md) explains problem entry,
+solution review, later work and explicit recall admission. The tutorial header
+identifies the active extension build. General research resumption and an
+integrated argument-reconstruction session remain later increments.
 
 ## What works
+
+- Work from a Markdown section through a problem, independent solution review, exact Return and saved resumption.
 
 - Open original notes and papers without importing them.
 - Follow note/PDF links, inspect backlinks and return within an explicitly chosen notes folder.

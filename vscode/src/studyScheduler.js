@@ -42,4 +42,8 @@ function select(questions, block, now = Date.now()) {
   const fresh = ready.filter(q=>!q.reviews?.length).sort((a,b)=>a.id.localeCompare(b.id));
   return block.newCount < block.newLimit && fresh.length ? { question: fresh[0], reason: 'new' } : { question: null, reason: fresh.length?'new-budget':'none-due' };
 }
-module.exports = { observe, replay, select, IDENTITY };
+function dueQuestions(questions, limit = 3, now = Date.now()) {
+  return questions.filter(q => q.kept && !q.retired && ['definition','hypotheses','missing_step','argument'].includes(q.activity) &&
+    (!q.card || +new Date(q.card.due) <= now)).sort((a,b) => (+new Date(a.card?.due || 0) - +new Date(b.card?.due || 0)) || a.id.localeCompare(b.id)).slice(0, Math.min(10, Math.max(1, Number(limit) || 3)));
+}
+module.exports = { observe, replay, select, dueQuestions, IDENTITY };

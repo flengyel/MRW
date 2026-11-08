@@ -1,82 +1,43 @@
 # UX_SPEC.md
 
-## Sidebar command buttons — 0.22.7
+## Current workflow — document sections and problems, 0.23.0
 
-The native **Commands** section keeps its buttons when a document opens or a
-study is saved. Contents and Studies contain navigation and saved work; they
-no longer replace command buttons with tree rows. Commands retain their IDs,
-tooltips and palette access. Preserve user view placement, notes, drafts and
-the working window. [Validation](docs/SIDEBAR_COMMANDS_VALIDATION.md).
+From Markdown preview/editor use **Problems for Document**; from a Contents
+heading or link use **Problems for Contents Section**. Capture that URI and
+occurrence before asynchronous work, independently of the last retained source.
+The existing study viewer identifies document/problem and named Return target.
+Enter a problem, find one in this document or explicitly associate saved work.
 
-## Document choice — 0.22.6
+Offer **Attempt** and **Review solution** together. Direct review creates no
+attempt, outcome or FSRS change. Attach/correct a missing solution with explicit
+attribution; preserve originals and keep reader work and unresolved steps
+separate. Consultation during an attempt preserves its draft and is carried
+into subsequent submission evidence. Earlier snapshots stay unchanged. Later
+independent recall remains possible. Saving, pausing, reopening and exact Return
+preserve ongoing work; changed or missing locations are reported without guesses.
 
-With a notes folder selected, Open Document presents a searchable Markdown list whose labels include the YAML title and filename ID, falling back to the first H1. Duplicate labels retain their relative paths. Dirty open text supplies its current title without saving it. Browse for another document retains the native dialog for PDFs and other locations. Cancel leaves the document and navigation state unchanged. Selection rechecks the actual file scope before granting or displaying it.
+Document associations survive incidental revisions. Editor-context snapshots
+are separate from `mrw-outline` retained citations and confer no source-store
+authority. Explicit links preserve source prefixes, revisions and passage text.
+Keep eligible recall questions for FSRS explicitly; separately keep/date a whole
+problem for later work. Application work, solution viewing, rereading and skips
+create no recall grades. Offer a small dismissible set of relevant admitted
+questions using existing short-block settings. Optional effort and adaptation
+remain task-linked, without a dwell-time comprehension model.
 
-## Current reader orientation — 0.22.1
+Preserve native **Commands** buttons, tooltips/focus help and title/filename
+document choice, Browse and cancellation. **Contents** remains Markdown navigation;
+**Studies** remains saved study work. VS Code owns both sidebars, editor groups,
+ordinary documents, Save and Undo. No action automatically hides, maximizes or
+rearranges work. Tutorial identity reports the active package; installation does
+not force reload. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md) and
+[validation](docs/DOCUMENT_LEARNING_VALIDATION.md) record the delivered scope.
 
-VS Code owns the workspace layout. Ordinary document/source opening and Return
-preserve both sidebar choices, editor groups and unsaved work. MRW issues no
-automatic maximize, hide-sidebar or minimize-other-editors commands. This
-supersedes historical expanded-reading behavior throughout this specification.
-
-Choosing Markdown for Contents visibly opens or reveals that same document,
-using its existing editor group when available. Contents persistently identifies
-the filename and path, including when its text editor closes. **Reveal Contents
-Document** reopens the selected document even with an unrelated editor active.
-Cancellation changes neither the selected Contents nor the visible document.
-
-The initial Contents interface and its title toolbar expose **Open Saved
-Source…** through the existing saved store. Hausdorff spaces reopens there
-offline. No acquisition or restoration of archived application state is needed.
-Above retained reading text, a sticky location line identifies the collection,
-chapter/section when supplied and complete qualified identifier. Hashes, storage
-paths and provenance details remain inside collapsed tools.
-
-The reader names its destination: **Return to filename** follows the citation's
-exact tracked occurrence; **Open filename** identifies an independently opened
-source's selected Contents document. Without a selected document it offers a
-Markdown choice. Each live reader keeps its own citation origin, follows
-nonoverlapping edits and refuses changed occurrences. Return opens the native
-rendered Markdown view without saving the document or changing other groups.
-Ordinary-file navigation keeps its separate Return pin. The native preview opens
-in the document's group explicitly, so a delayed focus notification cannot
-replace an unrelated group's visible editor. Exact navigation waits for the
-requested editor and selection to receive focus before following a citation.
-
-Ambiguous reader controls explain their effects on hover and keyboard focus,
-with accessible descriptions, a visible focus outline and Escape-dismissable
-help. Help itself invokes no action. Location, filename and destination remain
-visible without hovering. Native tree/view-title help remains host-owned;
-browser and controller checks do not establish native-window acceptance.
-
-## Current design — documents and research continuity, 2026-11-06
-
-[RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) governs the
-next interaction changes; [CODEX_DOCUMENT_WORKFLOW_PROMPT](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
-specifies the first GUI label patch. Document is the general name for material
-opened for work, including Markdown and PDF; Contents is navigation within it.
-The current navigator remains Markdown-only until its implementation expands.
-Opening an existing file and retaining a source revision are separate actions.
-
-Organize MRW around research questions and their linked documents, calculations,
-attempts, evidence and next actions. Start and resume research without requiring
-a model call, source selection or study exercise. Keep the existing bounded R3
-exchange intact as one possible linked operation. The later Research view must
-show question/work entries, not a renamed studies-only list or command tree.
-
-The existing Zettelkasten is a working collection, not a replacement research
-model. Support its note identity and links in place, with optional Obsidian
-opening. Ordinary documents outside a vault receive the same basic workflow.
-Reconstruction of compressed solutions joins original passages, attributed
-expansions, attempts, corrections, checking evidence and unresolved gaps.
-Comprehension questions and light review remain available within this work.
-
-Implement terminology first, document/note integrations next, then general
-research resumption and a complete reconstruction session. Prefer existing VS
-Code editors and tools; keep views few and contextual, preserve saved placement,
-and show only supported capabilities. Delivered descriptions below retain the
-labels and behavior of the releases they describe. The new design does not
-claim those later integrations are installed.
+The [research design](docs/RESEARCH_WORKSTATION_DESIGN.md) now orders document
+learning before general research resumption and integrated reconstruction.
+Those broader research goals remain planned; the existing bounded R3 exchange
+retains its contract. The document/note integrations are delivered, not a
+remaining prerequisite. Historical sections below describe earlier releases.
 
 ## Existing documents — 0.20.0
 

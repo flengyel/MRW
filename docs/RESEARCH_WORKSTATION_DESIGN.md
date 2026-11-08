@@ -6,13 +6,13 @@ links, backlinks and research records carry the full source prefix. See
 [SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md); canonical links do not replace
 retained citations.
 
-Status: approved design direction, 2026-11-06. The terminology increment is
-implemented in 0.19.2; the following integrations remain staged below.
-Latest review: MRW 0.19.2, `42b465f2fbdab96445e4c59cc5c3818cb735b4e7`.
-The active task is [existing documents and tutorial](CODEX_EXISTING_DOCUMENTS_PROMPT.md).
-This document governs the next product increments. Earlier delivery reports
-remain evidence of what was implemented and observed; they are not superseded
-as records of those deliveries.
+Status: approved design direction; current increment **document learning,
+0.23.0**, from reviewed baseline `2503d0e` / 0.22.7. Terminology and existing
+document integrations are delivered. The current task is
+[Markdown sections and problems](CODEX_DOCUMENT_LEARNING_PROMPT.md), before
+general research resumption. Historical validation reports retain their
+observations and limits. Current behavior belongs in the linked workflow and
+delivery validation, not earlier release descriptions.
 
 ## Purpose
 
@@ -74,7 +74,7 @@ and focus the tree; they do not constitute a general file-opening action.
 The 0.19.2 patch does not supply PDF contents, vault WikiLink resolution or
 opening an arbitrary external file through MRW. Its picker/help states the
 Markdown support plainly. Existing **File: Open File…** remains
-available through the host. General document opening is the next increment.
+available through the host. General document opening is delivered; document learning is the current increment.
 
 ## Existing documents and optional integrations
 
@@ -210,13 +210,16 @@ distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 | --- | --- | --- |
 | 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | Existing create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
 | 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
-| 3. Research resumption | Saved questions independent of ModelCall, linked documents/calculations/checks, persistent conclusion/gap/next action | Stop one investigation and resume its documents and unfinished work; ending the session preserves the summary. |
-| 4. Integrated reconstruction | One compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
+| 3. Document learning | Markdown section → associated problem → Attempt or independent Review solution → exact Return; existing light recall remains explicit | Save/reopen work and review context, handle changed/missing origins, offer relevant due questions without fabricated grades. |
+| 4. Research resumption | Saved questions independent of ModelCall, linked documents/calculations/checks, persistent conclusion/gap/next action | Stop one investigation and resume its documents and unfinished work; ending the session preserves the summary. |
+| 5. Integrated reconstruction | One compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
 
 Deliver coherent increments in that order; do not combine a naming patch with
 a storage rewrite. A discovered data-loss defect takes priority. The broad
-design is authorized; increment 1 is delivered and the immediate Codex task
-implements increment 2. The following increments remain specified here.
+design is authorized; increments 1 and 2 are delivered. The current task
+completes increment 3, using existing study/question records and FSRS. General
+research resumption and integrated reconstruction follow. Do not add another
+outline format, scheduler or dashboard.
 
 Evaluate practical continuity, explanatory help and learning separately. Extend
 the existing local history for explicit research open/resume, document-link

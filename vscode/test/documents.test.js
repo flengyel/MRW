@@ -444,7 +444,9 @@ test('preview identity uses YAML title alongside the immutable filename and upda
  const wiki=registerWikiLinks({vscode:h.api,context:h.context,register:(key,callback)=>h.commands.set(key,callback),documents:h.documents});
  const md=wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
  let html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/<strong[^>]*>A changed title<\/strong>/);assert.match(html,/<code>1a.md<\/code>/);
- const actions=[...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]);assert.equal(actions.length,3);
+ const actions=[...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]);assert.equal(actions.length,4);
+ const problems=actions.find(href=>JSON.parse(Buffer.from(new URL(href).searchParams.get('target'),'base64url')).action==='problems');
+ await wiki.handleUri(h.api.Uri.parse(problems));assert.equal(h.hostCalls.at(-1).name,'mrw.documentProblems');assert.equal(h.hostCalls.at(-1).args[0].uri,doc.uri.toString());
  const obsidian=actions.find(href=>JSON.parse(Buffer.from(new URL(href).searchParams.get('target'),'base64url')).action==='obsidian');await wiki.handleUri(h.api.Uri.parse(obsidian));assert.equal(h.external.at(-1).path,'/external-notes/1a.md');
  const at=doc.getText().indexOf('A changed title');h.change(doc,at,'A changed title'.length,'Revised title <&>');
  html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/Revised title &lt;&amp;&gt;/);assert.match(html,/<code>1a.md<\/code>/);assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),f.contents['1a.md']);

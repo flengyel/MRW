@@ -125,6 +125,10 @@ function questionHandoff(s, purpose='questions', submitted=null) {
     'Do not claim mathematical checking. A reference answer may be null. Hints: at most four strings. Keep attribution. Questions are not admitted to review automatically.',JSON.stringify(example,null,2));
   else parts.push('Give an attributed explanation or hint about the selected task in ordinary prose. Identify any unsupported step. This is a proposal, not mathematical checking. No graph or question JSON is needed.');
   for(const p of s.passages){const fence=String.fromCharCode(96).repeat(Math.max(4,...(p.text.match(/\x60+/g)||[]).map(s=>s.length+1)));parts.push(p.label,p.reference,'Source revision: '+p.source_revision,'Authors: '+(p.authors||'unrecorded'),fence,p.text,fence);}
+  if(s.documentContext)parts.push('Originating document: '+s.documentContext.uri,'Return section: '+s.documentContext.origin.section,
+    'Document context is a study snapshot, separate from an mrw-outline retained-source citation.');
+  if(s.reviewedProblem){parts.push('Problem under review: '+s.reviewedProblem.prompt);
+    if(s.solutionReview?.open&&s.reviewedProblem.answer)parts.push('Attributed solution ('+s.reviewedProblem.answer.author+'; '+s.reviewedProblem.answer.origin+'):',s.reviewedProblem.answer.text);}
   if(s.current){parts.push('Current question: '+s.current.question.prompt,'Attempt: '+s.current.id);if(purpose!=='questions'){
     const latest=s.current.submissions?.at(-1);
     parts.push('Current unsent draft (may differ from submitted work):',s.current.draft||'(empty)');

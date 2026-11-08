@@ -1,78 +1,34 @@
-# Codex continuation: MRW documents and research work
+# Codex continuation: document learning and research
 
-## Sidebar commands repair — 0.22.7
+## Current delivery — document learning, 0.23.0
 
-The native **Commands** section keeps its buttons when a document opens or a
-study is saved. Contents and Studies contain navigation and saved work; they
-no longer replace command buttons with tree rows. Commands retain their IDs,
-tooltips and palette access. Preserve user view placement, notes, drafts and
-the working window. [Validation](SIDEBAR_COMMANDS_VALIDATION.md).
+The [document-learning task](CODEX_DOCUMENT_LEARNING_PROMPT.md) is implemented
+after fetched main `2503d0e`. [Workflow](DOCUMENT_LEARNING_WORKFLOW.md) names
+the section/problem/Attempt-or-Review/Return path and explicit light review.
+[Validation](DOCUMENT_LEARNING_VALIDATION.md) records exact checks, package and
+native observations. Keep document associations separate from immutable
+source citations. Preserve original solution revisions, drafts, consultation
+evidence, review context and named Return locations across pause/reopen.
 
-## Document chooser repair — 0.22.6
+General research resumption is next after this delivery, followed by integrated
+argument reconstruction. Do not repeat document/identity/terminology repairs or
+require a manual study session. General research entries are not implemented
+by renaming Studies or broadening the bounded R3 transaction. Keep optional
+Obsidian, Codex, Lean and Sage integrations independent of basic reading/work.
 
-Open Document now offers title/filename selection within the configured notes folder, with YAML title preferred and the first H1 as fallback. Browse retains the general file/PDF picker. WSL reads bounded headers in one read-only Windows process; title labels confer no scope or retained-source authority. Preserve dirty buffers and the working window. See [validation](DOCUMENT_CHOOSER_VALIDATION.md) for native observations and package delivery.
+Preserve the title-aware chooser, persistent Commands buttons, existing command
+and view IDs, source-qualified references, exact revisions, notes, annotations
+and history. VS Code owns layout and dirty buffers. Install through the verified
+WSL VSIX route without reloading the working window. No archive restoration,
+preservation recopy, compatibility extension or automatic old-state adoption.
 
-## Current repair — reader orientation, 0.22.1
-
-The user's navigation correction supersedes historical automatic expanded-reading
-requirements in this file and the older 0.9.1 guidance. Leave both sidebars,
-editor groups, Codex and drafts available; VS Code owns layout. No maximize,
-hide-sidebar or minimize-other-editors call belongs in opening or Return.
-
-Contents must visibly open/reveal the chosen Markdown, identify its filename
-and path persistently, and offer **Reveal Contents Document**. Cancellation
-preserves the previous view. **Open Saved Source…** is available immediately
-and in the Contents title toolbar; **Hausdorff spaces** uses its existing bound
-store without a repeat import or preservation copy. Keep collection,
-chapter/section and qualified ID visible above reading text. Keep technical
-details collapsed. **Return to filename** means a citation's exact tracked
-occurrence; **Open filename** means independently opening the selected Contents
-document. Hover and keyboard focus explain ambiguous controls.
-Wait for native editor/selection focus acknowledgement before checking a
-programmatically selected citation. Use the registered native Markdown custom
-editor with an explicit document group for Return; the historical preference
-for the active-editor-only `markdown.reopenAsPreview` command is superseded.
-An older preview fallback must not replace an unrelated focused editor.
-
-The checkout was clean at the reviewed baseline `8bd8743`, then fast-forwarded
-to `1efa68e` at the user's request before implementation. Both READMEs and the
-concurrent recommended-extension guide remain untouched. Preserve all completed
-identity/source-display repairs and current Hausdorff annotations. Restore no
-archived studies/history/state. Install the verified local 0.22.1 VSIX without
-forcing a working-window reload. A package on disk is not proof of adoption.
-The tutorial identifies the active version and labels the local source changes.
-
-[Validation](READER_ORIENTATION_VALIDATION.md) separates controller checks,
-browser rendering and observed native behavior. The required sequence starts
-with an unrelated editor active: choose Markdown for Contents, follow its
-Hausdorff citation, Return to the same occurrence. Check both sidebar states,
-group layout, dirty text, cancellation and hover/focus help. Once delivered,
-complete the remaining native visible-editor acceptance before general research
-resumption. Local **0.22.1 is installed**, with package/runtime bytes verified.
-The final native fixture stops during initial unrelated-editor focus setup;
-do not weaken its assertion or describe it as passing. Earlier native
-source/Return/focus-help observations and final controller/browser checks are
-separate evidence. Preserve the installed repair while resolving this last
-acceptance check; do not repeat preservation or archived-state restoration.
-
-## Current identity increment — 0.22.0
-
-The user chose a fresh `flengyel.mrw` installation and rejected forwarding or a
-compatibility extension. Preserve the completed 0.21.1 reader repairs. Keep
-command/view IDs and source formats; generate only new MRW-authority URLs.
-The annotated Hausdorff source is a separate preservation requirement: use a
-one-time verified copy, with no automatic old-study/history restoration.
-Installed: **flengyel.mrw 0.22.0**, implementation `5ba7aba`, build
-`f98eedb`. Old extension unregistered; no compatibility extension is installed.
-VSIX SHA-256: `818fe026dbd27c952ced9d1de28988d7fdd5b03dc399eb9626055355329c87f1`.
-Checks: 285 Node passed; Python 346 passed / 67 explicit skips; package, installed
-bytes and packaged help passed. The installed bridge verified Hausdorff's two
-annotations and rendered diagram in the new namespace. Only that source was
-restored; studies/history start fresh and old records are archived separately.
-The window was not reloaded and native adoption was not observed.
-[Identity and delivery evidence](EXTENSION_IDENTITY.md) records source/package
-identities and observation limits. Do not repeat the data copy or overwrite
-new work from old storage. General research resumption follows.
+Earlier [sidebar](SIDEBAR_COMMANDS_VALIDATION.md),
+[chooser](DOCUMENT_CHOOSER_VALIDATION.md),
+[reader orientation](READER_ORIENTATION_VALIDATION.md) and
+[identity](EXTENSION_IDENTITY.md) validation retain their historical evidence.
+The 0.23.0 native fixture adds scoped observations, not a retrospective claim
+that every earlier acceptance case passed. Older delivery accounts below are
+historical; this section controls continuation and next-increment ordering.
 
 ## Earlier repair — source display and Return, 0.21.1
 

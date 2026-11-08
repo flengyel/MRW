@@ -291,14 +291,16 @@ function activate(context) {
     readingDestination: location => readingController.returnDestination(location),
     handleDocumentUri: uri => readingController.handleDocumentUri(uri) });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
-    resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations });
+    resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   registerProofStudy({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });
   const studyController=registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge:rawBridge,changed,
-    readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,selectPrerequisites:outlineRows.selectStudyPrerequisites,loadExample:outlineRows.loadStudyExample,
+    readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,
+    documentContext: (value, contents) => readingController.studyContext(value, contents),
+    returnToDocument: (origin, fileOnly) => readingController.returnToStudy(origin, fileOnly),selectPrerequisites:outlineRows.selectStudyPrerequisites,loadExample:outlineRows.loadStudyExample,
     getCurrent:async(root,invocation)=>{
       const editor=invocation?.editor;
       if(editor?.document.uri.scheme==='file'&&!invocation.range.isEmpty&&!editor.document.uri.fsPath.endsWith('.mrw-proof.json')&&!editor.document.uri.fsPath.endsWith('.mrw-study.json'))return outlineRows.captureStudySelection(root,invocation);

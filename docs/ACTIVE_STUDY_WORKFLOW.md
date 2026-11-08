@@ -1,4 +1,9 @@
-# Study current material — 0.19.1
+# Study and document problems — 0.23.0
+
+For Markdown sections, use **Problems for Contents Section** or **Problems for
+Document**. The [document-learning workflow](DOCUMENT_LEARNING_WORKFLOW.md) adds
+associated problems, independent solution review and a saved named Return.
+The retained-passage path below remains available separately.
 
 Select a passage in the retained reader and choose **Study current material**.
 A graph claim with a retained citation has **Study this claim**. For an ordinary
@@ -112,7 +117,7 @@ research and developer fixtures. Existing work is checkpointed and preserved.
 
 ## Review and effort
 
-**Keep for review** is explicit. Imported/saved questions do not automatically
+**Keep for spaced review** is explicit. Imported/saved questions do not automatically
 become continuing work. **Retire** preserves records. Due questions from the
 selected sources come first. A matching exact prerequisite pin can reuse a
 question from another recent study; different question/source revisions do not
@@ -139,7 +144,7 @@ application tasks do not update recall. Each attempt maps once. A correction
 replays the unchanged question's observations and replaces its mapped review,
 without adding a second review. Retired questions still reconstruct their
 historical reviews after corrections, while staying excluded from selection
-until Keep for review. Reviews use the original submission time; late
+until explicit recall admission. Reviews use the original submission time; late
 assessments replay subsequent observations chronologically. Experienced delay is
 pinned to each submission and its preceding eligible review, never the correction
 clock. Earlier records without that evidence report unknown. Learning intervals are FSRS estimates, not

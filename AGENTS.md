@@ -1,54 +1,27 @@
 # Codex instructions
 
-## Current repair — reader orientation, 0.22.1
+## Current priority — document learning, 0.23.0
 
-The navigation repair supersedes all historical automatic expanded-reading
-requirements, including 0.9.1 instructions below. Ordinary document/source
-opening and Return must not maximize, hide either sidebar, minimize other
-editors, close groups or discard drafts. VS Code owns layout. Selecting Markdown
-for Contents visibly opens/reveals it, identifies its filename and path, and
-offers Reveal Contents Document. Cancellation preserves the current view.
-Open Saved Source is available in the initial Contents interface and title
-toolbar; use the existing store to reopen Hausdorff spaces without importing.
-Source collection, chapter/section and qualified ID stay visible above reading
-text; technical storage/revision details stay collapsed. Name the Return target
-and distinguish a document citation's exact occurrence from independent opening.
-Provide hover and keyboard-focus explanations. Keep controller/browser checks
-separate from observed native sidebar/editor behavior. See
-[reader orientation validation](docs/READER_ORIENTATION_VALIDATION.md).
+Follow the user's [document-learning task](docs/CODEX_DOCUMENT_LEARNING_PROMPT.md)
+and consolidated CODEX_PLAN.md. Deliver Markdown → Contents section → associated
+problem → Attempt or independent Review solution → exact Return, with saved
+work/review context and explicit existing FSRS review before general research
+resumption. Reuse study/question records; add no outline format or scheduler.
+Original source/solution text, attribution, drafts, context and recall evidence
+remain separate. Review and application work do not fabricate recall grades.
 
-Synchronized with main `1efa68e` before implementation. The user's README and
-recommended-extensions work is concurrent: leave both READMEs and that guide
-unchanged. Preserve the completed rename, source fixes, exact references and
-current Hausdorff annotations. Do not repeat the preservation copy, restore
-archived application state or force a reload of the working window. Finish this
-repair before starting general research resumption or another feature.
+Preserve title-aware document choice, native Commands buttons, existing IDs,
+qualified source identifiers, revisions, notes, annotations, studies and history.
+VS Code owns sidebars, groups and dirty buffers; no automatic layout change or
+working-window reload. No migration, archive restoration or repeated Hausdorff
+preservation copy. The user explicitly requests affected README, design,
+workflow and tutorial updates for this increment; preserve concurrent work and
+leave the recommended-extension guide unchanged.
 
-## Current priority — continue after document integration, 2026-11-06
-
-The [existing-document increment](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md)
-is delivered in 0.20.0: opening files in place, scoped note links/backlinks,
-PDF host handoff and matching tutorial. Do not repeat it. The GUI terminology increment
-is delivered in 0.19.2; do not repeat it. Follow
-[RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md) for the
-ordered research integrations that follow. Document is the general term; Contents is
-its navigation view. Preserve Proof outline for a mathematical argument and
-use Saved source / Passage for retained reading material. Keep technical IDs,
-stored references and existing document bytes unchanged.
-
-MRW is a research workstation. Its purpose includes doing and resuming research,
-reconstructing compressed mathematical arguments, and learning while doing so.
-The existing Zettelkasten should be usable in place; Obsidian, Zettel conventions,
-AI, Lean and SageMath are optional integrations. General research questions must
-be resumable independently of a source passage or model exchange. Preserve the
-existing bounded R3 transaction and link it from research work rather than
-relaxing its contract. Durable research summaries must survive session ending.
-
-This priority supersedes older product-scope and task-ordering prose below,
-including study-only or corpus-specific priorities. Preserve existing safety,
-source, attribution and persistence contracts and the 0.19.1 repairs. The 0.19.2
-GUI patch implements terminology, without new PDF/vault/research capabilities.
-GPTWork maintains design and review; local Codex implements in VS Code/WSL2.
+Complete applicable checks, one focused native workflow observation and verified
+WSL packaging/installation. Report unobserved behavior accurately. Preserve
+historical validation evidence; new native observations are recorded separately.
+General research resumption and argument reconstruction remain later goals.
 
 ## Extension identity — 0.22.0
 

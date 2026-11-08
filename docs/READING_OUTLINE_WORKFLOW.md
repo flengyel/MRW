@@ -1,4 +1,8 @@
-# Existing documents, Contents and saved sources — 0.22.7
+# Existing documents, Contents and saved sources — 0.23.0
+
+**Problems for Contents Section** connects a heading or link occurrence to saved
+problems, independent solution review and named Return. **Problems for Document**
+works from the active Markdown preview/editor. See the [learning workflow](DOCUMENT_LEARNING_WORKFLOW.md).
 
 With a notes folder selected, **Open Document…** lists Markdown notes by YAML
 title and filename, falling back to the first H1. Search by title, filename or

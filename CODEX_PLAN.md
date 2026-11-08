@@ -1,72 +1,44 @@
 # CODEX_PLAN.md
 
-## Persistent sidebar commands — 0.22.7
+## Current increment — document problems and light review, 0.23.0
 
-The native **Commands** section keeps its buttons when a document opens or a
-study is saved. Contents and Studies contain navigation and saved work; they
-no longer replace command buttons with tree rows. Commands retain their IDs,
-tooltips and palette access. Preserve user view placement, notes, drafts and
-the working window. [Validation](docs/SIDEBAR_COMMANDS_VALIDATION.md).
+The governing task is [document learning](docs/CODEX_DOCUMENT_LEARNING_PROMPT.md).
+The implemented path is **Markdown → Contents section → associated problem →
+Attempt or Review solution → named Return**, with saved work/review context and
+optional existing FSRS review. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md)
+and [validation](docs/DOCUMENT_LEARNING_VALIDATION.md) define actual entry points
+and evidence. This increment precedes general research resumption.
 
-## Document chooser repair — 0.22.6
-
-Open Document now offers title/filename selection within the configured notes folder, with YAML title preferred and the first H1 as fallback. Browse retains the general file/PDF picker. WSL reads bounded headers in one read-only Windows process; title labels confer no scope or retained-source authority. Preserve dirty buffers and the working window. See [validation](docs/DOCUMENT_CHOOSER_VALIDATION.md) for native observations and package delivery.
-
-## Current repair — reader orientation, 0.22.1
-
-Repair reader orientation before the next feature. Implementation follows the
-reviewed `8bd8743` / 0.22.0 baseline after fast-forwarding to `1efa68e`, preserving
-the concurrent README/recommended-extension changes. Ordinary navigation and
-Return now leave layout control to VS Code; this supersedes all expanded-reading
-requirements in earlier entries. Contents opens/reveals its selected Markdown,
-keeps filename/path visible and provides an explicit reveal action. Initial
-saved-source access reuses the bound store. The reader shows essential source
-location, names its Return destination, separates citation and independent
-opening, and supplies hover/focus help. Preserve the completed rename, prior
-reader repairs, exact references and Hausdorff annotations; repeat no source
-copy or archived-state restoration. Deliver through the existing local
-build/verify/install route without reloading the working window.
-
-See [validation and native-observation limits](docs/READER_ORIENTATION_VALIDATION.md).
-Local 0.22.1 is installed and verified. Complete the remaining native
-visible-editor acceptance described there before the research-continuity
-increment below; the final fixture currently stops during initial focus setup.
-
-## Current priority — documents and resumable research, 2026-11-06
-
-The [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) governs
-the sequence. The [existing-document task](docs/CODEX_EXISTING_DOCUMENTS_PROMPT.md) is delivered
-in 0.20.0. The user-requested published-source extension is delivered in 0.21.0
-with matching help and the identity/revision contract below. Preserve later
-work and all delivered repairs; continue with general research resumption.
+Preserve title-aware document choice, Browse/cancellation, persistent native
+Commands buttons, hover/focus descriptions, source-qualified retained citations,
+notes, drafts and studies. Ordinary document context is separate from immutable
+saved-source authority. VS Code owns sidebars, groups and placement; no automatic
+layout changes, migration, archive restoration or working-window reload belongs
+in delivery. Learning benefit and mathematical correctness are not inferred from
+navigation, solution exposure or structural checks.
 
 | Order | Increment | Status |
 | --- | --- | --- |
-| 1 | Consistent Document / Contents / Saved source / Passage GUI labels and current help | Implemented in 0.19.2 |
-| 2 | Existing documents opened in place, ordinary links, optional Zettel links/backlinks and Obsidian, PDF host opening, matching tutorial | Implemented in 0.20.0; see existing-document validation |
-| 3 | Research questions independent of model exchanges, linked work and checks, durable summary and next action | Designed; reuse existing persistence and navigation |
-| 4 | One compressed-argument reconstruction session with explanations, attempts, appropriate tool use and restart | Designed; joins existing components |
+| 1 | Document / Contents / Saved source / Passage terminology | Delivered 0.19.2 |
+| 2 | Existing documents, optional notes folder, links/backlinks, PDF host opening | Delivered 0.20.0; later title/source/navigation repairs preserved |
+| 3 | Section-linked problems, independent solution review, return/resume and explicit light recall | Implemented 0.23.0; delivery checks in linked validation |
+| 4 | General research questions with linked work, durable summary and next action | Planned; reuse existing persistence and preserve bounded R3 |
+| 5 | Integrated reconstruction of a compressed mathematical argument | Planned; join existing components |
 
-The 0.20.0 implementation opens originals in place, scopes optional external
-notes, follows Markdown/ID links, opens PDFs through host readers, and supports
-backlinks, exact return and explicit reopen. Tutorial, command entry points and
-current guides match that route. See
-[validation](docs/EXISTING_DOCUMENTS_VALIDATION.md) for checks, package identity,
-installation and actual host limits. Continue with increment 3 after delivery;
-do not repeat the terminology or ordinary-document increments.
+The broader [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md)
+remains in force. Studies keep their name; a general research-question model
+is not implemented by this learning increment. Obsidian, Codex, Lean and Sage
+remain optional. Current workflow and packaged tutorial change together.
 
-Research continuity organizes the sequence. Study, comprehension questions,
-light rescheduling and task-linked effort/history remain components. Start from
-an existing document or question; no new vault, mandatory source import, model
-exchange or quiz is required. A general research session must retain its summary
-when ended; the bounded R3 AI transaction keeps its existing semantics.
+The 0.22.7 [persistent Commands repair](docs/SIDEBAR_COMMANDS_VALIDATION.md),
+0.22.6 [title chooser](docs/DOCUMENT_CHOOSER_VALIDATION.md), and earlier
+[reader orientation](docs/READER_ORIENTATION_VALIDATION.md) remain delivered
+behavior. Their historical reports retain their original observations and
+limits; the 0.23.0 native workflow records its additional orientation checks
+separately. Do not repeat preservation copies or previous manual study sessions.
 
-Complete and validate each bounded increment before expanding its behavior.
-Do not repeat delivered work or require another manual study ceremony. Update
-the live documentation with each implementation; the design labels remain
-planned until code is delivered. Publication and storage qualification are
-outside this sequence. Detailed labels, compatibility and acceptance scope are
-specified once in the linked task and design.
+Older implementation accounts below are historical context. This section
+controls the next-increment ordering when earlier roadmap prose differs.
 
 ## Extension identity — 0.22.0
 

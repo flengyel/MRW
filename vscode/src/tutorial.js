@@ -9,7 +9,7 @@ const descriptor = require('../package.json');
 
 const GUIDE_ROOT = 'https://github.com/flengyel/MRW/blob/main/';
 const GUIDES = new Set([
-  'PROOF_STUDY_WORKFLOW.md', 'ACTIVE_STUDY_WORKFLOW.md',
+  'PROOF_STUDY_WORKFLOW.md', 'ACTIVE_STUDY_WORKFLOW.md', 'DOCUMENT_LEARNING_WORKFLOW.md',
   'GETTING_STARTED_WSL_SAGEPOD.md', 'READING_OUTLINE_WORKFLOW.md',
   'OBSIDIAN_WORKFLOW.md', 'ARTIFACT_STORAGE.md', 'READER_AI_WORKFLOW.md', 'STACKS_WORKFLOW.md',
 ]);

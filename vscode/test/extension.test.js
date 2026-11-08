@@ -48,6 +48,7 @@ async function harness(root, state = new Map(), options = {}) {
         await fs.writeFile(this.uri.fsPath, this.text); this.isDirty = false; return true;
       },
       positionAt(at) { const lines = this.text.slice(0, at).split('\n'); return new Position(lines.length - 1, lines.at(-1).length); },
+      offsetAt(point) { return offset(this.text, point); },
       get lineCount() { return this.text.split('\n').length; }, validateRange: range => range };
     storedDocuments.set(doc.uri.toString(), doc);
     return doc;
@@ -2351,17 +2352,21 @@ test('import completion notifications do not hold the reader lock or block Retur
       ...options, spawn: (command, args, settings) => require('node:child_process').spawn(command,
         [args[0], path.join(extension, `test/${source}_bridge.py`)], settings),
     }));
-    const notifications = [];
-    h.api.window.showInformationMessage = () => new Promise(resolve => notifications.push(resolve));
+    const notifications = []; let notificationShown=()=>{};
+    h.api.window.showInformationMessage = () => new Promise(resolve => { notifications.push(resolve); notificationShown(); });
     t.after(() => notifications.forEach(resolve => resolve()));
     const command = source === 'stacks' ? 'mrw.importStacksSection' : 'mrw.importKerodonSection';
     for (let repeat = 0; repeat < 2; repeat++) {
       h.inputs.push(source === 'stacks' ? 'stacks-project:08ZD' : 'kerodon:0004');
       h.endings.push('Import section');
+      // Measure release from the notification boundary, not acquisition/disk I/O.
+      const shown=new Promise(resolve=>{notificationShown=resolve;});
+      const operation=h.commands.get(command)();
+      const first=await Promise.race([operation.then(result=>({result})),shown.then(()=>({shown:true}))]);
       let timer;
-      const result = await Promise.race([h.commands.get(command)(), new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new Error('Completed import is waiting for a notification dismissal')), 10000);
-      })]).finally(() => clearTimeout(timer));
+      const result=first.shown?await Promise.race([operation,new Promise((_,reject)=>{
+        timer=setTimeout(()=>reject(new Error('Completed import is waiting for a notification dismissal')),10000);
+      })]).finally(()=>clearTimeout(timer)):first.result;
       assert.ok(result, h.errors.join('\n'));
       assert.equal(!!result.reused, !!repeat);
       const panel = h.panels[0];
@@ -2383,4 +2388,37 @@ test('Contents displays the YAML title with filename identity and updates it aft
  assert.match(h.api.readingTree.description,/The EFG Theorem.*immutable-id\.md/);
  h.changeDocument(doc,text.indexOf('The EFG Theorem'),'The EFG Theorem'.length,'Fields and groups');await new Promise(resolve=>setTimeout(resolve,200));
  assert.match(h.api.readingTree.description,/Fields and groups.*immutable-id\.md/);assert.equal(doc.isDirty,true);assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);assert.deepEqual(h.errors,[]);
+});
+
+test('document problems capture a preview section after an unrelated reader without substituting remembered material',async t=>{
+  const root=await temporary(t),h=await harness(root);
+  await sourceReader(h,root);
+  const file=path.join(root,'learning.md'),text='# Learning\n\n## Selected section\nExact document context.\n\n## Other section\nOther context.\n';
+  await fs.writeFile(file,text);const doc=h.document(file,text);doc.languageId='markdown';
+  h.focus(h.editor(doc));const model=await h.commands.get('mrw.openReadingOutline')();
+  h.api.window.activeTextEditor=undefined;
+  h.api.window.tabGroups={activeTabGroup:{activeTab:{input:{uri:uri(file)}}},all:[]};
+  const node=model.all.find(n=>n.label==='Selected section');
+  const s=await h.commands.get('mrw.sectionProblems')(node);
+  assert.deepEqual(h.errors,[]);assert.equal(s.document.uri,doc.uri.toString());
+  assert.match(s.passages[0].text,/Exact document context/);assert.doesNotMatch(s.passages[0].text,/Other context|Source line/);
+  assert.equal(s.documentContext.origin.start,node.start);assert.equal(s.documentContext.origin.end,node.end);
+  assert.equal(s.current,null);
+  const note=await h.commands.get('mrw.documentProblems')();assert.equal(note.id,s.id);
+});
+
+test('document problem return tracks outside edits, reports overlap and missing files, and never saves dirty Markdown',async t=>{
+  const root=await temporary(t),h=await harness(root),file=path.join(root,'learning.md'),text='# Learning\n\n## Problem section\nOriginal prose.\n';
+  await fs.writeFile(file,text);const doc=h.document(file,text);doc.languageId='markdown';h.focus(h.editor(doc));
+  const nav=await h.commands.get('mrw.openReadingOutline')(),node=nav.all.find(n=>n.label==='Problem section');
+  const s=await h.commands.get('mrw.sectionProblems')(node),panel=h.panels.at(-1);
+  const post=async m=>{const state=panel.webview.messages.findLast(m=>m.type==='active_study').study;await panel.receive({study:s.id,attempt:state.current?.id||null,formEpoch:state.formEpoch,formDraftId:null,helpDraftId:null,...m});};
+  h.changeDocument(doc,0,0,'Unsaved preface\n');
+  await post({type:'document_return'});assert.equal(doc.getText(h.api.window.activeTextEditor.selection),'## Problem section');
+  assert.equal(doc.isDirty,true);assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);
+  h.changeDocument(doc,s.documentContext.origin.start,3,'Changed ');await post({type:'document_return'});
+  let view=panel.webview.messages.findLast(m=>m.type==='active_study');assert.match(view.study.returnError,/changed or missing/);
+  await post({type:'document_open'});assert.equal(h.saves.length,0);
+  await fs.unlink(file);await post({type:'document_return'});view=panel.webview.messages.findLast(m=>m.type==='active_study');assert.match(view.study.returnError,/changed or missing/);
+  assert.equal(s.document.uri,doc.uri.toString());assert.deepEqual(h.errors,[]);
 });
