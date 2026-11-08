@@ -103,6 +103,14 @@ function selectHistoryContext(events, selectedSessions) {
     }
     const responseIDs=[...(e?.data?.help_responses||[]),e?.data?.response].filter(Boolean);
     for(const response of responseIDs) {
+      if(response.startsWith('solution-review:')||response.startsWith('solution:')) {
+        const exact=response.startsWith('solution-review:'),id=response.slice(exact?'solution-review:'.length:'solution:'.length);
+        const matches=rows.filter(p=>sameStudy(p,e)&&p.action==='solution.review'&&p.data.available===true&&typeof p.data.snapshot==='string'&&
+          attemptKey(p)===attemptKey(e)&&(exact?p.id===id:p.data.revision===id));
+        if(matches.length)for(const linked of matches)wanted.add(linked.id);
+        else missing.push({event:e.id,reference:response,reason:'Linked solution review unavailable.'});
+        continue;
+      }
       const linked=rows.find(p=>sameStudy(p,e)&&p.action==='help.retained'&&p.data.response===response);
       if(linked)wanted.add(linked.id);
       // A preview can expose a draft before it is retained. That is valid exposure evidence.

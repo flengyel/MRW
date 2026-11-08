@@ -34,11 +34,14 @@ function review(s, q, recorder) {
   const a = s.current;
   if (q.answer && a && !a.finished) {
     if (sameQuestion(a.question, q)) a.answerExposed = true;
-    else { a.helpExposures ||= []; if (!a.helpExposures.includes('solution:' + q.revision)) a.helpExposures.push('solution:' + q.revision); }
+
   }
   const event=recorder.record('solution.review', { question: q.id, revision: q.revision, available: !!q.answer,
     snapshot: q.answer ? recorder.snapshot(q.answer) : null, attempt: a?.id || null, after_submission: !!a?.submissions.length,
     meaning: 'Solution display opportunity, separate from an attempt, recall grade or mathematical checking.' });
+  if (q.answer && a && !a.finished && !sameQuestion(a.question, q)) {
+    a.helpExposures ||= []; a.helpExposures.push('solution-review:' + event.id);
+  }
 }
 function keepForLater(q, date = null) {
   if (date !== null && (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date)) throw Error('Choose a valid date for later problem work.');

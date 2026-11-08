@@ -235,3 +235,28 @@ test('supporting earlier attempts resolve adaptation evidence without entering s
   assert.match(selected, /assessed attempts: 1/);
   assert.match(selected, /attempts not sampled: 1/);
 });
+
+
+test('cross-session export resolves other-solution exposure by its event and exact attributed snapshot, including legacy revisions', async t => {
+  const directory=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-solution-export-'));t.after(()=>fs.rm(directory,{recursive:true,force:true}));
+  const identity={study:'document-study',attempt:'active-attempt',question:'active-revision'};
+  const original=new StudyHistory(directory,{version:'0.23.1',commit:'original'},{origin:'automated_test'});await original.init();original.setContext(identity);
+  original.record('attempt.begin',{attempt:identity.attempt});
+  const solution={text:'Exact attributed solution λ.',author:'Reader',origin:'human'};
+  const current={id:identity.attempt,question:{id:'active-question',revision:'active-revision'},submissions:[],draft:'Keep my draft',finished:false,helpExposures:[]};
+  require('../src/studyDocument').review({current},{id:'other-question',revision:'other-revision',answer:solution},original);
+  assert.equal(current.draft,'Keep my draft');assert.match(current.helpExposures[0],/^solution-review:/);await original.close();
+  const resumed=new StudyHistory(directory,{version:'0.23.2',commit:'resumed'},{origin:'automated_test'});await resumed.init();resumed.setContext(identity);t.after(()=>resumed.close());
+  const submitted=resumed.record('attempt.submit',{attempt:identity.attempt,help_visible:true,help_responses:current.helpExposures,snapshot:resumed.snapshot({answer:current.draft})});
+  resumed.record('attempt.outcome',{attempt:identity.attempt,submission:submitted.id,activity:'argument',outcome:'help_dependent',assessor:'reader',consulted:true});
+  const all=await resumed.events();
+  for(const legacy of [false,true]) {
+    const rows=legacy?all.map(e=>e.id===submitted.id?{...e,data:{...e.data,help_responses:['solution:other-revision']}}:e):all;
+    const exported=selectHistoryContext(rows,[resumed.session]);assert.deepEqual(exported.missing,[]);
+    const review=exported.events.find(e=>e.action==='solution.review');assert.ok(review);assert.equal(review.export_context.role,'supporting');
+    assert.deepEqual(JSON.parse(await fs.readFile(path.join(directory,'snapshots',review.data.snapshot+'.json'),'utf8')),solution);
+    assert.equal(require('../src/studyEvidence').projectAttempts(exported.events).attempts[0].observation.help_visible,true);
+  }
+  const foreign=all.map(e=>e.action==='solution.review'?{...e,identity:{...e.identity,study:'another-study'}}:e);
+  assert.ok(selectHistoryContext(foreign,[resumed.session]).missing.some(m=>m.reason==='Linked solution review unavailable.'));
+});
