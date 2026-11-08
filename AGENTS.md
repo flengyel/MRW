@@ -1,11 +1,20 @@
 # Codex instructions
 
-## Current delivery — remove document Problems, 0.23.3
+## Current direction — ordinary work, 0.23.4
 
 The user rejected the document Problems interface. Its commands, preview,
 toolbar, Contents and welcome entry points and document-study creation path
 are removed. Opening/following a note displays that note. Do not restore
 these forms under a different label or make a problem record a reading requirement.
+
+Opening/following a document never creates a problem record or launches an
+exercise form. Questions, solutions and commentary can stay where written,
+connected by ordinary links. Add an interaction only to remove a demonstrated
+obstacle without duplicate entry. Do not replace Problems with Research Question
+registration. Resumption first recovers existing documents, supported locations
+and unfinished work; it requires no new question record, summary/next-action
+form or Research view. These rules supersede conflicting earlier prompts.
+No next feature increment is authorized merely by the roadmap.
 
 Preserve existing saved records, linked owners, drafts, source references and
 history. Earlier document-linked work reopens read-only in the existing viewer,
@@ -18,7 +27,8 @@ native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
 VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
 reloading the working window. General research resumption and argument
 reconstruction remain later work; they must start from an observed task, without
-adding another registration form. [Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
+adding another registration form. [Current rules and delivery](docs/ORDINARY_WORK_RULES.md).
+[Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Extension identity — 0.22.0
 

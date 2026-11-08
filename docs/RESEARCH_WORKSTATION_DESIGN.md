@@ -15,6 +15,27 @@ See [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md),
 [reading workflow](READING_OUTLINE_WORKFLOW.md) and
 [opening evidence](DOCUMENT_OPENING_REPAIR.md).
 
+## Rules for ordinary mathematical work
+
+These rules govern current and future implementation:
+
+1. Opening or following a document never creates a problem record or launches
+   an exercise form.
+2. Questions, solutions and commentary can remain where they were written,
+   connected by ordinary links.
+3. An additional MRW interaction must remove a demonstrated obstacle without
+   requiring duplicate entry.
+
+Do not replace Problems with a renamed **Research Question** registration system.
+Research resumption first recovers existing documents, supported locations and
+unfinished work. It does not require a new question record, title, summary,
+next-action form or Research view. Existing notes and links supply the work;
+VS Code owns unsaved buffers and their recovery. Preserve saved MRW records for
+access to earlier work, without requiring their use for ordinary reading.
+These rules supersede earlier prompts and roadmap requirements that conflict
+with them. A proposed interaction needs an observed obstacle from mathematical
+use; no further feature increment is selected by this correction.
+
 ## Purpose
 
 MRW is a hub for doing and resuming mathematical research. It connects a
@@ -51,7 +72,7 @@ No multi-user product framework is needed for this sequence.
 | Saved source | An explicitly retained source revision available independently of changes to its original, together with its reader selections and annotations where present. |
 | Passage | A selected part of a document or saved source; retained references identify the exact revision and range. |
 | Note / Zettel | A note is a document. A Zettel follows the existing Zettel note convention; that convention is optional. |
-| Research question | The mathematical question under investigation, with linked work and a place to resume. It need not be a recall question. |
+| Research question | The mathematical question under investigation; it may already be written in an ordinary note. This term does not require an MRW registration object or recall item. |
 | Study question | A task used to test or develop comprehension of particular material. Keeping it for scheduled review remains explicit. |
 | Proof outline | A condensed account of an argument. A proof graph is one representation of its claims and inferences. Neither term names a document's contents list. |
 | Reconstruction | Attributed work making an argument's reasoning explicit, including corrections and remaining gaps. It does not inherit the source's checking status. |
@@ -143,48 +164,39 @@ moving them into one directory or imposing one note format.
 
 ## Research that can be resumed
 
-Provide a visible way to find ongoing questions and resume their work. Start
-with a small **Research** content view in the existing MRW container, reusing
-the current research/study surface where practical rather than adding a panel
-for every tool. Show saved questions and linked work; keep commands in menus.
-Studies remain accessible within the work and independently.
+Start with the documents already in use, their supported locations, the last
+usable Return destination and unfinished work. Keep questions, solutions and
+commentary in those documents, connected by ordinary links. Reopening a note
+containing a solution displays that note, with the surrounding work preserved.
+VS Code owns recovery of unsaved buffers; MRW must not save or discard them to
+resume reading. Current Reopen Document and Return behavior is described in the
+[reading workflow](READING_OUTLINE_WORKFLOW.md). Broader recovery remains planned.
 
-A resumable question needs a title or question, links to relevant work, and
-durable places for the latest useful conclusion, unresolved issue and next
-action. Record locations and revisions where supported. These are aids, not
-mandatory reporting fields. Begin from current work and ask only for information
-that cannot be obtained from the selected documents or explicit actions.
-Capture observed file locations, actions and outputs automatically where
-supported. Conclusions and next actions remain authored text or clearly marked
-proposals; they are not inferred facts merely because an event was recorded.
+Do not introduce Research Question registration, a question-object hierarchy,
+a Research view or required title/summary/next-action fields as the default
+resumption path. An existing outline or linked note can already organize the
+mathematics. A conclusion, remaining gap or intended next action may stay as
+ordinary prose at its existing location; do not request a second copy in a form.
 
-Reuse existing record publication, study, navigation and summary services. The
-existing R3 investigation is a single model parent/child transaction. Preserve
-that contract and link its records from research work; do not turn it into a
-project model by removing its limits. A general research question must exist
-without a model call or source passage and may have several sessions, studies,
-calculations and linked exchanges. Ending a session retains its summary and
-next action. Closing, completing or archiving work does not discard those notes.
+Preserve existing private studies, retained annotations and history so previous
+work remains accessible. Source retention continues to serve exact citations;
+it is separate from opening a live note. Keep the bounded R3 model exchange's
+contract and its records. Resumption does not require a model call, exercise,
+new record schema, project database or automatic classification of notes.
 
-Retain meaningful attempts and abandoned approaches with their reasons when
-recorded. Keep a calculation's observed output separate from its interpretation,
-and a check separate from a claim about the current manuscript. If the relevant
-input changes, show that an earlier check belongs to an earlier revision.
-Reopening saved notebook output does not mean a kernel has reconstructed its
-variables. Capturing unknown or missing evidence as unknown is sufficient.
-
-Begin with resumable questions in the current workspace and explicit links to
-other work. A later recent-project list may route through VS Code's existing
-workspace opening. Do not pool unrelated private stores or add a global project
-database to deliver the first useful question/session workflow.
+Keep a calculation's saved output separate from an assertion that its kernel
+state has been reconstructed. A check belongs to the input revision it actually
+checked. Use the host and existing navigation/persistence services first. Add a
+control or saved navigation aid only after ordinary use demonstrates a specific
+failure to recover work, and keep it free of duplicate mathematical entry.
 
 ## Reconstructing a compressed solution
 
 Use the existing source reader, notes, companion exchange, study and checking
 surfaces in one session:
 
-1. Open the solution and state or recover the question being addressed. Keep
-   the original and its attribution; outside model output can be retained as
+1. Open the solution with the question or context already present in its note
+   or linked sources. Keep the original and its attribution; outside model output can be retained as
    supplied text without inventing a ModelCall or missing request metadata.
 2. Select a difficult passage. Identify missing definitions, assumptions,
    intermediate claims, citations or calculations needed to justify it.
@@ -196,8 +208,9 @@ surfaces in one session:
    useful; allow research to continue without answering it.
 5. Follow a source or make an explicit calculation/check when appropriate.
    Record what the evidence establishes and which version it concerns.
-6. Save the useful conclusion, remaining gap and next action with the work.
-   Resume at those documents and locations after closing the session.
+6. Keep useful conclusions, remaining gaps and next actions in the working
+   documents where they are written. Resume those documents and locations
+   without re-entering their contents in a form.
 
 A proof graph is optional. The workflow does not require full formalization,
 complete reconstruction of every step, or a positive correctness verdict.
@@ -205,21 +218,23 @@ Keep review scoped to the material currently relevant, with explicit admission
 and a small budget. Preserve the existing FSRS, effort-report and assistance
 distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 
-## Implementation order and useful evidence
+## Delivered work and possible next steps
 
 | Increment | Deliverable | Concrete completion evidence |
 | --- | --- | --- |
 | 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | Existing create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
 | 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
 | 3. Document Problems | Withdrawn at the user’s request in 0.23.3 | Creation routes removed; earlier records and drafts remain readable. |
-| 4. Research resumption | Saved questions independent of ModelCall, linked documents/calculations/checks, persistent conclusion/gap/next action | Stop one investigation and resume its documents and unfinished work; ending the session preserves the summary. |
+| 4. Resume existing work | Recover existing documents, supported locations, Return and unfinished work without question registration | Resume the same notes and drafts with their links and surrounding work preserved; add only a demonstrated missing recovery action. |
 | 5. Integrated reconstruction | One compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
 
-Deliver coherent increments in that order; do not combine a naming patch with
-a storage rewrite. A discovered data-loss defect takes priority. The broad
-design is authorized; increments 1 and 2 are delivered. Increment 3 is withdrawn; it is not a prerequisite for research.
-General research resumption and integrated reconstruction remain planned. Do not add another
-outline format, scheduler or dashboard.
+Choose future changes from obstacles encountered in ordinary mathematical use;
+the table is not a queue of required features. Increments 1 and 2 are delivered.
+Increment 3 is withdrawn and is not a prerequisite for research. General
+resumption and integrated reconstruction remain possible future work under the
+rules above. A demonstrated data-loss defect takes priority. This correction
+authorizes no new question registry, storage rewrite, outline format, scheduler
+or dashboard.
 
 Evaluate practical continuity, explanatory help and learning separately. Extend
 the existing local history for explicit research open/resume, document-link

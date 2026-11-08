@@ -1,3 +1,14 @@
+# Historical handoff — withdrawn document Problems
+
+Status: historical handoff. The document Problems subsystem implemented from
+this task was withdrawn in 0.23.3. Do not execute these requirements again or
+replace them with Research Question registration. The
+[current ordinary-work rules](RESEARCH_WORKSTATION_DESIGN.md#rules-for-ordinary-mathematical-work)
+supersede this handoff. Existing saved work remains accessible; ordinary reading
+uses the documents and their links. The original task below is retained as history.
+
+## Original task
+
 Implement one complete MRW learning workflow:
 
 **Markdown document → Contents section → associated problem → attempt or review solution → return to the originating section.**

@@ -1,16 +1,23 @@
 # Mathematical Research Workstation
 
-MRW is an experimental mathematical research workstation in VS Code. Its purpose
-is to keep questions, documents, attempts, calculations and checking evidence
-connected so work can be resumed. Reconstructing compressed arguments, including
-LLM-generated solutions, and testing comprehension are central uses.
+MRW is an experimental mathematical research workstation in VS Code for working
+with notes, papers, calculations and proofs. It opens documents in place and
+connects them through Contents, ordinary links, backlinks and Return. Questions,
+solutions and commentary can stay in the notes that contain them.
+
+Opening or following a document never creates a problem record or launches an
+exercise form. Additional interactions must remove a demonstrated obstacle
+without duplicate entry. Research resumption starts with existing documents,
+locations and unfinished work; it does not require Research Question registration.
+Broader recovery and integrated argument reconstruction remain planned.
 
 The current release opens existing notes and papers in place, follows note and
 PDF links, and provides Contents, backlinks and Return. Reading requires no
 problem record. The document Problems interface introduced in 0.23.0 is removed;
 earlier saved work and drafts remain readable.
 
-**Current version: 0.23.3.** [Removal and preservation checks](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
+**Current version: 0.23.4.** [Ordinary-work rules and delivery](docs/ORDINARY_WORK_RULES.md).
+[Subsystem removal and preservation checks](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 The repository remains private. There is no published Marketplace listing or
 GitHub release; obtain a maintainer VSIX or build locally. The technical
 extension identity is `flengyel.mrw`.
@@ -67,7 +74,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.22.0.vsix`. Confirm installation under that workspace
+select `mrw-0.23.4.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -77,8 +84,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.22.0.vsix
-sha256sum vscode/mrw-0.22.0.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.4.vsix
+sha256sum vscode/mrw-0.23.4.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.
@@ -149,7 +156,10 @@ creates Markdown. Retaining a source revision and importing text remain separate
 optional operations. Start with **MRW: Open Tutorial** or the
 [document workflow](docs/READING_OUTLINE_WORKFLOW.md).
 
-## One short study
+## Optional source study
+
+These tools are explicitly invoked when useful. Reading and returning to notes
+use the document navigation above.
 
 For an offline demonstration, run **MRW: Open Study Example**. It opens original,
 attributed elementary source text and two questions. Loading is explicit and its

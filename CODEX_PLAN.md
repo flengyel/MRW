@@ -1,11 +1,20 @@
 # CODEX_PLAN.md
 
-## Delivered correction — remove document Problems, 0.23.3
+## Current priority — ordinary work, 0.23.4
 
 The user rejected the document Problems interface. Its commands, preview,
 toolbar, Contents and welcome entry points and document-study creation path
 are removed. Opening/following a note displays that note. Do not restore
 these forms under a different label or make a problem record a reading requirement.
+
+Opening/following a document never creates a problem record or launches an
+exercise form. Questions, solutions and commentary can stay where written,
+connected by ordinary links. Add an interaction only to remove a demonstrated
+obstacle without duplicate entry. Do not replace Problems with Research Question
+registration. Resumption first recovers existing documents, supported locations
+and unfinished work; it requires no new question record, summary/next-action
+form or Research view. These rules supersede conflicting earlier prompts.
+No next feature increment is authorized merely by the roadmap.
 
 Preserve existing saved records, linked owners, drafts, source references and
 history. Earlier document-linked work reopens read-only in the existing viewer,
@@ -18,20 +27,21 @@ native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
 VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
 reloading the working window. General research resumption and argument
 reconstruction remain later work; they must start from an observed task, without
-adding another registration form. [Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
+adding another registration form. [Current rules and delivery](docs/ORDINARY_WORK_RULES.md).
+[Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 | Order | Increment | Status |
 | --- | --- | --- |
 | 1 | Document / Contents / Saved source / Passage terminology | Delivered 0.19.2 |
 | 2 | Existing documents, optional notes folder, links/backlinks, PDF host opening | Delivered 0.20.0; later title/source/navigation repairs preserved |
 | 3 | Document Problems | Withdrawn 0.23.3 at the user’s request; saved work remains readable |
-| 4 | General research questions with linked work, durable summary and next action | Planned; reuse existing persistence and preserve bounded R3 |
-| 5 | Integrated reconstruction of a compressed mathematical argument | Planned; join existing components |
+| 4 | Resume existing documents, locations and unfinished work | Planned only where ordinary use demonstrates a recovery obstacle; no question registration or duplicate entry |
+| 5 | Integrated reconstruction of a compressed mathematical argument | Possible future work when a concrete task demonstrates a missing interaction |
 
 The broader [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md)
-remains in force. Studies keep their name; a general research-question model
-remains planned. Obsidian, Codex, Lean and Sage
-remain optional. Current workflow and packaged tutorial change together.
+remains in force under these rules. Studies keeps its name for the separate
+optional tools; no research-question registration model is planned. Obsidian,
+Codex, Lean and Sage remain optional. Current workflow and packaged tutorial change together.
 
 The 0.22.7 [persistent Commands repair](docs/SIDEBAR_COMMANDS_VALIDATION.md),
 0.22.6 [title chooser](docs/DOCUMENT_CHOOSER_VALIDATION.md), and earlier

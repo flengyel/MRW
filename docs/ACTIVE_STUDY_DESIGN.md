@@ -7,7 +7,11 @@ Role clarified 2026-11-06. Original design baseline: `db656402190c255afd6a296da6
 
 [RESEARCH_WORKSTATION_DESIGN](RESEARCH_WORKSTATION_DESIGN.md) now governs the
 overall interaction and next implementation order. This document governs the
-study component. Comprehension testing, reconstruction, light review and
+optional study component. Opening or following a document never starts its
+forms or creates a problem record. Questions and solutions can stay in ordinary
+notes; do not duplicate them here to make reading or resumption work. The
+ordinary-work rules in the research design supersede earlier increment prompts.
+Comprehension testing, reconstruction, light review and
 task-linked effort/history support ongoing research; research questions need
 not begin as source-bound study questions and do not automatically enter FSRS.
 Keep existing study behavior and 0.19.1 reliability repairs while connecting
@@ -29,7 +33,7 @@ A study starts explicitly from a supported current passage/selection or Resume. 
 
 Use the selected retained reader passage, selected proof claim with its exact citation, active ordinary text selection through the existing capture/retention path, or the resumed study's saved passage. Keep source revision and question revision explicit. If a host cannot supply the selected text, explain that boundary locally; do not guess PDF text or notebook state from a filename.
 
-Opening or selecting material updates context and review eligibility. It does not automatically generate a question, send a provider request, mark successful recall, rewrite an interval or capture other open files. Log the MRW navigation event. Focus moving into an answer form, Codex pane or menu must not replace the study source. A deliberate switch of study source preserves the unfinished attempt and updates context for the next task.
+Within an explicitly opened source study, selecting its material updates context and review eligibility. It does not automatically generate a question, send a provider request, mark successful recall, rewrite an interval or capture other open files. Log the MRW navigation event. Focus moving into an answer form, Codex pane or menu must not replace the study source. A deliberate switch of study source preserves the unfinished attempt and updates context for the next task.
 
 Eligible review questions belong to the current source/study or explicitly selected prerequisite passages. Unrelated open tabs and the rest of the workspace are outside this review scope. Shared source identity may establish membership; mathematical prerequisite relationships require an explicit link, not a path-name guess.
 

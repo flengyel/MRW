@@ -38,10 +38,12 @@ display title or later selection.
 editable title. It need not be opened in Obsidian; not every Markdown file in
 an Obsidian vault follows this convention.
 
-**Research question:** the mathematical question under investigation, with
-linked work and a place to resume. It can precede any source selection or model
-call. Its general resumption workflow is planned; the existing R3 investigation
-remains a bounded parent/child model exchange.
+**Research question:** the mathematical question under investigation. It may
+already be written in a note, with ordinary links to related work. The term
+requires no MRW registration object or duplicate entry. Research resumption
+first recovers existing documents, supported locations and unfinished work;
+broader recovery remains planned. The existing R3 investigation remains a
+bounded parent/child model exchange.
 
 **Study question:** a task used to test or develop comprehension of particular
 material. It becomes a scheduled review item only through explicit admission.

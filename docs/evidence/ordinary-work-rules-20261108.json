@@ -1,0 +1,76 @@
+{
+  "version": "0.23.4",
+  "kind": "Documentation and packaged tutorial correction",
+  "sourceBase": "5ea0ad8210099dd1465636fd9223f20ade180b40",
+  "rules": [
+    "Opening or following a document never creates a problem record or launches an exercise form.",
+    "Questions, solutions and commentary can remain where written, connected by ordinary links.",
+    "Additional MRW interaction must remove a demonstrated obstacle without duplicate entry."
+  ],
+  "withdrawnPlanningRequirements": [
+    "Research Question registration model",
+    "Research view as the starting point for resumption",
+    "Required title, conclusion, gap and next-action entry in a separate record"
+  ],
+  "resumptionPriority": "Existing documents, supported locations, Return and unfinished work; preserve host-owned buffers and existing MRW data.",
+  "runtimeJavaScriptUnchanged": true,
+  "commandAndMenuContributionsUnchanged": true,
+  "genuineNotesOrStudiesModified": false,
+  "workingWindowReloaded": false,
+  "checks": {
+    "existingTutorialTests": {
+      "passed": 3,
+      "exit": 0
+    },
+    "packageVerificationPassed": true,
+    "packagedHelp": {
+      "version": "0.23.4",
+      "localChanges": true,
+      "packagedTextCorrect": true,
+      "reopensRefreshed": true,
+      "newActivationURI": true,
+      "observation": "Packaged provider and host-command API double; no native UI painting observed."
+    },
+    "nativeUIObservedThisPatch": false,
+    "broaderRegressions": "Not repeated: runtime unchanged; prior 0.23.3 removal checks remain historical evidence."
+  },
+  "package": {
+    "sha256": "ffc558644657882615acb77081cc2aba533d17678a71b46fb2b99feee9df6185",
+    "version": "0.23.4",
+    "production_manifest_matches": true,
+    "runtime_bytes_match": true,
+    "development_files_excluded": true
+  },
+  "installed": {
+    "version": "0.23.4",
+    "archive": "/home/flengyel/MRW/vscode/mrw-0.23.4.vsix",
+    "sha256": "ffc558644657882615acb77081cc2aba533d17678a71b46fb2b99feee9df6185",
+    "bytes": 581965,
+    "installedPayloadFiles": 105,
+    "installedBytesMatch": true,
+    "registryVersion": "0.23.4",
+    "workingWindowReloaded": false,
+    "runtimeJavaScriptUnchanged": true,
+    "exit": 0
+  },
+  "changedFileDigests": {
+    "AGENTS.md": "49cd37aa7637badce93a952f6f7c0cb6b598d99dc644ffb2b2054b6c9ee4179d",
+    "CODEX_PLAN.md": "22bce91002a4df3f3e11c6d8e6db44dc256b7dc6b98b3df18c634a046f56ab20",
+    "PUBLIC_READINESS.md": "cd059f57ed664b3aa1d59215ea8c5a5db3d06cbb27cafb54213142b63e6db91b",
+    "README.md": "5dc2652b160b6ab92ef56bd203fcbd24050ad8592a5f4c5d0dde6a8ec221377c",
+    "UX_SPEC.md": "4ddc6d3b85d047143bc4dc6816cf30c4cdad2988589e5532ff70ea0596d96dfd",
+    "VISION.md": "aeba94dd6a455ffbab5bfcfe618310aed1e6a4792368c4b706bae3467450cb98",
+    "VOCABULARY.md": "3d5dfc967d8605645106c90212bb5c0b75e2a901e4a265bff8fc9c28167d5d92",
+    "docs/ACTIVE_STUDY_DESIGN.md": "fe343ca50d4cb833cc0c2a6843f726217af4a01aa20aec2c70ab351f4762a871",
+    "docs/CODEX_CONTINUATION.md": "bae7ce82b7819ecfb9179ecc9beb0fec013bfa6401108397b11106f50480cbe2",
+    "docs/CODEX_DOCUMENT_LEARNING_PROMPT.md": "e3d6e31af8f657f2f84c5e7340d75a1b8d97ad66c53e3295e7e5eaa124656839",
+    "docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md": "587d61f45536265a1c9ec94f95ccac75186774a3d2b627c0d113809cf79e3ede",
+    "docs/INSTALLATION.md": "176a3dd99ed661bc0533c1a64179b6c3e84ec5928192ba45f849f69af3740673",
+    "docs/RESEARCH_WORKSTATION_DESIGN.md": "0c0b49a18881203cbae2aa9e8db252fdc85d0db05419f4a77d5ca46edb3d0bcb",
+    "vscode/README.md": "c8ebf5a1311d92e055c582c06913c7b0efe797a6f2d7806827d9c7177c4e4d86",
+    "vscode/media/first-steps.md": "699ccaf1b4ea2075c555eec7178d171a00fb24c62b6855942f58a3f5d16ce119",
+    "vscode/package-lock.json": "a93f3d04a73555a376cc877c3ec8d47fd98e9964c9bdde1f3768f3ed0690d9f0",
+    "vscode/package.json": "0bb28e2216cdce4b5cabcfbd528d37660b1a1f25f899714cb83f6bcf2f731f50"
+  },
+  "localEvidence": "/home/flengyel/MRW/.codex-work/vscode-host-reading-contract/evidence"
+}

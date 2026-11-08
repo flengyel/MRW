@@ -1,6 +1,6 @@
 # UX_SPEC.md
 
-## Current workflow — document reading, 0.23.3
+## Current workflow — ordinary work, 0.23.4
 
 **Open Document…** offers **Original file** (current contents in place) and
 **Saved copy** (a retained revision with MRW annotations) in one native picker.
@@ -24,6 +24,12 @@ Opening or following a note displays the note in place. Contents navigates its
 headings and links. The document Problems commands, preview link, Contents
 question actions and sidebar/editor entry points are removed at the user’s
 request. They must not return under another name.
+
+Questions, solutions and commentary can stay in the documents where they were
+written and remain connected by ordinary links. Do not substitute a Research
+Question registration system. Resumption first recovers those documents,
+supported locations and unfinished work. Add an interaction only for a
+demonstrated obstacle, without duplicate entry or mandatory reporting fields.
 
 Earlier document-linked records remain readable in the existing saved-work view.
 It shows statements, attributed solutions, pending drafts and unresolved text,

@@ -1,5 +1,12 @@
 # Codex task: clear document and source terminology
 
+Status: completed terminology handoff (0.19.2). Its later-roadmap paragraphs are
+historical; they do not authorize Research Question registration or a new Research
+view. Follow the
+[current ordinary-work rules](RESEARCH_WORKSTATION_DESIGN.md#rules-for-ordinary-mathematical-work):
+resumption starts with existing documents, supported locations and unfinished
+work, without duplicate entry. The original handoff below is retained as history.
+
 Updated 2026-11-06. Reviewed baseline: MRW 0.19.1 at
 `82f310bb8d0984af0535e296b2361d6cc38e5ce6`.
 

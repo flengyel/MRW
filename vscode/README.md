@@ -1,13 +1,17 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.3 opens existing mathematical documents in place and connects scoped
+MRW 0.23.4 opens existing mathematical documents in place and connects scoped
 note links, backlinks and return locations with retained sources, annotations
 and resumable study. The extension is experimental.
 [Opening repair checks](../docs/DOCUMENT_OPENING_REPAIR.md).
 
 The document Problems commands and forms are removed. Earlier document-linked
 work remains readable with its drafts, attributed text, Return and history/export.
-Reading a note requires no problem record. See
+Opening or following a document never starts an exercise form. Questions,
+solutions and commentary can stay in ordinary linked notes. Resumption starts
+with existing documents, locations and unfinished work; additional interactions
+must remove a demonstrated obstacle without duplicate entry. No replacement
+Research Question registration system is planned. See
 [the removal checks](../docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Open existing work
@@ -146,12 +150,12 @@ From a **repository-root checkout** with Python 3.11+, Linux Node.js 22+ and npm
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.22.0.vsix
-sha256sum vscode/mrw-0.22.0.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.4.vsix
+sha256sum vscode/mrw-0.23.4.vsix
 ```
 
 `npm run package` runs the Python bundling prepublish hook and pinned
-`@vscode/vsce` 4.0.0. It creates `vscode/mrw-0.22.0.vsix`; it does
+`@vscode/vsce` 4.0.0. It creates `vscode/mrw-0.23.4.vsix`; it does
 not publish it. The fixed epoch/UTC supplies stable archive timestamps. Record
 the hash of the actual archive and tool versions used; do not assume an older
 release's hash. Use Linux npm in WSL, not a Windows npm launcher.
@@ -164,11 +168,11 @@ VSIX archives are excluded. Python core copies and package files are Git-ignored
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…** or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.22.0.vsix
+code --install-extension /absolute/path/to/mrw-0.23.4.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.22.0` is installed on the **workspace host**,
+Confirm `flengyel.mrw@0.23.4` is installed on the **workspace host**,
 not solely the Windows UI. Save documents/forms before a requested reload. Keep
 workspace storage for future updates of `flengyel.mrw`. The bridge
 uses the package's bundled core through `python3 -I`; it needs no editable Python

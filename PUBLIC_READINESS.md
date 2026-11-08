@@ -4,6 +4,21 @@ MRW remains **private**. This task prepares inspection; it does not authorize a
 visibility change, release upload, Marketplace publication, credential rotation,
 history rewrite or contact with testers. No such action was performed.
 
+## Current introduction guidance — 2026-11-08
+
+The README introduction now leads with existing notes and papers, ordinary links,
+Contents, backlinks and Return. Opening or following a document never creates a
+problem record or launches an exercise form. Questions, solutions and commentary
+can remain where written. Additional interactions must remove a demonstrated
+obstacle without duplicate entry. Do not present Research Question registration
+as the next product increment; resumption first recovers existing documents,
+locations and unfinished work. Broader recovery remains planned. Optional
+source-study and proof tools are separate, explicitly chosen capabilities.
+
+This corrects product direction and introduction text. It does not expand the
+publication review below or resolve its outstanding disclosure decisions. Its
+scope and version references remain the historical 2026-11-05 review.
+
 ## Reviewed scope
 
 Review baseline: `923539a31f350a45d2ebaffcd945448550a3f758` (the new task over

@@ -26,10 +26,12 @@ occurrence again. The previous Return destination remains available. New notes
 open in the active preview group; already-open notes retain their group.
 Commands are also available through **F1**.
 
-Opening or following a note displays the note. Contents navigates its headings
-and links; no problem record is required. Earlier work saved through the removed
-document Problems feature remains readable from Studies or Resume Study, with
-pending drafts and history preserved.
+Questions, solutions and commentary can stay in their notes, connected by
+ordinary links. Follow those links and use **Return to Document** to retrace
+your work. Opening or following a document never creates a problem record or
+launches an exercise form. Earlier work saved through the removed document
+Problems feature remains readable from Studies or Resume Study, with drafts
+and history preserved.
 
 ## Open existing work
 

@@ -7,7 +7,7 @@ is implemented; see [workflow](docs/ACTIVE_STUDY_WORKFLOW.md). It establishes an
 instrumentation baseline. Learning benefit, an individual cognitive-load model
 and causal release comparisons remain hypotheses requiring observations.
 
-## Current product direction — 2026-11-06
+## Current product direction — 2026-11-08
 
 MRW is a hub for doing and resuming mathematical research. Connect ongoing
 questions to ordinary documents, notes, calculations, proofs, checking evidence
@@ -16,13 +16,19 @@ solutions, is a central workflow: expose assumptions and intermediate steps,
 locate cited results, develop examples, check claims, and preserve gaps and
 corrections. Research can start before a source passage or model response exists.
 
-Begin with the present GUI's nomenclature, then connect existing documents and
-optional integrations, research resumption, and a complete reconstruction
-session. [RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md)
-governs that sequence; [CODEX_DOCUMENT_WORKFLOW_PROMPT](docs/CODEX_DOCUMENT_WORKFLOW_PROMPT.md)
-specifies the immediate label patch. Document is format-neutral. Contents names
-its navigation view. The existing Zettelkasten is a useful collection of work;
-Obsidian and the Zettel note convention remain optional.
+Ordinary notes and their links are the starting point. Opening or following a
+document never creates a problem record or launches an exercise form. Questions,
+solutions and commentary can remain where written. Any additional interaction
+must remove a demonstrated obstacle without duplicate entry.
+
+Document navigation and optional note integrations are delivered. The document
+Problems subsystem was withdrawn in 0.23.3. Do not replace it with Research
+Question registration: resumption first recovers existing documents, supported
+locations and unfinished work. A new record, title, summary/next-action form or
+Research view is not an entry requirement. The
+[research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) records these
+rules. Future increments follow obstacles encountered in ordinary mathematical
+use. Obsidian and the Zettel note convention remain optional.
 
 The rapid-learning-console idea supplies an interaction, not a feature quota:
 present mathematics, support an attempt, test comprehension where useful, and
