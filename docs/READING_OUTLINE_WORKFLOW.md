@@ -1,13 +1,26 @@
-# Existing documents, Contents and saved sources — 0.23.0
+# Existing documents, Contents and saved sources — 0.23.2
 
 **Problems for Contents Section** connects a heading or link occurrence to saved
 problems, independent solution review and named Return. **Problems for Document**
 works from the active Markdown preview/editor. See the [learning workflow](DOCUMENT_LEARNING_WORKFLOW.md).
 
-With a notes folder selected, **Open Document…** lists Markdown notes by YAML
-title and filename, falling back to the first H1. Search by title, filename or
-path. **Browse for another document…** opens the file dialog for PDFs and files
-elsewhere. Cancelling preserves the current view and drafts.
+**Open Document…** offers **Original file** (current contents in place) and
+**Saved copy** (a retained revision with MRW annotations) in one native picker.
+**Browse for another document…** is usable immediately, before folder or saved-copy
+loading. The current folder lists filenames and subfolders without descending.
+YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+Search by title, filename or path. Select a folder or **Parent folder** to navigate;
+**Search subfolders…** explicitly requests a wider, bounded search. Its path,
+progress and incomplete results are shown. Failed title/listing work leaves
+Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
+an indexing scope. Cancellation preserves the current view and drafts.
+
+Saved-copy rows show their title, source/path and retained revision. Discovery
+runs independently of ordinary browsing. **Saved copy…** also opens the existing
+project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
+Command Palette. Opening an original does not import it; opening a saved copy
+does not refresh its source or replace annotations. PDFs use the existing host
+reader handoff. Shared backlink and note-ID completeness rules are unchanged.
 
 Ordinary navigation preserves VS Code's layout: MRW does not automatically
 maximize, hide either sidebar or minimize other editors. Keep MRW, Codex,

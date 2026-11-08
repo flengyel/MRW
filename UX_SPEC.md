@@ -1,6 +1,24 @@
 # UX_SPEC.md
 
-## Current workflow — document sections and problems, 0.23.0
+## Current workflow — document opening and section work, 0.23.2
+
+**Open Document…** offers **Original file** (current contents in place) and
+**Saved copy** (a retained revision with MRW annotations) in one native picker.
+**Browse for another document…** is usable immediately, before folder or saved-copy
+loading. The current folder lists filenames and subfolders without descending.
+YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+Search by title, filename or path. Select a folder or **Parent folder** to navigate;
+**Search subfolders…** explicitly requests a wider, bounded search. Its path,
+progress and incomplete results are shown. Failed title/listing work leaves
+Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
+an indexing scope. Cancellation preserves the current view and drafts.
+
+Saved-copy rows show their title, source/path and retained revision. Discovery
+runs independently of ordinary browsing. **Saved copy…** also opens the existing
+project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
+Command Palette. Opening an original does not import it; opening a saved copy
+does not refresh its source or replace annotations. PDFs use the existing host
+reader handoff. Shared backlink and note-ID completeness rules are unchanged.
 
 From Markdown preview/editor use **Problems for Document**; from a Contents
 heading or link use **Problems for Contents Section**. Capture that URI and

@@ -1,33 +1,28 @@
 # Codex instructions
 
-## Current priority — document learning, 0.23.0
+## Current delivery — document-opening reliability, 0.23.2
 
-Follow the user's [document-learning task](docs/CODEX_DOCUMENT_LEARNING_PROMPT.md)
-and consolidated CODEX_PLAN.md. Deliver Markdown → Contents section → associated
-problem → Attempt or independent Review solution → exact Return, with saved
-work/review context and explicit existing FSRS review before general research
-resumption. Reuse study/question records; add no outline format or scheduler.
-Original source/solution text, attribution, drafts, context and recall evidence
-remain separate. Review and application work do not fabricate recall grades.
+The [opening repair task](docs/CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md) is
+implemented; preserve the behavior below and follow consolidated CODEX_PLAN.md.
+Document learning is delivered; do not repeat it
+or require another manual problem session. The unified native **Open Document…**
+picker must show usable Browse before any I/O, list only the current folder,
+and enrich bounded titles asynchronously. Folder navigation and explicit recursive
+search must cancel stale work without changing notes-folder scope. Saved-copy
+discovery is independent and cannot prompt for a project in the background.
+Keep specialized command IDs, retained revisions/annotations, original files,
+dirty titles, queries and selection. No full-index fallback or shared-limit change.
 
-Preserve title-aware document choice, native Commands buttons, existing IDs,
-qualified source identifiers, revisions, notes, annotations, studies and history.
-VS Code owns sidebars, groups and dirty buffers; no automatic layout change or
-working-window reload. No migration, archive restoration or repeated Hausdorff
-preservation copy. The user explicitly requests affected README, design,
-workflow and tutorial updates for this increment; preserve concurrent work and
-leave the recommended-extension guide unchanged.
-
-Complete applicable checks, one focused native workflow observation and verified
-WSL packaging/installation. Report unobserved behavior accurately. Preserve
-historical validation evidence; new native observations are recorded separately.
-General research resumption and argument reconstruction remain later goals.
-
-The user's current request defers problem work and authorizes outstanding
-implementation repairs. The 0.23.1 navigation repair retains the last usable
-Return destination if an origin changes during asynchronous opening and checks
-backlink scope before host loading. Preserve these checks and the delivered
-learning workflow; do not require the user to run another problem session.
+Preserve the 0.23.1 Return-origin, scope and presentation checks, native Commands,
+source-qualified references, drafts and studies. Verify actual rendered Markdown
+in a disposable native window, including rename/restore; command completion alone
+is insufficient. Preserve both sidebars and unrelated work. Deliver the solution
+exposure/export repair separately, with legacy-record and cross-session checks.
+Update current help/design, run applicable regressions, verify/install the VSIX,
+and commit/push main without reloading the working window. Record observations
+and limits in [the repair report](docs/DOCUMENT_OPENING_REPAIR.md). General research
+resumption and argument reconstruction remain subsequent work. No migration,
+archive restoration, preservation recopy or recommended-extension guide change.
 
 ## Extension identity — 0.22.0
 

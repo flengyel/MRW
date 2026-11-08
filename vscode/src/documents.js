@@ -15,9 +15,9 @@ const { DEFAULT_LIMITS } = require('./documentLinks');
 const { workspaceRoute } = require('./companionLinks');
 const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
-const { documentChoices } = require('./documentPicker');
+const { createDocumentPicker } = require('./documentPicker');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: vscode.workspace.workspaceFile?.toString(), folders: (vscode.workspace.workspaceFolders || []).map(f => f.uri.toString()) }));
   const remembered = context.workspaceState.get(KEY);
@@ -28,8 +28,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   const pin = saved.origin;
   let origin = pin && typeof pin.uri === 'string' && (pin.fileOnly || (/^[a-f0-9]{64}$/.test(pin.revision) && Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start)) ? pin : undefined;
   let latestDisplay;
-  let generation = 0, publication = Promise.resolve();
+  let generation = 0, publication = Promise.resolve(), chooser;
+  function supersede() { chooser?.cancel(); return ++generation; }
   const candidates = new Set();
+  context.subscriptions.push({dispose:()=>chooser?.cancel()});
   const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
   function persist() {
     const value = { workspace, grants: [...grants], folder, last, origin };
@@ -77,8 +79,9 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if ((folder || configuredFolder()) && within(await folderRoot(), actual)) return actual;
     throw new Error('This document is outside the selected scope. Use Open Document or Choose Notes Folder explicitly.');
   }
-  async function grant(uri) {
+  async function grant(uri, expected) {
     const actual = await canonical(uri);
+    if (expected && actual !== expected) throw new Error('The chosen document changed while opening. Choose its current location.');
     grants = [...grants.filter(g => g.uri !== uri.toString()), { uri: uri.toString(), canonical: actual }].slice(-100);
     await persist(); return actual;
   }
@@ -184,35 +187,44 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     try { return vscode.Uri.file(await folderRoot()); }
     catch (_) { return undefined; } // A moved folder must not prevent choosing a new document.
   }
+  function ordinaryUri() {
+    return vscode.window.activeTextEditor?.document.uri || vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+  }
   async function open() {
-    const attempt = ++generation;
-    const defaultUri = await pickerFolder();
-    let choices;
-    if (defaultUri) {
-      const source = vscode.CancellationTokenSource ? new vscode.CancellationTokenSource() : { token: { isCancellationRequested: false }, cancel() { this.token.isCancellationRequested = true; }, dispose() {} };
-      let chosen;
-      try {
-        const items = documentChoices(defaultUri.fsPath, { remoteName: vscode.env.remoteName, token: source.token, overrides: await overlays(defaultUri.fsPath) })
-          .then(result => [{ label: 'Browse for another document…', browse: true,
-            detail: result.complete ? 'Choose a PDF or a file elsewhere.' : 'Some notes could not be listed. Browse for any document.' }, ...result.items]);
-        chosen = await vscode.window.showQuickPick(items, { title: 'Open document in place',
-          placeHolder: 'Search note title, filename or path', matchOnDescription: true, matchOnDetail: true }, source.token);
-      } finally { source.cancel(); source.dispose(); }
-      if (!chosen || attempt !== generation) return;
-      if (!chosen.browse) {
-        const uri = vscode.Uri.file(chosen.file);
-        if (!within(defaultUri.fsPath, await canonical(uri))) throw new Error('The chosen note moved outside the selected notes folder. Browse for its current location.');
-        choices = [uri];
-      }
+    const attempt = supersede(), invocation = ordinaryUri();
+    const session = createDocumentPicker(vscode, {
+      initialFolder: () => {
+        const configured=configuredFolder();
+        return typeof configured==='string'&&path.isAbsolute(configured)?configured:
+          folder?.uri?vscode.Uri.parse(folder.uri).fsPath:vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      },
+      remoteName: vscode.env.remoteName,
+      dirtyText: file => vscode.workspace.textDocuments?.find(d => d.uri.fsPath === file && d.isDirty && !d.isClosed)?.getText(),
+      listSaved: savedDocuments ? token => savedDocuments.list(token, invocation) : undefined,
+    });
+    chooser = session;
+    const choice = await session.result;
+    if (chooser === session) chooser = undefined;
+    if (!choice || attempt !== generation) return;
+    if (choice.action === 'saved') return vscode.commands.executeCommand('mrw.openOutline');
+    if (choice.action === 'saved-file') return savedDocuments.open(choice);
+    let selected, expected;
+    if (choice.action === 'file') {
+      const uri = vscode.Uri.file(choice.file), currentFolder = await fs.realpath(choice.currentFolder);
+      expected = await canonical(uri);
+      if (currentFolder !== choice.folder || !within(currentFolder, expected)) throw new Error('The chosen note moved outside the browsing folder. Browse for its current location.');
+      selected = uri;
+    } else {
+      const choices = await vscode.window.showOpenDialog({ title: 'Open original document in place', openLabel: 'Open Document',
+        defaultUri: choice.currentFolder ? vscode.Uri.file(choice.currentFolder) : undefined, canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
+      selected = choices?.[0];
     }
-    if (attempt !== generation) return;
-    if (!choices) choices = await vscode.window.showOpenDialog({ title: 'Open document in place', openLabel: 'Open Document', defaultUri, canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
-    if (!choices?.length || attempt !== generation) return;
-    await grant(choices[0]);
-    if (await display(choices[0], undefined, attempt)) { last = choices[0].toString(); await persist(); await onNavigated(); }
+    if (!selected || attempt !== generation) return;
+    await grant(selected, expected);
+    if (await display(selected, undefined, attempt)) { last = selected.toString(); await persist(); await onNavigated(); }
   }
   async function chooseFolder() {
-    const attempt = ++generation;
+    const attempt = supersede();
     const choices = await vscode.window.showOpenDialog({ title: 'Choose notes folder (Obsidian vault or ordinary folder)', openLabel: 'Use Notes Folder', defaultUri: await pickerFolder(), canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
     if (!choices?.length || attempt !== generation) return;
     const actual = await fs.realpath(choices[0].fsPath);
@@ -248,7 +260,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     const parsed = parseReadingMarkdown(doc.getText());
     const current = parsed.all.find(n => n.kind === 'document_link' && n.id === node.id && n.start === node.start && n.end === node.end && n.target === node.target && n.syntax === node.syntax);
     if (!current || (node.revision && node.revision !== parsed.revision)) throw new Error('The document link changed. Follow its current occurrence again.');
-    const attempt = ++generation, candidate = { location: snapshot(doc, node.start, node.end) }; candidates.add(candidate);
+    const attempt = supersede(), candidate = { location: snapshot(doc, node.start, node.end) }; candidates.add(candidate);
     try {
       if (current.qualified_id) {
         await check(doc.uri);
@@ -279,7 +291,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   async function showBacklinks(identifier) {
     const qualified = qualifiedIdentifier(identifier);
     if (identifier !== undefined && !qualified) throw new Error('Choose a complete source-qualified identifier.');
-    const attempt = ++generation;
+    const attempt = supersede();
     const invocationEditor = vscode.window.activeTextEditor;
     // A rendered Markdown custom editor has no activeTextEditor. Use its URI,
     // not an unrelated text editor left visible in another group.
@@ -319,7 +331,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   }
   async function returnToDocument() {
     if (!origin) return false;
-    const attempt = ++generation;
+    const attempt = supersede();
     const uri = vscode.Uri.parse(origin.uri);
     if (await display(uri, origin.fileOnly ? undefined : origin, attempt)) { last = uri.toString(); await persist(); }
     return true;
@@ -382,7 +394,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (uri.path !== '/note') return false;
     if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following the MRW note link.');
     const value = uri.toString(true), target = parseNoteLink(value, vscode.env.uriScheme || 'vscode');
-    const attempt = ++generation;
+    const attempt = supersede();
     const here = await noteWorkspace().catch(() => undefined);
     if (here !== target.workspace) {
       const choice = await vscode.window.showWarningMessage(`This note link belongs to ${target.workspace}. Open that workspace in a separate window, then run MRW: Open Link from Clipboard.`, 'Copy Link and Open Workspace');
@@ -406,7 +418,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   register('mrw.chooseNotesFolder', chooseFolder);
   register('mrw.followDocumentLink', followAtCursor);
   register('mrw.showBacklinks', showBacklinks);
-  register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), undefined, ++generation); });
-  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede: () => { generation++; } };
+  register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), undefined, supersede()); });
+  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
 }
 module.exports = { createDocuments };

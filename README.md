@@ -11,7 +11,8 @@ problem or review its attributed solution directly, save work, return to the
 originating section and resume later. Explicit light recall review uses FSRS. General research resumption and argument
 reconstruction remain later increments.
 
-**Current version: 0.23.0.** The repository remains private. There is no published
+**Current version: 0.23.2.** [Opening repair checks](docs/DOCUMENT_OPENING_REPAIR.md).
+The repository remains private. There is no published
 Marketplace listing or GitHub release; obtain a maintainer VSIX or build locally.
 The technical extension identity is `flengyel.mrw`.
 
@@ -117,10 +118,26 @@ Zettelkasten format and Obsidian configuration. Those conventions are optional.
 
 ## Open existing work
 
-Run **MRW: Open Document…** and select the original note or paper. Markdown opens
-in the editor with **Contents**. Choose an external or workspace notes folder
-with **MRW: Choose Notes Folder…** for `[[ID]]` lookup and backlinks; Obsidian
-is optional. Existing notes, IDs, YAML and attachments stay in place.
+**Open Document…** offers **Original file** (current contents in place) and
+**Saved copy** (a retained revision with MRW annotations) in one native picker.
+**Browse for another document…** is usable immediately, before folder or saved-copy
+loading. The current folder lists filenames and subfolders without descending.
+YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+Search by title, filename or path. Select a folder or **Parent folder** to navigate;
+**Search subfolders…** explicitly requests a wider, bounded search. Its path,
+progress and incomplete results are shown. Failed title/listing work leaves
+Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
+an indexing scope. Cancellation preserves the current view and drafts.
+
+Saved-copy rows show their title, source/path and retained revision. Discovery
+runs independently of ordinary browsing. **Saved copy…** also opens the existing
+project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
+Command Palette. Opening an original does not import it; opening a saved copy
+does not refresh its source or replace annotations. PDFs use the existing host
+reader handoff. Shared backlink and note-ID completeness rules are unchanged.
+
+Select **MRW: Choose Notes Folder…** to grant one explicit folder for note-ID
+lookup and backlinks; Obsidian is optional. Notes remain in place.
 
 Follow a note or PDF from Contents, or use **MRW: Follow Document Link** at its
 link in the editor. **MRW: Show Backlinks…** opens incoming source occurrences;

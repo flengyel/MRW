@@ -1,43 +1,28 @@
 # Codex continuation: document learning and research
 
-## Current delivery — document learning, 0.23.0
+## Current delivery — document-opening repair, 0.23.2
 
-The [document-learning task](CODEX_DOCUMENT_LEARNING_PROMPT.md) is implemented
-after fetched main `2503d0e`. [Workflow](DOCUMENT_LEARNING_WORKFLOW.md) names
-the section/problem/Attempt-or-Review/Return path and explicit light review.
-[Validation](DOCUMENT_LEARNING_VALIDATION.md) records exact checks, package and
-native observations. Keep document associations separate from immutable
-source citations. Preserve original solution revisions, drafts, consultation
-evidence, review context and named Return locations across pause/reopen.
+The [opening task](CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md) repairs reviewed main
+`828bc8c` without repeating delivered document learning. Use the unified native
+**Open Document…** flow for originals and saved copies. Browse precedes I/O;
+initial enumeration is strictly shallow. Bounded asynchronous titles preserve
+dirty text, selection and query. Folder/parent navigation and explicit recursive
+search are separate from notes-folder permission. Cancel superseded work and
+never fall back to a full content index. Background saved-copy discovery must
+not ask the user to choose a project. Saved opening preserves retained revisions.
 
-General research resumption is next after this delivery, followed by integrated
-argument reconstruction. Do not repeat document/identity/terminology repairs or
-require a manual study session. General research entries are not implemented
-by renaming Studies or broadening the bounded R3 transaction. Keep optional
-Obsidian, Codex, Lean and Sage integrations independent of basic reading/work.
+The separate solution-export correction follows recorded review-event/snapshot
+identity and supports legacy revision markers. Preserve assistance classification.
+[Repair report](DOCUMENT_OPENING_REPAIR.md) records regression/package identity,
+representative timings and native rendered open/follow/Return/rename observations.
+Preserve the 0.23.1 origin/scope/pane repairs and the document-learning workflow.
+No manual study exercise, new dashboard, scheduler or layout policy belongs here.
 
-Preserve the title-aware chooser, persistent Commands buttons, existing command
-and view IDs, source-qualified references, exact revisions, notes, annotations
-and history. VS Code owns layout and dirty buffers. Install through the verified
-WSL VSIX route without reloading the working window. No archive restoration,
-preservation recopy, compatibility extension or automatic old-state adoption.
-
-Earlier [sidebar](SIDEBAR_COMMANDS_VALIDATION.md),
-[chooser](DOCUMENT_CHOOSER_VALIDATION.md),
-[reader orientation](READER_ORIENTATION_VALIDATION.md) and
-[identity](EXTENSION_IDENTITY.md) validation retain their historical evidence.
-The 0.23.0 native fixture adds scoped observations, not a retrospective claim
-that every earlier acceptance case passed. Older delivery accounts below are
-historical; this section controls continuation and next-increment ordering.
-
-The following 0.23.1 [navigation repair](DOCUMENT_NAVIGATION_REPAIR.md) addresses
-four confirmed navigation failures without expanding study work.
-Keep validation of a tracked origin through the final host-opening yield, before
-publishing the display/Return destination. Recheck backlink scope before host
-loading, in addition to exact occurrence checks. New destinations use the active
-native preview group before falling back to a text editor; document and Contents
-opening share that presentation rule. No manual problem session is
-required. General research resumption remains subsequent product work.
+General research resumption and argument reconstruction remain subsequent work.
+Existing source IDs, exact revisions, notes, drafts, studies and history remain
+intact. VS Code owns ordinary documents, Save, Undo, sidebars and dirty recovery.
+Install through the verified WSL route without reloading the working window.
+Historical reports retain their original observations and limits.
 
 ## Earlier repair — source display and Return, 0.21.1
 

@@ -28,6 +28,8 @@ class WorkspaceEdit {
 }
 function uri(file, scheme = 'file') { return { scheme, path: file, fsPath: file, toString() { return `${scheme}:${file}`; } }; }
 
+const {CancellationTokenSource,quickPicker,WAIT}=require('./support/quickPicker');
+
 async function harness(root, state = new Map(), options = {}) {
   const commands = new Map(), errors = [], shown = [], reads = [], requests = [], providers = new Map(), executed = [];
   const opens = [], dialogs = [], saveChoices = [], saveDialogs = [], workspaceEdits = [], saves = [], commandCalls = [], inputs = [], picks = [], endings = [], panels = [];
@@ -64,6 +66,7 @@ async function harness(root, state = new Map(), options = {}) {
       } };
   }
   const api = {
+    CancellationTokenSource,
     extensions: { getExtension: () => undefined },
     Position, Range, Selection, WorkspaceEdit, Uri: { file: p => uri(p), from: x => uri(x.path, x.scheme), parse: x => x.startsWith('file:') ? uri(x.slice(5)) : uri(x, 'https') },
     ProgressLocation: { Notification: 15 },
@@ -101,6 +104,7 @@ async function harness(root, state = new Map(), options = {}) {
       },
     },
     window: {
+      createQuickPick() { return api.lastDocumentPicker=quickPicker(()=>WAIT); },
       activeTextEditor: undefined,
       createWebviewPanel(type, title, column) {
         let receive, viewState;
@@ -1442,9 +1446,11 @@ test('the MRW starting view offers New, Open, saved sources and tutorial as regi
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents;
-  for (const command of ['mrw.openDocument', 'mrw.openOutline', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
+  for (const command of ['mrw.openDocument', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
     assert.ok(welcome.includes('(command:' + command + ' ')); assert.ok(h.commands.has(command));
   }
+  assert.ok(h.commands.has('mrw.openOutline'));
+  assert.ok(!welcome.includes('(command:mrw.openOutline '));
   for (const command of ['mrw.newReadingOverview', 'mrw.openTutorial']) {
     assert.ok(manifest.contributes.menus['view/title'].some(item => item.when === 'view == mrw.readingOutline' && item.command === command));
   }
@@ -1819,7 +1825,8 @@ test('saved-source opening is discoverable and independent of an earlier citatio
   assert.equal(independent.kind, 'selected'); assert.match(independent.detail, /Opened independently/);
   assert.equal(independent.path, file);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
-  assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('[Open saved source…](command:mrw.openOutline '));
+  assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('[Open Document…](command:mrw.openDocument '));
+  assert.ok(!manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('(command:mrw.openOutline '));
   assert.ok(manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.openOutline' && item.group.startsWith('navigation')));
   assert.equal(doc.isDirty, true); assert.equal(h.saves.length, 0); assert.deepEqual(h.errors, []);
 });
@@ -2421,4 +2428,17 @@ test('document problem return tracks outside edits, reports overlap and missing 
   await post({type:'document_open'});assert.equal(h.saves.length,0);
   await fs.unlink(file);await post({type:'document_return'});view=panel.webview.messages.findLast(m=>m.type==='active_study');assert.match(view.study.returnError,/changed or missing/);
   assert.equal(s.document.uri,doc.uri.toString());assert.deepEqual(h.errors,[]);
+});
+
+
+test('background saved-copy discovery never prompts for a project in an ambiguous workspace', async t => {
+  const root=await temporary(t),h=await harness(root);
+  h.api.workspace.workspaceFolders.push({uri:uri(path.join(root,'another-project'))});
+  let prompts=0;h.api.window.showWorkspaceFolderPick=async()=>{prompts++;throw Error('background project prompt');};
+  const opening=h.commands.get('mrw.openDocument')();
+  for(let i=0;i<100&&!h.api.lastDocumentPicker.items.some(row=>row.label.includes('Use Saved copy'));i++)await new Promise(r=>setImmediate(r));
+  assert.ok(h.api.lastDocumentPicker.items.some(row=>row.action==='browse'));
+  assert.ok(h.api.lastDocumentPicker.items.some(row=>row.label.includes('Use Saved copy')));
+  assert.equal(prompts,0);assert.equal(h.requests.some(r=>r.method==='outline_list'),false);
+  h.api.lastDocumentPicker.hide();await opening;assert.deepEqual(h.errors,[]);
 });

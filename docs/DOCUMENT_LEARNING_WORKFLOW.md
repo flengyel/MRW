@@ -1,5 +1,7 @@
 # Problems from Markdown sections — MRW 0.23.0
 
+Use **Open Document…** for an original file or saved copy; see the
+[opening workflow](READING_OUTLINE_WORKFLOW.md) for folder navigation and scope.
 Open a Markdown document and choose its section in **Contents**. Use the
 question icon beside that heading, its **Problems for Contents Section**
 context-menu action, or the matching Contents title action. **Problems for
@@ -23,7 +25,9 @@ separate. Display and attribution do not establish mathematical correctness.
 
 An attempt starts with its solution and study source context concealed. If you
 review a solution, MRW retains the draft and records consultation. Subsequent
-submission snapshots carry that exposure. Earlier immutable submissions retain
+submission snapshots carry that exposure. History export resolves consulted solutions through their recorded review event
+and exact attributed snapshot, including older revision-only exposure markers.
+Earlier immutable submissions retain
 their original exposure evidence. Closing review does not erase consultation;
 a later independent attempt starts with fresh work and concealed help. MRW
 does not monitor other applications or infer whether displayed text was read.

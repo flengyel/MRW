@@ -864,6 +864,26 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     const target=await bridge({method:'outline_reference',store,project_root:root,id:result.outline.id,revision:result.revision,region:result.outline.regions.at(-1)?.id||null});
     return rows.studyPassage(target.reference,root);
   };
+  rows.savedDocuments = {
+    async list(token, invokingUri) {
+      const controller=new AbortController(),subscription=token?.onCancellationRequested(()=>controller.abort());
+      try {
+      // Background discovery must never open a workspace-folder picker.
+      const folders=vscode.workspace.workspaceFolders || [];
+      const folder=(invokingUri && vscode.workspace.getWorkspaceFolder?.(invokingUri)) || (folders.length===1?folders[0]:undefined);
+      if (!folder || folder.uri.scheme!=='file' || context.storageUri?.scheme!=='file') throw new Error('Use Saved copy… to choose a project.');
+      const root=await fs.realpath(folder.uri.fsPath),store=path.join(context.storageUri.fsPath,`outlines-${digest(root)}`);
+      if(token?.isCancellationRequested)throw new Error('Saved-copy listing cancelled.');
+      const result=await bridge({method:'outline_list',store,project_root:root},{signal:controller.signal});
+      return result.outlines.map(o=>({id:o.id,label:o.title||path.basename(o.path),description:o.locator||o.path,
+        detail:'Saved copy · revision '+(o.upstream_revision||o.revision),store,root}));
+      } finally { subscription?.dispose(); }
+    },
+    open: choice => locked(async()=>{
+      const loaded=await bridge({method:'outline_load',store:choice.store,project_root:choice.root,id:choice.id});
+      return (await display(loaded,choice.store,choice.root)).result;
+    }),
+  };
   rows.followReference = followReference;
   rows.updateReturnDestinations = () => {
     for (const controller of panels.values()) void controller.panel.webview.postMessage({ type: 'return_destination',

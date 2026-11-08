@@ -1,0 +1,230 @@
+{
+  "version": "0.23.2",
+  "baseline": "828bc8c48cd0cfb6618de3fd414d5bedcc14751d",
+  "exportCommit": "3b63d5a",
+  "sourceBase": "3b63d5aea5b18f9a02caddefab97546fbf6de6b0",
+  "checks": {
+    "extension": {
+      "passed": 357,
+      "exit": 0
+    },
+    "sharedPython": {
+      "passed": 13,
+      "exit": 0
+    },
+    "syntaxExit": 0,
+    "packageExit": 0,
+    "packageVerificationExit": 0
+  },
+  "native": {
+    "host": "1.144.1",
+    "remote": "wsl",
+    "complete": true,
+    "checks": [
+      "native rendered original after unified Open Document",
+      "native rendered linked note",
+      "native rendered exact Return",
+      "rendered rename/restore Return preserves dirty Markdown and unrelated work",
+      "unified saved-copy opening preserves exact retained text and reader annotation",
+      "representative native chooser phase timing and programmatic cancellation"
+    ],
+    "renderedCapturesInspected": [
+      "open",
+      "follow",
+      "return",
+      "restored",
+      "saved"
+    ],
+    "sidebarsAndUnrelatedDirtyPaneVisible": true,
+    "fixtureSourceDifference": "Native fixture precedes the final dirty-title header clamp in documentPicker.js; the final full regression includes that clamp.",
+    "startupNotifications": "Host startup delay and unsupported test-only auto-update setting warnings were visible; no MRW reader error was recorded.",
+    "dirtyBuffers": {
+      "a": true,
+      "other": true,
+      "otherClosed": false,
+      "otherText": "Unsent unrelated editor text\n"
+    },
+    "layout": {
+      "orientation": 0,
+      "groups": [
+        {
+          "size": 244
+        },
+        {
+          "size": 243.5
+        }
+      ]
+    }
+  },
+  "timings": {
+    "nativePicker": [
+      {
+        "phase": "browse",
+        "elapsed_ms": 2.169922000000952
+      },
+      {
+        "phase": "filenames",
+        "elapsed_ms": 3971.6392789999954,
+        "recursive": false,
+        "count": 1326,
+        "complete": true
+      },
+      {
+        "phase": "titles",
+        "elapsed_ms": 10466.75716400001,
+        "count": 1286,
+        "complete": true
+      }
+    ],
+    "browseMetric": "Native QuickPick.show returned with actionable controls before any I/O; renderer paint latency was not measured.",
+    "workerOnly": {
+      "filenames_ms": 1037.416013,
+      "titles_ms": 4861.128863,
+      "title_phase_ms": 3823.7326500000004,
+      "entries": 1326,
+      "markdownFiles": 1286,
+      "titles": 1286,
+      "listing_complete": true,
+      "titles_complete": true,
+      "errors": []
+    }
+  },
+  "package": {
+    "sha256": "ee30ed548d02589bca841210c7ab7e182de47a522081bfc326029bf9a7b9c81d",
+    "version": "0.23.2",
+    "production_manifest_matches": true,
+    "runtime_bytes_match": true,
+    "development_files_excluded": true
+  },
+  "packagedHelp": {
+    "activeVersion": "0.23.2",
+    "baseCommit": "3b63d5aea5b18f9a02caddefab97546fbf6de6b0",
+    "localChanges": true,
+    "packagedGuideMatches": true,
+    "guideLinksResolve": true,
+    "oldPrimaryLabelsAbsent": true
+  },
+  "archiveFiles": 108,
+  "archiveBytes": 584637,
+  "installed": {
+    "extension": "flengyel.mrw",
+    "version": "0.23.2",
+    "archive": "/home/flengyel/MRW/vscode/mrw-0.23.2.vsix",
+    "sha256": "ee30ed548d02589bca841210c7ab7e182de47a522081bfc326029bf9a7b9c81d",
+    "size": 584637,
+    "installedPayloadFiles": 106,
+    "installedBytesMatch": true,
+    "registryVersion": "0.23.2",
+    "exitStatus": 0,
+    "workingWindowReloaded": false
+  },
+  "sourceFiles": {
+    "vscode/src/activeStudy.js": "7e1cc3105985bfd0696f474dbd137e0996b1db538b9da793b33646051626eea4",
+    "vscode/src/activeStudyView.js": "fcfed5c9f933b0911955a4d07432add5b3f5cf0f0b433f7c24fb7080093ab2c8",
+    "vscode/src/annotationView.js": "0751a0f163dee75a18be5dfc321f29488cd627e3a36754e9051b23a088e08c4d",
+    "vscode/src/artifactStorage.js": "3f1b841b23cdac451fbe9fc3dc7b1835a961cd06c51b6ff79ba8aa8f1c292920",
+    "vscode/src/assistance.js": "73d8fe4448641026e1a93b2baf57403c530af5f747a901e7a62c7da3f8ee5412",
+    "vscode/src/bridge.js": "42665e06885ac7f38b33774b5b46a5ff76082b5707308c06f5726727ec1b20fd",
+    "vscode/src/chooserFiles.js": "dd0736c84a84765e8acae2e9f74c02149b0b3ae788e4ccd809d10d7671b57842",
+    "vscode/src/companionLinks.js": "e58d9bdf388a796dfe6233239288d74804912032cc7a928080995bbf41bb731d",
+    "vscode/src/documentLinks.js": "22d4bb8c1914b54aea351e8a48b5b8faeca6796abaae0343680aa86b3e6478a8",
+    "vscode/src/documentPicker.js": "72aa48f90b87ea01a898d12972e47335b4c58654dc9af8ff280630600eaae3d6",
+    "vscode/src/documentPresentation.js": "c16015667712dcdc0b3a0dbae6adeae79b6f3ba9f39ca940f512112b16b7c91c",
+    "vscode/src/documents.js": "fb3cd186a85d51194e22d09d3fc422849c0accca0e30dd503ace72780eb2b602",
+    "vscode/src/extension.js": "82e14dc26378e25c2174fd6ce881b82cc320e1f4177488d3a35a9f0f6a5cccc2",
+    "vscode/src/investigation.js": "84df3a651904f7a017b00c7ca5a060e35e753cf75f3d54383cb5dd70fb29d5b8",
+    "vscode/src/navigation.js": "deed67feb1026aeb46cc070ebad33cc2c08b21a1573e928f27daf99cf258970a",
+    "vscode/src/noteFiles.js": "631894752c4eec2f368749aafe83082d7cf3101b5f956914d3aedcb33014409a",
+    "vscode/src/noteIdentity.js": "d5a088e0abaf197f9949506beca5898ee92151e2d6b49c33ce6f9bfa32b086c8",
+    "vscode/src/noteLinks.js": "431997da22f0db87ab9b2147c97990f1dffff4bc113655d84f0acd537c448ecb",
+    "vscode/src/noteRefresh.js": "02771166c6a48fa53260d7ac9cc5bfe4ab27ebb0696c76bd3a7ddf9470b70e13",
+    "vscode/src/outlineReferences.js": "cc5d5e3ad5dfb0ca80fb081b8d5b8698e1443bf6ffd374b039818c20332bd44b",
+    "vscode/src/outlineView.js": "e3da3f944c9ad907c479a041527f6e968190cf7b15b4aac0e202cb5d94e5a95a",
+    "vscode/src/outlines.js": "13325e26e286f3909271ba0bd0e03a55d2e0bb4f96aa3d5fd565ca558a0ff819",
+    "vscode/src/proofGraph.js": "f120965622970de09443ca73e7502266311fb261e4afebedefffb685689815ba",
+    "vscode/src/proofGraphMap.js": "c0e1aad33b4337ce69c769b14d9004df27ed620ef57adcedf4d4b0b5e4ed2f41",
+    "vscode/src/proofGraphView.js": "eb39a57ca69e3d245f8cb5b1d2fd99d8222af62d75d64fc63a7d27370165895e",
+    "vscode/src/proofStudy.js": "8ee97ff8bc6c9f6ad3de2518f5da14431ffb0dd91c6290dfee2f80725f233d95",
+    "vscode/src/proofStudyView.js": "e3af5a764e52f0449f23c8ca4da712ff63a321bc098ec24913350c5dea8f36d7",
+    "vscode/src/readingMarkdown.js": "06e2230ebde737e62dbd335ae225a772acc6055449efda4a681b645eaf7161eb",
+    "vscode/src/readingOutline.js": "1385a97ff1874e561993f94ca8a976c0d3e079c507f5d75f8d76f80357a791d2",
+    "vscode/src/sourceIdentifiers.js": "8f46115b1492f8c204a4396223f0743536a8762a83f14a9e3dfce553970f8ef9",
+    "vscode/src/stacksView.js": "5e2b2642d68deab893fcdbf36c0af8b3b258061f2f6f21aff5d9dfeeec8db960",
+    "vscode/src/studyDocument.js": "e55726a2f133b8898f3933a8f3cef97575ad78c541d1056065ac5310def58663",
+    "vscode/src/studyEvidence.js": "f727f793fa035fadf0a5aa7e60678a13dcbefcc569a0153f52e8c73df456844f",
+    "vscode/src/studyExample.js": "29f812b611b6f5f24535dd579f8ef1eaab0db2670fa726110b340d987bbcd766",
+    "vscode/src/studyHelp.js": "304d966d6c9fefbe184c5344f78077e849c269e1fa8ded1319dd23a94e3ff810",
+    "vscode/src/studyHistory.js": "2f79315544bea4ed066c8748180a0132276b39df7cab792f9cbd45a154a010fa",
+    "vscode/src/studyModel.js": "9c4f34b49912c75b0cb9301fd2dbe311fc49429462dfc0afcd1685037bd542d4",
+    "vscode/src/studyScheduler.js": "5457ea5c2527fa418b243005668361c0fd0d627de5a7027ef38699f6fefd8024",
+    "vscode/src/tutorial.js": "f191de706c10c387f3d674b6ad0243a060ddc2fcf3fe46f287eaf118d01e123d",
+    "vscode/src/wikiLinks.js": "b507f492e7d212306acd2bff2bb5116aa3fb8fe9f9dfa8b8d75bca96255873e8",
+    "vscode/media/build-info.json": "c73aef90f9d520040f5a152d7966e0a846d97bc394697c3d0a97e82ec48bd58d",
+    "vscode/media/diagram-theme.css": "090944732e861d1277e3a9c96d346ccf0282f0859b4cfb78672afac14686f399",
+    "vscode/media/document-chooser.ps1": "7fa71556892c782f15702113edb72d152296ce6e21c46b7f009b0786a8d29e87",
+    "vscode/media/document-learning-example.md": "7619f8aa7099bf26d89799256003d5ff17d124f958e90a8e2ccf658004520555",
+    "vscode/media/first-steps.md": "bd8e1f54cfb20d7e909140d8bd76112985aa4d7c8cdc969d5454b8b7d956d7f6",
+    "vscode/media/fsrs/NOTICE.json": "4e9f1c7e9e5c8ae20103982304e6a051e84f122bc00dfd1d373a91b9973b83f9",
+    "vscode/media/katex/NOTICE.json": "9341416853c069b4626722a813936cb85d60f091ce265a8db1938cdcd9cda6f1",
+    "vscode/media/katex/auto-render.min.js": "e5372d199bcdae8b4de71d0f7ceba72a4ba12774a27c60a6f1f77d03b3228ee4",
+    "vscode/media/katex/katex.min.js": "103a53763cc033bba8d175bf3f0ba597c3505c9b6747dd3f2c7bc2a6bfcc8ae7",
+    "vscode/media/markdown-it/NOTICE.json": "c06e115725a60bd5f30727125d68106d4965cbf64d63ea878c5a27b8328682fc",
+    "vscode/media/markdown-it/markdown-it.js": "433ba2a6946e8200c464d8845b98d826022a1836b4a713f01fa2830477c381e8",
+    "vscode/media/note-files.ps1": "c7b739f09ab91c59dd004e832909df18c3d2c021be30029317f4870b9c05cab1",
+    "vscode/media/proof-graph.css": "8951ba912a66e387972f5d12e97f5697bf899e5e005c1c84118f3d7152f95988",
+    "vscode/media/proof-outline.schema.json": "37a8f410a27fdb85e7fabc9f806267fcd9b000e86708547702c2a1d45d406912",
+    "vscode/media/study-example.md": "33e6686e2dc37838e2b13d8fb8e929ff52435ddc21edb7601ca608a2776820cc",
+    "vscode/test/active-study-view.test.js": "c9125aa34cb8da91d1dba4a314644f0a28af7403022aa49744cfbfc19130c08d",
+    "vscode/test/active-study.test.js": "c82481e6da91351bdca9d6fa0a94c669839726475e83c1d86778ab424aaf7eef",
+    "vscode/test/annotations.test.js": "81f6239b0164cc9ae094b5ff6e7d98f37fc5031331840be4aafc9e51be0c1014",
+    "vscode/test/bridge.test.js": "2ea0942cc258b9ac73621580de9d5266cc9cfde1b7c5fafaaaee006d96c6f3b8",
+    "vscode/test/companion-links.test.js": "f9378eb2d2c6378446b2715250e3f2ec6bb1fe1677f89381a09343c3d8819b48",
+    "vscode/test/document-learning.test.js": "6cdc1957ae6c75cc279ce22d95cbdec86a0c16890638b629c54dae917f40425d",
+    "vscode/test/document-links.test.js": "696980a497ef0d23f142a5b2921169bef1a620b66fee948c45f69a251b0fa7d6",
+    "vscode/test/document-picker.test.js": "0150828cf8cbd08cc129aaf9182e6c4e2ea12677dad93f0a4ebaa12e845d6a9a",
+    "vscode/test/documents.test.js": "255f6ba5c84e4d4e709ed030762d5a1f4428e034569d3ff4030c40d7034c958c",
+    "vscode/test/extension.test.js": "b9b69dadb1b284cd7df574dea5596854937d34bfea9be8478ee8173f46f941ed",
+    "vscode/test/host/companion.js": "8f721bd3b1ec1c992aa551ebbe5e253cece8cc1507b2aacd38d79680f072c37b",
+    "vscode/test/host/diagrams.js": "5a29bcda232f37b0cf93d597b43761e00e70813b377c91bcf8e1784de5c59293",
+    "vscode/test/host/documentLearning.js": "7b8faa4d369ccdb7c7eac73bf5e081b32e66cc37e996b19b00ebe336b8942310",
+    "vscode/test/host/documentNavigation.js": "39174139ca0279b118f08d42264ace7411260ebd6ddf898ace98ed1d2ea3cc7d",
+    "vscode/test/host/documentPicker.js": "898470971f288a909566925674da12564fd380a53444808926f504ab44a86c54",
+    "vscode/test/host/folderRename.js": "a2141e6f017bfa62d83edd90b786630a3f7b846906ff69a5d350ff44c2f18ff0",
+    "vscode/test/host/index.js": "e3e14bb7a1fc77eb4a89bb9317ba0e1c70a78d97cc515bdb00e7c1ee35ffa98c",
+    "vscode/test/host/investigation.js": "f70a717d77698931b1ce6906efad879971d7f444b6bf3a286055b26f03d5dd5f",
+    "vscode/test/host/outlines.js": "884cd62c34f13f8ccaeca80430888be384c5be5d5f39c6545e66f33384ad6db1",
+    "vscode/test/host/overview.js": "a440850312d5939820bca1e7b27578b5cf721bf4baa1215b33e6a9a986f98aad",
+    "vscode/test/host/persistence.js": "09d7b8ec84e8daab140ef0b903835a535a15ed6628ad4fda96d74852aaec05c7",
+    "vscode/test/host/readerAssistance.js": "74a6e3c210e162b815c2122f6858f5b0e4648ddc6ef0ad70ec8b2c0bd12aca9d",
+    "vscode/test/host/readerOrientation.js": "7ca63f588ec09f19db01315d472e1590d496724c0a8fc29b3952977963adf831",
+    "vscode/test/host/reading.js": "a2d5a0ef909c54705426627596d82ffc3694cfe9f454674a7a49948c823a03f2",
+    "vscode/test/host/readingPresentation.js": "59556d98b871861ebe3fcd31b8738881a95b301db2bf6c6f7865a1b7680bf89f",
+    "vscode/test/host/sidebarCommands.js": "58c4b550c2a1d679aca15b70bcb1bcef868572932f33651b052d44f21cd29fb5",
+    "vscode/test/host/stacks.js": "dc49d5103051a2692a35d2488402d30b4369a78f33a735f21141a905e67a93a2",
+    "vscode/test/note-files.test.js": "e17534baa1189c38751dee1484041e4a507aea616770b9ffc189d4d44ef13ff0",
+    "vscode/test/note-links.test.js": "24ff00d427a224c6381c47c38a13e1abc62f69abc1b6a62f6f239dc0b6f559e3",
+    "vscode/test/note-refresh.test.js": "88c2e5e35e5e740e0b5e7cdefd6d456a7b859b677faa4b7c3273d9fb0b9e3106",
+    "vscode/test/outline-references.test.js": "d1e9169e23187e10c95cc0bf3de1374491ee1824777ee3af0eeb1fea17a6d3cf",
+    "vscode/test/outlines-view.test.js": "22ac795679c76effa0b0ef2185ac4362fb13be274be9f0809765a6a7ad84f93b",
+    "vscode/test/proof-graph-map.test.js": "63e14c8d62a96ca53169f279714879247f0a49007af3b906569b02646242b358",
+    "vscode/test/proof-graph.test.js": "18ec46de4a10a601c6f9e95545ca5f68510d9136d8457c96b9c14cb193abb938",
+    "vscode/test/proof-study-cases.js": "547834494891e8ed61568f94222eb27441f8f38e12c37a03eb255aaac6caa7b4",
+    "vscode/test/proof-study.test.js": "32b54ae84cb169e3e0a4237e54f308e48c2ff1425b044a3b639fc098556526fe",
+    "vscode/test/reading-outline.test.js": "f05572dd7babd91700591d6e2d30862d990ed8b95bba3248647c9279a9a6f0f9",
+    "vscode/test/source-identifiers.test.js": "b032872dab028044286efa20ff292db25d41500de896c9ea16f0dc76fa37e9a5",
+    "vscode/test/stacks.test.js": "f39b61ba154c77b03ca30b3bc36a7243a847299920d94aa4eb335cac555190a0",
+    "vscode/test/study-controller-reliability.test.js": "5b9e44bf0c29f9221e60faa170d10a5c3ff6d4d966c0c9d0e91da7d57beebe4a",
+    "vscode/test/study-feedback.test.js": "d462bcaf41912b184a532d32da04a73b5597f54bfb2611a1ea14fe82c4712487",
+    "vscode/test/study-help-reliability.test.js": "5550c51a9a2fd30c3730ef7a455222659a06292cf463a2d4db4bfbe839c319fa",
+    "vscode/test/study-history-reliability.test.js": "a47d3dcb6dec1cd2914b92dd77ace6b362ca5f8b6b6429f65a41608948982bc1",
+    "vscode/test/study-measurement.test.js": "730f2e21657e58e4ebf3c9e700dc7667eb2aad402ef5361e7a12ae0020df0a2c",
+    "vscode/test/study-message-fixture.js": "b00e91675e76f96a5087cdcc0f8259effa1a83bb3f5a971b8cd57b2f54d2193e",
+    "vscode/test/study-model-reliability.test.js": "b210d680c050171004d4cf64c0fecd98869d03b524c2f7aa184684bf5802ff10",
+    "vscode/test/support/quickPicker.js": "b9a7d359ef92cf31d656696b81bd5c7908f4fa68d86686423b193e291d03554b",
+    "vscode/test/tutorial.test.js": "bedd3becd10a86564cafb3c5d40d8aad7d9129a3026b7b8cc0157d4a4adc7d3d",
+    "vscode/package.json": "47b97a3a2f325607b5791b1918c16dcf7f1f08c1888238ce68e1aee1633c3f31",
+    "vscode/package-lock.json": "73fef2e69b7aba335907efe185230106973f452f4c69e2c8d837ecbad0221151"
+  },
+  "workingWindowReloaded": false,
+  "genuineStudyDataUsedAsFixture": false
+}

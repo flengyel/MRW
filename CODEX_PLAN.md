@@ -1,24 +1,26 @@
 # CODEX_PLAN.md
 
-## Current increment — document problems and light review, 0.23.0
+## Delivered repair — document opening, 0.23.2
 
-The governing task is [document learning](docs/CODEX_DOCUMENT_LEARNING_PROMPT.md).
-The implemented path is **Markdown → Contents section → associated problem →
-Attempt or Review solution → named Return**, with saved work/review context and
-optional existing FSRS review. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md)
-and [validation](docs/DOCUMENT_LEARNING_VALIDATION.md) define actual entry points
-and evidence. This increment precedes general research resumption.
-The 0.23.1 [navigation repair](docs/DOCUMENT_NAVIGATION_REPAIR.md) preserves
-pending Return origins and rechecks backlink scope before host loading. The
-user has deferred problem work; this repair requires no manual study session.
+The [document-opening repair](docs/CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md) is implemented.
+The native **Open Document…** picker unifies original files and saved revisions,
+shows Browse before I/O, lists one folder at a time and enriches bounded titles.
+Only **Search subfolders…** descends recursively. Browsing location never grants
+notes-folder indexing scope. Saved-copy loading cannot block ordinary browsing.
+Cancel stale workers, preserve query/selection and revalidate scope before open.
+The separate solution-export repair resolves review events and exact snapshots,
+including legacy records, without altering assistance classification.
+[Workflow](docs/READING_OUTLINE_WORKFLOW.md) and [repair evidence](docs/DOCUMENT_OPENING_REPAIR.md)
+record delivered behavior, timings, native observations and limits.
 
-Preserve title-aware document choice, Browse/cancellation, persistent native
-Commands buttons, hover/focus descriptions, source-qualified retained citations,
-notes, drafts and studies. Ordinary document context is separate from immutable
-saved-source authority. VS Code owns sidebars, groups and placement; no automatic
-layout changes, migration, archive restoration or working-window reload belongs
-in delivery. Learning benefit and mathematical correctness are not inferred from
-navigation, solution exposure or structural checks.
+Document learning and the 0.23.1 navigation repairs are delivered. Preserve
+Markdown → Contents section → problem → Attempt or Review solution → named Return,
+independent original/solution attribution and explicit FSRS admission. No manual
+problem session is a delivery gate. Source retention/graph validation establishes
+structure and identity, not mathematical correctness or learning benefit.
+Keep command/view IDs, private storage, notes, studies and history. VS Code owns
+sidebars, groups, dirty buffers and recovery. Verified installation must not
+reload the working window. General research resumption follows this repair.
 
 | Order | Increment | Status |
 | --- | --- | --- |

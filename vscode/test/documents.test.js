@@ -13,6 +13,7 @@ const { registerWikiLinks } = require('../src/wikiLinks');
 const MarkdownIt = require('../media/markdown-it/markdown-it');
 const { parseReadingMarkdown } = require('../src/readingMarkdown');
 const { trackLocation } = require('../src/readingOutline');
+const { CancellationTokenSource,quickPicker,WAIT }=require('./support/quickPicker');
 
 class Position { constructor(line, character) { Object.assign(this, { line, character }); } }
 class Range { constructor(start, end) { Object.assign(this, { start, end }); } }
@@ -38,11 +39,11 @@ async function fixture(t) {
 function harness(f, state = new Map(), options = {}) {
   const commands = new Map(), stored = new Map(), openChoices = [], dialogs = [], picks = [], informations = [], errors = [];
   const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [];
-  let documents, openHook, showHook, pickHook, infoResponse, externalResult = true;
+  let documents, openHook, showHook, pickHook, infoResponse, externalResult = true,latestPicker;
   const configuration = { notesFolder: options.notesFolder || '' }, configurationWrites = [];
   let linkProvider;
   const api = {
-    Position, Range, Selection, Uri: { from: fields => ({...fields,toString:()=>fields.scheme+'://'+(fields.authority||'')+fields.path.split('/').map(encodeURIComponent).join('/')}), file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
+    CancellationTokenSource, Position, Range, Selection, Uri: { from: fields => ({...fields,toString:()=>fields.scheme+'://'+(fields.authority||'')+fields.path.split('/').map(encodeURIComponent).join('/')}), file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
     ConfigurationTarget: { Workspace: 2 }, DocumentLink: class { constructor(range, target) { Object.assign(this, { range, target }); } },
     languages: { registerDocumentLinkProvider(_selector, provider) { linkProvider = provider; return { dispose() {} }; } },
     ProgressLocation: { Notification: 15 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 },
@@ -78,6 +79,7 @@ function harness(f, state = new Map(), options = {}) {
     },
     window: {
       activeTextEditor: undefined,
+      createQuickPick(){const picker=quickPicker((items,settings)=>pickHook&&picker.placeholder==='Choose an original file or a saved copy.'?WAIT:this.showQuickPick(items,settings));latestPicker=picker;return picker;},
       async showOpenDialog(settings) { dialogs.push(settings); return openChoices.shift(); },
       async showTextDocument(doc, settings) {
         if (showHook) await showHook(doc);
@@ -95,7 +97,7 @@ function harness(f, state = new Map(), options = {}) {
   const context = { subscriptions: [], workspaceState: {
     get: key => state.get(key), async update(key, value) { state.set(key, structuredClone(value)); },
   } };
-  documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name, callback), trackLocation, resolveReferences: options.resolveReferences,
+  documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
     api, context, commands, state, documents, configuration, configurationWrites, get linkProvider() { return linkProvider; }, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external,
@@ -320,7 +322,7 @@ test('qualified canonical links and legacy retained backlinks keep prefixes with
 test('document picker starts in the selected notes folder across restart, while cancellation and moved folders preserve state', async t => {
   const f=await fixture(t),state=new Map(),h=harness(f,state);
   h.openChoices.push(undefined);await h.commands.get('mrw.openDocument')();
-  assert.equal(h.dialogs.at(-1).defaultUri,undefined);
+  assert.equal(h.dialogs.at(-1).defaultUri.fsPath,f.root);
   await h.folder();const selected=structuredClone(state.get('mrw.documents.v1'));
   h.openChoices.push(undefined);await h.commands.get('mrw.openDocument')();
   assert.equal(h.dialogs.at(-1).defaultUri.fsPath,f.notes);
@@ -331,7 +333,7 @@ test('document picker starts in the selected notes folder across restart, while 
   assert.deepEqual(state.get('mrw.documents.v1'),selected);assert.equal(restarted.shown.length,0);
   await fs.rename(f.notes,path.join(f.base,'moved-notes'));
   restarted.openChoices.push(undefined);await restarted.commands.get('mrw.openDocument')();
-  assert.equal(restarted.dialogs.at(-1).defaultUri,undefined);
+  assert.equal(restarted.dialogs.at(-1).defaultUri.fsPath,f.notes, 'Browse remains immediate even when the remembered folder has moved');
   assert.deepEqual(state.get('mrw.documents.v1'),selected);
 });
 
@@ -623,4 +625,23 @@ test('a new note opens in the invoking preview group instead of an unrelated sta
   await h.follow(a, '3c.md');
   assert.equal(h.shown.findLast(value => value.doc.uri.fsPath === f.file('3c.md')).settings.viewColumn, 2,
     'the active native preview group owns a new destination when the text-editor acknowledgement lags');
+});
+
+
+test('chooser folder navigation grants only the explicitly opened file without changing notes scope', async t => {
+ const f=await fixture(t),h=harness(f);await h.folder();await fs.writeFile(path.join(f.outside,'Chosen.txt'),'Chosen original');await fs.writeFile(path.join(f.outside,'Other.txt'),'Other original');
+ let stage=0;h.setPickHook(items=>{if(stage++===0)return items.find(i=>i.key==='parent');if(stage===2)return items.find(i=>i.file===f.outside);return items.find(i=>i.file===path.join(f.outside,'Chosen.txt'));});
+ await h.commands.get('mrw.openDocument')();assert.equal(h.configuration.notesFolder,f.notes);assert.equal(h.state.get('mrw.documents.v1').folder.canonical,f.notes);
+ await h.documents.check(uri(path.join(f.outside,'Chosen.txt')));await assert.rejects(h.documents.check(uri(path.join(f.outside,'Other.txt'))),/outside.*scope/);
+});
+
+
+test('a superseding document command closes its old picker and cancellation preserves state', async t=>{
+  const f=await fixture(t),h=harness(f);h.setPickHook(()=>WAIT);
+  const first=h.commands.get('mrw.openDocument')();
+  await new Promise(r=>setImmediate(r));
+  const second=h.commands.get('mrw.openDocument')();
+  await first;
+  for(const disposable of h.context.subscriptions)disposable.dispose();
+  await second;assert.equal(h.reads.length,0);assert.equal(h.configurationWrites.length,0);
 });

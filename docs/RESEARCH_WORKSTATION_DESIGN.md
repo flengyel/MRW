@@ -6,13 +6,14 @@ links, backlinks and research records carry the full source prefix. See
 [SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md); canonical links do not replace
 retained citations.
 
-Status: approved design direction; current increment **document learning,
-0.23.0**, from reviewed baseline `2503d0e` / 0.22.7. Terminology and existing
-document integrations are delivered. The current task is
-[Markdown sections and problems](CODEX_DOCUMENT_LEARNING_PROMPT.md), before
-general research resumption. Historical validation reports retain their
-observations and limits. Current behavior belongs in the linked workflow and
-delivery validation, not earlier release descriptions.
+Status: approved design direction. Document learning and its 0.23.1 navigation
+repairs are delivered. The current **0.23.2 document-opening repair** precedes
+another feature increment: immediate native Browse, shallow navigation, optional
+recursive search, asynchronous titles and unified original/saved choices.
+See [the task](CODEX_DOCUMENT_OPENING_REPAIR_PROMPT.md),
+[workflow](READING_OUTLINE_WORKFLOW.md) and [evidence](DOCUMENT_OPENING_REPAIR.md).
+General research resumption and argument reconstruction remain later work.
+Historical reports retain their observations and limits.
 
 ## Purpose
 
@@ -74,7 +75,7 @@ and focus the tree; they do not constitute a general file-opening action.
 The 0.19.2 patch does not supply PDF contents, vault WikiLink resolution or
 opening an arbitrary external file through MRW. Its picker/help states the
 Markdown support plainly. Existing **File: Open File…** remains
-available through the host. General document opening is delivered; document learning is the current increment.
+available through the host. General document opening and document learning are delivered; opening reliability is the current repair.
 
 ## Existing documents and optional integrations
 

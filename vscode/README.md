@@ -1,8 +1,9 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.0 opens existing mathematical documents in place and connects scoped
+MRW 0.23.2 opens existing mathematical documents in place and connects scoped
 note links, backlinks and return locations with retained sources, annotations
 and resumable study. The extension is experimental.
+[Opening repair checks](../docs/DOCUMENT_OPENING_REPAIR.md).
 
 ## Work from a Markdown section
 
@@ -15,11 +16,26 @@ Explicit recall admission and later-problem dates are separate.
 
 ## Open existing work
 
-Run **MRW: Open Document…** to display the original note or paper. Markdown opens
-in preview and supplies **Contents** without import. Explicitly select a
-notes folder with **MRW: Choose Notes Folder…** for bounded note lookup and
-backlinks. It can be outside the workspace, including `/mnt/c/…` in WSL; it is
-ordinary document storage, not a request to relocate MRW private records.
+**Open Document…** offers **Original file** (current contents in place) and
+**Saved copy** (a retained revision with MRW annotations) in one native picker.
+**Browse for another document…** is usable immediately, before folder or saved-copy
+loading. The current folder lists filenames and subfolders without descending.
+YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+Search by title, filename or path. Select a folder or **Parent folder** to navigate;
+**Search subfolders…** explicitly requests a wider, bounded search. Its path,
+progress and incomplete results are shown. Failed title/listing work leaves
+Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
+an indexing scope. Cancellation preserves the current view and drafts.
+
+Saved-copy rows show their title, source/path and retained revision. Discovery
+runs independently of ordinary browsing. **Saved copy…** also opens the existing
+project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
+Command Palette. Opening an original does not import it; opening a saved copy
+does not refresh its source or replace annotations. PDFs use the existing host
+reader handoff. Shared backlink and note-ID completeness rules are unchanged.
+
+Select **MRW: Choose Notes Folder…** to grant one explicit folder for note-ID
+lookup and backlinks; Obsidian is optional. Notes remain in place.
 
 Follow ordinary relative Markdown links or exact Zettel `[[ID]]` links from
 Contents, or use **MRW: Follow Document Link** at the cursor. **Show Backlinks…**

@@ -1,16 +1,26 @@
 # Using MRW
 
-With a notes folder selected, **Open Document…** lists Markdown notes by YAML
-title and filename, falling back to the first H1. Search by title, filename or
-path. **Browse for another document…** opens the file dialog for PDFs and files
-elsewhere. Cancelling preserves the current view and drafts.
+**Open Document…** offers **Original file** (current contents in place) and
+**Saved copy** (a retained revision with MRW annotations) in one native picker.
+**Browse for another document…** is usable immediately, before folder or saved-copy
+loading. The current folder lists filenames and subfolders without descending.
+YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+Search by title, filename or path. Select a folder or **Parent folder** to navigate;
+**Search subfolders…** explicitly requests a wider, bounded search. Its path,
+progress and incomplete results are shown. Failed title/listing work leaves
+Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
+an indexing scope. Cancellation preserves the current view and drafts.
 
-Choose **Open a note or paper…** in the MRW sidebar, or **Open saved source…**
-for retained reading and annotations. **Choose notes folder…** selects an
-Obsidian vault or another notes folder for note links and backlinks. These
-actions stay in the **Commands** section as native buttons while documents
-and studies open. **Contents** lists document locations; **Studies** lists saved work.
-**Show Contents** returns to the document navigator and reading controls.
+Saved-copy rows show their title, source/path and retained revision. Discovery
+runs independently of ordinary browsing. **Saved copy…** also opens the existing
+project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
+Command Palette. Opening an original does not import it; opening a saved copy
+does not refresh its source or replace annotations. PDFs use the existing host
+reader handoff. Shared backlink and note-ID completeness rules are unchanged.
+
+These actions stay in the **Commands** section as native buttons while documents
+and studies open. **Contents** lists document locations; **Studies** lists saved
+work. **Show Contents** returns to the document navigator and reading controls.
 If an originating link changes while another note opens, select its current
 occurrence again. The previous Return destination remains available. New notes
 open in the active preview group; already-open notes retain their group.
@@ -63,9 +73,10 @@ Cancelling a choice preserves the current view and drafts. Ordinary navigation
 and Return leave both sidebars and editor groups under VS Code's layout control,
 so MRW, Codex and other work stay available.
 
-To resume saved reading immediately, use **Open Saved Source…** in the
-Commands section or the Contents title toolbar. In the Stacks workspace select
-**Hausdorff spaces** from the existing saved store; no import is needed.
+To resume saved reading, choose a **Saved copy** in **Open Document…**.
+In the Stacks workspace, choose **Hausdorff spaces** from the saved store;
+no import is needed. The specialized saved-source command remains available
+from the Command Palette and Contents title toolbar.
 
 A PDF uses an available registered VS Code reader. If none is available, MRW
 offers **Open with system reader**. That explicit handoff can also fail if the
@@ -111,7 +122,7 @@ changes**. MRW does not save, discard or merge that draft when opening Obsidian.
    the notes to navigate. It can be outside the workspace, including a Windows
    folder reached through `/mnt/c/…` in WSL. It need not be an Obsidian vault.
    For example, `C:\Users\you\Notes` is `/mnt/c/Users/you/Notes`. After folder
-   selection, **Open a note or paper…** starts there, including after restart.
+   selection, **Open Document…** starts there, including after restart.
    The picker sets **MRW: Notes Folder** in workspace settings. You can edit that
    setting directly; it is an absolute path on the extension host.
 2. Click a WikiLink in Markdown preview, or **Ctrl+click** it in the source
