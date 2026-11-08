@@ -546,3 +546,81 @@ test('a note replaced by an outside symlink after title selection is rejected be
   assert.equal(h.shown.length, 0);
   assert.equal(h.state.get('mrw.documents.v1').grants.length, 0);
 });
+
+
+test('ordinary follow refuses an origin changed during editor opening and preserves the previous Return', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md'); await h.follow(a, '2b');
+  const before = structuredClone(h.state.get('mrw.documents.v1'));
+  h.setShowHook(doc => {
+    if (doc.uri.fsPath === f.file('3c.md')) {
+      const at = a.getText().indexOf('3c.md'); h.change(a, at, '3c.md'.length, 'slow.md');
+    }
+  });
+  await assert.rejects(h.follow(a, '3c.md'), /originating.*changed/i);
+  h.setShowHook(undefined);
+  const current = h.state.get('mrw.documents.v1');
+  assert.equal(current.last, before.last); assert.equal(current.origin.start, before.origin.start); assert.equal(current.origin.end, before.origin.end); assert.equal(current.origin.invalid, false);
+  await h.documents.returnToDocument(); assert.equal(h.selected(), '[[2b]]');
+  assert.equal(a.isDirty, true); assert.equal(await fs.readFile(a.uri.fsPath, 'utf8'), f.contents['1a.md']);
+});
+
+test('ordinary follow tracks an outside origin edit during editor opening without rejecting the current link', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md');
+  h.setShowHook(doc => { if (doc.uri.fsPath === f.file('3c.md')) h.change(a, 0, 0, 'Unsaved preface α😀\n'); });
+  await h.follow(a, '3c.md'); h.setShowHook(undefined);
+  await h.documents.returnToDocument(); assert.equal(h.selected(), '[Third](3c.md)');
+  assert.equal(a.isDirty, true); assert.equal(await fs.readFile(a.uri.fsPath, 'utf8'), f.contents['1a.md']);
+});
+
+test('backlink scope is rechecked before the host reads a picker target redirected outside the notes folder', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md'); await h.follow(a, '2b');
+  const before = structuredClone(h.state.get('mrw.documents.v1')), reads = h.reads.length;
+  const outside = path.join(f.outside, 'private.md'); await fs.writeFile(outside, a.getText());
+  h.setPickHook(async choices => { await fs.unlink(a.uri.fsPath); await fs.symlink(outside, a.uri.fsPath); return choices[0]; });
+  await assert.rejects(h.commands.get('mrw.showBacklinks')(), /different file|outside.*scope|selected scope/i);
+  assert.deepEqual(h.reads.slice(reads), [], 'a rejected backlink must not ask the host to load its current file');
+  assert.deepEqual(h.state.get('mrw.documents.v1'), before); assert.equal(h.api.window.activeTextEditor.document.uri.fsPath, f.file('2b.md'));
+});
+
+test('backlink refuses a return occurrence changed during editor opening and retains the prior usable Return', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md'); await h.follow(a, '2b.md#target');
+  const b = h.api.window.activeTextEditor.document, before = structuredClone(h.state.get('mrw.documents.v1'));
+  h.setShowHook(doc => {
+    if (doc === a) { const at = b.getText().indexOf('# Target'); h.change(b, at, '# Target'.length, '# Changed'); }
+  });
+  await assert.rejects(h.commands.get('mrw.showBacklinks')(), /originating.*changed/i); h.setShowHook(undefined);
+  assert.deepEqual(h.state.get('mrw.documents.v1'), before);
+  await h.documents.returnToDocument(); assert.equal(h.selected(), '[Second](2b.md#target)');
+  assert.equal(b.isDirty, true); assert.equal(await fs.readFile(b.uri.fsPath, 'utf8'), f.contents['2b.md']);
+});
+
+
+test('PDF follow preserves the previous Return if its originating link changes during host opening', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md'); await h.follow(a, '2b');
+  const before = structuredClone(h.state.get('mrw.documents.v1')), execute = h.api.commands.executeCommand;
+  h.api.commands.executeCommand = async (name, ...args) => {
+    const value = await execute(name, ...args);
+    if (name === 'vscode.openWith' && args[1] === 'fixture.pdf') {
+      const at = a.getText().indexOf('paper.pdf'); h.change(a, at, 'paper.pdf'.length, 'other.pdf');
+    }
+    return value;
+  };
+  await assert.rejects(h.follow(a, 'paper.pdf'), /originating.*changed/i);
+  const current = h.state.get('mrw.documents.v1');
+  assert.equal(current.last, before.last); assert.equal(current.origin.start, before.origin.start); assert.equal(current.origin.end, before.origin.end);
+  await h.documents.returnToDocument(); assert.equal(h.selected(), '[[2b]]');
+  assert.equal(a.isDirty, true); assert.equal(await fs.readFile(a.uri.fsPath, 'utf8'), f.contents['1a.md']);
+});
+
+
+test('a new note opens in the invoking preview group instead of an unrelated stale active text editor', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md');
+  const unrelated = await h.doc('slow.md'), editor = await h.focus(unrelated); editor.viewColumn = 1;
+  h.api.window.tabGroups = { activeTabGroup: { viewColumn: 2, activeTab: { input: { uri: a.uri, viewType: 'vscode.markdown.preview.editor' } } }, all: [
+    { viewColumn: 1, tabs: [{ input: { uri: unrelated.uri } }] },
+    { viewColumn: 2, tabs: [{ input: { uri: a.uri, viewType: 'vscode.markdown.preview.editor' } }] },
+  ] };
+  await h.follow(a, '3c.md');
+  assert.equal(h.shown.findLast(value => value.doc.uri.fsPath === f.file('3c.md')).settings.viewColumn, 2,
+    'the active native preview group owns a new destination when the text-editor acknowledgement lags');
+});

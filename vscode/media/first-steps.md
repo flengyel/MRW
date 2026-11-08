@@ -11,6 +11,9 @@ Obsidian vault or another notes folder for note links and backlinks. These
 actions stay in the **Commands** section as native buttons while documents
 and studies open. **Contents** lists document locations; **Studies** lists saved work.
 **Show Contents** returns to the document navigator and reading controls.
+If an originating link changes while another note opens, select its current
+occurrence again. The previous Return destination remains available. New notes
+open in the active preview group; already-open notes retain their group.
 Commands are also available through **F1**.
 
 ## Work on a problem from a document

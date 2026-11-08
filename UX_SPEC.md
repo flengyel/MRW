@@ -30,7 +30,9 @@ document choice, Browse and cancellation. **Contents** remains Markdown navigati
 **Studies** remains saved study work. VS Code owns both sidebars, editor groups,
 ordinary documents, Save and Undo. No action automatically hides, maximizes or
 rearranges work. Tutorial identity reports the active package; installation does
-not force reload. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md) and
+not force reload. The 0.23.1 [navigation repair](docs/DOCUMENT_NAVIGATION_REPAIR.md)
+keeps the previous Return when an origin changes during opening, rechecks
+backlink scope before loading, and uses the active preview group for new notes. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md) and
 [validation](docs/DOCUMENT_LEARNING_VALIDATION.md) record the delivered scope.
 
 The [research design](docs/RESEARCH_WORKSTATION_DESIGN.md) now orders document

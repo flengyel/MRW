@@ -23,6 +23,12 @@ WSL packaging/installation. Report unobserved behavior accurately. Preserve
 historical validation evidence; new native observations are recorded separately.
 General research resumption and argument reconstruction remain later goals.
 
+The user's current request defers problem work and authorizes outstanding
+implementation repairs. The 0.23.1 navigation repair retains the last usable
+Return destination if an origin changes during asynchronous opening and checks
+backlink scope before host loading. Preserve these checks and the delivered
+learning workflow; do not require the user to run another problem session.
+
 ## Extension identity — 0.22.0
 
 The workstation extension is `flengyel.mrw`, packaged as `mrw-0.22.0.vsix`.

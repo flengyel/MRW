@@ -112,9 +112,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     return { uri: doc.uri.toString(), revision, start, end, initial: { revision, start, end } };
   }
   function documentColumn(doc) {
-    return vscode.window.visibleTextEditors?.find(editor => editor.document === doc)?.viewColumn ||
-      vscode.window.tabGroups?.all.find(group => group.tabs.some(tab => tab.input?.uri?.toString() === doc.uri.toString()))?.viewColumn ||
-      vscode.window.activeTextEditor?.viewColumn;
+    return readingDocumentColumn(vscode, doc);
   }
   async function showLocation(doc, location) {
     await checkDocument(doc);

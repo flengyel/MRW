@@ -1,0 +1,349 @@
+{
+  "baseline": "5f5335836e388c70db845a1d7ee322d7882ceab9",
+  "checks": {
+    "baseline_origin_scope_regressions": {
+      "exit": 1,
+      "failed": 3,
+      "passed": 1
+    },
+    "documents_final": {
+      "exit": 0,
+      "failed": 0,
+      "passed": 32
+    },
+    "extension_final": {
+      "exit": 0,
+      "failed": 0,
+      "passed": 345,
+      "skipped": 0
+    },
+    "pane_before_fix": {
+      "exit": 1,
+      "failed": 1,
+      "passed": 0
+    },
+    "python_editor_bridge": {
+      "passed": 11
+    },
+    "python_study_questions": {
+      "passed": 2
+    }
+  },
+  "date": "2026-11-08",
+  "installation": {
+    "archive": "/home/flengyel/MRW/vscode/mrw-0.23.1.vsix",
+    "exitStatus": 0,
+    "extension": "flengyel.mrw",
+    "installedBytesMatch": true,
+    "installedPayloadFiles": 104,
+    "registryVersion": "0.23.1",
+    "sha256": "3e9abb3ed27e6f55702c72a3c1a8a09cf98153e663285c6423c361b7e4200b63",
+    "size": 577901,
+    "version": "0.23.1",
+    "workingWindowReloaded": false
+  },
+  "limits": [
+    "Native checks use Windows/WSL high contrast only",
+    "The final capture has a blank preview surface; it does not prove rendered refresh after rename/restore",
+    "PDF race has controller coverage, not native PDF-reader coverage",
+    "No live Obsidian, AI, Lean or Sage check",
+    "Software behavior does not establish mathematical correctness or learning benefit"
+  ],
+  "local_evidence_directory": "/home/flengyel/MRW/.codex-work/vscode-host-navigation-repair/evidence",
+  "logs": {
+    "documents-final": {
+      "bytes": 3755,
+      "exit": 0,
+      "sha256": "8faa81de0862cf5ea81a4f9afe7fb68b090077700ab395225c6b6cf0f6da12cf"
+    },
+    "install": {
+      "bytes": 81,
+      "exit": 0,
+      "sha256": "3900ff993e4fbfc722971df47530304f3654acaa9a359c2120d177597baa3993"
+    },
+    "package-final": {
+      "bytes": 835,
+      "exit": 0,
+      "sha256": "4ca783d049fb7e7756a499eb895e6ec329d4994c4cc82b3f9f6b7d12af21546a"
+    },
+    "python-bridge": {
+      "bytes": 1845,
+      "exit": 0,
+      "sha256": "35395d3aa271a440c8494ce24da7f23b346a83e9939efa4ccb180009b58d35a9"
+    },
+    "python-study": {
+      "bytes": 430,
+      "exit": 0,
+      "sha256": "81d208b860dcc8f837199477510a4c88aa8239ded79bfdec7c44a5fa7ec60163"
+    },
+    "regression-final": {
+      "bytes": 37829,
+      "exit": 0,
+      "sha256": "a7447e076c19cd161729645c606b37fcf3f758199af16e78d93f912b27a86a81"
+    },
+    "syntax-final": {
+      "bytes": 1423,
+      "exit": 0,
+      "sha256": "0dccf41d9415b431ae2572e1f58ea628c75463066c05ff527a76cf441c902bdd"
+    }
+  },
+  "native": {
+    "final": {
+      "checks": [
+        "ordinary note follow and exact Return preserve a visible unrelated dirty editor",
+        "a link changed during native editor opening cannot replace the previous usable Return",
+        "outside source edits during native opening still lead back to the exact current link",
+        "a backlink whose return selection changes during native opening preserves the previous Return",
+        "a backlink redirected outside the selected scope is rejected before any host load request",
+        "dirty note bytes, pane layout and unrelated visible work survive all repaired paths"
+      ],
+      "complete": true,
+      "errors": [],
+      "layout": {
+        "groups": [
+          {
+            "size": 244
+          },
+          {
+            "size": 243.5
+          }
+        ],
+        "orientation": 0
+      },
+      "layoutCalls": [],
+      "remote": "wsl",
+      "scope": "Native production document workflow; injected picker choices and deterministic opening delays; disposable files only.",
+      "stage": "observation",
+      "trace": [
+        {
+          "after": "ordinary note follow and exact Return preserve a visible unrelated dirty editor",
+          "layout": {
+            "groups": [
+              {
+                "size": 244
+              },
+              {
+                "size": 243.5
+              }
+            ],
+            "orientation": 0
+          },
+          "visible": [
+            {
+              "column": 1,
+              "dirty": true,
+              "file": "unrelated.txt"
+            }
+          ]
+        },
+        {
+          "after": "a link changed during native editor opening cannot replace the previous usable Return",
+          "layout": {
+            "groups": [
+              {
+                "size": 244
+              },
+              {
+                "size": 243.5
+              }
+            ],
+            "orientation": 0
+          },
+          "visible": [
+            {
+              "column": 1,
+              "dirty": true,
+              "file": "unrelated.txt"
+            }
+          ]
+        },
+        {
+          "after": "outside source edits during native opening still lead back to the exact current link",
+          "layout": {
+            "groups": [
+              {
+                "size": 244
+              },
+              {
+                "size": 243.5
+              }
+            ],
+            "orientation": 0
+          },
+          "visible": [
+            {
+              "column": 1,
+              "dirty": true,
+              "file": "unrelated.txt"
+            }
+          ]
+        },
+        {
+          "after": "a backlink whose return selection changes during native opening preserves the previous Return",
+          "layout": {
+            "groups": [
+              {
+                "size": 244
+              },
+              {
+                "size": 243.5
+              }
+            ],
+            "orientation": 0
+          },
+          "visible": [
+            {
+              "column": 1,
+              "dirty": true,
+              "file": "unrelated.txt"
+            }
+          ]
+        },
+        {
+          "after": "a backlink redirected outside the selected scope is rejected before any host load request",
+          "layout": {
+            "groups": [
+              {
+                "size": 244
+              },
+              {
+                "size": 243.5
+              }
+            ],
+            "orientation": 0
+          },
+          "visible": [
+            {
+              "column": 1,
+              "dirty": true,
+              "file": "unrelated.txt"
+            }
+          ]
+        },
+        {
+          "after": "dirty note bytes, pane layout and unrelated visible work survive all repaired paths",
+          "layout": {
+            "groups": [
+              {
+                "size": 244
+              },
+              {
+                "size": 243.5
+              }
+            ],
+            "orientation": 0
+          },
+          "visible": [
+            {
+              "column": 1,
+              "dirty": true,
+              "file": "unrelated.txt"
+            }
+          ]
+        }
+      ],
+      "version": "1.144.1"
+    },
+    "fixture_sha256": "39174139ca0279b118f08d42264ace7411260ebd6ddf898ace98ed1d2ea3cc7d",
+    "genuine_data_used": false,
+    "initial_before_pane_fix": {
+      "checks": [
+        "ordinary note follow and exact Return preserve a visible unrelated dirty editor",
+        "a link changed during native editor opening cannot replace the previous usable Return",
+        "outside source edits during native opening still lead back to the exact current link",
+        "a backlink whose return selection changes during native opening preserves the previous Return",
+        "a backlink redirected outside the selected scope is rejected before any host load request"
+      ],
+      "complete": false,
+      "errors": [],
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n    groups: [\n      {\n+       size: 487.5\n-       size: 244\n      },\n-     {\n-       size: 243.5\n-     }\n    ],\n    orientation: 0\n  }\n\n\tat /tmp/mrw-navigation-repair-20261108/native/extension/test/host/documentNavigation.js:72:11\n\tat process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n\tat async check (/tmp/mrw-navigation-repair-20261108/native/extension/test/host/documentNavigation.js:16:33)\n\tat async run (/tmp/mrw-navigation-repair-20261108/native/extension/test/host/documentNavigation.js:71:3)",
+      "layout": {
+        "groups": [
+          {
+            "size": 244
+          },
+          {
+            "size": 243.5
+          }
+        ],
+        "orientation": 0
+      },
+      "remote": "wsl",
+      "scope": "Native production document workflow; injected picker choices and deterministic opening delays; disposable files only.",
+      "version": "1.144.1"
+    },
+    "injections": [
+      "picker choices",
+      "controlled source edits during opening"
+    ],
+    "screenshot": {
+      "bytes": 205930,
+      "name": "mrw-navigation-final.png",
+      "sha256": "e0807ce60ef74d9309cf1cc8c1c3ce581b6eba19a5af846d895fe01ce8f5b6c6"
+    },
+    "working_window_used_or_reloaded": false
+  },
+  "package": {
+    "archive": "/tmp/mrw-navigation-repair-20261108/build-final/vscode/mrw-0.23.1.vsix",
+    "archiveFiles": 106,
+    "checkoutRuntimeAndGuideMatch": true,
+    "historicalRootMarkerPreserved": true,
+    "nativeProductionBytesMatch": true,
+    "package": "3e9abb3ed27e6f55702c72a3c1a8a09cf98153e663285c6423c361b7e4200b63",
+    "productionJavaScriptFiles": 39,
+    "size": 577901
+  },
+  "package_verification": {
+    "development_files_excluded": true,
+    "production_manifest_matches": true,
+    "runtime_bytes_match": true
+  },
+  "source_state": {
+    "baseline_plus_local_changes": true,
+    "files": {
+      "vscode/package-lock.json": "7850a58ff924de2f8737a7552c51e669f9f0476e4ce5623880ed807dbd5afe04",
+      "vscode/package.json": "d398391873ba9cdd1bd635222f75acbf65cf55d2240fb7fa5556b806605481d4",
+      "vscode/src/activeStudy.js": "7e1cc3105985bfd0696f474dbd137e0996b1db538b9da793b33646051626eea4",
+      "vscode/src/activeStudyView.js": "fcfed5c9f933b0911955a4d07432add5b3f5cf0f0b433f7c24fb7080093ab2c8",
+      "vscode/src/annotationView.js": "0751a0f163dee75a18be5dfc321f29488cd627e3a36754e9051b23a088e08c4d",
+      "vscode/src/artifactStorage.js": "3f1b841b23cdac451fbe9fc3dc7b1835a961cd06c51b6ff79ba8aa8f1c292920",
+      "vscode/src/assistance.js": "73d8fe4448641026e1a93b2baf57403c530af5f747a901e7a62c7da3f8ee5412",
+      "vscode/src/bridge.js": "42665e06885ac7f38b33774b5b46a5ff76082b5707308c06f5726727ec1b20fd",
+      "vscode/src/companionLinks.js": "e58d9bdf388a796dfe6233239288d74804912032cc7a928080995bbf41bb731d",
+      "vscode/src/documentLinks.js": "22d4bb8c1914b54aea351e8a48b5b8faeca6796abaae0343680aa86b3e6478a8",
+      "vscode/src/documentPicker.js": "55c16a9b014b04276e8fe90350dae325744ca3b30d6b5e351c33deb8c96b2a50",
+      "vscode/src/documentPresentation.js": "c16015667712dcdc0b3a0dbae6adeae79b6f3ba9f39ca940f512112b16b7c91c",
+      "vscode/src/documents.js": "272ea06e242b3d3946e349338d62dfb72caf5cea564f4f0c49dddd287349669e",
+      "vscode/src/extension.js": "23802184ec2271bd87e030a6e751599f3928e19c2f1e308fd6f3159fede279e1",
+      "vscode/src/investigation.js": "84df3a651904f7a017b00c7ca5a060e35e753cf75f3d54383cb5dd70fb29d5b8",
+      "vscode/src/navigation.js": "deed67feb1026aeb46cc070ebad33cc2c08b21a1573e928f27daf99cf258970a",
+      "vscode/src/noteFiles.js": "631894752c4eec2f368749aafe83082d7cf3101b5f956914d3aedcb33014409a",
+      "vscode/src/noteIdentity.js": "d5a088e0abaf197f9949506beca5898ee92151e2d6b49c33ce6f9bfa32b086c8",
+      "vscode/src/noteLinks.js": "431997da22f0db87ab9b2147c97990f1dffff4bc113655d84f0acd537c448ecb",
+      "vscode/src/noteRefresh.js": "02771166c6a48fa53260d7ac9cc5bfe4ab27ebb0696c76bd3a7ddf9470b70e13",
+      "vscode/src/outlineReferences.js": "cc5d5e3ad5dfb0ca80fb081b8d5b8698e1443bf6ffd374b039818c20332bd44b",
+      "vscode/src/outlineView.js": "e3da3f944c9ad907c479a041527f6e968190cf7b15b4aac0e202cb5d94e5a95a",
+      "vscode/src/outlines.js": "7155eecb603aa267635817f222dc8f21260a806445385b01d9bee3dac58c27af",
+      "vscode/src/proofGraph.js": "f120965622970de09443ca73e7502266311fb261e4afebedefffb685689815ba",
+      "vscode/src/proofGraphMap.js": "c0e1aad33b4337ce69c769b14d9004df27ed620ef57adcedf4d4b0b5e4ed2f41",
+      "vscode/src/proofGraphView.js": "eb39a57ca69e3d245f8cb5b1d2fd99d8222af62d75d64fc63a7d27370165895e",
+      "vscode/src/proofStudy.js": "8ee97ff8bc6c9f6ad3de2518f5da14431ffb0dd91c6290dfee2f80725f233d95",
+      "vscode/src/proofStudyView.js": "e3af5a764e52f0449f23c8ca4da712ff63a321bc098ec24913350c5dea8f36d7",
+      "vscode/src/readingMarkdown.js": "06e2230ebde737e62dbd335ae225a772acc6055449efda4a681b645eaf7161eb",
+      "vscode/src/readingOutline.js": "bca3a0e11c692e6fdfc4bda6484a531c836107e8d5176e0da13130e131363577",
+      "vscode/src/sourceIdentifiers.js": "8f46115b1492f8c204a4396223f0743536a8762a83f14a9e3dfce553970f8ef9",
+      "vscode/src/stacksView.js": "5e2b2642d68deab893fcdbf36c0af8b3b258061f2f6f21aff5d9dfeeec8db960",
+      "vscode/src/studyDocument.js": "1b5f7d29c33d3cf352e53039a3ba69a31c5968f0cc4f805444a4871d7a2f778e",
+      "vscode/src/studyEvidence.js": "b045d8870b94c7b90e1ecb8d35cbaad1ac3469296c309b15e6b796cc7dfe1ec4",
+      "vscode/src/studyExample.js": "29f812b611b6f5f24535dd579f8ef1eaab0db2670fa726110b340d987bbcd766",
+      "vscode/src/studyHelp.js": "304d966d6c9fefbe184c5344f78077e849c269e1fa8ded1319dd23a94e3ff810",
+      "vscode/src/studyHistory.js": "2f79315544bea4ed066c8748180a0132276b39df7cab792f9cbd45a154a010fa",
+      "vscode/src/studyModel.js": "9c4f34b49912c75b0cb9301fd2dbe311fc49429462dfc0afcd1685037bd542d4",
+      "vscode/src/studyScheduler.js": "5457ea5c2527fa418b243005668361c0fd0d627de5a7027ef38699f6fefd8024",
+      "vscode/src/tutorial.js": "f191de706c10c387f3d674b6ad0243a060ddc2fcf3fe46f287eaf118d01e123d",
+      "vscode/src/wikiLinks.js": "b507f492e7d212306acd2bff2bb5116aa3fb8fe9f9dfa8b8d75bca96255873e8"
+    },
+    "production_unchanged_after_final_regression_started": true
+  },
+  "version": "0.23.1"
+}

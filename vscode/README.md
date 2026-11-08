@@ -28,6 +28,10 @@ selected folder/document and matching return pin persist in the workspace.
 **Reopen Document** explicitly opens the last opened/followed file after restart;
 activation does not open it automatically. Contents and backlinks respect dirty editor text; VS Code owns Save and Undo.
 Obsidian, Zettel metadata and text import are optional.
+A link changed during opening leaves the previous Return destination intact.
+Backlink targets are checked against the current file scope before loading.
+New notes use the active preview group; already-open notes retain their group.
+[Navigation repair evidence](../docs/DOCUMENT_NAVIGATION_REPAIR.md).
 
 A Document may be a note, PDF paper, manuscript or notebook. Other formats use
 registered host editors/readers; a PDF uses a registered custom reader or an

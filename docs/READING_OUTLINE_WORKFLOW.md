@@ -201,3 +201,21 @@ See the [Obsidian guide](OBSIDIAN_WORKFLOW.md) for optional supplied association
 Earlier [navigation](READING_OUTLINE_VALIDATION.md) and
 [terminology](DOCUMENT_TERMINOLOGY_VALIDATION.md) reports retain their original
 scope and labels.
+
+## Navigation repair — 0.23.1
+
+A new destination uses the invoking native preview group when no editor for it
+is open. An unrelated text editor left visible in another group does not own
+that destination. Already-open documents retain their group.
+
+When a note link or backlink is still opening, edits outside its originating
+occurrence continue to shift Return. An overlapping edit or closed source
+rejects the new origin and retains the previous usable Return destination.
+The target may already be visible when the host finishes opening; that does not
+commit a changed origin. Select the current occurrence to follow it again.
+
+A backlink picker contains an indexed snapshot. After selection, MRW checks the
+current file scope before asking the host to load that path, then verifies the
+exact indexed occurrence. A moved or redirected path requires an explicit new
+choice. No note, citation, draft or storage format is rewritten.
+[Repair checks and limits](DOCUMENT_NAVIGATION_REPAIR.md).

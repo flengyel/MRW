@@ -30,6 +30,15 @@ The 0.23.0 native fixture adds scoped observations, not a retrospective claim
 that every earlier acceptance case passed. Older delivery accounts below are
 historical; this section controls continuation and next-increment ordering.
 
+The following 0.23.1 [navigation repair](DOCUMENT_NAVIGATION_REPAIR.md) addresses
+four confirmed navigation failures without expanding study work.
+Keep validation of a tracked origin through the final host-opening yield, before
+publishing the display/Return destination. Recheck backlink scope before host
+loading, in addition to exact occurrence checks. New destinations use the active
+native preview group before falling back to a text editor; document and Contents
+opening share that presentation rule. No manual problem session is
+required. General research resumption remains subsequent product work.
+
 ## Earlier repair — source display and Return, 0.21.1
 
 The user reported degraded Kerodon display and Return failing with “Wait for the

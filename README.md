@@ -23,6 +23,11 @@ solution review, later work and explicit recall admission. The tutorial header
 identifies the active extension build. General research resumption and an
 integrated argument-reconstruction session remain later increments.
 
+Navigation repair **0.23.1** preserves the last usable Return destination when
+a note link or backlink changes during opening, and rechecks a backlink's
+current folder scope before loading it. New notes use the active preview group
+without displacing an unrelated text pane. [Checks and limits](docs/DOCUMENT_NAVIGATION_REPAIR.md).
+
 ## What works
 
 - Work from a Markdown section through a problem, independent solution review, exact Return and saved resumption.

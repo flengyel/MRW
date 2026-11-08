@@ -3,6 +3,10 @@
 function documentColumn(vscode, doc) {
   return vscode.window.visibleTextEditors?.find(editor => editor.document === doc)?.viewColumn ||
     vscode.window.tabGroups?.all?.find(group => group.tabs.some(tab => tab.input?.uri?.toString() === doc.uri.toString()))?.viewColumn ||
+    // A Markdown preview can be active while the text-editor acknowledgement
+    // still names an unrelated visible pane. New files belong to the active
+    // native tab group; already-open documents keep their own group above.
+    vscode.window.tabGroups?.activeTabGroup?.viewColumn ||
     vscode.window.activeTextEditor?.viewColumn;
 }
 

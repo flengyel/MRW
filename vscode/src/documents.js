@@ -117,6 +117,13 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     const revision = digest(doc.getText());
     return { uri: doc.uri.toString(), revision, start, end, initial: { revision, start, end } };
   }
+  function validateOrigin(doc, candidate) {
+    const location = candidate.location;
+    if (location.fileOnly) return;
+    if (!doc || doc.isClosed || location.invalid || digest(doc.getText()) !== location.revision) {
+      throw new Error('The originating document location changed while opening. Select its current occurrence again.');
+    }
+  }
   async function repairSupersededDisplay() {
     // The host cannot cancel an already-issued open. A late completion must not
     // leave the editor on an obsolete destination after a newer open succeeded.
@@ -124,12 +131,14 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (latest) await display(latest.uri, latest.location, generation);
     return false;
   }
-  async function display(uri, location, attempt) {
+  async function display(uri, location, attempt, validate) {
     await check(uri);
     if (attempt !== generation) return false;
+    validate?.();
     if (markdown(uri.fsPath)) {
       const doc = await vscode.workspace.openTextDocument(uri);
       if (attempt !== generation) return false;
+      validate?.();
       if (location && (location.invalid || digest(doc.getText()) !== location.revision || location.end > doc.getText().length)) {
         throw new Error('The exact document location changed. Restore its text or select the intended location again.');
       }
@@ -164,6 +173,9 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       } else await vscode.commands.executeCommand('vscode.openWith', uri, reader.viewType, { preview: false });
     } else await vscode.commands.executeCommand('vscode.open', uri, { preview: false });
     if (attempt !== generation) return repairSupersededDisplay();
+    // Opening yields to editor work: validate the tracked origin again before
+    // publishing either this display or the new Return destination.
+    validate?.();
     latestDisplay = { uri, location: location ? { ...location, uri: uri.toString() } : undefined };
     return true;
   }
@@ -242,17 +254,17 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
         await check(doc.uri);
         const opened = await vscode.env.openExternal(vscode.Uri.parse(canonicalCitation(current.qualified_id)));
         if (attempt !== generation) return;
-        if (candidate.location.invalid || digest(doc.getText()) !== candidate.location.revision) throw new Error('The originating link changed while opening. Follow its current occurrence again.');
+        validateOrigin(doc, candidate);
         if (opened) { origin = candidate.location; await persist(); await onNavigated(); return true; }
         throw new Error('The canonical published citation could not be opened.');
       }
       const resolved = await resolve(doc, node);
       if (attempt !== generation) return;
       if (!resolved.ok) throw new Error(resolved.error);
-      if (candidate.location.invalid || digest(doc.getText()) !== candidate.location.revision) throw new Error('The originating link changed while opening. Follow its current occurrence again.');
+      validateOrigin(doc, candidate);
       const uri = vscode.Uri.file(resolved.path);
       const location = resolved.heading && { revision: resolved.note.parsed.revision, start: resolved.heading.start, end: resolved.heading.end };
-      if (!await display(uri, location, attempt)) return;
+      if (!await display(uri, location, attempt, () => validateOrigin(doc, candidate))) return;
       origin = candidate.location; last = uri.toString(); await persist(); await onNavigated(); return true;
     } finally { candidates.delete(candidate); }
   }
@@ -287,10 +299,22 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       const choices = result.occurrences.map(hit => ({ label: `${path.relative(folder.canonical, hit.sourcePath)}:${hit.node.line + 1}`, description: hit.node.label, hit }));
       const choice = await vscode.window.showQuickPick(choices, { title: notice || 'Backlinks', placeHolder: 'Open the exact source occurrence' });
       if (!choice?.hit || attempt !== generation) return;
-      const hit = choice.hit, source = await vscode.workspace.openTextDocument(vscode.Uri.file(hit.sourcePath));
+      const validate = qualified ? undefined : () => validateOrigin(invocationDoc, pending);
+      validate?.();
+      const hit = choice.hit, sourceUri = vscode.Uri.file(hit.sourcePath);
+      // The picker is a snapshot, not permission to read its old pathname.
+      // Recheck redirects/scope before asking the host to load current contents.
+      await check(sourceUri);
+      if (attempt !== generation) return;
+      validate?.();
+      const source = await vscode.workspace.openTextDocument(sourceUri);
+      if (attempt !== generation) return;
       const node = parseReadingMarkdown(source.getText()).all.find(n => n.id === hit.node.id && n.start === hit.node.start && n.end === hit.node.end);
       if (!node || digest(source.getText()) !== hit.sourceRevision || source.getText().slice(node.start, node.end) !== hit.sourceText) throw new Error('The backlink changed. Inspect backlinks again.');
-        if (await display(source.uri, snapshot(source, node.start, node.end), attempt)) { if (!qualified) origin = pending.location; last = source.uri.toString(); await persist(); await onNavigated(); }
+      if (await display(source.uri, snapshot(source, node.start, node.end), attempt, validate)) {
+        if (!qualified) origin = pending.location;
+        last = source.uri.toString(); await persist(); await onNavigated();
+      }
     } finally { candidates.delete(pending); }
   }
   async function returnToDocument() {

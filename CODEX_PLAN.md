@@ -8,6 +8,9 @@ Attempt or Review solution → named Return**, with saved work/review context an
 optional existing FSRS review. [Workflow](docs/DOCUMENT_LEARNING_WORKFLOW.md)
 and [validation](docs/DOCUMENT_LEARNING_VALIDATION.md) define actual entry points
 and evidence. This increment precedes general research resumption.
+The 0.23.1 [navigation repair](docs/DOCUMENT_NAVIGATION_REPAIR.md) preserves
+pending Return origins and rechecks backlink scope before host loading. The
+user has deferred problem work; this repair requires no manual study session.
 
 Preserve title-aware document choice, Browse/cancellation, persistent native
 Commands buttons, hover/focus descriptions, source-qualified retained citations,
