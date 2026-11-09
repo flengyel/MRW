@@ -76,3 +76,24 @@ at 2.75 s, and all 1,286 titles at 7.27 s (41 batches). This is one observation,
 not a performance guarantee. An earlier fixed-deadline run stopped after 34
 batches despite continuing progress; the progress-aware deadline repairs that
 confirmed failure.
+
+## Committed delivery
+
+Final checks: **366/366** serialized Node checks, **26/26** Python bridge and
+isolated-renderer checks, syntax and package verification passed. The full Node
+run used the exact final runtime bytes; 88 runtime/configuration assets were
+compared with the delivery checkout. The title-worker followup is included.
+
+The package is **590,750 bytes**. SHA-256:
+`c9a85e375f4b33ea9c81d17b93606d4d0f844c7e9526aaa2a2f8cd754eb5ad0e`. Its build identifies implementation commit
+`c8a404e98eba9677304d5a7e6352ae5e39568c99`. All **107 installed payload files** match
+the verified VSIX, and the WSL registry selects `flengyel.mrw@0.23.5`. Installed
+help reports this version/build and refreshes on reopen. The original working
+window was preserved; its next normal reload adopts the update. Logs are retained
+in the local validation cache named in the evidence.
+
+Manual steps removed include locating a linked heading/block by hand, copying
+TikZ into a separate TeX document, waiting for every title before seeing early
+titles, and finding the last selected Markdown location after restart. Rendering
+changed TikZ still requires one explicit action. It is a rendered view, not a
+mathematical check.
