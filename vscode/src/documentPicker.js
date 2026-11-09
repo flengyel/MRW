@@ -35,8 +35,14 @@ function createDocumentPicker(vscode,{initialFolder,dirtyText=()=>undefined,list
    onTiming({phase:'filenames',elapsed_ms:performance.now()-started,folder,recursive,count:rows.length,complete:listing.complete});
    const files=rows.filter(i=>i.action==='file'&&/\.(md|markdown)$/i.test(i.file)).map(i=>i.file);picker.busy=false;
    if(!files.length)return;picker.busy=true;
-   const titles=await list(folder,{files,token,remoteName});if(finished||own!==epoch||token.isCancellationRequested)return;
-   for(const item of rows)if(item.action==='file'){
+   let firstTitles=true;const titled=new Set();
+   const onHeaders=headers=>{
+    if(finished||own!==epoch||token.isCancellationRequested)return;
+    for(const item of rows)if(headers.has(item.file)){item.label=documentItem(folder,item.file,dirtyText(item.file)??headers.get(item.file)).label;titled.add(item.file);}
+    publish();if(firstTitles){firstTitles=false;onTiming({phase:'first-titles',elapsed_ms:performance.now()-started,folder,count:headers.size});}
+   };
+   const titles=await list(folder,{files,token,remoteName,onHeaders});if(finished||own!==epoch||token.isCancellationRequested)return;
+   for(const item of rows)if(item.action==='file'&&!titled.has(item.file)){
     const text=dirtyText(item.file)??titles.headers?.get(item.file);if(text!==undefined)item.label=documentItem(folder,item.file,text).label;
    }
    if(!titles.complete)status+=' · Some titles unavailable or bounded.';publish();

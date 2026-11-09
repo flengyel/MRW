@@ -29,10 +29,12 @@ function validPin(pin) {
     Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start;
 }
 
-function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments }) {
+function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile }) {
   const saved = context.workspaceState.get(KEY) || {};
   let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
+  let displayedUri;
+  const differentDocument = () => displayedUri?.scheme === 'file' && displayedUri.toString() !== (document?.uri.toString() || overviewUri);
   let route = saved.route === 'ordinary' ? 'ordinary' : 'retained';
   let selected = validPin(saved.selected) ? saved.selected : undefined;
   let collapsed = new Set(Array.isArray(saved.collapsed) ? saved.collapsed.filter(x => typeof x === 'string').slice(0, 1000) : []);
@@ -62,7 +64,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   }
   const provider = {
     onDidChangeTreeData: changed.event,
-    getChildren: node => node ? node.children : model?.roots || [],
+    getChildren: node => differentDocument() ? [] : node ? node.children : model?.roots || [],
     getTreeItem(node) {
       // Citation prose remains authoritative in Markdown. The tree shows its
       // short title; its original label and exact location remain in the tooltip.
@@ -80,6 +82,13 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   const tree = vscode.window.createTreeView('mrw.readingOutline', { treeDataProvider: provider, showCollapseAll: true });
   function identifyDocument() {
     const uri = document?.uri || (overviewUri && vscode.Uri.parse(overviewUri));
+    if (differentDocument()) {
+      tree.description = path.basename(displayedUri.path);
+      tree.message = `Contents is not showing ${displayedUri.fsPath || displayedUri.toString()}. ` +
+        (/\.(md|markdown)$/i.test(displayedUri.path) ? 'Use Show Contents to select this Markdown document.' : 'MRW supplies Contents for Markdown only.') +
+        (uri ? `\nSelected Markdown: ${uri.fsPath || uri.toString()}. Use Reveal Contents Document to return to it.` : '');
+      return;
+    }
     tree.description = uri ? `${path.basename(uri.path)}${document?.isDirty ? ' •' : ''}` : undefined;
     tree.message = uri ? `Contents: ${uri.fsPath || uri.toString()}` : undefined;
   }
@@ -95,7 +104,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       tree.description = `${noteIdentity(document).label}${document.isDirty ? ' •' : ''}`;
       for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
       const notice = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? '' : 'Add Markdown headings or file, note, or MRW passage links.';
-      if (notice) tree.message += `\n${notice}`;
+      if (notice && !differentDocument()) tree.message += `\n${notice}`;
     } catch (error) { model = undefined; tree.message += `\n${error.message}`; }
     changed.fire();
   }
@@ -203,7 +212,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     if (attempt !== generation) return;
     const previous = document?.uri.toString() || overviewUri;
     if (previous && previous !== doc.uri.toString()) { collapsed = new Set(); selected = undefined; }
-    document = doc; refresh();
+    document = doc; displayedUri = doc.uri; refresh();
     if (!fromReader) await vscode.commands.executeCommand('mrw.readingOutline.focus');
     if (selected?.uri === doc.uri.toString() && model && selected.revision === model.revision) {
       await showLocation(doc, selected);
@@ -215,6 +224,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     return model;
   }
   const documents = createDocuments({ vscode, context, register, trackLocation, resolveReferences, savedDocuments,
+    onDisplayed: uri => { displayedUri = uri; refresh(); },
     onNavigated: async () => { route = 'ordinary'; await persist(); },
     onMarkdown: async doc => {
       generation++;
@@ -223,7 +233,16 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       tree.description = `${noteIdentity(doc).label}${doc.isDirty ? ' •' : ''}`;
       await persist();
     } });
-  const wikiLinks = registerWikiLinks({ vscode, context, register, documents });
+  const tabsChanged = vscode.window.tabGroups?.onDidChangeTabs?.(() => {
+    const uri = vscode.window.tabGroups.activeTabGroup?.activeTab?.input?.uri;
+    if (uri?.scheme === 'file') { displayedUri = uri; refresh(); }
+  });
+  const groupsChanged = vscode.window.tabGroups?.onDidChangeTabGroups?.(() => {
+    const uri = vscode.window.tabGroups.activeTabGroup?.activeTab?.input?.uri;
+    if (uri?.scheme === 'file') { displayedUri = uri; refresh(); }
+  });
+  for (const listener of [tabsChanged, groupsChanged]) if (listener) context.subscriptions.push(listener);
+  const wikiLinks = registerWikiLinks({ vscode, context, register, documents, compile });
   register('mrw.openReadingOutline', () => openReadingOutline());
   register('mrw.editDocumentSource', async () => {
     const active = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
@@ -307,6 +326,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     if (uri.scheme === 'file') await checkFile(uri);
     const doc = await vscode.workspace.openTextDocument(uri);
     const editor = await showLocation(doc, destination);
+    displayedUri = doc.uri;
     selected = destination;
     if (document !== doc) { document = doc; collapsed = new Set(); }
     refresh();

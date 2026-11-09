@@ -1,6 +1,6 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.4 opens existing mathematical documents in place and connects scoped
+MRW 0.23.5 opens existing mathematical documents in place and connects scoped
 note links, backlinks and return locations with retained sources, annotations
 and resumable study. The extension is experimental.
 [Opening repair checks](../docs/DOCUMENT_OPENING_REPAIR.md).
@@ -150,12 +150,12 @@ From a **repository-root checkout** with Python 3.11+, Linux Node.js 22+ and npm
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.4.vsix
-sha256sum vscode/mrw-0.23.4.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.5.vsix
+sha256sum vscode/mrw-0.23.5.vsix
 ```
 
 `npm run package` runs the Python bundling prepublish hook and pinned
-`@vscode/vsce` 4.0.0. It creates `vscode/mrw-0.23.4.vsix`; it does
+`@vscode/vsce` 4.0.0. It creates `vscode/mrw-0.23.5.vsix`; it does
 not publish it. The fixed epoch/UTC supplies stable archive timestamps. Record
 the hash of the actual archive and tool versions used; do not assume an older
 release's hash. Use Linux npm in WSL, not a Windows npm launcher.
@@ -168,11 +168,11 @@ VSIX archives are excluded. Python core copies and package files are Git-ignored
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…** or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.4.vsix
+code --install-extension /absolute/path/to/mrw-0.23.5.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.4` is installed on the **workspace host**,
+Confirm `flengyel.mrw@0.23.5` is installed on the **workspace host**,
 not solely the Windows UI. Save documents/forms before a requested reload. Keep
 workspace storage for future updates of `flengyel.mrw`. The bridge
 uses the package's bundled core through `python3 -I`; it needs no editable Python
@@ -310,3 +310,7 @@ not current installation instructions.
 The package includes the MRW Apache-2.0 license and bundled KaTeX, markdown-it
 (and its dependencies) and ts-fsrs notices. Repository fixture rights and public
 exposure findings are listed in [PUBLIC_READINESS](../PUBLIC_READINESS.md).
+
+Reading repairs add exact heading/block WikiLinks, note-local macros and explicit
+isolated TikZ rendering, progressive titles and saved Markdown selections.
+See [reading repairs](../docs/READING_REPAIRS.md).

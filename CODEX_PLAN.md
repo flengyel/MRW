@@ -1,6 +1,12 @@
 # CODEX_PLAN.md
 
-## Current priority — ordinary work, 0.23.4
+## Current priority — ordinary work, 0.23.5
+
+Reading repairs preserve these rules: Contents identifies a different active file,
+WikiLinks support scoped paths and exact heading/block targets, titles arrive
+progressively, and Reopen Document restores an exact Markdown selection.
+Ordinary-note macros and explicit isolated TikZ rendering preserve original bytes.
+See [reading repairs](docs/READING_REPAIRS.md).
 
 The user rejected the document Problems interface. Its commands, preview,
 toolbar, Contents and welcome entry points and document-study creation path

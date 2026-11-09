@@ -2418,3 +2418,15 @@ test('background saved-copy discovery never prompts for a project in an ambiguou
   assert.equal(prompts,0);assert.equal(h.requests.some(r=>r.method==='outline_list'),false);
   h.api.lastDocumentPicker.hide();await opening;assert.deepEqual(h.errors,[]);
 });
+
+test('Contents hides the preceding Markdown tree for a text document and restores it on Return', async t => {
+  const root = await temporary(t), h = await harness(root), a = path.join(root, 'a.md');
+  await fs.writeFile(a, '# Mathematics\n\n[Text](plain.txt)\n'); await fs.writeFile(path.join(root, 'plain.txt'), 'A text file.');
+  const doc = h.document(a, await fs.readFile(a, 'utf8')); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  const nav = await h.commands.get('mrw.openReadingOutline')(); assert.equal(h.api.readingProvider.getChildren().length, 1);
+  await h.commands.get('mrw.selectReadingOutlineItem')(nav.all.find(n => n.kind === 'document_link'));
+  assert.deepEqual(h.api.readingProvider.getChildren(), []); assert.match(h.api.readingTree.message, /plain.txt.*Markdown only/);
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, doc.uri.toString());
+  await h.commands.get('mrw.returnToReadingOutline')(); assert.equal(h.api.readingProvider.getChildren()[0].label, 'Mathematics');
+  assert.match(h.api.readingTree.message, /Contents: .*a.md/); assert.deepEqual(h.errors, []);
+});

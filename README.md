@@ -16,7 +16,7 @@ PDF links, and provides Contents, backlinks and Return. Reading requires no
 problem record. The document Problems interface introduced in 0.23.0 is removed;
 earlier saved work and drafts remain readable.
 
-**Current version: 0.23.4.** [Ordinary-work rules and delivery](docs/ORDINARY_WORK_RULES.md).
+**Current version: 0.23.5.** [Ordinary-work rules and delivery](docs/ORDINARY_WORK_RULES.md).
 [Subsystem removal and preservation checks](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 The repository remains private. There is no published Marketplace listing or
 GitHub release; obtain a maintainer VSIX or build locally. The technical
@@ -74,7 +74,7 @@ The latest study checks and host limitations are recorded in
 are not acceptance evidence for the new interaction.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.4.vsix`. Confirm installation under that workspace
+select `mrw-0.23.5.vsix`. Confirm installation under that workspace
 host's extensions. Save work before a requested reload; keep workspace storage
 when upgrading. Detailed steps: [installation](docs/INSTALLATION.md).
 
@@ -84,8 +84,8 @@ then run from the repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.4.vsix
-sha256sum vscode/mrw-0.23.4.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.5.vsix
+sha256sum vscode/mrw-0.23.5.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX. It publishes nothing.
@@ -274,3 +274,7 @@ fixtures retain their [upstream attribution and GFDL](tests/fixtures/stacks/READ
 Third-party evidence and the remaining publication decisions are documented in
 [PUBLIC_READINESS.md](PUBLIC_READINESS.md); the project license does not relicense
 retained source material.
+
+Reading repairs add exact heading/block WikiLinks, note-local macros and explicit
+isolated TikZ rendering, progressive titles and saved Markdown selections.
+See [reading repairs](docs/READING_REPAIRS.md).

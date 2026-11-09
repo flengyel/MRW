@@ -3,11 +3,13 @@ const { randomUUID } = require('node:crypto');
 const { noteIdentity } = require('./noteIdentity');
 const { documentColumn } = require('./documentPresentation');
 const { parseReadingMarkdown, zettelLinkParts, frontMatterInfo } = require('./readingMarkdown');
+const { registerDocumentMath } = require('./documentMath');
 
 // Discovery/rendering only uses the host's already-open text, never a folder
 // scan. A click rechecks the exact occurrence and uses ordinary scoped navigation.
-function registerWikiLinks({ vscode, context, register, documents }) {
+function registerWikiLinks({ vscode, context, register, documents, compile }) {
   const session = randomUUID(), cache = new WeakMap();
+  const math = registerDocumentMath({ vscode, context, documents, compile, session });
   const scheme = vscode.env.uriScheme || 'vscode';
   function linksFor(doc) {
     if (!doc || doc.isClosed || doc.uri.scheme !== 'file') return [];
@@ -89,18 +91,19 @@ function registerWikiLinks({ vscode, context, register, documents }) {
       const href = `${scheme}://flengyel.mrw/document-link?target=${target}`;
       return `<a href="${escape(href)}" title="${escape('Follow ' + zettelLinkParts(node.target).target)}">${escape(zettelLinkParts(node.target).label)}</a>`;
     };
-    return md;
+    return math.extendMarkdownIt(md);
   }
   async function handleUri(uri) {
     if (await documents.handleUri(uri)) return true;
     const value = uri.toString(true);
-    if (!['/document-link', '/document-action'].includes(uri.path)) return false;
+    if (!['/document-link', '/document-action', '/document-diagram'].includes(uri.path)) return false;
     if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following a note action.');
     if (value.length > 20000) throw new Error('Invalid MRW WikiLink.');
     const parsed = new URL(value), pairs = [...parsed.searchParams];
     if (parsed.protocol !== `${scheme}:` || parsed.host !== 'flengyel.mrw' || parsed.hash ||
         pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid MRW WikiLink.');
     const data = JSON.parse(Buffer.from(pairs[0][1], 'base64url').toString('utf8'));
+    if (uri.path === '/document-diagram') { await math.handle(data); return true; }
     if (uri.path === '/document-action') {
       if (data?.session !== session || typeof data.uri !== 'string' || data.uri.length > 8192 || !['obsidian', 'contents', 'copy'].includes(data.action)) throw new Error('This note action is unavailable. Reopen the preview.');
       const source = vscode.Uri.parse(data.uri);

@@ -5,6 +5,7 @@ $r=[Console]::In.ReadToEnd()|ConvertFrom-Json
 $root=[IO.DirectoryInfo]::new($r.root)
 $entries=[Collections.Generic.List[object]]::new();$errors=[Collections.Generic.List[string]]::new();$headers=@{};$complete=$true;$count=0;$total=0
 $excluded=@('.obsidian','.trash','.git','.lake','node_modules','.venv','__pycache__')
+$checkedDirectories=@{}
 if($r.mode -eq 'titles'){
  foreach($relative in $r.files){
   if($total -ge $r.maxTitleBytes){$complete=$false;break}
@@ -15,12 +16,15 @@ if($r.mode -eq 'titles'){
    if(($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){$complete=$false;continue}
    $ancestor=$file.Directory;$redirected=$false
    while($ancestor -and $ancestor.FullName.Length -ge $root.FullName.Length){
+    if($checkedDirectories.ContainsKey($ancestor.FullName)){$redirected=$checkedDirectories[$ancestor.FullName];break}
     if(($ancestor.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){$redirected=$true;break};$ancestor=$ancestor.Parent
    }
+   $checkedDirectories[$file.Directory.FullName]=$redirected
    if($redirected){$complete=$false;continue}
    $stream=[IO.File]::Open($file.FullName,[IO.FileMode]::Open,[IO.FileAccess]::Read,([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))
    $buffer=[byte[]]::new([Math]::Min($r.headerBytes,$r.maxTitleBytes-$total));$read=$stream.Read($buffer,0,$buffer.Length);$total+=$read
    $headers[$relative]=[Convert]::ToBase64String($buffer,0,$read)
+   if($r.stream -and $headers.Count -ge 32){[Console]::WriteLine((@{progress=$true;headers=$headers}|ConvertTo-Json -Depth 4 -Compress));$headers=@{}}
   }catch{$complete=$false}finally{if($stream){$stream.Dispose()}}
  }
 }else{

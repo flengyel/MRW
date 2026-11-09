@@ -96,7 +96,7 @@ test('no directory symlink is traversed and file symlinks cannot expand the expl
 test('unsupported selectors and schemes are inert data and never become approximate note matches', async t => {
   const root = await fixture(t, { 'a.md': '# A\n', '1a.md': '# Target\n' });
   const index = await buildNoteIndex(root), source = path.join(root, 'a.md');
-  for (const target of ['1a#Target', '1a^block', '../1a', '1 a', '1a#Target|Alias', '../1a|Safe label', '|1a']) {
+  for (const target of ['1a^block', '1 a', '|1a', 'bad\\path']) {
     assert.equal((await resolveNoteLink(index, source, target, 'zettel')).code, 'unsupported_selector', target);
   }
   for (const target of ['command:workbench.action.closeWindow', 'https://example.test/', 'file:///tmp/a.md', '//example/a.md', '/tmp/a.md']) {
@@ -104,10 +104,30 @@ test('unsupported selectors and schemes are inert data and never become approxim
   }
   assert.equal((await resolveNoteLink(index, source, '%2Ftmp/a.md')).code, 'unsupported_target');
   assert.equal((await resolveNoteLink(index, source, 'a.md?run=1')).code, 'unsupported_selector');
-  assert.equal((await resolveNoteLink(index, source, 'a.md#^block')).code, 'unsupported_selector');
+  assert.equal((await resolveNoteLink(index, source, 'a.md#^block')).code, 'missing_block');
+  assert.equal((await resolveNoteLink(index, source, '../1a', 'zettel')).code, 'outside_scope');
   assert.equal((await resolveNoteLink(index, source, 'a%XX.md')).code, 'invalid_encoding');
   assert.equal((await resolveNoteLink(index, source, 'missing.md')).code, 'missing_target');
   assert.equal((await resolveNoteLink(index, source, 'missing', 'zettel')).code, 'missing_id');
+});
+
+test('WikiLink headings, block IDs and scoped paths resolve exact text and appear in backlinks', async t => {
+  const root = await fixture(t, { 'start.md': '[[target#A theorem|Read]]\n[[folder/target#^proof]]\n',
+    'target.md': '# A theorem\n\nA proof. ^proof\n', 'folder/target.md': '# Other\n\nExact proof. ^proof\n' });
+  const index = await buildNoteIndex(root), source = path.join(root, 'start.md');
+  assert.equal((await resolveNoteLink(index, source, 'target#A theorem', 'zettel')).code, 'ambiguous_id');
+  const found = await resolveNoteLink(index, source, 'folder/target#^proof', 'zettel');
+  assert.equal(found.ok, true); assert.equal(found.note.text.slice(found.heading.start, found.heading.end), 'Exact proof. ^proof\n');
+  assert.equal((await resolveNoteLink(index, source, 'target.md#missing', 'zettel')).code, 'ambiguous_id');
+  const self = await resolveNoteLink(index, path.join(root, 'target.md'), '#A theorem', 'zettel');
+  assert.equal(self.ok, true); assert.equal(self.heading.label, 'A theorem');
+  const back = await backlinks(index, path.join(root, 'folder/target.md'));
+  assert.equal(back.occurrences.length, 1); assert.equal(back.occurrences[0].sourceText, '[[folder/target#^proof]]');
+  assert.equal((await resolveNoteLink(index, source, 'folder/target#^absent', 'zettel')).code, 'missing_block');
+  await fs.writeFile(path.join(root, 'folder/target.md'), '# Other\n# Other\n\nFirst ^same\n\nSecond ^same\n');
+  const changed = await buildNoteIndex(root);
+  assert.equal((await resolveNoteLink(changed, source, 'folder/target#Other', 'zettel')).code, 'ambiguous_heading');
+  assert.equal((await resolveNoteLink(changed, source, 'folder/target#^same', 'zettel')).code, 'missing_block');
 });
 
 test('index bounds, cancellation and read errors are explicit partial states rather than completed empty results', async t => {

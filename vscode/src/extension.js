@@ -291,6 +291,7 @@ function activate(context) {
     readingDestination: location => readingController.returnDestination(location),
     handleDocumentUri: uri => readingController.handleDocumentUri(uri) });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
+    compile: rawBridge,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });

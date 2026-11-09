@@ -1,4 +1,4 @@
-# Existing documents, Contents and saved sources — 0.23.3
+# Existing documents, Contents and saved sources — 0.23.5
 
 Opening/following a note displays the original in place. The document Problems
 entry points and creation path are removed. Earlier saved work and drafts remain
@@ -8,7 +8,8 @@ readable; see [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md).
 **Saved copy** (a retained revision with MRW annotations) in one native picker.
 **Browse for another document…** is usable immediately, before folder or saved-copy
 loading. The current folder lists filenames and subfolders without descending.
-YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+YAML titles, or the first H1, arrive progressively in batches; unsaved titles take
+precedence. Query and selection stay in place.
 Search by title, filename or path. Select a folder or **Parent folder** to navigate;
 **Search subfolders…** explicitly requests a wider, bounded search. Its path,
 progress and incomplete results are shown. Failed title/listing work leaves
@@ -54,6 +55,9 @@ Document…** chooses Markdown for Contents. Both visibly open or reveal the
 selected Markdown in its existing group when available. The Contents header
 identifies its filename and full path, including unsaved status; **Reveal
 Contents Document** brings it back even with an unrelated editor active.
+While another file is active, the preceding tree is hidden and the view identifies
+that file. It explains whether to select its Markdown or return to the selected
+Contents document. PDF and text-file opens do not show the preceding note’s tree.
 Cancellation leaves the current document, Contents and drafts unchanged.
 These actions are not general file openers. **New Document…** creates a `.md` or `.markdown` file through the host
 Save dialog and refuses to overwrite a file. An untitled Markdown document
@@ -123,11 +127,16 @@ such as `[[ID|Label]]` show the label while resolving the ID; backlinks retain
 the complete original link syntax. Duplicate filename IDs are reported.
 YAML `id` and `title` values are metadata; a differing YAML ID does not select
 a substitute file or block navigation to its immutable filename. Ordinary Markdown files need not adopt Zettel
-metadata. Missing targets and unsupported wiki heading/block selectors or paths
-produce local explanations rather than guessed replacements.
+metadata. `[[ID#Heading]]`, `[[ID#^block-id]]`, `[[#Heading]]` and
+`[[folder/ID#Heading]]` resolve exact headings or paragraph/list block IDs.
+Paths without `./` or `../` are vault-relative; those prefixes select paths
+relative to the source note, still inside the selected scope. A `.md` extension
+is optional. Duplicate IDs or heading names and missing/duplicate block IDs are
+reported rather than guessed. A Markdown anchor with its duplicate suffix can
+distinguish repeated headings. WikiLinks retain their complete Return syntax.
 
 Ordinary Markdown heading fragments use the parser's heading anchors, including
-duplicate suffixes. Non-Markdown fragments, such as a PDF `#page=…`, are not
+duplicate suffixes; `#^block-id` selects an exact paragraph/list block. Non-Markdown fragments, such as a PDF `#page=…`, are not
 silently dropped: use a whole-file link for MRW's file-level opening. Links are
 data; executable destinations, templates and embeds are not evaluated. Directory
 symlinks do not extend the selected scope. Supported link resolution remains
@@ -149,7 +158,9 @@ superseded asynchronous follow preserves the preceding successful origin.
 
 The chosen notes folder, document and return pin persist in this workspace's
 host-local state. **Reopen Document** explicitly reopens the last opened or
-followed file after restart; activation does not open it automatically. Use
+followed file and its last exact Markdown selection after restart; activation
+does not open it automatically. Contents, followed heading/block locations and
+source-editor selections are recorded; native preview scrolling is not. Use
 **Open Document…** for another file, or **Show Contents** for selected Markdown.
 **Return to Document** can reopen a matching origin.
 A mismatching saved revision or missing file requires an explicit new choice,
@@ -232,3 +243,14 @@ current file scope before asking the host to load that path, then verifies the
 exact indexed occurrence. A moved or redirected path requires an explicit new
 choice. No note, citation, draft or storage format is rewritten.
 [Repair checks and limits](DOCUMENT_NAVIGATION_REPAIR.md).
+
+## Mathematical rendering in ordinary notes
+
+The preview uses bounded note-local macro definitions from leading front matter.
+It does not evaluate arbitrary LaTeX preambles. A `tikz` fence offers **Render
+diagram**, using the existing isolated Linux/WSL compiler only on an explicit
+click. Successful light/dark SVG views are cached outside the note by exact code;
+opening and reopening do not compile or rewrite the note. Exported Quiver curves
+use the bundled attributed package. Changing code requires rendering that new
+code. Compiler failures preserve source and earlier views. Obsidian embeds and
+arbitrary TeX packages remain unsupported.

@@ -38,7 +38,8 @@ async function fixture(t) {
 
 function harness(f, state = new Map(), options = {}) {
   const commands = new Map(), stored = new Map(), openChoices = [], dialogs = [], picks = [], informations = [], errors = [];
-  const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [];
+  const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [], displayed = [];
+  let selectionChanged;
   let documents, openHook, showHook, pickHook, infoResponse, externalResult = true,latestPicker;
   const configuration = { notesFolder: options.notesFolder || '' }, configurationWrites = [];
   let linkProvider;
@@ -78,6 +79,7 @@ function harness(f, state = new Map(), options = {}) {
       },
     },
     window: {
+      onDidChangeTextEditorSelection(callback) { selectionChanged = callback; return { dispose() {} }; },
       activeTextEditor: undefined,
       createQuickPick(){const picker=quickPicker((items,settings)=>pickHook&&picker.placeholder==='Choose an original file or a saved copy.'?WAIT:this.showQuickPick(items,settings));latestPicker=picker;return picker;},
       async showOpenDialog(settings) { dialogs.push(settings); return openChoices.shift(); },
@@ -98,9 +100,11 @@ function harness(f, state = new Map(), options = {}) {
     get: key => state.get(key), async update(key, value) { state.set(key, structuredClone(value)); },
   } };
   documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
+    onDisplayed: uri => displayed.push(uri.fsPath),
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
-    api, context, commands, state, documents, configuration, configurationWrites, get linkProvider() { return linkProvider; }, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external,
+    api, context, commands, state, documents, configuration, configurationWrites, get linkProvider() { return linkProvider; }, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external, displayed,
+    selection(at, end = at) { const editor = api.window.activeTextEditor; editor.selection = new Selection(editor.document.positionAt(at), editor.document.positionAt(end)); selectionChanged({ textEditor: editor, selections: [editor.selection] }); },
     setOpenHook(value) { openHook = value; }, setShowHook(value) { showHook = value; }, setPickHook(value) { pickHook = value; },
     setInfoResponse(value) { infoResponse = value; }, setExternalResult(value) { externalResult = value; },
     async open(name) { openChoices.push([uri(f.file(name))]); await commands.get('mrw.openDocument')(); return api.window.activeTextEditor?.document; },
@@ -591,7 +595,9 @@ test('backlink refuses a return occurrence changed during editor opening and ret
     if (doc === a) { const at = b.getText().indexOf('# Target'); h.change(b, at, '# Target'.length, '# Changed'); }
   });
   await assert.rejects(h.commands.get('mrw.showBacklinks')(), /originating.*changed/i); h.setShowHook(undefined);
-  assert.deepEqual(h.state.get('mrw.documents.v1'), before);
+  const after = h.state.get('mrw.documents.v1');
+  assert.deepEqual(after.origin, before.origin); assert.equal(after.last, before.last);
+  assert.equal(after.location.invalid, true, 'Overwriting the saved destination must invalidate its resume position.');
   await h.documents.returnToDocument(); assert.equal(h.selected(), '[Second](2b.md#target)');
   assert.equal(b.isDirty, true); assert.equal(await fs.readFile(b.uri.fsPath, 'utf8'), f.contents['2b.md']);
 });
@@ -644,4 +650,36 @@ test('a superseding document command closes its old picker and cancellation pres
   await first;
   for(const disposable of h.context.subscriptions)disposable.dispose();
   await second;assert.equal(h.reads.length,0);assert.equal(h.configurationWrites.length,0);
+});
+
+test('heading and block WikiLinks follow current dirty text and Return preserves complete syntax', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder();
+  await fs.writeFile(f.file('2b.md'), '# Target\n\nAn exact proof. ^proof\n');
+  const source = await h.open('1a.md');
+  h.change(source, source.text.length, 0, '\n[[2b#Target|The theorem]]\n[[2b#^proof]]\n[[./2b#Target]]\n');
+  for (const target of ['2b#Target|The theorem', '2b#^proof', './2b#Target']) {
+    await h.follow(source, target);
+    assert.match(h.selected(), target.includes('^') ? /An exact proof/ : /# Target/);
+    await h.documents.returnToDocument(); assert.equal(h.selected(), '[[' + target + ']]');
+  }
+  assert.ok(source.isDirty); assert.deepEqual(h.errors, []);
+});
+
+test('reopen restores an exact selection after restart and refuses changed text without guessing', async t => {
+  const f = await fixture(t), state = new Map(), h = harness(f, state); const source = await h.open('1a.md');
+  const at = source.text.indexOf('[Second]'); h.selection(at, at + 8);
+  await new Promise(resolve => setImmediate(resolve));
+  const restarted = harness(f, state); await restarted.commands.get('mrw.reopenDocument')(); assert.equal(restarted.selected(), '[Second]');
+  await fs.appendFile(f.file('1a.md'), '\nExternal revision\n');
+  const changed = harness(f, state);
+  await assert.rejects(changed.commands.get('mrw.reopenDocument')(), /exact document location changed/);
+  assert.equal(changed.shown.length, 0);
+});
+
+test('only successful non-Markdown opens publish their displayed identity', async t => {
+  const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md');
+  await h.follow(a, 'paper.pdf'); assert.equal(h.displayed.at(-1), f.file('paper.pdf'));
+  await h.documents.returnToDocument(); assert.equal(h.displayed.at(-1), f.file('1a.md'));
+  const before = [...h.displayed]; await assert.rejects(h.follow(a, 'missing.md'));
+  assert.deepEqual(h.displayed, before);
 });

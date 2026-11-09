@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { digest } = require('./navigation');
 const { qualifiedIdentifier, canonicalCitation } = require('./sourceIdentifiers');
-const { parseReadingMarkdown, zettelLinkParts } = require('./readingMarkdown');
+const { parseReadingMarkdown, zettelLinkParts, wikiTarget } = require('./readingMarkdown');
 const { buildNoteIndex, resolveNoteLink, backlinks, within, markdown } = require('./documentLinks');
 const { showMarkdownPreview, documentColumn } = require('./documentPresentation');
 const { windowsNoteFiles } = require('./noteFiles');
@@ -17,7 +17,7 @@ const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
 const { createDocumentPicker } = require('./documentPicker');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: vscode.workspace.workspaceFile?.toString(), folders: (vscode.workspace.workspaceFolders || []).map(f => f.uri.toString()) }));
   const remembered = context.workspaceState.get(KEY);
@@ -25,6 +25,9 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   let grants = Array.isArray(saved.grants) ? saved.grants.filter(g => typeof g.uri === 'string' && typeof g.canonical === 'string').slice(-100) : [];
   let folder = saved.folder && typeof saved.folder.uri === 'string' && typeof saved.folder.canonical === 'string' ? saved.folder : undefined;
   let last = typeof saved.last === 'string' ? saved.last : undefined;
+  let lastLocation = saved.location && saved.location.uri === last && /^[a-f0-9]{64}$/.test(saved.location.revision) &&
+    Number.isSafeInteger(saved.location.start) && Number.isSafeInteger(saved.location.end) &&
+    saved.location.start >= 0 && saved.location.end >= saved.location.start ? saved.location : undefined;
   const pin = saved.origin;
   let origin = pin && typeof pin.uri === 'string' && (pin.fileOnly || (/^[a-f0-9]{64}$/.test(pin.revision) && Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start)) ? pin : undefined;
   let latestDisplay;
@@ -34,7 +37,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   context.subscriptions.push({dispose:()=>chooser?.cancel()});
   const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
   function persist() {
-    const value = { workspace, grants: [...grants], folder, last, origin };
+    const value = { workspace, grants: [...grants], folder, last, origin, location: lastLocation };
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
     return publication;
   }
@@ -135,6 +138,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     return false;
   }
   async function display(uri, location, attempt, validate) {
+    let shownLocation;
     await check(uri);
     if (attempt !== generation) return false;
     validate?.();
@@ -154,6 +158,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
         editor.selection = new vscode.Selection(range.start, range.end);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
       }
+      shownLocation = snapshot(doc, doc.offsetAt(editor.selection.start), doc.offsetAt(editor.selection.end));
       await onMarkdown(doc);
       if (attempt !== generation) return repairSupersededDisplay();
       await showMarkdownPreview(vscode, doc, editor.viewColumn);
@@ -179,7 +184,9 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     // Opening yields to editor work: validate the tracked origin again before
     // publishing either this display or the new Return destination.
     validate?.();
-    latestDisplay = { uri, location: location ? { ...location, uri: uri.toString() } : undefined };
+    latestDisplay = { uri, location: shownLocation };
+    lastLocation = shownLocation;
+    onDisplayed(uri);
     return true;
   }
   async function pickerFolder() {
@@ -240,7 +247,17 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   async function resolve(doc, node) {
     await check(doc.uri);
     if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || /^[/\\]/u.test(node.target))) throw new Error('MRW follows relative local file links here. Open other targets explicitly through the host.');
-    if (node.syntax === 'zettel') return resolveNoteLink(await index(false, zettelLinkParts(node.target).target), doc.uri.fsPath, node.target, node.syntax);
+    if (node.syntax === 'zettel') {
+      const wiki = wikiTarget(node.target);
+      if (wiki.lookupId) return resolveNoteLink(await index(false, wiki.lookupId), doc.uri.fsPath, node.target, node.syntax);
+      const root = await folderRoot();
+      let file = wiki.file ? path.resolve(wiki.file.startsWith('./') || wiki.file.startsWith('../') ? path.dirname(doc.uri.fsPath) : root, wiki.file) : doc.uri.fsPath;
+      if (wiki.file && !markdown(file)) file += '.md';
+      const uri = vscode.Uri.file(file); await check(uri);
+      if (!within(root, await canonical(uri))) throw Error('This WikiLink leaves the selected notes folder.');
+      const target = await vscode.workspace.openTextDocument(uri);
+      return resolveNoteLink({ root, files: new Map([[await canonical(uri), { text: target.getText(), parsed: parseReadingMarkdown(target.getText()) }]]), ids: new Map(), complete: true }, doc.uri.fsPath, node.target, node.syntax);
+    }
     // Relative-file navigation need not scan any directory. This temporary map
     // supplies heading text only; final scope is independently checked below.
     const source = await canonical(doc.uri), files = new Map();
@@ -339,9 +356,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   function changed(e) {
     if (!e.contentChanges.length) return;
     const uri = e.document.uri.toString();
-    if (origin?.uri !== uri && latestDisplay?.location?.uri !== uri && ![...candidates].some(p => p.location.uri === uri)) return;
+    if (origin?.uri !== uri && lastLocation?.uri !== uri && latestDisplay?.location?.uri !== uri && ![...candidates].some(p => p.location.uri === uri)) return;
     const revision = digest(e.document.getText());
     if (latestDisplay?.location?.uri === uri) latestDisplay.location = trackLocation(latestDisplay.location, e.contentChanges, revision);
+    if (lastLocation?.uri === uri) lastLocation = trackLocation(lastLocation, e.contentChanges, revision);
     if (origin?.uri === uri && !origin.fileOnly) origin = trackLocation(origin, e.contentChanges, revision);
     for (const pending of candidates) if (pending.location.uri === uri && !pending.location.fileOnly) pending.location = trackLocation(pending.location, e.contentChanges, revision);
     void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
@@ -418,7 +436,15 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   register('mrw.chooseNotesFolder', chooseFolder);
   register('mrw.followDocumentLink', followAtCursor);
   register('mrw.showBacklinks', showBacklinks);
-  register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), undefined, supersede()); });
+  const selectionChanged = vscode.window.onDidChangeTextEditorSelection?.(event => {
+    const doc = event.textEditor?.document, range = event.selections?.[0];
+    if (!range || doc?.isClosed || doc?.uri.toString() !== last || !markdown(doc.uri.fsPath)) return;
+    lastLocation = snapshot(doc, doc.offsetAt(range.start), doc.offsetAt(range.end));
+    if (latestDisplay?.uri.toString() === last) latestDisplay.location = lastLocation;
+    void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+  });
+  if (selectionChanged) context.subscriptions.push(selectionChanged);
+  register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), lastLocation, supersede()); });
   return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
 }
 module.exports = { createDocuments };

@@ -53,6 +53,12 @@ function zettelLinkParts(value) {
   const target = separator < 0 ? value : value.slice(0, separator);
   return { target, label: separator < 0 ? target : value.slice(separator + 1) || target };
 }
+function wikiTarget(value) {
+  const target = zettelLinkParts(value).target, at = target.indexOf('#');
+  const file = at < 0 ? target : target.slice(0, at);
+  return { file, fragment: at < 0 ? '' : target.slice(at + 1),
+    lookupId: file && !file.includes('/') ? file.replace(/\.(?:md|markdown)$/i, '') : undefined };
+}
 const plain = tokens => tokens.map(t => t.type === 'softbreak' || t.type === 'hardbreak' ? ' ' :
   t.type === 'zettel_link' ? zettelLinkParts(t.content).label :
   ['text', 'code_inline', 'image', 'mrw_bare'].includes(t.type) ? t.content : '').join('');
@@ -128,7 +134,7 @@ function parseReadingMarkdown(text) {
   // A BOM is likewise masked rather than removed before parsing.
   const parsedText = text.slice(0, frontMatter.end).replace(/[^\r\n]/g, ' ') + text.slice(frontMatter.end);
   const tokens = md.parse(parsedText.replace(/^\uFEFF/, ' '), {});
-  const roots = [], stack = [], all = [], counts = new Map(), anchors = new Set();
+  const roots = [], stack = [], all = [], blocks = [], counts = new Map(), anchors = new Set();
   function lineAt(offset) {
     let low = 0, high = starts.length;
     while (low + 1 < high) { const mid = (low + high) >>> 1; if (starts[mid] <= offset) low = mid; else high = mid; }
@@ -148,6 +154,11 @@ function parseReadingMarkdown(text) {
     const token = tokens[i];
     if (token.type !== 'inline' || !token.map) continue;
     const line = token.map[0];
+    // Obsidian paragraph/list block IDs. Use parser maps to exclude code, YAML
+    // and comments, and retain the exact paragraph rather than a text search.
+    const blockId = /(?:^|\s)\^([A-Za-z0-9-]+)[ \t]*$/.exec(token.content);
+    if (blockId) blocks.push({ block: blockId[1], line,
+      start: starts[line], end: starts[token.map[1]] ?? text.length });
     if (tokens[i - 1]?.type === 'heading_open') {
       const level = Number(tokens[i - 1].tag.slice(1));
       while (stack.length && stack.at(-1).level >= level) stack.pop();
@@ -185,6 +196,6 @@ function parseReadingMarkdown(text) {
       }
     }
   }
-  return { roots, all, revision: digest(text), frontMatter };
+  return { roots, all, blocks, revision: digest(text), frontMatter };
 }
-module.exports = { parseReadingMarkdown, frontMatterInfo, zettelLinkParts };
+module.exports = { parseReadingMarkdown, frontMatterInfo, zettelLinkParts, wikiTarget, headingAnchor };

@@ -106,6 +106,7 @@ def _dispatch(request):
         'outline_stacks_import': ({'store', 'project_root', 'ticket', 'packet'}, set()),
         'outline_stacks_reference': ({'store', 'project_root', 'id', 'revision', 'tag'}, set()),
         'outline_render_diagram': ({'store', 'project_root', 'id', 'revision', 'annotation', 'code'}, set()),
+        'document_render_diagram': ({'code'}, set()),
     }
     if not isinstance(method, str) or method not in fields:
         raise ValueError('Unknown editor action')
@@ -150,6 +151,12 @@ def _dispatch(request):
     if method == 'outline_render_diagram':
         from .reader_diagrams import diagram_action
         return diagram_action(request)
+    if method == 'document_render_diagram':
+        from .reader_diagrams import compile_tikz, dark_view
+        import base64
+        svg, _ = compile_tikz(request['code'])
+        return {name: 'data:image/svg+xml;base64,' + base64.b64encode(raw).decode('ascii')
+                for name, raw in (('light', svg), ('dark', dark_view(svg)))}
     if method.startswith('outline_'):
         return outline_action(request)
     if method in ('investigation_parent', 'investigation_state', 'resume_investigation',

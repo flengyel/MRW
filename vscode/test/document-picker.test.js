@@ -66,3 +66,15 @@ test('changing folders cancels pending saved discovery and ignores its late repl
  requests[1].resolve([{id:'current',label:'Current'}]);await wait(()=>h.p.items.some(i=>i.id==='current'));
  assert.equal(h.p.items.some(i=>i.id==='stale'),false);h.cancel();
 });
+
+test('titles arrive progressively without clearing the query, selection or a dirty title', async()=>{
+ const done=deferred();let headers;const file='/notes/ID.md';
+ const h=host({dirtyText:p=>p===file?'# Unsaved title\n':undefined,list:async(root,o)=>{
+  if(o.files){headers=o.onHeaders;return done.promise;}
+  return {root,entries:[{file,type:'file'}],complete:true};
+ }});
+ await wait(()=>!!headers);h.p.value='ID';h.p.activeItems=[h.p.items.find(i=>i.file===file)];
+ headers(new Map([[file,'# Disk title\n']]));assert.match(h.p.items.find(i=>i.file===file).label,/Unsaved title/);
+ assert.equal(h.p.value,'ID');assert.equal(h.p.activeItems[0].file,file);h.cancel();
+ headers(new Map([[file,'# Late title\n']]));done.resolve({headers:new Map(),complete:true});await h.result;
+});

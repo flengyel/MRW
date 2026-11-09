@@ -5,6 +5,8 @@
 **Browse for another document…** is usable immediately, before folder or saved-copy
 loading. The current folder lists filenames and subfolders without descending.
 YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
+Titles appear in batches while the remaining headers load; the query and
+selection stay in place.
 Search by title, filename or path. Select a folder or **Parent folder** to navigate;
 **Search subfolders…** explicitly requests a wider, bounded search. Its path,
 progress and incomplete results are shown. Failed title/listing work leaves
@@ -42,6 +44,8 @@ and MRW source links. **MRW: Show Contents** selects Markdown for that navigator
 **MRW: Choose Document…** chooses another Markdown document for Contents.
 Choosing Markdown visibly opens or reveals it. Contents keeps its filename and
 path visible; **MRW: Reveal Contents Document** brings that same document back.
+When another file is active, Contents hides the preceding tree and identifies
+that file. PDFs and text files do not acquire a Markdown outline.
 Cancelling a choice preserves the current view and drafts. Ordinary navigation
 and Return leave both sidebars and editor groups under VS Code's layout control,
 so MRW, Codex and other work stay available.
@@ -125,7 +129,30 @@ limits still apply to the remaining folder.
 
 The selected folder bounds the note lookup and backlink search. Following a link
 does not authorize indexing another folder. Missing or ambiguous IDs and
-unsupported selectors produce an explanation rather than a guessed destination.
+missing or ambiguous selectors produce an explanation rather than a guessed destination.
+
+WikiLinks can select a heading (`[[ID#Heading]]`), a paragraph block
+(`[[ID#^block-id]]`), or a vault-relative path (`[[folder/ID#Heading]]`).
+`[[#Heading]]` stays in the same note; `./` and `../` paths are relative to the
+source note and cannot leave the chosen notes folder. Duplicate IDs remain
+ambiguous; use a path to distinguish them. Markdown links can use `#^block-id`
+as well. These links retain their complete original occurrence for Return.
+
+## Read mathematical notation and diagrams
+
+The preview uses bounded `\newcommand`, `\renewcommand` and
+`\providecommand` definitions from leading front matter for that note's
+equations. Packages and arbitrary LaTeX preambles are not evaluated by the math
+preview. Definitions do not carry into another note.
+
+A `tikz` fence offers **Render diagram**. That explicit action runs the existing
+isolated pdfLaTeX renderer on Linux/WSL; opening a note never compiles it. It
+requires the installed TeX, Poppler and bubblewrap tools. A pinned, attributed
+Quiver package supplies exported curve styles. Successful diagrams are cached
+outside the note, follow the light/dark theme and remain available after restart.
+Changing the code shows its source until the new code is rendered. A compilation
+failure preserves the source and earlier derived views. **TikZ source** expands
+the exact code. Obsidian embeds and arbitrary TeX packages remain separate limits.
 Leading delimited YAML is metadata, not Contents. Notes, filenames, IDs, titles
 and existing links stay unchanged. Embeds and executable link destinations are
 not evaluated.
@@ -135,7 +162,9 @@ use dirty editor text; opening preview does not save a draft. **Ctrl+S**
 saves the note; MRW does not save it merely by opening, indexing or following.
 The selected document, notes folder and usable return pin survive an ordinary
 restart in this workspace. Run **MRW: Reopen Document** to reopen the last opened
-or followed file; MRW does not open it automatically at activation. If the saved
+or followed file and its last exact Markdown selection. Contents, followed
+heading/block locations and source-editor selections are recorded; preview
+scrolling is not. MRW does not open it automatically at activation. If the saved
 original has changed incompatibly or is missing, select it explicitly again.
 VS Code owns unsaved-buffer recovery.
 

@@ -19,6 +19,15 @@ NOTE = 'Reader α😀 explanation.\r\n```tikz\r\n' + CODE + '```\r\nQuestion for
 
 
 class ReaderDiagramTests(unittest.TestCase):
+    def test_document_render_has_no_store_or_note_mutation(self):
+        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)) as compiler:
+            result = dispatch(dict(protocol=1, method='document_render_diagram', code=CODE))
+        compiler.assert_called_once_with(CODE)
+        self.assertTrue(result['light'].startswith('data:image/svg+xml;base64,'))
+        self.assertNotEqual(result['light'], result['dark'])
+        with self.assertRaises(ValueError):
+            dispatch(dict(protocol=1, method='document_render_diagram', code=CODE, path='unrelated.md'))
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
         self.home = Path(temporary.name); self.project = self.home / 'project'; self.project.mkdir()
@@ -147,6 +156,13 @@ class ReaderDiagramTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get('THEOREM_TERMINAL_DIAGRAM_TESTS') == '1', 'Opt-in normal-host isolated TikZ rendering')
 class NativeDiagramTests(unittest.TestCase):
+    def test_display_equation_and_quiver_curve(self):
+        code = '\\begin{equation}\\begin{tikzpicture}\\draw[->] (0,0)--(1,0);\\end{tikzpicture}\\end{equation}'
+        svg, _ = compile_tikz(code)
+        self.assertGreater(len(svg), 100)
+        svg, _ = compile_tikz('\\begin{tikzcd} A \\arrow[r,curve={height=12pt}] & B \\end{tikzcd}')
+        self.assertGreater(len(svg), 100)
+
     def test_native_commutative_diagram_and_external_pdf_stream_refusal(self):
         svg, tools = compile_tikz('\\begin{document}\n' + CODE + '\\end{document}')
         self.assertGreater(len(svg), 1000); self.assertEqual(checked_svg(svg), svg)

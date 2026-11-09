@@ -19,4 +19,5 @@ theorem-terminal = "theorem_terminal.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
+"theorem_terminal" = ["quiver.json"]
 "theorem_terminal.data" = ["*.json"]

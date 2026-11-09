@@ -195,11 +195,25 @@ def compile_tikz(code):
     # is wrapped for convenience. User code cannot switch the engine or shell.
     if '\\begin{document}' not in code:
         code = '\\begin{document}\n' + code + '\n\\end{document}\n'
-    document = ('\\documentclass[tikz,border=3pt]{standalone}\n'
-                '\\usepackage{amsmath,amssymb,tikz-cd}\n' + code)
+    # A display equation needs vertical mode. The default TikZ preview wrapper
+    # otherwise enters restricted horizontal mode and emits "Missing $" even
+    # for a valid equation containing a TikZ picture.
+    options = 'varwidth,border=3pt' if re.search(r'\\begin\{(?:equation|align|gather)\*?\}', code) else 'tikz,border=3pt'
+    # Quiver exports use a named curve style, not TikZ's built-in bend keys.
+    # Supply its attributed, pinned package inside the isolated work directory.
+    quiver = bool(re.search(r'\bcurve\s*=|\\usepackage(?:\[[^\]]*\])?\{quiver\}', code))
+    document = ('\\documentclass[' + options + ']{standalone}\n'
+                '\\usepackage{amsmath,amssymb,tikz-cd}\n' +
+                ('\\usepackage{quiver}\n' if quiver else '') + code)
     deadline = time.monotonic() + MAX_SECONDS
     with tempfile.TemporaryDirectory(prefix='mrw-tikz-') as temporary:
         directory = Path(temporary)
+        if quiver:
+            package = strict_json((Path(__file__).with_name('quiver.json')).read_bytes())
+            raw = package['tex'].encode('utf-8')
+            if sha256(raw).hexdigest() != 'dd729a5bcfbd66d154d643f832f5003f7ff91dbcd1a925d4014ba9d3aec576cc':
+                raise ValueError('Invalid Quiver package')
+            (directory / 'quiver.sty').write_bytes(raw)
         (directory / 'diagram.tex').write_text(document, encoding='utf-8')
         (directory / 'diagram.tex').chmod(0o600)
         _run(_sandbox(bwrap, directory, compiler, ['-interaction=nonstopmode', '-halt-on-error',

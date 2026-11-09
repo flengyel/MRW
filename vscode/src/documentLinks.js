@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { TextDecoder } = require('node:util');
 const { qualifiedIdentifier } = require('./sourceIdentifiers');
-const { parseReadingMarkdown, frontMatterInfo, zettelLinkParts } = require('./readingMarkdown');
+const { parseReadingMarkdown, frontMatterInfo, wikiTarget, headingAnchor } = require('./readingMarkdown');
 
 const DEFAULT_LIMITS = Object.freeze({ maxFiles: 4096, maxBytes: 32 * 1024 * 1024,
   maxFileBytes: 4 * 1024 * 1024, maxDepth: 32, maxEntries: 20000 });
@@ -164,9 +164,16 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
   if (!within(index.root, source)) return failure('outside_scope', 'The source document is outside the selected notes folder.');
   let destination, fragment = '';
   if (syntax === 'zettel') {
-    target = zettelLinkParts(target).target;
+    const wiki = wikiTarget(target); target = wiki.lookupId; fragment = wiki.fragment;
+    if (!wiki.file && !fragment) return failure('unsupported_selector', 'This WikiLink has no target or selector.');
+    if (/[\\:*?"<>|\u0000-\u001f]/.test(wiki.file) || wiki.file.startsWith('/')) return failure('unsupported_selector', 'Use a note ID or a path inside the selected notes folder.');
+    if (!wiki.file) destination = source;
+    else if (wiki.file.includes('/')) {
+      destination = path.resolve(wiki.file.startsWith('./') || wiki.file.startsWith('../') ? path.dirname(source) : index.root, wiki.file);
+      if (!path.extname(destination) || !markdown(destination)) destination += '.md';
+    } else {
     if (index.lookupId !== undefined && index.lookupId !== target) return failure('incomplete_index', 'This filename lookup covers a different note ID.');
-    if (!idSyntax(target)) return failure('unsupported_selector', 'Use [[ID]] or [[ID|label]] for an exact note ID. Heading/block selectors and paths are not supported in wiki links.');
+    if (!idSyntax(target)) return failure('unsupported_selector', 'Use an exact note filename ID or a path inside the selected notes folder.');
     const matches = index.ids.get(target) || [];
     if (matches.length > 1) return failure('ambiguous_id', `Note ID ${JSON.stringify(target)} matches more than one filename in the selected folder.`);
     if (!matches.length) return failure(index.complete ? 'missing_id' : 'incomplete_index', index.complete ?
@@ -175,6 +182,7 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
     if (!index.complete) return failure('incomplete_index', `The notes index is incomplete; it cannot establish a unique target for ${JSON.stringify(target)}.`);
     const note = matches[0];
     destination = note.path;
+    }
   } else if (syntax === 'markdown') {
     if (/^[a-z][a-z0-9+.-]*:/i.test(target) || /^[/\\]/u.test(target)) return failure('unsupported_scheme', 'MRW note navigation supports relative local file links; this link needs the host or an explicit file choice.');
     const marker = target.indexOf('#'), filePart = marker < 0 ? target : target.slice(0, marker);
@@ -183,7 +191,7 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
     try { decoded = decodeURIComponent(filePart); fragment = marker < 0 ? '' : decodeURIComponent(target.slice(marker + 1)); }
     catch (_) { return failure('invalid_encoding', 'This local file link has invalid percent encoding.'); }
     if (/[\u0000-\u001f\\]/u.test(decoded) || path.isAbsolute(decoded) || /^[a-z][a-z0-9+.-]*:/i.test(decoded)) return failure('unsupported_target', 'This link does not name a supported relative local file.');
-    if (/[\u0000-\u001f]/u.test(fragment) || fragment.startsWith('^')) return failure('unsupported_selector', 'Block selectors are not supported; use a Markdown heading link.');
+    if (/[\u0000-\u001f]/u.test(fragment)) return failure('unsupported_selector', 'This link has an invalid fragment.');
     destination = decoded ? path.resolve(path.dirname(source), decoded) : source;
   } else return failure('unsupported_syntax', 'This note-link syntax is not supported.');
   if (!within(index.root, destination)) return failure('outside_scope', 'This link leaves the selected notes folder. Choose the other file or folder explicitly.');
@@ -198,8 +206,20 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
   let heading;
   if (fragment) {
     if (!note) return failure('unindexed_target', 'The target note could not be indexed, so its heading cannot be located exactly.');
-    heading = note.parsed.all.find(node => node.kind === 'heading' && node.anchor === fragment) ||
-      note.parsed.all.find(node => node.kind === 'heading' && node.anchor?.toLowerCase() === fragment.toLowerCase());
+    if (fragment.startsWith('^')) {
+      const matches = (note.parsed.blocks || []).filter(node => node.block === fragment.slice(1));
+      if (matches.length !== 1) return failure('missing_block', `The block ${JSON.stringify(fragment)} is missing or duplicated. No substitute was opened.`);
+      heading = matches[0];
+    } else {
+      const headings = note.parsed.all.filter(node => node.kind === 'heading');
+      if (syntax === 'zettel') {
+        const matches = headings.filter(node => node.label.toLowerCase() === fragment.toLowerCase());
+        if (matches.length > 1) return failure('ambiguous_heading', 'This WikiLink heading occurs more than once. Use a Markdown anchor with its duplicate suffix.');
+        heading = matches[0];
+      }
+      heading ||= headings.find(node => node.anchor === (syntax === 'zettel' ? headingAnchor(fragment) : fragment)) ||
+        headings.find(node => node.anchor?.toLowerCase() === fragment.toLowerCase());
+    }
     if (!heading) return failure('missing_heading', `The linked Markdown heading ${JSON.stringify(fragment)} was not found. The whole note was not substituted.`);
   }
   return { ok: true, path: file, fragment, type, ...(note ? { note } : {}), ...(heading ? { heading } : {}) };

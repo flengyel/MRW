@@ -40,6 +40,9 @@ def verify(archive):
     for path in (repository / 'src/theorem_terminal').rglob('*'):
         if path.is_file() and path.suffix in ('.py', '.json') and '__pycache__' not in path.parts:
             exact['extension/python/theorem_terminal/' + str(path.relative_to(repository / 'src/theorem_terminal'))] = path
+    quiver = json.loads((repository / 'src/theorem_terminal/quiver.json').read_text())
+    if sha256(quiver['tex'].encode()).hexdigest() != 'dd729a5bcfbd66d154d643f832f5003f7ff91dbcd1a925d4014ba9d3aec576cc' or 'MIT License' not in quiver['license']:
+        raise ValueError('Bundled Quiver package or attribution changed')
     expected.update(exact)
     with ZipFile(archive) as package:
         names = [i.filename for i in package.infolist() if not i.is_dir()]
