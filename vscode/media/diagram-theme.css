@@ -8,6 +8,10 @@ body.vscode-high-contrast img { color-scheme: only dark; }
   height: auto;
   background: var(--vscode-editor-background);
 }
+/* Native Markdown gives figures 40px margins on both sides. In a reading pane
+   that can leave the caption only a few characters wide. */
+figure.mrw-diagram-theme { margin: 1em 0; }
+figure.mrw-diagram-theme figcaption a { word-break: normal; overflow-wrap: normal; }
 .mrw-diagram-theme .mrw-diagram-light { display: inline-block; }
 .mrw-diagram-theme .mrw-diagram-dark { display: none; }
 body.vscode-dark .mrw-diagram-theme .mrw-diagram-light,

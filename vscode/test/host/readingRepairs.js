@@ -3,6 +3,8 @@ const vscode=require('vscode'),fs=require('node:fs/promises'),path=require('node
 let production,previewAPI;
 async function run(context){
  const root=vscode.workspace.workspaceFolders[0].uri.fsPath,cfg=JSON.parse(await fs.readFile(path.join(context.extensionPath,'host-test.json'),'utf8'));
+ assert.equal(root,path.join(cfg.artifacts,'project'),'Disposable fixture workspace only');
+ await fs.rm(path.join(context.storageUri.fsPath,'document-diagrams-v1'),{recursive:true,force:true});
  const report={host:vscode.version,remote:vscode.env.remoteName,version:context.extension.packageJSON.version,checks:[],errors:[],complete:false};
  const reload=path.join(cfg.artifacts,'reload');let reloading=false;
  const watcher=setInterval(async()=>{if(!reloading&&require('node:fs').existsSync(reload)){reloading=true;await fs.rm(reload);await vscode.commands.executeCommand('workbench.action.reloadWindow');}},500);context.subscriptions.push({dispose:()=>clearInterval(watcher)});
