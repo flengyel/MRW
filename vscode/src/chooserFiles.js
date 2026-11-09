@@ -4,10 +4,15 @@ const fs=require('node:fs/promises'),path=require('node:path'),{execFile}=requir
 const LIMITS=Object.freeze({maxEntries:40000,maxItems:20000,maxDepth:32,headerBytes:16384,maxTitleBytes:16*1024*1024});
 const excluded=new Set(['.obsidian','.trash','.git','.lake','node_modules','.venv','__pycache__']);
 const cancelled=token=>token?.isCancellationRequested;
-function execute(executable,args,input,token,onProgress){return new Promise((resolve,reject)=>{
- const child=execFile(executable,args,{timeout:12000,maxBuffer:48*1024*1024,encoding:'utf8',windowsHide:true},(error,stdout)=>{subscription?.dispose();error?reject(error):resolve(stdout);});
+function execute(executable,args,input,token,onProgress,deadlines={}){return new Promise((resolve,reject)=>{
+ const idleMs=deadlines.idleMs??12000,maximumMs=deadlines.maximumMs??30000;let idle;
+ const child=execFile(executable,args,{timeout:onProgress?maximumMs:idleMs,maxBuffer:48*1024*1024,encoding:'utf8',windowsHide:true},(error,stdout)=>{
+  clearTimeout(idle);subscription?.dispose();
+  if(error){const failure=Error((onProgress?'Title loading':'Document listing')+(error.killed?' timed out; partial results and Browse remain available.':' failed; Browse remains available.'));failure.code=error.code;reject(failure);}else resolve(stdout);
+ });
+ const touch=()=>{clearTimeout(idle);idle=setTimeout(()=>child.kill(),idleMs);};if(onProgress)touch();
  let partial='';
- if(onProgress)child.stdout.on('data',chunk=>{partial+=chunk;let end;while((end=partial.indexOf('\n'))>=0){const line=partial.slice(0,end).replace(/^\uFEFF/,'');partial=partial.slice(end+1);try{const value=JSON.parse(line);if(value.progress)onProgress(value);}catch{/* Final protocol validation still rejects malformed output. */}}});
+ if(onProgress)child.stdout.on('data',chunk=>{partial+=chunk;let end;while((end=partial.indexOf('\n'))>=0){const line=partial.slice(0,end).replace(/^\uFEFF/,'');partial=partial.slice(end+1);try{const value=JSON.parse(line);if(value.progress){touch();onProgress(value);}}catch{/* Final protocol validation still rejects malformed output. */}}});
  const subscription=token?.onCancellationRequested?.(()=>child.kill());child.stdin.on('error',()=>{});child.stdin.end(input);
 });}
 async function chooserFiles(folder,{recursive=false,files,token,remoteName,io=fs,run=execute,onHeaders}={}){
@@ -30,7 +35,7 @@ async function chooserFiles(folder,{recursive=false,files,token,remoteName,io=fs
    if(added.size&&!cancelled(token))onHeaders?.(added);
   };
   let progressError;
-  const raw=await run('/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],JSON.stringify(request),token,value=>{try{if(!cancelled(token))accept(value.headers);}catch(error){progressError=error;}});
+  const raw=await run('/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],JSON.stringify(request),token,onHeaders?value=>{try{if(!cancelled(token))accept(value.headers);}catch(error){progressError=error;}}:undefined);
   if(cancelled(token))return {root,entries:[],complete:false,cancelled:true};
   if(progressError)throw progressError;
   const lines=raw.replace(/^\uFEFF/,'').trim().split(/\r?\n/),value=JSON.parse(lines.at(-1));
@@ -68,4 +73,4 @@ async function chooserFiles(folder,{recursive=false,files,token,remoteName,io=fs
  if(batch.size&&!cancelled(token))onHeaders?.(batch);
  return {root,entries,headers,complete:complete&&!cancelled(token),cancelled:!!cancelled(token),errors};
 }
-module.exports={chooserFiles,LIMITS};
+module.exports={chooserFiles,LIMITS,execute};

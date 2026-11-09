@@ -6,7 +6,8 @@
 loading. The current folder lists filenames and subfolders without descending.
 YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
 Titles appear in batches while the remaining headers load; the query and
-selection stay in place.
+selection stay in place. A progressing title worker can continue up to 30 seconds;
+12 seconds without progress stops it while keeping partial titles and Browse.
 Search by title, filename or path. Select a folder or **Parent folder** to navigate;
 **Search subfolders…** explicitly requests a wider, bounded search. Its path,
 progress and incomplete results are shown. Failed title/listing work leaves

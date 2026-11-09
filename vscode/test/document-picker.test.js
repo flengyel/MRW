@@ -78,3 +78,16 @@ test('titles arrive progressively without clearing the query, selection or a dir
  assert.equal(h.p.value,'ID');assert.equal(h.p.activeItems[0].file,file);h.cancel();
  headers(new Map([[file,'# Late title\n']]));done.resolve({headers:new Map(),complete:true});await h.result;
 });
+
+test('a progressing title worker outlives the idle deadline but remains bounded overall',async()=>{
+ const {execute}=require('../src/chooserFiles');let batches=0;
+ const script="import json,time\nfor _ in range(4):\n print(json.dumps(dict(progress=True,headers={})),flush=True);time.sleep(.2)\nprint(json.dumps(dict(complete=True)),flush=True)";
+ const output=await execute('python3',['-u','-c',script],'',undefined,()=>batches++,{idleMs:500,maximumMs:4000});
+ assert.equal(batches,4);assert.equal(JSON.parse(output.trim().split('\n').at(-1)).complete,true);
+});
+
+test('stalled or failed workers provide concise errors without disclosing the encoded command',async()=>{
+ const {execute}=require('../src/chooserFiles');
+ await assert.rejects(execute('python3',['-c','import time;time.sleep(5)'],'',undefined,()=>{},{idleMs:100,maximumMs:500}),/Title loading timed out; partial results/);
+ await assert.rejects(execute('python3',['-c','import sys;sys.exit(3)'],'',undefined,undefined,{idleMs:500}),error=>error.message==='Document listing failed; Browse remains available.');
+});

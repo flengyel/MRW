@@ -30,7 +30,9 @@ migration. The working window is not reloaded.
 - Chooser titles arrive progressively in bounded batches. Query, selection and
   dirty-buffer titles survive updates and cancellation. Windows title lookup
   reuses parent-directory checks within that operation, without persistent title
-  or filename caches and without changing final navigation scope checks.
+  or filename caches and without changing final navigation scope checks. A progressing title worker has
+  a 12-second inactivity deadline and a 30-second overall limit. Stalled workers
+  stop, preserving partial rows, with a concise error instead of an encoded command.
 - Reopen Document restores the last exact Markdown selection after restart.
   Source-editor selections, Contents and followed heading/block locations are
   recorded. Missing or revised text is refused rather than approximated.
@@ -68,3 +70,9 @@ metadata loading removes the wait for all titles before early titles appear;
 it does not establish a guaranteed lookup time or eliminate mounted-filesystem
 cost. Quiver's package uses the system TikZ libraries; missing tools/libraries
 produce a compiler diagnostic rather than a partial or changed diagram.
+
+A read-only Windows-vault run returned filenames at 1.69 s, its first title batch
+at 2.75 s, and all 1,286 titles at 7.27 s (41 batches). This is one observation,
+not a performance guarantee. An earlier fixed-deadline run stopped after 34
+batches despite continuing progress; the progress-aware deadline repairs that
+confirmed failure.
