@@ -177,3 +177,9 @@ Supporting context does not add extra attempts to the selected sample.
 Comparisons across releases are descriptive: tasks, exposure and elapsed intervals
 may differ. Automated fixtures remain separate from reader observations. Neither
 test counts nor these reports establish a learning benefit.
+
+## Manage saved studies
+
+Use the native study row menu for **Archive Study** or **Delete Study…**.
+[Archive, Restore, Trash, Undo and permanent deletion](STUDY_LIFECYCLE.md)
+manage optional saved work without deleting ordinary documents or shared sources.

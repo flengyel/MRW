@@ -158,6 +158,10 @@ Opening or following notes does not create a study. Earlier document-linked
 work remains readable after removal of the
 document Problems interface.
 
+Right-click a study for **Archive Study** or **Delete Study…**. Use the Studies
+title menu for archived studies and Trash. [Restore and permanent deletion](docs/STUDY_LIFECYCLE.md)
+preserve shared sources, annotations and other studies.
+
 [Source-study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
 [Proof-study workflow](docs/PROOF_STUDY_WORKFLOW.md) ·
 [Removal and preservation checks](docs/DOCUMENT_PROBLEMS_REMOVAL.md)
@@ -193,9 +197,10 @@ Obsidian embeds and arbitrary LaTeX preambles/packages are not supported.
 Automatic prerequisite discovery, whole-corpus ingestion, general proof checking
 and recovery of calculation sessions are not implemented. Multiple hosts writing
 one private store and Windows-backed artifact storage are not qualified.
-Source-study state has no cross-machine migration interface. Study archive/delete
-controls are not yet implemented; their [design](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
-is the next bounded usability requirement.
+Source-study state has no cross-machine migration interface.
+[Study lifecycle controls](docs/STUDY_LIFECYCLE.md) provide Archive/Restore,
+Trash/Undo and confirmed permanent deletion without deleting ordinary files or
+shared sources.
 
 Contributions can improve navigation, accessibility, documentation or another
 specific obstacle encountered during mathematical work. See

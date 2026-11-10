@@ -23,13 +23,12 @@ repeat it or make it the whole workstation.
 
 ## Archive and delete Studies
 
-Design requirement, 2026-11-10; not implemented in MRW 0.23.10. The Studies view
-can accumulate unwanted studies but exposes no Archive or Delete action.
+Implemented after MRW 0.23.10; see the [lifecycle workflow](STUDY_LIFECYCLE.md).
+The following contract governs Archive, Restore and deletion.
 Retiring a question or archiving a help response does not manage the study.
 
-This is the next bounded usability requirement. It can be implemented with the
-existing study store and recorder; it must not wait for a general PROV service,
-new data-analysis plugin or replacement storage system.
+The implementation uses the existing study store and recorder. It requires no
+general PROV service, data-analysis plugin or replacement storage system.
 
 ### Actions and states
 

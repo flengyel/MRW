@@ -1,5 +1,20 @@
 # CODEX_PLAN.md
 
+## Delivered implementation — Study lifecycle
+
+Saved Studies now have Archive/Restore, Trash/Undo and explicit permanent
+deletion. Native row context actions and Command Palette pickers use the existing
+study/history stores. See [docs/STUDY_LIFECYCLE.md](docs/STUDY_LIFECYCLE.md).
+Preserve pending-write checks, lifecycle epochs, deletion recovery and opaque
+tombstones. Shared questions/snapshots, source annotations, ordinary files and
+other studies are protected. Test deletion only on disposable records.
+
+The design section below records the requested scope. Zotero reference and
+attachment linking is next; the small PROV trial should then retain two alternative
+calculations through restart, comparison and provenance export. Neither is
+implemented by this lifecycle increment.
+
+
 ## Current design — W3C PROV and Study lifecycle, 2026-11-10
 
 MRW's direction combines continuing mathematical study with a research lab
@@ -8,15 +23,15 @@ as the common provenance model for future integrations; see
 [the provenance design](docs/PROVENANCE_DESIGN.md). VisTrails is a design
 reference, not a new runtime dependency.
 
-The concrete next usability requirement is
+The implemented lifecycle contract is
 [Archive/Delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
 archive/restore, Trash/Undo and explicit permanent deletion of study-owned
 content, with shared sources, ordinary files and other studies preserved.
-It must not wait for a general provenance engine. Earlier preservation rules
+It remains independent of a general provenance engine. Earlier preservation rules
 forbid unsolicited deletion; they do not prohibit these user-invoked controls.
 
-This is a design update, not a claim that these commands or PROV export are
-implemented. It performs no data deletion or migration. Preserve the delivered
+The lifecycle commands are implemented as described above. PROV export remains
+a design goal. No genuine study was deleted during implementation. Preserve the delivered
 source plugins and Lean study unit. Consult
 [related systems](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
 before duplicating existing capabilities.
@@ -24,10 +39,9 @@ before duplicating existing capabilities.
 [Zotero integration](docs/RESEARCH_WORKSTATION_DESIGN.md#zotero-integration)
 is an explicit requested feature: connect the existing library's references and
 attachments to MRW notes, retained sources and citations. It remains unimplemented.
-Keep Study archive/delete first; include Zotero in subsequent integration work.
+Study archive/delete is delivered; include Zotero in subsequent integration work.
 
-Implement the Study lifecycle as one bounded change with the stated recovery
-and shared-data checks. A later provenance trial should follow two alternative
+The Study lifecycle implementation includes recovery and shared-data checks. A later provenance trial should follow two alternative
 calculations through save, restart, comparison and export. Zotero integration,
 repository study imports, CoCalc/Wolfram interoperability and data-analysis
 plugins remain unimplemented; keep Clowder and PreTeXt on the source-adapter list.

@@ -300,3 +300,26 @@ not reparse saved text; **Reparse Saved Source…** creates a separate derived c
 without moving annotations. No VSIX rebuild or window reload is needed to add
 a source. See the [source-plugin guide](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_PLUGINS.md)
 for the working external examples and trust boundary.
+
+
+## Put a study aside or remove it
+
+In **Studies**, right-click a study and choose **Archive Study**. It leaves the
+active list and stops reviews while keeping drafts, attempts, responses and
+review dates. Use the Studies **…** menu → **Show Archived Studies**, select the
+study, then **Restore study** to continue it. These commands also appear in the
+Command Palette.
+
+**Delete Study…** moves the selected study to Trash after showing its scope.
+Choose **Undo** in the notification, or later use **Show Deleted Studies** →
+**Restore study**. Restoration returns it to its prior active or archived state.
+
+For permanent removal, open **Show Deleted Studies**, select the study and
+choose **Permanently delete study…**. The confirmation lists the private data
+being removed and shared data being kept. Ordinary notes, source annotations,
+Lean files and other studies remain. Exports and backups are outside this action.
+
+If saving fails, the lifecycle action stops and preserves the draft. If deletion
+is interrupted, run **Show Deleted Studies** to retry cleanup. Returning to the
+same source does not resurrect removed work; **Start new study** explicitly
+creates a new identity.

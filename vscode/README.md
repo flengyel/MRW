@@ -295,3 +295,7 @@ explicitly registered source plugins. Retained snapshots remain readable without
 the plugin. See [source plugins](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_PLUGINS.md)
 and [nLab](https://github.com/flengyel/MRW/blob/main/docs/NLAB_WORKFLOW.md) for
 installation, supported mathematics, revision evidence and limits.
+
+Saved Studies have Archive/Restore, Trash/Undo and confirmed permanent deletion.
+Use row context menus or the Command Palette; the Studies title menu opens
+archived studies and Trash. See [lifecycle and recovery](../docs/STUDY_LIFECYCLE.md).

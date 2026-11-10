@@ -561,6 +561,42 @@
         "command": "mrw.manageLeanLessonPacks",
         "title": "Manage Lean Lesson Packs\u2026",
         "category": "MRW"
+      },
+      {
+        "command": "mrw.archiveStudy",
+        "title": "Archive Study",
+        "category": "MRW",
+        "icon": "$(archive)"
+      },
+      {
+        "command": "mrw.restoreStudy",
+        "title": "Restore Study",
+        "category": "MRW",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "mrw.deleteStudy",
+        "title": "Delete Study\u2026",
+        "category": "MRW",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "mrw.permanentlyDeleteStudy",
+        "title": "Permanently Delete Study\u2026",
+        "category": "MRW",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "mrw.showArchivedStudies",
+        "title": "Show Archived Studies",
+        "category": "MRW",
+        "icon": "$(archive)"
+      },
+      {
+        "command": "mrw.showDeletedStudies",
+        "title": "Show Deleted Studies",
+        "category": "MRW",
+        "icon": "$(trash)"
       }
     ],
     "views": {
@@ -772,6 +808,16 @@
           "command": "mrw.importKerodonSection",
           "when": "view == mrw.research",
           "group": "1_reading@3"
+        },
+        {
+          "command": "mrw.showArchivedStudies",
+          "when": "view == mrw.research",
+          "group": "1_study@4"
+        },
+        {
+          "command": "mrw.showDeletedStudies",
+          "when": "view == mrw.research",
+          "group": "1_study@5"
         }
       ],
       "editor/context": [
@@ -902,7 +948,38 @@
           "group": "navigation@21"
         }
       ],
-      "view/item/context": []
+      "view/item/context": [
+        {
+          "command": "mrw.archiveStudy",
+          "when": "view == mrw.research && viewItem == mrw.study.active",
+          "group": "study_lifecycle"
+        },
+        {
+          "command": "mrw.restoreStudy",
+          "when": "view == mrw.research && viewItem == mrw.study.archived",
+          "group": "study_lifecycle"
+        },
+        {
+          "command": "mrw.restoreStudy",
+          "when": "view == mrw.research && viewItem == mrw.study.trashed",
+          "group": "study_lifecycle"
+        },
+        {
+          "command": "mrw.deleteStudy",
+          "when": "view == mrw.research && viewItem == mrw.study.active",
+          "group": "study_lifecycle"
+        },
+        {
+          "command": "mrw.deleteStudy",
+          "when": "view == mrw.research && viewItem == mrw.study.archived",
+          "group": "study_lifecycle"
+        },
+        {
+          "command": "mrw.permanentlyDeleteStudy",
+          "when": "view == mrw.research && viewItem == mrw.study.trashed",
+          "group": "study_lifecycle"
+        }
+      ]
     },
     "configuration": {
       "title": "Mathematical Research Workstation",
@@ -1000,7 +1077,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },

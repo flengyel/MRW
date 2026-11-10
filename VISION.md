@@ -23,7 +23,7 @@ claim of uniqueness or a completed workflow.
 
 Keeping work includes control over what remains:
 [archive, restore and delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
-is a concrete missing capability. Provenance must support deliberate deletion
+is implemented in the optional saved-study workflow. Provenance must support deliberate deletion
 of private study data as well as retention.
 
 MRW should connect ongoing mathematical questions to ordinary documents,

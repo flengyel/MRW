@@ -17,7 +17,7 @@ function view(stored={studies:{}}){
     addEventListener:(_,fn)=>receive=fn,MRWAnnotations:{render:(p,t)=>{const n=new Node('div');n.textContent=t;p.append(n);}}};
   globals.window=globals;globals.origin='vscode-webview://fixture';
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/activeStudyView.js'),'utf8'),globals);
-  return{root,messages,send:(study,notice='',gap='')=>receive({origin:globals.origin,data:{type:'active_study',study:structuredClone(study),notice,gap}}),
+  return{root,messages,deliver:data=>receive({origin:globals.origin,data}),send:(study,notice='',gap='')=>receive({origin:globals.origin,data:{type:'active_study',study:structuredClone(study),notice,gap}}),
     error:message=>receive({origin:globals.origin,data:{type:'study_error',message}}),idle:()=>receive({origin:globals.origin,data:{type:'study_idle'}}),
     button:action=>root.all().find(n=>n.dataset.action===action),field:text=>root.all().find(n=>n['aria-label']===text),
     flush:()=>{const pending=[...timers.values()];timers.clear();pending.forEach(fn=>fn());},stored:()=>stored};
@@ -163,4 +163,27 @@ test('missing-solution form is distinct from an attempt and preserves attributio
  h.field('Solution author').value='Named source author';h.field('Solution author').oninput();h.button('solution_save').onclick();
  const sent=h.messages.at(-1);assert.equal(sent.answer.text,'Exact pasted solution λ');assert.equal(sent.answer.author,'Named source author');assert.equal(sent.attempt,null);
  h.error('Save rejected');assert.equal(h.field('Solution').value,'Exact pasted solution λ');assert.equal(h.field('Your attempt'),undefined);
+});
+
+
+test('lifecycle checkpoint captures unflushed controls and locks editing until the host replies',()=>{
+  const h=view(),s=study();s.current=attempt();h.send(s);
+  h.field('Your attempt').value='Latest unsent text';h.field('Your attempt').oninput();
+  h.deliver({type:'checkpoint_study',study:s.id,token:'checkpoint-1'});
+  const checkpoint=h.messages.at(-1);assert.equal(checkpoint.type,'lifecycle_checkpoint');assert.equal(checkpoint.token,'checkpoint-1');
+  assert.equal(checkpoint.draft,'Latest unsent text');assert.equal(h.field('Your attempt').disabled,true);
+  h.send(s);assert.equal(h.field('Your attempt').disabled,false);
+});
+test('archived work is inspectable without study actions and restoring discards obsolete local draft caches',()=>{
+  const h=view(),s=study();s.current=attempt();h.send(s);h.field('Your attempt').value='old cache';h.field('Your attempt').oninput();
+  s.current.draft='Checkpointed prose';s.lifecycle={epoch:'archive-1'};s.lifecycleStatus='archived';h.send(s);
+  assert.match(h.root.text(),/Checkpointed prose/);assert.match(h.root.text(),/Reviews are suspended/);
+  assert.equal(h.button('next'),undefined);assert.equal(h.button('pause'),undefined);assert.equal(h.field('Your attempt'),undefined);
+  s.lifecycle={epoch:'restore-1'};s.lifecycleStatus='active';h.send(s);assert.equal(h.field('Your attempt').value,'Checkpointed prose');
+});
+test('deletion purges cached drafts for inactive studies and cancels delayed messages',()=>{
+  const h=view(),a=study();a.current=attempt();h.send(a);h.field('Your attempt').value='Private obsolete draft';h.field('Your attempt').oninput();
+  const b=study();b.id='other-study';h.send(b);h.deliver({type:'study_deleted',study:a.id});h.flush();
+  assert.equal(h.stored().studies[a.id],undefined);assert.ok(h.stored().studies[b.id]);
+  assert.ok(!h.messages.some(m=>m.type==='form_draft'&&m.study===a.id));
 });

@@ -43,7 +43,8 @@ active, archived, trashed, or permanently deleted. Archive suspends selection
 and review while retaining work; permanent deletion removes the selected
 study-owned data. Shared sources, other studies and ordinary files remain
 separate. Follow [the lifecycle contract](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
-This extends the design only; it is not a storage-schema version change.
+The saved-study lifecycle is implemented through additive markers beside the
+existing private records; existing study content is not migrated.
 
 ## Earlier model revisions
 

@@ -71,3 +71,6 @@ for present commands and installation.
 
 - [Source plugins: installation and API 1](SOURCE_PLUGINS.md)
 - [nLab reader and revision limits](NLAB_WORKFLOW.md)
+
+- [Study lifecycle](STUDY_LIFECYCLE.md): Archive/Restore, Trash/Undo,
+  permanent deletion and interrupted-operation recovery.

@@ -11,7 +11,7 @@
   const copy=value=>value===undefined?undefined:structuredClone(value);
   function reportDraft(){return state?.current?local.reports?.[state.current.id]||state.current.reportDraft||null:null;}
   function identities(){
-    return {study:state.id,attempt:state.current?.id||null,formEpoch:state.formEpoch,
+    return {study:state.id,lifecycleEpoch:state.lifecycle?.epoch,attempt:state.current?.id||null,formEpoch:state.formEpoch,
       formDraftId:local.form?.draftId||null,helpDraftId:local.helpDraft?.id||null};
   }
   function saveLocal(){
@@ -193,11 +193,11 @@
   }
   function renderSavedDocument(){
     if(state.current&&local.attempt!==state.current.id){local.attempt=state.current.id;local.answer=state.current.draft;local.paper=state.current.paper;}
-    el('p','Document problem forms have been removed. Earlier saved work remains available here.');
+    el('p',state.lifecycleStatus&&state.lifecycleStatus!=='active'?'This study is '+state.lifecycleStatus+'. Reviews are suspended. Restore it through MRW: Restore Study to continue.':'Document problem forms have been removed. Earlier saved work remains available here.');
     const bar=el('div');bar.className='toolbar';
     const origin=state.returnOrigin||state.documentContext?.origin;
     if(origin){button(bar,'← Return to '+origin.filename+' › '+origin.section,'document_return');button(bar,'Open document without exact location','document_open');}
-    button(bar,'Save pending work','pause');button(bar,'Inspect history','history');button(bar,'Export history…','export');
+    if(!state.lifecycleStatus||state.lifecycleStatus==='active')button(bar,'Save pending work','pause');button(bar,'Inspect history','history');button(bar,'Export history…','export');
     if(origin?.invalid||state.returnError)el('p',state.returnError||'The original location changed. Open the document to navigate manually.');
     if(state.missingProblems?.length)el('p','An associated saved record is unavailable. Its reference is preserved.');
     const prose=(parent,title,value)=>{if(value?.text){el('h3',title,parent);el('p',value.author+' · '+label(value.origin),parent);math(parent,value.text);}};
@@ -266,7 +266,7 @@
     const focus=document.activeElement,focusKey=focus?.dataset?.field,selection=focusKey?[focus.selectionStart,focus.selectionEnd]:null;
     focusedControl=null;hoveredControl=null;root.replaceChildren();el('h1',state.title);
     const status=el('p',notice);status.setAttribute('role','status');if(state.gap){const gap=el('p',state.gap);gap.className='warning';}
-    if(state.document){renderSavedDocument();return;}
+    if(state.document||(state.lifecycleStatus&&state.lifecycleStatus!=='active')){renderSavedDocument();return;}
     const bar=el('div');bar.className='toolbar';button(bar,'Pause / save','pause');
     const options=details(bar,'Study actions','study-actions');button(options,'Add prerequisites…','prerequisites');button(options,'Inspect history','history');button(options,'Export history…','export');
     const a=state.current,questions=state.questions.filter(q=>!q.retired);
@@ -332,11 +332,28 @@
     // Preserve newer local text while adopting the host's identity for a legacy draft.
     form=local.form||copy(study.formDraft)||null;
     if(form&&!form.draftId)form.draftId=study.formDraft?.draftId||crypto.randomUUID();
-    local.form=form;local.formEpoch=study.formEpoch;
+    local.form=form;local.formEpoch=study.formEpoch;local.lifecycleEpoch=study.lifecycle?.epoch;
   }
   window.addEventListener('message',event=>{
     if(event.origin!==window.origin)return;const m=event.data;
-    if(m?.type==='active_study'){
+    if(m?.type==='checkpoint_study'){
+      clearTimeout(formTimers.get(m.study));formTimers.delete(m.study);
+      const pending=state?.id===m.study?local:saved.studies[m.study];
+      if(!pending){api.postMessage({type:'lifecycle_checkpoint',token:m.token,study:m.study,present:false});return;}
+      if(state?.id===m.study){busy=true;disableBusy();}
+      const scope=state?.id===m.study?identities():{study:m.study,attempt:pending.attempt||null,formEpoch:pending.formEpoch,
+        formDraftId:pending.form?.draftId||null,helpDraftId:pending.helpDraft?.id||null,lifecycleEpoch:pending.lifecycleEpoch};
+      api.postMessage({type:'lifecycle_checkpoint',token:m.token,...scope,form:pending.form||null,
+        draft:pending.answer,paper:pending.paper,reportDraft:state?.id===m.study?reportDraft():pending.reports?.[pending.attempt]||null,
+        helpDraft:pending.helpDraft||null,unresolvedDraft:pending.unresolved??(state?.id===m.study?state.unresolved:undefined)});
+    }else if(m?.type==='study_deleted'){
+      clearTimeout(formTimers.get(m.study));formTimers.delete(m.study);delete saved.studies[m.study];api.setState?.(saved);
+      if(state?.id===m.study){state=null;local={};root.replaceChildren();el('p','Study deleted.');}
+    }else if(m?.type==='active_study'){
+      for(const id of m.deletedStudies||[]){delete saved.studies[id];clearTimeout(formTimers.get(id));formTimers.delete(id);}
+      if(state?.id===m.study.id&&state.lifecycle?.epoch!==m.study.lifecycle?.epoch){
+        delete saved.studies[m.study.id];local={study:m.study.id};
+      }
       const changed=state?.id!==m.study.id;
       restoreForm(m.study,changed);
       if(m.study.document){if(!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}

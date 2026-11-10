@@ -2,12 +2,11 @@
 
 ## Proposed interaction — Study lifecycle and lab notebook
 
-The missing Study lifecycle is specified in
+The implemented Study lifecycle follows
 [Archive and delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
 Add native Studies row actions and Command Palette pickers for archive/restore,
 Trash/Undo and explicit permanent deletion. Preserve drafts, Return and shared
-records; do not turn archive or deletion into a recall outcome. These commands
-are not implemented in the current release.
+records; do not turn archive or deletion into a recall outcome. See the [delivered workflow](docs/STUDY_LIFECYCLE.md).
 
 The proposed [W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) links results to
 inputs, method revisions and notes. It supports comparison and resumption

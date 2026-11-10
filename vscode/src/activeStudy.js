@@ -3,17 +3,37 @@ const fs=require('node:fs/promises'),path=require('node:path'),{randomUUID}=requ
 const model=require('./studyModel'),scheduler=require('./studyScheduler'),help=require('./studyHelp');
 const documentStudy=require('./studyDocument'),{trackLocation}=require('./readingOutline');
 const {outlineHtml}=require('./outlines');
+const files=require('./studyFiles'),{StudyLifecycle,digests}=require('./studyLifecycle');
 const {hash,summarize,selectHistoryContext}=require('./studyHistory');
 function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,changed,getCurrent,readPassage,followPassage,selectPrerequisites,loadExample,returnToDocument,io=fs}){
   let active,panel,loaded=false,loading,queue=Promise.resolve(),saveTail=Promise.resolve();
   const dirty=new Set(),draftTimers=new Map(),durable=new Map();
   const studies=new Map(),recentKey='mrw.lightStudy.recent.v1';
   const home=context.storageUri&&path.join(context.storageUri.fsPath,'active-studies-v1');
-  const recent=()=>context.workspaceState.get(recentKey)||[];
+  const lifecycle=new StudyLifecycle(home,recorder,io);recorder.lifecycleDirectory=home;
+  let checkpoint;
+  const stateOf=s=>lifecycle.state(typeof s==='string'?s:s.id);
+  const activeStudy=s=>stateOf(s)==='active';
+  const recent=()=>(context.workspaceState.get(recentKey)||[]).filter(r=>stateOf(r.id)==='active');
+  const sourceKey=s=>s.sourceKey||hash(JSON.stringify({root:s.root,sources:model.signature(s.passages)}));
+  async function updateIndex(){
+    const rows=[...studies.values()].filter(activeStudy).sort((a,b)=>b.updated.localeCompare(a.updated)).slice(0,30)
+      .map(s=>({id:s.id,title:s.title,document:s.document?.uri,sources:s.passages.length,unfinished:!!s.current&&!s.current.finished}));
+    await context.workspaceState.update(recentKey,rows);changed.fire();
+  }
   function load(){if(loaded)return Promise.resolve();if(!loading)loading=restore().catch(e=>{loading=undefined;throw e;});return loading;}
   async function restore(){if(!home)throw new Error('Open a folder to save study continuity.');await recorder.init();
     await io.mkdir(home,{recursive:true,mode:0o700});
-    for(const item of recent())try{const s=JSON.parse(await io.readFile(path.join(home,item.id+'.json'),'utf8'));if(s.version===2&&s.id===item.id){durable.set(s.id,structuredClone(s));normalizeDrafts(s);studies.set(s.id,s);}}catch(e){recorder.record('operation.error',{operation:'study.restore',message:e.message,study:item.id});}
+    await lifecycle.load();
+    // Recent is a disposable locator, not the inventory or deletion authority.
+    // Read every study, including archived work and shared owners outside 30 recents.
+    for(const name of await io.readdir(home))if(/^[a-f0-9]{64}\.json$/.test(name)){
+      const id=name.slice(0,64);if(['deleted','deleting'].includes(stateOf(id)))continue;
+      const s=await files.json(io,path.join(home,name));
+      if(s.version!==2||s.id!==id||!Array.isArray(s.questions)||!Array.isArray(s.passages))throw Error('Saved study is invalid; its files are preserved.');
+      durable.set(id,structuredClone(s));normalizeDrafts(s);studies.set(id,s);
+    }
+    await lifecycle.recover(studies);await updateIndex();
     for(const s of [...studies.values()])await loadProblemOwners(s);
     loaded=true;
     try{await reconcilePending();}catch(e){recorder.failure(e);}
@@ -21,21 +41,23 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   function persist(s,patch={}){
     dirty.add(s.id);s.updated=new Date().toISOString();const snapshot=JSON.stringify({...s,...patch},null,2)+'\n';
     const job=saveTail.then(async()=>{try{
-      const dest=path.join(home,s.id+'.json'),temp=dest+'.pending';await io.writeFile(temp,snapshot,{mode:0o600});await io.rename(temp,dest);
+      await lifecycle.assertCurrent(s.id);
+      const dest=path.join(home,s.id+'.json');await files.write(io,dest,snapshot);
       durable.set(s.id,JSON.parse(snapshot));if(JSON.stringify(s,null,2)+'\n'===snapshot)dirty.delete(s.id);
-      const r=[{id:s.id,title:s.title,document:s.document?.uri,sources:s.passages.length,unfinished:!!s.current&&!s.current.finished},...recent().filter(x=>x.id!==s.id)].slice(0,30);await context.workspaceState.update(recentKey,r);changed.fire();
+      await updateIndex();
     }catch(e){recorder.failure(e);await send('Study save failed; keep this view open or copy your draft. '+e.message);throw e;}});saveTail=job.catch(()=>{});return job;
   }
   function syncContext(){if(active)recorder.setContext(model.identity(active));}
-  function eligible(s){
+  function eligible(s,inspection=false){
+    if(!inspection&&!activeStudy(s))return[];
     if(s.document){
       const bank=[...s.questions];
-      for(const link of s.problemLinks||[]){if(link.supersededBy||studies.get(link.owner)?.root!==s.root)continue;const q=studies.get(link.owner)?.questions.find(q=>q.id===link.question&&q.revision===link.revision);
+      for(const link of s.problemLinks||[]){if(link.supersededBy||studies.get(link.owner)?.root!==s.root||(!inspection&&!activeStudy(link.owner)))continue;const q=studies.get(link.owner)?.questions.find(q=>q.id===link.question&&q.revision===link.revision);
         if(q&&!bank.some(old=>documentStudy.sameQuestion(old,q)))bank.push(q);}
       return bank;
     }
     const pins=new Set(model.signature(s.passages).map(p=>JSON.stringify(p))),bank=[];
-    for(const owner of studies.values())for(const q of owner.questions){
+    for(const owner of studies.values())if(inspection||activeStudy(owner))for(const q of owner.questions){
       if(q.references.every(ref=>{const p=owner.passages.find(p=>p.reference===ref);return p&&pins.has(JSON.stringify(model.signature([p])[0]));}))bank.push(q);
     }return bank;
   }
@@ -59,6 +81,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   }
   function stopTimers(){for(const timer of draftTimers.values())clearTimeout(timer);draftTimers.clear();}
   async function readOwner(id){
+    if(['deleted','deleting'].includes(stateOf(id)))throw Error('The linked study was deleted.');
     if(studies.has(id))return studies.get(id);
     if(!/^[a-f0-9]{64}$/.test(id))throw new Error('Pending question owner identity is invalid.');
     const owner=JSON.parse(await io.readFile(path.join(home,id+'.json'),'utf8'));
@@ -107,10 +130,11 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   }
   async function send(notice=''){
     if(!panel||!active)return;syncContext();
-    await panel.webview.postMessage({type:'active_study',study:{...active,returnOrigin:problemReturn(active),passages:passagesFor(active),questions:eligible(active)},gap:recorder.gap,notice,scheduler:scheduler.IDENTITY});
+    await panel.webview.postMessage({type:'active_study',deletedStudies:[...lifecycle.records.values()].filter(r=>['deleted','deleting'].includes(r.state)).map(r=>r.id),study:{...active,lifecycle:lifecycle.get(active.id)||null,lifecycleStatus:stateOf(active),returnOrigin:problemReturn(active),passages:passagesFor(active),questions:eligible(active,!activeStudy(active))},gap:recorder.gap,notice,scheduler:scheduler.IDENTITY});
   }
   async function open(s,reason){
     if(active&&active.id!==s.id){await persist(active);recorder.record('source.change',{from:active.id,to:s.id,unfinished:!!active.current&&!active.current.finished});}
+    if(['deleted','deleting'].includes(stateOf(s)))throw Error('This study was deleted.');
     active=s;syncContext();recorder.record(reason==='resume'?'study.resume':'study.open',{restored_attempt:s.current?.id,has_draft:!!s.current?.draft});
     if(!panel){panel=vscode.window.createWebviewPanel('mrw.proofStudy','Study: '+s.title,vscode.ViewColumn.Active||1,{enableScripts:true,retainContextWhenHidden:true,localResourceRoots:[]});
       panel.onDidDispose(()=>{stopTimers();if(active){recorder.record('session.pause',{reason:'study-view-closed'});dirty.add(active.id);}panel=undefined;void enqueue(flushDirty).catch(e=>recorder.failure(e));});
@@ -122,10 +146,24 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     }else panel.reveal();
     panel.title=(s.document?'Saved work: ':'Study: ')+s.title;await send();
   }
-  async function startStudy(passages,root,title){await load();const created=model.createStudy(passages,root,title);let s=studies.get(created.id);
-    if(!s){try{s=JSON.parse(await io.readFile(path.join(home,created.id+'.json'),'utf8'));
-      if(s.version!==2||s.id!==created.id||s.root!==root||!Array.isArray(s.questions)||JSON.stringify(model.signature(s.passages))!==JSON.stringify(model.signature(passages)))throw new Error('Saved study identity differs.');
-    }catch(e){if(e.code!=='ENOENT')throw new Error('Saved study kept without replacement: '+e.message);s=created;}}
+  async function startStudy(passages,root,title,prepare){
+    await load();const created=model.createStudy(passages,root,title),key=created.id;
+    const matches=[...studies.values()].filter(s=>sourceKey(s)===key);
+    let s=matches.filter(activeStudy).sort((a,b)=>b.updated.localeCompare(a.updated))[0];
+    if(!s){
+      const retained=matches.find(s=>['archived','trashed'].includes(stateOf(s)));
+      const deleted=[...lifecycle.records.values()].some(r=>r.sourceKey===key);
+      if(retained||deleted){
+        const choice=await vscode.window.showQuickPick([
+          ...(retained?[{label:'Restore saved study',action:'restore',description:retained.title+' · '+stateOf(retained)}]:[]),
+          {label:'Start new study',action:'new',description:'Use a distinct identity for the same material.'}
+        ],{placeHolder:retained?'This material has a '+stateOf(retained)+' study.':'The earlier study was deleted. Start new work explicitly.'});
+        if(!choice)return;
+        if(choice.action==='restore'){await settle(retained);await transition(retained,'active');await open(retained,'resume');return retained;}
+        created.id=hash(key+':'+randomUUID());created.sourceKey=key;
+      }
+      s=created;if(prepare)prepare(s);
+    }
     normalizeDrafts(s);studies.set(s.id,s);await persist(s);await open(s,'open');return s;
   }
   async function offerNext(){
@@ -182,7 +220,10 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   }
   function messageStudy(m){
     const s=studies.get(m.study);
-    if(!s)throw new Error('Study identity is unavailable; no draft was redirected.');
+    if(!s)throw new Error(['deleted','deleting'].includes(stateOf(m.study))?'This study was deleted.':'Study identity is unavailable; no draft was redirected.');
+    if(m.formEpoch!==s.formEpoch)throw Error('Study draft checkpoint changed; stale message rejected.');
+    if(m.lifecycleEpoch!==(lifecycle.get(s.id)?.epoch))throw Error('Study state changed; stale message rejected.');
+    if(!activeStudy(s)&&!['source','history','export','document_return','document_open'].includes(m.type))throw Error('Restore this study before changing it.');
     return s;
   }
   function checkAttempt(s,m,expected=s.current?.id||null){
@@ -202,11 +243,19 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(m.helpDraftId!==expected)throw new Error('Response draft changed; stale message rejected.');
     if(value&&(!s.helpDraft||value.id!==expected||value.attempt!==s.helpDraft.attempt))throw new Error('Response draft identity changed.');
   }
-  function receive(m){return enqueue(()=>handleMessage(m));}
+  function receive(m){
+    // A lifecycle command waits for this explicit webview checkpoint while
+    // holding the action queue. Resolving it here avoids a queue deadlock.
+    if(m?.type==='lifecycle_checkpoint'){
+      if(checkpoint&&m.token===checkpoint.token&&m.study===checkpoint.study){checkpoint.resolve(m);checkpoint=undefined;}
+      return Promise.resolve();
+    }
+    return enqueue(()=>handleMessage(m));
+  }
   async function handleMessage(m){
     if(!m||typeof m!=='object')return;
     if(m.type==='ready'){await send();return;}
-    const s=messageStudy(m);
+    const s=messageStudy(m);await lifecycle.assertCurrent(s.id);
     if(['form_draft','draft','report_draft','help_draft'].includes(m.type)){
       if(m.type==='help_draft'){
         checkAttempt(s,m,s.helpDraft?.attempt??null);checkHelp(s,m,m.response);
@@ -418,6 +467,126 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     }else return false;
     return true;
   }
+  async function checkpointView(s){
+    if(!panel||!activeStudy(s))return;
+    const token=randomUUID();let timer;
+    try{
+      const response=new Promise((resolve,reject)=>{
+        checkpoint={token,study:s.id,resolve};timer=setTimeout(()=>reject(Error('The study view did not finish saving its draft. Reopen the view and retry; no lifecycle change was made.')),5000);
+      });
+      await panel.webview.postMessage({type:'checkpoint_study',study:s.id,token});
+      const m=await response;
+      if(m.present===false){s.formEpoch=randomUUID();dirty.add(s.id);return;}
+      checkAttempt(s,m);checkForm(s,m);checkHelp(s,m);
+      if(m.form&&Buffer.byteLength(JSON.stringify(m.form))>64*1024)throw Error('Question draft exceeds 64 KiB; keep or copy it before archiving.');
+      if(m.helpDraft&&Buffer.byteLength(JSON.stringify(m.helpDraft))>96*1024)throw Error('Response draft exceeds 96 KiB; keep or copy it before archiving.');
+      if(typeof m.draft==='string'&&Buffer.byteLength(m.draft)>64*1024)throw Error('Attempt draft exceeds 64 KiB; keep or copy it before archiving.');
+      if(typeof m.unresolvedDraft==='string'&&m.unresolvedDraft.length>8192)throw Error('Unresolved question exceeds 8192 characters; keep or copy it before archiving.');
+      keepControls(s,m);
+      if(m.form&&Buffer.byteLength(JSON.stringify(m.form))<=64*1024)s.formDraft=structuredClone(m.form);
+      if(s.current&&!s.current.finished&&typeof m.draft==='string'&&Buffer.byteLength(m.draft)<=64*1024){s.current.draft=m.draft;s.current.paper=!!m.paper;}
+      // Also invalidate messages queued before a cancelled or failed action.
+      s.formEpoch=randomUUID();
+    }finally{clearTimeout(timer);checkpoint=undefined;}
+  }
+  async function settle(s){await checkpointView(s);stopTimers();await flushDirty();await recorder.flush();if(recorder.gap)throw Error(recorder.gap);}
+  async function transition(s,state){
+    await lifecycle.change(s.id,state,sourceKey(s));await updateIndex();
+    recorder.record('study.'+state,{state},'observed_action',{study:s.id});
+    await send(state==='active'?'Study restored.':state==='archived'?'Study archived. Reviews are suspended.':'Study moved to Trash.');
+  }
+  async function chooseStudy(item,states,prompt){
+    await load();if(item?.study){const s=studies.get(item.study);if(!s||!states.includes(stateOf(s)))throw Error('This study is unavailable for that action.');return s;}
+    const rows=[...studies.values()].filter(s=>states.includes(stateOf(s))).map(s=>({label:s.title,description:stateOf(s),study:s.id}));
+    if(!rows.length){await vscode.window.showInformationMessage('No studies in this list.');return;}
+    const choice=await vscode.window.showQuickPick(rows,{placeHolder:prompt});return studies.get(choice?.study);
+  }
+  async function changeStudy(item,action){
+    const states=action==='archive'?['active']:action==='restore'?['archived','trashed']:['active','archived'];
+    const s=await chooseStudy(item,states,action==='archive'?'Archive study':action==='restore'?'Restore study':'Move study to Trash');if(!s)return;
+    try{
+      await settle(s);
+      if(action==='trash'){
+        const choice=await vscode.window.showWarningMessage('Move “'+s.title+'” to Trash?',{modal:true,detail:'Preserves its questions, drafts, attempts, responses, history and scheduling state for Undo or Restore. Reviews stop. Sources, annotations and ordinary files are unaffected.'},'Move to Trash');
+        if(choice!=='Move to Trash')return;
+      }
+      const state=action==='archive'?'archived':action==='restore'?(lifecycle.get(s.id)?.previous||'active'):'trashed';
+      await transition(s,state);
+      if(action==='trash'){
+        const token=lifecycle.get(s.id).epoch;
+        // A notification must not hold the study action queue until dismissed.
+        void vscode.window.showInformationMessage('Study moved to Trash.','Undo').then(answer=>{
+          if(answer==='Undo')return enqueue(async()=>{
+            if(stateOf(s)==='trashed'&&lifecycle.get(s.id)?.epoch===token)await transition(s,lifecycle.get(s.id).previous||'active');
+          });
+        }).catch(e=>recorder.failure(e));
+      }
+    }finally{await send();}
+  }
+  function sharedTransfers(s){
+    const transfers=[];
+    for(const other of studies.values())if(other!==s&&!['deleted','deleting'].includes(stateOf(other))){
+      const pins=new Set(model.signature(other.passages).map(p=>JSON.stringify(p)));
+      const questions=s.questions.filter(q=>
+        (other.problemLinks||[]).some(l=>l.owner===s.id&&l.question===q.id&&l.revision===q.revision)||
+        documentStudy.sameQuestion(other.current?.question,q)||
+        (!other.document&&q.references.every(ref=>{const p=s.passages.find(p=>p.reference===ref);return p&&pins.has(JSON.stringify(model.signature([p])[0]));})));
+      if(questions.length)transfers.push({other,questions});
+    }return transfers;
+  }
+  async function permanentlyDelete(item){
+    const s=await chooseStudy(item,['trashed'],'Permanently delete a study from Trash');if(!s)return;
+    try{
+      await settle(s);
+      const scope=await recorder.deletionScope(s.id),transfers=sharedTransfers(s);
+      const candidates=digests(s,scope.snapshots),others=[...studies.values()].filter(o=>o!==s);
+      const kept=digests(others,scope.retained);for(const {questions} of transfers)digests(questions,kept);await recorder.retainReferencedSnapshots(kept);
+      const blobs=new Set((await io.readdir(path.join(recorder.directory,'snapshots')).catch(e=>{if(e.code==='ENOENT')return[];throw e;})).filter(n=>/^[a-f0-9]{64}\.json$/.test(n)).map(n=>n.slice(0,64)));
+      const owned=[...candidates].filter(id=>blobs.has(id));
+      const shared=`${owned.filter(id=>kept.has(id)).length} shared snapshots remain. `;
+      const choice=await vscode.window.showWarningMessage('Permanently delete “'+s.title+'”?',{
+        modal:true,detail:`Removes this study’s ${s.questions.length} question revisions, attempts, drafts, responses, scheduling state, ${scope.events.length} history events and ${owned.filter(id=>!kept.has(id)).length} unshared snapshots. ${transfers.length} other studies retain shared questions. ${shared}Shared sources, source annotations, ordinary files and other studies remain. Exports, backups and external copies are outside this deletion. This cannot be undone.`
+      },'Permanently Delete');if(choice!=='Permanently Delete')return;
+      // Retain exact shared question revisions in surviving owners before the
+      // deletion intent. Retrying after interruption is harmless and preserves
+      // current answers/cards; no recall observation is generated.
+      for(const {other,questions} of transfers){
+        for(const q of questions)if(!other.questions.some(old=>documentStudy.sameQuestion(old,q)))other.questions.push(structuredClone(q));
+        other.problemLinks=(other.problemLinks||[]).filter(l=>!(l.owner===s.id&&questions.some(q=>q.id===l.question&&q.revision===l.revision)));
+        await persist(other);
+      }
+      await lifecycle.beginDelete(s.id,sourceKey(s),candidates);
+      await panel?.webview.postMessage({type:'study_deleted',study:s.id});
+      if(active===s){
+        // Remove local webview draft caches before disposing; none is a recovery
+        // authority once the durable deletion intent exists.
+        active=undefined;recorder.setContext({});const old=panel;panel=undefined;old?.dispose();
+      }
+      dirty.delete(s.id);durable.delete(s.id);studies.delete(s.id);
+      await updateIndex();await lifecycle.finishDelete(s.id,studies);changed.fire();
+      await vscode.window.showInformationMessage('Study permanently deleted.');
+    }catch(e){
+      if(['deleting','deleted'].includes(stateOf(s))){dirty.delete(s.id);studies.delete(s.id);if(active===s){await panel?.webview.postMessage({type:'study_deleted',study:s.id});active=undefined;recorder.setContext({});const old=panel;panel=undefined;old?.dispose();}await updateIndex();throw Error('Deletion is incomplete. Run Show Deleted Studies to retry cleanup, or reopen the workspace. '+e.message);}
+      throw e;
+    }finally{await send();}
+  }
+  async function showStudies(state){
+    await load();await lifecycle.recover(studies);await updateIndex();
+    const s=await chooseStudy(null,[state],state==='archived'?'Archived studies':'Deleted studies (Trash)');if(!s)return;
+    const action=await vscode.window.showQuickPick([
+      {label:'Inspect study',action:'inspect'},{label:'Restore study',action:'restore'},
+      {label:state==='trashed'?'Permanently delete study…':'Delete study…',action:state==='trashed'?'permanent':'trash'}
+    ],{placeHolder:s.title});
+    if(action?.action==='inspect')await open(s,'inspect');
+    else if(action?.action==='permanent')await permanentlyDelete({study:s.id});
+    else if(action)await changeStudy({study:s.id},action.action);
+  }
+  registerQueued('mrw.archiveStudy',item=>changeStudy(item,'archive'));
+  registerQueued('mrw.restoreStudy',item=>changeStudy(item,'restore'));
+  registerQueued('mrw.deleteStudy',item=>changeStudy(item,'trash'));
+  registerQueued('mrw.permanentlyDeleteStudy',permanentlyDelete);
+  registerQueued('mrw.showArchivedStudies',()=>showStudies('archived'));
+  registerQueued('mrw.showDeletedStudies',()=>showStudies('trashed'));
   register('mrw.studyCurrent',async supplied=>{const editor=vscode.window.activeTextEditor;
     const invocation=editor&&{editor,document:editor.document,version:editor.document.version,range:editor.selection};
     const root=await projectRoot(editor);
@@ -428,34 +597,32 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   registerQueued('mrw.openStudyExample',async()=>{
     if(!loadExample)throw new Error('The offline example is unavailable in this host.');
     const {root,passage}=await loadExample();await load();
-    const created=model.createStudy([passage],root,'Example: sums of odd integers');let s=studies.get(created.id);
-    if(!s){try{s=JSON.parse(await io.readFile(path.join(home,created.id+'.json'),'utf8'));if(s.id!==created.id||s.version!==2||!s.practice)throw new Error('Saved example identity differs.');}
-      catch(e){if(e.code!=='ENOENT')throw e;s=created;s.practice=true;s.questions=require('./studyExample').questions(passage.reference).map(q=>model.question(q,[passage]));}}
-    normalizeDrafts(s);studies.set(s.id,s);s.practice=true;await open(s,'open');recorder.record('example.open',{attribution:'Codex companion (OpenAI)',license:'CC0-1.0'});await persist(s);
+    const s=await startStudy([passage],root,'Example: sums of odd integers',s=>{s.practice=true;s.questions=require('./studyExample').questions(passage.reference).map(q=>model.question(q,[passage]));});if(!s)return;
+    recorder.record('example.open',{attribution:'Codex companion (OpenAI)',license:'CC0-1.0'});await persist(s);await send();
   });
   registerQueued('mrw.resumeStudy',async item=>{await load();let id=item?.study;
-    if(!id&&active)id=active.id;if(!id&&recent().length===1)id=recent()[0].id;
+    if(!id&&active&&activeStudy(active))id=active.id;if(!id&&recent().length===1)id=recent()[0].id;
     if(!id){const picked=await vscode.window.showQuickPick(recent().map(x=>({label:x.title,id:x.id})),{placeHolder:'Resume a saved study'});id=picked?.id;}
-    const s=studies.get(id);if(s)await open(s,'resume');else if(id)throw new Error('This study is unavailable; its history is preserved.');
+    const s=studies.get(id);if(s&&!activeStudy(s))throw Error('This study is '+stateOf(s)+'. Use Show Archived Studies or Show Deleted Studies.');if(s)await open(s,'resume');else if(id)throw new Error('This study is unavailable; its history is preserved.');
   });
   registerQueued('mrw.inspectStudyHistory',inspect);registerQueued('mrw.exportStudyHistory',exportHistory);
   registerQueued('mrw.openStudyItem',async item=>{
-    await load();const s=studies.get(item.study);if(!s)return;await open(s,'resume');
+    await load();const s=studies.get(item.study);if(!s){if(item.study)throw Error('This study was deleted or is unavailable.');return;}await open(s,'resume');
     if(item.reference){const p=s.passages.find(p=>p.reference===item.reference);
       if(p?.kind==='document_context')await returnToDocument(p.documentOrigin);else await followPassage(item.reference,s.root);}
-    if(item.revision){const q=eligible(s).find(q=>q.revision===item.revision);if(q){
+    if(item.revision&&activeStudy(s)){const q=eligible(s).find(q=>q.revision===item.revision);if(q){
       if(s.document){await send();}
       else{if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected question row');await persist(s);await send();}
     }}
   });
   function registerQueued(name,fn){register(name,(...args)=>enqueue(()=>fn(...args)));}
   const tree={onDidChangeTreeData:changed.event,getChildren:async item=>{
-    if(!item)return recent().sort((a,b)=>Number(b.id===active?.id)-Number(a.id===active?.id)).map(r=>({...r,study:r.id,kind:'study'}));
-    await load();const s=studies.get(item.study);
+    await load();if(!item)return recent().sort((a,b)=>Number(b.id===active?.id)-Number(a.id===active?.id)).map(r=>({...r,study:r.id,kind:'study'}));
+    const s=studies.get(item.study);
     if(item.kind==='study')return [...(s?.passages||[]).map(p=>({label:p.label,reference:p.reference,study:item.study,kind:'source'})),...(s?eligible(s):[]).filter(q=>!q.retired).slice(-10).map(q=>({label:q.prompt,study:item.study,revision:q.revision,kind:'question',description:q.kept?'kept for review':'available'}))];return[];
   },getTreeItem:item=>{
     const row=new vscode.TreeItem(item.title||item.label,item.kind==='study'?vscode.TreeItemCollapsibleState.Collapsed:vscode.TreeItemCollapsibleState.None);
-    row.id=item.kind+':'+item.study+':'+(item.reference||item.revision||'');row.contextValue='mrw.'+item.kind;row.description=item.kind==='study'?[active?.id===item.study?'Current':null,item.sources?item.sources+' passages':null,item.unfinished?'unfinished':null].filter(Boolean).join(' · '):item.description;
+    row.id=item.kind+':'+item.study+':'+(item.reference||item.revision||'');row.contextValue=item.kind==='study'?'mrw.study.'+stateOf(item.study):'mrw.'+item.kind;row.description=item.kind==='study'?[active?.id===item.study?'Current':null,item.sources?item.sources+' passages':null,item.unfinished?'unfinished':null].filter(Boolean).join(' · '):item.description;
     row.tooltip=item.reference||item.label||item.title;row.command={command:'mrw.openStudyItem',title:'Open '+item.kind,arguments:[item]};return row;}};
   context.subscriptions.push(vscode.window.registerTreeDataProvider('mrw.research',tree));
   return {start:(...args)=>enqueue(()=>startStudy(...args)),documentChanged,tree,flush:async()=>{stopTimers();await queue;if(active)dirty.add(active.id);await flushDirty();},receive,get active(){return active;},hasRecent:()=>recent().length>0};

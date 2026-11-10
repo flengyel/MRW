@@ -2,6 +2,8 @@
 // One local recorder. No provider, source scanner, editor text listener or telemetry.
 const fs = require('node:fs/promises'), path = require('node:path'), crypto = require('node:crypto');
 const { constants } = require('node:fs');
+const files=require('./studyFiles');
+const {digests}=require('./studyLifecycle');
 const { performance } = require('node:perf_hooks');
 const hash = text => crypto.createHash('sha256').update(text).digest('hex');
 const POLICY = 'study-feedback-2', SCHEMA = 1;
@@ -10,6 +12,7 @@ class StudyHistory {
   constructor(directory, software, { io = fs, origin = 'production', onGap = () => {} } = {}) {
     this.directory = directory; this.software = software; this.io = io; this.origin = origin; this.onGap = onGap;
     this.session = crypto.randomUUID(); this.sequence = 0; this.pending = []; this.snapshots = new Map();
+    this.excluded=new Set();this.snapshotStudies=new Map();
     this.tail = Promise.resolve(); this.context = {}; this.gap = ''; this.started = false;
   }
   init() {
@@ -31,10 +34,14 @@ class StudyHistory {
       at: new Date().toISOString(), monotonic_ms: performance.now(), origin: this.origin==='production'&&identity?.practice?'practice_demo':this.origin,
       software: this.software, policy: POLICY, scheduler: require('./studyScheduler').IDENTITY,
       identity: structuredClone(identity), action, evidence, data: structuredClone(data) };
-    this.pending.push(e); this.schedule(); return e;
+    if(!this.excluded.has(identity?.study)){this.pending.push(e); this.schedule();} return e;
   }
   snapshot(value) {
-    const text = JSON.stringify(value), id = hash(text); this.snapshots.set(id, text); this.schedule(); return id;
+    const text = JSON.stringify(value), id = hash(text);
+    if(!this.excluded.has(this.context?.study)){
+      const owners=this.snapshotStudies.get(id)||new Set();owners.add(this.context?.study||null);this.snapshotStudies.set(id,owners);
+      this.snapshots.set(id,text);this.schedule();
+    }return id;
   }
   schedule() { if (!this.timer) { this.timer = setTimeout(() => { this.timer = undefined; void this.flush(); }, 250); this.timer.unref?.(); } }
   failure(e) { this.gap = 'History gap: ' + e.message + '. Reading and drafts remain available.'; this.onGap(this.gap); }
@@ -89,9 +96,75 @@ class StudyHistory {
       finally { await this.removeOwnedTemporary(temporary, identity); }
     }
   }
+  excludeStudies(ids){for(const id of ids)this.excluded.add(id);}
+  async refreshExcluded(){
+    if(!this.lifecycleDirectory)return;
+    for(const name of await this.io.readdir(this.lifecycleDirectory))if(/^[a-f0-9]{64}\.lifecycle\.json$/.test(name)){
+      const r=await files.json(this.io,path.join(this.lifecycleDirectory,name));
+      if(['deleting','deleted'].includes(r.state))this.excluded.add(r.id);
+    }
+  }
+  belongs(e,id){return e.identity?.study===id||e.data?.study===id;}
+  async deletionScope(id){
+    await this.flush();if(this.gap)throw Error(this.gap);
+    const events=await this.readEvents();
+    return {events:events.filter(e=>this.belongs(e,id)),snapshots:digests(events.filter(e=>this.belongs(e,id))),retained:digests(events.filter(e=>!this.belongs(e,id)))};
+  }
+  async readEvents(){
+    const events=[];
+    for(const name of (await this.io.readdir(this.directory)).filter(n=>/^[a-f0-9-]+-\d+-\d+\.json(?:\.pending)*$/.test(n)).sort()){
+      const rows=await files.json(this.io,path.join(this.directory,name));
+      if(!Array.isArray(rows))throw Error('Study history is invalid; deletion stopped.');
+      events.push(...rows);
+    }
+    return events;
+  }
+  async retainReferencedSnapshots(retained){
+    // Some retained payloads reference earlier snapshots. Follow only existing,
+    // digest-verified private snapshot files; never resolve arbitrary paths.
+    const visited=new Set();
+    for(const id of retained){
+      if(visited.has(id))continue;visited.add(id);
+      const file=path.join(this.directory,'snapshots',id+'.json');
+      try{await files.regular(this.io,file);const text=await this.io.readFile(file,'utf8');
+        if(hash(text)!==id)throw Error('Retained snapshot digest differs; deletion stopped.');
+        digests(JSON.parse(text),retained);
+      }catch(e){if(e.code!=='ENOENT')throw e;}
+    }
+    return retained;
+  }
+  eraseStudy(id,candidates,retained){
+    this.excludeStudies([id]);
+    const job=this.tail.then(async()=>{
+      // Complete lists are read before any removal. A malformed history file
+      // stops cleanup, leaving the durable deletion intent for retry.
+      const entries=[];
+      for(const name of (await this.io.readdir(this.directory)).filter(n=>/^[a-f0-9-]+-\d+-\d+\.json(?:\.pending)*$/.test(n)).sort()){
+        const file=path.join(this.directory,name),rows=await files.json(this.io,file);
+        if(!Array.isArray(rows))throw Error('Study history is invalid; deletion stopped.');
+        const keep=rows.filter(e=>!this.belongs(e,id));digests(keep,retained);entries.push({file,rows,keep});
+      }
+      this.pending=this.pending.filter(e=>!this.belongs(e,id));digests(this.pending,retained);
+      await this.retainReferencedSnapshots(retained);
+      for(const {file,rows,keep} of entries)if(keep.length!==rows.length){
+        if(keep.length)await files.write(this.io,file,JSON.stringify(keep)+'\n');else await files.remove(this.io,file);
+      }
+      for(const candidate of candidates)if(!retained.has(candidate)){
+        this.snapshots.delete(candidate);this.snapshotStudies.delete(candidate);
+        const directory=path.join(this.directory,'snapshots');
+        try{await files.remove(this.io,path.join(directory,candidate+'.json'));}catch(e){if(e.code!=='ENOENT')throw e;}
+        // Failed immutable publication may have left only an owned temp name.
+        for(const name of await this.io.readdir(directory).catch(e=>{if(e.code==='ENOENT')return[];throw e;}))
+          if(name.startsWith('.'+candidate+'-')&&name.endsWith('.pending'))await files.remove(this.io,path.join(directory,name));
+      }
+    });this.tail=job.catch(e=>this.failure(e));return job;
+  }
   flush() {
     clearTimeout(this.timer); this.timer = undefined;
     this.tail = this.tail.then(async () => {
+      try{await this.refreshExcluded();}catch(e){this.failure(e);return;}
+      this.pending=this.pending.filter(e=>!this.excluded.has(e.identity?.study)&&!this.excluded.has(e.data?.study));
+      for(const [id,owners] of this.snapshotStudies)if([...owners].every(owner=>this.excluded.has(owner)))this.snapshots.delete(id);
       if (!this.pending.length && !this.snapshots.size) return;
       const events = this.pending.splice(0), snapshots = new Map(this.snapshots); this.snapshots.clear();
       try {
@@ -100,8 +173,9 @@ class StudyHistory {
         if (events.length) {
           const file = path.join(this.directory, this.session + '-' + events[0].sequence + '-' + events.at(-1).sequence + '.json');
           const text = JSON.stringify(events) + '\n', temporary = file + '.pending';
-          await this.io.writeFile(temporary, text, { mode: 0o600 }); await this.io.rename(temporary, file);
+          await files.write(this.io,file,text);
         }
+        for(const id of snapshots.keys())if(!this.snapshots.has(id))this.snapshotStudies.delete(id);
         if (this.gap) { this.gap = ''; this.record('recorder.recovered', { missingness: 'A persistence gap was reported; retained buffered events now saved.' }); }
       } catch (e) { this.pending.unshift(...events); for (const [id, text] of snapshots) this.snapshots.set(id, text); this.failure(e); }
     }); return this.tail;
@@ -116,7 +190,7 @@ class StudyHistory {
       }
     } catch (e) { this.failure(e); }
     const byID = new Map([...events, ...this.pending].map(e => [e.id, e]));
-    return [...byID.values()].sort((a,b) => a.at.localeCompare(b.at) || a.session.localeCompare(b.session) || a.sequence-b.sequence);
+    return [...byID.values()].filter(e=>!this.excluded.has(e.identity?.study)&&!this.excluded.has(e.data?.study)).sort((a,b) => a.at.localeCompare(b.at) || a.session.localeCompare(b.session) || a.sequence-b.sequence);
   }
   async close() {
     if (!this.started || this.closed) return;this.closed=true;
