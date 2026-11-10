@@ -402,6 +402,8 @@ class OutlineStore:
         elif value.get('acquisition', {}).get('kind') == 'kerodon-section':
             from .kerodon_import import enrich
             enrich(self, value)
+        from .published_sources import reader_configuration
+        reader_configuration(value)
         from .reader_diagrams import enrich as diagram_view
         diagram_view(self, value)
         return {'outline': value, 'revision': self.revision, 'blocked': False}

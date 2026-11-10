@@ -3,7 +3,7 @@
   const api = acquireVsCodeApi(), root = document.getElementById('reader');
   let editDraft, reselectAfterSave;
   let state, busy = false, selected, request = 0, passage, sourceMode = 'live';
-  let shell, header, bar, count, mapHost, map, inspector, sourceArea, readingList;
+  let shell, header, bar, count, mapHost, map, inspector, sourceArea, readingList, sourceReader, savedSource;
   const el = (tag, parent, text, className) => {
     const n = document.createElement(tag); if (text !== undefined) n.textContent = text;
     if (className) n.className = className; parent.append(n); return n;
@@ -93,35 +93,23 @@
     local(form, 'Cancel', () => { if (!busy) { editDraft = undefined;api.postMessage({type:'view_event',event:'summary_cancel',revision:state.documentRevision,node:node.id});form.remove(); } });
   }
   function renderSource() {
-    if (!sourceArea) return; sourceArea.replaceChildren();
-    if (!passage) { el('p', sourceArea, 'Opening saved Stacks association…', 'muted'); return; }
-    if (!passage.tag) {
-      el('p', sourceArea, passage.notice || 'No corresponding Stacks tag is saved.', 'warning');
-      if (passage.exact_text) el('pre', sourceArea, passage.exact_text);
-      return;
+    if (!sourceArea) return;
+    if (!passage) { sourceArea.replaceChildren();sourceReader=undefined;el('p',sourceArea,'Opening saved source association…','muted');return; }
+    if (!sourceReader) {
+      sourceArea.replaceChildren();const host=el('section',sourceArea);savedSource=el('div',sourceArea);
+      sourceReader=window.MRWSourceReader.create({root:savedSource,host,initialMode:sourceMode,originalLabel:'Stacks page',
+        onBrowser:()=>send('stacks_page',{node:selected}),
+        onMode:mode=>{sourceMode=mode;api.postMessage({type:'view_event',event:'source_mode',revision:state.documentRevision,node:selected,mode});}});
     }
-    el('h3', sourceArea, 'Stacks Project · Tag ' + passage.tag);
-    const tabs = el('div', sourceArea, undefined, 'proof-tabs');
-    for (const [mode, label] of [['live', 'Stacks page'], ['saved', 'Saved text']]) {
-      const b = local(tabs, label, () => { sourceMode = mode;api.postMessage({type:'view_event',event:'source_mode',revision:state.documentRevision,node:selected,mode});renderSource(); }, mode === 'live' ? 'Load the corresponding tagged page from the Stacks Project.' : 'Read the pinned statement and proof offline.');
-      b.dataset.action = 'source-' + mode; b.setAttribute('aria-pressed', String(sourceMode === mode));
+    savedSource.replaceChildren();
+    if (!/^[A-Z0-9]{4}$/.test(passage.tag || '')) {
+      sourceReader.update(undefined);el('p',savedSource,passage.notice || 'No corresponding Stacks tag is saved.','warning');
+      if(passage.exact_text)el('pre',savedSource,passage.exact_text);return;
     }
-    button(tabs, 'Open on Stacks ↗', 'stacks_page', { node: selected }, 'Open this exact tag in your browser.');
-    if (sourceMode === 'live') {
-      el('p', sourceArea, 'Current Stacks page · ' + passage.tag, 'source-caption');
-      const frame = el('iframe', sourceArea, undefined, 'proof-stacks-page');
-      frame.title = 'Stacks Project · Tag ' + passage.tag;
-      frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
-      frame.setAttribute('referrerpolicy', 'no-referrer');
-      // Only a tag verified against a retained published part can reach here.
-      frame.src = 'https://stacks.math.columbia.edu/tag/' + passage.tag;
-    } else {
-      el('p', sourceArea, `${passage.authors} · Git ${passage.commit}`, 'source-caption');
-      for (const part of passage.parts) {
-        el('h3', sourceArea, part.role === 'statement' ? 'Statement' : 'Proof');
-        window.MRWStacks.part(sourceArea, part, (action, tag) => send('stacks_citation', { node: selected, tag }));
-      }
-    }
+    sourceReader.update({sourceId:'stacks-project',name:'Stacks Project · Tag '+passage.tag,
+      url:'https://stacks.math.columbia.edu/tag/'+passage.tag,origins:['https://stacks.math.columbia.edu'],supported:true,revision:passage.commit});
+    el('p',savedSource,`${passage.authors} · Git ${passage.commit}`,'source-caption');
+    for(const part of passage.parts){el('h3',savedSource,part.role==='statement'?'Statement':'Proof');window.MRWStacks.part(savedSource,part,(action,tag)=>send('stacks_citation',{node:selected,tag}));}
     controls();
   }
   function clearSelection() {
@@ -136,7 +124,7 @@
     const node = state.graph.nodes.find(n => n.id === id);
     el('h2', inspector, node.title); math(inspector, node.claim); attributed(inspector, node.explanation); nodeActions(inspector, node);
     const details = el('details', inspector); el('summary', details, 'Premises and original steps'); argument(details, node);
-    sourceArea = el('section', inspector); renderSource();
+    sourceArea = el('section', inspector); sourceReader=undefined; renderSource();
     api.postMessage({ type: 'inspect', revision: state.documentRevision, node: id, request: ++request });
     controls();
   }

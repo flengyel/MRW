@@ -4,6 +4,7 @@
 // use bundled, restricted MathML rendering; their exact text stays accessible.
 const api = acquireVsCodeApi();
 const root = document.getElementById('reader');
+const sourceReader = window.MRWSourceReader?.create({root, onBrowser:()=>post({type:'stacks_citation', tag:model?.outline.published?.qualified_tag}), onReturn:()=>post({type:'reading_return'})});
 const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail'];
 const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
@@ -292,6 +293,7 @@ function updateReturnDestination() {
 }
 function render() {
   if (!model) return;
+  sourceReader?.update(model.outline.published?.online);
   toolbarObserver?.disconnect();
   const o = model.outline;
   for (const node of root.querySelectorAll('details')) if (node.dataset.disclosure) openDetails.set(node.dataset.disclosure, !!node.open);
@@ -497,6 +499,7 @@ function render() {
   controls();
 }
 window.addEventListener('message', event => {
+  if (event.origin !== window.origin || sourceReader?.fromFrame(event)) return;
   const value = event.data;
   if (value.type === 'return_destination') { returnDestination = value.destination; updateReturnDestination(); return; }
   if (value.type === 'storageCheck') {

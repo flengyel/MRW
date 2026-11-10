@@ -43,3 +43,18 @@ def qualify_view(value, source_id):
         part.update(source_id=source_id, qualified_tag=qualified_tag(source_id, part['tag']))
         tokens(part.get('tokens', []))
     return value
+
+
+def reader_configuration(value):
+    """Only verified retained provenance supplies the original-page target."""
+    published = value.get('published')
+    if not published or published.get('error'):
+        return
+    source_id = published.get('source_id')
+    if source_id not in SOURCES:
+        return
+    from urllib.parse import urlsplit
+    url = citation(source_id, published['tag'])
+    origin = 'https://' + urlsplit(url).netloc
+    published['online'] = dict(sourceId=source_id, name=SOURCES[source_id]['name'], url=url,
+        origins=[origin], supported=True, revision=published['source_revision'])

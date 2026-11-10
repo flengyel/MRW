@@ -112,7 +112,7 @@ test('AI preparation captures only the exact graph and requires an explicit acti
 
 async function renderer({ initial = true } = {}) {
   class Node {
-    constructor(tag){this.tag=tag;this.children=[];this.listeners={};this.dataset={};this.textContent='';this.classList={add(){}};}
+    constructor(tag){this.tag=tag;this.style={};this.children=[];this.listeners={};this.dataset={};this.textContent='';this.classList={add(){}};}
     append(n){n.parent=this;this.children.push(n);}insertBefore(n,b){this.children=this.children.filter(x=>x!==n);const i=this.children.indexOf(b);this.children.splice(i<0?this.children.length:i,0,n);n.parent=this;}replaceChildren(){this.children=[];}
     remove(){if(this.parent)this.parent.children=this.parent.children.filter(n=>n!==this);}
     getBoundingClientRect(){return{left:0,top:0,width:900,height:600};}
@@ -125,11 +125,12 @@ async function renderer({ initial = true } = {}) {
   const origin='vscode-webview://proof-test';
   const global={document:{body:new Node('body'),getElementById:id=>id==='reader'?root:root.all().find(n=>n.id===id),createElement:t=>new Node(t),createElementNS:(_,t)=>new Node(t)},
     acquireVsCodeApi:()=>({postMessage:m=>messages.push(m)}),addEventListener:(_,f)=>{receive=f;}};
-  global.window=global;global.parent=global;global.origin=origin;
+  global.URL=URL;global.window=global;global.parent=global;global.origin=origin;
   global.setTimeout=f=>{timers.set(1,f);return 1;};global.clearTimeout=id=>timers.delete(id);
   global.MRWAnnotations={render:(p,s)=>{const n=new Node('p');n.textContent=s;p.append(n);}};
   global.MRWStacks={part:(p,part)=>{const n=new Node('p');n.textContent=part.exact_text;p.append(n);}};
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/proofGraphMap.js'),'utf8'),global);
+  vm.runInNewContext(await fs.readFile(path.join(extension,'src/sourceReader.js'),'utf8'),global);
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/proofGraphView.js'),'utf8'),global);
   const graph=JSON.parse(await fs.readFile(fixture,'utf8'));
   graph.nodes[0].explanation.text='<img src=x onerror=alert(1)>';
@@ -204,7 +205,7 @@ test('selected vertex opens its exact tag beside the graph; deletion keeps the p
   const projected=await bridge({method:'proof_graph',graph:h.model.graph,hidden:[...h.model.projection.hidden,'closed-diagonal']});
   h.receive({data:{type:'graph',...projected,sourceStatus:{},documentRevision:'pin'}});
   assert.equal(h.root.all().find(n=>n.tag==='iframe'),frame);assert.equal(h.messages.filter(m=>m.type==='inspect').length,1);
-  h.root.all().find(n=>n.dataset.action==='source-saved').listeners.click();assert.equal(h.root.all().filter(n=>n.tag==='iframe').length,0);
+  h.root.all().find(n=>n.dataset.action==='source-saved').listeners.click();assert.equal(h.root.all().find(n=>n.tag==='iframe'),frame);
   assert.match(h.root.text(),/Exact statement/);assert.match(h.root.text(),/Exact proof/);
   h.receive({origin:'https://stacks.math.columbia.edu',source:{},data:{type:'graph',documentRevision:'forged'}});assert.match(h.root.text(),/08ZH/);
 });

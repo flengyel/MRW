@@ -241,3 +241,14 @@ and structure, not the mathematical argument. See
 
 **MRW: Open Study Example** supplies an optional offline demonstration. Reopen
 this active build's guide with **MRW: Open Tutorial**.
+
+
+## Read a published section
+
+**Import Stacks Project Section…** and **Import Kerodon Section…** are available
+in Commands even with a document open. Import a section, then use **Original
+page** to read its current official page inside MRW, or **Saved text** to return
+to the retained revision and annotations. **Open in browser** opens the official
+page separately. The online page may have changed since import; switching views
+does not update saved text or relocate annotations. Save reader annotations
+explicitly before closing the reader.

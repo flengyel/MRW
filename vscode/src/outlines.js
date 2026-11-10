@@ -9,13 +9,18 @@ const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require(
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
 
+function framePolicy(options) {
+  const origins = options.frameOrigins || (options.stacksFrame ? ['https://stacks.math.columbia.edu'] : []);
+  if (!Array.isArray(origins) || origins.some(o => typeof o !== 'string' || !/^https:\/\/[a-z0-9.-]+(?::[0-9]+)?$/.test(o) || new URL(o).origin !== o)) throw new Error('Invalid source frame origin');
+  return origins.length ? 'frame-src ' + [...new Set(origins)].join(' ') + '; ' : '';
+}
 function outlineHtml(script, support = [], diagramStyle = '', options = {}) {
   const caption = ({ proof: 'Proof outline', proofStudy: 'Proof work', study: 'Study' })[options.kind] || 'Saved source';
   script = [...support, script].join('\n;\n');
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; ${options.stacksFrame ? 'frame-src https://stacks.math.columbia.edu; ' : ''}base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; ${framePolicy(options)}base-uri 'none'; form-action 'none'">
 <title>${caption}</title><style nonce="${nonce}">
 body{font-family:var(--vscode-font-family);color:var(--vscode-editor-foreground);background:var(--vscode-editor-background);padding:12px;max-width:1000px;margin:auto;overflow-wrap:anywhere}
 h1{font-size:1.35em}h2{font-size:1.1em}h3{font-size:1em}button,input,select,textarea{font:inherit}
@@ -280,11 +285,12 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       for (const name of ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
         support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
       }
-      if (['stacks-section','kerodon-section'].includes(result.outline.acquisition?.kind)) {
+      support.push(await fs.readFile(path.join(context.extensionPath, 'src/sourceReader.js'), 'utf8'));
+      if (result.outline.published) {
         support.push(await fs.readFile(path.join(context.extensionPath, 'src/stacksView.js'), 'utf8'));
       }
       const diagramStyle = await fs.readFile(path.join(context.extensionPath, 'media', 'diagram-theme.css'), 'utf8');
-      panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support, diagramStyle);
+      panel.webview.html = outlineHtml(await fs.readFile(path.join(context.extensionPath, 'src', 'outlineView.js'), 'utf8'), support, diagramStyle, { frameOrigins: result.outline.published?.online?.origins || [] });
     } else c.panel.reveal(c.panel.viewColumn);
     c.returnContext?.release();
     c.returnContext = presentation.returnContext;

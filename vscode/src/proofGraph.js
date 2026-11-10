@@ -231,10 +231,10 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     if (panel.onDidChangeViewState) context.subscriptions.push(panel.onDidChangeViewState(event => {
       if (event.webviewPanel.visible && !c.busy) void panel.webview.postMessage({ type: 'idle' });
     }));
-    const support = await Promise.all(['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/stacksView.js', 'src/proofGraphMap.js'].map(f => fs.readFile(path.join(context.extensionPath, f), 'utf8')));
+    const support = await Promise.all(['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/stacksView.js', 'src/proofGraphMap.js', 'src/sourceReader.js'].map(f => fs.readFile(path.join(context.extensionPath, f), 'utf8')));
     const script = await fs.readFile(path.join(context.extensionPath, 'src/proofGraphView.js'), 'utf8');
     const style = await fs.readFile(path.join(context.extensionPath, 'media/proof-graph.css'), 'utf8');
-    panel.webview.html = outlineHtml(script, support, style, { stacksFrame: true, kind: 'proof' });
+    panel.webview.html = outlineHtml(script, support, style, { frameOrigins: ['https://stacks.math.columbia.edu'], kind: 'proof' });
     context.subscriptions.push(panel);
   });
 }
