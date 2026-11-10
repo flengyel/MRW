@@ -19,7 +19,7 @@ function setSources(items){
  }
 }
 function split(value){
- const match=/^([a-z][a-z0-9-]{0,63}):([^\s/#]{1,2304})$/.exec(value);
+ const match=/^([a-z][a-z0-9-]{0,63}):([^\s/#]{1,3072})$/.exec(value);
  if(!match||reserved.has(match[1]))return;
  try {const item=decodeURIComponent(match[2]);if(!item||Array.from(item).length>256||/[\x00-\x1f\x7f]/.test(item)||encode(item)!==match[2])return;return {source:match[1],item,id:match[0]};}catch{return;}
 }

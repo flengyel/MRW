@@ -30,6 +30,7 @@ test('document links and backlink occurrences retain qualified source identity a
 test('named pages preserve case, Unicode, literal plus, slashes, revision URLs and heading fragments',async t=>{
  const {setSources}=require('../src/sourceIdentifiers');
  const id='nlab:A%2BB%2F%CE%B1';
+ const long='nlab:'+encodeURIComponent('😀'.repeat(256));assert.equal(qualifiedIdentifier(long),long);
  assert.equal(canonicalCitation(id),'https://ncatlab.org/nlab/show/A%2BB%2F%CE%B1');
  assert.equal(qualifiedIdentifier('https://ncatlab.org/nlab/show/adjoint+functor#Definition'),'nlab:adjoint%20functor');
  assert.equal(canonicalCitation('https://ncatlab.org/nlab/revision/Adjoint+Functor/156#Definition'),'https://ncatlab.org/nlab/revision/Adjoint+Functor/156#Definition');

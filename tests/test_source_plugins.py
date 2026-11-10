@@ -136,7 +136,7 @@ class SourcePluginTests(unittest.TestCase):
 class NlabTests(unittest.TestCase):
     def setUp(self):self.spec=deepcopy(BUILTINS[2])
     def test_reversible_named_items_fragments_revision_and_literal_plus(self):
-        for name in ('adjoint functor','A+B/α😀','Case.Sensitive','punctuation: a?b#c'):
+        for name in ('adjoint functor','A+B/α😀','Case.Sensitive','punctuation: a?b#c','😀'*256):
             url=page_url(self.spec,name,'156','Definition α');item=normalize(self.spec,url)
             self.assertEqual(item['itemId'],name);self.assertEqual(item['revision'],'156');self.assertEqual(item['fragment'],'Definition α')
             self.assertEqual(normalize(self.spec,qualified('nlab',name))['itemId'],name)
@@ -149,6 +149,16 @@ class NlabTests(unittest.TestCase):
         self.assertNotIn('malicious()',tokens);self.assertNotIn('Sidebar',tokens);self.assertNotIn('Contents',tokens)
         self.assertTrue(all(span_text(source,p['span']).startswith('<h') for p in model['parts']))
         with self.assertRaisesRegex(ValueError,'fragment'):parse(source,dict(item,fragment='missing'),self.spec)
+    def test_svg_namespaces_are_unique_across_equal_offsets_in_different_passages(self):
+        import xml.etree.ElementTree as ET
+        diagram='<svg><defs><path id="glyph" d="M0 0"/></defs><use href="#glyph"/></svg>'
+        source=SourceDocument.from_bytes('/nlab.html',('<div id="revision"><h1 id="A">A</h1>'+diagram+'<h1 id="B">B</h1>'+diagram+'</div>').encode())
+        model=parse(source,normalize(self.spec,'nlab:Example'),self.spec)
+        ids=[]
+        for p in model['parts']:
+            for t in p['tokens']:
+                if t['kind']=='svg':ids.extend(n.attrib['id'] for n in ET.fromstring(t['text']).iter() if 'id' in n.attrib)
+        self.assertEqual(len(ids),2);self.assertEqual(len(set(ids)),2)
     def test_numbered_revision_requires_exact_footer_evidence_and_xml_rejects_active_content(self):
         item=normalize(self.spec,'https://ncatlab.org/nlab/revision/adjoint+functor/156');verify_revision(NLAB.encode(),item,self.spec)
         with self.assertRaisesRegex(ValueError,'verify'):verify_revision(NLAB.replace('/156/cite','/155/cite').encode(),item,self.spec)

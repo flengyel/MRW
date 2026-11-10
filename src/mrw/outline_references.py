@@ -12,7 +12,7 @@ COL = r'(?:0|[1-9][0-9]{0,6})'
 REFERENCE = re.compile(rf'mrw-outline:v1/({HEX})/({UUID})/({HEX})'
                        rf'(?:/({UUID})/({LINE})\.({COL})-({LINE})\.({COL}))?')
 
-QUALIFIED = re.compile(r'mrw-outline:v2/([a-z][a-z0-9-]{0,63}:[^/\s]{1,2304})/(.*)')
+QUALIFIED = re.compile(r'mrw-outline:v2/([a-z][a-z0-9-]{0,63}:[^/\s]{1,3072})/(.*)')
 
 
 def published_identity(store, region=None, span=None):
