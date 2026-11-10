@@ -82,6 +82,15 @@ def _dispatch(request):
         'investigation_view': ({'store', 'project_root', 'revision', 'summary'}, set()),
         'investigation_handoff': ({'store', 'project_root', 'revision', 'summary'}, set()),
         'end_investigation': ({'store', 'project_root', 'revision'}, set()),
+        'source_plugins_list': (set(),set()),
+        'source_plugins_installed': (set(),set()),
+        'source_plugins_add_profile': ({'path'},set()),
+        'source_plugins_add_adapter': ({'entry_point','distribution'},set()),
+        'source_plugins_change': ({'source_id','enabled','remove'},set()),
+        'outline_source_prepare': ({'store','project_root','source_id','input'},set()),
+        'outline_source_import': ({'store','project_root','ticket','section'},set()),
+        'outline_source_reference': ({'store','project_root','id','revision','tag'},set()),
+        'outline_source_reparse': ({'store','project_root','id','revision'},set()),
         'outline_list': ({'store', 'project_root'}, set()),
         'outline_create': ({'store', 'project_root', 'path', 'source_revision'}, set()),
         'outline_import_note': ({'store', 'project_root', 'path', 'source_revision'}, set()),
@@ -142,6 +151,9 @@ def _dispatch(request):
         return assistance_context_action(request)
     if method in ('outline_notes', 'outline_update_note'):
         return note_action(request)
+    if method.startswith(('source_plugins_', 'outline_source_')):
+        from .source_records import action
+        return action(request)
     if method.startswith('outline_kerodon_'):
         from .kerodon_import import kerodon_action
         return kerodon_action(request)

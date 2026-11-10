@@ -17,7 +17,7 @@ commit = 'a' * 40
 
 
 def transport(url, limit):
-    if request['method'] != 'outline_stacks_prepare':
+    if request['method'] not in ('outline_stacks_prepare','outline_source_prepare'):
         raise ValueError('Offline bridge action unexpectedly attempted a download')
     if url == stacks_import.REF:
         return json.dumps({'object': {'type': 'commit', 'sha': commit}}).encode()
@@ -31,4 +31,7 @@ def transport(url, limit):
 
 
 stacks_import.fetch = transport
+from mrw import source_records
+original_prepare=source_records.prepare
+source_records.prepare=lambda request:original_prepare(request,downloader=transport)
 raise SystemExit(main())

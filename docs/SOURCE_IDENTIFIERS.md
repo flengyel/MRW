@@ -5,7 +5,7 @@ revision of that item's contents. Retained references distinguish four fields:
 
 | Field | Example | Meaning |
 | --- | --- | --- |
-| Qualified item ID | `stacks-project:08ZH`, `kerodon:0004` | Source namespace and source-local tag |
+| Qualified item ID | `stacks-project:08ZH`, `kerodon:0004`, `nlab:adjoint%20functor` | Source namespace and source-local item |
 | Content revision | Retained SHA-256; Stacks Project also retains a Git commit | The exact acquired bytes |
 | Passage | Outline/region identity and scalar start/end range | The exact quotation within those bytes |
 | Private scope | Workspace/store identity | Authority to resolve retained material |
@@ -59,9 +59,13 @@ structure fails rather than inventing a complete section. Live page comments
 and navigation are excluded from mathematical passages; the original response
 remains retained unchanged.
 
-nLab has no implemented importer in this release. Inspect its format,
-identifiers, revision mechanism and rights before adding an adapter. Do not infer
-that a similar rendered page shares Gerby's source or acquisition contract.
+nLab uses named pages and explicit official HTML snapshots through the same API.
+Page identities percent-encode Unicode, spaces, literal plus and slash reversibly;
+heading fragments and upstream revision numbers remain separate.
+[Source plugins and installation](SOURCE_PLUGINS.md) describes API 1, data profiles,
+trusted installed adapters and plugin-independent retained display models.
+[The nLab reader](NLAB_WORKFLOW.md) describes revision evidence, MathML/SVG
+and its browser-only original page.
 
 These checks establish source identity, byte retention and navigation. They do
 not establish mathematical correctness, complete dependencies or comprehension.

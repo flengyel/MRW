@@ -17,7 +17,7 @@ const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
 const { createDocumentPicker } = require('./documentPicker');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins }) {
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: vscode.workspace.workspaceFile?.toString(), folders: (vscode.workspace.workspaceFolders || []).map(f => f.uri.toString()) }));
   const remembered = context.workspaceState.get(KEY);
@@ -281,7 +281,8 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     try {
       if (current.qualified_id) {
         await check(doc.uri);
-        const opened = await vscode.env.openExternal(vscode.Uri.parse(canonicalCitation(current.qualified_id)));
+        await sourcePlugins?.load();
+        const opened = await vscode.env.openExternal(vscode.Uri.parse(canonicalCitation(current.target || current.qualified_id)));
         if (attempt !== generation) return;
         validateOrigin(doc, candidate);
         if (opened) { origin = candidate.location; await persist(); await onNavigated(); return true; }

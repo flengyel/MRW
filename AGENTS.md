@@ -1,5 +1,17 @@
 # Codex instructions
 
+## Current task — shared readers and source plugins
+
+Preserve the completed MRW rename and all genuine records. The source API 1
+workflow is documented in docs/SOURCE_PLUGINS.md and docs/NLAB_WORKFLOW.md
+(paths relative to the repository root). Keep direct native Stacks Project and
+Kerodon buttons, explicit Original page/Saved text switching and proof frames.
+New acquisition uses the plugin registry. Saved plugin snapshots reopen without
+executing their producer; upgrades do not move notes or reparse saved content.
+nLab is a named-page adapter; its website refuses embedding. Clowder and PreTeXt
+remain unimplemented candidates. Preserve the working window.
+
+
 ## Current direction — complete MRW rename, 0.23.8
 
 The user explicitly requires MRW throughout the active project: `src/mrw`, Python
@@ -84,7 +96,7 @@ retained passage to current text.
 New published-source citations use qualified `mrw-outline:v2` links. Existing
 `mrw-outline:v1` links remain valid; qualify their identity from verified retained
 provenance when needed, without rewriting genuine notes or source records.
-The shared source registry does not make nLab acquisition implemented. Read
+nLab now uses source API 1; its limits are documented in docs/NLAB_WORKFLOW.md. Read
 [SOURCE_IDENTIFIERS](docs/SOURCE_IDENTIFIERS.md) and
 [the import workflow](docs/STACKS_WORKFLOW.md) before extending source adapters.
 

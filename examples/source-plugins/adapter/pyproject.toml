@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mrw-example-source"
+version = "1.0.0"
+requires-python = ">=3.11"
+description = "External MRW source API 1 adapter example"
+
+[project.entry-points."mrw.sources"]
+example = "mrw_example_source:Adapter"
+
+[tool.setuptools.packages.find]
+where = ["src"]

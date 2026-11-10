@@ -1,0 +1,27 @@
+{
+  "apiVersion": 1,
+  "pluginId": "example.gerby-profile",
+  "pluginVersion": "1.0.0",
+  "sourceId": "gerby-example",
+  "name": "External Gerby profile example",
+  "parser": "gerby-html-v1",
+  "origins": [
+    "https://kerodon.net"
+  ],
+  "urlRules": {
+    "itemPath": "/tag/{id}",
+    "revisionPath": null,
+    "identifier": "tag"
+  },
+  "capabilities": {
+    "onlineView": true,
+    "savedImport": true,
+    "sectionSelection": false,
+    "revisionLookup": false
+  },
+  "attribution": {
+    "authors": "Jacob Lurie",
+    "license": "No license statement supplied by the retrieved page",
+    "url": "https://kerodon.net"
+  }
+}

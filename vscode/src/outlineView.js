@@ -280,6 +280,10 @@ function proofNavigation(parent, part) {
 }
 function publishedAction(type, target) {
   if (type === 'stacks_jump') return jumpPublished(target);
+  if (type === 'source_link') {
+    if(target.startsWith('#')){const name=decodeURIComponent(target.slice(1)),anchor=[...root.querySelectorAll('[data-source-anchor]')].find(n=>n.dataset.sourceAnchor===name);if(anchor){anchor.scrollIntoView({block:'start'});return;}}
+    return post({type,url:target});
+  }
   post({ type, tag: target });
 }
 function updateReturnDestination() {
@@ -302,7 +306,7 @@ function render() {
   if (o.source.bibliography.authors) el('p', o.source.bibliography.authors, root, 'muted');
   const readingBar = el('div', undefined, root, 'toolbar reading-bar');
   const published = o.published;
-  const collection = ({ 'stacks-project': 'The Stacks Project', kerodon: 'Kerodon' })[published?.source_id || (o.acquisition?.kind === 'stacks-section' ? 'stacks-project' : o.acquisition?.kind === 'kerodon-section' ? 'kerodon' : '')];
+  const collection = published?.source_name;
   const location = published && !published.error ? [collection, published.chapter,
     published.section_number != null ? `Section ${published.section_number}: ${published.title || o.source.bibliography.title || ''}` : published.title,
     published.qualified_tag].filter(Boolean).join(' · ') : o.source.bibliography.locator || o.source.bibliography.title || 'Retained source';

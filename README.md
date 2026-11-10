@@ -213,3 +213,10 @@ retain their own licenses and notices. Stacks fixtures retain
 license does not relicense retained source material.
 [PUBLIC_READINESS.md](PUBLIC_READINESS.md) records the publication review and
 its unresolved disclosure and attribution decisions.
+
+Source readers provide **Original page / Saved text** controls and persistent
+Stacks Project/Kerodon import buttons. **Import Source…** also supports nLab and
+explicitly registered source plugins. Retained snapshots remain readable without
+the plugin. See [source plugins](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_PLUGINS.md)
+and [nLab](https://github.com/flengyel/MRW/blob/main/docs/NLAB_WORKFLOW.md) for
+installation, supported mathematics, revision evidence and limits.

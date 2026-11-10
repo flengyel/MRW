@@ -12,35 +12,18 @@ COL = r'(?:0|[1-9][0-9]{0,6})'
 REFERENCE = re.compile(rf'mrw-outline:v1/({HEX})/({UUID})/({HEX})'
                        rf'(?:/({UUID})/({LINE})\.({COL})-({LINE})\.({COL}))?')
 
-QUALIFIED = re.compile(r'mrw-outline:v2/((?:stacks-project|kerodon):[A-Z0-9]{4})/(.*)')
+QUALIFIED = re.compile(r'mrw-outline:v2/([a-z][a-z0-9-]{0,63}:[^/\s]{1,2304})/(.*)')
 
 
 def published_identity(store, region=None, span=None):
-    kind = store.state.get('acquisition', {}).get('kind')
-    if kind == 'stacks-section':
-        from .stacks_import import _manifest
-        source_id = 'stacks-project'
-    elif kind == 'kerodon-section':
-        from .kerodon_import import _manifest
-        source_id = 'kerodon'
-    else:
-        return None
-    manifest = getattr(store, '_published_manifest', None)
-    if manifest is None:
-        manifest, _ = _manifest(store)
-        store._published_manifest = manifest
-    def contains(part):
-        original = part['span']
-        return (original['start_line'], original['start_col']) <= (span['start_line'], span['start_col']) and (span['end_line'], span['end_col']) <= (original['end_line'], original['end_col'])
-    part = next((p for p in manifest['parts'] if (contains(p) if span else region and p['region'] == region)), None)
-    from .published_sources import qualified_tag
-    return qualified_tag(source_id, part['tag'] if part else manifest['tag'])
+    from .source_records import published_identity as read_identity
+    return read_identity(store,region,span)
 
 
 def parse_reference(value):
-    qualified = QUALIFIED.fullmatch(value) if isinstance(value, str) and len(value) <= 512 else None
+    qualified = QUALIFIED.fullmatch(value) if isinstance(value, str) and len(value) <= 4096 else None
     legacy = 'mrw-outline:v1/' + qualified[2] if qualified else value
-    match = REFERENCE.fullmatch(legacy) if isinstance(legacy, str) and len(legacy) <= 512 else None
+    match = REFERENCE.fullmatch(legacy) if isinstance(legacy, str) and len(legacy) <= 4096 else None
     if match is None:
         raise ValueError('Malformed MRW source or passage link; no target was opened')
     scope, outline, source, region, *points = match.groups()
@@ -51,7 +34,10 @@ def parse_reference(value):
             raise ValueError('Malformed MRW source or passage link range')
         span = dict(source_revision=source, start_line=sl, start_col=sc, end_line=el, end_col=ec)
     result = dict(scope=scope, outline=outline, source=source, region=region, span=span)
-    if qualified: result['qualified_id'] = qualified[1]
+    if qualified:
+        from .source_plugins import parse_qualified
+        parse_qualified(qualified[1])
+        result['qualified_id'] = qualified[1]
     return result
 
 

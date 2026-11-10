@@ -252,3 +252,20 @@ to the retained revision and annotations. **Open in browser** opens the official
 page separately. The online page may have changed since import; switching views
 does not update saved text or relocate annotations. Save reader annotations
 explicitly before closing the reader.
+
+## Import another source
+
+**Import Source…** lists enabled source plugins. Choose **nLab**, paste a page
+URL, and select Whole page or a heading with its subsections. A supplied heading
+fragment preselects its section; an unknown heading reports an error. Read the
+revision/hash and destination before importing. Saved text supports MathML and
+inline SVG; unsupported media is marked where it occurs. nLab blocks embedded
+pages, so Original page explains the limit and Open in browser opens the site.
+
+**Add Source Plugin…** accepts a local JSON profile or trusted installed Python
+adapter. **Manage Source Plugins…** enables, disables or removes them. Saved
+imports keep their text, citations and notes without the plugin. An upgrade does
+not reparse saved text; **Reparse Saved Source…** creates a separate derived copy
+without moving annotations. No VSIX rebuild or window reload is needed to add
+a source. See the [source-plugin guide](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_PLUGINS.md)
+for the working external examples and trust boundary.

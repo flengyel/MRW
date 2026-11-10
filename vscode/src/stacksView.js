@@ -10,7 +10,16 @@
   }
   function tokens(parent, values, action) {
     for (const value of values) {
-      if (value.kind === 'math') {
+      if (value.kind === 'mathml' || value.kind === 'svg') {
+        const target=node('span',parent,undefined,value.kind==='svg'?'published-diagram':'published-math');
+        try{window.MRWSourceRendering.render(target,value.text,value.kind);}
+        catch(error){node('pre',target,'[Display unavailable at this location: '+error.message+'. Read exact HTML or open the original page.]','warning');}
+      } else if (value.kind === 'anchor') {node('span',parent).dataset.sourceAnchor=value.name;
+      } else if (value.kind === 'link') {
+        const link=node('button',parent,value.label,'source-reference');link.type='button';
+        link.title=value.url.startsWith('#')?'Follow this anchor in the retained source':'Open this source link in your browser';
+        link.addEventListener('click',()=>action('source_link',value.url));
+      } else if (value.kind === 'math') {
         const target = node(value.display ? 'div' : 'span', parent, undefined, 'published-math');
         try {
           window.katex.render(value.text, target, { output: 'mathml', displayMode: value.display,
@@ -53,7 +62,7 @@
     node('pre', exact, published.exact_text);
   }
   function header(parent, value, action) {
-    node('p', parent, value.authors + ' · ' + value.chapter + ' · Section ' + value.section_number + ' · ' + (value.qualified_tag || value.tag));
+    node('p', parent, [value.authors,value.source_name||value.chapter,value.section_number!=null?'Section '+value.section_number:null,value.qualified_tag||value.tag].filter(Boolean).join(' · '));
     node('p', parent, 'Published source structure and explicit citations; no complete dependency graph or mathematical verification is asserted.', 'muted');
     if (value.limitation) node('p', parent, 'Source retained only: ' + value.limitation + '. No generated regions are presented.', 'warning');
     const citation = node('button', parent, 'Open canonical source citation ↗');
@@ -68,6 +77,8 @@
     node('p', details, value.source_file + (value.commit ? ' · Git ' + value.commit : ' · Page SHA-256 ' + value.source_revision) + ' · retrieved ' + value.retrieved_at);
     node('p', details, 'Retained SHA-256 ' + value.source_revision);
     node('p', details, value.citation);
+    if(value.producer)node('p',details,'Display from '+value.producer.pluginId+' '+value.producer.pluginVersion+' · API '+value.producer.apiVersion);
+    if(value.derived_from)node('p',details,'Derived from saved source '+value.derived_from+'. Earlier citations and annotations remain with that source.');
     node('p', details, value.license + '. Rendering is a derived view; the exact retained source is available offline.');
     for (const [label, entry] of [['Chapter', { title: value.chapter, tag: value.chapter_tag }],
       ['Previous section', value.previous], ['Next section', value.next]]) {

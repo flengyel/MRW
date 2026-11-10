@@ -273,3 +273,10 @@ records releases and the separate Qt/CLI prototype.
 The package includes the MRW Apache-2.0 license and notices for bundled KaTeX,
 markdown-it and its dependencies, ts-fsrs, and Quiver. Fixture rights and
 outstanding publication decisions are recorded in [PUBLIC_READINESS](../PUBLIC_READINESS.md).
+
+Source readers provide **Original page / Saved text** controls and persistent
+Stacks Project/Kerodon import buttons. **Import Source…** also supports nLab and
+explicitly registered source plugins. Retained snapshots remain readable without
+the plugin. See [source plugins](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_PLUGINS.md)
+and [nLab](https://github.com/flengyel/MRW/blob/main/docs/NLAB_WORKFLOW.md) for
+installation, supported mathematics, revision evidence and limits.

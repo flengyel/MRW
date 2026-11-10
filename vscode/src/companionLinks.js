@@ -53,7 +53,7 @@ function parseExternal(value, scheme = 'vscode') {
   if (!target || Object.keys(target).sort().join(',') !== 'project,reference,workspace' ||
       typeof target.project !== 'string' || !path.posix.isAbsolute(target.project) || path.posix.normalize(target.project) !== target.project ||
       /[\x00-\x1f\x7f\\]/u.test(target.project) || target.project.length > 4096 ||
-      typeof target.reference !== 'string' || !/^mrw-outline:v[12]\//.test(target.reference) || target.reference.length > 512) {
+      typeof target.reference !== 'string' || !/^mrw-outline:v[12]\//.test(target.reference) || target.reference.length > 4096) {
     throw new Error('Malformed MRW retained target.');
   }
   target.workspace = route(target.workspace);

@@ -26,3 +26,20 @@ test('document links and backlink occurrences retain qualified source identity a
  assert.ok(result.occurrences.every(n=>n.qualified_id==='kerodon:0004'&&n.targetPath==='kerodon:0004'));
  assert.equal((await backlinks(index,'stacks-project:0004')).occurrences.length,1);
 });
+
+test('named pages preserve case, Unicode, literal plus, slashes, revision URLs and heading fragments',async t=>{
+ const {setSources}=require('../src/sourceIdentifiers');
+ const id='nlab:A%2BB%2F%CE%B1';
+ assert.equal(canonicalCitation(id),'https://ncatlab.org/nlab/show/A%2BB%2F%CE%B1');
+ assert.equal(qualifiedIdentifier('https://ncatlab.org/nlab/show/adjoint+functor#Definition'),'nlab:adjoint%20functor');
+ assert.equal(canonicalCitation('https://ncatlab.org/nlab/revision/Adjoint+Functor/156#Definition'),'https://ncatlab.org/nlab/revision/Adjoint+Functor/156#Definition');
+ assert.equal(qualifiedIdentifier('https://ncatlab.org/nlab/show/A%2BB%2F%CE%B1'),id);
+ setSources([{sourceId:'example-notes',origins:['https://example.invalid'],urlRules:{identifier:'page',itemPath:'/pages/{id}',revisionPath:null}}]);
+ assert.equal(canonicalCitation('example-notes:Some%20Page'),'https://example.invalid/pages/Some+Page');
+ setSources([{sourceId:'nlab',origins:['javascript:bad'],urlRules:{identifier:'page',itemPath:'/bad/{id}',revisionPath:null}}]);
+ assert.equal(canonicalCitation(id),'https://ncatlab.org/nlab/show/A%2BB%2F%CE%B1');
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-named-links-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+ await fs.writeFile(path.join(root,'note.md'),'# Work\n[[nlab:A%2BB%2F%CE%B1]]\n[Revision](https://ncatlab.org/nlab/revision/A%2BB%2F%CE%B1/156#Definition)\n');
+ const index=await buildNoteIndex(root),found=await backlinks(index,id);
+ assert.equal(found.occurrences.length,2);assert.ok(found.occurrences.every(o=>o.qualified_id===id));
+});

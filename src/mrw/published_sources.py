@@ -1,31 +1,30 @@
 """Source-qualified published identities, independent of retained-store routing."""
 import re
 
-SOURCES = {
-    'stacks-project': dict(name='Stacks Project', base='https://stacks.math.columbia.edu/tag/', kind='stacks-section'),
-    'kerodon': dict(name='Kerodon', base='https://kerodon.net/tag/', kind='kerodon-section'),
-}
+from .source_plugins import BUILTINS, Registry, normalize, page_url, qualified
+
+SOURCES = {s['sourceId']: dict(name=s['name'], base=s['origins'][0]+s['urlRules']['itemPath'].replace('{id}',''), spec=s) for s in BUILTINS}
+
+
+def source_spec(source_id):
+    if source_id in SOURCES:return SOURCES[source_id]['spec']
+    entry=Registry().sources.get(source_id)
+    if entry is None:raise ValueError('Unknown published source namespace')
+    return entry['manifest']
+
 
 
 def local_tag(source_id, value):
-    if source_id not in SOURCES or not isinstance(value, str) or len(value) > 256:
-        raise ValueError('Unknown published source or tag')
-    value = value.strip()
-    if value.startswith(source_id + ':'):
-        value = value[len(source_id) + 1:]
-    elif value.startswith(SOURCES[source_id]['base']):
-        value = value[len(SOURCES[source_id]['base']):].removesuffix('/')
-    if not re.fullmatch(r'[A-Za-z0-9]{4}', value):
-        raise ValueError('Use a tag, source-qualified tag or official section URL for ' + SOURCES[source_id]['name'])
-    return value.upper()
+    spec=source_spec(source_id)
+    return normalize(spec,value)['itemId']
 
 
 def qualified_tag(source_id, tag):
-    return source_id + ':' + local_tag(source_id, tag)
+    return qualified(source_id,local_tag(source_id,tag))
 
 
 def citation(source_id, tag):
-    return SOURCES[source_id]['base'] + local_tag(source_id, tag)
+    return page_url(source_spec(source_id),local_tag(source_id,tag))
 
 
 def qualify_view(value, source_id):
@@ -48,7 +47,7 @@ def qualify_view(value, source_id):
 def reader_configuration(value):
     """Only verified retained provenance supplies the original-page target."""
     published = value.get('published')
-    if not published or published.get('error'):
+    if not published or published.get('error') or published.get('online'):
         return
     source_id = published.get('source_id')
     if source_id not in SOURCES:

@@ -219,7 +219,7 @@ def validate_state(value, root, identifier):
                 raise ValueError('Invalid source range')
         if (item['start_line'], item['start_col']) >= (item['end_line'], item['end_col']):
             raise ValueError('Invalid source range order')
-    for key, limit in [('regions', 64), ('contexts', 32), ('artifacts', 16)]:
+    for key, limit in [('regions', 128 if value.get('acquisition', {}).get('kind') == 'source-plugin' else 64), ('contexts', 32), ('artifacts', 16)]:
         if not isinstance(value[key], list) or len(value[key]) > limit:
             raise ValueError(f'At most {limit} {key} per saved source')
     for region in value['regions']:
@@ -253,7 +253,7 @@ def validate_state(value, root, identifier):
     if imported:
         acquisition = value['acquisition']
         fields(acquisition, {'kind', 'artifact'}, 'source acquisition')
-        if acquisition['kind'] not in ('stacks-section', 'kerodon-section'):
+        if acquisition['kind'] not in ('stacks-section', 'kerodon-section', 'source-plugin'):
             raise ValueError('Unsupported source acquisition')
         identity(acquisition['artifact'])
         if not any(a['id'] == acquisition['artifact'] and a['kind'] == 'supporting_artifact'
@@ -396,12 +396,8 @@ class OutlineStore:
                     a['goals'] = entry['goals']
             except (OSError, ValueError) as exc:
                 a['error'] = str(exc)
-        if value.get('acquisition', {}).get('kind') == 'stacks-section':
-            from .stacks_import import enrich
-            enrich(self, value)
-        elif value.get('acquisition', {}).get('kind') == 'kerodon-section':
-            from .kerodon_import import enrich
-            enrich(self, value)
+        from .source_records import enrich
+        enrich(self, value)
         from .published_sources import reader_configuration
         reader_configuration(value)
         from .reader_diagrams import enrich as diagram_view
@@ -641,7 +637,7 @@ def outline_action(request):
                 raise ValueError('Unknown passage')
             span = region['statement']['span'] if request['statement'] and region['statement'] else region['span']
         span_text(source, span)
-        if store.state.get('acquisition', {}).get('kind') in ('stacks-section', 'kerodon-section'):
+        if store.state.get('acquisition'):
             return {'retained': True, 'text': source.text, 'source_revision': source.revision,
                     'start': host_point(source, span, 'start'), 'end': host_point(source, span, 'end')}
         current = ordinary_source(str(source.path), source.revision)

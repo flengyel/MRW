@@ -161,6 +161,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
+    if (name === './sourcePlugins') return require('../src/sourcePlugins');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');
     if (name === './activeStudy') return require('../src/activeStudy');
@@ -1198,7 +1199,7 @@ test('Stacks import command previews identity/destination and preserves retained
   assert.equal(imported.outline.regions.length, 9);
   assert.equal(imported.outline.published.tag, '08ZD');
   assert.match(h.panels[0].webview.html, /MathML|mathml/);
-  assert.equal(h.requests.filter(r => r.method === 'outline_stacks_prepare').length, 1);
+  assert.equal(h.requests.filter(r => r.method === 'outline_source_prepare' && r.source_id==='stacks-project').length, 1);
   await h.panels[0].receive({ type: 'stacks_reference', tag: '08ZE' });
   assert.deepEqual(h.errors, []);
   assert.match(h.shown.at(-1).getText(), /\\label\{lemma-Hausdorff\}/);
@@ -1228,14 +1229,14 @@ test('cancelled Stacks preview publishes no outline and invalid input cannot acq
       [args[0], path.join(extension, 'test/stacks_bridge.py')], settings),
   }));
   await h.commands.get('mrw.importStacksSection')();
-  assert.equal(h.requests.length, 0);
+  assert.ok(!h.requests.some(r=>r.method==='outline_source_prepare'));
   h.inputs.push('08ZD');
   await h.commands.get('mrw.importStacksSection')();
   assert.equal(h.panels.length, 0);
-  assert.ok(!h.requests.some(r => r.method === 'outline_stacks_import'));
+  assert.ok(!h.requests.some(r => r.method === 'outline_source_import'));
   h.inputs.push('https://example.org/tag/08ZD');
   await h.commands.get('mrw.importStacksSection')();
-  assert.match(h.errors.at(-1), /official/);
+  assert.match(h.errors.at(-1), /recognize|canonical/);
   assert.equal(h.panels.length, 0);
 });
 
@@ -2337,7 +2338,7 @@ test('Kerodon import confirms a source-qualified page snapshot and reopens its e
   h.inputs.push('kerodon:0004');h.endings.push('Import section');
   const result=await h.commands.get('mrw.importKerodonSection')();assert.ok(result,h.errors.join('\n'));
   const pub=result.outline.published;assert.equal(pub.qualified_tag,'kerodon:0004');assert.equal(pub.authors,'Jacob Lurie');assert.equal(pub.commit,null);
-  assert.ok(h.panels[0].webview.html.includes('MRWStacks'));assert.equal(h.requests.filter(r=>r.method==='outline_kerodon_prepare').length,1);
+  assert.ok(h.panels[0].webview.html.includes('MRWStacks'));assert.equal(h.requests.filter(r=>r.method==='outline_source_prepare'&&r.source_id==='kerodon').length,1);
   const statement=Object.values(pub.parts).find(p=>p.tag==='000A'&&p.role==='statement');
   await h.panels[0].receive({type:'stacks_reference',tag:'kerodon:000A'});
   assert.ok(h.panels[0].webview.messages.findLast(m=>m.type==='outline').reference.uri.startsWith('mrw-outline:v2/kerodon:000A/'));

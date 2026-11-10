@@ -7,6 +7,7 @@ const path = require('node:path');
 const { runBridge } = require('./bridge');
 const { registerAssistance } = require('./assistance');
 const { registerOutlines } = require('./outlines');
+const { registerSourcePlugins } = require('./sourcePlugins');
 const { registerReadingOutline } = require('./readingOutline');
 const { registerProofGraph } = require('./proofGraph');
 const { registerProofStudy } = require('./proofStudy');
@@ -286,12 +287,13 @@ function activate(context) {
   });
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
-  const outlineRows = registerOutlines({ vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
+  const sourcePlugins=registerSourcePlugins({vscode,register,rawBridge});
+  const outlineRows = registerOutlines({sourcePlugins, vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
     askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
     readingDestination: location => readingController.returnDestination(location),
     handleDocumentUri: uri => readingController.handleDocumentUri(uri) });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
-    compile: rawBridge,
+    compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });

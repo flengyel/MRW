@@ -16,6 +16,7 @@ from uuid import uuid4, uuid5, NAMESPACE_URL
 from .local_files import read_bounded
 from .private_persistence import persist_private_new
 from .source import SourceDocument
+from .source_api import source_span
 from .source_outlines import (OutlineStore, BIBLIOGRAPHY, MAX_SOURCE, SCHEMA,
                               directory, encoded, fields, identity, now,
                               select_span, span_text, validate_state)
@@ -101,14 +102,6 @@ def chapter_for(mapping, tag):
     return match[1], match[2]
 
 
-def _span(source, start, end):
-    value = source.text.removeprefix('\ufeff')
-    def point(offset):
-        before = value[:offset]
-        lines = re.split(r'\r\n|\r|\n', before)
-        return [len(lines) - 1, len(lines[-1].encode('utf-16-le')) // 2]
-    return select_span(source, point(start), point(end))
-
 
 def _heading(masked, match):
     title, end = group(masked, match.end())
@@ -143,7 +136,7 @@ def extract(source, mapping_raw, tag):
     result = dict(tag=tag, title=selected['title'], chapter=chapter_title,
                   chapter_tag=reverse.get(chapter + '-section-phantom'),
                   section_number=index + 1, previous=neighbour(index - 1), next=neighbour(index + 1),
-                  span=_span(source, selected['start'], end), parts=[], references={},
+                  span=source_span(source, selected['start'], end), parts=[], references={},
                   limitation=None)
     body = masked[selected['body']:end]
     for match in re.finditer(r'\\ref\s*\{([^{}]+)\}', body):
@@ -174,7 +167,7 @@ def extract(source, mapping_raw, tag):
         def context(a, b):
             if masked[a:b].strip():
                 result['parts'].append(dict(role='context', tag=tag, title='Source context',
-                                            span=_span(source, a, b), body=[a, b]))
+                                            span=source_span(source, a, b), body=[a, b]))
         for a, b, env in segments:
             context(cursor, a)
             env_open = re.match(r'\\begin\s*\{[^{}]+\}', masked[a:b])
@@ -194,7 +187,7 @@ def extract(source, mapping_raw, tag):
             else:
                 item_tag, role, title, content = tag, 'context', 'Source context', [a, b]
             result['parts'].append(dict(role=role, tag=item_tag, title=title,
-                                        span=_span(source, a, b), body=content))
+                                        span=source_span(source, a, b), body=content))
             cursor = b
         context(cursor, end)
         if len(result['parts']) > 64:

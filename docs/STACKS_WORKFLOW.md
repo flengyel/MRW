@@ -50,8 +50,8 @@ Run **MRW: Import Kerodon Section…** with `kerodon:0004` or
 `https://kerodon.net/tag/0004` for Section 1.1, Simplicial Sets. Review the page
 SHA-256 and saved-work destination, then choose **Import section**.
 
-The importer retains one official section or subsection page, up to 1 MiB and
-64 supported passages. It does not follow linked subsections. An individual
+The importer retains one official section or subsection page, up to 2 MiB combined acquisition bytes and
+128 supported passages for new plugin imports. It does not follow linked subsections. An individual
 result page or unsupported layout produces an error rather than a substitute
 outline.
 
@@ -106,3 +106,16 @@ diffs, annotation relocation across revisions, prerequisite synthesis or a
 complete proof graph. Import and display do not check mathematical correctness.
 The [saved-work storage limits](ARTIFACT_STORAGE.md) apply independently;
 importing does not move the store or change mount or synchronization settings.
+
+## Shared reader and source plugins
+
+Both direct import buttons remain in Commands with documents open. **Original
+page** explicitly opens the current official section in MRW; **Saved text**
+restores the retained revision and annotations. **Open in browser** is separate.
+Switching preserves reader drafts, selection and Return, and leaves the frame
+mounted across local updates. Websites may have changed since import.
+
+Stacks Project and Kerodon use the same [source API 1](SOURCE_PLUGINS.md) as
+[nLab](NLAB_WORKFLOW.md) and user-installed profiles/adapters. Existing retained
+identities and citations are unchanged. New snapshots keep their normalized
+display/mappings and producer version, so reopening needs no plugin or site.

@@ -22,7 +22,7 @@ from .published_sources import local_tag, citation, qualified_tag, qualify_view
 from .source import SourceDocument
 from .source_outlines import (OutlineStore, BIBLIOGRAPHY, SCHEMA, directory, encoded,
                               fields, identity, now, span_text, validate_state)
-from .stacks_import import _span
+from .source_api import source_span
 from .stacks_tex import display_tokens
 from .workspace import strict_json
 
@@ -135,7 +135,7 @@ def plain(node):
     return ''.join(plain(c) for c in node['children'])
 
 
-def recipe(node, targets, refs, warnings, *, render_math=False):
+def recipe(node, targets, refs, warnings, *, render_math=False, source_spec=None):
     if isinstance(node, str):
         # Gerby emits bare equation environments outside dollar delimiters.
         # This bounded display projection uses an inert three-column array;
@@ -151,9 +151,11 @@ def recipe(node, targets, refs, warnings, *, render_math=False):
     name, attrs = node['name'], node['attrs']
     if name in ('script', 'style', 'template'):
         return []
-    children = lambda: [t for c in node['children'] for t in recipe(c, targets, refs, warnings, render_math=render_math)]
+    children = lambda: [t for c in node['children'] for t in recipe(c, targets, refs, warnings, render_math=render_math, source_spec=source_spec)]
     if name == 'a':
-        match = re.fullmatch(r'(?:https://kerodon\.net)?/tag/([A-Z0-9]{4})', attrs.get('href', ''))
+        base = re.escape(source_spec['origins'][0]) if source_spec else r'https://kerodon\.net'
+        route = re.escape(source_spec['urlRules']['itemPath']).replace(re.escape('{id}'), r'([A-Z0-9]{4})') if source_spec else r'/tag/([A-Z0-9]{4})'
+        match = re.fullmatch('(?:'+base+')?'+route, attrs.get('href', ''))
         if match:
             tag = match[1]
             if attrs.get('data-tag', tag) != tag:
@@ -161,7 +163,7 @@ def recipe(node, targets, refs, warnings, *, render_math=False):
             refs.add(tag)
             return [dict(kind='reference', label=plain(node), tag=tag, retained=tag in targets)]
     if name in ('ul', 'ol'):
-        return [dict(kind='list', ordered=name == 'ol', items=[recipe(c, targets, refs, warnings, render_math=render_math)
+        return [dict(kind='list', ordered=name == 'ol', items=[recipe(c, targets, refs, warnings, render_math=render_math, source_spec=source_spec)
                      for c in node['children'] if isinstance(c, dict) and c['name'] == 'li'])]
     if name in ('em', 'strong', 'code'):
         return [dict(kind=name, children=children())]
@@ -199,7 +201,7 @@ def compact_paragraphs(tokens):
     return result
 
 
-def extract(source, tag, *, coalesce_text=False):
+def extract(source, tag, *, coalesce_text=False, source_spec=None):
     # The original token recipe remains the validation format for retained v1
     # manifests. Display can improve without rewriting that historical payload.
     page = Page(source.text.removeprefix('\ufeff'), coalesce_text=coalesce_text)
@@ -266,11 +268,11 @@ def extract(source, tag, *, coalesce_text=False):
         if not node['end']:
             raise ValueError('Incomplete Kerodon mathematical content')
         own_warnings = set()
-        tokens = recipe(node, targets, refs, own_warnings, render_math=coalesce_text)
+        tokens = recipe(node, targets, refs, own_warnings, render_math=coalesce_text, source_spec=source_spec)
         if coalesce_text:
             tokens = compact_paragraphs(tokens)
         parts.append(dict(tag=key, role=role, title=qualified_tag(SOURCE_ID, key) + ' — ' + label,
-                          span=_span(source, node['start'], node['end']), tokens=tokens,
+                          span=source_span(source, node['start'], node['end']), tokens=tokens,
                           warning='; '.join(sorted(own_warnings)) or None))
     if not parts or len(parts) > 64:
         raise ValueError('Kerodon page must contain between 1 and 64 supported passages; choose a smaller subsection')

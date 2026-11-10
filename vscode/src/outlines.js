@@ -39,11 +39,12 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
 .proof-map{overflow:auto;max-width:100%;margin:12px 0}.proof-map svg{display:block}.proof-map text{cursor:pointer}
 ${diagramStyle}
+.published-svg{max-width:100%;height:auto;color:var(--vscode-editor-foreground)}
 </style></head><body><main id="reader" aria-live="polite">Opening ${caption.toLowerCase()}…</main>
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri }) {
+function registerOutlines({ vscode, context, register, bridge, sourcePlugins, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -220,21 +221,33 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
         else if (value.type === 'stacks_reference') {
-          const result = await bridge(request(c, c.result.outline.acquisition?.kind === 'kerodon-section' ? 'outline_kerodon_reference' : 'outline_stacks_reference', { tag: value.tag }));
+          const result = await bridge(request(c, 'outline_source_reference', { tag: value.tag }));
           c.reference = result.reference; c.selected = result.reference.region;
           await send(c, result);
           await openDocument(c, null, result.document);
           await c.panel.webview.postMessage({ type: 'publishedFocus', region: c.selected });
+        } else if (value.type === 'source_link') {
+          const source=c.result.outline.published;
+          if(!source?.links?.includes(value.url))throw new Error('This link is not in the retained source display.');
+          if(value.url.startsWith('#')){
+            const anchor=decodeURIComponent(value.url.slice(1));
+            const contains=items=>items.some(t=>(t.kind==='anchor'&&t.name===anchor)||contains(t.children||[])||(t.items||[]).some(contains));
+            const part=Object.values(source.parts).find(p=>p.anchor===anchor||contains(p.tokens));
+            if(!part)throw new Error('This anchor is outside the retained section. Open the original page to follow it.');
+            c.selected=part.region;await send(c,c.result);await c.panel.webview.postMessage({type:'publishedFocus',region:part.region,anchor});
+          }else if(!await vscode.env.openExternal(vscode.Uri.parse(value.url)))throw new Error('The source link could not be opened.');
         } else if (value.type === 'stacks_citation') {
           const source = c.result.outline.published;
           const allowed = new Set([source?.tag, source?.chapter_tag, source?.previous?.tag,
             source?.next?.tag, ...(source?.reference_tags || [])]);
-          const sourceId = source?.source_id || 'stacks-project';
+          const sourceId = source?.source_id;
           const qualified = require('./sourceIdentifiers').qualifiedIdentifier(value.tag) || (/^[A-Z0-9]{4}$/.test(value.tag) ? sourceId + ':' + value.tag : undefined);
-          if (!qualified || !qualified.startsWith(sourceId + ':') || !allowed.has(qualified.split(':')[1])) {
+          if (!qualified || !qualified.startsWith(sourceId + ':') || !allowed.has(decodeURIComponent(qualified.slice(sourceId.length + 1)))) {
             throw new Error('This is not an identified citation in the retained section.');
           }
-          if (!await vscode.env.openExternal(vscode.Uri.parse(require('./sourceIdentifiers').canonicalCitation(qualified)))) {
+          await sourcePlugins?.load();
+          const target=qualified===source.qualified_tag?source.citation:require('./sourceIdentifiers').canonicalCitation(qualified);
+          if (!await vscode.env.openExternal(vscode.Uri.parse(target))) {
             throw new Error('The canonical source citation could not be opened.');
           }
         }
@@ -285,7 +298,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
       for (const name of ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
         support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
       }
-      support.push(await fs.readFile(path.join(context.extensionPath, 'src/sourceReader.js'), 'utf8'));
+      for(const name of ['sourceReader.js','sourceRendering.js'])support.push(await fs.readFile(path.join(context.extensionPath, 'src',name), 'utf8'));
       if (result.outline.published) {
         support.push(await fs.readFile(path.join(context.extensionPath, 'src/stacksView.js'), 'utf8'));
       }
@@ -562,74 +575,43 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     if (!region) throw new Error('Select a passage first.');
     c.selected = region.id; return region.id;
   }
-  register('mrw.importStacksSection', () => locked(async () => {
-    const input = await vscode.window.showInputBox({ title: 'Import a Stacks Project section',
-      prompt: 'Section tag, stacks-project:TAG or official HTTPS URL. Downloads one pinned source revision.',
-      value: 'stacks-project:08ZD', ignoreFocusOut: true,
-      validateInput: value => /^(?:(?:stacks-project:)?[A-Za-z0-9]{4}|https:\/\/stacks\.math\.columbia\.edu\/tag\/[A-Za-z0-9]{4}\/?)$/.test(value.trim())
-        ? undefined : 'Enter a section tag or its official HTTPS URL, without query or fragment.' });
-    if (input === undefined) return;
-    const { store, root } = await storage(); writable({ store });
-    const download = () => bridge({ method: 'outline_stacks_prepare', store, project_root: root, input }, { timeout: 120000 });
-    const prepared = vscode.window.withProgress
-      ? await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification,
-        title: 'MRW: obtaining one Stacks Project section and its matching source metadata', cancellable: false }, download)
-      : await download();
-    const destination = await bridge({ method: 'artifact_status' });
-    const section = prepared.section;
-    const choice = section.limitation ? 'Retain source only' : 'Import section';
-    const statements = section.parts.filter(p => p.role === 'statement').length;
-    const proofs = section.parts.filter(p => p.role === 'proof').length;
-    const confirm = await vscode.window.showWarningMessage(
-      'Import The Stacks Project Authors — ' + section.title.slice(0, 200) + ' (stacks-project:' + section.tag + ')?\n'
-      + section.chapter.slice(0, 200) + ' · section ' + section.section_number + '\n'
-      + 'Git revision: ' + prepared.packet.commit + '\n'
-      + 'Destination: ' + destination.location + '\nProject: ' + root + '\n'
-      + (section.limitation ? 'Source retained only: ' + section.limitation
-        : statements + ' statements and ' + proofs + ' proofs, with exact retained source and explicit citations.')
-      + '\nEarlier revisions, annotations and ordinary notes are preserved. No TeX or remote script is executed.',
-      { modal: true }, choice);
-    if (confirm !== choice) return;
-    let result;
-    try {
-      result = await bridge({ method: 'outline_stacks_import', store, project_root: root,
-        ticket: prepared.ticket, packet: prepared.packet });
-    } catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(store); throw error; }
-    if (result.blocked) {
-      blockedStores.add(store);
-      throw new Error('Stacks import publication failed: ' + result.write_error
-        + '. Existing work is preserved. Reload the host before retrying.');
+  async function importSource(shortcut, reparse) {
+    const registry=await sourcePlugins.load();
+    const available=registry.sources.filter(s=>s.enabled&&s.capabilities.savedImport);
+    const selected=shortcut?available.find(s=>s.sourceId===shortcut.sourceId):await vscode.window.showQuickPick(available.map(s=>({label:s.name,description:s.sourceId+' · '+s.pluginId+' '+s.pluginVersion,...s})),{placeHolder:'Import from a registered source'});
+    if(!selected){if(shortcut)throw new Error('Source plugin unavailable or disabled: '+shortcut.sourceId);return;}
+    const {store,root}=await storage();writable({store});
+    let prepared;
+    if(reparse)prepared=await bridge(request(reparse,'outline_source_reparse'));
+    else {
+      const input=await vscode.window.showInputBox({title:'Import '+selected.name,prompt:'Source-qualified identifier or canonical HTTPS page URL. Acquires a retained revision.',value:shortcut?.value||'',ignoreFocusOut:true});
+      if(input===undefined)return;
+      const download=()=>bridge({method:'outline_source_prepare',store,project_root:root,source_id:selected.sourceId,input},{timeout:120000});
+      prepared=await vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title:'Obtaining '+selected.name+' source',cancellable:false},download);
     }
-    const controller = await display(result, store, root);
-    // Completion notifications can remain unresolved in the notification tray.
-    // They must not retain the reader-action lock after a completed import.
-    void vscode.window.showInformationMessage(result.reused
-      ? 'This section at this Git revision was already imported. Its saved annotations and links were kept.'
-      : 'Stacks Project section retained. Reading, internal references and annotations work offline. Reopen with MRW: Open Saved Source…');
-    return controller.result;
-  }));
-  register('mrw.importKerodonSection', () => locked(async () => {
-    const input = await vscode.window.showInputBox({ title: 'Import a Kerodon section',
-      prompt: 'Section or subsection tag, kerodon:TAG or official HTTPS URL. Retains one page snapshot.',
-      value: 'kerodon:0004', ignoreFocusOut: true,
-      validateInput: value => /^(?:kerodon:)?[A-Za-z0-9]{4}$/.test(value.trim()) || /^https:\/\/kerodon\.net\/tag\/[A-Za-z0-9]{4}\/?$/.test(value.trim()) ? undefined : 'Enter a Kerodon section tag or its official URL.' });
-    if (input === undefined) return;
-    const { store, root } = await storage(); writable({ store });
-    const download = () => bridge({ method: 'outline_kerodon_prepare', store, project_root: root, input }, { timeout: 120000 });
-    const prepared = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Obtaining one Kerodon section', cancellable: false }, download);
-    const destination = await bridge({ method: 'artifact_status' }), section = prepared.section;
-    const confirm = await vscode.window.showWarningMessage('Import Jacob Lurie — ' + section.title + ' (kerodon:' + section.tag + ')?\n'
-      + 'Page SHA-256: ' + prepared.source_revision + '\nDestination: ' + destination.location
-      + '\nRetains this section page, not its linked subsections. Reading and annotations work offline.', { modal: true }, 'Import section');
-    if (confirm !== 'Import section') return;
+    const preview=prepared.preview;let section=preview.choices.find(c=>c.id===preview.default);
+    if(preview.capabilities.sectionSelection){
+      section=await vscode.window.showQuickPick([...preview.choices].sort((a,b)=>(b.id===preview.default)-(a.id===preview.default)).map(c=>({label:c.title,description:c.id===preview.default?'Selected by supplied heading or default':'',...c})),{placeHolder:'Choose Whole page or a heading with its subsections'});
+      if(!section)return;
+    }
+    const destination=await bridge({method:'artifact_status'}),choice=selected.urlRules.identifier==='tag'?'Import section':'Import source';
+    const confirm=await vscode.window.showWarningMessage('Import '+preview.attribution.authors+' — '+preview.title+' ('+preview.sourceId+')?\n'
+      +'Plugin: '+preview.producer.pluginId+' '+preview.producer.pluginVersion+' · API '+preview.producer.apiVersion+'\n'
+      +'Revision: '+(preview.revision.label||'Dated, hashed snapshot')+'\nSHA-256: '+preview.sourceRevision+'\n'
+      +'Scope: '+section.title+'\nDestination: '+destination.location+'\nProject: '+root+'\nEarlier citations and annotations are preserved.',{modal:true},choice);
+    if(confirm!==choice)return;
     let result;
-    try { result = await bridge({ method: 'outline_kerodon_import', store, project_root: root, ticket: prepared.ticket, packet: prepared.packet }); }
-    catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(store); throw error; }
-    if (result.blocked) { blockedStores.add(store); throw new Error('Kerodon import publication failed: ' + result.write_error + '. Existing work is preserved. Reload the host before retrying.'); }
-    const controller = await display(result, store, root);
-    void vscode.window.showInformationMessage(result.reused ? 'This Kerodon page snapshot is already retained. Its annotations and links were kept.' : 'Kerodon section retained. Reopen with Open Saved Source.');
+    try{result=await bridge({method:'outline_source_import',store,project_root:root,ticket:prepared.ticket,section:section.id});}
+    catch(error){if(error.code!=='ACTION_REJECTED')blockedStores.add(store);throw error;}
+    if(result.blocked){blockedStores.add(store);throw new Error('Source import publication failed: '+result.write_error+'. Existing work and drafts are preserved.');}
+    const controller=await display(result,store,root);
+    void vscode.window.showInformationMessage(result.reused?'This source revision is already retained. Its annotations and links were kept.':selected.name+' source retained. Reading and annotation work offline.');
     return controller.result;
-  }));
+  }
+  register('mrw.importStacksSection',()=>locked(()=>importSource({sourceId:'stacks-project',value:'stacks-project:08ZD'})));
+  register('mrw.importKerodonSection',()=>locked(()=>importSource({sourceId:'kerodon',value:'kerodon:0004'})));
+  register('mrw.importSource',()=>locked(()=>importSource()));
+  register('mrw.reparseSource',()=>locked(()=>importSource({sourceId:current().result.outline.published?.source_id},current())));
   register('mrw.importObsidianNote', () => locked(async () => {
     const choice = await vscode.window.showQuickPick([
       { label: 'Retain a source copy', kind: 'source', description: 'Retain a copy for reading, passages and annotations' },
@@ -798,6 +780,7 @@ function registerOutlines({ vscode, context, register, bridge, show, projectRoot
     ['Follow document link', 'mrw.followDocumentLink'], ['Show backlinks…', 'mrw.showBacklinks'], ['Reopen document', 'mrw.reopenDocument'], ['New document…', 'mrw.newReadingOverview'], ['Show contents', 'mrw.openReadingOutline'],
     ['Open tutorial', 'mrw.openTutorial'],
     ['Return to document', 'mrw.returnToReadingOutline'], ['Import Stacks Project section…', 'mrw.importStacksSection'], ['Import Kerodon section…', 'mrw.importKerodonSection'],
+    ['Import source…','mrw.importSource'], ['Add source plugin…','mrw.addSourcePlugin'], ['Manage source plugins…','mrw.manageSourcePlugins'], ['Reparse saved source…','mrw.reparseSource'],
     ['Import Markdown text…', 'mrw.importObsidianNote'],
     ['Retain document as source', 'mrw.createOutline'], ['Open saved source…', 'mrw.openOutline'],
     ['Copy source or passage link…', 'mrw.copyOutlineLink'], ['Open link from clipboard', 'mrw.openLinkFromClipboard'],
