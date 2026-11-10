@@ -30,6 +30,12 @@ valid. PROV adds relationships among artifacts, operations and responsible
 agents; it does not collapse origin, verification, premise admission and human
 judgment into one status.
 
+For a related implementation, see
+[Eigenius's treatment of provenance and justification](https://eigenius.io/docs/platform/justification-logic/).
+It separates records of how an artifact was produced from grounds for a
+proposition and a checked proof. Compare this boundary when linking the PROV
+profile to MRW's [justification subsystem](JUSTIFICATION_LOGIC_EXPERIMENT.md#related-implementation).
+
 ## Minimal semantic profile
 
 Here `prov:` denotes `http://www.w3.org/ns/prov#`. These are design mappings,
