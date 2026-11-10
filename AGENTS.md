@@ -21,6 +21,11 @@ source plugins and Lean study unit. Consult
 [related systems](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
 before duplicating existing capabilities.
 
+[Zotero integration](docs/RESEARCH_WORKSTATION_DESIGN.md#zotero-integration)
+is an explicit requested feature: connect the existing library's references and
+attachments to MRW notes, retained sources and citations. It remains unimplemented.
+Keep Study archive/delete first; include Zotero in subsequent integration work.
+
 
 ## Delivered — optional Lean study, 0.23.10
 

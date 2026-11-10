@@ -99,6 +99,7 @@ uses in MRW are separate; this is not a hands-on evaluation of these systems.
 
 | System | Documented overlap | What MRW should investigate or reuse |
 | --- | --- | --- |
+| [Zotero](https://www.zotero.org/support/quick_start_guide) | Bibliographic references, attachments, notes and citation formatting. | Connect the existing library to MRW source reading, notes and citations; reuse its reference-management functions. |
 | [CoCalc](https://doc.cocalc.com/) | Projects combining SageMath, Jupyter, Markdown, LaTeX, AI assistance and course tools. | Interoperate with existing projects, notebooks and computation rather than build another hosted computing environment. |
 | [Wolfram Notebooks](https://www.wolfram.com/notebooks/) | Documents combining text, executable code, results and interactive content. | Link calculations and notebooks to research notes, preserving available inputs, outputs and execution context. |
 | [Proofscape / PISE](https://docs.proofscape.org/en/stable/ref/library/dc.html) | A mathematical study environment connecting proof charts, annotations and source documents. | Study its [bidirectional linking](https://www.proofscape.org/en/stable/tutorials/users/linking.html), proof expansion and comparison before adding equivalent navigation. |
@@ -129,8 +130,9 @@ The [source plugins](SOURCE_PLUGINS.md) for Stacks Project, Kerodon and nLab,
 [local lesson packs](LEAN_LESSON_PACKS.md) are implemented. Notebook computation
 currently uses the separate [SagePod/Jupyter workflow](SAGEPOD_NOTEBOOK_WORKFLOW.md).
 
-Repository study imports, CoCalc and Wolfram interoperability plugins, a
-data-analysis plugin and broader lab-notebook provenance remain proposals.
+Zotero integration, repository study imports, CoCalc and Wolfram interoperability
+plugins, a data-analysis plugin and broader lab-notebook provenance remain
+unimplemented. Zotero is an explicit requested integration; its scope is below.
 Clowder and PreTeXt source adapters also remain proposed. These are distinct
 from the delivered source-import and local lesson-pack interfaces.
 
@@ -138,6 +140,49 @@ W3C PROV is the common model for the proposed lab notebook; see
 [the provenance design](PROVENANCE_DESIGN.md). VisTrails supplies ideas for
 workflow evolution and result comparison. Existing libraries, formats and
 interfaces should be assessed before implementing equivalent mechanisms.
+
+### Zotero integration
+
+Requested feature, 2026-11-10; not implemented. Connect the existing Zotero
+library to mathematical study and the research lab notebook. Zotero continues
+to manage references; MRW links them to the passages, notes, calculations and
+proofs that use them.
+
+The initial workflow should support:
+
+1. Find and select an item from a chosen Zotero library, retaining its
+   bibliographic metadata and a link back to the item.
+2. Open an available attachment through the existing document/PDF reader and
+   associate it with an MRW note or retained source. Report unavailable files;
+   do not substitute a different attachment.
+3. Add a citation to an existing note using the selected reference, reusing
+   Zotero's metadata and citation facilities. Keep bibliographic citations
+   distinct from MRW's exact retained-passage references.
+
+Use Zotero's documented [local API](https://www.zotero.org/support/dev/web_api/v3/local_api)
+or [Web API](https://www.zotero.org/support/dev/web_api/v3/basics) as appropriate to
+the selected library and host. Begin with reference lookup and linking; automatic
+two-way synchronization and library editing are outside the first increment.
+Do not read or modify the live SQLite database or move Zotero-managed files.
+
+Verify the Windows Zotero / WSL2 MRW connection explicitly before choosing a
+transport. Do not assume both applications share localhost or filesystem paths,
+and do not expose Zotero's unauthenticated local API through a forwarded port.
+Detect the available API capabilities; do not require a cloud-synced library
+for a local workflow or mistake cloud metadata access for attachment access.
+
+Carry library scope, item and attachment keys, metadata versions and the
+available API-instance identity. Local and Web API version counters are not
+interchangeable. When retaining source content, preserve its exact bytes and
+hash as well as the Zotero reference; an item key or DOI alone is not a source
+revision. Map acquired records into the [common PROV model](PROVENANCE_DESIGN.md)
+without treating a citation link as proof of a derivation.
+
+A first implementation should demonstrate selection, attachment opening,
+citation insertion and resumption in the Windows/WSL2 arrangement. Include a
+missing attachment and changed metadata/content; earlier retained citations
+must keep their original targets. Archive/delete of an MRW Study must leave
+Zotero's library and attachments intact.
 
 ## Vocabulary and interface labels
 
