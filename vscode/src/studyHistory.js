@@ -99,7 +99,9 @@ class StudyHistory {
   excludeStudies(ids){for(const id of ids)this.excluded.add(id);}
   async refreshExcluded(){
     if(!this.lifecycleDirectory)return;
-    for(const name of await this.io.readdir(this.lifecycleDirectory))if(/^[a-f0-9]{64}\.lifecycle\.json$/.test(name)){
+    let names;
+    try{names=await this.io.readdir(this.lifecycleDirectory);}catch(e){if(e.code==='ENOENT')return;throw e;}
+    for(const name of names)if(/^[a-f0-9]{64}\.lifecycle\.json$/.test(name)){
       const r=await files.json(this.io,path.join(this.lifecycleDirectory,name));
       if(['deleting','deleted'].includes(r.state))this.excluded.add(r.id);
     }

@@ -170,3 +170,12 @@ test('interrupted final study removal is retried without recreating the already 
  failID=null;await h.run('showDeletedStudies');assert.equal((await h.marker(a)).state,'deleted');
  assert.equal(await exists(path.join(h.home,'active-studies-v1',a.id+'.json')),false);assert.ok(!(await h.history.events()).some(e=>e.identity.study===a.id));
 });
+
+
+test('history can start before any study directory exists without reporting a save failure',async t=>{
+ const h=await fixture(t);assert.equal(await exists(path.join(h.home,'active-studies-v1')),false);
+ await h.history.init();await h.history.flush();assert.equal(h.history.gap,'');
+ assert.ok((await h.history.events()).some(e=>e.action==='session.start'));
+ const s=await h.start();await h.trash(s);await h.delete(s);
+ assert.equal((await h.marker(s)).state,'deleted');assert.equal(h.history.gap,'');
+});
