@@ -1,0 +1,6 @@
+name = "lean_foundations_study"
+version = "0.1.0"
+defaultTargets = ["Study"]
+
+[[lean_lib]]
+name = "Study"
