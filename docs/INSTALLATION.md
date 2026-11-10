@@ -1,8 +1,8 @@
 # Install Mathematical Research Workstation
 
-MRW 0.23.6 is installed from a VSIX.
-[Download the prerelease](https://github.com/flengyel/MRW/releases/download/v0.23.6/mrw-0.23.6.vsix)
-and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.6),
+MRW 0.23.7 is installed from a VSIX.
+[Download the prerelease](https://github.com/flengyel/MRW/releases/download/v0.23.7/mrw-0.23.7.vsix)
+and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.7),
 or [build from source](../vscode/README.md#package-and-install-a-vsix).
 There is no Marketplace listing. The extension identifier is `flengyel.mrw`.
 
@@ -51,15 +51,15 @@ workspace there and perform the same Python and extension-host checks.
 
 ### 2. Install the VSIX in that workspace host
 
-Run **Extensions: Install from VSIX…** and select `mrw-0.23.6.vsix`.
+Run **Extensions: Install from VSIX…** and select `mrw-0.23.7.vsix`.
 Alternatively, use that window's Linux terminal and substitute the package path:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.6.vsix
+code --install-extension /absolute/path/to/mrw-0.23.7.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.6` under the WSL/SSH host's installed extensions.
+Confirm `flengyel.mrw@0.23.7` under the WSL/SSH host's installed extensions.
 Installing solely on the Windows interface does not install the workspace
 extension. Save unfinished work before a requested reload. Keep workspace
 storage when upgrading `flengyel.mrw`.
