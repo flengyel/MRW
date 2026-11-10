@@ -34,8 +34,10 @@ that version and the saved records it produced.
   plugin responsibilities and a bounded implementation trial.
 - [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
   proposed lifecycle, shared-data boundaries and completion checks.
+- [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration): requested
+  reference, attachment and citation workflow; not yet implemented.
 - [Related systems and reuse](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse):
-  CoCalc, Wolfram, Proofscape, TeXmacs, MathHub/ALeA and VisTrails.
+  Zotero, CoCalc, Wolfram, Proofscape, TeXmacs, MathHub/ALeA and VisTrails.
 
 - [Contributing](../CONTRIBUTING.md): focused changes, bug reports and larger proposals.
 - [Lean lesson packs](LEAN_LESSON_PACKS.md): explicit local content registration and API 1.

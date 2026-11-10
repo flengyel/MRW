@@ -63,6 +63,14 @@ Validation of a PROV record checks its consistency, not the mathematics or the
 truth of its supplied account. A Lean checking result retains its exact subject,
 environment and checking scope.
 
+The planned [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration)
+adds a bibliographic connection to retained sources. Identify metadata snapshots
+and attachment revisions separately, retaining the library and item identity,
+API-instance context, available version and exact content hash. A later metadata
+edit must not retarget an earlier retained passage. Record observed acquisition
+as an activity; a citation or item association alone does not establish
+`prov:wasDerivedFrom`.
+
 ## Core and plugin responsibilities
 
 The core validates the common profile, assigns or resolves scoped identities,
@@ -121,7 +129,7 @@ revision-specific links, readable retained results, explicit missing context,
 and a documented validation scope. Exercise one failed run and the deletion
 boundary. Do not claim complete PROV conformance from a subset validator.
 
-CoCalc and Wolfram adapters, repository-based study imports and data-analysis
-workflows remain proposed follow-on work. Compare their available interfaces
+Zotero integration, CoCalc and Wolfram adapters, repository-based study imports
+and data-analysis workflows remain unimplemented follow-on work. Compare their available interfaces
 against this profile before adding new machinery; see
 [related systems](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse).
