@@ -118,6 +118,15 @@ in \(*\) must be fixed independently of a proposed \(\mathsf{KP}\)
 classification; it is a model parameter, not a declaration of mathematical
 truth.
 
+## Related implementation
+
+[Eigenius](https://eigenius.io/docs/platform/justification-logic/) applies Artemov's justification
+logic to scientific records. Its [evidence definitions](https://github.com/eigenius/eigenius/blob/1c0879c3acd1bb6d06f5c5dde97fc2e928f82efc/ontologies/justification/justification.esl)
+retain grounds for a claim and compose them through application and alternatives.
+Its tutorial distinguishes checking those grounds from proving the claim. This
+is a reference for MRW's source and inference design; the logical specification
+above remains authoritative for MRW.
+
 ## Separation invariant
 
 Six things remain distinct:
