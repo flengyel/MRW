@@ -85,6 +85,42 @@ and build-tool dependencies (`@azure/identity`, `@azure/msal-node`, `@vscode/vsc
 `minimatch`). Dependency pins were preserved. The release notes and external
 release evidence record the clean package, checksum and publication result.
 
+## Package and publication
+
+[MRW 0.23.10 — Lean study](https://github.com/flengyel/MRW/releases/tag/v0.23.10)
+is published as a prerelease, with the
+[VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.10/mrw-0.23.10.vsix)
+and [SHA256SUMS](https://github.com/flengyel/MRW/releases/download/v0.23.10/SHA256SUMS).
+
+- Commit A: `5d73f9eb47074a5d020055d3661d8c9ca07e3713`.
+- Marker-only commit B and tag target: `08e61c19135c82a517f66c4fe3ee3b9909dfc0b1`.
+- Built from clean B using UTC and `SOURCE_DATE_EPOCH=1792094267`.
+- VSIX: 635,667 bytes; SHA-256
+  `6415227ee502d7cb7345f400dd112abbdda833bbcebe2d1d113e4de7945ac1c8`.
+
+The final package has 134 entries. The verifier passed exact inventory,
+runtime-byte, manifest, attribution and dependency-notice checks. The packaged
+README, tutorial, lesson, project and A-source marker were inspected. Tests,
+build tools, generated Lake files, logs and private notes are excluded. Compared
+with 0.23.9, source readers and backend behavior retain their bytes; the existing
+JavaScript changes are the integration registration and cloned current-reading
+location accessor, plus the two new Lean modules. The sole Python-byte change
+is its version.
+
+All 461 tracked files and all package entries were searched: zero superseded
+identity occurrences. The extracted package passed isolated bundled Python
+import/CLI and a real exact-passage bridge request, with no earlier installation
+needed. Both published assets were downloaded anonymously through their public
+versioned URLs, matched the verified local bytes and passed `sha256sum -c`.
+The public prerelease flag, tag target and README links were checked.
+
+Logs, exit statuses, compiler source hashes, both broad-test runs, native runner
+and observations, package inspection and downloaded-asset checks are preserved
+outside the maintained tree under
+`~/.cache/mrw-releases/0.23.10-20261110/`. This report-only follow-up does not
+change the tagged package. No Marketplace publication, working-window install
+or forced reload was performed.
+
 ## Limits
 
 Book links use the official external browser pages. MRW has no supported live
