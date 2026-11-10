@@ -1,5 +1,7 @@
 # Archive, restore and delete Studies
 
+Delivered in [0.23.11](STUDY_LIFECYCLE_VALIDATION.md).
+
 These controls manage saved records in **Studies**, including preserved
 records from the removed document Problems interface. They do not manage Lean
 lesson directories, proof-outline documents or ordinary notes.
