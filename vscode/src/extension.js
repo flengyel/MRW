@@ -1,5 +1,6 @@
 'use strict';
 
+const {registerLeanStudy}=require('./leanStudy');
 const hostVscode = require('vscode');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
@@ -295,6 +296,9 @@ function activate(context) {
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
     compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
+  registerLeanStudy({vscode,context,register,trackLocation:require('./readingOutline').trackLocation,
+    readingLocation:()=>readingController.currentLocation(),
+    returnToDocument:location=>vscode.commands.executeCommand('mrw.returnToReadingOutline',{retained:true,location})});
   registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });

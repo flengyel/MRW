@@ -185,6 +185,7 @@ Reopen an imported section offline with **Open Saved Source…**. See
 | Reader annotation | **Save annotation** | **Open Saved Source…**, then **Reader notes** |
 | Optional study attempt | **Pause / save** | **Resume Study** or its row in **Studies** |
 | Optional proof-work question | **Save question** in **Proof work** | **Continue proof work** |
+| Lean lesson code and notes | **Ctrl+S** in ordinary editors | **Resume Lean Study** |
 
 The selected document, notes folder and usable Return location survive an
 ordinary restart in this workspace. **MRW: Reopen Document** restores the last
@@ -198,6 +199,36 @@ and the next step in the working document. An external notes folder is separate
 from MRW's private saved-work directory: copying Markdown does not copy linked
 saved sources, annotations, studies or history. Consult the
 [storage guide](https://github.com/flengyel/MRW/blob/main/docs/ARTIFACT_STORAGE.md) before moving saved work.
+
+## Study Lean 4
+
+Choose **Study Lean 4…** in **Commands** and select **Functions, proofs and
+dependent application**. The completed first unit explains function composition,
+implication proofs and dependent application, with variations and separate
+solutions. The lesson preview and code use ordinary tabs; the official Lean
+InfoView opens beside the code. Put the cursor before `exact hQR hQ` to inspect
+the live context and remaining goal.
+
+Install the optional official **Lean 4** extension (`leanprover.lean4`) and
+Lean/elan on the workspace host. In WSL2, choose **Install in WSL: Debian**.
+The dedicated project pins Lean 4.33.0 and needs no Mathlib download. Ordinary
+MRW activation starts no Lean build or download. Without Lean, the lesson and
+code remain readable, with a route to official setup through MRW's notice.
+
+The working project goes in `<notes folder>/Lean Study/lean-foundations/`, or
+under the parent selected on first opening. **Lean Study Actions…** opens your
+associated `Notes.md`, official book links, variations, solutions and deliberate
+errors. The book opens in the external browser. **Return from Lean Study**
+recovers the prior MRW document range; **Resume Lean Study** reuses your edited
+files and code location. Save and undo in their native editors. Explicit reset
+requires confirmation, preserves Undo and does not save automatically.
+
+Unfinished variations and deliberate errors are excluded from the successful
+default `lake build`. Live goals and diagnostics belong to Lean; lesson goal
+blocks are illustrations. Structural pack validation and successful Lean
+checking do not establish agreement with an intended informal theorem.
+See the [Lean workflow](https://github.com/flengyel/MRW/blob/main/docs/LEAN_STUDY_WORKFLOW.md)
+and [lesson-pack authoring](https://github.com/flengyel/MRW/blob/main/docs/LEAN_LESSON_PACKS.md).
 
 ## Work through a difficult step
 

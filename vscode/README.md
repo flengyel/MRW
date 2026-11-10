@@ -80,6 +80,21 @@ WSL2 or Remote SSH. Windows VS Code may provide the interface. Required:
 An installed VSIX needs no npm, Qt, Lean, SageMath, container or AI account for
 ordinary reading.
 
+**Study Lean 4…** opens the first companion unit for *Theorem Proving in Lean
+4*: functions, implication proofs and dependent application. It copies a
+core-only project pinned to Lean 4.33.0 into your selected notes/study parent,
+with editable examples, separate solutions and an ordinary notes file.
+**Resume Lean Study** preserves code edits and the cursor; **Lean Study Actions…**
+opens variations, book links and Return. See the
+[workflow](../docs/LEAN_STUDY_WORKFLOW.md) and
+[local lesson-pack guide](../docs/LEAN_LESSON_PACKS.md).
+
+For live goals and checking, install `leanprover.lean4` and Lean/elan on the
+workspace host. In WSL2, use **Install in WSL: Debian**. MRW calls its supported
+`lean4.displayGoal` command; it neither creates a second Lean client nor starts
+Lean during ordinary activation. The lesson remains readable without Lean or
+an AI account. Pack structure checks do not verify its mathematical content.
+
 | Arrangement | Evidence |
 | --- | --- |
 | Windows VS Code + WSL2 Debian | Current scoped reading and renderer checks |

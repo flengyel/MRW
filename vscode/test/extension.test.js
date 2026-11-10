@@ -82,7 +82,7 @@ async function harness(root, state = new Map(), options = {}) {
       registerTextDocumentContentProvider(scheme, provider) { providers.set(scheme, provider); return disposable; },
       onDidCloseTextDocument(fn) { const previous = closeListener; closeListener = doc => { previous(doc); fn(doc); }; return disposable; },
       onDidOpenTextDocument(fn) { openListener = fn; return disposable; },
-      onDidChangeTextDocument(fn) { changeListener = fn; return disposable; },
+      onDidChangeTextDocument(fn) { const previous=changeListener; changeListener=e=>{previous(e);fn(e);}; return disposable; },
       async applyEdit(edit) {
         workspaceEdits.push(edit);
         for (const op of edit.operations) {
@@ -161,6 +161,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
+    if (name === './leanStudy') return require('../src/leanStudy');
     if (name === './sourcePlugins') return require('../src/sourcePlugins');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');

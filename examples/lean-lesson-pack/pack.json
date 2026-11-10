@@ -1,0 +1,30 @@
+{
+  "apiVersion": 1,
+  "packId": "external.identity-proof",
+  "contentVersion": "1.0.0",
+  "title": "External Lean lesson example",
+  "testedToolchain": "leanprover/lean4:v4.33.0",
+  "projectFiles": [
+    "lean-toolchain",
+    "lakefile.toml"
+  ],
+  "notesTemplate": "Notes.md",
+  "lessons": [
+    {
+      "id": "identity-proof",
+      "title": "Return a supplied proof",
+      "order": 1,
+      "explanation": "lesson.md",
+      "examples": "Example.lean",
+      "exercises": [],
+      "solutions": [],
+      "mistakes": [],
+      "bookSections": [
+        {
+          "title": "Propositions and Proofs",
+          "url": "https://lean-lang.org/theorem_proving_in_lean4/Propositions-and-Proofs/"
+        }
+      ]
+    }
+  ]
+}

@@ -29,6 +29,8 @@ There is no Marketplace listing. The extension ID is `flengyel.mrw`.
   exact passages, and add separately attributed annotations.
 - Use SageMath/Jupyter, Lean, LaTeX tools and Codex alongside MRW through their
   VS Code interfaces.
+- Study functions, proofs and dependent application through **Study Lean 4…**:
+  a companion lesson, editable core-only examples and the native Lean InfoView.
 
 Rendering, retained citations and navigation checks do not establish
 mathematical correctness. Calculations, formal proof checking and review of an
@@ -127,6 +129,10 @@ preview choices; the PDF extension's cross-host MRW handoff remains unobserved.
 
 ## Other reading tools
 
+- [Lean study](docs/LEAN_STUDY_WORKFLOW.md): open the first companion unit for
+  *Theorem Proving in Lean 4*, keep notes and resume edited code. The optional
+  official Lean extension runs on the workspace host, including WSL Debian.
+  [Local lesson packs](docs/LEAN_LESSON_PACKS.md) add content without rebuilding MRW.
 - [Stacks Project and Kerodon](docs/STACKS_WORKFLOW.md): import a section with
   source-qualified identifiers such as `stacks-project:08ZE` and `kerodon:0004`;
   reopen its retained revision offline.

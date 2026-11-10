@@ -1,5 +1,30 @@
 # Codex continuation: reading and research
 
+
+## Delivered — optional Lean study, 0.23.10
+
+**Study Lean 4…** opens a completed companion unit for *Theorem Proving in Lean
+4*, a user-owned core-only project pinned to 4.33.0 and the official extension's
+native InfoView (`lean4.displayGoal`). Resume preserves the copied lesson,
+code selection and notes; Return uses the existing exact document pin. In WSL,
+Lean/elan and `leanprover.lean4` belong on the Debian workspace host. Ordinary
+activation does not start Lean. No quiz, new record form or AI account is required.
+
+Keep the installed integration separate from declarative content API 1.
+Explicitly registered local packs load without a VSIX rebuild; they supply data,
+not executable MRW hooks or new language integrations. Do not overwrite working
+copies on pack updates. The lesson, notes and code remain ordinary files.
+See LEAN_STUDY_WORKFLOW.md and LEAN_LESSON_PACKS.md.
+
+Preserve the independent source-reader/plugin work below. Native goals belong
+to Lean; illustrated lesson states are explanatory, structural checks do not
+check mathematics, and compiler success does not establish informal correspondence.
+Do not scrape InfoView or create another Lean language client. New units require
+complete prose, explicit hypotheses, compiled solutions and isolated failing
+practice files. Later course topics are a sequence, not authorization to ship
+empty units. Preserve the working window, genuine source store and research data.
+
+
 ## Delivered — shared readers and source plugins, 0.23.9
 
 Preserve the completed MRW rename and all genuine records. The source API 1
@@ -12,11 +37,11 @@ nLab is a named-page adapter; its website refuses embedding. Clowder and PreTeXt
 remain unimplemented candidates. Preserve the working window.
 
 
-## Current priority — complete MRW rename, 0.23.8
+## Delivered — complete MRW rename, 0.23.8
 
 The user requires the active Python package, distribution and CLI to be `mrw`,
 the Lean namespace to be `MRW`, and the extension to remain `flengyel.mrw`.
-Complete the backend, bridge, packaging, tests and current documentation rename.
+The backend, bridge, packaging, tests and current documentation use MRW names.
 Earlier technical-name preservation instructions are superseded. Use MRW names and formats throughout. Perform any necessary saved-data
 conversion once outside the maintained tree and release, retaining originals
 outside active project and installation locations. No compatibility exceptions

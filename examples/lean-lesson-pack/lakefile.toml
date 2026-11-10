@@ -1,0 +1,6 @@
+name = "external_lean_lesson"
+version = "0.1.0"
+defaultTargets = ["Example"]
+
+[[lean_lib]]
+name = "Example"

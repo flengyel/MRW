@@ -16,6 +16,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Ask about a passage using Codex or MRW's separate API connector | [AI assistance](READER_AI_WORKFLOW.md) |
 | Inspect and edit a proof outline | [Proof outlines](PROOF_GRAPH_WORKFLOW.md) |
 | Use SageMath through Jupyter and SagePod | [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md) |
+| Study Lean with editable examples, native goals and Return | [Lean study](LEAN_STUDY_WORKFLOW.md) |
 | Choose companion extensions | [Recommended extensions](RECOMMENDED_EXTENSIONS.md) |
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
 | Prepare to rename a folder containing an MRW workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
@@ -30,6 +31,7 @@ that version and the saved records it produced.
 ## Design and development
 
 - [Contributing](../CONTRIBUTING.md): focused changes, bug reports and larger proposals.
+- [Lean lesson packs](LEAN_LESSON_PACKS.md): explicit local content registration and API 1.
 - [Development setup](../vscode/README.md#run-from-this-checkout): source launch,
   checks and packaging.
 - [Research-workstation design](RESEARCH_WORKSTATION_DESIGN.md): current scope,
