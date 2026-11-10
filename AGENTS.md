@@ -1,6 +1,6 @@
 # Codex instructions
 
-## Current task — shared readers and source plugins
+## Delivered — shared readers and source plugins, 0.23.9
 
 Preserve the completed MRW rename and all genuine records. The source API 1
 workflow is documented in docs/SOURCE_PLUGINS.md and docs/NLAB_WORKFLOW.md

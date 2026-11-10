@@ -57,3 +57,6 @@ The [changelog](../CHANGELOG.md) and
 [earlier VS Code development account](VS_CODE_DEVELOPMENT_HISTORY.md) preserve
 preceding workflows and the separate Qt/CLI prototype. Use current user guides
 for present commands and installation.
+
+- [Source plugins: installation and API 1](SOURCE_PLUGINS.md)
+- [nLab reader and revision limits](NLAB_WORKFLOW.md)
