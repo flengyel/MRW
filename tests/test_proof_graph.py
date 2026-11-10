@@ -7,8 +7,8 @@ import random
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.proof_graph import project
+from mrw.editor_bridge import dispatch
+from mrw.proof_graph import project
 
 
 def explanation(s='Reason'):

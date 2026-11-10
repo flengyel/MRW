@@ -106,4 +106,4 @@ tree. TikZ, LaTeX preambles and Obsidian embeds remain rendering work; the numbe
 theory outline is reused directly.
 
 The bundled tutorial and current document/Obsidian guides are updated.
-[Machine-readable evidence](evidence/note-reading-20261107.json).
+[Machine-readable evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/note-reading-20261107.json).

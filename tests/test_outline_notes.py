@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.outline_notes import obsidian_url
+from mrw.editor_bridge import dispatch
+from mrw.outline_notes import obsidian_url
 
 
 class OutlineNoteTests(unittest.TestCase):
@@ -80,7 +80,7 @@ class OutlineNoteTests(unittest.TestCase):
 
     def test_publication_failure_blocks_without_touching_retained_or_reader_bytes(self):
         previous = self.notes(); before = self.inventory()
-        with patch('theorem_terminal.outline_notes.save_mutable', side_effect=OSError('injected directory sync')):
+        with patch('mrw.outline_notes.save_mutable', side_effect=OSError('injected directory sync')):
             failed = self.update(previous)
         self.assertTrue(failed['blocked']); self.assertIn('sync', failed['write_error'])
         self.assertEqual(before, self.inventory())

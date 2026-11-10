@@ -12,11 +12,11 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.latex_build import (build_arguments, build_log, load_build, parse_diagnostics,
+from mrw.latex_build import (build_arguments, build_log, load_build, parse_diagnostics,
     pdf_bytes, recorder_inputs, recorder_observations, run_capture, run_latex, stale_inputs, input_snapshot, FAILURE_LOG_BYTES,
     StorageMonitor, STAGED_MONITOR_INTERVAL, bibliography_inputs, generated_usage, storage_snapshot)
-from theorem_terminal.workstation import Workstation
-from theorem_terminal.workspace import WorkspaceError
+from mrw.workstation import Workstation
+from mrw.workspace import WorkspaceError
 
 
 ROOT_TEX = r'''\documentclass{article}
@@ -62,7 +62,7 @@ class BuildTests(unittest.TestCase):
         self.c.set_tex_root()
 
     def test_no_automatic_typesetting(self):
-        with patch('theorem_terminal.latex_build.run_latex', side_effect=AssertionError('implicit build')), patch('subprocess.Popen', side_effect=AssertionError('implicit process')):
+        with patch('mrw.latex_build.run_latex', side_effect=AssertionError('implicit build')), patch('subprocess.Popen', side_effect=AssertionError('implicit process')):
             self.c.view()
             self.c.close_project()
             self.c.open_project(self.project)
@@ -121,7 +121,7 @@ class BuildTests(unittest.TestCase):
         self.assertIn(str(supplied), revisions)
 
     def test_lualatex_aliases_wrappers_and_native_windows_rejected_before_launch(self):
-        from theorem_terminal.tool_settings import SettingsStore
+        from mrw.tool_settings import SettingsStore
         with patch('subprocess.Popen', side_effect=AssertionError('must not launch')):
             for name in ('lualatex', 'xelatex'):
                 with self.assertRaises(WorkspaceError):
@@ -151,7 +151,7 @@ class BuildTests(unittest.TestCase):
             with self.assertRaisesRegex(WorkspaceError, 'wrapper'):
                 self.c.settings_store.configure('tex_engine', str(wrapper))
             pdflatex = shutil.which('pdflatex') or 'pdflatex'
-            with patch('theorem_terminal.latex_build.sys.platform', 'win32'):
+            with patch('mrw.latex_build.sys.platform', 'win32'):
                 with self.assertRaisesRegex(WorkspaceError, 'unavailable'):
                     run_latex(**{**self.c.build_request(), 'configured_engine': pdflatex})
 
@@ -221,11 +221,11 @@ class BuildTests(unittest.TestCase):
         project_before = {p.name: p.read_bytes() for p in self.project.iterdir()}
         records_before = set(self.state.rglob('*.json'))
         with (
-            patch('theorem_terminal.record_actions.persist_private_new',
+            patch('mrw.record_actions.persist_private_new',
                   side_effect=AssertionError('immutable record publication')),
-            patch('theorem_terminal.documentary_warrant.create_documentary_warrant_package',
+            patch('mrw.documentary_warrant.create_documentary_warrant_package',
                   side_effect=AssertionError('warrant creation')),
-            patch('theorem_terminal.documentary_warrant.run_lean_documentary_checker',
+            patch('mrw.documentary_warrant.run_lean_documentary_checker',
                   side_effect=AssertionError('Lean invocation')),
             patch('socket.socket', side_effect=AssertionError('network')),
         ):
@@ -280,7 +280,7 @@ class BuildTests(unittest.TestCase):
             for root, dirs, files in walk(*args, **kwargs):
                 visited.append(Path(root))
                 yield root, dirs, files
-        with patch('theorem_terminal.latex_build.os.walk', observed_walk):
+        with patch('mrw.latex_build.os.walk', observed_walk):
             self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL / 2),
                              (1, len(b'generated output')))
         self.assertEqual(set(visited), {output, generated})
@@ -303,7 +303,7 @@ class BuildTests(unittest.TestCase):
         auxiliary = output / 'main.aux'
         auxiliary.write_bytes(b'output')
         self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL / 2), (1, 6))
-        with patch('theorem_terminal.latex_build.storage_snapshot', wraps=storage_snapshot) as scan:
+        with patch('mrw.latex_build.storage_snapshot', wraps=storage_snapshot) as scan:
             self.assertEqual(monitor.poll(STAGED_MONITOR_INTERVAL), (4, 14))
             self.assertEqual([call.args[0] for call in scan.call_args_list], [output, staged])
             scan.reset_mock()
@@ -334,7 +334,7 @@ class BuildTests(unittest.TestCase):
                 runner = """
 import json,sys
 from unittest.mock import patch
-from theorem_terminal import latex_build as build
+from mrw import latex_build as build
 observations = []
 usage = build.generated_usage
 def observed_usage(directory, baseline, **kwargs):
@@ -390,7 +390,7 @@ print(json.dumps(observations))
     def test_real_success_failure_staleness_digests_provenance_and_restart(self):
         self.c.settings_store.configure('tex_engine', shutil.which('pdflatex'))
         before = {p.name: p.read_bytes() for p in self.project.iterdir()}
-        with patch('theorem_terminal.private_persistence.persist_private_new', side_effect=AssertionError('mathematical record publication')), patch('socket.socket', side_effect=AssertionError('network')):
+        with patch('mrw.private_persistence.persist_private_new', side_effect=AssertionError('mathematical record publication')), patch('socket.socket', side_effect=AssertionError('network')):
             report = self.c.build_latex()
         self.assertTrue(report['success'], report['stdout'] + report['stderr'])
         self.assertEqual(report['exit_code'], 0)
@@ -415,7 +415,7 @@ print(json.dumps(observations))
         script = '''
 import json,sys
 from pathlib import Path
-from theorem_terminal.workstation import Workstation
+from mrw.workstation import Workstation
 c=Workstation(state_root=Path(sys.argv[2]))
 c.open_project(Path(sys.argv[1]))
 r,raw,stale=c.pdf_snapshot()
@@ -533,9 +533,9 @@ print(json.dumps([c.current().pdf_page,c.current().pdf_zoom,c.current().pdf_scal
                 f'Database file #1: refs.bib\nDatabase file #2: {outside_bib}\n')
             return 1, 'Synthetic stopped build for dependency-limit test', '', ''
         request = {**self.c.build_request(), 'configured_engine': 'pdflatex'}
-        with (patch('theorem_terminal.latex_build.validated_tex_executable', return_value='/tools/pdflatex'),
-              patch('theorem_terminal.latex_build.run_capture', side_effect=capture)):
-            with patch('theorem_terminal.latex_build.MAX_INPUTS', 6):
+        with (patch('mrw.latex_build.validated_tex_executable', return_value='/tools/pdflatex'),
+              patch('mrw.latex_build.run_capture', side_effect=capture)):
+            with patch('mrw.latex_build.MAX_INPUTS', 6):
                 report = run_latex(**request)
                 self.assertEqual({item['path'] for item in report['inputs']},
                                  {str(self.root), str(self.project / 'argument.tex'), str(database), str(supplied)})
@@ -543,8 +543,8 @@ print(json.dumps([c.current().pdf_page,c.current().pdf_zoom,c.current().pdf_scal
                 self.assertEqual(len(report['inputs']) + len(report['outside_inputs']), 6)
                 self.assertEqual(load_build(self.c.build_storage, report['id'], self.project), report)
             reports_before = set(self.c.build_storage.glob('*/report.json'))
-            with (patch('theorem_terminal.latex_build.MAX_INPUTS', 5),
-                  patch('theorem_terminal.latex_build.save_mutable',
+            with (patch('mrw.latex_build.MAX_INPUTS', 5),
+                  patch('mrw.latex_build.save_mutable',
                         side_effect=AssertionError('Excessive dependency report must not be published'))):
                 with self.assertRaisesRegex(WorkspaceError, 'Combined build input observations exceed 5 files'):
                     run_latex(**request)

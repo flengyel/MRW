@@ -10,8 +10,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.artifact_storage import ArtifactStorage, inventory, encoded, read_json
-from theorem_terminal.editor_bridge import dispatch
+from mrw.artifact_storage import ArtifactStorage, inventory, encoded, read_json
+from mrw.editor_bridge import dispatch
 
 
 def interrupted_move(home, destination, roots, manifest, phase):
@@ -72,6 +72,24 @@ class ArtifactStorageTests(unittest.TestCase):
         result=self.control('artifact_move',destination=str(self.destination),roots=[str(self.root)],manifest=plan['source_manifest'])
         self.epoch=result['epoch'];return result
 
+    def test_mrw_store_v2_preserves_citation_scopes_and_rejects_invalid_identity(self):
+        self.move()
+        path = self.destination / 'store.json'
+        raw = path.read_bytes()
+        identity = json.loads(raw)
+        self.assertEqual(identity['version'], 2)
+        scopes = identity['projects'][0]['reference_scopes']
+        self.assertEqual(len(scopes), 1)
+        self.assertTrue(self.call('outline_follow_reference', reference=self.ref)['document'])
+        for invalid in ([], scopes * 2, ['invalid-scope']):
+            changed = deepcopy(identity)
+            changed['projects'][0]['reference_scopes'] = invalid
+            path.write_bytes(encoded(changed))
+            with self.assertRaisesRegex(ValueError, 'citation scope'):
+                self.manager.load(self.destination)
+        path.write_bytes(raw)
+        self.manager.load(self.destination)
+
     def test_move_pinned_links_notes_mutation_restart_and_old_payload_removal(self):
         moved=self.move();self.assertTrue(moved['committed']);self.assertFalse(moved['cleanup_pending'])
         self.assertEqual(inventory(self.home,legacy=True),{})
@@ -93,26 +111,26 @@ class ArtifactStorageTests(unittest.TestCase):
         self.assertFalse(any('/locks/' in p for p in inventory(self.destination)))
 
     def test_retained_diagram_moves_with_its_annotation_and_stale_render_is_refused(self):
-        from theorem_terminal.reader_diagrams import checked_svg
+        from mrw.reader_diagrams import checked_svg
         code = '```tikz\n\\begin{tikzpicture}\\draw (0,0)--(1,1);\\end{tikzpicture}\n```'
         saved = self.call('outline_mutate',id=self.id,revision=self.created['revision'],change=dict(
             kind='annotation',region=None,id=None,purpose='explanation',text=code,origin='human_work',author='Reader'))
         note=saved['outline']['annotations'][0];block=next(b for b in note['fragments'] if b['kind']=='tikz')
         svg=checked_svg(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 0L20 20"/></svg>')
         request=dict(id=self.id,revision=saved['revision'],annotation=note['id'],code=block['key'])
-        with patch('theorem_terminal.reader_diagrams.compile_tikz',return_value=(svg,dict(pdflatex='1'*64,pdftocairo='2'*64))):
+        with patch('mrw.reader_diagrams.compile_tikz',return_value=(svg,dict(pdflatex='1'*64,pdftocairo='2'*64))):
             rendered=self.call('outline_render_diagram',**request)
         image=next(b for b in rendered['outline']['annotations'][0]['fragments'] if b['kind']=='tikz')['image']
         self.move()
-        with patch('theorem_terminal.reader_diagrams.compile_tikz',side_effect=AssertionError('Implicit compiler')):
+        with patch('mrw.reader_diagrams.compile_tikz',side_effect=AssertionError('Implicit compiler')):
             reopened=self.call('outline_follow_reference',reference=self.ref)
             self.assertEqual(next(b for b in reopened['outline']['annotations'][0]['fragments'] if b['kind']=='tikz')['image'],image)
             self.epoch='legacy'
             with self.assertRaisesRegex(ValueError,'stale client'):self.call('outline_render_diagram',**request)
 
     def test_location_aliases_do_not_rewrite_human_prose_or_source_provenance(self):
-        from theorem_terminal.artifact_context import CURRENT, stable_paths
-        from theorem_terminal.artifact_storage import StoreAccess
+        from mrw.artifact_context import CURRENT, stable_paths
+        from mrw.artifact_storage import StoreAccess
         self.move();ident,head,raw,payload=self.manager.load(self.destination)
         literal=str(payload/'a path discussed by the reader α')
         original=dict(summary={'question':literal,'last_conclusion':literal},body=literal,
@@ -194,14 +212,14 @@ class ArtifactStorageTests(unittest.TestCase):
                 plan=self.control('artifact_plan',destination=str(self.destination),roots=[str(self.root)])
 
     def test_binding_replaced_but_sync_uncertain_blocks_and_recovers_new_authority(self):
-        from theorem_terminal.mutable_files import save_mutable
+        from mrw.mutable_files import save_mutable
         plan=self.control('artifact_plan',destination=str(self.destination),roots=[str(self.root)])
         def publication(path,*args,**kwargs):
             if path==self.manager.binding_path:
-                with patch('theorem_terminal.mutable_files.sync_directory',side_effect=OSError('binding sync uncertain')):
+                with patch('mrw.mutable_files.sync_directory',side_effect=OSError('binding sync uncertain')):
                     return save_mutable(path,*args,**kwargs)
             return save_mutable(path,*args,**kwargs)
-        with patch('theorem_terminal.artifact_storage.save_mutable',side_effect=publication),self.assertRaisesRegex(OSError,'uncertain'):
+        with patch('mrw.artifact_storage.save_mutable',side_effect=publication),self.assertRaisesRegex(OSError,'uncertain'):
             self.control('artifact_move',destination=str(self.destination),roots=[str(self.root)],manifest=plan['source_manifest'])
         self.assertTrue(self.manager.binding_path.exists());self.assertEqual(inventory(self.home,legacy=True),self.original)
         with self.assertRaisesRegex(ValueError,'recovery'):self.call('outline_list')
@@ -301,8 +319,8 @@ class ArtifactStorageTests(unittest.TestCase):
             pass
 
     def test_required_external_model_call_dependencies_resume_without_originals(self):
-        from theorem_terminal.editor_assistance import assistance_action
-        from theorem_terminal.openai_response import TransportResult
+        from mrw.editor_assistance import assistance_action
+        from mrw.openai_response import TransportResult
         external=self.base/'external parent.json';external.write_bytes((Path(__file__).parent/'fixtures/mechanical_model_call.json').read_bytes())
         child=self.home/'model-calls'/'child.json';child.parent.mkdir()
         inv=self.home/('investigation-'+sha256(str(self.root).encode()).hexdigest())
@@ -351,8 +369,8 @@ class ArtifactStorageTests(unittest.TestCase):
 
     def test_updated_independent_publishers_reject_retired_paths(self):
         self.move()
-        from theorem_terminal.private_persistence import persist_private_new
-        from theorem_terminal.mutable_files import save_mutable
+        from mrw.private_persistence import persist_private_new
+        from mrw.mutable_files import save_mutable
         with self.assertRaisesRegex(ValueError,'retired locator'):
             persist_private_new(self.home/'model-calls'/'stale.json',b'{}')
         with self.assertRaisesRegex(ValueError,'retired locator'):
@@ -409,8 +427,8 @@ class ArtifactStorageTests(unittest.TestCase):
         self.assertEqual(len(set((self.destination/'versions').iterdir()) - versions), 1)
 
     def test_managed_explicit_send_keeps_pending_reservation_durable_before_transport(self):
-        from theorem_terminal.editor_assistance import assistance_action
-        from theorem_terminal.openai_response import TransportResult
+        from mrw.editor_assistance import assistance_action
+        from mrw.openai_response import TransportResult
         self.move()
         parent=self.base/'selected parent.json';parent.write_bytes((Path(__file__).parent/'fixtures/mechanical_model_call.json').read_bytes())
         inv=self.home/('investigation-'+sha256(str(self.root).encode()).hexdigest())
@@ -427,7 +445,7 @@ class ArtifactStorageTests(unittest.TestCase):
             observed.append('durable pending before transport')
             response=dict(object='response',id='fixture',model='deterministic',status='completed',output=[dict(type='message',role='assistant',status='completed',content=[dict(type='output_text',text='Retained fixture result.',annotations=[])])])
             return TransportResult(200,json.dumps(response).encode())
-        with patch.dict(os.environ,{'OPENAI_API_KEY':'synthetic'}),patch('theorem_terminal.editor_bridge.assistance_action',side_effect=lambda r:assistance_action(r,transport=transport)):
+        with patch.dict(os.environ,{'OPENAI_API_KEY':'synthetic'}),patch('mrw.editor_bridge.assistance_action',side_effect=lambda r:assistance_action(r,transport=transport)):
             result=action('send_assistance',draft=draft,preview=preview,confirmation='SEND')
         self.assertEqual(observed,['durable pending before transport'],result);self.assertEqual(result['status'],'completed')
         self.assertFalse(self.manager.journal.exists())
@@ -435,9 +453,9 @@ class ArtifactStorageTests(unittest.TestCase):
         self.assertIn('Child terminal status: completed',resumed['body']);self.assertNotIn('missing or changed',resumed['body'])
 
     def test_interrupted_managed_send_recovers_retained_record_without_retry(self):
-        from theorem_terminal.editor_assistance import assistance_action
-        from theorem_terminal.editor_investigation import InvestigationStore
-        from theorem_terminal.openai_response import TransportResult
+        from mrw.editor_assistance import assistance_action
+        from mrw.editor_investigation import InvestigationStore
+        from mrw.openai_response import TransportResult
         self.move()
         parent=self.base/'parent for interruption.json';parent.write_bytes((Path(__file__).parent/'fixtures/mechanical_model_call.json').read_bytes())
         inv=self.home/('investigation-'+sha256(str(self.root).encode()).hexdigest())
@@ -449,7 +467,7 @@ class ArtifactStorageTests(unittest.TestCase):
                 if active and active['phase']=='terminal':os._exit(74)
                 return original_publish(store,active)
             response=dict(object='response',id='fixture',model='deterministic',status='completed',output=[dict(type='message',role='assistant',status='completed',content=[dict(type='output_text',text='Exact interrupted result.',annotations=[])])])
-            with patch.dict(os.environ,{'OPENAI_API_KEY':'synthetic'}),patch.object(InvestigationStore,'publish',publish),patch('theorem_terminal.editor_bridge.assistance_action',side_effect=lambda r:assistance_action(r,transport=lambda *args:TransportResult(200,json.dumps(response).encode()))):
+            with patch.dict(os.environ,{'OPENAI_API_KEY':'synthetic'}),patch.object(InvestigationStore,'publish',publish),patch('mrw.editor_bridge.assistance_action',side_effect=lambda r:assistance_action(r,transport=lambda *args:TransportResult(200,json.dumps(response).encode()))):
                 dispatch(dict(protocol=1,method='send_assistance',artifact_home=str(self.home),artifact_epoch=self.epoch,draft=draft,preview=preview,confirmation='SEND'))
         process=multiprocessing.get_context('fork').Process(target=worker);process.start();process.join(15)
         self.assertFalse(process.is_alive());self.assertEqual(process.exitcode,74)

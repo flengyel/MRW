@@ -9,13 +9,13 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.artifact_storage import ArtifactStorage
-from theorem_terminal.source_outlines import OutlineStore, span_text
-from theorem_terminal.stacks_import import (REF, RAW, _NoRedirect, fetch, section_tag,
+from mrw.editor_bridge import dispatch
+from mrw.artifact_storage import ArtifactStorage
+from mrw.source_outlines import OutlineStore, span_text
+from mrw.stacks_import import (REF, RAW, _NoRedirect, fetch, section_tag,
                                            extract, unpack)
-from theorem_terminal.stacks_tex import comment_mask, display_tokens
-from theorem_terminal.source import SourceDocument
+from mrw.stacks_tex import comment_mask, display_tokens
+from mrw.source import SourceDocument
 
 FIXTURE = Path(__file__).parent / 'fixtures/stacks'
 REVISION = 'a' * 40  # Deliberately synthetic transport-double revision.
@@ -55,7 +55,7 @@ class StacksImportTests(unittest.TestCase):
         return dispatch(dict(protocol=1, method=method, artifact_home=str(self.home), **extra))
 
     def prepare(self, value='08ZD'):
-        with patch('theorem_terminal.stacks_import.fetch', side_effect=self.downloader):
+        with patch('mrw.stacks_import.fetch', side_effect=self.downloader):
             return self.call('outline_stacks_prepare', input=value)
 
     def import_section(self, prepared=None):
@@ -102,7 +102,7 @@ class StacksImportTests(unittest.TestCase):
     def test_retained_references_annotation_restart_and_original_absent_are_offline(self):
         loaded = self.import_section()
         key = loaded['outline']['id']
-        with patch('theorem_terminal.stacks_import.fetch', side_effect=AssertionError('Reading must be offline')):
+        with patch('mrw.stacks_import.fetch', side_effect=AssertionError('Reading must be offline')):
             followed = self.call('outline_stacks_reference', id=key, revision=loaded['revision'], tag='08ZE')
             self.assertEqual(followed['document']['text'].encode(), self.files['topology.tex'])
             region = followed['reference']['region']
@@ -222,11 +222,11 @@ class StacksImportTests(unittest.TestCase):
         existing = self.import_section()
         old = OutlineStore(str(self.store), str(self.root), existing['outline']['id']).raw
         self.commit = 'b' * 40
-        with patch('theorem_terminal.stacks_import.fetch', side_effect=ValueError('Download unavailable')):
+        with patch('mrw.stacks_import.fetch', side_effect=ValueError('Download unavailable')):
             with self.assertRaisesRegex(ValueError, 'unavailable'):
                 self.call('outline_stacks_prepare', input='08ZD')
         prepared = self.prepare()
-        with patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('disk full')):
+        with patch('mrw.source_outlines.save_mutable', side_effect=OSError('disk full')):
             result = self.import_section(prepared)
         self.assertTrue(result['blocked'])
         self.assertEqual(len(self.call('outline_list')['outlines']), 1)

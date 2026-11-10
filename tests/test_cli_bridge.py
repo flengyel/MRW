@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.cli import main
+from mrw.cli import main
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +28,7 @@ class BridgeCliTests(unittest.TestCase):
             projection = Path(temporary) / "projection.json"
             request = Path(temporary) / "request.json"
             with patch(
-                "theorem_terminal.documentary_warrant.subprocess.Popen",
+                "mrw.documentary_warrant.subprocess.Popen",
                 side_effect=AssertionError("Lean must not run"),
             ):
                 status, stdout, stderr = self.invoke(

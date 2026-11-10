@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'python'))
-from theorem_terminal import editor_bridge
+from mrw import editor_bridge
 
 os.environ.pop('OPENAI_API_KEY', None)
 
@@ -18,7 +18,7 @@ socket.socket.connect = forbidden
 socket.socket.connect_ex = forbidden
 subprocess.Popen = forbidden
 if '--fail-publication' in sys.argv:
-    from theorem_terminal import source_outlines
+    from mrw import source_outlines
     def fail_publication(*args, **kwargs):
         raise OSError('Injected pre-replacement publication failure in actual host check')
     source_outlines.save_mutable = fail_publication

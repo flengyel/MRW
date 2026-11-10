@@ -8,8 +8,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal import appendix_a
-from theorem_terminal.cli import main
+from mrw import appendix_a
+from mrw.cli import main
 
 
 APPENDIX_A = r"""% !TEX root = rs_main.tex
@@ -123,7 +123,7 @@ class AppendixACommandTests(unittest.TestCase):
             "Select lem:range-lifting-pullback-section with the study command.",
             output,
         )
-        self.assertNotIn(f"theorem-terminal study {self.source}", output)
+        self.assertNotIn(f"mrw study {self.source}", output)
 
     def test_orientation_identifies_exact_source_revision(self) -> None:
         status, output, _ = self.run_command("orient", str(self.source))

@@ -6,8 +6,8 @@ import sys
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / 'python'))
-from theorem_terminal import stacks_import
-from theorem_terminal.editor_bridge import main, MAX_REQUEST_BYTES
+from mrw import stacks_import
+from mrw.editor_bridge import main, MAX_REQUEST_BYTES
 
 raw = sys.stdin.buffer.read(MAX_REQUEST_BYTES + 1)
 request = json.loads(raw)

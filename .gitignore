@@ -5,7 +5,7 @@ __pycache__/
 /build/
 /dist/
 /lean/.lake/
-/vscode/python/theorem_terminal/
+/vscode/python/mrw/
 /vscode/LICENSE
 /vscode/*.vsix
 /vscode/node_modules/

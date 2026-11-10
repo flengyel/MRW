@@ -6,7 +6,7 @@ import json
 from types import MappingProxyType
 import unittest
 
-from theorem_terminal.justification import (
+from mrw.justification import (
     BundleExpectation,
     ExactBinding,
     JustificationBundleError,
@@ -14,7 +14,7 @@ from theorem_terminal.justification import (
     render_warrant,
     validate_bundle,
 )
-from theorem_terminal.appendix_a_warrant import (
+from mrw.appendix_a_warrant import (
     APPENDIX_A_BUNDLE_EXPECTATION,
     load_appendix_a_bundle,
 )
@@ -42,7 +42,7 @@ def sample_document(
     stdout = "checked output\n"
     stderr = ""
     profile = {
-        "checker": "TheoremTerminal.Justification.checkCertificate",
+        "checker": "MRW.Justification.checkCertificate",
         "checker_version": "checker-v1",
         "constant_specification": None,
         "id": "j0-v1",
@@ -93,12 +93,12 @@ def sample_document(
         "checker_source_closure": [
             {
                 "digest": digest("7" * 64),
-                "path": "TheoremTerminal/Justification/Certificate.lean",
+                "path": "MRW/Justification/Certificate.lean",
             }
         ],
         "fixture_source": {
             "digest": digest("b" * 64),
-            "path": "TheoremTerminal/Justification/AppendixA.lean",
+            "path": "MRW/Justification/AppendixA.lean",
         },
         "lake_manifest_digest": digest("c" * 64),
         "lakefile_digest": digest("d" * 64),
@@ -229,7 +229,7 @@ def sample_document(
         "fixture_id": "appendix-a-test-fixture-v1",
         "justification_verification": {
             "at": "2026-09-01T00:00:02Z",
-            "checker": "TheoremTerminal.Justification.checkCertificate",
+            "checker": "MRW.Justification.checkCertificate",
             "checker_revision": "checker-v1",
             "claim_checked": "Certificate denotes the recorded derivation.",
             "context": "context-v1",
@@ -242,7 +242,7 @@ def sample_document(
         },
         "profile": profile,
         "related_source_bindings": related_bindings,
-        "schema": "theorem-terminal.justification-bundle",
+        "schema": "mrw.justification-bundle",
         "schema_version": 1,
     }
 

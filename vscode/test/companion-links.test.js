@@ -14,7 +14,7 @@ test('durable external URI encodes Unicode, spaces, percent and Markdown punctua
 });
 test('external URI rejects other schemes, actions, repeated/unknown parameters and invalid encoding', () => {
   const good = makeExternal(target);
-  for (const value of [good.replace('flengyel.mrw', 'flengyel.theorem-terminal'), good.replace('vscode:', 'command:'), good.replace('/outline?', '/run?'), good+'#fragment', good+'&v=1',
+  for (const value of [good.replace('flengyel.mrw', 'other.extension'), good.replace('vscode:', 'command:'), good.replace('/outline?', '/run?'), good+'#fragment', good+'&v=1',
     good+'&append=yes', good.replace('target=', 'target=%ZZ'), good+' ', good.replace('target=', 'target=é'),
     'vscode://evil.extension/outline?v=1&target=e30', good.replace('v=1', 'v=2')]) assert.throws(() => parseExternal(value));
   for (const workspace of ['command:evil', 'https://example.com', 'file:///tmp/folder?x=1', 'vscode-remote://evil/tmp',
@@ -46,5 +46,5 @@ test('new extension URLs retain qualified source identity, revision and passage 
   const link = makeExternal({...target, reference});
   assert.match(link, /^vscode:\/\/flengyel\.mrw\//);
   assert.equal(parseExternal(link).reference, reference);
-  assert.throws(() => parseExternal(link.replace('flengyel.mrw', 'flengyel.theorem-terminal')), /Unsupported/);
+  assert.throws(() => parseExternal(link.replace('flengyel.mrw', 'other.extension')), /Unsupported/);
 });

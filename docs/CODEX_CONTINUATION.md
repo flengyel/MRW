@@ -1,5 +1,18 @@
 # Codex continuation: reading and research
 
+## Current priority — complete MRW rename, 0.23.8
+
+The user requires the active Python package, distribution and CLI to be `mrw`,
+the Lean namespace to be `MRW`, and the extension to remain `flengyel.mrw`.
+Complete the backend, bridge, packaging, tests and current documentation rename.
+Earlier technical-name preservation instructions are superseded. Use MRW names and formats throughout. Perform any necessary saved-data
+conversion once outside the maintained tree and release, retaining originals
+outside active project and installation locations. No compatibility exceptions
+remain. Preserve exact source references. This is a
+runtime change requiring the full Python and extension regression suites, clean
+entry-point and extracted-package checks, and isolated host observation. Preserve
+the working window; do not install there or force a reload.
+
 ## Current direction — ordinary work, 0.23.5
 
 Reading repairs preserve these rules: Contents identifies a different active file,
@@ -30,8 +43,7 @@ migration or deletion. Other explicitly invoked study/proof tools remain separat
 
 Preserve the delivered opening, title, scope, Return and pane-placement repairs,
 native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
-VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
-reloading the working window. General research resumption and argument
+VS Code owns dirty buffers, Save, Undo and layout. Verify the release without installing into or reloading the working window. General research resumption and argument
 reconstruction remain later work; they must start from an observed task, without
 adding another registration form. [Current rules and delivery](ORDINARY_WORK_RULES.md).
 [Delivery](DOCUMENT_PROBLEMS_REMOVAL.md).
@@ -804,7 +816,7 @@ implementation check. The user is holding off; their actual preparation and
 rename remain separate explicit actions after delivery. Preserve its 08ZG Codex
 annotation, current overviews, notebook project, TikZ trial and open drafts.
 The GitHub repository is already `flengyel/MRW`; the local path remains
-`/home/flengyel/src/theorem_terminal`. Keep API-key setup, Windows-backed storage
+`/home/flengyel/src/mrw`. Keep API-key setup, Windows-backed storage
 qualification and unrelated host campaigns deferred.
 
 ## GitHub repository renamed MRW — 2026-11-04
@@ -814,7 +826,7 @@ The rename is complete: [flengyel/MRW](https://github.com/flengyel/MRW), retaini
 repository ID `R_kgDOTykQVQ`, private visibility and default branch `main`.
 The local `origin` is now `git@github.com:flengyel/MRW.git`; current installation
 and extension repository/package-content links use the new URL. This does not
-rename the checkout at `/home/flengyel/src/theorem_terminal`, its technical
+rename the checkout at `/home/flengyel/src/mrw`, its technical
 packages/records or any study workspace. No new VSIX or runtime behavior is added.
 
 The user is opening the existing hidden study folder as an interim measure and
@@ -835,7 +847,7 @@ that AI setup is deferred: the deferral applies to MRW's direct API credential
 setup and live connector trial, not to user-led mathematical questions in Codex.
 
 The user now reports that the Codex extension is installed and its sidebar opens
-successfully. They have opened `/home/flengyel/src/theorem_terminal` in Windows
+successfully. They have opened `/home/flengyel/src/mrw` in Windows
 VS Code connected to **WSL: Debian**. This records successful sidebar startup by
 user report, separate from a tested MRW-to-Codex workflow. Transfer of a retained
 passage/reference, a resulting reply and explicit attributed retention remain
@@ -862,11 +874,11 @@ documentation only: no new VSIX, provider request or desktop-testing campaign.
 
 ### Reopen the existing study workspace beside Codex
 
-The current `/home/flengyel/src/theorem_terminal` folder is the **development
+The current `/home/flengyel/src/mrw` folder is the **development
 checkout**. The retained Stacks study belongs to its own existing workspace:
 
 ```text
-/home/flengyel/src/theorem_terminal/.codex-work/stacks-import-20261021/reading-workspace
+/home/flengyel/src/mrw/.codex-work/stacks-import-20261021/reading-workspace
 ```
 
 Although this folder is under the checkout's ignored work directory, its private
@@ -938,7 +950,7 @@ Prior development-host seed/reopen evidence stays separate.
 Final syntax checks and **89 Node tests pass**. Python ran **379 tests: 317
 passed, 62 skipped**; compilation passed. Tests, packaging and installed bridge
 checks ran sequentially. Verified and installed **0.11.1**:
-`vscode/theorem-terminal-0.11.1.vsix`, 66 files, SHA-256
+`vscode/mrw-0.11.1.vsix`, 66 files, SHA-256
 `3adda92714ed3a4f41f5e934e8553c619c5cbe73a162ab373736608fabc93bfe`.
 All 61 installed runtime files, production manifest and packaged README match.
 Prior archives remain. Installed bridge checks followed both sources, refused
@@ -1499,7 +1511,7 @@ subsequent annotation, logical reference and fresh storage-client UUID. One test
 ran in 11.158 s, operator 11.848 s, with no retries. The fresh client is in-process;
 there was no normal application restart, installed-command or physical hyperlink
 acceptance in this check. Read [the precise result](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20)
-and [sanitized evidence](evidence/artifact-storage-20261020/obsidian-closed.json).
+and [sanitized evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/artifact-storage-20261020/obsidian-closed.json).
 
 The test trees were cleaned; the real store, authoritative work, original fixture
 source, temporary note, configuration and prior/current packages stayed unchanged.
@@ -1526,7 +1538,7 @@ at `save_mutable → os.replace`: `PermissionError`, errno 13. No move committed
 One selected test ran and errored; the other eight and extra mode/source-absent
 checks were not reached. The helper deliberately exited 1, not by timeout.
 Read [the exact result](ARTIFACT_STORAGE_VALIDATION.md#approved-paused-transaction-check--2026-10-20)
-and [sanitized evidence](evidence/artifact-storage-20261020/paused-qualification.json).
+and [sanitized evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/artifact-storage-20261020/paused-qualification.json).
 
 The operator's finally block restored `paused=false` and confirmed the complete
 folder configuration unchanged. Its elapsed time was 2.29 seconds. An independent
@@ -1749,7 +1761,7 @@ Lean build ran. Cross-device ext4→tmpfs protocol testing uses a test-only bypa
 makes no persistence/power-loss claim. A bounded second-host SSH check failed
 authentication; no second-host synchronization acceptance is claimed.
 
-The package is `vscode/theorem-terminal-0.7.0.vsix`; earlier packages are preserved.
+The package is `vscode/mrw-0.7.0.vsix`; earlier packages are preserved.
 Normal installed-workspace restart followed the same pre-move URI through the
 Windows protocol handler and independently confirmed the exact Unicode selection.
 After the validated path-based/logical note-target correction, a fresh actual host
@@ -1809,7 +1821,7 @@ All 14 inventoried fixture, note, saved study and VSIX files were unchanged. The
 user's working window and drafts were preserved. An unrelated active Copilot
 session in the empty test window was cancelled; the user confirmed that was
 wanted. No MRW assistance action ran. The delivered package remains
-`vscode/theorem-terminal-0.6.1.vsix`; no rebuild was needed for this evidence-only
+`vscode/mrw-0.6.1.vsix`; no rebuild was needed for this evidence-only
 follow-up. Exact observations, captures and limits are in the validation report.
 No requested navigation check remains outstanding. Save reader annotations before
 reloading working windows to pick up the installed patch; do not close or rewrite
@@ -1965,7 +1977,7 @@ the existing Python core, reader, storage and navigation services. Read
 [the reference contract](PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16)
 and [the focused validation report](VS_CODE_OVERVIEW_VALIDATION.md).
 
-Delivery: `vscode/theorem-terminal-0.5.0.vsix`, SHA-256
+Delivery: `vscode/mrw-0.5.0.vsix`, SHA-256
 `1580ff1ff022662028a1c302abe190698919663fb1bf40fc74742696baa1ebe8`.
 Two UTC/fixed-epoch builds were byte-identical. All 45 archive files were
 verified against the production manifest/runtime/license allowlist; test
@@ -2023,7 +2035,7 @@ by completion; mathematical usefulness remains unassessed.
 
 The association-editing increment is complete at `db3665a`. The completed delivery
 packages that existing extension as an installable VSIX, preserving identity
-`flengyel.theorem-terminal` 0.4.1 and all existing private-state conventions.
+`flengyel.mrw` 0.4.1 and all existing private-state conventions.
 Use [the reproducible packaging and installation procedure](../vscode/README.md#package-and-install-a-vsix)
 and [the installed-package report](VS_CODE_OUTLINE_VALIDATION.md#installed-vsix--2026-10-15)
 for the artifact digest, archive contents, ordinary-window workflow and limits.
@@ -2052,7 +2064,7 @@ backend portability remains a separate deferred task.
 The same archive now also passes a scoped **Windows VS Code / Remote SSH /
 Raspberry Pi 5, Debian 12 ARM64, Python 3.11.2** check. See the
 [Pi report](VS_CODE_OUTLINE_VALIDATION.md#remote-ssh-on-raspberry-pi-5--2026-10-15)
-and [committed host evidence](evidence/vsix-pi-20261015/host-checks.json).
+and [committed host evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/vsix-pi-20261015/host-checks.json).
 Installation used ordinary SCP and `code --install-extension` in the remote
 terminal. All 41 installed files match the archive; observed isolated bridge
 processes and 19 imported module code origins point to the installed bundle.

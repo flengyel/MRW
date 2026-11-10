@@ -9,10 +9,10 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.documentary_warrant import parse_documentary_projection
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.record_actions import call_passage, attributed_contribution
-from theorem_terminal.workstation import Workstation
+from mrw.documentary_warrant import parse_documentary_projection
+from mrw.editor_bridge import dispatch
+from mrw.record_actions import call_passage, attributed_contribution
+from mrw.workstation import Workstation
 
 FIXTURE = Path(__file__).parent / 'fixtures' / 'mechanical_model_call.json'
 
@@ -137,7 +137,7 @@ class EditorBridgeTests(unittest.TestCase):
 
     def test_cli_structured_failure_and_duplicate_keys(self):
         for raw in [b'{"protocol":1,"protocol":1}', b'x' * (64 * 1024 + 1)]:
-            result = subprocess.run([sys.executable, '-m', 'theorem_terminal.editor_bridge'], input=raw, capture_output=True)
+            result = subprocess.run([sys.executable, '-m', 'mrw.editor_bridge'], input=raw, capture_output=True)
             reply = json.loads(result.stdout)
             self.assertEqual(result.returncode, 1)
             self.assertFalse(reply['ok'])

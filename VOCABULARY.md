@@ -3,7 +3,7 @@
 Terminology used throughout Mathematical Research Workstation.
 
 The repository is `flengyel/MRW`, and the VS Code extension is `flengyel.mrw`.
-The Python package `theorem_terminal` and CLI command `theorem-terminal` retain
+The Python package `mrw` and CLI command `mrw` retain
 their technical names. The terms below describe documents, mathematical work
 and research records; they do not require every mathematical object to be
 registered in MRW.

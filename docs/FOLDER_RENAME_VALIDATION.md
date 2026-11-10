@@ -65,7 +65,7 @@ Syntax, Python compilation, local documentation links/anchors, Markdown and
 diff checks pass. The final archive was packaged only after the relevant final
 regression completed. A preliminary archive predating the directory-sync repair
 was retained privately and is not the installed package. See
-[validation metadata](evidence/folder-rename-20261104/validation.json).
+[validation metadata](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/folder-rename-20261104/validation.json).
 
 ## Actual-host attempt
 

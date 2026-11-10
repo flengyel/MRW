@@ -252,7 +252,7 @@ or qualification.
 
 ## Implementation prerequisite
 
-The justification-logic warrant subsystem is integral to Theorem Terminal and
+The justification-logic warrant subsystem is integral to MRW and
 is implemented in Lean under the repository-owned, standalone `lean/` Lake
 project. `Standalone` identifies a build and dependency boundary; it does not
 make the subsystem an external or optional add-on. Before executable Lean
@@ -261,9 +261,9 @@ test:
 
 - `lean/lean-toolchain`, pinning the exact Lean toolchain;
 - `lean/lakefile.toml`, pinning the Lake environment and dependencies;
-- the source path `lean/TheoremTerminal/Justification/`;
+- the source path `lean/MRW/Justification/`;
 - the checked Appendix fixture
-  `lean/TheoremTerminal/Justification/AppendixA.lean`; and
+  `lean/MRW/Justification/AppendixA.lean`; and
 - the `justification_bundle` Lake executable.
 
 The canonical compile, fixture-check, and export commands are:
@@ -272,9 +272,9 @@ The canonical compile, fixture-check, and export commands are:
 cd lean
 lake build
 lake test
-lake env lean TheoremTerminal/Justification/AppendixA.lean
+lake env lean MRW/Justification/AppendixA.lean
 lake exe justification_bundle --output \
-  ../src/theorem_terminal/data/appendix_a_justification.json
+  ../src/mrw/data/appendix_a_justification.json
 ```
 
 The formal-attestation basis also records the exact command actually run in the
@@ -298,7 +298,7 @@ list is not a substitute for the run.
    known profile, exact dependencies, and trusted expected digest, then render
    it. Python does not reimplement the logical checker. A clean wheel-install
    smoke test must show that the frozen bundle and expected digest are packaged
-   and that `theorem-terminal why PATH/TO/rs_Appendix_A.tex` works without a
+   and that `mrw why PATH/TO/rs_Appendix_A.tex` works without a
    local Lean installation.
 6. Test source, environment, and bridge changes and confirm that a new context
    deactivates exactly the dependent current route while preserving history.

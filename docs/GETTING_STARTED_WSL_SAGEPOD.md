@@ -71,22 +71,22 @@ Install these components in the locations shown:
 | Extension | Identifier | Installation location |
 | --- | --- | --- |
 | WSL | `ms-vscode-remote.remote-wsl` | Windows/local |
-| Mathematical Research Workstation | `flengyel.theorem-terminal` | WSL, from the VSIX |
+| Mathematical Research Workstation | `flengyel.mrw` | WSL, from the VSIX |
 | Jupyter | `ms-toolsai.jupyter` | WSL |
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`theorem-terminal-0.19.2.vsix`. Alternatively, in that window's WSL integrated
+`mrw-0.19.2.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/theorem-terminal-0.19.2.vsix
+code --install-extension /absolute/path/to/mrw-0.19.2.vsix
 code --list-extensions --show-versions
 ```
 
 Check that **Mathematical Research Workstation 0.19.2** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.theorem-terminal@0.19.2`. If an extension appears
+The CLI identity is `flengyel.mrw@0.19.2`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
@@ -276,11 +276,11 @@ cd ~/src/mrw-install
 git rev-parse HEAD
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- theorem-terminal-0.19.2.vsix
-sha256sum vscode/theorem-terminal-0.19.2.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.19.2.vsix
+sha256sum vscode/mrw-0.19.2.vsix
 ```
 
-This creates `~/src/mrw-install/vscode/theorem-terminal-0.19.2.vsix` and verifies
+This creates `~/src/mrw-install/vscode/mrw-0.19.2.vsix` and verifies
 its runtime bytes against that checkout. Record the commit printed by
 `git rev-parse HEAD` and the archive's actual SHA-256. The
 [terminology validation record](DOCUMENT_TERMINOLOGY_VALIDATION.md) identifies

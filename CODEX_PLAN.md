@@ -1,5 +1,18 @@
 # CODEX_PLAN.md
 
+## Current priority — complete MRW rename, 0.23.8
+
+The user requires the active Python package, distribution and CLI to be `mrw`,
+the Lean namespace to be `MRW`, and the extension to remain `flengyel.mrw`.
+Complete the backend, bridge, packaging, tests and current documentation rename.
+Earlier technical-name preservation instructions are superseded. Use MRW names and formats throughout. Perform any necessary saved-data
+conversion once outside the maintained tree and release, retaining originals
+outside active project and installation locations. No compatibility exceptions
+remain. Preserve exact source references. This is a
+runtime change requiring the full Python and extension regression suites, clean
+entry-point and extracted-package checks, and isolated host observation. Preserve
+the working window; do not install there or force a reload.
+
 ## Current priority — ordinary work, 0.23.5
 
 Reading repairs preserve these rules: Contents identifies a different active file,
@@ -30,8 +43,7 @@ migration or deletion. Other explicitly invoked study/proof tools remain separat
 
 Preserve the delivered opening, title, scope, Return and pane-placement repairs,
 native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
-VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
-reloading the working window. General research resumption and argument
+VS Code owns dirty buffers, Save, Undo and layout. Verify the release without installing into or reloading the working window. General research resumption and argument
 reconstruction remain later work; they must start from an observed task, without
 adding another registration form. [Current rules and delivery](docs/ORDINARY_WORK_RULES.md).
 [Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
@@ -368,7 +380,7 @@ setup and Windows-backed storage qualification stay deferred.
 
 ### GitHub repository renamed MRW — 2026-11-04
 
-At the user's request, GitHub's `flengyel/theorem_terminal` is now
+At the user's request, GitHub's `flengyel/mrw` is now
 [flengyel/MRW](https://github.com/flengyel/MRW). Its repository ID, private
 visibility and default branch remain unchanged. The existing checkout's `origin`,
 installation clone URL and extension repository/package-content URLs use the
@@ -1309,8 +1321,8 @@ layout: LaTeX source → explicit build → rendered PDF → navigable diagnosti
 resumable state. These implementation choices are not domain invariants.
 
 Mathematical Research Workstation is the user-facing system being developed from
-the Theorem Terminal experimental prototype. Its principal interface is
-`theorem-terminal gui [PROJECT_DIRECTORY]`; the CLI remains available for testing,
+the MRW experimental prototype. Its principal interface is
+`mrw gui [PROJECT_DIRECTORY]`; the CLI remains available for testing,
 automation, reproducibility, low-level records and earlier study commands.
 
 Implemented with PySide6 Qt Widgets and QtPdf: ordinary project-directory
@@ -1873,19 +1885,19 @@ Lean kernel or identify Lean proof terms with justification terms.
 
 The Lean implementation is owned by this repository at `lean/` as a standalone
 Lake project. Here `standalone` names its build and dependency boundary, not its
-architectural status: the warrant subsystem is integral to Theorem Terminal.
+architectural status: the warrant subsystem is integral to MRW.
 Before executable checker code or a checked bundle is committed, pin and test
 `lean/lean-toolchain`, `lean/lakefile.toml`, the source directory
-`lean/TheoremTerminal/Justification/`, the fixture
-`lean/TheoremTerminal/Justification/AppendixA.lean`, and the
+`lean/MRW/Justification/`, the fixture
+`lean/MRW/Justification/AppendixA.lean`, and the
 `justification_bundle` executable. The canonical commands are:
 
 ```text
 cd lean
 lake build
-lake env lean TheoremTerminal/Justification/AppendixA.lean
+lake env lean MRW/Justification/AppendixA.lean
 lake exe justification_bundle --output \
-  ../src/theorem_terminal/data/appendix_a_justification.json
+  ../src/mrw/data/appendix_a_justification.json
 ```
 
 Also record and reproduce the exact check command in the pinned Categorical
@@ -1937,7 +1949,7 @@ Emit one deterministic, versioned audit bundle only from a successfully checked
 derivation. Ship that frozen bundle with the Python package and pin its exact
 byte digest in code. Python validates the known bundle schema, profile, exact
 source and environment bindings, and independently retained expected digest,
-then renders `theorem-terminal why PATH/TO/rs_Appendix_A.tex`. This is a
+then renders `mrw why PATH/TO/rs_Appendix_A.tex`. This is a
 cumulative, explicitly requested post-correspondence view that assumes no prior
 command or hidden session state and restates the Kallenberg levels before the
 warrant. Python does not reproduce the derivation checker. No hand-authored
@@ -2041,7 +2053,7 @@ selected-section importer described above; earlier evaluation prerequisites do
 not gate it. The broader large-corpus study experiment remains deferred and
 requires separate authorization after Stage 5.
 
-**Goal.** Test whether Theorem Terminal supports beginning and progressively
+**Goal.** Test whether MRW supports beginning and progressively
 studying one large structured mathematical corpus, initially either the Stacks
 Project [@stacksprojectauthorsStacksProject2021] or Kerodon.
 

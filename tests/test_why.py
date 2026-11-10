@@ -10,9 +10,9 @@ from unittest.mock import patch
 
 from test_appendix_a import APPENDIX_A
 from test_justification_bundle import encode, expectation_for, sample_document
-from theorem_terminal import appendix_a, appendix_a_warrant
-from theorem_terminal.cli import main
-from theorem_terminal.source import SourceDocument
+from mrw import appendix_a, appendix_a_warrant
+from mrw.cli import main
+from mrw.source import SourceDocument
 
 
 class WhyCommandTests(unittest.TestCase):
@@ -91,7 +91,7 @@ class WhyCommandTests(unittest.TestCase):
         self.assertIn("admission-x: x:claim-F", output)
         self.assertIn("Profile: j0-v1 (J0)", output)
         self.assertIn("Context: context-v1", output)
-        self.assertIn("TheoremTerminal.Justification.checkCertificate", output)
+        self.assertIn("MRW.Justification.checkCertificate", output)
         self.assertIn("Lean: 4.32.2", output)
         self.assertIn("Axioms reported: propext", output)
         self.assertIn("correspondence-v1: formal_to_manuscript", output)

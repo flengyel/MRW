@@ -16,27 +16,27 @@ with Lean 4.29.1 (`f72c35b3f637c8c6571d353742168ab66cc22c00`) and Mathlib
 `lake build +equational_theories.Subgraph`, using its pinned dependency manifest
 and a selective Mathlib cache. Full source hashes, tool revisions, commands,
 outcomes and retained-output hashes are in
-[provenance.json](evidence/proof-outline-20261014/provenance.json).
+[provenance.json](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/provenance.json).
 
 | Existing tool / inspected revision | Actual result and granularity |
 |---|---|
-| [lean4export `6f4e21d`](https://github.com/leanprover/lean4export/tree/6f4e21dd70c3c11d7fbd07d39e3192792c657448), tag `v4.29.1` | Selected-declaration export succeeded: [652 NDJSON records](evidence/proof-outline-20261014/equation387.ndjson), including 543 expression entries and transitive constant definitions. This is elaborated term structure, with typed binders and applications, rather than a source/tactic graph. |
-| [doc-gen4 `a0aebd7`](https://github.com/leanprover/doc-gen4/tree/a0aebd77a6619214a727994fade0e05203fc5252), tag `v4.29.1` | Inspected the [published declaration element](evidence/proof-outline-20261014/docgen-selected.html): parameters, `h : Equation387 G`, conclusion and an exact revision/source-range link. No local `have` claims or proof body appear. Local generation failed because the C toolchain was unavailable. The published page does not identify its producing tool commit; the inspected revision must not be attributed to it. |
+| [lean4export `6f4e21d`](https://github.com/leanprover/lean4export/tree/6f4e21dd70c3c11d7fbd07d39e3192792c657448), tag `v4.29.1` | Selected-declaration export succeeded: [652 NDJSON records](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/equation387.ndjson), including 543 expression entries and transitive constant definitions. This is elaborated term structure, with typed binders and applications, rather than a source/tactic graph. |
+| [doc-gen4 `a0aebd7`](https://github.com/leanprover/doc-gen4/tree/a0aebd77a6619214a727994fade0e05203fc5252), tag `v4.29.1` | Inspected the [published declaration element](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/docgen-selected.html): parameters, `h : Equation387 G`, conclusion and an exact revision/source-range link. No local `have` claims or proof body appear. Local generation failed because the C toolchain was unavailable. The published page does not identify its producing tool commit; the inspected revision must not be attributed to it. |
 | [ntp-toolkit `64c9047`](https://github.com/cmu-l3/ntp-toolkit/tree/64c9047dc53bf9ef29a3323fe31f1e1f79389db2) | Source inspection only; its Lean/Mathlib/doc-gen4 dependencies target 4.24.0. No compatible selected-proof output was obtained or port attempted. `training_data` emits state/tactic examples; `premises` collects named-constant uses. Its internal InfoTree JSON code includes syntax ranges, children and before/after goals, but those fields are not a demonstrated outline export here. |
-| [LeanArchitect `1b7341d`](https://github.com/hanwenzhu/LeanArchitect/tree/1b7341de673b0572e4ffbd17c222ff7d35e0d4f4), tag `v4.29.1` | Built and ran `extract_blueprint single --json` on the unchanged module: [empty array](evidence/proof-outline-20261014/architect-Subgraph.json). The module has no blueprint annotations. The tool's annotated declaration dependencies do not expose these local proof steps. No annotations or synthetic nodes were added. |
-| Native Lean server, same pinned Lean | Six `$/lean/plainGoal` requests returned [goal/context snapshots](evidence/proof-outline-20261014/lean-goals.json). Definition lookup on the final use of `comm` returned its local binder at line 240. These are position-associated tactic views and a source location, not inference edges. |
+| [LeanArchitect `1b7341d`](https://github.com/hanwenzhu/LeanArchitect/tree/1b7341de673b0572e4ffbd17c222ff7d35e0d4f4), tag `v4.29.1` | Built and ran `extract_blueprint single --json` on the unchanged module: [empty array](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/architect-Subgraph.json). The module has no blueprint annotations. The tool's annotated declaration dependencies do not expose these local proof steps. No annotations or synthetic nodes were added. |
+| Native Lean server, same pinned Lean | Six `$/lean/plainGoal` requests returned [goal/context snapshots](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/lean-goals.json). Definition lookup on the final use of `comm` returned its local binder at line 240. These are position-associated tactic views and a source location, not inference edges. |
 
 The term export retains `idem`, `comm` and `op_idem` as three nested `letE`
 expressions (IDs 539, 538 and 537 in the default export), inside the `G`, magma
 instance and `h` binders. Each has its own type, value and continuation. The
-[`--export-mdata` run](evidence/proof-outline-20261014/equation387-mdata.ndjson)
+[`--export-mdata` run](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/equation387-mdata.ndjson)
 also succeeded and supplied no metadata/source-position nodes. Its only output
 difference was retaining `nondep: true` on those three bindings; that elaborator
 flag does not mean an unused proof premise.
 
 The final goal snapshot displays all three quantified local claims and `h`.
 The `op_idem` snapshot also has `idem` and `comm` available, although its
-[source body](evidence/proof-outline-20261014/Subgraph-L236-L242.lean.txt) only
+[source body](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/proof-outline-20261014/Subgraph-L236-L242.lean.txt) only
 rewrites with `h`. Context availability therefore cannot be converted into
 dependency edges. Declaration references, lexical scope, tactic nesting and
 actual inference arguments must remain distinct.

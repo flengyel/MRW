@@ -16,14 +16,14 @@ import unittest
 from unittest.mock import patch
 
 from test_model_projection import model_call_document, encode
-from theorem_terminal.documentary_warrant import parse_documentary_projection
-from theorem_terminal.model_projection import parse_finalized_model_call
-from theorem_terminal.response_review import passages, render_response_review
-from theorem_terminal.mutable_files import MutableFileError, file_lock, save_mutable
-from theorem_terminal.workspace import (BufferState, MAX_TEXT_BYTES, PaneViewState, VERSION,
+from mrw.documentary_warrant import parse_documentary_projection
+from mrw.model_projection import parse_finalized_model_call
+from mrw.response_review import passages, render_response_review
+from mrw.mutable_files import MutableFileError, file_lock, save_mutable
+from mrw.workspace import (BufferState, MAX_TEXT_BYTES, PaneViewState, VERSION,
                                         WorkMarker, Workspace, WorkspaceError, WorkspaceStore,
                                         decode_workspace, encode_workspace)
-from theorem_terminal.workstation import Workstation
+from mrw.workstation import Workstation
 
 def mathematical_project(root):
     files = {
@@ -72,7 +72,7 @@ def historical_workspace(root, version):
     path = str(root / 'proof.md')
     identifier = '11111111-1111-1111-1111-111111111111'
     marker = dict(path=path, revision='a' * 64, start='3.00', end='3.07')
-    data = dict(schema='theorem-terminal.workspace', schema_version=version, root=str(root),
+    data = dict(schema='mrw.workspace', schema_version=version, root=str(root),
         buffers=[dict(id=identifier, path=path, format='text', revision='a' * 64,
             readonly=False, external=False, companion=None, companion_revision=None,
             cursor='3.07', selection=['3.00', '3.07'], yscroll=.7, xscroll=.2,
@@ -115,7 +115,7 @@ def verification_fixture():
                 "method": "justification_checker", "result": "passed", "checker": "synthetic",
                 "checker_revision": "synthetic", "environment": environment,
                 "profile": profile["id"], "context": context["id"], "at": "2026-09-09T00:00:00Z"}
-    bundle = {"schema": "theorem-terminal.justification-bundle", "schema_version": 1,
+    bundle = {"schema": "mrw.justification-bundle", "schema_version": 1,
               "fixture_id": "synthetic-test-only", "profile": profile, "claims": [],
               "admissions": [], "external_verifications": [], "related_source_bindings": [],
               "context": context, "justification_verification": embedded,
@@ -175,7 +175,7 @@ class WorkstationTests(unittest.TestCase):
 
     def test_edit_changes_memory_without_serialization_or_recovery_io(self):
         b = self.controller.open_file(self.files['proof.md'])
-        with patch('theorem_terminal.workspace.json_bytes', side_effect=AssertionError('per-edit serialization')), patch.object(self.controller.store, 'write_recovery', side_effect=AssertionError('per-edit write')), patch.object(self.controller.store, 'clear_recovery', side_effect=AssertionError('per-edit removal')):
+        with patch('mrw.workspace.json_bytes', side_effect=AssertionError('per-edit serialization')), patch.object(self.controller.store, 'write_recovery', side_effect=AssertionError('per-edit write')), patch.object(self.controller.store, 'clear_recovery', side_effect=AssertionError('per-edit removal')):
             self.controller.edit(b.state.id, b.original + 'An unfinished calculation.')
             self.controller.edit(b.state.id, b.original)
         self.assertFalse(b.dirty)
@@ -188,7 +188,7 @@ class WorkstationTests(unittest.TestCase):
         script = """
 import sys
 from pathlib import Path
-from theorem_terminal.workstation import Workstation
+from mrw.workstation import Workstation
 c=Workstation(state_root=Path(sys.argv[2]))
 print('ready', flush=True)
 for command in sys.stdin:
@@ -224,7 +224,7 @@ for command in sys.stdin:
                 if child.poll() is None:
                     child.kill()
                     child.communicate()
-        from theorem_terminal.tool_settings import SettingsStore
+        from mrw.tool_settings import SettingsStore
         a, b = SettingsStore(self.state_root), SettingsStore(self.state_root)
         a.configure('editor', 'vim +{line} {file}')
         with self.assertRaisesRegex(WorkspaceError, 'another process'):
@@ -237,7 +237,7 @@ for command in sys.stdin:
         before = self.snapshot()
         self.controller.close_project()
         self.controller.open_project(self.root)
-        with patch('theorem_terminal.workstation.os.scandir', wraps=os.scandir) as scan:
+        with patch('mrw.workstation.os.scandir', wraps=os.scandir) as scan:
             entries = self.controller.entries(self.root)
             scan.assert_called_once_with(self.root)
         self.assertEqual({e.path.name for e in entries if e.directory}, {'notes', 'formal', 'calculations'})
@@ -247,7 +247,7 @@ for command in sys.stdin:
             self.assertEqual(buffer.content.encode(), path.read_bytes())
         self.controller.close_project()
         self.assertEqual(before, self.snapshot())
-        self.assertFalse((self.root / '.theorem-terminal').exists())
+        self.assertFalse((self.root / '.mrw').exists())
         self.assertFalse(self.manifest.is_relative_to(self.root))
 
     def test_imported_pdf_is_a_separate_identity_and_restores_with_the_work_note(self):
@@ -259,7 +259,7 @@ for command in sys.stdin:
         self.controller.edit(note.state.id, changed_note)
         before_buffers = list(self.controller.buffers)
         with patch.object(self.controller, 'build_latex', side_effect=AssertionError('PDF open invoked TeX')), \
-             patch('theorem_terminal.workstation.launch_tool', side_effect=AssertionError('PDF open invoked an external action')):
+             patch('mrw.workstation.launch_tool', side_effect=AssertionError('PDF open invoked an external action')):
             snapshot = self.controller.prepare_pdf(pdf)
             reference = self.controller.accept_imported_pdf(snapshot)
         self.assertEqual(pdf.read_bytes(), raw)
@@ -308,7 +308,7 @@ for command in sys.stdin:
             self.controller.imported_pdf_snapshot()
         self.assertEqual(self.controller.current().imported_pdf, expected)
         self.assertEqual(note.content, note_text)
-        with patch('theorem_terminal.workstation.read_bounded', side_effect=OSError('permission denied')):
+        with patch('mrw.workstation.read_bounded', side_effect=OSError('permission denied')):
             pdf.write_bytes(original)
             with self.assertRaisesRegex(WorkspaceError, 'work note was retained'):
                 self.controller.prepare_pdf(pdf)
@@ -324,7 +324,7 @@ for command in sys.stdin:
         old = {key: value for key, value in current.items()
                if key not in ('pdf_source', 'imported_pdf', 'investigation')}
         old['schema_version'] = 7
-        with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read a source')):
+        with patch('mrw.workspace.read_bounded', side_effect=AssertionError('migration read a source')):
             migrated = decode_workspace(encode(old))
         self.assertEqual((migrated.pdf_source, migrated.imported_pdf), ('generated', None))
         self.assertEqual((migrated.pdf_page, migrated.pdf_zoom, migrated.pdf_scale),
@@ -348,7 +348,7 @@ for command in sys.stdin:
                 decode_workspace(encode({**current, **mutation}))
 
     def test_project_content_cannot_configure_tools_or_restore_external_files(self):
-        path = self.root / '.theorem-terminal' / 'editor-state.json'
+        path = self.root / '.mrw' / 'editor-state.json'
         path.parent.mkdir()
         malicious = {'editor_command': 'evil --execute', 'buffers': [{'path': '/etc/passwd'}], 'schema_version': 2}
         path.write_bytes(encode(malicious))
@@ -367,7 +367,7 @@ for command in sys.stdin:
         Path(opened[0].state.path).unlink()
         Path(opened[1].state.path).write_text('Changed externally')
         Path(opened[2].state.path).write_bytes(b'x' * (MAX_TEXT_BYTES + 1))
-        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('eager source read')):
+        with patch('mrw.workstation.text_snapshot', side_effect=AssertionError('eager source read')):
             restored = self.restored()
         self.assertTrue(all(not b.loaded for b in restored.buffers.values()))
         for buffer in opened[:3]:
@@ -394,8 +394,8 @@ for command in sys.stdin:
         script = '''
 import sys
 from pathlib import Path
-from theorem_terminal.workstation import Workstation
-from theorem_terminal.workspace import encode_workspace
+from mrw.workstation import Workstation
+from mrw.workspace import encode_workspace
 c = Workstation(state_root=Path(sys.argv[2]))
 c.open_project(Path(sys.argv[1]))
 assert not any(b.loaded for b in c.buffers.values())
@@ -421,7 +421,7 @@ print(encode_workspace(c.current()).decode())
         script = '''
 import sys, time
 from pathlib import Path
-from theorem_terminal.workstation import Workstation
+from mrw.workstation import Workstation
 c=Workstation(state_root=Path(sys.argv[2]))
 c.open_project(Path(sys.argv[1]))
 b=c.open_file(Path(sys.argv[1])/'proof.md')
@@ -501,7 +501,7 @@ time.sleep(120)
         script = '''
 import sys,time
 from pathlib import Path
-from theorem_terminal.mutable_files import file_lock
+from mrw.mutable_files import file_lock
 with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
  print('locked', flush=True)
  time.sleep(120)
@@ -522,7 +522,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
     def test_atomic_mutable_failures_preserve_complete_destination_and_allow_retry(self):
         path = self.files['proof.md']
         original = path.read_bytes()
-        with patch('theorem_terminal.mutable_files.os.replace', side_effect=OSError('replace denied')):
+        with patch('mrw.mutable_files.os.replace', side_effect=OSError('replace denied')):
             with self.assertRaises(OSError):
                 save_mutable(path, b'new', previous=original, lock_root=self.state_root / 'locks')
         self.assertEqual(path.read_bytes(), original)
@@ -533,7 +533,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertEqual(path.read_bytes(), b'new')
 
     def test_recovery_deletion_synchronizes_directory_after_unlink(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         c = self.controller
         b = c.open_file(self.files['proof.md'])
         c.edit(b.state.id, b.original + 'Unsaved recovery\n')
@@ -544,7 +544,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertFalse(path.exists(), 'Recovery must be unlinked before directory synchronization')
             synchronized.append(directory)
             return sync_directory(directory)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=after_unlink):
+        with patch('mrw.mutable_files.sync_directory', side_effect=after_unlink):
             c.store.clear_recovery(b.state.id)
         self.assertEqual(synchronized, [path.parent])
         self.assertIsNone(c.store.recovery_previous[b.state.id])
@@ -556,7 +556,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertTrue(c.checkpoint())
         path = c.store.recovery_path(b.state.id)
         previous = c.store.recovery_previous[b.state.id]
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('deletion sync denied')):
+        with patch('mrw.mutable_files.sync_directory', side_effect=OSError('deletion sync denied')):
             with self.assertRaisesRegex(OSError, 'deletion sync denied'):
                 c.store.clear_recovery(b.state.id)
         self.assertFalse(path.exists())
@@ -593,23 +593,23 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_directory_sync_does_not_hide_unsupported_errors_or_windows(self):
         import errno
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         for number in (errno.EINVAL, errno.ENOTSUP, errno.EBADF):
-            with self.subTest(errno=number), patch('theorem_terminal.mutable_files.os.fsync',
+            with self.subTest(errno=number), patch('mrw.mutable_files.os.fsync',
                                                   side_effect=OSError(number, 'directory sync failed')):
                 with self.assertRaises(OSError) as raised:
                     sync_directory(self.home)
                 self.assertEqual(raised.exception.errno, number)
-        with self.subTest(platform='native Windows'), patch('theorem_terminal.mutable_files.os.name', 'nt'):
+        with self.subTest(platform='native Windows'), patch('mrw.mutable_files.os.name', 'nt'):
             with self.assertRaisesRegex((OSError, MutableFileError), 'Windows'):
                 sync_directory(self.home)
 
     def test_exact_delete_compares_under_publication_lock_then_unlinks_and_syncs(self):
-        from theorem_terminal.local_files import read_bounded
-        from theorem_terminal.mutable_files import delete_mutable, sync_directory
+        from mrw.local_files import read_bounded
+        from mrw.mutable_files import delete_mutable, sync_directory
         path, locks = self.home / 'exact-delete.json', self.state_root / 'locks'
         path.write_bytes(b'{}')
-        with file_lock(path, locks), patch('theorem_terminal.mutable_files.read_bounded') as read:
+        with file_lock(path, locks), patch('mrw.mutable_files.read_bounded') as read:
             with self.assertRaisesRegex(MutableFileError, 'Another process'):
                 delete_mutable(path, previous=b'{}', limit=2, lock_root=locks)
             read.assert_not_called()
@@ -631,19 +631,19 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             self.assertFalse(path.exists())
             events.append('sync')
             sync_directory(directory)
-        with patch('theorem_terminal.mutable_files.read_bounded', side_effect=read_locked), \
+        with patch('mrw.mutable_files.read_bounded', side_effect=read_locked), \
              patch.object(Path, 'unlink', autospec=True, side_effect=remove), \
-             patch('theorem_terminal.mutable_files.sync_directory', side_effect=synchronize):
+             patch('mrw.mutable_files.sync_directory', side_effect=synchronize):
             delete_mutable(path, previous=b'{}', limit=2, lock_root=locks)
         self.assertEqual(events, ['compare', 'unlink', 'sync'])
         with patch.object(Path, 'unlink') as remove, \
-             patch('theorem_terminal.mutable_files.sync_directory', wraps=sync_directory) as sync:
+             patch('mrw.mutable_files.sync_directory', wraps=sync_directory) as sync:
             delete_mutable(path, previous=None, limit=2, lock_root=locks)
             remove.assert_not_called()
             sync.assert_called_once_with(path.parent)
 
     def test_exact_delete_rejects_changed_missing_symlink_and_nonregular_destinations(self):
-        from theorem_terminal.mutable_files import delete_mutable
+        from mrw.mutable_files import delete_mutable
         target = self.home / 'retained-target'
         target.write_bytes(b'{}')
         for kind in ('changed', 'oversized', 'missing', 'symlink', 'broken-symlink', 'directory', 'unexpected'):
@@ -656,7 +656,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                 elif kind == 'directory':
                     path.mkdir()
                 with patch.object(Path, 'unlink') as unlink, \
-                     patch('theorem_terminal.mutable_files.sync_directory') as sync:
+                     patch('mrw.mutable_files.sync_directory') as sync:
                     with self.assertRaises((ValueError, OSError)):
                         delete_mutable(path, previous=None if kind == 'unexpected' else b'{}',
                                        limit=2, lock_root=self.state_root / 'locks')
@@ -689,8 +689,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                 self.assertEqual(c.store.recovery_previous[b.state.id], previous)
                 self.assertTrue(path.exists())
                 self.assertTrue(c.store.blocked)
-                with patch('theorem_terminal.workspace.delete_mutable') as delete, \
-                     patch('theorem_terminal.workspace.private_directory') as mkdir:
+                with patch('mrw.workspace.delete_mutable') as delete, \
+                     patch('mrw.workspace.private_directory') as mkdir:
                     with self.assertRaisesRegex(WorkspaceError, 'close and reopen'):
                         c.store.clear_recovery(b.state.id)
                     delete.assert_not_called()
@@ -698,7 +698,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                 self.assertFalse(c.checkpoint())
 
     def test_save_discard_refresh_and_return_to_clean_require_durable_cleanup(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         for action in ('save', 'discard', 'refresh', 'return to clean'):
             for fail in (False, True):
                 with self.subTest(action=action, sync_failure=fail):
@@ -724,7 +724,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                         if action == 'refresh':
                             return c.refresh(b.state.id, discard=True)
                         return getattr(c, action)(b.state.id)
-                    with patch('theorem_terminal.mutable_files.sync_directory', side_effect=after_delete):
+                    with patch('mrw.mutable_files.sync_directory', side_effect=after_delete):
                         if fail and action != 'return to clean':
                             with self.assertRaisesRegex(OSError, 'post-unlink directory sync denied'):
                                 perform()
@@ -753,7 +753,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                     self.assertFalse(path.exists())
 
     def test_mixed_newline_edit_preserves_unchanged_bytes(self):
-        from theorem_terminal.workstation import preserve_newlines
+        from mrw.workstation import preserve_newlines
         previous = 'First α\r\nSecond β\nThird γ\rFourth δ'
         self.assertEqual(preserve_newlines(previous, previous.replace('\r\n', '\n').replace('\r', '\n')), previous)
         self.assertEqual(preserve_newlines(previous, 'First α\nChanged β\nThird γ\nFourth δ'),
@@ -823,7 +823,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertNotIn('"source"', buffer.content)
         with self.assertRaises(WorkspaceError):
             self.controller.edit(buffer.state.id, '{}')
-        with patch('theorem_terminal.tool_settings.subprocess.Popen') as launch:
+        with patch('mrw.tool_settings.subprocess.Popen') as launch:
             self.controller.view()
             launch.assert_not_called()
         self.assertEqual(path.read_bytes(), raw)
@@ -856,7 +856,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
     def test_editor_templates_precedence_and_credentials_are_not_persisted(self):
         b = self.controller.open_file(self.files['proof.md'])
         with patch.dict(os.environ, {'VISUAL': 'vim +{line} {file}', 'EDITOR': 'other +{line} {file}', 'OPENAI_API_KEY': 'secret-credential-not-for-settings'}):
-            with patch('theorem_terminal.tool_settings.resolve_executable', side_effect=lambda x: x):
+            with patch('mrw.tool_settings.resolve_executable', side_effect=lambda x: x):
                 self.assertEqual(self.controller.external_editor_arguments(), ['vim', '+1', b.state.path])
                 self.controller.configure_editor('custom --line {line} --column {column} {file}')
                 self.assertEqual(self.controller.external_editor_arguments()[0], 'custom')
@@ -981,7 +981,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertEqual(getattr(entry, 'preview', None), ' '.join(text.split())[:120])
         raw = c.store.path.read_bytes()
         self.assertEqual(json.loads(raw)['schema_version'], VERSION)
-        with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration source read')):
+        with patch('mrw.workspace.read_bounded', side_effect=AssertionError('migration source read')):
             restored = decode_workspace(raw)
         self.assertEqual(restored.selection_shelf, [entry])
 
@@ -1057,7 +1057,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertEqual(Path(b.state.path).read_bytes(), text.encode('utf-8'))
 
     def test_live_anchor_persistence_failures_retain_memory_and_block_later_writes(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         for boundary in ('recovery', 'manifest', 'directory'):
             with self.subTest(boundary=boundary):
                 c = Workstation(state_root=self.home / ('anchors-' + boundary))
@@ -1076,7 +1076,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
                     return sync_directory(directory)
                 with ExitStack() as stack:
                     if boundary == 'directory':
-                        stack.enter_context(patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_manifest_sync))
+                        stack.enter_context(patch('mrw.mutable_files.sync_directory', side_effect=fail_manifest_sync))
                     else:
                         stack.enter_context(patch.object(c.store, 'write_recovery' if boundary == 'recovery' else 'save',
                                                        side_effect=OSError('anchor publication denied')))
@@ -1140,8 +1140,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 
     def test_version_six_history_is_strict_and_gains_only_empty_previews(self):
         old = historical_workspace(self.root, 6)
-        with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read')), \
-             patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('migration source read')):
+        with patch('mrw.workspace.read_bounded', side_effect=AssertionError('migration read')), \
+             patch('mrw.workstation.text_snapshot', side_effect=AssertionError('migration source read')):
             current = decode_workspace(encode(old))
         self.assertFalse(current.wrap)
         self.assertEqual(current.marker.preview, '')
@@ -1196,7 +1196,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             wanted['pane_views'] = [deepcopy(position), deepcopy(position)]
         raw = encode(old)
         self.manifest.write_bytes(raw)
-        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('eager source read')):
+        with patch('mrw.workstation.text_snapshot', side_effect=AssertionError('eager source read')):
             store, migrated = WorkspaceStore.for_project(self.root, self.state_root)
             self.assertEqual(asdict(migrated), expected)
             self.assertEqual(self.manifest.read_bytes(), raw)
@@ -1252,7 +1252,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
             with self.subTest(version=version):
                 document = historical_workspace(self.root, version)
                 raw = encode(document)
-                with patch('theorem_terminal.workspace.read_bounded', side_effect=AssertionError('migration read a file')):
+                with patch('mrw.workspace.read_bounded', side_effect=AssertionError('migration read a file')):
                     state = decode_workspace(raw)
                 self.assertEqual(document, json.loads(raw))
                 self.assertEqual(state.visible, [state.buffers[0].id] * 2)
@@ -1387,7 +1387,7 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
         self.assertEqual(b.state.pane_views[1].selection, ['1.1', '1.4'])
         c.set_position(b.state.id, pane=0, **left)
         c.set_position(b.state.id, pane=1, **right)
-        with patch('theorem_terminal.tool_settings.resolve_executable', side_effect=lambda x: x):
+        with patch('mrw.tool_settings.resolve_executable', side_effect=lambda x: x):
             c.configure_editor('editor {line} {column} {file}')
             for pane, expected in ((0, ['1', '6']), (1, ['3', '8'])):
                 c.activate(b.state.id, pane)
@@ -1433,8 +1433,8 @@ with file_lock(Path(sys.argv[1]), Path(sys.argv[2])):
 import os, sys
 from pathlib import Path
 from unittest.mock import patch
-from theorem_terminal.workstation import Workstation
-from theorem_terminal.workspace import WorkspaceError
+from mrw.workstation import Workstation
+from mrw.workspace import WorkspaceError
 c = Workstation(state_root=Path(sys.argv[2]))
 c.open_project(Path(sys.argv[1]))
 b = c.open_file(Path(sys.argv[1]) / 'proof.md')
@@ -1593,7 +1593,7 @@ os._exit(0)
         self.assertIn('close and reopen', c.persistence_error)
 
     def test_candidate_directory_sync_failure_never_replaces_manifest_twice(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         c = self.controller
         b = c.open_file(self.files['proof.md'])
         c.set_position(b.state.id, cursor='1.5', selection=['1.0', '1.5'], yscroll=0, xscroll=0)
@@ -1603,8 +1603,8 @@ os._exit(0)
             if directory == c.store.directory and json.loads(self.manifest.read_bytes())['selection_shelf']:
                 raise OSError('candidate directory sync denied')
             return sync_directory(directory)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_candidate_sync), \
-             patch('theorem_terminal.mutable_files.os.replace', wraps=os.replace) as replacement:
+        with patch('mrw.mutable_files.sync_directory', side_effect=fail_candidate_sync), \
+             patch('mrw.mutable_files.os.replace', wraps=os.replace) as replacement:
             with self.assertRaisesRegex(WorkspaceError, 'candidate directory sync denied'):
                 c.add_context_selection(b.state.id, '1.0', '1.5')
         self.assertEqual(replacement.call_count, 1, 'Publication failure must not attempt rollback')
@@ -1647,14 +1647,14 @@ os._exit(0)
         self.assertIn('close and reopen', c.persistence_error)
 
     def test_cached_publications_sync_directory_without_replacement(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         c = self.controller
         b = c.open_file(self.files['proof.md'])
         c.edit(b.state.id, b.original + 'Checkpointed work\n')
         self.assertTrue(c.checkpoint())
         before = self.manifest.read_bytes()
-        with patch('theorem_terminal.mutable_files.os.replace', wraps=os.replace) as replacement, \
-             patch('theorem_terminal.mutable_files.sync_directory', wraps=sync_directory) as sync:
+        with patch('mrw.mutable_files.os.replace', wraps=os.replace) as replacement, \
+             patch('mrw.mutable_files.sync_directory', wraps=sync_directory) as sync:
             self.assertTrue(c.checkpoint())
             replacement.assert_not_called()
             parents = [call.args[0] for call in sync.call_args_list]
@@ -1663,7 +1663,7 @@ os._exit(0)
         self.assertEqual(self.manifest.read_bytes(), before)
 
     def test_exact_noop_verification_uses_existing_lock_and_bounded_bytes(self):
-        from theorem_terminal.mutable_files import verify_mutable
+        from mrw.mutable_files import verify_mutable
         path = self.home / 'mutable.json'
         path.write_bytes(b'{}')
         locks = self.state_root / 'locks'
@@ -1682,7 +1682,7 @@ os._exit(0)
             verify_mutable(path, b'{}', limit=2, lock_root=locks)
 
     def test_cached_directory_sync_failure_stays_blocked_despite_complete_bytes(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         for target in ('manifest', 'recovery'):
             with self.subTest(target=target):
                 c = Workstation(state_root=self.home / ('sync-' + target))
@@ -1696,16 +1696,16 @@ os._exit(0)
                     if directory == path.parent:
                         raise OSError('no-op directory sync denied')
                     return sync_directory(directory)
-                with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_sync), \
-                     patch('theorem_terminal.mutable_files.os.replace', wraps=os.replace) as replacement:
+                with patch('mrw.mutable_files.sync_directory', side_effect=fail_sync), \
+                     patch('mrw.mutable_files.os.replace', wraps=os.replace) as replacement:
                     self.assertFalse(c.checkpoint())
                     replacement.assert_not_called()
                 self.assertEqual(path.read_bytes(), raw)
                 self.assertFalse(c.checkpoint())
                 self.assertIn('no-op directory sync denied', c.persistence_error)
                 self.assertIn('close and reopen', c.persistence_error)
-                with patch('theorem_terminal.workspace.save_mutable') as save, \
-                     patch('theorem_terminal.workspace.verify_mutable') as verify:
+                with patch('mrw.workspace.save_mutable') as save, \
+                     patch('mrw.workspace.verify_mutable') as verify:
                     for operation in (lambda: c.store.save(c.current()),
                                       lambda: c.store.write_recovery(b),
                                       lambda: c.store.clear_recovery(b.state.id)):
@@ -1719,7 +1719,7 @@ os._exit(0)
                 self.assertTrue(c.checkpoint())
 
     def test_recovery_replacement_sync_failure_blocks_manifest_and_keeps_complete_text(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
         c = self.controller
         b = c.open_file(self.files['proof.md'])
         self.assertTrue(c.checkpoint())
@@ -1730,7 +1730,7 @@ os._exit(0)
             if directory == path.parent:
                 raise OSError('recovery replacement sync denied')
             return sync_directory(directory)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=fail_sync), \
+        with patch('mrw.mutable_files.sync_directory', side_effect=fail_sync), \
              patch.object(c.store, 'save') as save:
             self.assertFalse(c.checkpoint())
             save.assert_not_called()
@@ -1767,14 +1767,14 @@ from pathlib import Path
 from contextlib import ExitStack
 from unittest.mock import patch
 from dataclasses import asdict
-from theorem_terminal.workstation import Workstation
+from mrw.workstation import Workstation
 with ExitStack() as stack:
  for name in ('socket.socket', 'subprocess.Popen', 'os.system', 'urllib.request.urlopen',
-              'theorem_terminal.documentary_warrant.run_lean_documentary_checker',
-              'theorem_terminal.latex_build.run_latex'):
+              'mrw.documentary_warrant.run_lean_documentary_checker',
+              'mrw.latex_build.run_latex'):
   stack.enter_context(patch(name, side_effect=AssertionError('unexpected external action')))
  c = Workstation(state_root=Path(sys.argv[2]))
- with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('eager shelf read')):
+ with patch('mrw.workstation.text_snapshot', side_effect=AssertionError('eager shelf read')):
   c.open_project(Path(sys.argv[1]))
  assert not any(b.loaded for b in c.buffers.values())
  before = asdict(c.current())
@@ -1966,8 +1966,8 @@ with ExitStack() as stack:
  for name in ('socket.socket','subprocess.Popen','os.system','urllib.request.urlopen'):
   stack.enter_context(patch(name,side_effect=AssertionError('external action')))
  stack.enter_context(patch.dict(os.environ,{'OPENAI_API_KEY':'','PATH':''}))
- from theorem_terminal.workstation import Workstation
- stack.enter_context(patch('theorem_terminal.documentary_warrant.run_lean_documentary_checker',side_effect=AssertionError('Lean')))
+ from mrw.workstation import Workstation
+ stack.enter_context(patch('mrw.documentary_warrant.run_lean_documentary_checker',side_effect=AssertionError('Lean')))
  c=Workstation(state_root=Path(sys.argv[2]))
  c.open_project(Path(sys.argv[1]))
  for identifier in list(c.buffers): c.view(identifier)

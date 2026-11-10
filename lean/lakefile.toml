@@ -1,10 +1,10 @@
-name = "TheoremTerminalJustification"
+name = "MRWJustification"
 version = "0.1.0"
-defaultTargets = ["TheoremTerminal", "justification_bundle", "justification_tests"]
+defaultTargets = ["MRW", "justification_bundle", "justification_tests"]
 testDriver = "justification_tests"
 
 [[lean_lib]]
-name = "TheoremTerminal"
+name = "MRW"
 
 [[lean_exe]]
 name = "justification_bundle"

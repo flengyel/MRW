@@ -8,10 +8,10 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.editor_assistance import assistance_action, prepare_editor_assistance
-from theorem_terminal.editor_investigation import InvestigationStore, reserve_child
-from theorem_terminal.openai_response import TransportResult
+from mrw.editor_bridge import dispatch
+from mrw.editor_assistance import assistance_action, prepare_editor_assistance
+from mrw.editor_investigation import InvestigationStore, reserve_child
+from mrw.openai_response import TransportResult
 
 
 class EditorInvestigationTests(unittest.TestCase):
@@ -117,7 +117,7 @@ class EditorInvestigationTests(unittest.TestCase):
         self.assertEqual(resumed['revision'], reserved['revision'])
         # Simulate a process interrupted after immutable publication, before
         # pointer finalization. Reuse the same shared adapter and exact request.
-        from theorem_terminal.assistance_actions import transmit_assistance
+        from mrw.assistance_actions import transmit_assistance
         def transport(*args):
             return TransportResult(200, json.dumps(dict(object='response',id='r',model='local-resolved',status='completed',output=[
                 dict(type='message',role='assistant',status='completed',content=[
@@ -148,7 +148,7 @@ class EditorInvestigationTests(unittest.TestCase):
             result = assistance_action(dict(method='send_assistance',draft=self.draft,preview=preview,confirmation='SEND'),
                 transport=lambda *args: self.fail('unexpected transport'))
         self.assertEqual(result['status'], 'not_sent'); self.assertFalse(self.store.exists())
-        with patch('theorem_terminal.editor_investigation.save_mutable', side_effect=OSError('disk failure')):
+        with patch('mrw.editor_investigation.save_mutable', side_effect=OSError('disk failure')):
             result = self.send()
         self.assertEqual(result['status'], 'not_sent')
         self.assertTrue(result['investigation']['blocked']); self.assertEqual(self.calls, [])
@@ -156,11 +156,11 @@ class EditorInvestigationTests(unittest.TestCase):
 
     def test_end_failure_preserves_live_pointer_and_uncertain_disk_replacement(self):
         sent = self.send()['investigation']; old = (self.store/'active.json').read_bytes()
-        with patch('theorem_terminal.editor_investigation.save_mutable', side_effect=OSError('before replace')):
+        with patch('mrw.editor_investigation.save_mutable', side_effect=OSError('before replace')):
             failed = self.call('end_investigation', revision=sent['revision'])
         self.assertTrue(failed['blocked']); self.assertEqual(failed['active'], sent['active'])
         self.assertEqual((self.store/'active.json').read_bytes(), old)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('after replace')):
+        with patch('mrw.mutable_files.sync_directory', side_effect=OSError('after replace')):
             failed = self.call('end_investigation', revision=sent['revision'])
         self.assertTrue(failed['blocked']); self.assertEqual(failed['active'], sent['active'])
         self.assertIsNone(self.call('investigation_state')['active'])

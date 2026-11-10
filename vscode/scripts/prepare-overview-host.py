@@ -20,8 +20,8 @@ if a.phase=='restart':
 else:
  if config_path.exists():raise SystemExit('Use a new artifacts directory; existing validation work is preserved')
  project=Path(tempfile.mkdtemp(prefix='mrw-overview-20261016-'))
- shutil.copyfile(repo/'docs/evidence/source-outline-20261014/euclid-ix20.txt',project/'euclid-ix20.txt')
- shutil.copyfile(repo/'docs/evidence/vsix-install-20261015/source.txt',project/'divisor-note.txt')
+ shutil.copyfile(repo/'tests/fixtures/reading/euclid-ix20.txt',project/'euclid-ix20.txt')
+ shutil.copyfile(repo/'tests/fixtures/reading/divisor-note.txt',project/'divisor-note.txt')
  (project/'overview.md').write_bytes('# Manual overview — validation fixture\r\n\r\nPurpose: compare two retained reading routes. This is scripted reader synthesis.\r\n\r\n'.encode())
  (stage/'test/host').mkdir(parents=True)
  for directory in ('src','python'):

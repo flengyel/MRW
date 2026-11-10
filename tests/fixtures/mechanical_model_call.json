@@ -28,7 +28,7 @@
   "requested_model": "synthetic-fixture-model",
   "resolved_model": "synthetic-fixture-model-v1",
   "response_id": "synthetic-fixture-response-v1",
-  "schema": "theorem-terminal.model-call",
+  "schema": "mrw.model-call",
   "schema_version": 1,
   "settings": {
     "store": false,

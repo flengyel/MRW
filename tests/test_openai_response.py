@@ -11,14 +11,14 @@ import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-from theorem_terminal.cli import main
-from theorem_terminal.model_projection import parse_finalized_model_call
-from theorem_terminal.documentary_warrant import encode_documentary_projection
-from theorem_terminal.model_projection import (
+from mrw.cli import main
+from mrw.model_projection import parse_finalized_model_call
+from mrw.documentary_warrant import encode_documentary_projection
+from mrw.model_projection import (
     extract_lossless_representation,
     make_model_produced_claim,
 )
-from theorem_terminal.openai_response import (
+from mrw.openai_response import (
     OpenAIResponseError,
     RESPONSES_URL,
     TransportResult,
@@ -30,7 +30,7 @@ from theorem_terminal.openai_response import (
     render_preview,
     request_assistance,
 )
-import theorem_terminal.openai_response as openai_response_module
+import mrw.openai_response as openai_response_module
 
 
 def request_spec() -> dict[str, object]:
@@ -283,7 +283,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 raise HTTPError(request.full_url, 302, "redirect", {}, None)
 
         opener = RedirectingOpener()
-        with patch("theorem_terminal.openai_response.build_opener", return_value=opener) as builder:
+        with patch("mrw.openai_response.build_opener", return_value=opener) as builder:
             with self.assertRaisesRegex(OpenAIResponseError, "HTTP 302"):
                 http_transport(
                     "POST", RESPONSES_URL, b"{}", {"Authorization": "Bearer secret"},
@@ -309,7 +309,7 @@ class OpenAIResponseTests(unittest.TestCase):
         class LargeOpener:
             def open(self, request, timeout):
                 return response
-        with patch("theorem_terminal.openai_response.build_opener", return_value=LargeOpener()):
+        with patch("mrw.openai_response.build_opener", return_value=LargeOpener()):
             with self.assertRaisesRegex(OpenAIResponseError, "exceeds"):
                 http_transport("POST", RESPONSES_URL, b"{}", {}, 30, 100)
         self.assertEqual(response.amount, 101)
@@ -322,7 +322,7 @@ class OpenAIResponseTests(unittest.TestCase):
         class TruncatedOpener:
             def open(self, request, timeout):
                 return truncated
-        with patch("theorem_terminal.openai_response.build_opener", return_value=TruncatedOpener()):
+        with patch("mrw.openai_response.build_opener", return_value=TruncatedOpener()):
             with self.assertRaisesRegex(OpenAIResponseError, "truncated"):
                 http_transport("POST", RESPONSES_URL, b"{}", {}, 30, 100)
 
@@ -499,7 +499,7 @@ class OpenAIResponseTests(unittest.TestCase):
             spec = request_spec()
             spec["limits"]["max_provider_response_bytes"] = 10
             destination = Path(temporary) / "call.json"
-            with patch("theorem_terminal.openai_response.classify_response") as classify:
+            with patch("mrw.openai_response.classify_response") as classify:
                 with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
                     request_assistance(
                         spec, "model", destination, "secret",
@@ -607,7 +607,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 self.assertEqual(len(calls), 1)
                 operation = prepare_operation(self.spec, "configured-model", destination)
                 expected = {
-                    "schema": "theorem-terminal.model-call",
+                    "schema": "mrw.model-call",
                     "schema_version": 1,
                     "id": f"{name}-call",
                     "initiated_by": "person-test",
@@ -669,7 +669,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 call, representation, claim_id="large-claim",
                 display_name="Large bounded projection", description="Boundary regression.",
             )
-            from theorem_terminal.documentary_warrant import DocumentaryProjection
+            from mrw.documentary_warrant import DocumentaryProjection
             projection = DocumentaryProjection(call, representation, claim)
             self.assertLessEqual(len(encode_documentary_projection(projection)), 4 * 1024 * 1024)
 
@@ -736,7 +736,7 @@ class OpenAIResponseTests(unittest.TestCase):
             )
             self.assertEqual(json.loads(first.read_bytes())["status"], "completed")
             second = Path(temporary) / "over.json"
-            with patch("theorem_terminal.openai_response.classify_response") as classify:
+            with patch("mrw.openai_response.classify_response") as classify:
                 with self.assertRaisesRegex(OpenAIResponseError, "failed ModelCall"):
                     request_assistance(
                         spec, "model", second, "secret", preview=lambda _: None,
@@ -791,7 +791,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 os.write(descriptor, b"concurrent")
                 os.close(descriptor)
                 return real_link(source, target, **kwargs)
-            with patch("theorem_terminal.openai_response.os.link", racing_link):
+            with patch("mrw.openai_response.os.link", racing_link):
                 with self.assertRaisesRegex(OpenAIResponseError, "already exists"):
                     install_atomic_no_overwrite(destination, b"ours")
             self.assertEqual(destination.read_bytes(), b"concurrent")
@@ -815,7 +815,7 @@ class OpenAIResponseTests(unittest.TestCase):
             parent = Path(temporary)
             destination = parent / "call.json"
             with patch(
-                "theorem_terminal.private_persistence.os.write",
+                "mrw.private_persistence.os.write",
                 side_effect=OSError("write failed"),
             ):
                 with self.assertRaises(OSError):
@@ -841,7 +841,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 unlink_attempts.append(Path(path))
                 return real_unlink(path, *args, **kwargs)
             complete = b'{"complete":"ModelCall"}\n'
-            with patch("theorem_terminal.openai_response.os.fsync", side_effect=fsync), \
+            with patch("mrw.openai_response.os.fsync", side_effect=fsync), \
                  patch("os.unlink", side_effect=unlink):
                 with self.assertRaisesRegex(OpenAIResponseError, "published.*durability"):
                     install_atomic_no_overwrite(destination, complete)
@@ -856,7 +856,7 @@ class OpenAIResponseTests(unittest.TestCase):
             with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
                 parent = Path(temporary)
                 destination = parent / "call.json"
-                target = "theorem_terminal.openai_response.os."
+                target = "mrw.openai_response.os."
                 with patch(target + next(iter(patches)), side_effect=next(iter(patches.values()))):
                     with self.assertRaises(BaseException):
                         install_atomic_no_overwrite(destination, b"complete")
@@ -889,7 +889,7 @@ class OpenAIResponseTests(unittest.TestCase):
             destination = parent / "call.json"
             calls = []
             with patch(
-                "theorem_terminal.openai_response.os.fstat",
+                "mrw.openai_response.os.fstat",
                 side_effect=OSError("reservation fstat failed"),
             ):
                 with self.assertRaisesRegex(OSError, "reservation fstat failed"):
@@ -952,7 +952,7 @@ class OpenAIResponseTests(unittest.TestCase):
                 with patch.dict(os.environ, environment, clear=True), \
                      patch("sys.stdin", io.StringIO(entered)), \
                      patch("sys.stdout", stdout), patch("sys.stderr", stderr), \
-                     patch("theorem_terminal.openai_response.http_transport", transport):
+                     patch("mrw.openai_response.http_transport", transport):
                     code = main([
                         "request-assistance", str(request_path), "--model", "configured-model",
                         "--output", str(destination),

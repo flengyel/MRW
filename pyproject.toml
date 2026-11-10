@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "theorem-terminal"
-version = "0.1.0"
-description = "Mathematical Research Workstation developed from the Theorem Terminal prototype"
+name = "mrw"
+version = "0.23.8"
+description = "Mathematical Research Workstation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
@@ -13,11 +13,11 @@ authors = [{ name = "F. Lengyel" }]
 dependencies = ["PySide6>=6.8,<7"]
 
 [project.scripts]
-theorem-terminal = "theorem_terminal.cli:main"
+mrw = "mrw.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"theorem_terminal" = ["quiver.json"]
-"theorem_terminal.data" = ["*.json"]
+"mrw" = ["quiver.json"]
+"mrw.data" = ["*.json"]

@@ -6,8 +6,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.source_outlines import encoded
+from mrw.editor_bridge import dispatch
+from mrw.source_outlines import encoded
 
 
 class OutlineReferenceTests(unittest.TestCase):
@@ -52,7 +52,7 @@ class OutlineReferenceTests(unittest.TestCase):
         self.assertEqual((context['start'], context['end']), ('1.1', '2.5'))
         self.assertNotIn('PRIVATE READER EXPLANATION', str(context))
         self.assertEqual(before, self.inventory())
-        from theorem_terminal.editor_assistance import decode_context
+        from mrw.editor_assistance import decode_context
         self.assertEqual(decode_context(context).text, context['text'])
 
     def test_assistance_keeps_earlier_range_after_reassociation_and_rejects_whole_or_wrong_scope(self):

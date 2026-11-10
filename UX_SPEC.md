@@ -1235,7 +1235,7 @@ with source identity/current revision/scalar range, the question, complete
 instructions/input, configured limits, destination, retention disclosure and
 the exact UTF-8 body with its byte count and digest. Context removal or any draft
 edit invalidates the preview. The requested model is a non-secret per-request
-field optionally initialized by `THEOREM_TERMINAL_OPENAI_MODEL`; the credential
+field optionally initialized by `MRW_OPENAI_MODEL`; the credential
 is read only from `OPENAI_API_KEY` at the separate Send action. No credential is
 stored or displayed.
 

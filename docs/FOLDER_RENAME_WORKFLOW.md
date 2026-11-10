@@ -74,7 +74,7 @@ this workflow. Save first and reopen the ordinary documents; no similar-text
 search, guessed pin or automatic prose rewrite is supplied.
 
 The genuine Stacks study currently remains at
-`/home/flengyel/src/theorem_terminal/.codex-work/stacks-import-20261021/reading-workspace`.
+`/home/flengyel/src/mrw/.codex-work/stacks-import-20261021/reading-workspace`.
 Its existing 08ZG explanation is preserved. This delivery does not move it or
-rename `/home/flengyel/src/theorem_terminal`. MRW API-key setup and Windows-backed
+rename `/home/flengyel/src/mrw`. MRW API-key setup and Windows-backed
 storage qualification remain deferred. See [validation and host limits](FOLDER_RENAME_VALIDATION.md).

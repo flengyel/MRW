@@ -1,7 +1,7 @@
 # Publish a GitHub prerelease
 
 MRW is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
-The current prerelease is [0.23.7](https://github.com/flengyel/MRW/releases/tag/v0.23.7).
+The current prerelease is [0.23.8](https://github.com/flengyel/MRW/releases/tag/v0.23.8).
 GitHub-distributed updates require downloading and installing a newer VSIX;
 there is no automatic update channel or Marketplace publication in this procedure.
 
@@ -12,7 +12,8 @@ there is no automatic update channel or Marketplace publication in this procedur
 2. Update `vscode/package.json` and matching root metadata in
    `vscode/package-lock.json`, preserving dependency pins. Update current examples
    in both READMEs and the installation guide, plus explicit versioned release
-   and VSIX links. Keep dated validation reports unchanged. Commit these changes
+   and VSIX links. Preserve historical evidence unchanged; if a task requires its
+   archival, link its immutable source snapshot. Commit these changes
    as **A**.
 3. Set `vscode/media/build-info.json` to the selected version, A's full commit SHA
    and `localChanges: false`. Commit only that marker as **B**. Verify that the
@@ -25,14 +26,20 @@ there is no automatic update channel or Marketplace publication in this procedur
    npm ci --prefix vscode --ignore-scripts
    node --test vscode/test/tutorial.test.js
    TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-   npm run verify-vsix --prefix vscode -- mrw-0.23.7.vsix
+   npm run verify-vsix --prefix vscode -- mrw-0.23.8.vsix
    ```
 
    Substitute the selected version. Check changed documents and their links.
    Record dependency audit findings without silently changing pinned versions.
    Compare runtime files with the previously verified baseline; run relevant
-   regressions for uncovered runtime changes. A documentation/version-only
-   release does not require another full runtime or native-host campaign.
+   regressions for uncovered runtime changes. The 0.23.8 full rename requires
+   the full Python and extension suites, syntax checks, a clean wheel install,
+   an extracted-VSIX bridge check and isolated interface checks. Verify no stale
+   generated package is present. Search every tracked path and text file, then
+   the extracted VSIX, for superseded identities: zero occurrences are required.
+   Keep one-time data conversion and original evidence outside maintained source
+   and installation directories. No compatibility-reader or evidence exception
+   substitutes for completion. Documentation-only shortcuts do not apply.
 5. Inspect the final manifest, build marker, revised tutorial, guide links and
    packaged README. The verifier checks the exact inventory, runtime bytes and
    bundled licenses/notices; do not include vault files, private settings, logs
@@ -40,17 +47,17 @@ there is no automatic update channel or Marketplace publication in this procedur
 
    ```sh
    cd vscode
-   sha256sum mrw-0.23.7.vsix > SHA256SUMS
+   sha256sum mrw-0.23.8.vsix > SHA256SUMS
    sha256sum -c SHA256SUMS
    ```
 
    Keep packages, checksums and build/check logs outside tracked source. Retain
    local logs and exit statuses; upload only the intended release assets.
 6. Fetch again and preserve concurrent main commits with normal integration and
-   pushes. Confirm B is included in main. Create and push tag `v0.23.7` at verified
+   pushes. Confirm B is included in main. Create and push tag `v0.23.8` at verified
    B. Use an authenticated GitHub API or browser to create a **draft prerelease**,
-   titled **MRW 0.23.7 — documentation update** for this release.
-   Attach `mrw-0.23.7.vsix` and `SHA256SUMS` before publishing. Do not expose or
+   titled **MRW 0.23.8 — complete MRW rename** for this release.
+   Attach `mrw-0.23.8.vsix` and `SHA256SUMS` before publishing. Do not expose or
    commit credentials. No automatic publishing workflow is needed.
 7. Release notes identify B and A, actual changes, requirements, installation,
    optional companions, known limits and manual update instructions. Link the

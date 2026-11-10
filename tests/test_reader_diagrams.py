@@ -8,9 +8,9 @@ import time
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.reader_diagrams import checked_svg, compile_tikz, dark_view, fragments, validate_retained
-from theorem_terminal.source_outlines import OutlineStore
+from mrw.editor_bridge import dispatch
+from mrw.reader_diagrams import checked_svg, compile_tikz, dark_view, fragments, validate_retained
+from mrw.source_outlines import OutlineStore
 
 SVG = checked_svg(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 0L20 20"/></svg>')
 TOOLS = dict(pdflatex='1' * 64, pdftocairo='2' * 64)
@@ -20,7 +20,7 @@ NOTE = 'Reader α😀 explanation.\r\n```tikz\r\n' + CODE + '```\r\nQuestion for
 
 class ReaderDiagramTests(unittest.TestCase):
     def test_document_render_has_no_store_or_note_mutation(self):
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)) as compiler:
+        with patch('mrw.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)) as compiler:
             result = dispatch(dict(protocol=1, method='document_render_diagram', code=CODE))
         compiler.assert_called_once_with(CODE)
         self.assertTrue(result['light'].startswith('data:image/svg+xml;base64,'))
@@ -69,13 +69,13 @@ class ReaderDiagramTests(unittest.TestCase):
         store = OutlineStore(self.base['store'], self.base['project_root'], self.id)
         before = (store.directory / 'outline.json').read_bytes()
         source = self.source.read_bytes()
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)) as compiler:
+        with patch('mrw.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)) as compiler:
             self.render(); compiler.assert_called_once_with(CODE)
         self.assertEqual((store.directory / 'outline.json').read_bytes(), before)
         self.assertEqual(self.source.read_bytes(), source)
         self.assertEqual(self.saved['outline']['annotations'][0]['text'], NOTE)
         self.source.unlink()
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', side_effect=AssertionError('Implicit compiler')):
+        with patch('mrw.reader_diagrams.compile_tikz', side_effect=AssertionError('Implicit compiler')):
             reopened = self.call('outline_load', id=self.id)
             block = next(b for b in reopened['outline']['annotations'][0]['fragments'] if b['kind'] == 'tikz')
             self.assertTrue(block['image'].startswith('data:image/svg+xml;base64,'))
@@ -83,7 +83,7 @@ class ReaderDiagramTests(unittest.TestCase):
         self.assertEqual((store.directory / 'diagram-renders.json').stat().st_mode & 0o777, 0o600)
 
     def test_changed_code_cannot_acquire_earlier_rendering_and_exact_undo_can(self):
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)):
+        with patch('mrw.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)):
             self.render()
         self.edit(NOTE.replace('"f"', '"g"'))
         self.assertIsNone(self.block['image'])
@@ -92,7 +92,7 @@ class ReaderDiagramTests(unittest.TestCase):
 
     def test_stale_revision_code_annotation_and_wrong_workspace_refuse_before_compiler(self):
         request = dict(id=self.id, revision=self.saved['revision'], annotation=self.note['id'], code=self.block['key'])
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', side_effect=AssertionError('Unexpected compiler')):
+        with patch('mrw.reader_diagrams.compile_tikz', side_effect=AssertionError('Unexpected compiler')):
             for key, value in [('revision', 'a' * 64), ('annotation', '11111111-1111-1111-1111-111111111111'), ('code', 'f' * 64)]:
                 with self.subTest(key=key), self.assertRaises(ValueError):
                     self.call('outline_render_diagram', **{**request, key: value})
@@ -100,11 +100,11 @@ class ReaderDiagramTests(unittest.TestCase):
                 dispatch(dict(protocol=1, method='outline_render_diagram', **{**self.base, 'project_root': str(self.home)}, **request))
 
     def test_missing_or_corrupt_retained_svg_reports_error_without_replacement(self):
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)):
+        with patch('mrw.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)):
             self.render()
         store = OutlineStore(self.base['store'], self.base['project_root'], self.id)
         blob = store.blob(sha256(SVG).hexdigest()); blob.unlink()
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', side_effect=AssertionError('Implicit replacement')):
+        with patch('mrw.reader_diagrams.compile_tikz', side_effect=AssertionError('Implicit replacement')):
             result = self.call('outline_load', id=self.id)
             block = next(b for b in result['outline']['annotations'][0]['fragments'] if b['kind'] == 'tikz')
             self.assertIsNotNone(block['error']); self.assertIsNone(block['image'])
@@ -120,17 +120,17 @@ class ReaderDiagramTests(unittest.TestCase):
         with self.assertRaises(ValueError): self.render()
 
     def test_failed_render_preserves_previous_svg_and_all_note_bytes(self):
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)):
+        with patch('mrw.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)):
             self.render()
         root = Path(self.base['store']) / self.id
         before = {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', side_effect=ValueError('Bad TikZ')):
+        with patch('mrw.reader_diagrams.compile_tikz', side_effect=ValueError('Bad TikZ')):
             with self.assertRaisesRegex(ValueError, 'Bad TikZ'): self.render()
         self.assertEqual({p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}, before)
 
     def test_uncertain_publication_reports_blocked_without_confirmed_success(self):
-        with patch('theorem_terminal.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)), \
-             patch('theorem_terminal.reader_diagrams.save_mutable', side_effect=OSError('Directory sync failed')):
+        with patch('mrw.reader_diagrams.compile_tikz', return_value=(SVG, TOOLS)), \
+             patch('mrw.reader_diagrams.save_mutable', side_effect=OSError('Directory sync failed')):
             result = self.render()
         self.assertTrue(result['blocked']); self.assertNotIn('outline', result)
         self.assertFalse((Path(self.base['store']) / self.id / 'diagram-renders.json').exists())
@@ -154,7 +154,7 @@ class ReaderDiagramTests(unittest.TestCase):
         self.assertEqual(checked_svg(dark),dark)
 
 
-@unittest.skipUnless(os.environ.get('THEOREM_TERMINAL_DIAGRAM_TESTS') == '1', 'Opt-in normal-host isolated TikZ rendering')
+@unittest.skipUnless(os.environ.get('MRW_DIAGRAM_TESTS') == '1', 'Opt-in normal-host isolated TikZ rendering')
 class NativeDiagramTests(unittest.TestCase):
     def test_display_equation_and_quiver_curve(self):
         code = '\\begin{equation}\\begin{tikzpicture}\\draw[->] (0,0)--(1,0);\\end{tikzpicture}\\end{equation}'
@@ -176,7 +176,7 @@ class NativeDiagramTests(unittest.TestCase):
 
     def test_native_infinite_tex_stops_without_publication(self):
         start = time.monotonic()
-        with patch('theorem_terminal.reader_diagrams.MAX_SECONDS', .2):
+        with patch('mrw.reader_diagrams.MAX_SECONDS', .2):
             with self.assertRaisesRegex(ValueError, 'time or output limit'):
                 compile_tikz('\\begin{document}\\loop\\iftrue\\repeat\\end{document}')
         self.assertLess(time.monotonic() - start, 5)

@@ -1,7 +1,7 @@
-import TheoremTerminal.Justification.AIInteractionBundle
+import MRW.Justification.AIInteractionBundle
 
-open TheoremTerminal.Justification
-open TheoremTerminal.Justification.AIInteractionBundle
+open MRW.Justification
+open MRW.Justification.AIInteractionBundle
 
 private def documentaryBundle (requestPath : String) : IO (Except String ByteArray) := do
   try

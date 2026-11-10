@@ -7,8 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE
+from mrw.editor_bridge import dispatch
+from mrw.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE
 
 
 class SourceOutlineTests(unittest.TestCase):
@@ -115,7 +115,7 @@ class SourceOutlineTests(unittest.TestCase):
 
     def test_obsidian_note_publication_failure_is_not_reported_as_an_import(self):
         path = self.home/'note.md'; path.write_text('A note')
-        with patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+        with patch('mrw.source_outlines.save_mutable', side_effect=OSError('before replacement')):
             result = self.call('outline_import_note', path=str(path), source_revision=sha256(path.read_bytes()).hexdigest())
         self.assertTrue(result['blocked'])
         self.assertEqual(len(self.call('outline_list')['outlines']), 1)
@@ -163,11 +163,11 @@ class SourceOutlineTests(unittest.TestCase):
 
     def test_annotation_deletion_does_not_report_failed_or_uncertain_publication_as_success(self):
         self.note(); note = self.saved['outline']['annotations'][0]; before = deepcopy(self.saved)
-        with patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+        with patch('mrw.source_outlines.save_mutable', side_effect=OSError('before replacement')):
             result = self.edit(kind='remove_annotation', region=None, id=note['id'])
         self.assertTrue(result['blocked'])
         self.assertEqual(self.call('outline_load', id=before['outline']['id']), before)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
+        with patch('mrw.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
             result = self.edit(kind='remove_annotation', region=None, id=note['id'])
         self.assertTrue(result['blocked'])
         self.assertEqual(self.saved, before)
@@ -258,12 +258,12 @@ class SourceOutlineTests(unittest.TestCase):
                        dict(kind='remove_context', context=context['id']),
                        dict(kind='evidence_association', artifact=artifact['id'], region=None, selector=1),
                        dict(kind='remove_evidence_association', artifact=artifact['id'])]:
-            with self.subTest(change=change), patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+            with self.subTest(change=change), patch('mrw.source_outlines.save_mutable', side_effect=OSError('before replacement')):
                 result = self.edit(**change)
             self.assertTrue(result['blocked'])
             self.assertEqual(self.call('outline_load', id=before['outline']['id']), before)
         self.assertEqual(self.action('outline_document', artifact=artifact['id'])['text'].encode(), raw)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
+        with patch('mrw.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
             result = self.edit(kind='remove_evidence_association', artifact=artifact['id'])
         self.assertTrue(result['blocked']); self.assertEqual(self.saved, before)
         self.saved = self.call('outline_load', id=before['outline']['id'])
@@ -393,11 +393,11 @@ class SourceOutlineTests(unittest.TestCase):
             self.call('outline_mutate', id=self.saved['outline']['id'], revision=stale,
                       change=dict(kind='add_region', start=[0, 0], end=[1, 0]))
         previous = self.saved['revision']
-        with patch('theorem_terminal.source_outlines.save_mutable', side_effect=OSError('before replacement')):
+        with patch('mrw.source_outlines.save_mutable', side_effect=OSError('before replacement')):
             result = self.note(content='This edit was not saved')
         self.assertTrue(result['blocked'])
         self.assertEqual(self.call('outline_load', id=self.saved['outline']['id'])['revision'], previous)
-        with patch('theorem_terminal.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
+        with patch('mrw.mutable_files.sync_directory', side_effect=OSError('uncertain sync')):
             result = self.note(content='Complete replacement may be on disk')
         self.assertTrue(result['blocked'])
         loaded = self.call('outline_load', id=self.saved['outline']['id'])

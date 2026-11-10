@@ -113,7 +113,7 @@ Copilot backend are not implemented here.
 
 The connector's November 3 checks used MRW **0.11.0**. They are evidence for that
 connector delivery, not an installation report for the current release. The
-[validation metadata](evidence/reader-ai-20261103/validation.json) records its
+[validation metadata](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/reader-ai-20261103/validation.json) records its
 package identity and checks. An installed isolated bridge prepared an exact
 Unicode/CRLF passage after removal of its disposable original, without a provider
 request or changes to source bytes.

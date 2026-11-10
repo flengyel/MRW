@@ -47,7 +47,7 @@ metadata scan measurement, not a timed human picker interaction.
   build marker, which records 0436a96 with local changes. Development files are
   excluded. The root's existing build marker was preserved.
 
-[Machine-readable evidence](evidence/document-chooser-20261107.json) records the
+[Machine-readable evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/document-chooser-20261107.json) records the
 checks. Installed **flengyel.mrw 0.22.6** in the WSL Debian extension host. All
 **102** installed payload files match the verified VSIX, excluding installer-only
 manifest metadata. The working window was not reloaded. Its active instance

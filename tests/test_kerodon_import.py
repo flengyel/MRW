@@ -7,12 +7,12 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal import kerodon_import as k
-from theorem_terminal.outline_references import parse_reference
-from theorem_terminal.published_sources import qualified_tag, local_tag
-from theorem_terminal.source import SourceDocument
-from theorem_terminal.source_outlines import OutlineStore, span_text
+from mrw.editor_bridge import dispatch
+from mrw import kerodon_import as k
+from mrw.outline_references import parse_reference
+from mrw.published_sources import qualified_tag, local_tag
+from mrw.source import SourceDocument
+from mrw.source_outlines import OutlineStore, span_text
 
 PAGE = '''<!doctype html><html><head><script>forbidden()</script></head><body>
 <section id="main"><div class="html" id="tag">

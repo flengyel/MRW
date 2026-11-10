@@ -93,7 +93,7 @@ Installed by the established WSL code-server route, exit 0. All
 excluding installer-only manifest metadata. The registry selects **flengyel.mrw
 0.23.2**. The working window was not reloaded; adoption occurs at normal activation.
 
-[Machine evidence](evidence/document-opening-repair-20261108.json) records source
+[Machine evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/document-opening-repair-20261108.json) records source
 hashes, phase timings, checks and package identity. Full logs, statuses and captures
 remain under ignored `.codex-work/vscode-host-opening-repair/evidence`.
 Genuine vault data was read only for metadata timing, never used as a write fixture.

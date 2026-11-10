@@ -37,10 +37,10 @@ def verify(archive):
     for name, expected_digest in scheduler['files'].items():
         if sha256((extension / 'media/fsrs' / name).read_bytes()).hexdigest() != expected_digest:
             raise ValueError('Bundled scheduler or license bytes changed')
-    for path in (repository / 'src/theorem_terminal').rglob('*'):
+    for path in (repository / 'src/mrw').rglob('*'):
         if path.is_file() and path.suffix in ('.py', '.json') and '__pycache__' not in path.parts:
-            exact['extension/python/theorem_terminal/' + str(path.relative_to(repository / 'src/theorem_terminal'))] = path
-    quiver = json.loads((repository / 'src/theorem_terminal/quiver.json').read_text())
+            exact['extension/python/mrw/' + str(path.relative_to(repository / 'src/mrw'))] = path
+    quiver = json.loads((repository / 'src/mrw/quiver.json').read_text())
     if sha256(quiver['tex'].encode()).hexdigest() != 'dd729a5bcfbd66d154d643f832f5003f7ff91dbcd1a925d4014ba9d3aec576cc' or 'MIT License' not in quiver['license']:
         raise ValueError('Bundled Quiver package or attribution changed')
     expected.update(exact)

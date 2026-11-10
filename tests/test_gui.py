@@ -15,7 +15,7 @@ from test_model_projection import model_call_document, encode
 from test_workstation import mathematical_project, minimal_pdf, verification_fixture
 
 
-@unittest.skipUnless(os.environ.get('THEOREM_TERMINAL_GUI_TESTS') == '1', 'set THEOREM_TERMINAL_GUI_TESTS=1 to exercise actual Qt widgets')
+@unittest.skipUnless(os.environ.get('MRW_GUI_TESTS') == '1', 'set MRW_GUI_TESTS=1 to exercise actual Qt widgets')
 class GraphicalEditorTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -23,8 +23,8 @@ class GraphicalEditorTests(unittest.TestCase):
         cls.app = QApplication.instance() or QApplication([])
 
     def setUp(self):
-        from theorem_terminal.gui import WorkstationWindow
-        from theorem_terminal.workstation import Workstation
+        from mrw.gui import WorkstationWindow
+        from mrw.workstation import Workstation
         self.temp = tempfile.TemporaryDirectory(prefix='mrw-widget-test-')
         self.home = Path(self.temp.name)
         self.root = self.home / 'project'
@@ -58,19 +58,19 @@ class GraphicalEditorTests(unittest.TestCase):
         self.assertFalse(self.window.jobs, 'worker action did not complete')
 
     def open_project(self):
-        with patch('theorem_terminal.gui.QFileDialog.getExistingDirectory', return_value=str(self.root)):
+        with patch('mrw.gui.QFileDialog.getExistingDirectory', return_value=str(self.root)):
             self.window.actions['project'].trigger()
         self.wait_idle()
 
     def open_file(self, path):
-        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(path), '')):
+        with patch('mrw.gui.QFileDialog.getOpenFileName', return_value=(str(path), '')):
             self.window.actions['open'].trigger()
         self.wait_idle()
         return self.window.active_pane()
 
     def select_passage(self, pane, start, end):
         from PySide6.QtGui import QTextCursor
-        from theorem_terminal.gui import qt_position
+        from mrw.gui import qt_position
         cursor = pane.text.textCursor()
         cursor.setPosition(qt_position(pane.text, start))
         cursor.setPosition(qt_position(pane.text, end), QTextCursor.MoveMode.KeepAnchor)
@@ -82,8 +82,8 @@ class GraphicalEditorTests(unittest.TestCase):
                 pane.text.verticalScrollBar().value(), pane.text.horizontalScrollBar().value())
 
     def restart_window(self, *, discard_session=False):
-        from theorem_terminal.gui import WorkstationWindow
-        from theorem_terminal.workstation import Workstation
+        from mrw.gui import WorkstationWindow
+        from mrw.workstation import Workstation
         if not discard_session:
             self.window.flush()
         self.controller.close_project(keep_recovery=True, discard_session=discard_session)
@@ -124,7 +124,7 @@ class GraphicalEditorTests(unittest.TestCase):
         document = next(d for i, d in self.window.documents.items()
                         if self.controller.buffer(i).state.path == entry.path)
         cursor = QTextCursor(document)
-        from theorem_terminal.gui import document_position
+        from mrw.gui import document_position
         cursor.setPosition(document_position(document, entry.start))
         cursor.setPosition(document_position(document, entry.end), QTextCursor.MoveMode.KeepAnchor)
         return cursor.selectedText()
@@ -192,7 +192,7 @@ class GraphicalEditorTests(unittest.TestCase):
         self.window.actions['mark'].trigger()
         entry = self.controller.current().selection_shelf[0]
         self.assertEqual(getattr(entry, 'preview', None), '😀 lemma exact')
-        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('display read source')):
+        with patch('mrw.workstation.text_snapshot', side_effect=AssertionError('display read source')):
             self.window.refresh_selection_shelf()
             self.window.update_actions()
         row = self.window.selection_list.item(0)
@@ -463,8 +463,8 @@ class GraphicalEditorTests(unittest.TestCase):
         originals = {p: p.read_bytes() for p in paths}
         with ExitStack() as stack:
             for name in ('socket.socket', 'subprocess.Popen', 'os.system', 'urllib.request.urlopen',
-                         'theorem_terminal.documentary_warrant.run_lean_documentary_checker',
-                         'theorem_terminal.latex_build.run_latex'):
+                         'mrw.documentary_warrant.run_lean_documentary_checker',
+                         'mrw.latex_build.run_latex'):
                 stack.enter_context(patch(name, side_effect=AssertionError('automatic external action')))
             for path, span in zip(paths, spans):
                 pane = self.open_file(path)
@@ -480,7 +480,7 @@ class GraphicalEditorTests(unittest.TestCase):
             self.restart_window()
             self.assertEqual(self.controller.current().selection_shelf, wanted)
             self.assertEqual([self.window.selection_list.item(i).text() for i in range(5)], rows)
-            with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('preview source read')):
+            with patch('mrw.workstation.text_snapshot', side_effect=AssertionError('preview source read')):
                 self.window.refresh_selection_shelf()
                 self.window.update_actions()
         self.assertEqual({p: p.read_bytes() for p in originals}, originals)
@@ -927,7 +927,7 @@ class GraphicalEditorTests(unittest.TestCase):
 
     def test_same_file_pane_views_survive_render_edit_split_and_restart(self):
         from PySide6.QtGui import QTextCursor
-        from theorem_terminal.gui import qt_position
+        from mrw.gui import qt_position
         self.open_project()
         self.window.disk_timer.stop()
         self.window.resize(1280, 820)
@@ -1006,8 +1006,8 @@ class GraphicalEditorTests(unittest.TestCase):
 import json, sys, time
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
-from theorem_terminal.gui import WorkstationWindow
-from theorem_terminal.workstation import Workstation
+from mrw.gui import WorkstationWindow
+from mrw.workstation import Workstation
 expected = json.load(sys.stdin)
 app = QApplication([])
 c = Workstation(state_root=Path(sys.argv[2]))
@@ -1044,8 +1044,8 @@ w.close()
     def test_shared_lazy_load_is_deduplicated_and_placeholder_captures_no_views(self):
         import threading
         from copy import deepcopy
-        from theorem_terminal.gui import WorkstationWindow
-        from theorem_terminal.workstation import Workstation
+        from mrw.gui import WorkstationWindow
+        from mrw.workstation import Workstation
         self.open_project()
         self.window.disk_timer.stop()
         self.window.actions['wrap'].trigger()
@@ -1213,7 +1213,7 @@ w.close()
 
     def test_actual_offline_widgets_directory_six_formats_edit_save_split_restart(self):
         with ExitStack() as stack:
-            for name in ('socket.socket', 'subprocess.Popen', 'urllib.request.urlopen', 'theorem_terminal.documentary_warrant.run_lean_documentary_checker'):
+            for name in ('socket.socket', 'subprocess.Popen', 'urllib.request.urlopen', 'mrw.documentary_warrant.run_lean_documentary_checker'):
                 stack.enter_context(patch(name, side_effect=AssertionError('external action')))
             self.open_project()
             for path in self.files.values():
@@ -1232,7 +1232,7 @@ w.close()
             right = self.open_file(self.files['proof.md'])
             right.text.appendPlainText('The leading term survives in characteristic zero.')
             self.window.actions['save'].trigger()
-            from theorem_terminal.gui import qt_position
+            from mrw.gui import qt_position
             from PySide6.QtGui import QTextCursor
             cursor = right.text.textCursor()
             cursor.setPosition(qt_position(right.text, '3.0'))
@@ -1255,7 +1255,7 @@ w.close()
         self.open_project()
         pane = self.open_file(self.files['proof.md'])
         ready = threading.Event()
-        with patch('theorem_terminal.gui.Workstation.external_snapshot', side_effect=lambda *_: (ready.wait(2), None)[1]):
+        with patch('mrw.gui.Workstation.external_snapshot', side_effect=lambda *_: (ready.wait(2), None)[1]):
             self.window.observe_disk()
             try:
                 self.assertTrue(self.window.actions['save'].isEnabled())
@@ -1271,8 +1271,8 @@ w.close()
 
     def test_loading_placeholder_preserves_recovered_cursor_selection_and_scroll(self):
         import threading
-        from theorem_terminal.gui import WorkstationWindow, cursor_index
-        from theorem_terminal.workstation import Workstation
+        from mrw.gui import WorkstationWindow, cursor_index
+        from mrw.workstation import Workstation
 
         self.open_project()
         path = self.root / 'work-note.md'
@@ -1363,25 +1363,25 @@ w.close()
     def test_find_line_new_file_save_as_refresh_and_configured_editor_menu(self):
         self.open_project()
         pane = self.open_file(self.files['calculations/check.py'])
-        with patch('theorem_terminal.gui.QInputDialog.getText', return_value=('return', True)):
+        with patch('mrw.gui.QInputDialog.getText', return_value=('return', True)):
             self.window.actions['find'].trigger()
         self.assertEqual(pane.text.textCursor().selectedText(), 'return')
-        with patch('theorem_terminal.gui.QInputDialog.getInt', return_value=(1, True)):
+        with patch('mrw.gui.QInputDialog.getInt', return_value=(1, True)):
             self.window.actions['line'].trigger()
         self.assertEqual(pane.text.textCursor().blockNumber(), 0)
         self.window.actions['new'].trigger()
         pane = self.window.active_pane()
         pane.text.insertPlainText('Working calculation\n')
         destination = self.root / 'working.txt'
-        with patch('theorem_terminal.gui.QFileDialog.getSaveFileName', return_value=(str(destination), '')):
+        with patch('mrw.gui.QFileDialog.getSaveFileName', return_value=(str(destination), '')):
             self.window.actions['save_as'].trigger()
         self.assertEqual(destination.read_text(), 'Working calculation\n')
         destination.write_text('External calculation\n')
         self.window.actions['refresh'].trigger()
         self.assertEqual(pane.text.toPlainText(), 'External calculation\n')
-        with patch('theorem_terminal.gui.QInputDialog.getText', return_value=('editor --line {line} {file}', True)):
+        with patch('mrw.gui.QInputDialog.getText', return_value=('editor --line {line} {file}', True)):
             self.window.actions['editor_config'].trigger()
-        with patch('theorem_terminal.tool_settings.resolve_executable', return_value='/tools/editor'), patch('theorem_terminal.tool_settings.subprocess.Popen') as launch:
+        with patch('mrw.tool_settings.resolve_executable', return_value='/tools/editor'), patch('mrw.tool_settings.subprocess.Popen') as launch:
             self.window.actions['external'].trigger()
             self.assertEqual(launch.call_args.args, (['/tools/editor', '--line', '2', str(destination)],))
             self.assertIs(launch.call_args.kwargs['shell'], False)
@@ -1424,20 +1424,20 @@ w.close()
         pane.review('passage')
         self.assertIn('Second β', pane.text.toPlainText())
         before = {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
-        with patch('theorem_terminal.gui.QFileDialog.getSaveFileName', return_value=('', '')):
+        with patch('mrw.gui.QFileDialog.getSaveFileName', return_value=('', '')):
             pane.retain.click()
         self.assertEqual(before, {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()})
         pane.passage.setValue(1)
         destination = self.root / 'selected.json'
-        with patch('theorem_terminal.gui.QFileDialog.getSaveFileName', return_value=(str(destination), '')):
+        with patch('mrw.gui.QFileDialog.getSaveFileName', return_value=(str(destination), '')):
             pane.retain.click()
-        from theorem_terminal.documentary_warrant import parse_documentary_projection
+        from mrw.documentary_warrant import parse_documentary_projection
         self.assertEqual(parse_documentary_projection(destination.read_bytes()).representation.content, 'Second β\n')
         verification, bundle = verification_fixture()
         vp, bp = self.root / 'verification.json', self.root / 'bundle.json'
         vp.write_bytes(verification)
         bp.write_bytes(bundle)
-        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', side_effect=[(str(vp), ''), (str(bp), '')]):
+        with patch('mrw.gui.QFileDialog.getOpenFileName', side_effect=[(str(vp), ''), (str(bp), '')]):
             self.window.actions['verification'].trigger()
         self.wait_idle()
         from PySide6.QtWidgets import QToolButton
@@ -1451,7 +1451,7 @@ w.close()
         from copy import deepcopy
         from PySide6.QtCore import Qt
         from PySide6.QtTest import QTest
-        from theorem_terminal.gui import EditorPane
+        from mrw.gui import EditorPane
         tex = self.files['notes/differences.tex']
         tex.write_bytes('% α😀 base\r\nProof line β\r\n'.encode('utf-8'))
         external = self.home / 'external-reference.txt'
@@ -1459,9 +1459,9 @@ w.close()
         original = {p: p.read_bytes() for p in [*self.files.values(), external]}
         with ExitStack() as stack:
             for name in ('socket.socket', 'subprocess.Popen', 'os.system', 'urllib.request.urlopen',
-                         'theorem_terminal.documentary_warrant.run_lean_documentary_checker',
-                         'theorem_terminal.latex_build.run_latex',
-                         'theorem_terminal.gui.QInputDialog.getText', 'theorem_terminal.gui.QInputDialog.getInt'):
+                         'mrw.documentary_warrant.run_lean_documentary_checker',
+                         'mrw.latex_build.run_latex',
+                         'mrw.gui.QInputDialog.getText', 'mrw.gui.QInputDialog.getInt'):
                 stack.enter_context(patch(name, side_effect=AssertionError('unexpected tool, network or form')))
             self.open_project()
             self.window.disk_timer.stop()
@@ -1560,7 +1560,7 @@ w.close()
         self.assertEqual(self.window.selection_list.count(), 1)
         self.assertFalse(self.controller.buffers)
         self.assertTrue(self.window.close_project())
-        with patch('theorem_terminal.workstation.text_snapshot', side_effect=AssertionError('shelf read source content')):
+        with patch('mrw.workstation.text_snapshot', side_effect=AssertionError('shelf read source content')):
             self.window.open_project(self.root)
             self.wait_idle()
             self.window.render()
@@ -1610,7 +1610,7 @@ w.close()
         from PySide6.QtCore import Qt
         from PySide6.QtGui import QKeySequence, QTextCursor
         from PySide6.QtTest import QTest
-        from theorem_terminal.gui import qt_position
+        from mrw.gui import qt_position
 
         self.open_project()
         pdf = self.root / 'reading.pdf'
@@ -1628,9 +1628,9 @@ w.close()
                               ('find', QKeySequence.StandardKey.Find),
                               ('find_next', QKeySequence.StandardKey.FindNext)):
             self.assertIn(self.window.actions[key].shortcut(), QKeySequence.keyBindings(standard))
-        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(pdf), '')), \
+        with patch('mrw.gui.QFileDialog.getOpenFileName', return_value=(str(pdf), '')), \
              patch.object(self.controller, 'build_latex', side_effect=AssertionError('ordinary PDF open built TeX')), \
-             patch('theorem_terminal.workstation.launch_tool', side_effect=AssertionError('ordinary PDF open launched a tool')):
+             patch('mrw.workstation.launch_tool', side_effect=AssertionError('ordinary PDF open launched a tool')):
             pane.text.setFocus()
             QTest.keySequence(pane.text, self.window.actions['open'].shortcut())
             self.wait_idle()
@@ -1658,7 +1658,7 @@ w.close()
         cursor = pane.text.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.Start)
         pane.text.setTextCursor(cursor)
-        with patch('theorem_terminal.gui.QInputDialog.getText', return_value=('term', True)):
+        with patch('mrw.gui.QInputDialog.getText', return_value=('term', True)):
             QTest.keySequence(pane.text, self.window.actions['find'].shortcut())
         first = pane.text.textCursor().selectionStart()
         self.assertEqual(pane.text.textCursor().selectedText(), 'term')
@@ -1710,20 +1710,20 @@ w.close()
         pane = self.open_file(self.files['questions.txt'])
         pane.text.insertPlainText('Durable note before a failed PDF load. ')
         self.window.save(pane.shown)
-        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(valid), '')):
+        with patch('mrw.gui.QFileDialog.getOpenFileName', return_value=(str(valid), '')):
             QTest.keySequence(pane.text, self.window.actions['open'].shortcut())
             self.wait_idle()
         old_document = self.window.pdf.document
         old_identity = deepcopy(self.controller.current().imported_pdf)
         note_text = self.controller.buffer(pane.shown).content
 
-        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=('', '')):
+        with patch('mrw.gui.QFileDialog.getOpenFileName', return_value=('', '')):
             QTest.keySequence(self.window.pdf.view, self.window.actions['open'].shortcut())
         self.app.processEvents()
         self.assertIs(self.window.pdf.document, old_document)
         self.assertEqual(self.controller.current().imported_pdf, old_identity)
 
-        with patch('theorem_terminal.gui.QFileDialog.getOpenFileName', return_value=(str(invalid), '')):
+        with patch('mrw.gui.QFileDialog.getOpenFileName', return_value=(str(invalid), '')):
             QTest.keySequence(self.window.pdf.view, self.window.actions['open'].shortcut())
             self.wait_idle()
         self.assertIs(self.window.pdf.document, old_document)

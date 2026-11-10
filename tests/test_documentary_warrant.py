@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.documentary_warrant import (
+from mrw.documentary_warrant import (
     DocumentaryProjection,
     DocumentaryWarrantError,
     build_lean_request,
@@ -20,7 +20,7 @@ from theorem_terminal.documentary_warrant import (
     parse_lean_request,
     render_documentary_warrant,
 )
-from theorem_terminal.model_projection import (
+from mrw.model_projection import (
     extract_lossless_representation,
     make_model_produced_claim,
     parse_finalized_model_call,
@@ -185,10 +185,10 @@ class DocumentaryWarrantTests(unittest.TestCase):
             bundle = package.bundle.document
             self.assertEqual(
                 package.bundle.digest,
-                "a674dfbf3c9b9e094f4f51048f4eba62c7c6fd1e993be277b6fa1d2fc743ba49",
+                "7d51e6a1d251dbf56e92587354ce30b7d6cdd28c529adfb0757f68fb408442af",
             )
 
-            self.assertEqual(bundle["schema"], "theorem-terminal.justification-bundle")
+            self.assertEqual(bundle["schema"], "mrw.justification-bundle")
             self.assertEqual(len(bundle["claims"]), 1)
             self.assertEqual(len(bundle["admissions"]), 1)
             self.assertEqual(len(bundle["derivation"]["nodes"]), 1)
@@ -238,7 +238,7 @@ class DocumentaryWarrantTests(unittest.TestCase):
             parent = Path(temporary)
             destination = parent / "package"
             with patch(
-                "theorem_terminal.documentary_warrant.MAX_VERIFICATION_BYTES",
+                "mrw.documentary_warrant.MAX_VERIFICATION_BYTES",
                 1,
             ):
                 with self.assertRaisesRegex(

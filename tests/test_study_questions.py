@@ -1,6 +1,6 @@
 import copy
 import unittest
-from theorem_terminal.study_questions import validate_questions
+from mrw.study_questions import validate_questions
 
 
 class StudyQuestionsTests(unittest.TestCase):

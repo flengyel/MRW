@@ -85,7 +85,7 @@ VSIX, excluding installer-only manifest metadata, and the registry selects
 **flengyel.mrw 0.23.0**. No working-window reload was forced; its active instance
 adopts the update at its next normal activation. Native observations used the
 verified package in the separate fixture, not an asserted live working-window
-adoption. [Machine evidence](evidence/document-learning-20261107.json) records
+adoption. [Machine evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/document-learning-20261107.json) records
 hashes, statuses and observations. Logs/screenshots remain under the ignored
 `.codex-work/vscode-host-document-learning/evidence` directory.
 

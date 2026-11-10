@@ -32,7 +32,7 @@ function protectedText(text) {
   try {
     const value = JSON.parse(text);
     return !!value && typeof value === 'object' &&
-      ((typeof value.schema === 'string' && value.schema.startsWith('theorem-terminal.')) ||
+      ((typeof value.schema === 'string' && value.schema.startsWith('mrw.')) ||
        ['artifact_identity', 'artifact_digest', 'method', 'subject'].every(key => key in value));
   } catch { return false; }
 }

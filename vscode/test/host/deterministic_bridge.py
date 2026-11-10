@@ -10,8 +10,8 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'python'))
-from theorem_terminal import editor_bridge, editor_assistance
-from theorem_terminal.openai_response import TransportResult
+from mrw import editor_bridge, editor_assistance
+from mrw.openai_response import TransportResult
 
 artifacts = Path(sys.argv[1])
 scenario = sys.argv[2]

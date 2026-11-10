@@ -22,7 +22,7 @@ test('real isolated bridge reviews, copies, and retains the same exact Unicode p
     const request = { method: 'project', path: fixture, revision: reviewed.revision, number: 1, destination };
     await runBridge(extension, 'python3', request);
     const retained = await fs.readFile(destination, 'utf8');
-    assert.match(retained, /theorem-terminal.documentary-projection/);
+    assert.match(retained, /mrw.documentary-projection/);
     await assert.rejects(runBridge(extension, 'python3', request), /already exists/);
     assert.equal(await fs.readFile(destination, 'utf8'), retained);
   } finally { await fs.rm(directory, { recursive: true, force: true }); }
@@ -64,6 +64,6 @@ test('navigation state is typed and proof viewer URLs cannot execute commands', 
     assert.throws(() => httpsViewer(url));
   }
   assert.equal(httpsViewer('https://example.com/proofs/#a'), 'https://example.com/proofs/#a');
-  assert.equal(protectedText('{"schema":"theorem-terminal.model-call"}'), true);
+  assert.equal(protectedText('{"schema":"mrw.model-call"}'), true);
   assert.equal(protectedText('ordinary mathematical prose'), false);
 });

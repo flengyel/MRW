@@ -1,8 +1,8 @@
-import TheoremTerminal
+import MRW
 
-namespace TheoremTerminal.Justification.Tests
+namespace MRW.Justification.Tests
 
-open TheoremTerminal.Justification
+open MRW.Justification
 
 private def atom (name : String) : Formula :=
   .atom { id := name, contentHash := "test-" ++ name }
@@ -33,7 +33,7 @@ def testMetadata (id : String) : ProfileMetadata := {
   id := id
   syntaxVersion := "justification-syntax-v1"
   ruleVersion := "j0-hilbert-v1"
-  checker := "TheoremTerminal.Justification.checkCertificate"
+  checker := "MRW.Justification.checkCertificate"
   checkerVersion := "justification-checker-v1"
 }
 
@@ -60,7 +60,7 @@ def mislabeledMetadata : ProfileMetadata := {
   id := "test-mislabeled-j0-v1"
   syntaxVersion := "justification-syntax-v1"
   ruleVersion := "not-the-implemented-rules"
-  checker := "TheoremTerminal.Justification.checkCertificate"
+  checker := "MRW.Justification.checkCertificate"
   checkerVersion := "justification-checker-v1"
 }
 
@@ -461,11 +461,11 @@ private def runTests : IO Unit := do
 #print axioms AIInteraction.mechanical_documentary_derivable
 #print axioms AIInteraction.documentary_only_not_substantive
 
-end TheoremTerminal.Justification.Tests
+end MRW.Justification.Tests
 
 def main : IO UInt32 := do
   try
-    TheoremTerminal.Justification.Tests.runTests
+    MRW.Justification.Tests.runTests
     IO.println "justification tests: passed"
     return 0
   catch error =>

@@ -56,7 +56,7 @@ normal reload; its post-upgrade appearance has not been observed in this run.
 Earlier document-linked records are deliberately read-only; no automatic
 conversion to ordinary notes is supplied.
 
-[Machine-readable evidence](evidence/document-problems-removal-20261108.json)
+[Machine-readable evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/document-problems-removal-20261108.json)
 records tested source digests, native checks, package and installation identity.
 Full logs, captures and the disposable native fixture remain in
 `.codex-work/vscode-host-problems-removal/evidence/`.

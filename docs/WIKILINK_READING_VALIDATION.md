@@ -70,4 +70,4 @@ heading/block selectors and embeds remain unsupported; backlink results can
 remain incomplete when links elsewhere in the vault cannot be resolved. This
 patch does not extend those resolver capabilities or claim mathematical checking.
 
-[Machine-readable evidence](evidence/wikilink-reading-20261107.json).
+[Machine-readable evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/wikilink-reading-20261107.json).

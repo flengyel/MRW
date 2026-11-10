@@ -118,5 +118,5 @@ performed. Installation establishes the version on disk; a normal later
 activation adopts it. The tutorial reports its activation's version and labels
 this uncommitted build as based on `1efa68e` with local changes.
 
-[Machine-readable delivery evidence](evidence/reader-orientation-20261106/delivery.json)
+[Machine-readable delivery evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/reader-orientation-20261106/delivery.json)
 records the distinct validation layers and remaining native acceptance.

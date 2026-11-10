@@ -42,6 +42,6 @@ included in committed tests or this evidence.
 - Package: `vscode/mrw-0.22.2.vsix`, **552,912 bytes**. SHA-256:
   `a30d0f87f0c385a9ab20aa2c566e8221f0f4d1119e1e5227027a3de3e0031333`.
 
-[Sanitized machine-readable evidence](evidence/obsidian-aliases-20261107.json)
+[Sanitized machine-readable evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/obsidian-aliases-20261107.json)
 records the source/package identities and separates the complete note index
 from the incomplete backlink result.

@@ -50,7 +50,7 @@ The verified package is **567,895 bytes**, SHA-256
 Installed **flengyel.mrw 0.22.7**; all **102** payload files match the verified
 VSIX, excluding installer-only manifest metadata. The extension registry entry
 also names 0.22.7. Package identity and installed-byte verification are recorded
-in [the evidence file](evidence/sidebar-commands-20261107.json). The root's
+in [the evidence file](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/sidebar-commands-20261107.json). The root's
 previous build marker is preserved; the isolated package marker records the
 base commit and local changes. Installation does not reload the working window;
 the active instance adopts the update on its next normal reload.

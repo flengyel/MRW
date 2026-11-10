@@ -82,7 +82,7 @@ route, exit 0. All **104 installed payload files** match the verified
 VSIX, excluding installer-only manifest metadata. The registry selects
 **flengyel.mrw 0.23.1**. Working-window adoption was not forced or asserted.
 
-[Machine evidence](evidence/document-navigation-repair-20261108.json) records
+[Machine evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/document-navigation-repair-20261108.json) records
 source/package hashes, exit statuses and native results. Logs and screenshots
 remain locally under the ignored
 `.codex-work/vscode-host-navigation-repair/evidence` directory. The working

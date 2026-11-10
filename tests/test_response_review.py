@@ -12,17 +12,17 @@ import tracemalloc
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.cli import main
-from theorem_terminal.model_projection import (
+from mrw.cli import main
+from mrw.model_projection import (
     MAX_MODEL_CALL_BYTES,
     parse_finalized_model_call,
 )
-from theorem_terminal.private_persistence import (
+from mrw.private_persistence import (
     PrivatePersistenceError,
     persist_private_new,
 )
-from theorem_terminal import private_persistence as persistence_module
-from theorem_terminal.response_review import (
+from mrw import private_persistence as persistence_module
+from mrw.response_review import (
     INDEX_PAGE_SIZE,
     PREVIEW_SCALARS,
     METADATA_PREVIEW_SCALARS,
@@ -35,7 +35,7 @@ from theorem_terminal.response_review import (
 
 def call_document(response: str) -> dict[str, object]:
     return {
-        "schema": "theorem-terminal.model-call",
+        "schema": "mrw.model-call",
         "schema_version": 1,
         "id": "call\\id\u001b",
         "initiated_by": "person",
@@ -213,7 +213,7 @@ class ReviewCliTests(unittest.TestCase):
             source = parent / "call.json"
             source.write_bytes(encoded_call("one\n\ntwo\n"))
             before = set(parent.iterdir())
-            with patch("theorem_terminal.openai_response.http_transport", side_effect=AssertionError("network")), \
+            with patch("mrw.openai_response.http_transport", side_effect=AssertionError("network")), \
                  patch("subprocess.run", side_effect=AssertionError("subprocess")):
                 code, output, error = self.run_main(["review-response", str(source), "--passage", "2"])
             self.assertEqual((code, error), (0, ""))
@@ -398,7 +398,7 @@ class PrivatePersistenceTests(unittest.TestCase):
                 os.write(descriptor, b"concurrent")
                 os.close(descriptor)
                 return real_link(source, target, **kwargs)
-            with patch("theorem_terminal.private_persistence.os.link", side_effect=link):
+            with patch("mrw.private_persistence.os.link", side_effect=link):
                 with self.assertRaisesRegex(PrivatePersistenceError, "File exists"):
                     persist_private_new(raced, b"ours")
             self.assertEqual(raced.read_bytes(), b"concurrent")
@@ -409,7 +409,7 @@ class PrivatePersistenceTests(unittest.TestCase):
             parent = Path(temporary)
             for operation in ("fchmod", "write", "fsync", "link"):
                 destination = parent / f"{operation}.json"
-                target = f"theorem_terminal.private_persistence.os.{operation}"
+                target = f"mrw.private_persistence.os.{operation}"
                 with self.subTest(operation=operation), patch(target, side_effect=OSError("failed")):
                     with self.assertRaises(OSError):
                         persist_private_new(destination, b"complete")
@@ -418,7 +418,7 @@ class PrivatePersistenceTests(unittest.TestCase):
 
             destination = parent / "durability.json"
             with patch(
-                "theorem_terminal.private_persistence.os.fsync",
+                "mrw.private_persistence.os.fsync",
                 side_effect=(None, OSError("directory sync failed")),
             ):
                 with self.assertRaisesRegex(PrivatePersistenceError, "published.*durability"):
@@ -452,7 +452,7 @@ class PrivatePersistenceTests(unittest.TestCase):
                 return real_stat(path, *args, **kwargs)
 
             with patch(
-                "theorem_terminal.private_persistence.os.stat",
+                "mrw.private_persistence.os.stat",
                 side_effect=replacing_stat,
             ):
                 with self.assertRaisesRegex(PrivatePersistenceError, "identity"):
@@ -478,7 +478,7 @@ class PrivatePersistenceTests(unittest.TestCase):
                 return real_link(source, target, **kwargs)
 
             with patch(
-                "theorem_terminal.private_persistence.os.link",
+                "mrw.private_persistence.os.link",
                 side_effect=substitute_then_link,
             ):
                 with self.assertRaisesRegex(PrivatePersistenceError, "identity"):
@@ -509,7 +509,7 @@ class PrivatePersistenceTests(unittest.TestCase):
                 return real_unlink(*args, **kwargs)
 
             with patch(
-                "theorem_terminal.private_persistence.os.unlink",
+                "mrw.private_persistence.os.unlink",
                 side_effect=transient_unlink,
             ):
                 persist_private_new(destination, b"complete")
@@ -533,7 +533,7 @@ class PrivatePersistenceTests(unittest.TestCase):
                 return real_close(descriptor)
 
             with patch(
-                "theorem_terminal.private_persistence.os.close",
+                "mrw.private_persistence.os.close",
                 side_effect=close_then_report,
             ):
                 with self.assertRaisesRegex(PrivatePersistenceError, "cleanup failed"):

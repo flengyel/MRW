@@ -47,6 +47,6 @@ Package: `vscode/mrw-0.23.4.vsix` (581965 bytes).
 
 SHA-256: `ffc558644657882615acb77081cc2aba533d17678a71b46fb2b99feee9df6185`.
 
-[Machine-readable evidence](evidence/ordinary-work-rules-20261108.json) records
+[Machine-readable evidence](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/ordinary-work-rules-20261108.json) records
 source digests and actual package/help/install checks. Logs remain in
 `.codex-work/vscode-host-reading-contract/evidence/`.

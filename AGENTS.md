@@ -1,6 +1,15 @@
 # Codex instructions
 
-## Current direction — ordinary work, 0.23.5
+## Current direction — complete MRW rename, 0.23.8
+
+The user explicitly requires MRW throughout the active project: `src/mrw`, Python
+distribution/module/CLI `mrw`, Lean namespace `MRW`, and extension `flengyel.mrw`.
+Do not preserve an earlier backend name, add a renamed wrapper, or conceal names
+through encoding. No earlier-identity aliases, readers or evidence remain in the maintained tree. Preserve originals outside active project and installation paths, and preserve
+notes, drafts, source pins and saved research. Verify both installed entry points and the extracted
+VSIX; documentation-only checks do not cover this rename.
+
+## Delivered ordinary reading behavior
 
 Reading repairs preserve these rules: Contents identifies a different active file,
 WikiLinks support scoped paths and exact heading/block targets, titles arrive
@@ -25,13 +34,12 @@ No next feature increment is authorized merely by the roadmap.
 Preserve existing saved records, linked owners, drafts, source references and
 history. Earlier document-linked work reopens read-only in the existing viewer,
 with Return and history/export available. Accept late draft checkpoints and
-failed-save retries; reject stale creation/grading/scheduling actions. No storage
-migration or deletion. Other explicitly invoked study/proof tools remain separate.
+failed-save retries; reject stale creation/grading/scheduling actions. No deletion or unrelated storage migration. The explicitly requested naming
+upgrade preserves originals through external one-time conversion and existing MRW citations. Other explicitly invoked study/proof tools remain separate.
 
 Preserve the delivered opening, title, scope, Return and pane-placement repairs,
 native Commands buttons, note preview, WikiLinks and Obsidian interoperability.
-VS Code owns dirty buffers, Save, Undo and layout. Verify and install without
-reloading the working window. General research resumption and argument
+VS Code owns dirty buffers, Save, Undo and layout. Verify the release without installing into or reloading the working window. General research resumption and argument
 reconstruction remain later work; they must start from an observed task, without
 adding another registration form. [Current rules and delivery](docs/ORDINARY_WORK_RULES.md).
 [Delivery](docs/DOCUMENT_PROBLEMS_REMOVAL.md).
@@ -41,18 +49,20 @@ adding another registration form. [Current rules and delivery](docs/ORDINARY_WOR
 The workstation extension is `flengyel.mrw`, packaged as `mrw-0.22.0.vsix`.
 The user explicitly chose a fresh extension namespace. Do not add a compatibility
 extension, URL forwarding, automatic old-state adoption or dual installations.
-New `vscode://flengyel.mrw/…` links use the current authority; old extension URLs
-are not redirected. Existing command/view IDs, settings, Python implementation
-names, record schemas and source-qualified identifiers remain unchanged.
+New `vscode://flengyel.mrw/…` links use the current authority.
+The complete MRW rename includes the backend, CLI, Lean namespace, packaging and
+documentation. Earlier data is converted by a separate one-time operation outside the
+maintained tree. The running application accepts only MRW formats and names.
 
 The user separately requested preservation of the annotated Hausdorff source.
 That source, its two annotations and rendered diagram are restored in the new
 workspace through a completed one-time verified copy and existing store binding.
 Do not repeat the copy or replace later edits with the old source store.
-Do not copy old studies/history, mutate mathematical prose or require live
-compatibility code. Keep original notes available on disk. Preserve the working
-window; install without forcing a reload. Future migration work needs its own
-explicit requirement. [Identity task](docs/EXTENSION_IDENTITY.md).
+Do not repeat that historical study copy or mutate mathematical prose.
+The current full rename authorizes one-time conversion outside the maintained
+tree, preserving originals. It prohibits compatibility readers in the application. Keep original notes available on disk. Preserve the working
+window; install without forcing a reload. The current one-time conversion is explicitly authorized and remains outside
+maintained source and installation directories. [Identity task](docs/EXTENSION_IDENTITY.md).
 
 ## Published source identity and retained citations — 0.21.0
 
@@ -143,7 +153,7 @@ are not mandatory acceptance gates.
 
 ## Existing implementation and retained invariants
 
-Mathematical Research Workstation is the user-facing system being developed from the Theorem Terminal experimental prototype.
+Mathematical Research Workstation is the user-facing system being developed from the MRW experimental prototype.
 
 The project should help people work with mathematics whose justification exceeds
 their present understanding, while making further understanding possible
@@ -355,8 +365,8 @@ necessary closure or real-store qualification. Read the latest validation and
 handoff; do not turn the single success into a supported procedure.
 
 The existing editor-centered Qt GUI remains available as
-`theorem-terminal gui [PROJECT_DIRECTORY]`. Keep the CLI and all technical
-identities unchanged. Open Project Directory is the principal entry: show the
+`mrw gui [PROJECT_DIRECTORY]`. Use `mrw` for the Python package, distribution and CLI, and `MRW` for the Lean
+namespace. Earlier technical-name preservation instructions are superseded. Open Project Directory is the principal entry: show the
 actual directory tree lazily and open ordinary mathematical files as buffers.
 External references are read-only. No attachment step, preliminary form or
 mathematical metadata questionnaire is required. Mathematical content belongs in
@@ -473,7 +483,7 @@ for extension-only changes. Shared-service changes retain regression coverage
 for both callers, with unavailable Qt checks reported explicitly.
 
 For Qt changes, exercise toolkit-independent controllers and actual Qt widgets with
-`THEOREM_TERMINAL_GUI_TESTS=1` (an offscreen Qt platform can run widget tests).
+`MRW_GUI_TESTS=1` (an offscreen Qt platform can run widget tests).
 Use ordinary test documents; no test-only controller subclass may stand in for
 the GUI. When changing widgets, exercise the affected user workflow visibly at
 1280×820 and 960×680. Preserve R1 regression coverage for a local PDF beside an
@@ -584,7 +594,7 @@ The Qt summary/handoff remains unchanged; no notebook-cell bridge to R2/R3 is
 implemented. Record actual UI results separately from API checks and usefulness.
 
 The justification-logic warrant subsystem is architecturally integral to
-Theorem Terminal. Its object language, profiles, derivations, constant
+MRW. Its object language, profiles, derivations, constant
 specifications, certificate checker, and certificate-soundness theorem are
 implemented in the repository-owned `lean/` Lake project. The toolkit-independent Python
 record and checker services use the standard library: they validate and render

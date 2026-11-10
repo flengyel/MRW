@@ -13,6 +13,7 @@ parser.add_argument('--persistence-phase', choices=('seed', 'restart'))
 parser.add_argument('--investigation-phase', choices=('seed', 'resume_end', 'sequential'))
 parser.add_argument('--investigation-outcome', choices=('failed', 'refused', 'incomplete'))
 parser.add_argument('--outline-phase', choices=('seed', 'restart', 'refine', 'associations', 'associations_restart'))
+parser.add_argument('--proof-provenance', type=Path, help='external original proof provenance record for historical outline checks')
 args = parser.parse_args()
 if args.investigation_outcome and args.investigation_phase != 'sequential':
     parser.error('--investigation-outcome requires --investigation-phase sequential')
@@ -63,7 +64,7 @@ if args.outline_phase == 'seed':
     if hashlib.sha256(pinned_source.read_bytes()).hexdigest() != '63fd9ade107c888ca9b04d57f0a1ee8f0b0fb324fb4646cdac7404f8741301cd':
         raise SystemExit('Pinned reconnaissance source unavailable or changed; do not fetch or compile automatically')
     for source, name in [(pinned_source, 'Subgraph.lean'),
-                         (repo / 'docs/evidence/source-outline-20261014/euclid-ix20.txt', 'euclid-ix20.txt')]:
+                         (repo / 'tests/fixtures/reading/euclid-ix20.txt', 'euclid-ix20.txt')]:
         target = project / name
         if target.exists() and target.read_bytes() != source.read_bytes():
             raise SystemExit(f'Refusing to replace existing source: {target}')
@@ -89,9 +90,11 @@ manifest['activationEvents'] = ['*']
 (staged / 'package.json').write_text(json.dumps(manifest, indent=2))
 host_config = dict(config, phase='seed')
 if args.outline_phase:
+    if args.proof_provenance is None or not args.proof_provenance.is_file():
+        raise SystemExit('Provide the original external --proof-provenance record for these historical checks')
     host_config.update(phase=args.outline_phase,
-                       goals=str(extension.parent / 'docs/evidence/proof-outline-20261014/lean-goals.json'),
-                       provenance=str(extension.parent / 'docs/evidence/proof-outline-20261014/provenance.json'),
+                       goals=str(extension.parent / 'tests/fixtures/reading/lean-goals.json'),
+                       provenance=str(args.proof_provenance.resolve()),
                        sourceCommit='1aec8a7acf223b7c56e4830977b6e90d4ef1924b',
                        euclidUrl='https://www.claymath.org/library/historical/euclid/files/elem.9.20.html')
 (staged / 'host-test.json').write_text(json.dumps(host_config, indent=2))

@@ -12,9 +12,9 @@ import unittest
 from unittest.mock import patch
 
 from test_workstation import mathematical_project
-from theorem_terminal.openai_response import TransportResult
-from theorem_terminal.workstation import Workstation
-from theorem_terminal.workspace import VERSION, WorkspaceError, decode_workspace, encode_workspace
+from mrw.openai_response import TransportResult
+from mrw.workstation import Workstation
+from mrw.workspace import VERSION, WorkspaceError, decode_workspace, encode_workspace
 
 
 def provider_response(identifier, text, *, status="completed"):
@@ -37,7 +37,7 @@ def provider_response(identifier, text, *, status="completed"):
 
 class InvestigationControllerTests(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="theorem-terminal-r3-")
+        temporary = tempfile.TemporaryDirectory(prefix="mrw-r3-")
         self.addCleanup(temporary.cleanup)
         self.home = Path(temporary.name)
         self.root = self.home / "project"
@@ -99,7 +99,7 @@ class InvestigationControllerTests(unittest.TestCase):
         current["schema_version"] = 8
         raw = (json.dumps(current, ensure_ascii=False) + "\n").encode("utf-8")
         with patch(
-            "theorem_terminal.workspace.read_bounded",
+            "mrw.workspace.read_bounded",
             side_effect=AssertionError("migration read a record"),
         ):
             migrated = decode_workspace(raw)
@@ -382,7 +382,7 @@ class InvestigationControllerTests(unittest.TestCase):
         self.assertEqual(note.content, note_before)
 
     def test_end_post_replacement_sync_failure_keeps_live_pointer_without_rollback(self):
-        from theorem_terminal.mutable_files import sync_directory
+        from mrw.mutable_files import sync_directory
 
         parent, parent_outcome = self.make_parent()
         prepared, _note = self.prepare_child(parent)
@@ -403,10 +403,10 @@ class InvestigationControllerTests(unittest.TestCase):
             return sync_directory(directory)
 
         with patch(
-            "theorem_terminal.mutable_files.sync_directory",
+            "mrw.mutable_files.sync_directory",
             side_effect=fail_after_null_replacement,
         ), patch(
-            "theorem_terminal.mutable_files.os.replace", wraps=os.replace
+            "mrw.mutable_files.os.replace", wraps=os.replace
         ) as replacement, self.assertRaisesRegex(
             WorkspaceError, "post-replacement directory sync denial"
         ):

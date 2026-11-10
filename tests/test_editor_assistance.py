@@ -8,10 +8,10 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theorem_terminal.editor_bridge import dispatch
-from theorem_terminal.editor_assistance import assistance_action
-from theorem_terminal.openai_response import TransportResult
-from theorem_terminal.model_projection import parse_terminal_model_call
+from mrw.editor_bridge import dispatch
+from mrw.editor_assistance import assistance_action
+from mrw.openai_response import TransportResult
+from mrw.model_projection import parse_terminal_model_call
 
 
 class EditorAssistanceTests(unittest.TestCase):
@@ -120,7 +120,7 @@ class EditorAssistanceTests(unittest.TestCase):
             self.preview()
 
     def test_post_publication_error_recovers_matching_record_and_redacts_key(self):
-        from theorem_terminal import assistance_actions
+        from mrw import assistance_actions
         original = assistance_actions.request_assistance
         def fail_after(*args, **kwargs):
             original(*args, **kwargs)
@@ -139,7 +139,7 @@ class EditorAssistanceTests(unittest.TestCase):
         def forbidden(*args):
             self.fail('transport must not run')
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'synthetic-key'}):
-            with patch('theorem_terminal.editor_assistance.POSIX_PUBLICATION_SUPPORTED', False):
+            with patch('mrw.editor_assistance.POSIX_PUBLICATION_SUPPORTED', False):
                 result = assistance_action(request, transport=forbidden)
             self.assertEqual(result['status'], 'not_sent')
             self.assertIn('Remote WSL', result['body'])
@@ -153,7 +153,7 @@ class EditorAssistanceTests(unittest.TestCase):
             self.assertEqual(Path(self.draft['output']).read_bytes(), b'existing unrelated bytes')
 
     def test_unretained_transport_outcome_is_never_reported_as_not_sent(self):
-        from theorem_terminal import assistance_actions
+        from mrw import assistance_actions
         original = assistance_actions.request_assistance
         def failed_publication(*args):
             raise OSError('synthetic disk failure')

@@ -106,9 +106,9 @@ window. The first diagram/retention workflow is established independently.
   publication failure, exact-source editing/restoration and supported relocation.
 
 Logs and private generated artifacts stay under `.codex-work/tikz-20261102/`.
-[Seed](evidence/tikz-20261102/host-seed.json),
-[normal reopen](evidence/tikz-20261102/host-reopen.json) and
-[check summary](evidence/tikz-20261102/checks.json) retain their separate scopes.
+[Seed](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/tikz-20261102/host-seed.json),
+[normal reopen](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/tikz-20261102/host-reopen.json) and
+[check summary](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/tikz-20261102/checks.json) retain their separate scopes.
 
 ## Package and installed checks
 
@@ -116,10 +116,10 @@ The final VSIX contains **66 files**, SHA-256
 `1ba44124d4755caca7516c26d9339a4fde784058943874c48010082fa1c43792`.
 The established WSL code-server installation succeeded. The production manifest,
 entry point and all **61 installed runtime files** match the verified archive;
-see [installed package](evidence/tikz-20261102/installed-package.json).
+see [installed package](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/tikz-20261102/installed-package.json).
 Earlier VSIX packages, including 0.9.4, remain unchanged.
 
-The [installed workflow](evidence/tikz-20261102/installed-workflow.json) created a
+The [installed workflow](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/tikz-20261102/installed-workflow.json) created a
 fresh synthetic fixture outside the user's reading workspace, saved one colored
 TikZ block, explicitly rendered it through the actual installed Python bridge
 and tools, obtained both Paper/Dark display images, and reopened it after removal

@@ -11,10 +11,10 @@ import tempfile
 import unittest
 
 from test_workstation import mathematical_project
-from theorem_terminal.documentary_warrant import parse_documentary_projection
-from theorem_terminal.openai_response import TransportResult
-from theorem_terminal.workstation import Workstation
-from theorem_terminal.workspace import WorkspaceError
+from mrw.documentary_warrant import parse_documentary_projection
+from mrw.openai_response import TransportResult
+from mrw.workstation import Workstation
+from mrw.workspace import WorkspaceError
 
 
 def provider_response(text="First idea: use α → β.\n\nSecond 😀 passage.\n"):
@@ -34,7 +34,7 @@ def provider_response(text="First idea: use α → β.\n\nSecond 😀 passage.\n
 
 class AssistanceControllerTests(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="theorem-terminal-r2-")
+        temporary = tempfile.TemporaryDirectory(prefix="mrw-r2-")
         self.addCleanup(temporary.cleanup)
         self.home = Path(temporary.name)
         self.root = self.home / "project"

@@ -12,8 +12,8 @@ import unittest
 from unittest.mock import patch
 
 from test_workstation import mathematical_project
-from theorem_terminal.documentary_warrant import parse_documentary_projection
-from theorem_terminal.openai_response import TransportResult
+from mrw.documentary_warrant import parse_documentary_projection
+from mrw.openai_response import TransportResult
 
 
 def completed_response(text):
@@ -32,8 +32,8 @@ def completed_response(text):
 
 
 @unittest.skipUnless(
-    os.environ.get("THEOREM_TERMINAL_GUI_TESTS") == "1",
-    "set THEOREM_TERMINAL_GUI_TESTS=1 to exercise actual Qt widgets",
+    os.environ.get("MRW_GUI_TESTS") == "1",
+    "set MRW_GUI_TESTS=1 to exercise actual Qt widgets",
 )
 class AssistanceWidgetTests(unittest.TestCase):
     @classmethod
@@ -42,10 +42,10 @@ class AssistanceWidgetTests(unittest.TestCase):
         cls.app = QApplication.instance() or QApplication([])
 
     def setUp(self):
-        from theorem_terminal.gui import WorkstationWindow
-        from theorem_terminal.workstation import Workstation
+        from mrw.gui import WorkstationWindow
+        from mrw.workstation import Workstation
 
-        self.temporary = tempfile.TemporaryDirectory(prefix="theorem-terminal-r2-gui-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="mrw-r2-gui-")
         self.home = Path(self.temporary.name)
         self.root = self.home / "project"
         self.root.mkdir()
@@ -125,7 +125,7 @@ class AssistanceWidgetTests(unittest.TestCase):
 
     def select(self, pane, start, end):
         from PySide6.QtGui import QTextCursor
-        from theorem_terminal.gui import qt_position
+        from mrw.gui import qt_position
 
         cursor = pane.text.textCursor()
         cursor.setPosition(qt_position(pane.text, start))
@@ -256,7 +256,7 @@ class AssistanceWidgetTests(unittest.TestCase):
 
             retained = self.root / "gui-retained-passage.json"
             with patch(
-                "theorem_terminal.gui.QFileDialog.getSaveFileName",
+                "mrw.gui.QFileDialog.getSaveFileName",
                 return_value=(str(retained), ""),
             ):
                 panel.retain_button.click()

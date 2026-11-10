@@ -6,7 +6,7 @@ import json
 from types import MappingProxyType
 import unittest
 
-from theorem_terminal.model_projection import (
+from mrw.model_projection import (
     MODEL_CALL_SCHEMA,
     MODEL_CALL_SCHEMA_VERSION,
     ModelProjectionError,
