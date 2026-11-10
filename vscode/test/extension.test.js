@@ -1464,9 +1464,14 @@ test('the MRW starting view offers New, Open, saved sources and tutorial as regi
   h.focus(h.editor(doc));
   await h.commands.get('mrw.openReadingOutline')();
   assert.equal(h.errors.length, 0); assert.equal(h.api.readingProvider.getChildren()[0].label, 'Active document');
-  h.state.set('mrw.lightStudy.recent.v1', [{id:'a'.repeat(64),title:'Saved study',sources:1}]);
+  const saved = require('../src/studyModel').createStudy([{reference:'fixture-saved',source_revision:'a'.repeat(64),text:'Saved source',label:'Saved study'}],root);
+  const studyHome=path.join(root,'..','private-state','active-studies-v1');
+  await fs.mkdir(studyHome,{recursive:true});
+  await fs.writeFile(path.join(studyHome,saved.id+'.json'),JSON.stringify(saved));
+  h.state.set('mrw.lightStudy.recent.v1', [{id:'a'.repeat(64),title:'Stale cache entry',sources:1}]);
   assert.deepEqual(await buttons.getChildren(), []);
-  assert.equal((await h.api.treeProviders['mrw.research'].getChildren()).length, 1);
+  const studies=await h.api.treeProviders['mrw.research'].getChildren();
+  assert.equal(studies.length, 1);assert.equal(studies[0].study,saved.id);
   assert.equal(h.requests.length, 0);
 });
 
