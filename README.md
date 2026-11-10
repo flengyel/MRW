@@ -9,9 +9,9 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.10 — Lean study.**
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.10/mrw-0.23.10.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
+**MRW 0.23.11 — Study archive and deletion.**
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.11/mrw-0.23.11.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.11).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -87,7 +87,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.10.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.11.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -97,8 +97,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.10.vsix
-sha256sum vscode/mrw-0.23.10.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.11.vsix
+sha256sum vscode/mrw-0.23.11.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.

@@ -1,7 +1,7 @@
 # Publish a GitHub release
 
 MRW is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
-The current release is [0.23.10](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
+The current release is [0.23.11](https://github.com/flengyel/MRW/releases/tag/v0.23.11).
 GitHub-distributed updates require downloading and installing a newer VSIX;
 there is no automatic update channel or Marketplace publication in this procedure.
 
@@ -37,7 +37,7 @@ The steps below apply when building a new version.
    npm ci --prefix vscode --ignore-scripts
    node --test vscode/test/tutorial.test.js
    TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-   npm run verify-vsix --prefix vscode -- mrw-0.23.10.vsix
+   npm run verify-vsix --prefix vscode -- mrw-0.23.11.vsix
    ```
 
    Substitute the selected version. Check changed documents and their links.
@@ -58,17 +58,17 @@ The steps below apply when building a new version.
 
    ```sh
    cd vscode
-   sha256sum mrw-0.23.10.vsix > SHA256SUMS
+   sha256sum mrw-0.23.11.vsix > SHA256SUMS
    sha256sum -c SHA256SUMS
    ```
 
    Keep packages, checksums and build/check logs outside tracked source. Retain
    local logs and exit statuses; upload only the intended release assets.
 6. Fetch again and preserve concurrent main commits with normal integration and
-   pushes. Confirm B is included in main. Create and push tag `v0.23.10` at verified
+   pushes. Confirm B is included in main. Create and push tag `v0.23.11` at verified
    B. Use an authenticated GitHub API or browser to create a **draft release**
-   with `prerelease: false`, titled **MRW 0.23.10 — Lean study** for this release.
-   Attach `mrw-0.23.10.vsix` and `SHA256SUMS` before publishing. Do not expose or
+   with `prerelease: false`, titled **MRW 0.23.11 — Study archive and deletion** for this release.
+   Attach `mrw-0.23.11.vsix` and `SHA256SUMS` before publishing. Do not expose or
    commit credentials. No automatic publishing workflow is needed.
 7. Release notes identify B and A, actual changes, requirements, installation,
    optional companions, known limits and manual update instructions. Link the
