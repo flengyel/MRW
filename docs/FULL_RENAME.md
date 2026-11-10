@@ -13,7 +13,7 @@ annotations are preserved. Existing MRW source IDs and citation scope hashes are
 retained in the converted store, whose format version is 2.
 
 Superseded verification reports and evidence were archived unchanged outside the
-maintained project. Their historical source snapshots remain available through
+maintained project. Their earlier source revisions remain available through
 Git history. Current links identify those snapshots instead of presenting edited
 evidence as original observations.
 
@@ -25,7 +25,7 @@ notes record the actual results, source commits and remaining validation limits.
 
 ## Verification for 0.23.8
 
-The persistent-checkout Python run passed 417 tests, with the Windows-mounted
+The persistent-checkout Python run passed 418 tests, with the Windows-mounted
 project case skipped because no authorized disposable Windows project parent
 was configured. Qt widget and isolated TikZ checks were enabled. Three focused
 entry-point, staging and store-identity checks also passed. The pinned Lean
@@ -44,8 +44,14 @@ Three standalone sessions and their buffer identities were also converted and
 validated. Original records, conversion tools and journals remain in the external
 migration archive; none are shipped as runtime compatibility code.
 
-The candidate tracked-tree audit searched every tracked path and file and found
-zero superseded identity matches. Final clean-build package checks and the
-extension-suite outcome are recorded in the release notes, with the source marker,
+All 366 extension tests passed. A separate VS Code 1.145.2 WSL window opened
+the converted Hausdorff source and both reader annotations, followed Markdown
+links, returned to the document and rendered a TikZ diagram. Its independent
+unsent draft remained intact.
+
+The tracked-tree audit searched every tracked path and file and found zero
+superseded identity matches. The extracted VSIX audit searched all 109 entries
+and also found zero matches. Final package checks are recorded in the release
+notes, with the source marker,
 release commit and download checksum. The working VS Code window is not reloaded
 or used as the acceptance-test window.

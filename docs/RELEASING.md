@@ -12,7 +12,7 @@ there is no automatic update channel or Marketplace publication in this procedur
 2. Update `vscode/package.json` and matching root metadata in
    `vscode/package-lock.json`, preserving dependency pins. Update current examples
    in both READMEs and the installation guide, plus explicit versioned release
-   and VSIX links. Preserve historical evidence unchanged; if a task requires its
+   and VSIX links. Preserve earlier evidence unchanged; if a task requires its
    archival, link its immutable source snapshot. Commit these changes
    as **A**.
 3. Set `vscode/media/build-info.json` to the selected version, A's full commit SHA

@@ -1,10 +1,10 @@
-# Vs Code Outline Validation: historical record
+# Vs Code Outline Validation: archived report
 
 The original report is preserved unchanged in the
 [recorded source snapshot](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/VS_CODE_OUTLINE_VALIDATION.md)
 and in the maintainer’s external evidence archive. It was moved out of the
-maintained tree during the complete MRW rename; its observations and limits
-remain historical, not new verification claims.
+maintained tree during the complete MRW rename; the linked report preserves the
+observations and limits recorded for that revision.
 
 See [the current rename verification](FULL_RENAME.md).
 

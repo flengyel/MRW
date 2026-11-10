@@ -58,7 +58,7 @@ The user separately requested preservation of the annotated Hausdorff source.
 That source, its two annotations and rendered diagram are restored in the new
 workspace through a completed one-time verified copy and existing store binding.
 Do not repeat the copy or replace later edits with the old source store.
-Do not repeat that historical study copy or mutate mathematical prose.
+Do not repeat that earlier study copy or mutate mathematical prose.
 The current full rename authorizes one-time conversion outside the maintained
 tree, preserving originals. It prohibits compatibility readers in the application. Keep original notes available on disk. Preserve the working
 window; install without forcing a reload. The current one-time conversion is explicitly authorized and remains outside
