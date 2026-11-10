@@ -128,14 +128,14 @@ test('a missing recent-study locator never replaces a saved study or unfinished 
 });
 
 
-test('Studies lists only saved work without creating or loading a study',async t=>{
- const h=await host(t),tree=h.c.tree;
- assert.deepEqual(await tree.getChildren(),[]);
- h.state.set('mrw.lightStudy.recent.v1',[{id:'a'.repeat(64),title:'Example: sums of odd integers',sources:1}]);
+test('Studies recovers saved work without opening it or creating a study from a stale cache entry',async t=>{
+ const h=await host(t),tree=h.c.tree,s=study(),home=path.join(h.home,'active-studies-v1');
+ await fs.mkdir(home,{recursive:true});const text=JSON.stringify(s);await fs.writeFile(path.join(home,s.id+'.json'),text);
+ h.state.set('mrw.lightStudy.recent.v1',[{id:'a'.repeat(64),title:'Stale cache entry',sources:1}]);
  const populated=await tree.getChildren();assert.equal(populated.length,1);
  const saved=populated[0];assert.equal(saved.kind,'study');
  assert.equal(tree.getTreeItem(saved).command.command,'mrw.openStudyItem');
- assert.equal(tree.getTreeItem(saved).command.arguments[0].study,'a'.repeat(64));
+ assert.equal(tree.getTreeItem(saved).command.arguments[0].study,s.id);
  assert.equal(h.c.active,undefined);assert.equal(h.panels.length,0);
- await assert.rejects(fs.stat(path.join(h.home,'active-studies-v1')),error=>error.code==='ENOENT');
+ assert.deepEqual(await fs.readdir(home),[s.id+'.json']);assert.equal(await fs.readFile(path.join(home,s.id+'.json'),'utf8'),text);
 });
