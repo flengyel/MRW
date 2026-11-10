@@ -9,7 +9,7 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.10 — Lean study prerelease.**
+**MRW 0.23.10 — Lean study.**
 [Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.10/mrw-0.23.10.vsix)
 · [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.

@@ -1,7 +1,7 @@
 # Install Mathematical Research Workstation
 
 MRW 0.23.10 is installed from a VSIX.
-[Download the prerelease](https://github.com/flengyel/MRW/releases/download/v0.23.10/mrw-0.23.10.vsix)
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.10/mrw-0.23.10.vsix)
 and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.10),
 or [build from source](../vscode/README.md#package-and-install-a-vsix).
 There is no Marketplace listing. The extension identifier is `flengyel.mrw`.

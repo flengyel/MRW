@@ -112,7 +112,7 @@ one private store are unsupported.
 ## Package and install a VSIX
 
 [Download MRW 0.23.10](https://github.com/flengyel/MRW/releases/download/v0.23.10/mrw-0.23.10.vsix)
-· [Prerelease notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
 Updates from GitHub require installing the newer VSIX. For publication and build
 identity, follow [the release procedure](../docs/RELEASING.md).
 

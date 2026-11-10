@@ -1,9 +1,20 @@
-# Publish a GitHub prerelease
+# Publish a GitHub release
 
 MRW is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
-The current prerelease is [0.23.10](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
+The current release is [0.23.10](https://github.com/flengyel/MRW/releases/tag/v0.23.10).
 GitHub-distributed updates require downloading and installing a newer VSIX;
 there is no automatic update channel or Marketplace publication in this procedure.
+
+Publish normal releases by default (`prerelease: false`) and mark the newest
+release as **Latest**. Reserve the prerelease flag for an explicitly designated
+test candidate. MRW remains experimental; that description does not require the
+GitHub prerelease flag.
+
+To promote an existing prerelease, clear **Set as a pre-release**, select
+**Set as the latest release**, and save. Keep its tag, version, assets and
+checksums unchanged; changing release metadata requires no rebuild. Verify the
+release page and the [latest-release link](https://github.com/flengyel/MRW/releases/latest).
+The steps below apply when building a new version.
 
 1. Fetch origin and reconcile main without discarding local work. Inspect remote
    tags and all releases, including drafts. Choose an unused patch version;
@@ -55,16 +66,17 @@ there is no automatic update channel or Marketplace publication in this procedur
    local logs and exit statuses; upload only the intended release assets.
 6. Fetch again and preserve concurrent main commits with normal integration and
    pushes. Confirm B is included in main. Create and push tag `v0.23.10` at verified
-   B. Use an authenticated GitHub API or browser to create a **draft prerelease**,
-   titled **MRW 0.23.10 — Lean study** for this release.
+   B. Use an authenticated GitHub API or browser to create a **draft release**
+   with `prerelease: false`, titled **MRW 0.23.10 — Lean study** for this release.
    Attach `mrw-0.23.10.vsix` and `SHA256SUMS` before publishing. Do not expose or
    commit credentials. No automatic publishing workflow is needed.
 7. Release notes identify B and A, actual changes, requirements, installation,
    optional companions, known limits and manual update instructions. Link the
    [installation guide](INSTALLATION.md), [reading guide](READING_OUTLINE_WORKFLOW.md)
-   and [TikZ setup](TIKZ_WORKFLOW.md). Publish only the completed draft. Verify
-   its public page, prerelease flag, tag target and README link. Download both
-   assets through their versioned URLs; check the downloaded VSIX against
+   and [TikZ setup](TIKZ_WORKFLOW.md). Publish only the completed draft and mark
+   it as **Latest**. Verify its public page, `prerelease: false`, latest-release
+   link, tag target and README link. Download both assets through their
+   versioned URLs; check the downloaded VSIX against
    `SHA256SUMS` and the verified local bytes. Record the URLs, commits, checksum
    and actual checks in the delivery report. Publication failure remains pending,
    not a completed release; preserve the ready assets and release-note text.
