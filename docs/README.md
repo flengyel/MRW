@@ -30,6 +30,13 @@ that version and the saved records it produced.
 
 ## Design and development
 
+- [W3C PROV lab-notebook design](PROVENANCE_DESIGN.md): shared provenance model,
+  plugin responsibilities and a bounded implementation trial.
+- [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
+  proposed lifecycle, shared-data boundaries and completion checks.
+- [Related systems and reuse](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse):
+  CoCalc, Wolfram, Proofscape, TeXmacs, MathHub/ALeA and VisTrails.
+
 - [Contributing](../CONTRIBUTING.md): focused changes, bug reports and larger proposals.
 - [Lean lesson packs](LEAN_LESSON_PACKS.md): explicit local content registration and API 1.
 - [Development setup](../vscode/README.md#run-from-this-checkout): source launch,

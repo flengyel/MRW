@@ -1,5 +1,20 @@
 # User experience specification
 
+## Proposed interaction — Study lifecycle and lab notebook
+
+The missing Study lifecycle is specified in
+[Archive and delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
+Add native Studies row actions and Command Palette pickers for archive/restore,
+Trash/Undo and explicit permanent deletion. Preserve drafts, Return and shared
+records; do not turn archive or deletion into a recall outcome. These commands
+are not implemented in the current release.
+
+The proposed [W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) links results to
+inputs, method revisions and notes. It supports comparison and resumption
+without a mandatory workflow canvas, question registration or duplicate prose.
+Expose useful actions such as inspecting a result's inputs; keep PROV syntax
+in export/developer documentation. Opening or restoring work executes nothing.
+
 The current workflow below describes MRW 0.23.5. Later versioned sections record
 behavior at the named release; the numbered sections give design requirements
 and experiments, not a list of current VS Code features. The

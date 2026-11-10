@@ -193,7 +193,9 @@ Obsidian embeds and arbitrary LaTeX preambles/packages are not supported.
 Automatic prerequisite discovery, whole-corpus ingestion, general proof checking
 and recovery of calculation sessions are not implemented. Multiple hosts writing
 one private store and Windows-backed artifact storage are not qualified.
-Source-study state has no cross-machine migration interface.
+Source-study state has no cross-machine migration interface. Study archive/delete
+controls are not yet implemented; their [design](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
+is the next bounded usability requirement.
 
 Contributions can improve navigation, accessibility, documentation or another
 specific obstacle encountered during mathematical work. See
@@ -205,6 +207,8 @@ unfinished work; follow the native VS Code interface conventions.
 
 [Documentation index](docs/README.md) ·
 [Research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) ·
+[W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) ·
+[Related systems](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse) ·
 [Vision](VISION.md) · [Domain model](DOMAIN_MODEL.md) ·
 [Vocabulary](VOCABULARY.md) · [UX specification](UX_SPEC.md)
 
