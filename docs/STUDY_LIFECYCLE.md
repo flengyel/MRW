@@ -53,6 +53,9 @@ beyond its 30-row display limit.
 
 Permanent deletion first publishes a deletion intent containing opaque IDs and
 snapshot digests. Cleanup is serialized with history writes and is idempotent.
+If a history-file replacement is interrupted, cleanup uses the complete saved
+batch and removes its temporary file after retry. An unreadable batch without a
+complete saved counterpart stops deletion rather than discarding other work.
 An interrupted deletion stays hidden and reports failure; **Show Deleted
 Studies** or reopening the workspace retries it. Completion is reported only
 after the selected files, events and unshared snapshots are removed. The final

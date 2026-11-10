@@ -179,3 +179,23 @@ test('history can start before any study directory exists without reporting a sa
  const s=await h.start();await h.trash(s);await h.delete(s);
  assert.equal((await h.marker(s)).state,'deleted');assert.equal(h.history.gap,'');
 });
+
+
+test('partial mixed-session replacement recovers from its complete batch after restart',async t=>{
+ const h=await fixture(t);let fail=false;
+ h.io={...fs,writeFile:async(file,text,...args)=>{
+  if(fail&&String(file).includes('/study-history-v1/')&&String(file).endsWith('.json.pending')&&String(text).includes('mixed-b')){
+   await fs.writeFile(file,String(text).slice(0,11),...args);throw Error('partial history replacement');
+  }return fs.writeFile(file,text,...args);
+ }};await h.restart();
+ const a=await h.start(),b=await h.start([extra(6)]);
+ h.history.record('mixed-a',{text:'Selected work'},'observed_action',{study:a.id});
+ h.history.record('mixed-b',{text:'Preserve exact other work'},'observed_action',{study:b.id});await h.history.flush();
+ await h.trash(a);fail=true;await assert.rejects(h.delete(a),/partial history replacement/);
+ assert.equal((await h.marker(a)).state,'deleting');
+ assert.ok((await fs.readdir(h.history.directory)).some(n=>n.endsWith('.pending')));
+ fail=false;await h.restart();await h.c.tree.getChildren();assert.equal((await h.marker(a)).state,'deleted');
+ const events=await h.history.events();assert.ok(!events.some(e=>e.action==='mixed-a'));
+ assert.equal(events.find(e=>e.action==='mixed-b').data.text,'Preserve exact other work');
+ assert.ok(!(await fs.readdir(h.history.directory)).some(n=>n.endsWith('.pending')));
+});

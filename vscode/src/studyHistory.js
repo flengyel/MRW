@@ -112,9 +112,17 @@ class StudyHistory {
     const events=await this.readEvents();
     return {events:events.filter(e=>this.belongs(e,id)),snapshots:digests(events.filter(e=>this.belongs(e,id))),retained:digests(events.filter(e=>!this.belongs(e,id)))};
   }
+  async historyFiles(){
+    const names=(await this.io.readdir(this.directory)).filter(n=>/^[a-f0-9-]+-\d+-\d+\.json(?:\.pending)*$/.test(n)).sort(),all=new Set(names);
+    // An interrupted atomic replacement can leave partial staging bytes beside
+    // the complete published batch. The published batch remains authoritative;
+    // retry its filtering before removing superseded staging files.
+    const staging=names.filter(n=>n.endsWith('.pending')&&all.has(n.slice(0,-8)));
+    return {records:names.filter(n=>!staging.includes(n)),staging};
+  }
   async readEvents(){
     const events=[];
-    for(const name of (await this.io.readdir(this.directory)).filter(n=>/^[a-f0-9-]+-\d+-\d+\.json(?:\.pending)*$/.test(n)).sort()){
+    for(const name of (await this.historyFiles()).records){
       const rows=await files.json(this.io,path.join(this.directory,name));
       if(!Array.isArray(rows))throw Error('Study history is invalid; deletion stopped.');
       events.push(...rows);
@@ -140,8 +148,8 @@ class StudyHistory {
     const job=this.tail.then(async()=>{
       // Complete lists are read before any removal. A malformed history file
       // stops cleanup, leaving the durable deletion intent for retry.
-      const entries=[];
-      for(const name of (await this.io.readdir(this.directory)).filter(n=>/^[a-f0-9-]+-\d+-\d+\.json(?:\.pending)*$/.test(n)).sort()){
+      const entries=[],batches=await this.historyFiles();
+      for(const name of batches.records){
         const file=path.join(this.directory,name),rows=await files.json(this.io,file);
         if(!Array.isArray(rows))throw Error('Study history is invalid; deletion stopped.');
         const keep=rows.filter(e=>!this.belongs(e,id));digests(keep,retained);entries.push({file,rows,keep});
@@ -151,6 +159,7 @@ class StudyHistory {
       for(const {file,rows,keep} of entries)if(keep.length!==rows.length){
         if(keep.length)await files.write(this.io,file,JSON.stringify(keep)+'\n');else await files.remove(this.io,file);
       }
+      for(const name of batches.staging)await files.remove(this.io,path.join(this.directory,name));
       for(const candidate of candidates)if(!retained.has(candidate)){
         this.snapshots.delete(candidate);this.snapshotStudies.delete(candidate);
         const directory=path.join(this.directory,'snapshots');
