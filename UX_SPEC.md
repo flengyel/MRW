@@ -20,10 +20,10 @@ Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
 an indexing scope. Cancellation preserves the current view and drafts.
 
 Saved-copy rows show their title, source/path and retained revision. Discovery
-runs independently of ordinary browsing. **Saved copy…** also opens the existing
+runs independently of ordinary browsing. **Saved copy…** also opens the
 project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
 Command Palette. Opening an original does not import it; opening a saved copy
-does not refresh its source or replace annotations. PDFs use the existing host
+does not refresh its source or replace annotations. PDFs use the host
 reader handoff. Shared backlink and note-ID completeness rules are unchanged.
 
 Contents identifies the selected document and indicates when another file is
@@ -46,7 +46,7 @@ Question registration system. Resumption first recovers those documents,
 supported locations and unfinished work. Add an interaction only for a
 demonstrated obstacle, without duplicate entry or mandatory reporting fields.
 
-Earlier document-linked records remain readable in the existing saved-work view.
+Earlier document-linked records remain readable in the saved-work view.
 It shows statements, attributed solutions, pending drafts and unresolved text,
 with Return and history/export. It offers no problem entry, attempts, grading,
 association or scheduling forms. No data migration or deletion is performed.

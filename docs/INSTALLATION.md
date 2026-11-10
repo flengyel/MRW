@@ -68,7 +68,9 @@ The former `flengyel.theorem-terminal` extension has a separate identity. Its
 private studies and history are not copied automatically, and its URLs are not
 forwarded. See [the identity change](EXTENSION_IDENTITY.md) when upgrading from it.
 
-### 3. Open existing work
+<a id="3-open-existing-work"></a>
+
+### 3. Open a document
 
 1. Open the MRW Activity Bar view and choose **Open Document…**, or run
    **MRW: Open Document…** from the Command Palette (**F1**).
@@ -81,7 +83,7 @@ forwarded. See [the identity change](EXTENSION_IDENTITY.md) when upgrading from 
 
 **Commands** keeps navigation actions available. **Contents** identifies the
 selected document, and **Studies** holds separately saved work. Opening or
-following a note creates no exercise record. Existing questions and solutions
+following a note creates no exercise record. Questions and solutions
 can remain in their notes.
 
 Run **MRW: Open Tutorial** for the current build's instructions. The
@@ -140,7 +142,7 @@ Linux tools and an explicit render action; saved diagrams can be read offline.
 [source-store move/reconnect](ARTIFACT_STORAGE.md) transfer supported source
 records. They do not transfer current-study checkpoints or interaction history.
 Those remain in MRW's private VS Code workspace storage on the Linux host.
-**Inspect Study History** opens a report; **Export Study History…** explicitly
+**Inspect Study History** opens a report; **Export Study History…**
 creates a readable or JSON copy. Exports may contain private source text,
 attempts and replies. See [data and transfers](../README.md#data-and-transfers).
 

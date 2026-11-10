@@ -1,7 +1,7 @@
 # Using MRW
 
 Start with **Open Document…** in MRW's **Commands** view, or press **F1** and run
-**MRW: Open Document…**. Choose an existing note or paper. Questions, solutions
+**MRW: Open Document…**. Choose a note or paper. Questions, solutions
 and commentary can stay in their notes, connected by ordinary links.
 
 **Contents** lists headings and links in the selected Markdown document.
@@ -9,7 +9,9 @@ and commentary can stay in their notes, connected by ordinary links.
 separately saved work; it is not required for reading. Opening or following a
 document never creates a problem record or launches an exercise form.
 
-## Open existing work
+<a id="open-existing-work"></a>
+
+## Open a document
 
 The picker offers two kinds of document:
 
@@ -21,9 +23,11 @@ The picker offers two kinds of document:
 Choose **Browse for another document…** to use the file dialog immediately.
 The picker lists the current folder's files and subfolders before loading their
 titles. Search by title, filename or path, enter a subfolder, or choose **Parent
-folder**. **Search subfolders…** requests a wider, bounded search. Titles arrive
-in batches without changing the current query or selection; incomplete results
-are identified. Cancelling preserves the current view and drafts.
+folder**. **Search subfolders…** searches nested folders within the
+[chooser limits](https://github.com/flengyel/MRW/blob/main/docs/DOCUMENT_OPENING_REPAIR.md).
+Titles arrive in batches without changing the current query or selection;
+incomplete results are identified. Cancelling preserves the current view and
+drafts.
 
 Markdown opens in preview and supplies Contents. **MRW: Show Contents** selects
 or reveals that document; **MRW: Choose Document…** selects another Markdown
@@ -75,10 +79,12 @@ leave the chosen notes folder. Markdown links can also use `#^block-id`.
 Missing or ambiguous IDs, headings and blocks produce an explanation rather
 than a guessed destination. Use a path to distinguish duplicate note IDs.
 
-Lookup and backlink searches are bounded and report incomplete results. They
-exclude `.obsidian`, `.trash`, `.git`, `.lake`, `node_modules`, `.venv` and
-`__pycache__`. Browsing another folder does not change the selected notes folder
-or extend backlink indexing. If a link changes while another note opens, select
+Lookup and backlink searches follow the
+[documented limits](https://github.com/flengyel/MRW/blob/main/docs/READING_OUTLINE_WORKFLOW.md)
+and report incomplete results. They exclude `.obsidian`, `.trash`, `.git`,
+`.lake`, `node_modules`, `.venv` and `__pycache__`. Browsing another folder does
+not change the selected notes folder or extend backlink indexing. If a link
+changes while another note opens, select
 its current occurrence again; the previous Return destination remains available.
 
 ### Use the same notes in Obsidian
@@ -119,7 +125,7 @@ Quiver package is supplied for exported curve styles. Opening or saving a note
 never compiles it. Successful diagrams are cached outside the note, follow the
 light/dark theme and remain available after restart.
 
-After a code change, render the new code explicitly. **TikZ source** reveals
+After changing the code, render the block again. **TikZ source** reveals
 the exact code. A failed render preserves the source and earlier derived views.
 Rendering does not check the mathematics. Obsidian embeds and arbitrary TeX
 packages remain unsupported. See
@@ -152,7 +158,7 @@ For an independently opened source, **Open filename** opens the selected Content
 document instead; **Choose a document…** appears if none is selected. Hover or
 Tab-focus controls for help; Escape dismisses it. Return never saves a document.
 
-**MRW: Import Markdown Text…** separately copies text into a saved source, a
+**MRW: Import Markdown Text…** copies text into a saved source, a
 passage annotation or a Markdown document. It does not synchronize files.
 
 ## Import a published section
@@ -218,7 +224,7 @@ from Studies or Resume Study; its removed forms do not reopen.
 ## Work through a proof
 
 **MRW: Work through a proof…** collects a saved proof, selected prerequisite
-passages and a question for an explicit Codex handoff. A returned outline can
+passages and a question for a Codex handoff. A returned outline can
 be inspected as a graph and its claim summaries edited. **Continue proof work**
 reopens the saved question and linked outline. Graph validation checks references
 and structure, not the mathematical argument. See

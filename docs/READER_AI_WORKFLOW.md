@@ -35,8 +35,8 @@ For a question about a passage:
 For repeated work with selected sources, the optional
 [source-study tool](ACTIVE_STUDY_WORKFLOW.md#retain-companion-help) assembles a
 help request and retains pasted replies. For a proposed graph, use
-[Work through a proof](PROOF_STUDY_WORKFLOW.md). Both use explicit clipboard
-transfers. Neither requires MRW's API credentials.
+[Work through a proof](PROOF_STUDY_WORKFLOW.md). Both require copying and
+pasting the selected material. Neither requires MRW's API credentials.
 
 Manual companion work creates no MRW API `ModelCall` record or proof-checking
 status. The reader's **Ask AI about this passage…** button uses the separate API
@@ -58,14 +58,14 @@ working credentials and access to the selected model.
 For the normal WSL server, Microsoft's
 [environment setup instructions](https://code.visualstudio.com/docs/remote/wsl#_advanced-environment-setup-script)
 describe `~/.vscode-server/server-env-setup`, processed before server startup.
-Preserve any existing setup and use valid Bourne-shell syntax. Save documents
-and reader forms before restarting the WSL VS Code server to load a changed
-environment. MRW does not edit this script or store the credential.
+Preserve the script's other settings and use valid Bourne-shell syntax. Save
+documents and reader forms before restarting the WSL VS Code server to load a
+changed environment. MRW does not edit this script or store the credential.
 
 ## Ask, preview and send
 
 1. Open the intended workspace and retained source with **MRW: Open Saved
-   Source…**, or follow an existing source/passage link.
+   Source…**, or follow a source/passage link.
 2. Beside the passage, choose **Ask AI about this passage…**. Alternatively use
    **Ask AI about a passage…** in the reading toolbar or **MRW: Ask About Reader
    Passage…** in the Command Palette. Expand a hidden proof to expose its action.

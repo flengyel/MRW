@@ -10,7 +10,9 @@ or following a document creates no exercise form. Work saved through the removed
 document Problems feature remains readable, including drafts and attribution;
 see [the preservation checks](../docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
-## Open existing work
+<a id="open-existing-work"></a>
+
+## Open a document
 
 1. Run **MRW: Open Document…** and choose an **Original file**. Markdown opens in
    preview; other formats use a registered editor or reader.
@@ -33,8 +35,9 @@ layout and unsaved-buffer recovery under VS Code's control.
 The opening picker lists the current folder's files and subfolders first.
 Titles arrive in batches from YAML or the first heading; unsaved titles take
 precedence. Browse immediately with **Browse for another document…**, enter a
-subfolder, or choose **Search subfolders…** for a wider, bounded search. Folder
-browsing does not change the notes folder used for ID lookup and backlinks.
+subfolder, or choose **Search subfolders…** to search nested folders within the
+[chooser limits](../docs/DOCUMENT_OPENING_REPAIR.md#opening-behavior). Browsing
+does not change the notes folder used for ID lookup and backlinks.
 Partial searches are identified; cancellation preserves the current document.
 
 To read a retained revision, choose a **Saved copy** in the same picker. Its row
@@ -188,8 +191,9 @@ still be opened from a Windows folder.
 Source study is optional and separately invoked. **Study Current Material**
 starts from selected saved text; **Study current material** starts from a retained
 reader passage. It supports entered questions, attempts, attributed companion
-responses and optional FSRS review. **Keep for spaced review** explicitly enrolls a
-question. **Pause / save** and **Resume Study** retain unfinished work.
+responses and optional FSRS review. **Keep for spaced review** enrolls a
+question; saving alone does not. **Pause / save** and **Resume Study** retain
+unfinished work.
 
 The Codex handoff copies the selected source, question and work. Pasted replies
 are reviewed before retention; a supplied author name does not authenticate
@@ -209,7 +213,7 @@ is marked separately.
 - [Proof graphs](../docs/PROOF_GRAPH_WORKFLOW.md): navigate claims, correct
   summaries and simplify the displayed graph. Reference and graph validation
   does not verify the argument.
-- [Obsidian](../docs/OBSIDIAN_WORKFLOW.md): use existing notes in place.
+- [Obsidian](../docs/OBSIDIAN_WORKFLOW.md): open the same notes in both applications.
 - [SagePod/Jupyter](../docs/GETTING_STARTED_WSL_SAGEPOD.md): optional computation
   through a separate notebook kernel.
 
@@ -238,19 +242,22 @@ and [association checks](../docs/VS_CODE_OUTLINE_VALIDATION.md) describe this ru
 
 ### Investigation persistence boundary
 
-The separate bounded API investigation keeps a versioned private pointer and
-exact parent/child record bindings. It does not import Qt recovery state or own
-ordinary editor buffers. Its contract is recorded in the
+An API investigation supports one response and one follow-up. It keeps a
+versioned private pointer and exact parent/child record bindings. It does not
+import Qt recovery state or own ordinary editor buffers. Its contract is in the
 [investigation persistence details](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#investigation-persistence-boundary).
 
 ### Obsidian companion notes
 
-A selected notes folder provides bounded ID lookup and backlinks. Optional
-Obsidian handoffs open the same files in that application. Saved-reader
+MRW looks up note IDs and backlinks within the selected notes folder and the
+[search limits](../docs/READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart).
+Optional Obsidian handoffs open the same files in that application. Saved-reader
 associations are supplied separately. See [the Obsidian guide](../docs/OBSIDIAN_WORKFLOW.md).
 MRW does not discover vaults or synchronize their contents.
 
-### Reproduce the bounded outline host checks
+<a id="reproduce-the-bounded-outline-host-checks"></a>
+
+### Reproduce the outline host checks
 
 The earlier reader runner's pinned source, seed/restart phases and offline
 guards are recorded in the

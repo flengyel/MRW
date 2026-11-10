@@ -14,14 +14,14 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Retain a Stacks Project or Kerodon section | [Published sources](STACKS_WORKFLOW.md) |
 | Distinguish a source item, its revision and a quoted passage | [Source identifiers](SOURCE_IDENTIFIERS.md) |
 | Ask about a passage using Codex or MRW's separate API connector | [AI assistance](READER_AI_WORKFLOW.md) |
-| Inspect and edit an explicit proof outline | [Proof outlines](PROOF_GRAPH_WORKFLOW.md) |
+| Inspect and edit a proof outline | [Proof outlines](PROOF_GRAPH_WORKFLOW.md) |
 | Use SageMath through Jupyter and SagePod | [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md) |
 | Choose companion extensions | [Recommended extensions](RECOMMENDED_EXTENSIONS.md) |
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
 | Prepare to rename a folder containing an MRW workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
 
 Optional [source study](ACTIVE_STUDY_WORKFLOW.md) and
-[proof study](PROOF_STUDY_WORKFLOW.md) support deliberately selected passages,
+[proof study](PROOF_STUDY_WORKFLOW.md) support selected passages,
 questions and saved work. They are separate from ordinary document navigation.
 The document Problems interface was removed in 0.23.3; its
 [earlier workflow](DOCUMENT_LEARNING_WORKFLOW.md) is retained only to explain
@@ -39,7 +39,7 @@ that version and the saved records it produced.
   product aims, concepts and behavior.
 - [Agent instructions](../AGENTS.md), [plan](../CODEX_PLAN.md) and
   [continuation](CODEX_CONTINUATION.md): current development constraints and
-  preceding implementation accounts. Their opening sections identify the
+  reports of earlier implementations. Their opening sections identify the
   current direction; completed or withdrawn prompts do not authorize new work.
 
 ## Reports and earlier implementations

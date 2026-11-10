@@ -1,8 +1,8 @@
 # Contributing to MRW
 
 MRW is an experimental VS Code extension for mathematical study and research.
-Contributions are welcome, especially changes that make existing work easier to
-read, navigate, check and resume.
+Contributions are welcome, especially changes that make mathematical work
+easier to read, navigate, check and resume.
 
 ## Useful contributions
 
@@ -13,11 +13,11 @@ are useful starting points.
 Small fixes can be submitted directly as pull requests. For substantial changes,
 open an issue first describing the mathematical task, the present difficulty and
 the proposed interaction. This applies particularly to new work modes,
-integrations, storage formats, automatic actions and changes to existing command
+integrations, storage formats, automatic actions and changes to command
 behavior. A short concrete example is more useful than a large feature list.
 
 Alternative ways of organizing work are welcome proposals. They should reuse
-existing notes, sources and records where practical. Work modes are a design
+notes, sources and records where practical. Work modes are a design
 possibility, not an established extension API.
 
 ## Reporting a problem
@@ -52,7 +52,7 @@ editor layout. Keep source revisions and attribution distinct from editable
 explanations and corrections. Propose incompatible record changes explicitly.
 
 Follow [Microsoft's VS Code UX guidance](https://code.visualstudio.com/api/ux-guidelines/overview).
-Prefer existing native controls and contextual actions. Basic reading and work
+Prefer native controls and contextual actions. Basic reading and work
 must remain usable without Obsidian, an AI account, Lean or SageMath.
 
 Keep mathematical claims precise. Source preservation, software tests,
@@ -78,6 +78,6 @@ project. The maintainer may request revisions, defer a change or decline it.
 Opening a discussion or submitting a pull request does not guarantee a merge
 or a particular review date.
 
-The project uses the [Apache-2.0 license](LICENSE). Preserve existing notices
+The project uses the [Apache-2.0 license](LICENSE). Preserve notices
 and include source, license and attribution information for third-party
 material added by a contribution.

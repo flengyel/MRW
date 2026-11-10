@@ -1,16 +1,13 @@
 # Mathematical Research Workstation
 
-MRW is an experimental VS Code extension for reading and working with
-mathematics across notes, papers, calculations and proofs. It opens existing
-documents in place, connects them through Contents, links and backlinks, and
-keeps a Return destination while following references. Questions, solutions and
-commentary can stay in the notes that contain them.
+MRW is an experimental VS Code extension for mathematical study and research.
+It opens documents in place, connects them through Contents, links and
+backlinks, and preserves a Return destination while following references.
+Questions, solutions and commentary can stay in their notes.
 
-The aim is to make mathematical work easier to follow and resume, including
-study of unfamiliar subjects and examination of compressed AI-generated
-arguments. The current extension supplies reading, navigation, source retention
-and annotation tools. Broader research resumption and integrated argument
-reconstruction remain planned.
+The extension provides reading, navigation, source retention and annotation
+tools. Resuming work across notes, calculations and proofs, and reconstructing
+compressed AI-generated arguments remain design goals.
 
 **MRW 0.23.6 — first public prerelease.**
 [Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.6/mrw-0.23.6.vsix)
@@ -25,19 +22,21 @@ There is no Marketplace listing. The extension ID is `flengyel.mrw`.
   and the maintainer's Zettel conventions are optional.
 - Navigate headings, ordinary links, WikiLinks and backlinks. WikiLinks support
   scoped paths, headings and supported block IDs.
-- Render mathematical notation and supported note-local macros. Explicitly
-  render TikZ diagrams in Markdown notes or saved reader annotations.
+- Render mathematical notation and supported note-local macros. Render TikZ
+  diagrams on request in Markdown notes or saved reader annotations.
 - Open PDFs through an available reader and return to the referring document.
 - Import a Stacks Project or Kerodon section, retain its source revision and
   exact passages, and add separately attributed annotations.
 - Use SageMath/Jupyter, Lean, LaTeX tools and Codex alongside MRW through their
-  existing VS Code interfaces.
+  VS Code interfaces.
 
 Rendering, retained citations and navigation checks do not establish
 mathematical correctness. Calculations, formal proof checking and review of an
 argument remain distinct activities.
 
-## Open existing work
+<a id="open-existing-work"></a>
+
+## Open a document
 
 1. Choose **MRW: Open Document…**. **Original file** opens the current file in
    place; **Saved copy** opens a retained revision with MRW annotations.
@@ -55,13 +54,14 @@ argument remain distinct activities.
    references. Choosing a folder leaves its notes in place.
 
 The document picker lists the current folder before reading titles. Enter a
-subfolder to browse it, or choose **Search subfolders…** for a wider, bounded
-search. Browsing does not change the notes folder's lookup scope. Opening an
+subfolder to browse it, or choose **Search subfolders…** to search below it.
+The picker reports when search limits leave results incomplete.
+Browsing does not change the notes folder's lookup scope. Opening an
 original does not import it; opening a saved copy does not refresh or overwrite
 its retained source.
 
-PDF opening delegates to a registered reader or an explicit system-reader
-handoff. MRW does not extract PDF text, build PDF Contents or restore PDF pages.
+PDFs open in a registered reader or, on request, the system reader.
+MRW does not extract PDF text, build PDF Contents or restore PDF pages.
 **New Document…** creates Markdown. Ordinary reading requires no problem record
 or exercise form.
 
@@ -120,8 +120,8 @@ Install companions for the tasks that need them:
 | Read PDFs when no suitable viewer is installed | [vscode-pdf](https://marketplace.visualstudio.com/items?itemName=tomoki1207.pdf) | `tomoki1207.pdf` |
 
 LaTeX Workshop needs a TeX distribution; Jupyter connects to a separate kernel.
-These extensions own their respective editing, calculation and checking tasks.
-Keep an existing working previewer or PDF reader. The
+These extensions handle editing, calculation and checking.
+Keep a previewer or PDF reader that works. The
 [companion guide](docs/RECOMMENDED_EXTENSIONS.md) explains host placement and
 preview choices; the PDF extension's cross-host MRW handoff remains unobserved.
 
@@ -130,7 +130,7 @@ preview choices; the PDF extension's cross-host MRW handoff remains unobserved.
 - [Stacks Project and Kerodon](docs/STACKS_WORKFLOW.md): import a section with
   source-qualified identifiers such as `stacks-project:08ZE` and `kerodon:0004`;
   reopen its retained revision offline.
-- [TikZ diagrams](docs/TIKZ_WORKFLOW.md): render explicitly using an isolated
+- [TikZ diagrams](docs/TIKZ_WORKFLOW.md): render on request using an isolated
   compiler, while preserving the note or annotation source.
 - [Proof outlines](docs/PROOF_GRAPH_WORKFLOW.md): inspect claims and linked
   sources, edit attributed summaries and collapse displayed intermediate steps.
@@ -148,8 +148,8 @@ Zettelkasten conventions.
 For deliberate practice on a selected passage, **Study Current Material** offers
 questions, saved attempts, attributed companion replies and opt-in review using
 FSRS. **Work through a proof…** supports a separate passage-and-outline handoff.
-These tools are explicitly invoked; opening or following notes does not create
-a study. Earlier document-linked work remains readable after removal of the
+Opening or following notes does not create a study. Earlier document-linked
+work remains readable after removal of the
 document Problems interface.
 
 [Source-study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
@@ -165,11 +165,12 @@ and attributed annotations in a source store associated with the workspace.
 Source-study checkpoints and interaction history live separately in private
 VS Code workspace storage on the host. They can include drafts, submissions,
 replies, exact source snapshots and reported outcomes or effort. **Inspect Study
-History** shows a local report; **Export Study History…** exports explicitly
-selected sessions. No unrelated application activity or passive comprehension
-is recorded. Scheduling and effort reports do not establish a learning benefit.
+History** shows a local report; **Export Study History…** exports selected
+sessions. MRW does not record unrelated application activity or infer
+comprehension from it. Scheduling and effort reports do not establish a
+learning benefit.
 
-Companion handoffs use explicit clipboard transfers of the selected material.
+Companion handoffs require copying and pasting the selected material.
 The separate API workflow sends only after its request preview and Send action.
 Pasted attribution does not authenticate a reply or verify its mathematics.
 
@@ -191,7 +192,7 @@ Source-study state has no cross-machine migration interface.
 Contributions can improve navigation, accessibility, documentation or another
 specific obstacle encountered during mathematical work. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports, focused pull requests and
-discussion of larger proposals. Preserve existing notes, source attribution and
+discussion of larger proposals. Preserve notes, source attribution and
 unfinished work; follow the native VS Code interface conventions.
 
 ## Project documents and license
@@ -204,8 +205,7 @@ unfinished work; follow the native VS Code interface conventions.
 [AGENTS.md](AGENTS.md), the [current plan](CODEX_PLAN.md) and
 [continuation](docs/CODEX_CONTINUATION.md) guide development. The
 [changelog](CHANGELOG.md) and [earlier extension details](docs/VS_CODE_DEVELOPMENT_HISTORY.md)
-retain the preceding implementation accounts, including the separate Qt/CLI
-prototype.
+describe earlier versions, including the separate Qt/CLI prototype.
 
 MRW code is Copyright 2026 F. Lengyel, [Apache-2.0](LICENSE). Bundled dependencies
 retain their own licenses and notices. Stacks fixtures retain

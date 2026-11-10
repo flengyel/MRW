@@ -38,16 +38,16 @@ revision.
 reference identifies its source revision and range, independently of a mutable
 display title or later selection.
 
-**Note / Zettel:** a note is a document. A Zettel uses the existing
-[note convention](https://github.com/flengyel/Zettel), including a stable ID and
-editable title. It need not be opened in Obsidian; not every Markdown file in
-an Obsidian vault follows this convention.
+**Note / Zettel:** a note is a document. The example
+[Zettel convention](https://github.com/flengyel/Zettel) uses a stable ID and
+editable title. This convention is optional, as is Obsidian; not every Markdown
+file in an Obsidian vault follows it.
 
 **Research question:** the mathematical question under investigation. It may
 already be written in a note, with ordinary links to related work. The term
 requires no MRW registration object or duplicate entry. Research resumption
-first recovers existing documents, supported locations and unfinished work;
-broader recovery remains planned. The existing R3 investigation remains a
+first recovers documents, supported locations and unfinished work;
+broader recovery remains planned. The R3 investigation remains a
 bounded parent/child model exchange.
 
 **Study question:** a task used to test or develop comprehension of particular

@@ -1,6 +1,6 @@
 # Documents, research continuity, and argument reconstruction
 
-This design starts with existing mathematical work: open a document, follow its
+This design starts with mathematical work: open a document, follow its
 references, compare passages, add an explanation or calculation, and return to
 unfinished work. The current implementation is MRW 0.23.5; broader recovery and
 integrated argument reconstruction remain proposed work.
@@ -34,9 +34,9 @@ These rules govern current and future implementation:
    requiring duplicate entry.
 
 Do not replace Problems with a renamed **Research Question** registration system.
-Research resumption first recovers existing documents, supported locations and
+Research resumption first recovers documents, supported locations and
 unfinished work. It does not require a new question record, title, summary,
-next-action form or Research view. Existing notes and links supply the work;
+next-action form or Research view. Notes and links supply the work;
 VS Code owns unsaved buffers and their recovery. Preserve saved MRW records for
 access to earlier work, without requiring their use for ordinary reading.
 These rules supersede earlier prompts and roadmap requirements that conflict
@@ -48,8 +48,8 @@ use; no further feature increment is selected by this correction.
 MRW is a hub for doing and resuming mathematical research. It connects a
 question to documents, attempts, calculations, proofs, explanations, checking
 evidence, and the next action. Reading and learning belong within this work.
-Work can begin with an unfinished question or calculation, without an existing
-solution, a source passage, an AI response, or a comprehension exercise.
+Work can begin with an unfinished question or calculation, without a solution,
+a source passage, an AI response, or a comprehension exercise.
 
 A central use is reconstructing a compressed mathematical argument, including
 an LLM-generated solution: identify its assumptions, definitions, intermediate
@@ -64,7 +64,7 @@ mathematics, let the reader work, offer pertinent tests of comprehension, and
 remember where work stopped. Speed is not a performance target. A feature is
 valuable when it contributes to that interaction or makes research resumable.
 
-Design first for Florian's existing mathematical work and tools. Keep the
+Design first for Florian's mathematical work and tools. Keep the
 implementation usable with ordinary files and folders, without Obsidian,
 Zettel conventions, a model account, Lean, or SageMath as entry requirements.
 No multi-user product framework is needed for this sequence.
@@ -78,7 +78,7 @@ No multi-user product framework is needed for this sequence.
 | Source | A document or other material used as a reference for a particular question or claim. This is a role, not a file format. |
 | Saved source | An explicitly retained source revision, with reader selections and annotations where present. The Open Document picker labels this choice **Saved copy**. |
 | Passage | A selected part of a document or saved source; retained references identify the exact revision and range. |
-| Note / Zettel | A note is a document. A Zettel follows the existing Zettel note convention; that convention is optional. |
+| Note / Zettel | A note is a document. The example [Zettel convention](https://github.com/flengyel/Zettel) uses a stable ID and editable title; that convention is optional. |
 | Research question | The mathematical question under investigation; it may already be written in an ordinary note. This term does not require an MRW registration object or recall item. |
 | Study question | A task used to test or develop comprehension of particular material. Keeping it for scheduled review remains explicit. |
 | Proof outline | A condensed account of an argument. A proof graph is one representation of its claims and inferences. Neither term names a document's contents list. |
@@ -92,7 +92,7 @@ they have their ordinary meanings.
 
 The delivered 0.19.2 GUI patch changed visible labels, help, welcome text and
 current workflow instructions. It preserved command IDs, view IDs, settings keys,
-serialized records, stored references, existing filenames and note bytes.
+serialized records, stored references, filenames and note bytes.
 In particular, `mrw-outline:v1` remains a compatible reference format.
 The exact first-patch label map and implementation boundaries are in
 [the Codex task](CODEX_DOCUMENT_WORKFLOW_PROMPT.md).
@@ -103,9 +103,11 @@ ordinary links, scoped WikiLinks and retained-source references; it does not
 extract a contents tree from a PDF. The host's **File: Open File…** remains
 available alongside MRW's commands.
 
-## Existing documents and optional integrations
+<a id="existing-documents-and-optional-integrations"></a>
 
-Opening a document means working with the selected existing file. Importing or
+## Documents and optional integrations
+
+Opening a document means working with the selected file. Importing or
 retaining a source revision is a separate action. No conversion into an MRW
 overview, move into private storage, or new note template is required merely
 to read a file. Ordinary files remain under VS Code's editing, saving, undo,
@@ -115,28 +117,30 @@ external-change handling and recovery. MRW's retained records remain separate.
 | --- | --- |
 | Markdown | Open in place; edit or preview; navigate headings and supported links through Contents. Note-local macros and explicitly rendered TikZ diagrams stay separate from the original text. |
 | PDF | Hand off to an available reader. MRW does not extract text or Contents, or restore a PDF page. |
-| Existing Zettel | Open the same Markdown file; recognize its ID and title; resolve supported links within a selected notes folder. Obsidian embeds remain unsupported in MRW. |
+| Zettel | Open the same Markdown file; recognize its ID and title; resolve supported links within a selected notes folder. Obsidian embeds remain unsupported in MRW. |
 | Notebook / SageMath | Use VS Code/Jupyter with SagePod. Notebook editing and execution belong to that integration; MRW does not restore live kernel state. |
 | Lean / LaTeX / code | Use the relevant host extension or tool. Opening a file does not check a proof, compile a manuscript or run code. |
-| Handwritten work | Keep a link to the existing scan, image or PDF in a note and open it with an available viewer. MRW supplies no handwriting recognition. |
+| Handwritten work | Keep a link to the scan, image or PDF in a note and open it with an available viewer. MRW supplies no handwriting recognition. |
 
 Opening, reading, extracting selected text, restoring an exact position, and
 running a computation are different capabilities. Detect what the host exposes
 and describe missing operations locally. A filename supplies neither PDF text
-nor notebook kernel state. Prefer existing host integrations over new readers,
+nor notebook kernel state. Prefer host integrations over new readers,
 editors, kernel managers or tool runtimes. Opening/resuming work starts no
 container, executes no cells, invokes no checker, and sends no model request.
 
-An explicitly chosen external document or notes folder needs a deliberate
-navigation path. Implement it without weakening the private-store, workspace,
-trust and exact-reference checks used for retained research records. Record a
-host-appropriate file URI; reopening in another workspace or on another machine
+Support navigation to a selected external document or notes folder without
+weakening the private-store, workspace, trust and exact-reference checks used
+for retained research records. Record a host-appropriate file URI; reopening
+in another workspace or on another machine
 must not guess a replacement file or private store. Do not require moving a
 Windows-backed vault into the WSL repository to read it.
 
-### Existing Zettelkasten
+<a id="existing-zettelkasten"></a>
 
-Use the existing vault as Florian's working note collection. The public
+### Zettelkasten
+
+Use Florian's vault as the working note collection. The public
 `flengyel/Zettel` repository contains its specification and tools; it is not the
 private vault. Notes can be used without the Obsidian application.
 
@@ -180,25 +184,25 @@ resume reading. Current Reopen Document and Return behavior is described in the
 
 Do not introduce Research Question registration, a question-object hierarchy,
 a Research view or required title/summary/next-action fields as the default
-resumption path. An existing outline or linked note can already organize the
-mathematics. A conclusion, remaining gap or intended next action may stay as
-ordinary prose at its existing location; do not request a second copy in a form.
+resumption path. An outline or linked note can organize the mathematics. A
+conclusion, remaining gap or intended next action may stay as ordinary prose
+where written; do not request a second copy in a form.
 
-Preserve existing private studies, retained annotations and history so previous
+Preserve private studies, retained annotations and history so previous
 work remains accessible. Source retention continues to serve exact citations;
 it is separate from opening a live note. Keep the bounded R3 model exchange's
 contract and its records. Resumption does not require a model call, exercise,
 new record schema, project database or automatic classification of notes.
 
 Keep a calculation's saved output separate from an assertion that its kernel
-state has been reconstructed. A check belongs to the input revision it actually
-checked. Use the host and existing navigation/persistence services first. Add a
+state has been reconstructed. A check belongs to the input revision it checked.
+Use the host and navigation/persistence services first. Add a
 control or saved navigation aid only after ordinary use demonstrates a specific
 failure to recover work, and keep it free of duplicate mathematical entry.
 
 ## Reconstructing a compressed solution
 
-The intended integrated workflow uses the existing source reader, notes,
+The intended integrated workflow uses the source reader, notes,
 companion exchange and checking tools. Its components are available separately;
 MRW does not yet automate or restore the complete sequence:
 
@@ -222,19 +226,19 @@ MRW does not yet automate or restore the complete sequence:
 A proof graph is optional. The workflow does not require full formalization,
 complete reconstruction of every step, or a positive correctness verdict.
 Optional recall should concern the material currently relevant. **Keep for
-review** explicitly enrolls a study question; reading a document does not.
-Preserve the existing FSRS, effort-report and assistance distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
+spaced review** enrolls a study question; reading a document does not.
+Preserve the FSRS, effort-report and assistance distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 
 ## Delivered work and possible next steps
 
 | Increment | Deliverable | Concrete completion evidence |
 | --- | --- | --- |
-| 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | Existing create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
-| 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
+| 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | The create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
+| 2. Documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
 | 3. Document Problems | Withdrawn at the user’s request in 0.23.3 | Creation routes removed; earlier records and drafts remain readable. |
 | 4. Reading repairs, 0.23.5 | Delivered: exact heading/block WikiLinks, note macros, explicit TikZ rendering, progressive titles and saved Markdown selections | [Repair report and limits](READING_REPAIRS.md). |
 | 5. Broader resumption | Proposed: recover additional locations and unfinished work without question registration | Resume the same notes and drafts with their links and surrounding work preserved; add only a demonstrated missing recovery action. |
-| 6. Integrated reconstruction | Proposed: one compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
+| 6. Integrated reconstruction | Proposed: one compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use the study/history mechanisms. |
 
 Choose future changes from obstacles encountered in ordinary mathematical use;
 the table is not a queue of required features. Increments 1, 2 and 4 are
@@ -245,22 +249,22 @@ authorizes no new question registry, storage rewrite, outline format, scheduler
 or dashboard.
 
 Evaluate practical continuity, explanatory help and learning separately. Extend
-the existing local history for explicit research open/resume, document-link
+the local history for explicit research open/resume, document-link
 navigation, attempts, checking actions and failed operations, including software
 and input revisions. A model proposal, reader report, observed event and derived
 estimate remain distinguishable. Use the history to adapt the current session
 and choose later improvements. Time away and tab switching alone establish no
 cognitive-load or comprehension result. Do not create a second telemetry system.
 
-Use a supplied mathematical example and existing notes for read-only opening;
+Use a supplied mathematical example and notes for read-only opening;
 new work has an explicit destination. Use disposable copies for destructive
 checks. Missing native-host access is a reported limit, not a requirement for
-another manual study ceremony. Automated checks demonstrate mechanics; genuine
-use demonstrates whether work became easier to resume or understand.
+a manual study procedure. Automated checks demonstrate mechanics; mathematical
+use demonstrates whether the software makes work easier to resume or understand.
 
 ## Interface guidance and scope
 
-The bundled tutorial is part of each increment. Lead with opening existing work,
+The bundled tutorial is part of each increment. Lead with opening documents,
 then navigating, retaining a useful passage when needed, working through a step,
 and saving/resuming. Keep optional graphs and setup/recovery in linked guides.
 Describe only delivered commands and show the active extension build in help;
@@ -278,7 +282,7 @@ Microsoft. Consistent terminology applies the notation and reader-orientation
 principles in Knuth, Larrabee and Roberts, *Mathematical Writing*, sections 1 and
 13 ([Stanford text](https://www-cs-faculty.stanford.edu/~knuth/papers/cs1193.pdf)).
 
-Keep one VS Code extension and the existing Python services on the workspace
+Keep one VS Code extension and the Python services on the workspace
 host. This sequence adds no frontend rewrite, universal knowledge graph,
 autonomous research agent, new cognitive simulator or project-management suite.
 Preserve the delivered 0.19.1 reliability repairs. Repository publication,

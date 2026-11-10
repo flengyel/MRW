@@ -15,11 +15,10 @@ VS Code is the active frontend; the standalone Qt application is another
 client of the same independent services. Host text documents, undo stacks, and
 document recovery are editor responsibilities, not new domain records. Research
 records retain their identities and evidence boundaries across frontends.
-This model describes intended entities and contracts, not a claim that every
-entity has an implemented VS Code command; consult README and CODEX_PLAN for
-frontend-specific delivery status.
+This model includes entities without an implemented VS Code command; consult
+README and CODEX_PLAN for delivery status by frontend.
 
-The deployment direction retains one extension over the existing Python core
+The deployment direction retains one extension over the Python core
 in the workspace environment, through standard local Linux, WSL2 or Remote SSH
 to Linux hosts. The backend requires Python 3.11+. Windows may supply the editor
 UI while Linux owns backend execution and filesystem operations; native Windows
@@ -72,12 +71,12 @@ result of task evidence; formal material made explicitly optional.
 
 The implemented Obsidian companion uses small private mutable navigation
 associations, separate from source outlines, retained quotations, attributed
-annotations and all warrant records. Each association names an exact existing
-scoped outline/region reference, an explicit Obsidian open URL and a short label.
+annotations and all warrant records. Each association names an exact
+scoped outline/region reference, an Obsidian open URL and a short label.
 It stores no note prose or vault copy. Replacing/removing the association does
-not alter either endpoint. A note's immutable Zettel ID and editable title keep
-their existing roles; no MRW conversion is required. Workspace/remote routing
-is separate from stable target identity. A navigation link establishes no
+not alter either endpoint. A note keeps its immutable Zettel ID and editable
+title; no MRW conversion is required. Workspace/remote routing is separate from
+stable target identity. A navigation link establishes no
 dependency, verification or human judgment. See
 [the companion contract](docs/OBSIDIAN_WORKFLOW.md).
 
@@ -89,9 +88,9 @@ folders. Relocation preserves immutable record bytes, source provenance, spans
 and evidence distinctions. Mutable aliases resolve required absolute record
 locators; they do not amend earlier evidence. A copied store becomes writable
 only after complete validation and explicit local adoption. Journals, locks and
-runtime/UI state remain host-local. This is a bounded navigation/persistence
-protocol, not a mathematical status, distributed transaction or synchronization
-service. See [the storage contract](docs/ARTIFACT_STORAGE.md).
+runtime/UI state remain host-local. This protocol handles navigation and
+persistence; it does not confer mathematical status or provide distributed
+transactions or synchronization. See [the storage contract](docs/ARTIFACT_STORAGE.md).
 
 For a body of mathematics under study, the model must represent:
 

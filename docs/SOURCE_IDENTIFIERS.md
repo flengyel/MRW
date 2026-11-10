@@ -1,15 +1,14 @@
 # Source identity, revisions and exact passages
 
 A stable identifier names an item in a source. It does not identify an immutable
-revision of that item's contents. These are separate fields in subsequent Codex
-tasks and implementations:
+revision of that item's contents. Retained references distinguish four fields:
 
 | Field | Example | Meaning |
 | --- | --- | --- |
 | Qualified item ID | `stacks-project:08ZH`, `kerodon:0004` | Source namespace and source-local tag |
 | Content revision | Retained SHA-256; Stacks Project also retains a Git commit | The exact acquired bytes |
 | Passage | Outline/region identity and scalar start/end range | The exact quotation within those bytes |
-| Private scope | Existing workspace/store identity | Authority to resolve retained material |
+| Private scope | Workspace/store identity | Authority to resolve retained material |
 
 Keep the qualified identifier intact in document links, backlinks, study/research
 records, handoffs and resumption. Never collapse `kerodon:0004` and
@@ -20,7 +19,7 @@ the exact quoted span.
 ## Navigation and retention
 
 `[[kerodon:0004]]` and canonical website links identify current published items.
-Following them explicitly opens the official page in the browser. They make no
+Following them opens the official page in the browser. They make no
 promise about content revision. No source is acquired merely to resolve a link.
 
 New retained published references include the qualified ID:
@@ -29,7 +28,7 @@ New retained published references include the qualified ID:
 mrw-outline:v2/kerodon:000A/<scope>/<outline>/<source-sha256>/<region>/<start>-<end>
 ```
 
-The hash and exact scalar range retain their existing meaning. Outline-level
+The hash and exact scalar range retain their meaning. Outline-level
 links omit the region/range. A prefix cannot excuse a hash mismatch or authorize
 another private scope. A canonical URL cannot substitute for a failed retained
 reference. Changing a published page creates a distinct retained snapshot;
@@ -60,7 +59,7 @@ structure fails rather than inventing a complete section. Live page comments
 and navigation are excluded from mathematical passages; the original response
 remains retained unchanged.
 
-nLab has no implemented importer in this release. Inspect its actual format,
+nLab has no implemented importer in this release. Inspect its format,
 identifiers, revision mechanism and rights before adding an adapter. Do not infer
 that a similar rendered page shares Gerby's source or acquisition contract.
 

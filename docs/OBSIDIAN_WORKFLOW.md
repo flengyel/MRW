@@ -130,7 +130,7 @@ paths when working in WSL.
 
 ## Link a note to a source or passage
 
-1. In Obsidian, open the existing note and run **Copy Obsidian URL for current
+1. In Obsidian, open the note and run **Copy Obsidian URL for current
    file**. The URL has the form
    `obsidian://open?vault=Zettelkasten&file=NOTE_ID` and contains no note prose.
 2. In MRW's saved-source reader, expand **Source details and tools** and, for a
@@ -151,13 +151,13 @@ range has since changed.
    **Whole source**, or **Copy link to this passage** under **This passage**.
    Alternatively run **MRW: Copy Source or Passage Link…** and select a target.
 2. Paste and save the Markdown link in an Obsidian note, for example under
-   References.
+   a Research heading.
 3. Click the link to open the saved reader. A passage link also selects its
    exact retained range in a read-only source view.
 
 **Copy link** supplies a destination from the note into MRW. **Link an Obsidian
-note…** supplies a destination from MRW back to the note. Each action is explicit;
-copying one does not create the other.
+note…** supplies a destination from MRW back to the note. Creating one link
+does not create the other.
 
 Whole-source actions address the entire saved source. **This passage** addresses
 its current range. **Earlier linked passage** preserves the range from an older

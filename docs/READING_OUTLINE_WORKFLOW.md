@@ -1,6 +1,6 @@
 # Documents, Contents and saved sources — 0.23.5
 
-Open an existing note or paper with **MRW: Open Document…**. Markdown opens in
+Open a note or paper with **MRW: Open Document…**. Markdown opens in
 VS Code's preview, and **Contents** lists its headings and links. The original
 file stays in place. Reading, following links and returning require no import
 or problem record.
@@ -119,9 +119,9 @@ Ordinary non-Markdown attachments do not consume that entry budget. Lookup
 excludes `.obsidian`, `.trash`, `.git`, `.lake`, `node_modules`, `.venv` and
 `__pycache__`. Cancellation, unreadable files and exceeded limits produce
 incomplete results, not a claim that no links exist. Windows-mounted folders
-use bounded Windows filename enumeration when available, followed by the
-same scope, duplicate-ID and file-content checks. No persistent filename cache
-or background synchronization is created.
+use Windows filename enumeration within these limits when available, followed
+by the same scope, duplicate-ID and file-content checks. No persistent filename
+cache or background synchronization is created.
 
 Following a link does not save a dirty buffer. Return locations follow edits
 outside their captured occurrences; an overlapping edit blocks Return until
@@ -129,7 +129,7 @@ exact undo restores it. A failed or superseded follow preserves the previous
 successful origin.
 
 The notes folder, selected document and return location persist in this
-workspace. **Reopen Document** explicitly opens the last opened or followed
+workspace. **Reopen Document** opens the last opened or followed
 file and restores its last exact Markdown selection after restart. This covers
 source-editor selections and followed heading/block locations, not native
 preview scrolling. Activation does not open a document automatically. A missing
@@ -170,7 +170,7 @@ available, and qualified identifier. Source and storage details stay under
 **Source details and tools**. Hover or Tab-focus reader controls for help;
 Escape dismisses it. Destination labels remain visible without hovering.
 Annotations use **Save annotation** and remain separate from the source text.
-Copying a Markdown link does not copy its private retained target. Existing
+Copying a Markdown link does not copy its private retained target.
 `mrw-outline:v1` references remain valid.
 
 Optional source-study and proof tools have their own
@@ -181,7 +181,7 @@ and automatic argument reconstruction remain unimplemented.
 ## Navigation repair — 0.23.1
 
 A new destination uses the invoking preview group; an already-open document
-keeps its existing group. An unrelated text editor in another group is not
+keeps its group. An unrelated text editor in another group is not
 replaced. Note and backlink origins are checked again after asynchronous
 opening, and backlink scope is checked before loading. Changed or redirected
 occurrences require a new selection. See the

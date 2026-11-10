@@ -1,6 +1,6 @@
 # Companion software and recommended extensions for MRW
 
-Use VS Code's existing editing and preview tools alongside MRW. Install a
+Use VS Code's editing and preview tools alongside MRW. Install a
 companion for a specific task: writing LaTeX, running a SageMath notebook,
 checking Lean proofs or using another PDF reader. Ordinary Markdown navigation
 and retained-source reading work without these companions.
@@ -24,10 +24,10 @@ or its saved-source reader.
 | --- | --- | --- |
 | [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) — `James-Yu.latex-workshop` | Recommended for manuscript editing, compilation, PDF preview and source/PDF navigation. | A working TeX distribution and build recipe on its execution host. |
 | [Markdown Preview Enhanced](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced) — `shd101wyy.markdown-preview-enhanced` | Optional richer Markdown preview, diagrams and export. Open it with its own named preview command. | Some export and diagram features need external tools. It does not automatically replace MRW's native preview route. |
-| [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) — `ms-toolsai.jupyter` | Edit notebooks and connect to the existing SagePod Jupyter server. | The SageMath kernel supplied by [SagePod](https://github.com/flengyel/sagepod); the extension is not a kernel. |
+| [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) — `ms-toolsai.jupyter` | Edit notebooks and connect to the SagePod Jupyter server. | The SageMath kernel supplied by [SagePod](https://github.com/flengyel/sagepod); the extension is not a kernel. |
 | [SageMath Enhanced](https://marketplace.visualstudio.com/items?itemName=Lov3.sagemath-enhanced) — `Lov3.sagemath-enhanced` | SageMath language support used by the documented notebook setup and by `.sage` files. | Follow the [SagePod workflow](GETTING_STARTED_WSL_SAGEPOD.md). **Run SageMath File** is a separate execution route. |
 | [Lean 4](https://marketplace.visualstudio.com/items?itemName=leanprover.lean4) — `leanprover.lean4` | Edit formal proofs and inspect goals with Lean. | The project's Lean toolchain. Opening a file from MRW does not itself record a formal check in MRW. |
-| [vscode-pdf](https://marketplace.visualstudio.com/items?itemName=tomoki1207.pdf) — `tomoki1207.pdf` | An optional viewer for standalone PDFs when no suitable reader is installed. | MRW's handoff between the WSL workspace host and this local UI extension remains unobserved. Retain an existing working viewer. |
+| [vscode-pdf](https://marketplace.visualstudio.com/items?itemName=tomoki1207.pdf) — `tomoki1207.pdf` | An optional viewer for standalone PDFs when no suitable reader is installed. | MRW's handoff between the WSL workspace host and this local UI extension remains unobserved. Keep a working viewer. |
 
 A PDF viewer supplies reading; MRW currently provides file-level PDF opening and
 return, without PDF Contents, text extraction or page restoration. See
@@ -35,7 +35,7 @@ return, without PDF Contents, text extraction or page restoration. See
 
 ### LaTeX Workshop and the TeX installation
 
-Keep an existing working LaTeX Workshop configuration. Its
+Keep a working LaTeX Workshop configuration. Its
 [installation guide](https://github.com/James-Yu/LaTeX-Workshop/wiki/Install)
 describes TeX Live, TinyTeX and MiKTeX. The default `latexmk` recipe needs Perl;
 MiKTeX does not bundle Perl.
@@ -69,14 +69,16 @@ Use Microsoft's [WSL](https://marketplace.visualstudio.com/items?itemName=ms-vsc
 [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
 (`ms-vscode-remote.remote-ssh`) for a Linux SSH host.
 
-Install companions from the intended connected window's Extensions view.
+Install companions from the connected window's Extensions view.
 VS Code normally chooses the appropriate Local or WSL/SSH location; inspect
 those groups rather than forcing every extension into WSL.
 [Microsoft's guidance](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains placement. Each companion has its own VS Code and external-tool
 requirements.
 
-## Identify an existing Markdown previewer
+<a id="identify-an-existing-markdown-previewer"></a>
+
+## Identify the active Markdown previewer
 
 In Extensions (**Ctrl+Shift+X**), search `@enabled markdown` and inspect the name,
 publisher, identifier and version in the Local and WSL/SSH groups. Search

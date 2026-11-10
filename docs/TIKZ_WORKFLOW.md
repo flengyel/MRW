@@ -22,8 +22,8 @@ not a check of its mathematical content.
 
 3. Choose **Render diagram** below the block. The result appears above the
    action; **TikZ source** keeps the code available.
-4. After changing the code, render the new block explicitly. **Render diagram
-   again** recompiles an existing view.
+4. After changing the code, render the block again. **Render diagram
+   again** recompiles a rendered block.
 
 The action checks that the note and block still match the preview before
 compiling. If the note has changed, use the refreshed preview. Ordinary-note
@@ -51,8 +51,8 @@ curves, with no runtime download.
 A bare drawing environment can omit `\begin{document}` and `\end{document}`.
 A complete body can include preamble commands such as `\usepackage{pgfplots}`
 when the package is installed. Do not add another document class. Use one PDF
-page per block; split multipage output into separate fences. Close each fence
-explicitly. Code in fences with other language labels remains uncompiled.
+page per block; split multipage output into separate fences. Include the closing
+fence. Code in fences with other language labels remains uncompiled.
 
 The same fenced syntax is used by Obsidian's TikZJax plugin, but MRW does not
 install or invoke that plugin. Ordinary-note mathematical macros are read from

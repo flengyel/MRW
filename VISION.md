@@ -22,24 +22,24 @@ must remove a demonstrated obstacle without duplicate entry.
 
 Document navigation and optional note integrations are delivered. The document
 Problems subsystem was withdrawn in 0.23.3. Do not replace it with Research
-Question registration: resumption first recovers existing documents, supported
+Question registration: resumption first recovers documents, supported
 locations and unfinished work. A new record, title, summary/next-action form or
 Research view is not an entry requirement. The
 [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) records these
 rules. Future increments follow obstacles encountered in ordinary mathematical
 use. Obsidian and the Zettel note convention remain optional.
 
-The rapid-learning-console idea supplies an interaction, not a feature quota:
-present mathematics, support an attempt, test comprehension where useful, and
-retain the work for continuation. Frequent local questions and light review
-belong within research and study. They do not turn every research question into
+The rapid-learning-console idea guides the interaction: present mathematics,
+support an attempt, test comprehension where useful, and retain the work for
+continuation. Frequent local questions and light review belong within research
+and study. They do not turn every research question into
 a recall item or make a quiz the price of returning to work.
 
 Track cognitive load through task-linked reports of mental effort and separate
-observations of assistance, outcomes, interruptions and navigation. Record
-enough meaningful interaction detail to adapt the present session and evaluate
-later MRW versions. Preserve the distinction between what was observed,
-reported, assessed or inferred. No single score establishes understanding.
+observations of assistance, outcomes, interruptions and navigation. Use those
+records to adapt the present session and evaluate later MRW versions. Preserve
+the distinction between what was observed, reported, assessed or inferred.
+No single score establishes understanding.
 
 The optional source-study tools record attempts, reported effort, review and
 local history; see their [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
@@ -50,7 +50,6 @@ evidence and limits behind these proposals.
 Spacing has support in mathematics; retrieval findings are broader and less
 conclusive for mathematics specifically. CHREST informs questions about
 expertise and presentation without becoming a prerequisite for implementation.
-The study workflow distinguishes delivered behavior from unobserved benefits.
 Preserve the 0.19.1 repairs while integrating the wider research workflow.
 
 The [domain model](DOMAIN_MODEL.md) defines entities and invariants, the
@@ -58,23 +57,22 @@ The [domain model](DOMAIN_MODEL.md) defines entities and invariants, the
 [implementation plan](CODEX_PLAN.md) records delivery and priorities.
 
 The active frontend is a VS Code extension over independent research services;
-the standalone Qt application remains available. The purpose and evidence
-distinctions here are independent of that choice. VS Code supplies ordinary
+the standalone Qt application remains available. VS Code supplies ordinary
 editing and document lifecycle; the extension contributes research continuity
 and explicit record operations. This vision states intended benefits, not
 feature parity between frontends or observed mathematical usefulness.
 
 Simplicity and interoperability guide deployment: keep one VS Code extension
-and the existing Python core, running the backend in the workspace environment.
+and the Python core, running the backend in the workspace environment.
 Use the host's standard local Linux, WSL2 and Remote SSH mechanisms. Windows
-VS Code connected to Linux is an intended arrangement. Python 3.11+ is an
-explicit workspace-host requirement; ordinary reading and outlining need no
-Lean, SageMath, container or model provider. These remain optional integrations.
+VS Code connected to Linux is an intended arrangement. Python 3.11+ is required
+on the workspace host; ordinary reading and outlining need no Lean, SageMath,
+container or model provider. These remain optional integrations.
 Native Windows backend portability is deferred. Scoped installed-VSIX checks
 pass with WSL Debian and Remote SSH to a Raspberry Pi 5 on Debian 12 ARM64;
 other Linux SSH hosts, local Linux desktop use and other Pi OS/ARM configurations
 remain separate validation targets.
-Deployment intent is distinct from the actual configurations recorded in the
+Deployment intent is distinct from the tested configurations recorded in the
 [validation report](docs/VS_CODE_OUTLINE_VALIDATION.md); this direction adds no
 new runtime, remote service or record semantics.
 
@@ -90,7 +88,7 @@ unfinished work. Entering unfamiliar subjects and locating prerequisites belong
 alongside calculations, proof attempts, manuscripts and recorded checks.
 Reducing repeated reconstruction of research context is a central objective.
 The distinctions between justification, appropriate use, and understanding
-apply to both existing literature and human- or AI-generated work.
+apply to both the literature and human- or AI-generated work.
 
 * Learning a large body of mathematics requires orientation, mathematical work,
   integration, and retention.
@@ -148,7 +146,7 @@ to complete a description of what is supposedly understood.
 ### From paper to research computing
 
 MRW should ease a gradual transition from blackboard and pen-and-paper work to
-research computing. Begin with the mathematician's existing question, source
+research computing. Begin with the mathematician's question, source
 and handwritten work. Ordinary editable notes, precise citations and an explicit
 place to resume supply continuity. When computation helps, keep the code, inputs,
 outputs and interpretation together so the calculation can be inspected and
