@@ -1,18 +1,17 @@
-# VISION.md
+# Vision
 
-## Implemented study interaction — 0.18.0
-
-The first source-focused attempt, effort, review and local-history interaction
-is implemented; see [workflow](docs/ACTIVE_STUDY_WORKFLOW.md). It establishes an
-instrumentation baseline. Learning benefit, an individual cognitive-load model
-and causal release comparisons remain hypotheses requiring observations.
+MRW is being developed to help read, investigate and return to mathematics across
+notes, sources, calculations and proofs. This document explains its goals and the
+evidence needed to assess them. The [README](README.md) describes current
+capabilities; the [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md)
+connects those capabilities to proposed work.
 
 ## Current product direction — 2026-11-08
 
-MRW is a hub for doing and resuming mathematical research. Connect ongoing
-questions to ordinary documents, notes, calculations, proofs, checking evidence
-and a next action. Reconstructing compressed arguments, including LLM-generated
-solutions, is a central workflow: expose assumptions and intermediate steps,
+MRW should connect ongoing mathematical questions to ordinary documents,
+notes, calculations, proofs, checking evidence and unfinished work.
+Reconstructing compressed arguments, including LLM-generated solutions, is a
+central goal: expose assumptions and intermediate steps,
 locate cited results, develop examples, check claims, and preserve gaps and
 corrections. Research can start before a source passage or model response exists.
 
@@ -42,17 +41,21 @@ enough meaningful interaction detail to adapt the present session and evaluate
 later MRW versions. Preserve the distinction between what was observed,
 reported, assessed or inferred. No single score establishes understanding.
 
-The [study design](docs/ACTIVE_STUDY_DESIGN.md) governs that component;
-the [research review](docs/LEARNING_RESEARCH.md) supplies its evidence and limits.
+The optional source-study tools record attempts, reported effort, review and
+local history; see their [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
+[design](docs/ACTIVE_STUDY_DESIGN.md). Their implementation does not establish a
+learning benefit, an individual cognitive-load model or a causal comparison
+between releases. The [research review](docs/LEARNING_RESEARCH.md) supplies the
+evidence and limits behind these proposals.
 Spacing has support in mathematics; retrieval findings are broader and less
 conclusive for mathematics specifically. CHREST informs questions about
 expertise and presentation without becoming a prerequisite for implementation.
 The study workflow distinguishes delivered behavior from unobserved benefits.
 Preserve the 0.19.1 repairs while integrating the wider research workflow.
 
-Why Theorem Terminal exists. Companion to `DOMAIN_MODEL.md` (entities and
-invariants), `UX_SPEC.md` (the human workflow), and `CODEX_PLAN.md` (staged
-implementation).
+The [domain model](DOMAIN_MODEL.md) defines entities and invariants, the
+[UX specification](UX_SPEC.md) describes interactions, and the
+[implementation plan](CODEX_PLAN.md) records delivery and priorities.
 
 The active frontend is a VS Code extension over independent research services;
 the standalone Qt application remains available. The purpose and evidence
@@ -98,7 +101,7 @@ apply to both existing literature and human- or AI-generated work.
 * Human- or AI-generated mathematics may be justified without being fully
   understood. It remains available for appropriate use and further study;
   complete conceptual understanding is not a condition of acceptance.
-* Theorem Terminal may request task-specific assistance from a configured model;
+* MRW may request task-specific assistance from a configured model;
   the request, selected context, raw response, and resulting proposals retain
   their provenance.
 * When a task needs an account of how reasons compose, a non-factive
@@ -111,13 +114,13 @@ apply to both existing literature and human- or AI-generated work.
   without completing that sequence.
 * Curry's account of increasing but never absolute precision explains why
   informal and formal representations remain distinct.
-* Theorem Terminal explores tools for learning, solving problems,
+* MRW explores tools for learning, solving problems,
   reconstructing arguments, integrating results, and retaining mathematics.
 * Evidence of learning comes from mathematical work and later performance.
   Reported mental effort supplies separate evidence about experienced effort;
   it does not establish understanding or mathematical correctness.
 
-Theorem Terminal is intended both for navigating and learning from a large
+MRW is intended both for navigating and learning from a large
 corpus, such as the Stacks Project
 [@stacksprojectauthorsStacksProject2021], and for returning to one's own
 research, an inactive project, or a subject not studied or taught for years.
@@ -126,21 +129,17 @@ create them. Tao observes that the growth of the literature, the increasing
 length and specialization of major proofs, and the strain on the refereeing
 system all predate modern AI [@taoMathematicsAgeAI2026].
 
-The first implementation is an experiment, not a completed system or a
-product specification. It will begin with mathematical work and test whether
-source locations, problem attempts, proof drafts, computations, diagrams,
-bounded model calls, generated proposals, correspondences, formal facts,
-checked warrant paths, corrections, and review results support later
-reconstruction and application. It will also determine which information can be
-obtained or updated mechanically and which decisions require mathematical
-judgment.
+Evaluate MRW through mathematical work: do saved locations, notes, calculations,
+diagrams, model exchanges and recorded checks make a later argument easier to
+reconstruct or apply? Evaluate the cost of maintaining those records as well.
+Determine which information can be obtained or updated mechanically and which
+decisions require mathematical judgment.
 
-Theorem Terminal is an assistant's assistant. A mathematician may consult
-several machine assistants for exploration and criticism, a proof assistant for
-verification when a formal development exists, a computer algebra system for
-computation, and the literature for definitions and exposition. Theorem
-Terminal may also make a bounded request to a configured model from active
-mathematical work. It preserves the selected context, request, any raw
+A mathematician may consult several machine assistants for exploration and
+criticism, a proof assistant for verification when a formal development exists,
+a computer algebra system for computation, and the literature for definitions
+and exposition. MRW may also make a bounded request to a configured model from
+active mathematical work. It preserves the selected context, request, any raw
 response, resulting mathematical representations and work artifacts,
 provenance, checking status, and the state at which work stopped. No one
 assistant becomes the authority. The system does not require a mathematician
@@ -249,7 +248,7 @@ independently reproduced are four different things. Research-active
 mathematicians can disagree about whether an argument is a valid proof
 [@inglisMathematiciansDifferentStandards2013], and an argument's attributed
 source can affect how it is read and judged
-[@weberInfluenceSourcesReading2013]. Theorem Terminal must keep source,
+[@weberInfluenceSourcesReading2013]. MRW must keep source,
 verification, admitted warrant, checked derivability, epistemic status, and
 later judgments distinct in its data model and interface.
 
@@ -292,7 +291,7 @@ an intended informal claim remains a separate question. The non-factive warrant
 layer continues to report derivability relative to admitted premises and policy,
 without automatically asserting truth, knowledge, or understanding.
 
-## 2. Activities Theorem Terminal supports
+## 2. Activities MRW should support
 
 Five activities are not completed merely by possessing a theorem statement or a
 proof.
@@ -339,7 +338,7 @@ implicit warrants [@inglisExpertNoviceApproaches2012]; and diagrams developed
 during problem solving [@stylianouInteractionVisualizationAnalysis2002].
 
 These studies concern particular tasks and do not establish a universal
-representation of mathematical expertise. Theorem Terminal represents sources,
+representation of mathematical expertise. MRW represents sources,
 mathematical objects and relations, work artifacts, requests for assistance, and
 task results. Proof attempts, informal deductions, examples, computations,
 diagrams, formal checks, and source use remain distinct records available as the
@@ -429,7 +428,7 @@ correctness or observed explanatory benefit.
 
 Machine assistance can propose an outline of a formal proof, suggest a
 formalization target for an informal argument, compare definitions, or identify
-possible source correspondences. When Theorem Terminal requests such assistance,
+possible source correspondences. When MRW requests such assistance,
 the model call and its raw response remain available alongside any extracted
 representations. Each proposal retains its origin and checking status.
 
@@ -446,8 +445,8 @@ mathematics; and whether the argument can be reconstructed and used.
 
 Where a formal development exists, it supplies mechanically checkable facts
 about types, dependencies, axioms, and verification status. Where none exists,
-Theorem Terminal still supports orientation, problem solving, proof attempts,
-computations, reconstruction, and review. An informal argument or problem
+MRW should still support orientation, problem solving, proof attempts,
+computations, reconstruction and review. An informal argument or problem
 attempt is not treated as awaiting formalization.
 
 Two rules follow. Formal facts — types, dependencies, axiom usage, checking
@@ -460,7 +459,7 @@ then checked, has one origin and one or more attestations.
 
 Provenance answers where a claim or artifact came from. Verification records a
 scoped check. Neither records how one admitted reason combines with another.
-Theorem Terminal therefore adopts a bounded justification-logic layer for
+MRW therefore adopts a bounded justification-logic layer for
 explicit warrant composition, based initially on the non-factive
 Artemov--Fitting systems \(J_0\) and \(J(CS)\)
 ([Chapter 2](https://doi.org/10.1017/9781108348034.003)).

@@ -59,6 +59,6 @@ Test a deliberately delayed or failing worker: Browse must remain actionable bef
 
 Measure time to usable Browse, first selectable filenames and title completion separately on the representative WSL/Windows notes location. Do not equate total indexing time with interface responsiveness.
 
-Update current design instructions, README, workflow and bundled tutorial to explain the actual opening flow. Keep historical evidence intact.
+Update current design instructions, README, workflow and bundled tutorial to explain the actual opening flow. Keep earlier evidence intact.
 
 Run applicable regression and package checks, commit and push to main, and install the verified package without forcing a working-window reload. Report the changes, timings, native observations and remaining limits. No new research dashboard, scheduler or mandatory user exercise belongs in this repair.

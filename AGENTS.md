@@ -308,7 +308,7 @@ private pinned note associations; read `docs/OBSIDIAN_WORKFLOW.md`. Obsidian own
 its existing Zettel notes and attachments, including handwritten work. Store
 only URLs, labels and exact references, using existing mutable publication rules.
 Keep workspace routing separate from target identity; wrong windows must not
-resolve against unrelated private storage. Preserve legacy `mrw-outline:v1`
+resolve against unrelated private storage. Preserve existing `mrw-outline:v1`
 links. No note conversion, vault indexing, automatic rewriting or synchronization
 is implemented. Treat the Euclid material only as a navigation fixture; no new
 exercise or study session gates this delivery. See `docs/OBSIDIAN_VALIDATION.md`
@@ -328,7 +328,7 @@ sources, outlines, annotations, retained evidence, note associations and require
 investigation records. Read `docs/ARTIFACT_STORAGE.md` and its validation report.
 Keep authority in one host-local binding, with journals, locks, reservations and
 runtime state outside user-selected artifact storage. Preserve logical store
-identity, verified legacy reference mappings and exact immutable bytes. Settings
+identity, verified mappings for earlier references and exact immutable bytes. Settings
 must not bypass migration. Missing/incomplete/conflicted stores block access;
 never initialize replacements or merge stores. Local writer exclusion does not
 coordinate computers. Require one writing installation and complete verified
@@ -365,7 +365,7 @@ ordinary files.
 All projects, navigation, files and persistence are corpus-independent.
 `rs_Appendix_A.tex` opens like any other file. Add no Appendix-specific production
 imports, navigation, corpus selector, study-guide option, adapter registry, saved
-capability identifier or integration machinery. Preserve the legacy
+capability identifier or integration machinery. Preserve the existing
 Appendix-specific CLI and its source checks. Corpus-neutral format and tool
 integrations are permitted when invoked by direct user action.
 
@@ -539,7 +539,7 @@ behavior and the continuation handoff together. Mark mathematical usefulness
 pending when it has not been observed; do not fabricate human acceptance or
 leave authorized implementation blocked on a manual study ceremony.
 
-Implementation is authorized. The legacy CLI experiment uses `rs_Appendix_A.tex`
+Implementation is authorized. The earlier CLI experiment uses `rs_Appendix_A.tex`
 from `flengyel/Categorical_Rice_Shapiro` as its first corpus. Its ordered
 mathematical guidance begins with top-down orientation. This does not impose a
 corpus or a preliminary activity on the general editor.
@@ -556,7 +556,7 @@ orientation, including for a problem-centered text, is:
 4. its governing idea or proposed method;
 5. detailed proof, calculation, or construction.
 
-The legacy explicitly requested `why` view follows these levels and is never a
+The existing `why` view follows these levels and is never a
 substitute for them. In the first stateless CLI, `why` must assume no earlier
 command or hidden session state. It cumulatively presents purpose and
 organization, central concepts and results, the selected result's role and
@@ -784,7 +784,7 @@ use, or proposal disposition never creates a premise automatically.
 Bind the fixture to the exact manuscript revision, Categorical Rice--Shapiro
 commit, Lean environment, declaration type, axiom report, admissions, logic
 profile, and checker version. A successor context may make a route inactive but
-does not invalidate the historical certificate under its original context.
+does not invalidate the earlier certificate under its original context.
 
 Additional LaTeX labels are needed only when optional correspondence maintenance
 expands beyond the already labeled selected result; they are not a prerequisite

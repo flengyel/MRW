@@ -30,7 +30,8 @@ Document links, backlink results, research/study passage references and handoffs
 retain the complete prefix. Canonical/qualified links explicitly open today's
 page; they do not claim to be snapshots. Published backlinks group item IDs
 across revisions while preserving each exact retained occurrence. Up to 256
-legacy references can be qualified read-only from verified retained provenance;
+references in the earlier format can be qualified read-only from verified
+retained provenance;
 missing stores, scope errors and limits yield incomplete results rather than
 inferred bare-tag matches. The selected notes folder remains the scan boundary.
 
@@ -39,8 +40,8 @@ inferred bare-tag matches. The selected notes folder remains the scan boundary.
 - Node broader regression: **281/281 passed**, exit 0, no skips. Final focused
   command checks: **6/6 passed**, exit 0, after rebundling the final Python core
   and updating import defaults/build identity. The final delta covers Stacks and
-  Kerodon imports, exact published navigation, qualified legacy backlinks, study
-  reference identity and packaged help. The broader pass began before the last
+  Kerodon imports, exact published navigation, qualified backlinks in the earlier
+  format, study reference identity and packaged help. The broader pass began before the last
   media-only HTML correction; the final delta and Python pass cover that change.
 - Python full regression on final source: **409 run, 342 passed, 67 explicit
   skips**, exit 0. Skips: 58 opt-in Qt, five unbuilt pinned Lean checker, three

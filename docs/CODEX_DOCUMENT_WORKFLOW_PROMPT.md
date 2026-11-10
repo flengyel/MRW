@@ -1,8 +1,8 @@
 # Codex task: clear document and source terminology
 
-Status: completed terminology handoff (0.19.2). Its later-roadmap paragraphs are
-historical; they do not authorize Research Question registration or a new Research
-view. Follow the
+Status: completed terminology handoff (0.19.2). Its later-roadmap paragraphs
+describe an earlier proposal; they do not authorize Research Question registration
+or a new Research view. Follow the
 [current ordinary-work rules](RESEARCH_WORKSTATION_DESIGN.md#rules-for-ordinary-mathematical-work):
 resumption starts with existing documents, supported locations and unfinished
 work, without duplicate entry. The original handoff below is retained as history.

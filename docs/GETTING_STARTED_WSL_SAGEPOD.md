@@ -211,7 +211,7 @@ and prose useful for your work; there is no required template.
    source/passage reference to open the reader. **MRW: Return to Document**
    returns to its originating occurrence in the rendered document. Editing the
    document, including unsaved edits and undo/redo, updates Contents.
-   Contents currently requires a saved Markdown file to belong to the workspace.
+   Contents can also use an explicitly selected Markdown file outside the workspace.
 4. In a notebook Markdown cell, a relative link such as
    `[Working note](overview.md)` opens the companion file. Use an ordinary
    file link in that note to return to the notebook. MRW reference commands

@@ -65,7 +65,7 @@ file operations, edits, scope checks and native editors/preview use final
 production JavaScript. It is an automated Extension Development Host check,
 not a human acceptance or learning study. Other themes/platforms, live Obsidian,
 PDF readers, AI, Lean and Sage were not exercised. No mathematical correctness
-or comprehension claim follows from these checks. Historical validation reports
+or comprehension claim follows from these checks. Earlier validation reports
 remain unchanged.
 
 ## Package and delivery
@@ -76,7 +76,7 @@ The verifier checked **106 archive files**, the production manifest and runtime
 bytes, and exclusion of development files. The native fixture uses matching
 production JavaScript. Packaged tutorial/source README match the checkout;
 vsce expands relative README links. The isolated package marker records base
-`5f53358` plus local changes; the root historical marker is preserved.
+`5f53358` plus local changes; the root's previous marker is preserved.
 Installed through the established WSL `code-server --install-extension … --force`
 route, exit 0. All **104 installed payload files** match the verified
 VSIX, excluding installer-only manifest metadata. The registry selects

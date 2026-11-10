@@ -2,15 +2,18 @@
 
 Terminology used throughout Mathematical Research Workstation.
 
-These terms apply to the shared mathematical domain, independently of the
-frontend. The repository is `flengyel/MRW`. Theorem Terminal remains the
-technical package, extension and CLI identity.
+The repository is `flengyel/MRW`, and the VS Code extension is `flengyel.mrw`.
+The Python package `theorem_terminal` and CLI command `theorem-terminal` retain
+their technical names. The terms below describe documents, mathematical work
+and research records; they do not require every mathematical object to be
+registered in MRW.
 
 ## Documents and research work
 
-These terms govern the 0.19.2 GUI and subsequent integrations in
-[RESEARCH_WORKSTATION_DESIGN](docs/RESEARCH_WORKSTATION_DESIGN.md). They do not
-claim that every document format or integration is already supported.
+These terms govern the interface and the
+[research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md). The
+[README](README.md) distinguishes supported formats and integrations from
+planned work.
 
 **Document:** material opened for work, such as a Markdown note, PDF paper,
 manuscript or notebook. Specify its format when the operation requires it.
@@ -18,7 +21,7 @@ Reading overview is an earlier interface name for an ordinary Markdown
 document, not a distinct document type.
 
 **Contents:** navigation within the selected document. The current navigator
-derives headings and MRW links from Markdown, including unsaved edits. It is
+derives headings and supported links from Markdown, including unsaved edits. It is
 not a second authored document. Reading Outline is its earlier interface name;
 the built-in VS Code Outline view retains its own name.
 
@@ -27,7 +30,9 @@ This is a role; a note, paper, manuscript or supplied solution can be a source.
 
 **Saved source:** an explicitly retained source revision, with its selected
 passages and reader annotations where present. Its original document may
-subsequently change. Ordinary file saving and MRW source retention are distinct.
+subsequently change. **Saved copy** in the Open Document picker refers to a
+saved source. Saving edits to an ordinary file does not retain an MRW source
+revision.
 
 **Passage:** a selected part of a document or saved source. An exact retained
 reference identifies its source revision and range, independently of a mutable
@@ -46,8 +51,8 @@ broader recovery remains planned. The existing R3 investigation remains a
 bounded parent/child model exchange.
 
 **Study question:** a task used to test or develop comprehension of particular
-material. It becomes a scheduled review item only through explicit admission.
-Research questions are not automatically scheduled recall items.
+material. It becomes a scheduled review item only when **Keep for spaced review**
+is chosen. Research questions are not automatically scheduled recall items.
 
 **Proof outline:** a condensed mathematical argument with its claims and
 intended inferences. A proof graph represents such claims and inferences;
@@ -60,8 +65,8 @@ following source-region term.
 **Source-region outline:** a reader-selected view over exact retained source
 ranges, with reversible hiding of argument detail, separate exact statements
 and context, and attributed editable explanations. It can describe informal
-mathematics without Lean. The delivered manual reader is not a verified
-inference graph or the planned vertex-elimination operation.
+mathematics without Lean. The manual reader is separate from the proof-outline graph view, whose
+display operations do not verify its inferences.
 
 **Reader reconstruction:** separately attributed reader material describing
 ideas, intermediate claims, intended inferences, dependencies, questions, gaps
@@ -85,7 +90,7 @@ it is not a JustificationContext and creates no mathematical warrant.
 
 ## Context
 
-The persistent mathematical environment maintained by Theorem Terminal.
+The persistent mathematical environment maintained by MRW.
 
 Context records sources, active problems, mathematical work, model calls,
 provenance, verification, previous task events, and proposed next work. It does
@@ -147,7 +152,9 @@ A source problem or exercise that can be attempted directly.
 
 A problem may request a proof, an omitted proof step, an application, a
 calculation, an example, or a counterexample. It remains distinct from attempts
-to solve it.
+to solve it. A problem and its solution may stay in ordinary linked notes;
+this term does not prescribe a form or restore the removed document Problems
+interface.
 
 ## Problem relation
 
@@ -227,12 +234,13 @@ solving, reconstruction, or review.
 ## Vertex elimination
 
 A graph operation that removes a vertex after joining each of its predecessors
-to each of its successors. In the planned proof-outline view, hidden vertices
-are eliminated while the original graph and witnesses remain available for
-expansion. Each summarized proof region has a visible claim and explanation;
+to each of its successors. In the proof-outline view, hidden vertices are
+omitted from the display while the original graph and derivations remain
+available for expansion. Each summarized proof region has a visible claim and explanation;
 required assumptions and joint premises are preserved. This is distinct from
-transitive reduction, node grouping, and proof checking. See
-[PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md).
+transitive reduction, node grouping, and proof checking. See the
+[proof-graph workflow](docs/PROOF_GRAPH_WORKFLOW.md) for current behavior and
+[PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md) for the design.
 
 ## Claim atom version
 
@@ -333,23 +341,23 @@ Provenance does not admit a premise or establish a justification derivation.
 A theorem, problem, proof, explanation, hint, example, solution, or other
 mathematical representation produced by a model.
 
-Content produced outside Theorem Terminal may be imported through a source
+Content produced outside MRW may be imported through a source
 occurrence and studied like any other representation. Formal verification does
 not change its origin.
 
 ## System-generated assistance
 
-An AI proposal produced through a model call made by Theorem Terminal.
+An AI proposal produced through a model call made by MRW.
 
 It is one source of AI-generated mathematical content, not a condition for
 studying such content. AI output produced elsewhere may be imported and studied
-before Theorem Terminal generates any assistance. The request and raw response
+before MRW generates any assistance. The request and raw response
 remain distinct from any mathematical representations extracted from the
 response.
 
 ## Model call
 
-A task-attached request made by Theorem Terminal to a configured model,
+A task-attached request made by MRW to a configured model,
 together with its outcome and returned response, if any.
 
 In the first experiment, *bounded* has an operational meaning. Each explicit
@@ -392,7 +400,7 @@ passages, and lets the mathematician select visible exact text while the
 application computes the digest-anchored UTF-8 span. Viewing creates no
 representation, task disposition, premise admission, or check. A candidate-route view is derived only from routes actually returned or
 recorded in ordinary work artifacts; it is not a new stored entity. The current adapter sends no reasoning-summary parameter
-and ignores auxiliary reasoning items. Theorem Terminal does not label returned
+and ignores auxiliary reasoning items. MRW does not label returned
 explanations as raw chain of thought or claim access to hidden model reasoning
 or search history.
 

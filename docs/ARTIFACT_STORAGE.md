@@ -188,7 +188,7 @@ environment; local copied-store checks do not establish distributed safety.
 
 ## Existing links and boundaries
 
-Note opening/management resolves both verified legacy and logical references
+Note opening/management resolves both verified path-based and logical references
 through the existing Python resolver before matching an association's exact
 retained target. Replacing/removing an existing association preserves its stored
 reference bytes; a current region's changed range never selects an earlier pin.
@@ -205,7 +205,7 @@ routing to resolve locally. A wrong/unbound window still offers **Copy Link and
 Open Workspace**, whose saved address may belong to the original computer.
 That button cannot invent a different local workspace address. Copy the link,
 open your mapped local workspace and use the clipboard command. Original-source
-navigation can remain unavailable if its historical path is absent; exact
+navigation can remain unavailable if its original path is absent; exact
 retained passages and Obsidian associations remain accessible.
 
 **Copying or synchronizing a note alone does not copy its MRW saved material.**

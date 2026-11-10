@@ -16,7 +16,7 @@ Both reported data-handling defects are confirmed against unchanged HEAD:
   journal, and a HEAD that does not reference that generation. Not-sent cleanup,
   uncertain publication preservation and journaled failure preservation pass.
   Interrupted managed Send still retains and recovers its outcome without retry.
-  Historical generations are not swept.
+  Earlier generations are not swept.
 - Ordinary Ask clears an unsent draft before a cancellable question dialog. Its
   new regression fails against HEAD. The repair refuses a replacement before
   invalidating the old draft or exact preview, matching the reader/proof Ask

@@ -37,7 +37,7 @@ earlier citations still resolve their original bytes and passage.
 
 Older v1 links remain supported. The reader derives their published identity
 from the retained manifest. Explicit published-item backlink scans can resolve
-up to 256 distinct legacy references in the selected notes folder, read-only.
+up to 256 distinct v1 references in the selected notes folder, read-only.
 Missing stores, wrong scope and scan limits are reported as incomplete results;
 identities are never guessed from prose or rewritten into original notes.
 Backlinks group published item identities across revisions, while every retained

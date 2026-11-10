@@ -14,11 +14,11 @@ existing store. Essential source location stays in the sticky reading toolbar;
 hashes and storage details stay collapsed. Each live citation reader keeps its
 own tracked Return occurrence, while independent opening names the selected
 Contents document. Help uses hover, keyboard focus and accessible descriptions.
-These requirements supersede historical full-width-reading acceptance checks.
+These requirements supersede earlier full-width-reading acceptance checks.
 
 The rename, source display/lock repairs, exact v1/v2 references and genuine
 Hausdorff source/annotations/diagram are preserved. No preservation copy,
-archived-state restoration, re-import or working-window reload is performed.
+restoration of earlier state, re-import or working-window reload is performed.
 
 ## Hover diagnosis
 
@@ -43,7 +43,7 @@ cover visible Stacks/Kerodon orientation, collapsed technical details,
 hover/focus/Escape help without actions, and destination updates preserving
 the actual unsaved annotation form. These are API/DOM contracts.
 
-The historical actual-host presentation driver now checks group preservation
+The existing actual-host presentation driver now checks group preservation
 instead of minimum full-width reading. Native sidebar visibility is not exposed
 by the public editor API and must be recorded through visible observation.
 Browser rendering, controller layout assertions and package installation are
@@ -109,7 +109,7 @@ Hausdorff source/annotation/diagram files match the initial inventory; all **26*
 inventoried Stacks document/source files remain byte-identical. The existing
 store also contains a later additional source; its current HEAD was preserved,
 not replaced by the initial inventory. Loading changed no store HEAD. No
-preservation copy, archived-state restoration, diagram compilation or new
+preservation copy, restoration of earlier state, diagram compilation or new
 genuine-source acquisition occurred.
 
 Both READMEs and the recommended-extension guide match synchronized main

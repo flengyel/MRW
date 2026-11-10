@@ -183,7 +183,7 @@ as recorded above, with configuration restored. It supplies no supported
 pause/write procedure. The real store remains unmoved; actual Pi
 creation/edit-back/access tests and the complete Windows-backed desktop return
 remain unconfirmed. There is no runtime change or new VSIX. Document/helper
-syntax and preservation checks are separate from the historical 0.7.0 regression
+syntax and preservation checks are separate from the earlier 0.7.0 regression
 suite. [Sanitized comparison evidence](evidence/artifact-storage-20261020/quiet-comparison.json)
 retains the exact per-probe results and independent final API status.
 
@@ -286,8 +286,8 @@ bindings/journals/locks remain outside the store. All prior 14 inventoried
 work/package files, the original fixture source and temporary note retained
 their hashes; intentional disposable annotation changes are separate. No new
 VSIX is appropriate for this configuration/evidence-only result. The full 0.7.0
-regressions are historical below; the new Windows runs and their errors are
-reported separately. [Sanitized trial evidence](evidence/artifact-storage-20261020/metadata-trial.json)
+regression results below are from the earlier run; the new Windows runs and their
+errors are reported separately. [Sanitized trial evidence](evidence/artifact-storage-20261020/metadata-trial.json)
 records the distinctions.
 
 ## Windows-backed follow-up — 2026-10-20
@@ -363,8 +363,8 @@ wrapper reported an error during initial note launch; that action neither set
 the clipboard nor edited a note, and is not counted as hyperlink acceptance.
 The later guarded physical click and read-only UTF-8 comparison completed.
 Nineteen existing focused Python storage tests passed again. Required 0.7.0
-final regressions below remain historical (345 run = 286 passed + 59 skipped);
-no runtime change requires a repeated full-suite or package build.
+final regression results below are from the earlier run
+(345 run = 286 passed + 59 skipped); no runtime change requires a repeated full-suite or package build.
 Both proposed shell blocks passed syntax checking. Windows PowerShell parsed the
 proposed ACL commands without errors and constructed the three-rule protected
 ACL in memory; no ACL was applied. All 14 prior inventoried work/package files
@@ -423,7 +423,7 @@ existing private outlines and previous VSIX packages were preserved.
   a UUID serialize through host-local exclusion.
 
 Validation exposed a real post-move note-opening defect: the reader generated a
-logical-scope reference but filtered legacy associations by literal URI equality.
+logical-scope reference but filtered pre-move associations by literal URI equality.
 The core now resolves the selected target with its existing parser/resolver and
 matches only already-validated associations with the same exact region/span.
 Existing stored references are unchanged. Focused bridge/command coverage opens,
@@ -459,7 +459,7 @@ probes in Windows Temp and, following the user's express authorization, inside
 | Atomic replacement | Returned success |
 
 The actual VS Code move command attempted a disposable Windows Temp destination
-on this mount and **rejected before commit**, preserving the original legacy
+on this mount and **rejected before commit**, preserving the original
 store and leaving no destination. The private-permission condition is unsupported;
 no completed Linux→Windows artifact move is claimed. The exact intended vault
 filesystem also fails those mode checks. Probes removed only their temporary
@@ -515,8 +515,9 @@ fixture above, not counted as a successful persistent move.
 
 A physical pointer attempt in the temporary Obsidian note verified that the
 pointer target was the exact saved MRW hyperlink before clicking. It did **not**
-produce a confirmed fresh retained selection in the intended window. Initial reader-return attempts exposed the legacy/logical reference comparison
-defect described above. After correction, a fresh actual Development Host
+produce a confirmed fresh retained selection in the intended window. Initial
+reader-return attempts exposed the defect in comparing pre-move and logical
+references described above. After correction, a fresh actual Development Host
 followed the same old link, checked the exact passage and stored label, and
 successfully ran the production linked-note command with real URI dispatch and
 no error. Its scripted chooser selected the existing passage. This establishes

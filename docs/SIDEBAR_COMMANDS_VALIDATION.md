@@ -34,7 +34,7 @@ own window. Genuine notes and the user's working window were not used.
 Native view height can require scrolling the Commands list when Studies is
 expanded. The borders follow the active VS Code theme. This check used the
 high-contrast theme; other themes were not visually checked. It does not
-complete the separate historical reader-orientation acceptance sequence.
+complete the separate earlier reader-orientation acceptance sequence.
 
 ## Delivery
 
@@ -51,6 +51,6 @@ Installed **flengyel.mrw 0.22.7**; all **102** payload files match the verified
 VSIX, excluding installer-only manifest metadata. The extension registry entry
 also names 0.22.7. Package identity and installed-byte verification are recorded
 in [the evidence file](evidence/sidebar-commands-20261107.json). The root's
-historical build marker is preserved; the isolated package marker records the
+previous build marker is preserved; the isolated package marker records the
 base commit and local changes. Installation does not reload the working window;
 the active instance adopts the update on its next normal reload.

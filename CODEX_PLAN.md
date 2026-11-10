@@ -52,11 +52,11 @@ Codex, Lean and Sage remain optional. Current workflow and packaged tutorial cha
 The 0.22.7 [persistent Commands repair](docs/SIDEBAR_COMMANDS_VALIDATION.md),
 0.22.6 [title chooser](docs/DOCUMENT_CHOOSER_VALIDATION.md), and earlier
 [reader orientation](docs/READER_ORIENTATION_VALIDATION.md) remain delivered
-behavior. Their historical reports retain their original observations and
+behavior. Those reports retain their recorded observations and
 limits; the 0.23.0 native workflow records its additional orientation checks
 separately. Do not repeat preservation copies or previous manual study sessions.
 
-Older implementation accounts below are historical context. This section
+Older implementation accounts below describe completed work. This section
 controls the next-increment ordering when earlier roadmap prose differs.
 
 ## Extension identity — 0.22.0
@@ -281,7 +281,7 @@ delivered; broader outline requirements remain deferred. The 2026-10-13 host val
 completed the scoped command checks and a normal-host persistence check;
 see [evidence and limits](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
 The reader's scoped explanatory-benefit report is recorded below. The Qt delivery and observation
-reports below are historical evidence, not extension acceptance evidence.
+reports below are evidence for those versions, not extension acceptance evidence.
 
 Documentation clarification, 2026-09-27: justification may exceed present
 understanding; the four benefit categories below refine evaluation without
@@ -483,7 +483,7 @@ the server/kernel selection. They found creation of a new cell unclear. The
 explicit cell insertion, focus, execution and save steps. This is a documentation
 repair; [the validation follow-up](docs/SAGEPOD_NOTEBOOK_VALIDATION.md#user-led-reconnection-and-cell-creation--2026-11-03)
 records user-reported execution separately from observed container status and
-the historical complete notebook campaign. It adds no MRW capability or
+the completed notebook checks. It adds no MRW capability or
 mathematical-usefulness claim. Reader-to-AI assistance remains the next increment.
 
 ### Installation tutorial and next reader-to-AI increment — 2026-11-02
@@ -501,7 +501,7 @@ access. A public tutorial/distribution route still needs a separate publication
 decision; do not change repository visibility to make an onboarding link public.
 
 This is documentation delivery, not a new runtime or notebook acceptance test.
-The October 16 Windows/WSL companion result remains historical evidence. A
+The October 16 Windows/WSL companion result remains evidence for those versions. A
 read-only November 2 inventory found no default `sagepod` container and only the
 separate SageQueue `sagemath` container on port 8888. No server was started,
 recreated, repaired or probed with a credential. Follow current installation
@@ -760,7 +760,7 @@ from this foundation; do not restart the architecture.
 
 **Integration status, 2026-09-20:** reviewed repair
 `d91e35bc56d5e66778c115e1c8ffea4d6937cd28` was integrated into `main` at that
-review. This is a historical checkpoint, not the current branch tip. The
+review. This is an earlier checkpoint, not the current branch tip. The
 combined focused investigation
 suite passed 21 deterministic controller/widget tests, the installed module
 matches the integrated source bytes, and the GUI entry point launched against a
@@ -785,7 +785,7 @@ actual warrant question.
 | Routine operation | R1 binds platform-standard Open, Save, Find and Find-next, makes PDF-versus-text focus explicit, and shows marker/Return status | Preserve these behaviors while evaluating the delivered continuation |
 | Study benefit | The September 14 session saved useful purpose, definition and near-product notes; explanatory guidance came from the surrounding assistant interaction | This supports the value of the study activity, not a delivered workstation guidance feature |
 | AI collaboration | R2 can initiate one explicitly previewed question; R3 can send one independently previewed child from selected exact parent passages plus separate human correction/current context, then restore the parent, correction, child and task summary; R3.1 can explicitly end that active pointer without deleting its records | Observe genuine sequential use; synthetic responses establish mechanics, not benefit, and do not justify simultaneous investigations or a conversation tree |
-| Re-entry evidence | Five-anchor evaluation was incomplete; marker creation was unconfirmed; the original historical note was unavailable | No anchor defect, crash, mislanding or historical reduction is established. Use a fresh prospective continuation test |
+| Re-entry evidence | Five-anchor evaluation was incomplete; marker creation was unconfirmed; the original note was unavailable | No anchor defect, crash, mislanding or reduction in effort relative to the earlier session is established. Use a fresh prospective continuation test |
 
 The failed prescribed sessions are evidence about the product and evaluation
 design, not a failure by the human participant. Starting at a local lifting
@@ -1129,7 +1129,7 @@ The delivered Qt R1 boundary is:
   confirm successful marking and make the reason for an unavailable Return
   discoverable. Keep the established anchor semantics.
 - Use the smallest validated workspace-state change required. Preserve all
-  supported historical migrations, recovery, pane positions, wrap preference
+  supported migrations from earlier formats, recovery, pane positions, wrap preference
   and anchors. Migration must not read source files or fabricate build records.
 
 R1 ended with the above working through actual GUI actions, meaningful
@@ -1237,9 +1237,9 @@ Use the user's ordinary PDF reader/editor/assistant workflow as the practical
 comparison. Record setup, navigation and correction burden when consequential,
 but judge whether the workstation helps produce and resume worthwhile work.
 A repeat of the same learned task is not a controlled speed comparison.
-No historical improvement claim is available without a comparable baseline.
+No improvement claim is available without a comparable baseline.
 Observe prospective resumption from the actual saved work instead of repeatedly
-reconstructing a missing historical seed.
+reconstructing a missing earlier example.
 
 Before expanding beyond R1–R3.1, require useful work in two separate sessions
 and one later continuation. This is a chosen adoption check, not a
@@ -1269,7 +1269,7 @@ their preservation does not require putting them in front of ordinary study.
 
 The sections below retain shared domain contracts, standalone Qt implementation
 details, and task-dependent CLI/Lean experiments. They do not prescribe a new
-VS Code editor, PDF renderer, or recovery system, and their historical sequence
+VS Code editor, PDF renderer, or recovery system, and their original sequence
 does not override the active migration order above.
 
 ## Governing constraint
@@ -1287,7 +1287,7 @@ Two initial experiments test distinct functions:
 2. problem-centered study in a source with little or no formalization.
 
 The original 2026-08-25 authorization began with Appendix A and a top-down
-orientation command. That legacy CLI behavior remains. The active GUI roadmap
+orientation command. That CLI behavior remains. The active GUI roadmap
 above supersedes the old corpus order. For requested guidance in unfamiliar
 material, offer purpose, organization, concepts and examples before unnecessary
 detail; allow the user to go directly to a selected problem or local question.
@@ -1311,7 +1311,7 @@ resumable state. These implementation choices are not domain invariants.
 Mathematical Research Workstation is the user-facing system being developed from
 the Theorem Terminal experimental prototype. Its principal interface is
 `theorem-terminal gui [PROJECT_DIRECTORY]`; the CLI remains available for testing,
-automation, reproducibility, low-level records and legacy study commands.
+automation, reproducibility, low-level records and earlier study commands.
 
 Implemented with PySide6 Qt Widgets and QtPdf: ordinary project-directory
 navigation, editable mathematical files, read-only external references, two
@@ -1373,7 +1373,7 @@ no Lean or model provider was invoked for this increment.
 
 No corpus-specific production import, navigation, registry or persistence field
 exists. Appendix A supplied the first real integration smoke test, selected as ordinary
-files. The legacy CLI and frozen source bindings remain unchanged. Current limits
+files. The existing CLI and frozen source bindings remain unchanged. Current limits
 and installation commands belong in README; the workflow specification belongs
 in UX_SPEC.
 
@@ -1813,7 +1813,7 @@ the result as evidence against the other functions.
 **Goal.** Re-enter the mathematics of `rs_Appendix_A.tex` and continue
 mathematical work after an interruption.
 
-**Deliverable.** The legacy Appendix A guidance path presents purpose,
+**Deliverable.** The Appendix A CLI guidance path presents purpose,
 organization and central concepts before a selected result. In the general
 GUI, make that orientation available when requested; a returning user may
 resume directly at the relevant question, definition or unfinished argument.
@@ -2100,7 +2100,7 @@ for it.
 The controlling delivery order is R1 readable study, R2 task-local assistance,
 then R3 continued investigation and resumption. Evaluate usefulness within each
 increment. Preserve the detailed contracts above for the components actually
-changed; numbered legacy stages are not a serial release gate.
+changed; earlier numbered stages are not a serial release gate.
 
 Formal correspondence and warrant experiments remain available on demand and
 retain their independent acceptance obligations. Appendix A completion, a

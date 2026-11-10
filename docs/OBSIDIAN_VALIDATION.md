@@ -114,14 +114,16 @@ The user's real artifact directory remains unchanged. No new vault is needed.
 
 A new clearly labeled ordinary temporary note, `MRWStoreNav20261019de166d.md`,
 contains the fixture links and follows Zettel conventions. It was opened through
-Obsidian's standard URI. After correcting a literal legacy/logical reference comparison, a fresh actual
-host successfully dispatched the pre-move associated note through the production
+Obsidian's standard URI. After correcting a literal comparison of pre-move and
+logical references, a fresh actual host successfully dispatched the pre-move
+associated note through the production
 command. The physical hyperlink click still did not confirm a fresh exact
 retained selection; the complete post-move desktop round trip remains **unconfirmed**. Automated association preservation does not
 substitute for it. Seven new fixture files and all 14 inventoried pre-existing
 study/note/package files remained unchanged through navigation. No second-host
 synchronization acceptance was available. The earlier completed 0.6.1 desktop
-checks below remain historical evidence, not post-relocation acceptance.
+checks below record the pre-relocation result and do not establish
+post-relocation acceptance.
 
 Final checks: 48 Node cases; 345 Python tests ran: 286 passed and 59 skipped; syntax,
 compilation, archive and installed-file verification. The user's report of

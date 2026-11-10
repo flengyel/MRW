@@ -1,19 +1,26 @@
 # Documents, research continuity, and argument reconstruction
 
+This design starts with existing mathematical work: open a document, follow its
+references, compare passages, add an explanation or calculation, and return to
+unfinished work. The current implementation is MRW 0.23.5; broader recovery and
+integrated argument reconstruction remain proposed work.
+
 Published-source implementations must preserve the distinction between a stable
 qualified item ID, an immutable content revision and an exact passage. Document
 links, backlinks and research records carry the full source prefix. See
 [SOURCE_IDENTIFIERS](SOURCE_IDENTIFIERS.md); canonical links do not replace
 retained citations.
 
-Status: the user withdrew the document Problems interface in 0.23.3. Its commands
-and creation path are removed; saved work and pending drafts remain readable.
-Opening/following notes stays ordinary reading. Preserve the 0.23.1 navigation
-and 0.23.2 opening repairs. General research resumption and argument
-reconstruction remain later work, guided by a concrete research task.
-See [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md),
-[reading workflow](READING_OUTLINE_WORKFLOW.md) and
-[opening evidence](DOCUMENT_OPENING_REPAIR.md).
+Current reading supports original files, retained source copies, Contents,
+scoped note links and backlinks, and Return. Markdown previews support note-local
+macros and explicit TikZ rendering; Reopen Document can restore an exact saved
+Markdown selection. PDF pages, preview scroll positions and notebook kernel
+state are not restored by MRW. See the [reading workflow](READING_OUTLINE_WORKFLOW.md)
+and [0.23.5 repair report](READING_REPAIRS.md).
+
+The document Problems interface was removed in 0.23.3. Its creation commands are
+absent, while earlier saved work and pending drafts remain readable. Opening or
+following notes stays ordinary reading; see [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Rules for ordinary mathematical work
 
@@ -62,14 +69,14 @@ implementation usable with ordinary files and folders, without Obsidian,
 Zettel conventions, a model account, Lean, or SageMath as entry requirements.
 No multi-user product framework is needed for this sequence.
 
-## Vocabulary and the first GUI change
+## Vocabulary and interface labels
 
 | Term | Meaning |
 | --- | --- |
 | Document | Material opened for work, such as a Markdown note, PDF paper, manuscript, or notebook. Format determines available operations. |
 | Contents | Navigation within the selected document. It is derived from the document, not a second authored document. |
 | Source | A document or other material used as a reference for a particular question or claim. This is a role, not a file format. |
-| Saved source | An explicitly retained source revision available independently of changes to its original, together with its reader selections and annotations where present. |
+| Saved source | An explicitly retained source revision, with reader selections and annotations where present. The Open Document picker labels this choice **Saved copy**. |
 | Passage | A selected part of a document or saved source; retained references identify the exact revision and range. |
 | Note / Zettel | A note is a document. A Zettel follows the existing Zettel note convention; that convention is optional. |
 | Research question | The mathematical question under investigation; it may already be written in an ordinary note. This term does not require an MRW registration object or recall item. |
@@ -90,13 +97,11 @@ In particular, `mrw-outline:v1` remains a compatible reference format.
 The exact first-patch label map and implementation boundaries are in
 [the Codex task](CODEX_DOCUMENT_WORKFLOW_PROMPT.md).
 
-At the reviewed baseline, the document navigator handles Markdown headings and
-MRW retained-source links. Its choose/show actions select a Markdown document
-and focus the tree; they do not constitute a general file-opening action.
-The 0.19.2 patch does not supply PDF contents, vault WikiLink resolution or
-opening an arbitrary external file through MRW. Its picker/help states the
-Markdown support plainly. Existing **File: Open File…** remains
-available through the host. General document opening is delivered. The later document Problems interface was withdrawn; do not reinstate it.
+**Open Document…** opens an original file or a saved copy. **Show Contents**
+focuses navigation for a selected Markdown document. Contents supports headings,
+ordinary links, scoped WikiLinks and retained-source references; it does not
+extract a contents tree from a PDF. The host's **File: Open File…** remains
+available alongside MRW's commands.
 
 ## Existing documents and optional integrations
 
@@ -106,14 +111,14 @@ overview, move into private storage, or new note template is required merely
 to read a file. Ordinary files remain under VS Code's editing, saving, undo,
 external-change handling and recovery. MRW's retained records remain separate.
 
-| Material | Intended integration |
+| Material | Current path and limits |
 | --- | --- |
-| Markdown | Open in place; edit or preview; derive Contents from headings; follow ordinary document links. |
-| PDF | Open in an available PDF reader; restore page/position when the reader exposes it; use bookmarks or page navigation when available. |
-| Existing Zettel | Open the same Markdown file; recognize its stable ID and editable title; resolve its note links within a selected notes folder. |
-| Notebook / SageMath | Reopen the notebook through VS Code/Jupyter and the existing SagePod arrangement; keep calculation inputs, saved outputs, interpretation and relevant revisions connected to the question. |
-| Lean / LaTeX / code | Reopen the relevant file/location through the established host extension or tool; associate recorded checks with the input revision and scope actually checked. |
-| Handwritten work | Link an existing scan, image or PDF alongside the question; transcription is optional. |
+| Markdown | Open in place; edit or preview; navigate headings and supported links through Contents. Note-local macros and explicitly rendered TikZ diagrams stay separate from the original text. |
+| PDF | Hand off to an available reader. MRW does not extract text or Contents, or restore a PDF page. |
+| Existing Zettel | Open the same Markdown file; recognize its ID and title; resolve supported links within a selected notes folder. Obsidian embeds remain unsupported in MRW. |
+| Notebook / SageMath | Use VS Code/Jupyter with SagePod. Notebook editing and execution belong to that integration; MRW does not restore live kernel state. |
+| Lean / LaTeX / code | Use the relevant host extension or tool. Opening a file does not check a proof, compile a manuscript or run code. |
+| Handwritten work | Keep a link to the existing scan, image or PDF in a note and open it with an available viewer. MRW supplies no handwriting recognition. |
 
 Opening, reading, extracting selected text, restoring an exact position, and
 running a computation are different capabilities. Detect what the host exposes
@@ -150,11 +155,12 @@ that navigation. The notes integration should resolve outgoing links and show
 backlinks using a bounded index of an explicitly selected folder. Show duplicate
 or missing IDs rather than choosing a target by title. The index is derived and
 rebuildable; the files remain authoritative. Do not scan unrelated folders or
-send a vault to a model. An optional **Open in Obsidian** action opens the same
-note using a supplied Obsidian URL or an explicitly configured folder-to-vault
-mapping. The existing companion bridge opens stored associations; it does not
-identify an arbitrary file's vault. Never infer that identity from a folder
-name or WSL path.
+send a vault to a model. **Open in Obsidian** opens the same note through the
+registered URI handler. It uses the configured vault name or ID, or the name
+of the explicitly selected notes folder when that setting is empty. Windows
+and WSL paths must refer to the same file; the action does not synchronize a
+remote copy. Stored source-to-note associations remain a separate companion
+link. See [Obsidian configuration](OBSIDIAN_WORKFLOW.md#configure-obsidian-with-mrw).
 
 Keep note categories optional. The wiki's
 [note-category discussion](https://github.com/flengyel/Zettel/wiki/From-Fleeting-Notes-to-Project-Notes)
@@ -192,8 +198,9 @@ failure to recover work, and keep it free of duplicate mathematical entry.
 
 ## Reconstructing a compressed solution
 
-Use the existing source reader, notes, companion exchange, study and checking
-surfaces in one session:
+The intended integrated workflow uses the existing source reader, notes,
+companion exchange and checking tools. Its components are available separately;
+MRW does not yet automate or restore the complete sequence:
 
 1. Open the solution with the question or context already present in its note
    or linked sources. Keep the original and its attribution; outside model output can be retained as
@@ -214,9 +221,9 @@ surfaces in one session:
 
 A proof graph is optional. The workflow does not require full formalization,
 complete reconstruction of every step, or a positive correctness verdict.
-Keep review scoped to the material currently relevant, with explicit admission
-and a small budget. Preserve the existing FSRS, effort-report and assistance
-distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
+Optional recall should concern the material currently relevant. **Keep for
+review** explicitly enrolls a study question; reading a document does not.
+Preserve the existing FSRS, effort-report and assistance distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 
 ## Delivered work and possible next steps
 
@@ -225,13 +232,14 @@ distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 | 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | Existing create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
 | 2. Existing documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
 | 3. Document Problems | Withdrawn at the user’s request in 0.23.3 | Creation routes removed; earlier records and drafts remain readable. |
-| 4. Resume existing work | Recover existing documents, supported locations, Return and unfinished work without question registration | Resume the same notes and drafts with their links and surrounding work preserved; add only a demonstrated missing recovery action. |
-| 5. Integrated reconstruction | One compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
+| 4. Reading repairs, 0.23.5 | Delivered: exact heading/block WikiLinks, note macros, explicit TikZ rendering, progressive titles and saved Markdown selections | [Repair report and limits](READING_REPAIRS.md). |
+| 5. Broader resumption | Proposed: recover additional locations and unfinished work without question registration | Resume the same notes and drafts with their links and surrounding work preserved; add only a demonstrated missing recovery action. |
+| 6. Integrated reconstruction | Proposed: one compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use existing study/history mechanisms. |
 
 Choose future changes from obstacles encountered in ordinary mathematical use;
-the table is not a queue of required features. Increments 1 and 2 are delivered.
-Increment 3 is withdrawn and is not a prerequisite for research. General
-resumption and integrated reconstruction remain possible future work under the
+the table is not a queue of required features. Increments 1, 2 and 4 are
+delivered. Increment 3 is withdrawn and is not a prerequisite for research.
+General resumption and integrated reconstruction remain possible future work under the
 rules above. A demonstrated data-loss defect takes priority. This correction
 authorizes no new question registry, storage rewrite, outline format, scheduler
 or dashboard.

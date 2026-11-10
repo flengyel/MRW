@@ -8,10 +8,10 @@ problem entry, grading or scheduling controls.
 [Current reading workflow](READING_OUTLINE_WORKFLOW.md) ·
 [Removal and preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md).
 
-The account below describes the historical 0.23.0 implementation, not current
+The account below describes the 0.23.0 implementation, not current
 instructions or a requirement to restore it.
 
-## Historical workflow — MRW 0.23.0
+## Earlier workflow — MRW 0.23.0
 
 
 Use **Open Document…** for an original file or saved copy; see the

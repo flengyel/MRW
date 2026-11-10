@@ -19,7 +19,7 @@ obsolete action itself is rejected. Other explicitly invoked source-study and
 proof tools remain available separately.
 
 Current instructions and the packaged tutorial describe reading directly.
-The earlier document-learning account and native fixture are marked historical;
+The document-learning account and native fixture describe the removed feature;
 previous validation reports are preserved. Genuine notes and study data were
 not used as fixtures or changed.
 
@@ -40,7 +40,7 @@ fixture; the tutorial matches the package.
 Actual host: Windows VS Code **1.144.1**, WSL Debian, high-contrast theme,
 in a disposable workspace. Inspected rendered Open, linked-solution Follow,
 Return and saved-work captures. The Commands buttons retain their borders and
-have no Problems action. The legacy view has **zero form fields**; its statement,
+have no Problems action. The saved-work view has **zero form fields**; its statement,
 solution and pending prose survive reopening. An independent dirty editor and
 both sidebars remain visible, with the editor layout unchanged. The final native
 check also saves the latest prose bundled with an obsolete action without

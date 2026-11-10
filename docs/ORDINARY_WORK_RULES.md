@@ -18,10 +18,10 @@ unfinished work. Further controls depend on an obstacle encountered in use.
 
 The README introduction, public-introduction guidance, extension README and
 packaged tutorial describe ordinary linked notes. The existing public-readiness
-review and earlier validation reports retain their historical scope. The old
+review and earlier validation reports retain their original scope. The earlier
 document-learning handoff is marked withdrawn; the completed terminology
-handoff's later roadmap is explicitly historical. Neither can reauthorize the
-removed feature. There was no separate public-introduction draft in the checkout;
+handoff's roadmap is no longer an instruction for future work. Neither can
+reauthorize the removed feature. There was no separate public-introduction draft in the checkout;
 the README introduction and PUBLIC_READINESS guidance were updated.
 
 This is a documentation patch. Runtime JavaScript, command/menu contributions,
@@ -37,7 +37,8 @@ no new native rendered-interface observation is claimed. Runtime comparisons
 confirm unchanged JavaScript. The package verifier passed; all
 **105 installed payload files** match the VSIX.
 A full runtime regression was not repeated for these documentation changes.
-The [0.23.3 removal checks](DOCUMENT_PROBLEMS_REMOVAL.md) remain historical evidence.
+The [0.23.3 removal checks](DOCUMENT_PROBLEMS_REMOVAL.md) record the earlier
+runtime verification.
 
 Installed through the WSL host CLI without reloading the working window.
 The revised help is adopted on the next normal reload.

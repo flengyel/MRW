@@ -35,7 +35,7 @@ Another problem's solution review is linked by its recorded review-event ID,
 then exported with the exact attributed snapshot. Older `solution:<revision>`
 markers still resolve to matching same-study reviews. Missing solution evidence
 is identified as a missing solution review, rather than a missing help reply.
-The cross-session regression covers original and legacy records, draft
+The cross-session regression covers both record formats, draft
 preservation and rejection of another study's evidence. Assistance classification
 is unchanged; neither export nor structural validation checks mathematics.
 
@@ -87,7 +87,7 @@ Verified `vscode/mrw-0.23.2.vsix`: **584,637 bytes**, **108 archive files**,
 SHA-256 `ee30ed548d02589bca841210c7ab7e182de47a522081bfc326029bf9a7b9c81d`. Manifest, production JavaScript, media and Python
 bytes match the isolated build; development files are excluded. Packaged tutorial
 matches current instructions; vsce expands README links. The isolated marker
-records base `3b63d5a` plus local repair bytes; the root historical marker is intact.
+records base `3b63d5a` plus local repair bytes; the root's previous marker is intact.
 Installed by the established WSL code-server route, exit 0. All
 **106 installed payload files** match the archive,
 excluding installer-only manifest metadata. The registry selects **flengyel.mrw

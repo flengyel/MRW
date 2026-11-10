@@ -1,9 +1,9 @@
 # Companion software and recommended extensions for MRW
 
-Use VS Code's existing editing and preview tools alongside MRW. None of the
-companions below is required for MRW's ordinary Markdown navigation or retained
-source reading. Install by task; no extension pack or automatic installation is
-needed.
+Use VS Code's existing editing and preview tools alongside MRW. Install a
+companion for a specific task: writing LaTeX, running a SageMath notebook,
+checking Lean proofs or using another PDF reader. Ordinary Markdown navigation
+and retained-source reading work without these companions.
 
 ## Start with Markdown already in VS Code
 
@@ -12,10 +12,11 @@ The [built-in preview](https://code.visualstudio.com/docs/languages/markdown#_ma
 renders inline `$...$` and displayed `$$...$$` mathematics with KaTeX.
 A separate math extension is unnecessary for this basic workflow.
 
-MRW currently uses native Markdown preview commands for Return to Document.
-Its saved-source reader is a separate view with its own bundled renderer.
-Installing a Markdown preview extension does not change that reader or repair
-MRW's navigation behavior.
+MRW opens ordinary Markdown in the native preview and adds note links,
+supported note-local macros and explicit [TikZ rendering](TIKZ_WORKFLOW.md).
+Its saved-source reader is a separate view with its own renderer. Installing
+another Markdown previewer does not replace either MRW's native navigation route
+or its saved-source reader.
 
 ## Choose companions by task
 
@@ -41,8 +42,8 @@ MiKTeX does not bundle Perl.
 
 For a WSL-hosted LaTeX Workshop, the configured TeX tools must be accessible to
 that host. A Windows MiKTeX installation alone does not configure the WSL
-toolchain. MRW's separate [annotation diagram renderer](TIKZ_WORKFLOW.md) has its
-own Linux requirements.
+toolchain. MRW's [diagram renderer](TIKZ_WORKFLOW.md), used for note fences and reader
+annotations, has its own Linux requirements.
 
 ## Obsidian
 
@@ -78,7 +79,7 @@ requirements.
 ## Identify an existing Markdown previewer
 
 In Extensions (**Ctrl+Shift+X**), search `@enabled markdown` and inspect the name,
-publisher, identifier and version in both Local and WSL groups. Search
-`@builtin markdown` for native features. Note the command used to open the
-preview: an installed extension need not own the visible preview.
+publisher, identifier and version in the Local and WSL/SSH groups. Search
+`@builtin markdown` for native features. The command used to open a preview
+identifies which previewer is in use; installation alone does not select it.
 [Extension filters](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace#_extensions-view-filters).

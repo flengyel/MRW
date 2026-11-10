@@ -1,8 +1,11 @@
 # Proof outlines and vertex deletion
 
-If the proof outline does not open within 15 seconds, **Retry** requests it
-again. Host errors and rendering failures appear in the view. Patch 0.16.1
-repairs the 0.16.0 wrapper-message filter that left the loading screen visible.
+Open an explicit proof outline to inspect its claims, sources and proposed
+dependencies. **Delete vertex** simplifies the displayed graph; it preserves
+the original steps and can be reversed. This is a reading aid, not a proof checker.
+
+If the outline does not open within 15 seconds, **Retry** requests it again.
+Host errors and rendering failures appear in the view.
 
 ## Graph and tagged Stacks passage (0.16.0)
 
@@ -35,13 +38,13 @@ The ordinary source reader retains its previous frame-free policy. No live page
 content is added to an AI request or written into the saved source store.
 
 An **Open Proof Outline** icon now appears in the title bar of a
-`.mrw-proof.json` editor, alongside the existing command-palette and Research
-Tools command. Selecting a JSON file in Explorer still opens its ordinary editor;
+`.mrw-proof.json` editor, alongside the Command Palette and Contents view menu.
+Selecting a JSON file in Explorer still opens its ordinary editor;
 the icon opens the interactive graph without another MRW-sidebar step.
 
 Run **MRW: Open Proof Outline…** and choose a `.mrw-proof.json` file in the
-workspace. The command also uses an active file with that suffix. Research Tools
-lists it alphabetically. Opening an outline starts no network, model or Lean job.
+workspace. The command also uses an active file with that suffix. Opening an
+outline starts no network, model or Lean job.
 
 Each claim has a statement, attributed explanation, variables/hypotheses and
 source citations. The graph shows dependency paths. The derivations under each
@@ -54,9 +57,10 @@ claim specify premises needed **jointly**; different derivations are alternative
   Premises, conclusions and local scope boundaries stay visible.
 - **Use AI outline** applies the attributed selection saved in the file. It
   invokes no model. The reader can change that selection one vertex at a time.
-- **Edit summary** opens the claim in the ordinary JSON editor. Edit the text
-  and attribution there; **Refresh** reads current editor text, including unsaved
-  changes. VS Code owns editing, undo, save and recovery.
+- **Edit summary** opens an inline form for the claim, explanation and
+  attribution. **Save summary** applies and saves a document edit to the outline
+  file. The JSON file can also be edited directly; **Refresh** reads its current
+  editor text, including unsaved changes. VS Code owns undo and file recovery.
 - **Ask AI…** prepares a question using only the exact outline JSON, through the
   existing preview/Send workflow. Source files are not added implicitly. An unsent
   request cannot be replaced by this action. Nothing is sent until **Send exact

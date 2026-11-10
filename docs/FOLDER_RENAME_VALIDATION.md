@@ -19,21 +19,21 @@ Reconnection requires an explicit choice and project mapping in an empty,
 unbound workspace. It compares the inspected identity with the prepared locator
 and invokes the existing complete-store adoption. Locators never establish
 authority; the Python binding, identities and content validation still do.
-No reference grammar, record schema, historical source path, compiler, provider
+No reference grammar, record schema, original source path, compiler, provider
 or Qt behavior changes. Ordinary directory renaming remains a file-tool action.
 
 ## Automated evidence
 
 Command tests use disposable Linux fixtures and the real Python bridge, with a
 VS Code API double. They cover actual filesystem rename, opening a new workspace
-storage home, explicit reconnection, unchanged exact legacy passage links and
-Unicode ranges, retained AI attribution, subsequent annotation saving and
+storage home, explicit reconnection, unchanged exact passage links from before
+the move and Unicode ranges, retained AI attribution, subsequent annotation saving and
 restart. No synthetic fixture is counted as user study or mathematical benefit.
 
 Additional cases cover unsaved reader drafts, cancellation, unfinished cleanup,
 shortcut publication failure after a committed move, mismatched shortcut/store
-identity, an already bound workspace and an existing legacy study refusing a
-merge. The existing shared Python artifact suite covers transactional failures,
+identity, an already bound workspace and an existing study in the earlier
+storage layout refusing a merge. The existing shared Python artifact suite covers transactional failures,
 interruption recovery, stale clients, required investigation records, diagram
 retention and explicit project mapping.
 

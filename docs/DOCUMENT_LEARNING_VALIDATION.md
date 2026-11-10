@@ -63,7 +63,7 @@ by resume and Return. No product assertion was removed for these checkpoints.
 
 Screenshots show high-contrast native Commands button borders, document
 Contents, and both sidebars. Other themes/platforms, PDFs, live AI, Obsidian,
-Sage and Lean were not exercised in this increment. Historical orientation
+Sage and Lean were not exercised in this increment. Earlier orientation
 reports remain unchanged; this records the additional observed scope only.
 Genuine notes, annotations and study records were not fixtures or rewritten.
 The working window was not switched, closed, reloaded or rearranged.
@@ -76,7 +76,7 @@ Verification checked **106 archive files**, the production manifest and runtime
 bytes, with development fixtures excluded. All production JavaScript matches
 the native fixture. The packaged tutorial and source README match this checkout;
 vsce expands relative README links. The isolated build marker records base
-`2503d0e0734a219ae05d6dec4c132915cbf5729a` plus local changes. The root's historical
+`2503d0e0734a219ae05d6dec4c132915cbf5729a` plus local changes. The root's previous
 marker was preserved. No runtime code changed after the final regression pass.
 
 Installation through the established WSL `code-server --install-extension …

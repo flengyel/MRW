@@ -45,8 +45,8 @@ create the required namespaces; the coding sandbox cannot. Native checks run
 outside the coding sandbox under the explicitly authorized tool calls.
 
 The diagram index uses existing mutable publication and its SVG uses existing
-immutable blobs. The legacy move inventory now recognizes the new index. One
-focused disposable Linux regression initially exposed the omitted index, then
+immutable blobs. The move inventory for the earlier storage layout now recognizes
+the new index. One focused disposable Linux regression initially exposed the omitted index, then
 passed after that ownership-list fix. It also verifies exact saved images after
 a supported move and refusal of a stale render client. No real artifact store
 was moved and Windows storage qualification was not reopened.

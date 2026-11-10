@@ -19,7 +19,7 @@ This is user-reported execution through the notebook connection, with separately
 observed container status. No new screenshot, independent cell-output inspection,
 save/close/reopen observation or fresh-kernel rerun is claimed. It does not
 establish mathematical usefulness. The October 16 campaign below remains
-historical evidence; it was not repeated.
+a record of that earlier run; it was not repeated.
 
 ## Original companion validation
 

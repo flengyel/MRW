@@ -47,7 +47,7 @@ unresolved across new/repeated imports and exercise Return and refresh.
 
 HTMLParser splits literal `<` and entity text into separate callbacks. Kerodon
 display now coalesces these before math parsing and displays bounded equation
-arrays. Legacy manifests still validate through their original projection; the
+arrays. Earlier manifests still validate through their original projection; the
 new display derives from exactly the same source and spans without rewriting
 them. The reading toolbar exposes **Open original source ↗** for the current
 canonical page in the external browser.
@@ -245,7 +245,7 @@ final study persistence run passes 16. Actual native launch did not reach its
 runner, so do not turn browser/API checks into native acceptance. No user-window
 reload was invoked. The first action after saving/reloading is **Study Current
 Material** from a selected retained passage; **Resume Study** restores new local
-sessions, and legacy **Resume Proof Study** retains its earlier file workflow.
+sessions, and the earlier **Resume Proof Study** command retains its earlier file workflow.
 
 ## Prior delivery notes
 
@@ -258,7 +258,7 @@ regressions and the parent-frame browser check pass. Both new defect regressions
 fail against HEAD and pass with the repairs: discard only unpublished,
 unjournaled call-owned candidate generations; refuse ordinary Ask replacement
 before touching an unsent draft/preview. Preserve uncertain publication and
-interrupted Send recovery. Do not sweep historical generations.
+interrupted Send recovery. Do not sweep earlier generations.
 
 **0.17.0** adds Prepare Proof Study and Resume Proof Study. Reader selection
 uses the existing scoped reference and exact-assistance-quotation core. The
@@ -630,7 +630,7 @@ A Codex-attributed TikZ annotation was saved beneath **08ZH — Proof**, annotat
 the pullback of the diagonal with the fiber product upper-left. The requested
 diagram was rendered and reopened from its retained SVG. All preceding source
 records and annotations, including 08ZG, were preserved exactly. The study store
-now has this additional annotation; the old pre-move outline hash is historical.
+now has this additional annotation; the pre-move outline hash records the earlier state.
 Preserve the new note and render as genuine study work.
 
 The 0.13.3 package and 64 installed runtime files were verified; VS Code reported
@@ -769,7 +769,7 @@ is a locator only. After closing, an ordinary file-tool rename and reopening,
 the user explicitly chooses the prepared study and confirms its project mapping.
 The core verifies the complete identity/content before adopting into an empty
 workspace. Old scoped passage references, annotations and attribution remain
-readable; no mathematical or historical source record is rewritten.
+readable; no mathematical or earlier source record is rewritten.
 
 The final **0.12.0** package is verified and installed in WSL: 66 archive files,
 62 installed runtime/license files, production manifest and README matching;
@@ -797,7 +797,7 @@ is preserved. Editor recovery, live drafts, unsent requests and host-local view
 pins/preferences are not transferred. Save first. A parent rename requires
 preparing every nested study separately; the development checkout cannot stand
 in for the genuine study's workspace. Earlier commands alone do not discover or
-repair an arbitrary already renamed legacy workspace.
+repair an arbitrary already renamed workspace using the earlier storage format.
 
 Do not rename the real checkout or move the genuine Stacks store as an
 implementation check. The user is holding off; their actual preparation and
@@ -1042,7 +1042,7 @@ repository-visibility change is authorized by that future possibility.
 
 The user adds an Obsidian link for later and reports it untested in this setup.
 Keep it optional and its user test pending; older scoped validation remains
-historical evidence. Do not open/index a vault, create a new one, rewrite notes
+evidence for that version. Do not open/index a vault, create a new one, rewrite notes
 or repeat the Obsidian campaign for installation documentation.
 
 The immediate purpose is reviewing mathematics with AI directly in MRW's source
@@ -1073,7 +1073,7 @@ entered the authenticated URL privately, completed kernel selection and reported
 the factorization worked. Creating a new cell was not obvious. The getting-started
 tutorial now explicitly describes **+ Code**, clicking into the cell, **Ctrl+Enter**,
 **Shift+Enter**, saving and **Esc**, then **B**. The validation report separates
-this user report from observed container status and historical October tests.
+this user report from observed container status and the October tests.
 No notebook bytes, kernel, credentials or MRW retained study work were inspected
 or changed. No new save/reopen or mathematical-usefulness acceptance is claimed.
 
@@ -1104,7 +1104,7 @@ WSL manifest. SagePod's checkout is now `4bc1bc3`; its pre-existing untracked
 over reading token-bearing logs. No authenticated URL was retrieved. The default
 `sagepod` container is absent from the current Podman inventory; the separate
 SageQueue `sagemath` container is running on port 8888. Leave it alone. Do not
-treat the October 16 historical running SagePod/8889 result as current service
+treat the October 16 running SagePod/8889 result as current service
 availability. No setup/start/restart, permission, mount, sync or kernel action
 was taken. A fresh installed-window notebook connection is not claimed.
 
@@ -1672,7 +1672,7 @@ mount defaults prove insufficient. Existing rejection stays in force.
 
 Nineteen focused storage regressions passed again. This documentation/setup-plan
 follow-up does not change runtime code, so the required 0.7.0 final regression
-evidence remains historical: 48 Node cases; **345 Python tests run = 286 passed
+evidence remains specific to that version: 48 Node cases; **345 Python tests run = 286 passed
 and 59 skipped**. No packaging/bridge race or broad acceptance campaign is needed.
 
 The independent physical post-move Obsidian round trip now passed on the existing
@@ -1704,14 +1704,14 @@ explicit recovery. Journals never override observed binding bytes. Incomplete
 uncommitted destinations without a complete deletion inventory are retained for
 inspection, with their path reported. Do not recursively delete workspace storage.
 
-Note opening/management resolves both verified legacy and logical references
+Note opening/management resolves both verified path-based and logical references
 through the existing Python resolver before matching an association's exact
 retained target. Replacing/removing an existing association preserves its stored
 reference bytes; a current region's changed range never selects an earlier pin.
 
-Persistent store/project UUIDs and recomputed verified legacy mappings preserve
+Persistent store/project UUIDs and recomputed verified mappings for earlier references preserve
 existing `mrw-outline:v1` IDs, exact source hashes/ranges and stored note links.
-Historical source paths/record bytes remain immutable. Explicit aliases resolve
+Original source paths and record bytes remain immutable. Explicit aliases resolve
 retained dependencies. Another local path needs full manifest verification and
 explicit project mapping into an empty/unbound workspace, with no merging.
 Use the mapped workspace and **Open Link from Clipboard** for links whose saved
@@ -1752,7 +1752,7 @@ authentication; no second-host synchronization acceptance is claimed.
 The package is `vscode/theorem-terminal-0.7.0.vsix`; earlier packages are preserved.
 Normal installed-workspace restart followed the same pre-move URI through the
 Windows protocol handler and independently confirmed the exact Unicode selection.
-After the validated legacy/logical note-target correction, a fresh actual host
+After the validated path-based/logical note-target correction, a fresh actual host
 also dispatched its existing associated note through the production command.
 The physical post-move Obsidian hyperlink click still did not establish a fresh
 exact retained selection, so the complete desktop round trip remains unconfirmed.
@@ -1841,7 +1841,7 @@ active Markdown editor. Explicit note association/open/replacement/removal uses
 only validated Obsidian open URLs. Each association keeps its exact reference
 in a separate private mutable sidecar. Earlier pinned associations remain
 accessible after region edits. Existing outlines, annotations, retained sources,
-evidence and legacy `mrw-outline:v1` links remain compatible. Workspace/host
+evidence and existing `mrw-outline:v1` links remain compatible. Workspace/host
 routing is separate from target identity; wrong windows offer a recovery action
 and never resolve against an unrelated project. No transient window/callback
 identity, vault indexing, sync, plugin or background server is added.
@@ -2253,7 +2253,7 @@ research-state behavior that the host does not supply. Do not reproduce Qt
 buffers, checkpoint machinery, widgets, or splitter constraints in the extension.
 R3/R3.1 is implemented in VS Code; proof-outline vertex elimination is not.
 
-## Separate Qt study observation and historical evidence
+## Separate Qt study observation and evidence for that version
 
 The active roadmap is
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
@@ -2264,7 +2264,7 @@ verified. R3.1 can explicitly end that sole active investigation without
 deleting its records, preserves latest visible handoff edits, rejects stale
 restore completion and then permits a new bounded investigation after restart.
 Reviewed repair `d91e35bc56d5e66778c115e1c8ffea4d6937cd28` is integrated
-in `main` as a historical checkpoint. The focused controller/widget
+in `main` as an earlier checkpoint. The focused controller/widget
 gate passed 21 deterministic tests; the installed module matches the integrated
 source and its GUI entry point launched against a durable study project. A
 private ordinary note has been prepared outside this repository. The selected

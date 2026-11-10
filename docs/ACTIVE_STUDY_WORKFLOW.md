@@ -1,243 +1,179 @@
 # Optional source study
 
-Document Problems was removed in 0.23.3. Opening and following notes remains ordinary
-reading. Earlier document-linked work is readable without its forms; see
-[the preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md). The explicitly invoked
-source-study tools below remain separate from document navigation.
+Use these tools when a selected passage would benefit from recorded attempts,
+companion explanations or scheduled recall. They are separate from ordinary
+[document reading](READING_OUTLINE_WORKFLOW.md): opening a note or following a
+link creates no study. Questions and solutions can remain in their existing
+notes. The document Problems interface was removed in 0.23.3; earlier saved work
+remains readable without its forms. See the
+[preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md).
 
-Select a passage in the retained reader and choose **Study current material**.
-A graph claim with a retained citation has **Study this claim**. For an ordinary
-saved text, Markdown or TeX file, select text and run **MRW: Study Current
-Material**; MRW uses its existing exact retention path. Unsaved source changes,
-PDF extraction and notebook state are outside that path. An explicit saved
-editor selection takes precedence over a previously remembered reader passage.
-The selection is captured before asynchronous work; ordinary focus changes leave
-the study's source fixed.
+To start, select a saved passage and run **MRW: Study Current Material**, or choose
+**Study current material** in the retained reader. A graph claim with a retained
+citation also offers **Study this claim**. Saved text, Markdown and TeX selections
+are supported; unsaved source changes, PDF extraction and notebook state are
+outside this path. An explicit editor selection takes precedence over the last
+reader passage. Switching tabs afterward does not change the selected source.
 
-The study opens without a question popup, subject questionnaire or graph.
-**Enter a question** creates a definition, hypothesis, missing-step, argument or
-application task. A reference answer is optional. Identify the question and
-answer authors/origins. Hints and exact source references are editable in the
-form. Editing creates a new revision with fresh review state; earlier questions
-and observations remain in history. **Add prerequisites…** explicitly expands
-the selected source set into a separate saved context; the preceding context
-keeps unfinished work. No unrelated open tabs enter that set.
+**Enter a question** creates a question about a definition, hypothesis, missing
+step, argument or application. A reference answer and hints are optional. Record
+the authors/origins of the question and answer. Editing creates a new revision
+with fresh review state while preserving earlier questions and observations.
+**Add prerequisites…** creates a separate context with the additional selected
+passages; it preserves unfinished work in the preceding context and includes no
+unrelated tabs.
 
-Alternatively, **Request questions from Codex** copies the exact selected
-text, source revisions and one bounded question-object example. Paste it into
-Codex, then copy the complete returned object and **Import questions from
-clipboard**. At most ten questions, four hints per question and 256 KiB are
-accepted. Unknown fields, duplicate JSON keys, changed source entries and
-unselected references are rejected. Imported questions are available offline.
-**Copy help request for Codex** requests ordinary explanatory prose; graph JSON is not
-required. Clipboard transfer remains explicit. MRW invokes no provider or
-compiler in these actions.
+Alternatively, **Request questions from Codex** copies the selected text, source
+revisions and a question-object example. Paste it into Codex, then copy the
+complete returned object and choose **Import questions from clipboard**. Imports
+accept at most ten questions, four hints per question and 256 KiB. Changed source
+entries, unselected references, duplicate JSON keys and unknown fields are
+rejected. Imported questions remain available offline. These clipboard actions
+make no provider request and run no compiler.
 
 ## Attempts and continuation
 
-An empty study shows its source and **Enter a question** / **Request questions
-from Codex**. Once questions are available, choose **Begin short block**, or
-deliberately choose **Attempt** on a question.
-Type work or select **Worked on paper**, then **Submit answer**. Every submission
-has an immutable snapshot and sequence. Submitting again links another snapshot.
-Hints, reference-answer reveals and source exposure keep their event order.
-Revealing an answer after submission cannot alter the earlier snapshot.
+Choose **Begin short block** or **Attempt** on a question. Type the work, or select
+**Worked on paper**, then **Submit answer**. Each submission preserves an
+immutable snapshot. **Submit revised work** adds another snapshot to the same
+unfinished attempt.
 
 Report **Unaided success**, **Completed with help**, **Unresolved** or **Not
-assessed** and whether the source was consulted before that submission. Unrecorded outcome and consultation choices are checkpointed by attempt ID
-through rerenders and pause/reopen; they are never submitted automatically. This
-is a reader report, not a mathematical check. Unknown consultation stays unknown.
-**Correct outcome** links a correction rather than rewriting an earlier event.
-Reference answers retain their attribution. AI proposal format/source validation
-does not check their mathematical validity. External checking remains in the
-existing checked-record workflow.
+assessed**, and whether the source was consulted before submission. These are
+reader reports, not mathematical checks. **Correct outcome** preserves the earlier
+report and records its correction. Unsubmitted report choices survive pause and
+reopen; they are never submitted automatically.
 
-The selected source is visible for orientation before an attempt. Starting recall
-conceals the source and reference answer inside the study. Revealing them records
-possible exposure, not that they were read. Concealing them again does not erase
-that attempt’s exposure; prior study does not permanently exclude later recall. The reader/graph can remain available elsewhere.
-MRW does not monitor other applications or infer consultation from tab focus.
-Report consultation explicitly. Switching to Codex leaves the study context
-fixed. A deliberate source change saves the earlier attempt with its source.
+Starting recall conceals the source and reference answer inside the study.
+Revealing either records possible exposure, without claiming that it was read.
+Later exposure does not change an earlier submission. The source may still be
+visible in another pane or application: MRW does not monitor those applications
+or infer consultation from tab focus. Report consultation explicitly.
 
-**Pause / save** checkpoints the attempt and form. **MRW: Resume Study**, or a
-study row in **Studies**, restores the question and draft. Draft checkpoints are
-batched separately for each study; Pause/save, close and shutdown flush dirty
-studies rather than just the active one. Messages carry study, attempt and draft
-identities; valid delayed drafts stay with their source, and stale or unknown
-identities are rejected before mutation. Abrupt termination can still lose
-characters not yet checkpointed. A failed question save retains the draft;
-failed cancellation restores a checkpointed form. Native
-VS Code ordinary files, reader annotation drafts, earlier `.mrw-study.json`
-files and proof graphs retain their existing owners. The earlier proof-study
-view offers **Questions and attempts** to use its selected passages here.
+**Pause / save** saves the current work. **MRW: Resume Study**, or its row in
+**Studies**, restores the question and draft. After recording an outcome or
+skipping, **Continue with revised work** starts a linked, assisted attempt;
+**Next question** starts independently. Submission or Pause alone does not finish
+an attempt. Finish or skip it before switching questions.
+
+Drafts are checkpointed separately for each study. Pause/save, close and shutdown
+flush pending drafts; abrupt termination can lose text not yet checkpointed.
+Failed saves retain the draft and report the error. Ordinary files, reader
+annotations and proof-study files keep their separate save/recovery behavior.
+The [proof-study view](PROOF_STUDY_WORKFLOW.md) offers **Questions and attempts**
+for its selected passages.
 
 ## Retain companion help
 
-**Copy help request for Codex** includes the exact selected source text and
-revisions, question/attempt identity, current unsent draft, and the latest
-immutable submission with its snapshot reference and exact text when available.
-The draft and submitted work are labeled separately. The outgoing request has
-its own retained snapshot. Copying proves a request, not consultation or benefit.
+**Copy help request for Codex** copies the selected source text and revisions,
+question, current draft and latest submitted work. Draft and submitted text are
+labeled separately, and the outgoing request is retained. This action requests
+ordinary explanatory prose; no graph JSON is required.
 
-Copy the reply from the companion, then **Paste companion response…**. Review
-ordinary mathematical prose and equations, correct attribution when needed and
-**Retain response**. No graph/question JSON is required. The pasted original is
-preserved; text edits default to Reader attribution, and **Edit response** creates
-a separately identifiable revision. Successive replies do not overwrite earlier
-ones. Request, attempt, source signatures and any originating adaptation choice
-remain associated. With one request, association is automatic. With multiple
-requests for the attempt, choose the request/purpose or leave the reply
-unassociated; recency does not decide. An edited association creates an attributed
-revision retaining the original text and earlier association. Pending response
-drafts must be retained or discarded before Paste/Edit opens another response,
-even when the pending text is empty. Manual association does not authenticate
-the reply’s origin.
+After copying a reply, choose **Paste companion response…**, review the prose and
+attribution, then **Retain response**. The pasted original is preserved. Edited
+text defaults to Reader attribution; **Edit response** creates a new revision.
+Retained help appears beside the work and returns on Resume.
 
-Retained help appears beside the work and returns on Resume. Response drafts
-remain editable after a failed checkpoint. Up to 64 responses/revisions and 200
-help requests fit one study; replies are limited to 64 KiB. Pasted preview,
-retention and reveal opportunities have separate events. Previewing help before
-submission marks that submission as exposed, including an immediate assisted
-revision. Receiving help afterward does not relabel the earlier submission.
-External consultation remains the reader’s report, possibly unknown.
+A reply is associated automatically when the attempt has one request. With
+multiple requests, choose the corresponding request or leave the reply
+unassociated. Changing an association preserves its earlier version. Attribution
+and association are supplied by the reader; neither authenticates the reply.
+Save or discard a pending response draft before opening another response, even
+if the pending text is empty. A failed checkpoint leaves that draft editable.
 
-Before an outcome, **Submit revised work** adds a new immutable submission to
-the same attempt. After an outcome or skip, **Continue with revised work** starts
-an explicitly linked new attempt and preserves the earlier work/outcome. That
-immediate continuation is assisted; a deliberately new independent recall attempt
-conceals earlier help and starts fresh exposure tracking. **Next question** also
-starts independently. Submit or Pause alone leaves the current attempt unfinished;
-record an outcome or skip before switching questions.
+A study accepts up to 64 responses/revisions and 200 help requests; replies are
+limited to 64 KiB. Previewing or revealing help before submission marks possible
+exposure for that submission. Receiving help afterward does not relabel earlier
+work. Copying a request or retaining a reply does not establish that help was used
+or that it was useful.
 
-**MRW: Open Study Example** explicitly retains the bundled original Markdown
-example and opens two attributed questions through these same mechanisms. Its
-history is marked `practice_demo` in normal use, separately from production
-research and developer fixtures. Existing work is checkpointed and preserved.
+For an offline example, **MRW: Open Study Example** opens original attributed
+text and two questions. Its history is labeled `practice_demo`, separately from
+research use and automated fixtures. Existing work is preserved.
 
 ## Review and effort
 
-**Keep for spaced review** is explicit. Imported/saved questions do not automatically
-become continuing work. **Retire** preserves records. Due questions from the
-selected sources come first. A matching exact prerequisite pin can reuse a
-question from another recent study; different question/source revisions do not
-inherit history. Current/recent studies are bounded to 30 locators, and question
-revisions to 200 per study. This is not a corpus-wide review index.
+**Keep for spaced review** enrolls a question. Creating or importing one does not.
+**Retire** removes it from review while preserving its records. Due questions
+from the selected sources come first. A matching exact prerequisite can reuse a
+question from another recent study; different question or source revisions do
+not inherit its review history. The current index covers up to 30 recent studies
+and 200 question revisions per study, not an entire corpus.
 
-Default blocks stop after three questions or approximately five minutes, at an
-attempt boundary, and admit at most one new question to the block. Newly kept
-questions also count as new. Settings `mrw.studyQuestions`, `mrw.studyMinutes`
-and `mrw.studyNewQuestions` adjust these prototype limits. Explicit **Attempt**
-selection records a reader override; **Start another block** continues without
-a forced catch-up queue. The scheduler never interrupts a live answer.
+Blocks default to three questions, about five minutes and at most one new
+question. Adjust these limits with `mrw.studyQuestions`, `mrw.studyMinutes` and
+`mrw.studyNewQuestions`. A block stops at an attempt boundary, never during an
+answer. **Attempt** permits a direct choice, and **Start another block** continues
+without a compulsory catch-up queue.
 
-The extension now requires VS Code 1.95+ for its Node 20+ host runtime
-([Microsoft runtime release notes](https://code.visualstudio.com/updates/v1_95#_electron-32-update)).
-The versioned adapter bundles maintained **ts-fsrs 5.4.2** (MIT), its default
-parameters and retention, with fuzz disabled for deterministic decisions:
-`ts-fsrs/5.4.2:defaults:no-fuzz:adapter-2`. Nothing is fitted from these sessions.
-Reader-confirmed unaided recall maps to **Good**. Explicit unresolved or
-help-dependent recall maps to **Again**, with the original observation retained.
-Only kept, current recall revisions with an explicit consultation report qualify.
-Opening, rereading, skips, interruption, missing assessment, AI assessment and
-application tasks do not update recall. Each attempt maps once. A correction
-replays the unchanged question's observations and replaces its mapped review,
-without adding a second review. Retired questions still reconstruct their
-historical reviews after corrections, while staying excluded from selection
-until explicit recall admission. Reviews use the original submission time; late
-assessments replay subsequent observations chronologically. Experienced delay is
-pinned to each submission and its preceding eligible review, never the correction
-clock. Earlier records without that evidence report unknown. Learning intervals are FSRS estimates, not
-mathematical understanding or mental effort. The pinned implementation and
-license hashes are checked during package verification.
+Scheduling uses bundled ts-fsrs 5.4.2 with default parameters and retention, and
+with fuzz disabled (`ts-fsrs/5.4.2:defaults:no-fuzz:adapter-2`). It fits no model
+from these sessions. Reader-confirmed unaided recall maps to **Good**; unresolved
+or help-dependent recall maps to **Again**. Only current, enrolled recall
+questions with an explicit consultation report qualify. Opening, rereading,
+skipping, interruption, missing assessment, AI assessment and application work
+do not update recall.
 
-At a block boundary, or through **Report effort**, the last completed attempt
-can receive the optional 1–9 item “How much mental effort did that last attempt
-require?” Missing, declined and not sampled are distinct. High effort (prototype
-threshold 7–9) with repeated difficulty can offer a smaller step, prerequisite,
-worked example or pause. High effort with success preserves the challenge.
-Missing ratings, long duration and focus changes imply no load diagnosis.
-Help proposals use the same explicit Codex clipboard handoff. Offers require reader-confirmed recall evidence and effort linked to that
-particular attempt. Correcting an outcome withdraws or replaces any unsupported
-outstanding offer using that attempt's original effort response; the earlier
-offer and withdrawal remain events. Obsolete offer choices are rejected.
-AI assessments, application work and unknown consultation
-are kept separate. Offers and choices record their evidence; they do not change recall outcomes to force an interval.
+A correction recalculates the affected reviews using their original submission
+times; it does not add a second review. Retired questions stay out of selection.
+Missing earlier timing evidence remains unknown. The resulting intervals are
+scheduling estimates, not measures of mathematical understanding or mental effort.
+
+At a block boundary, or through **Report effort**, an optional 1–9 rating asks:
+“How much mental effort did that last attempt require?” Missing, declined and
+unsampled ratings remain distinct. High reported effort (7–9) with repeated
+difficulty can offer a smaller step, prerequisite, worked example or pause.
+High effort with success preserves the challenge. Offers require reader-confirmed
+recall evidence and effort linked to that attempt. Correcting the outcome
+withdraws or replaces unsupported offers while preserving their earlier records.
+
+Long duration, focus changes and missing ratings produce no cognitive-load
+diagnosis. AI assessments, application work and unknown consultation remain
+separate. Help offers use the explicit Codex clipboard handoff and do not change
+reported outcomes to force a review interval.
 
 ## History and export
 
-**Studies** replaces the Research Tools command list using the same movable view
-ID. It contains recent studies, their exact source rows and questions. Its book
-action studies current material; Resume, Inspect, Export and source operations
-are in **…**. All earlier command IDs remain in the Command Palette. Source and
-question rows open that content; there is no new full source explorer.
+**Studies** contains recent studies, sources and questions. Its **…** menu and
+the Command Palette provide Resume, Inspect, Export and source operations.
 
-One recorder instruments MRW command/dialog and reader/graph/study boundaries.
-It records navigation, question/review decisions, submissions, exposure, effort,
-adaptations, operations, cancellation, error, elapsed operation latency and
-resumption. It does not record unrelated editor/application actions or keystrokes
-as history. Draft checkpoint messages are not interaction events. Focus-away
-intervals are observations, never active-thinking time or cognitive-load scores.
+MRW records its navigation, submissions, question/review decisions, exposure,
+effort reports, help offers, cancellations, errors, operation times and
+resumption. Records include available source/question/attempt identity and
+software versions. It does not record unrelated application activity or
+keystrokes as history. Focus-away intervals are not active-thinking time.
+Observed actions, reader reports, AI assessments and derived estimates remain
+distinct.
 
-Every event has schema, session/sequence, event ID, UTC and monotonic times,
-software commit/version, policy, scheduler, origin and available study/source/
-question/attempt identity. Observed actions, reader reports, AI assessments and
-derived estimates remain distinct. Source-navigation events before a study
-retain the available source identity. No earlier 0.17.0 events are fabricated.
+Study checkpoints live in `active-studies-v1/` and events and immutable snapshots
+in `study-history-v1/`, within private VS Code workspace storage. They are not
+repository files or package resources. Managed saved-source moves do not transfer
+this state, and cross-machine or renamed-workspace migration is not implemented.
+Keep the original workspace storage when continuing work. One local writer per
+workspace is supported.
 
-Personal state is local to VS Code's private workspace storage:
-`active-studies-v1/` holds bounded study checkpoints; `study-history-v1/` holds
-batched event files and content-addressed immutable submission/question snapshots.
-Neither directory is Git content, a VSIX resource, a telemetry service, or part
-of managed retained-source migration. Workspace rename/machine transfer of this
-new learning history is not implemented; earlier retained-source move guarantees
-are unchanged. The active study and recorder use one local writer per workspace.
-Recorder failure exposes a history gap in the study/status bar, buffers events,
-and keeps reading and live drafts usable. A failed study checkpoint is reported;
-keep the view open or copy the draft. A successful checkpoint uses atomic file
-replacement, with the latest completed checkpoint available on restart.
+A recorder failure displays a history gap and buffers events while keeping
+reading and drafts usable. A failed study checkpoint is reported separately;
+keep the view open or copy the draft. Recovery preserves conflicting stored
+work rather than overwriting it. The [design](ACTIVE_STUDY_DESIGN.md) and
+[validation report](ACTIVE_STUDY_VALIDATION.md) describe persistence and recovery
+in detail.
 
-Snapshot publication writes and synchronizes a complete operation-owned temporary
-file before linking its immutable digest name without overwrite. Partial-write
-failure leaves buffered events retryable; cleanup removes only the owned inode.
-Existing mismatched snapshots and unrecognized files remain intact and keep the
-history gap visible. A retry can record later events after successful recovery.
+**Inspect history** shows a readable summary and the latest 100 events.
+**Export history…** selects recorded sessions and creates a readable comparison
+or a JSON export with linked submission, request and help snapshots. Supporting
+context outside the selection is labeled; unrelated sessions are excluded, and
+missing context is reported. Exports use native document creation/save and refuse
+overwrites. Only explicit export writes personal history outside private storage.
 
-A shared question may belong to another recent study. Before updating that
-owner, the active checkpoint retains the outcome and a bounded `pendingOwners`
-intent: owner/question/revision, preceding digest and exact derived question
-state. This checkpoint is authoritative for recovery. Retry, dirty flush and
-restart reconcile unchanged or already-applied owner state idempotently, then
-clear the intent. A conflicting owner checkpoint is preserved and reported;
-MRW does not overwrite it or invent another review. This is a single-writer
-workspace recovery boundary, not synchronization or a general transaction store.
-Event history remains separately buffered and may report a gap.
+Reports distinguish attempts, submitted revisions and assessments, with their
+missing values and denominators. They include delayed recall of at least one
+day, help/exposure, navigation, pauses, errors, operation times and review
+choices. Corrections and later effort responses remain linked to the original
+attempt, with their own dates and software versions recorded separately.
+Supporting context does not add extra attempts to the selected sample.
 
-**Inspect history** displays the current study's readable summary and latest
-100 events. **Export history…** selects recorded sessions (with dates/versions)
-and exports either a readable comparison or events plus submitted/request/help
-snapshots. Linked context outside the selected sessions is labeled supporting;
-unrelated sessions/studies are not added. Missing context is reported and
-unsupported derived values are excluded.
-Exports use native document creation/save and refuse overwrites. Only explicit
-export writes personal history outside private storage.
-
-The report includes denominators, missing outcomes/ratings, separately identified
-application tasks, delayed recall (at least one day), help/exposure, navigation,
-pauses/resumption, errors, operation latency and review admission/deferral/
-retirement. Comparisons across versions are descriptive: task mix, exposure and
-elapsed intervals differ. Test fixtures carry a separate origin and are never
-presented as user observations. No learning benefit is inferred from test counts.
-
-Corrections resolve across releases before comparison. An attempt and its
-submission revisions belong to the release where that attempt occurred;
-assessment/correction dates and versions are listed separately. Attempt,
-submission-revision and assessment denominators are distinct and event IDs are
-deduplicated. Adaptation selections, copied requests, retained replies and display
-opportunities are named separately; none establishes help use or benefit.
-
-Effort offers and responses resolve globally by task and offer IDs before release
-or selected-session grouping. The observation belongs to the original task;
-response UTC/version are listed separately. Supporting-only earlier tasks resolve
-links without adding selected attempts, assessments or unsampled-effort counts.
-Missing links remain unknown rather than becoming a numerical sample.
+Comparisons across releases are descriptive: tasks, exposure and elapsed intervals
+may differ. Automated fixtures remain separate from reader observations. Neither
+test counts nor these reports establish a learning benefit.

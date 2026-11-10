@@ -1,337 +1,227 @@
-# Notes in place and optional Obsidian associations — 0.22.5
+# Obsidian and notes in place — 0.23.5
 
-MRW opens ordinary notes in place and provides scoped note links and backlinks
-without Obsidian or text import. It separately connects supplied Obsidian note
-URLs to saved sources and exact retained passages. Obsidian owns its note
-editing and rendering; VS Code owns ordinary files opened in MRW. MRW owns its
-saved-source reader and retained material.
-Handwritten derivations can stay handwritten: link scans, PDFs or other ordinary
-references from the Obsidian note. No LaTeX transcription is required.
+MRW and Obsidian can open the same Markdown notes. MRW supplies Contents,
+links, backlinks and Return in VS Code; Obsidian retains its own editing and
+rendering. No conversion, import or Zettel metadata is required. Handwritten
+work can remain in scans, PDFs or other attachments linked from a note.
+
+MRW also supports links between Obsidian notes and separately retained sources
+or passages. Those links are optional and are described below.
 
 ## Configure Obsidian with MRW
 
-Install Obsidian on the desktop and open the vault there. In MRW, run **Choose
-Notes Folder…** and select the same vault root: the folder containing `.obsidian`
-and the notes, rather than the `.obsidian` folder itself. The picker stores
-`mrw.notesFolder` for the current workspace. Both settings below can also be
-configured in VS Code Settings.
+Open the vault in Obsidian. In MRW, run **Choose Notes Folder…** and select the
+same vault root: the folder containing `.obsidian` and the notes, rather than
+`.obsidian` itself. Both settings can also be changed in VS Code Settings.
 
 | Setting | Value |
 | --- | --- |
 | `mrw.notesFolder` | Absolute vault-root path on the extension host. A Windows vault at `C:\Users\<user>\Zettelkasten` is `/mnt/c/Users/<user>/Zettelkasten` in WSL. |
 | `mrw.obsidianVault` | Optional Obsidian vault name or ID. Empty uses the selected folder's name, such as `Zettelkasten`. This is not a directory path. |
 
-Open a note through MRW, then use **Open in Obsidian** above its Markdown
-preview or **MRW: Open Note in Obsidian**. Obsidian's URI handler must be
-registered with the desktop. MRW uses that handler and does not require the
-Obsidian CLI to be enabled. If several vaults have the same name, configure
-the intended vault's ID.
+Open a note through **MRW: Open Document…**, then choose **Open in Obsidian**
+above its Markdown preview or run **MRW: Open Note in Obsidian**. This uses the
+desktop's registered Obsidian URI handler and requires no Obsidian CLI. If
+several vaults share a name, configure the intended vault's ID.
 
-Save edits in Obsidian and return to the note's MRW preview. While VS Code is
-focused, MRW checks the displayed note about every two seconds and refreshes
-a clean document. Unsaved VS Code changes prevent replacement; MRW does not
-save or merge them. Both applications must address the same files. An Obsidian
-link does not synchronize a separate Linux or SSH copy.
+Save edits in Obsidian and return to MRW. While VS Code is focused, MRW checks
+the displayed note about every two seconds and refreshes a clean document.
+Unsaved VS Code changes prevent replacement; MRW does not save or merge them.
+Both applications must address the same files. A link does not synchronize a
+separate Linux or SSH copy.
 
-The maintainer's [flengyel/Zettel repository](https://github.com/flengyel/Zettel)
-documents the Zettelkasten note format, templates and supporting scripts; the
-[Zettel wiki](https://github.com/flengyel/Zettel/wiki) documents Obsidian
-configuration, software and workflow conventions. Use these as companion
-references, rather than MRW requirements. MRW does not install those plugins,
-run those scripts or change the vault's configuration.
+The maintainer's [Zettel repository](https://github.com/flengyel/Zettel) describes
+a note format, templates and scripts. Its [wiki](https://github.com/flengyel/Zettel/wiki)
+describes Obsidian configuration and conventions. These are optional companion
+resources; MRW does not install their plugins, run their scripts or configure
+the vault.
 
-MRW's native Markdown preview does not render TikZ blocks or Obsidian embeds,
-and does not apply LaTeX preambles from YAML. Keep using Obsidian's renderer
-for notes that depend on those features. MRW's separate
-[annotation diagram renderer](TIKZ_WORKFLOW.md) does not render vault-note TikZ.
+MRW's native Markdown preview supports note-local mathematical macros and
+explicit rendering of `tikz` fences. See [TikZ diagrams](TIKZ_WORKFLOW.md).
+Obsidian embeds and arbitrary LaTeX preambles remain unsupported; a note that
+uses them may render differently in the two applications.
 
 ## Open a notes folder without import
 
-The preview and Contents show a note’s YAML title beside its filename. The
-filename remains its immutable ID; metadata differences do not rename files.
+Use **Open Document…** to browse original notes and papers. The picker starts
+in the selected notes folder, lists one directory at a time, and offers
+**Search subfolders…** for a wider search. Titles arrive progressively without
+blocking **Browse for another document…**. The preview and Contents show the
+title beside the filename; neither is rewritten.
 
-Use **Open a note or paper…** in the MRW sidebar to choose the original note.
-**Choose notes folder…** selects the folder for `[[ID]]` lookup and **Show
-Backlinks…**. Both actions remain visible when saved studies are listed. After
-folder selection, the document picker starts in that folder, including after
-restart. The equivalent commands are **MRW: Open Document…** and **MRW: Choose
-Notes Folder…**. A vault is just one possible folder: ordinary Markdown works
-without Zettel metadata or Obsidian. In WSL, a Windows folder may be selected
-through `/mnt/c/…`; reading it does not move MRW private storage there.
+Click a WikiLink in preview, select a link in Contents, or use **Follow Document
+Link** at the source cursor. Supported links include `[[ID]]`, aliases such as
+`[[ID|Label]]`, exact headings, paragraph/list block IDs and scoped paths.
+**Show Backlinks…** opens an incoming source occurrence; **Return to Document**
+returns to the originating occurrence. **Reopen Document** restores the last
+opened or followed file and its exact Markdown selection after restart.
+Native preview scrolling and PDF pages are not restored.
 
-Use Contents or **Follow Document Link** at the cursor to follow relative
-Markdown note/file links, `[[ID]]` and Obsidian `[[ID|label]]` display aliases.
-The label changes what Contents displays; the filename ID still selects the
-note. Backlinks preserve each exact link occurrence. Heading fragments work for
-Markdown; PDF links open the whole file through an available host reader.
-PDF page/block selectors are not silently replaced by whole-file targets.
-Backlinks open source-note occurrences; **Return to Document** restores the
-origin. The selected folder, document and matching return pin survive normal
-restart in the same workspace. **Reopen Document** explicitly opens the last
-opened/followed file; activation does not reopen it automatically. Dirty buffers
-stay under VS Code's save/undo and recovery controls.
+Lookup and backlinks stay inside the explicitly selected notes folder and use
+unsaved editor text where available. Missing or duplicate targets and incomplete
+searches are reported. Filename stems determine note identity; YAML metadata
+or a display alias does not redirect a link. `.obsidian`, `.trash`, `.git`,
+`.lake`, `node_modules`, `.venv` and `__pycache__` are excluded. For supported
+syntax, search bounds and Return behavior, see the
+[document workflow](READING_OUTLINE_WORKFLOW.md).
 
-ID lookup searches filenames and reads only matching notes. Backlink search
-reads note text separately and reports partial results when a limit is reached.
-The text search admits at most 4,096 notes and 32 MiB; larger searches remain
-explicitly partial.
-The entry budget counts candidate notes, directories and symlinks; ordinary
-non-Markdown attachments do not consume it.
-
-Note lookup excludes `.obsidian`, `.trash`, `.git`, `.lake`, `node_modules`,
-`.venv` and `__pycache__` directories. These are not indexed as notes; the scan
-limits still apply to the remaining folder.
-
-The bounded index is rebuilt explicitly from the chosen folder, using dirty
-editor text where available. It does not discover a vault, scan ancestors or
-follow directory symlinks outside scope. Missing or duplicate filename IDs, unsupported selectors and incomplete scans
-receive local explanations. YAML identity differences remain metadata and do
-not redirect links or prevent opening the exact filename. IDs
-remain filename stems; editable titles and `[[ID]] Title` prose do not rename
-notes. Leading delimited YAML stays metadata rather than Contents. See
-[the document workflow](READING_OUTLINE_WORKFLOW.md) for exact limits.
-
-The ordinary-note action uses the explicitly selected vault root and vault
-setting. A saved-source reader still uses its separately supplied, validated
-Obsidian association below; opening an ordinary note does not rewrite retained
-source or passage associations.
+Ordinary-note navigation does not change the separately stored Obsidian
+associations on retained sources or passages.
 
 ## Open the current note from Obsidian
 
-Run **Templater: Open in MRW** while working in the note. MRW opens its
-current file in Markdown preview and selects it for Contents. The command
-uses Obsidian's current filename and a vault-local MRW workspace setting;
-no per-note link or clipboard transfer is needed.
+The optional [OpenInMRW template and setup](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
+provide **Templater: Open in MRW**. After that setup, run the command from a
+note in Obsidian to open its current file in MRW's Markdown preview and select
+it for Contents. No per-note link or clipboard transfer is needed.
 
-The [OpenInMRW template and setup](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
-are maintained in `flengyel/Zettel`, alongside the configured Timestamp,
-NewFileTemplate and WikilinkTitle commands. A startup template registers this
-named navigation action; it does not open MRW automatically or insert text.
-The local `.obsidian/mrw.json` selects the MRW workspace and the same
-notes root used by **Choose Notes Folder…**. The command requires MRW 0.22.5
-or later to be active; it uses neither the Obsidian CLI nor a note-import step.
-
-The action works in reading view or editing view. It reads the current
-filename; editor selections, cursor positions and YAML are not processed.
+The startup template registers the command; it does not automatically open
+MRW or insert text. Vault-local `.obsidian/mrw.json` selects the MRW workspace
+and the same notes root used by **Choose Notes Folder…**. The action requires
+MRW 0.22.5 or later and uses neither the Obsidian CLI nor a note import.
+It reads the current filename in reading or editing view, without transferring
+cursor positions, selections or YAML.
 
 ### Keep a note link
 
-A saved Markdown link is an optional route to a particular note:
+1. In the note's MRW preview, click **Copy MRW link**, or run **MRW: Copy Note
+   Link for Obsidian**. The copied Markdown label contains the title and filename.
+2. Paste and save the link in an Obsidian note.
+3. Click it in Obsidian's reading view, or Ctrl+click while editing. Allow the
+   desktop to open VS Code if prompted.
 
-1. In the note's MRW Markdown preview, click **Copy MRW link**, or run
-   **MRW: Copy Note Link for Obsidian**. The copied Markdown link includes the
-   title and filename as its label.
-2. Paste the link into an Obsidian note and save it normally. MRW does not
-   insert it into the vault or change the note for you.
-3. Click it in Obsidian's reading view, or Ctrl+click while editing. Allow
-   Windows to open VS Code if prompted. MRW opens the original note in Markdown
-   preview and selects it for Contents.
+The link records the workspace, selected notes folder and relative filename.
+It opens the file's current contents, not a pinned revision, and does not save
+or replace unsaved VS Code text. A moved or renamed file needs a new link;
+the title is only a label. A link cannot grant a different notes-folder scope.
+For a link delivered to the wrong VS Code window, see
+[workspace routing and recovery](#workspace-routing-and-recovery).
 
-The link survives an extension restart. It records the workspace address,
-selected notes folder and relative filename, and opens the file's **current
-contents**. It does not pin a source revision or passage. Unsaved VS Code text
-stays in the native editor; following the link does not save or replace it.
-Moving or renaming the file requires a new link; no title or filename substitute
-is guessed. The title is a label, not the destination.
-
-The intended workspace and selected notes folder must match. A link cannot
-select another vault or grant access to a file. If VS Code delivers it to a
-different workspace, **Copy Link and Open Workspace** opens the intended one
-in a separate window. Run **MRW: Open Link from Clipboard** there; that command
-accepts either the Markdown link or its complete URL. No working window is
-reloaded or replaced. WSL routes use the distribution name; SSH requires
-**MRW: Navigation Workspace URI**, as described under routing below.
-
-Existing **Copy Source or Passage Link…** actions still open retained reading.
-Those links preserve immutable source references separately from ordinary-note
-links. Neither kind depends on an Obsidian plugin or CLI.
+<a id="import-note-text-0140"></a>
 
 ## Import Markdown text
 
-Run **MRW: Import Markdown Text…** from the Studies menu or F1. Choose where its
-text should go, then select the note’s `.md` or `.markdown` file:
+Import only when a separate retained copy or text insertion is useful. Run
+**MRW: Import Markdown Text…** from the Studies menu or Command Palette, choose
+a destination, then select a `.md` or `.markdown` file.
 
 | Destination | Result |
 | --- | --- |
-| Retain a source copy | Retains the file and opens its text for reading, passage links and annotations |
-| Add text to a passage annotation | Select a saved source and passage; its reader notes receive the note text |
-| Insert text into a Markdown document | Inserts text at the active Markdown document cursor, or offers a Markdown document picker |
+| Retain a source copy | Saves a revision for passage links and reader annotations |
+| Add text to a passage annotation | Saves the text as an annotation on a selected source passage |
+| Insert text into a Markdown document | Inserts at the active Markdown cursor, or offers a document picker |
 
-The source option saves its retained copy during import. Importing the same file
-at the same revision reopens that copy and preserves annotations. A changed file
-gets a separate copy. Notes up to 2 MiB are supported; longer passages are split
-at the reader’s 256 KiB range limit. The source remains readable after the vault
-file changes or disappears. The source title initially uses the filename.
+Importing the same file revision reopens its saved copy with annotations intact.
+A changed revision gets a separate copy. Notes up to 2 MiB are supported;
+longer passages are split at the reader's 256 KiB range limit. The source title
+initially uses the filename, and the retained copy remains readable after the
+original changes or disappears.
 
-Annotation import saves up to 16 KiB of text, with origin and author initially
-unknown. Edit its attribution in the reader when known. Document insertion
-leaves an unsaved editor change: **Ctrl+S** saves it and ordinary Undo reverses
-it. The combined Markdown document retains the 4 MiB navigation limit.
+Annotation import accepts up to 16 KiB, with origin and author initially unknown;
+edit that attribution when known. Document insertion remains unsaved until
+ordinary Save and can be undone. The combined Markdown document retains the
+4 MiB navigation limit.
 
-The original note stays unchanged. In the imported copy, YAML, wiki links and
-embeds remain in the Markdown text; linked notes and attachments are not copied
-or resolved by the saved-source reader. That reader shows retained Markdown as text. Save open note-editor changes
-before importing. In WSL, select a Windows vault file through its `/mnt/c/…`
-path; no vault discovery or background synchronization runs.
+The original note is unchanged. Retained Markdown is displayed as text:
+YAML, WikiLinks and embeds remain in that text, but linked notes and attachments
+are not copied or resolved by the saved-source reader. Save source-editor
+changes before importing, and select Windows files through their `/mnt/c/…`
+paths when working in WSL.
 
 ## Link a note to a source or passage
 
-1. In **Obsidian**, open the existing note you want to return to. Press **Ctrl+P**
-   and run **Copy Obsidian URL for current file**. Here “current file” means the
-   note open in Obsidian. Its URL is an address such as
-   `obsidian://open?vault=Zettelkasten&file=NOTE_ID`; it contains no note prose.
-2. In **MRW's source reader**, click **Link an Obsidian note…** under **Whole source**, or in the desired passage card’s **This passage** group. Paste that
-   URL and enter a short
-   note title or ID. This sets that note as the return destination from the
-   selected MRW target.
-3. Click **Open linked note in Obsidian** in the same group to return to the note.
-   **Manage linked notes…** offers **Replace linked note** or **Remove note
-   link**. The **All linked notes and earlier passage ranges** section also
-   exposes earlier pinned targets after a range changes.
-   One linked note shows its saved label beside its open button. Several notes
-   offer a chooser. An empty group says no note is linked yet; use **Link an
-   Obsidian note…** to add the return destination.
+1. In Obsidian, open the existing note and run **Copy Obsidian URL for current
+   file**. The URL has the form
+   `obsidian://open?vault=Zettelkasten&file=NOTE_ID` and contains no note prose.
+2. In MRW's saved-source reader, expand **Source details and tools** and, for a
+   published source, **Source links and Obsidian notes**. Choose **Link an
+   Obsidian note…** under **Whole source**, or use a passage's **This passage**
+   group. Paste the URL and enter a short label.
+3. Use **Open linked note in Obsidian** in that group to open it.
+   **Manage linked notes…** offers **Replace linked note** and **Remove note link**.
 
-An Obsidian URL is not copied note text. Existing notes keep their immutable IDs
-matching filenames, separate editable titles, YAML front matter, `[[ID]]`
-links, `SEE ALSO` and `References`. No MRW note format or conversion is needed.
-The [Zettel specification](https://github.com/flengyel/Zettel) and
-[templates](https://github.com/flengyel/Zettel/tree/main/templates) remain the
-companion conventions, not a location from which MRW discovers a private vault.
+The stored association contains an address, a label and an exact MRW reference,
+not a copy of the note. Multiple notes produce a chooser. **All linked notes
+and earlier passage ranges** retains access to associations whose passage
+range has since changed.
 
 ## Put an MRW link in the Obsidian note
 
-1. In MRW, click **Copy link to this source** under **Whole source**, or
-   **Copy link to this passage** in the desired passage’s **This passage** group.
-   Alternatively run **MRW: Copy Source or Passage Link…** from the Command
-   Palette and choose a saved source and target. No Markdown editor
-   or cursor position is required.
-2. Paste the ordinary Markdown link into your Obsidian note, for example under
-   **References**, using Obsidian's normal editing and saving.
-3. Click the link in Obsidian's reading view, or Ctrl+click while editing. Permit
-   Windows to open VS Code if prompted. MRW opens the saved reader; a passage
-   link also selects the pinned passage in a read-only retained-source view.
+1. In the saved-source reader, choose **Copy link to this source** under
+   **Whole source**, or **Copy link to this passage** under **This passage**.
+   Alternatively run **MRW: Copy Source or Passage Link…** and select a target.
+2. Paste and save the Markdown link in an Obsidian note, for example under
+   References.
+3. Click the link to open the saved reader. A passage link also selects its
+   exact retained range in a read-only source view.
 
-**Copying** supplies the MRW destination for your note. **Linking an Obsidian
-note** supplies the return destination from MRW. These are separate explicit
-actions; copying a link does not automatically link a note back. Both buttons
-have brief tooltips explaining this.
+**Copy link** supplies a destination from the note into MRW. **Link an Obsidian
+note…** supplies a destination from MRW back to the note. Each action is explicit;
+copying one does not create the other.
 
-**Whole source** actions affect the whole source. A passage card’s
-**This passage** actions use its current range. If a saved link points to an
-earlier range, **Earlier linked passage** keeps that original pinned target;
-the current passage’s actions stay separate. **All linked notes and earlier
-passage ranges** labels each stored target and preserves access after range edits.
+Whole-source actions address the entire saved source. **This passage** addresses
+its current range. **Earlier linked passage** preserves the range from an older
+link when that range differs from the current passage.
 
 ## Workspace routing and recovery
 
-The link contains a stable `mrw-outline:v1` reference and a separate workspace
-address. WSL normally uses the distribution name and saved folder/workspace
-path. For SSH, set **MRW: Navigation Workspace URI** in Remote settings to that
-folder or saved `.code-workspace` file's `vscode-remote://ssh-remote+HOST/…`
-address. Save an untitled multi-folder workspace before copying a link.
-These addresses contain no transient window ID or callback token.
+MRW links carry their target separately from the workspace address. Retained
+links use `mrw-outline:v1` or source-qualified `mrw-outline:v2` references;
+ordinary-note links identify current files. WSL routing uses the distribution
+name and saved folder/workspace path. For SSH, set **MRW: Navigation Workspace
+URI** in Remote settings to the intended folder or `.code-workspace` file's
+`vscode-remote://ssh-remote+HOST/…` address. Save an untitled multi-folder workspace
+before copying a link.
 
-VS Code can deliver a link to the topmost window. If that window has a different
-workspace, MRW does not resolve the private target there. Choose **Copy Link and
-Open Workspace**, then run **MRW: Open Link from Clipboard** in the intended
-workspace. If that window has no MRW handler, open the intended WSL workspace
-yourself, copy the Markdown link or its complete URL from Obsidian, and use the
-same command. Standard VS Code trust and remote-connection prompts still apply.
-Opening the intended workspace uses VS Code's normal window selection. Wait for
-the connection and any folder-specific trust prompt before running the clipboard
-command; MRW commands remain unavailable in Restricted Mode. If no trust prompt
-appears, run **Workspaces: Manage Workspace Trust** and trust only the intended
-folder; leave any option to trust its parent unchecked.
-If the warning disappears, open VS Code's **Notifications** to find its recovery
-action. A hidden routing warning does not block other MRW commands.
+If VS Code delivers a link to a different workspace, choose **Copy Link and Open
+Workspace**, then run **MRW: Open Link from Clipboard** in the intended window.
+The command accepts either the Markdown link or its complete URL. If no handler
+is available in the receiving window, open the intended WSL workspace and use
+the clipboard command there. A dismissed routing warning remains in VS Code's
+Notifications. Standard workspace-trust and remote-connection prompts apply;
+MRW commands are unavailable in Restricted Mode.
 
-Unavailable private storage or a different private-store scope produces an
-error: reopen the original workspace/profile with its saved state, or explicitly
-open a complete synchronized artifact store using the storage guide.
-Do not recreate targets or reset workspace storage. Missing/changed original
-sources do not prevent access to retained bytes. Region links keep their old
-range when the reading association changes; MRW reports the change explicitly.
+For unavailable private storage, reopen the original workspace/profile or use
+the [storage guide](ARTIFACT_STORAGE.md) to open a complete saved-work copy.
+Do not reset storage or recreate targets to repair a link. Retained sources
+remain readable if the original file changes or disappears. After a supported
+store transfer to another workspace address, open the mapped workspace and use
+**Open Link from Clipboard**; the original link cannot guess the new address.
 
-Only supplied `obsidian://open` URLs with exactly `vault` and `file` are supported.
-The vault must be a name or ID, and the target a whole note; path-form vaults,
-heading/block selectors and names containing `?` or `#` are outside this increment.
-Dispatch uses Obsidian's documented equivalent `obsidian://vault/…` path form,
-so encoded punctuation in a name cannot become a writing query parameter.
-Writing, callback, search and other actions/parameters are rejected. Windows/Obsidian
-handles note existence and application availability; successful URL dispatch
-does not acknowledge that a note opened. If Obsidian reports a missing note or
-vault, open the intended existing note there, copy its current Obsidian URL,
-and replace the association. MRW does not search for a replacement.
+Supplied Obsidian associations accept only `obsidian://open` URLs with `vault`
+and `file`, addressing a whole note. Path-form vaults, heading/block selectors,
+names containing `?` or `#`, and write/search/callback actions are unsupported.
+Dispatch uses the equivalent `obsidian://vault/…` form. Successful dispatch
+means the desktop accepted the URL, not that Obsidian confirmed the target.
+For a missing note or vault, copy the intended note's current Obsidian URL and
+replace the association.
 
 ## Persistence and limits
 
-Associations survive normal close/reopen in private
-`outlines-…/OUTLINE_ID/obsidian-links.json` beside the existing outline state.
-Only bounded labels, Obsidian URLs and exact MRW references are stored: at most
-64 associations and 128 KiB per outline. Writes use exact-previous-byte checking,
-the existing publication lock, atomic replacement and directory synchronization.
-Failed/uncertain publication blocks further outline/association writes until
-host reload. Removing an association retains an empty state file; it deletes
-neither note nor retained material. Concurrent writing installations remain unsupported; local locks are not distributed.
+Associations persist beside saved-source state in
+`outlines-…/OUTLINE_ID/obsidian-links.json`, with up to 64 associations and
+128 KiB per outline. Removing an association deletes neither the note nor
+retained material. Failed or uncertain publication blocks further private
+writes until host reload; keep unsaved text before reloading. Concurrent writing
+from multiple installations is unsupported.
 
-**Copying or synchronizing a Markdown note does not copy its MRW saved material.**
-Here that material means retained sources, saved outlines, annotations and note
-associations. The note contains an address, not those separately saved files.
-No new Obsidian vault is required. **MRW: Move Saved Work Directory…** separately
-moves this workspace's complete saved material; **MRW: Open Saved Work
-Directory…** verifies a complete synchronized copy on another installation.
-See [storage scope, commands and recovery](ARTIFACT_STORAGE.md). The current
-`/mnt/c` mount cannot preserve MRW's private modes and is rejected for MRW
-saved-work storage. That restriction does not forbid ordinary note/PDF opening
-from a selected Windows folder. No action automatically adds anything to
-Syncthing or copies a vault.
-The [scoped Windows-backed setup trial](WSL_ARTIFACT_STORAGE_SETUP.md) was
-separately approved and configured. A disposable move/save/reopen and local
-Windows-created receiving-copy checks passed, but nested replacement denials
-remain unresolved; it is not qualified for real work. Displayed `0777` without
-metadata alone does not establish Windows access by every account. Receiving
-permissions must be verified after both
-synchronized creation and replacement. No supported vault-storage handover is
-claimed from the current rejection.
-The separately approved comparison paused only the Windows client's vault
-folder, left note bytes unchanged and verified resumption afterward. Four
-paused probes passed, while one probe in each active phase was denied. That
-bounded result did not qualify a pause/write/handover procedure. The subsequent
-approved paused transaction test failed at its first preflight replacement;
-synchronization/configuration were restored and independently verified. See
-[both results](WSL_ARTIFACT_STORAGE_COMPARISON.md). No new desktop attempt ran.
+**Copying a Markdown note does not copy MRW's retained sources, annotations or
+associations.** **Move Saved Work Directory…** and **Open Saved Work Directory…**
+handle the supported saved-work store separately; see
+[storage scope and recovery](ARTIFACT_STORAGE.md). Current-study checkpoints
+and interaction history are outside that transfer.
 
-The user later normally closed Obsidian for one additional disposable core check.
-With its processes absent and Syncthing unpaused/unchanged, move/cleanup,
-annotation save and existing reference/association checks passed. No hyperlink
-or return action ran in that check, and one pass does not establish that closing
-Obsidian is necessary. Obsidian notes stay in place during an MRW artifact move.
-The real-store procedure remains unqualified; see
-[the separate observations](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
+Opening ordinary Windows-vault notes through `/mnt/c` does not qualify that
+location for MRW's private saved-work store. Windows-backed store placement
+remains unqualified. Neither pausing synchronization nor closing Obsidian is
+an established remedy for the recorded replacement failures. The
+[storage comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md) and
+[Obsidian-closed observation](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20)
+record those limited tests; they do not impose a requirement to close Obsidian
+for ordinary reading.
 
-The existing moved ext4 navigation fixture completed the physical Obsidian
-hyperlink click, fresh exact retained selection and reader return to the linked
-note after normal application restart on 2026-10-20. See
-[the observed round trip](OBSIDIAN_VALIDATION.md#post-move-desktop-follow-up--2026-10-20).
-That result is independent of the still-unqualified Windows-backed setup.
-
-After verified adoption at a different local workspace address, open that mapped
-workspace and use **MRW: Open Link from Clipboard** with the existing saved link.
-The normal recovery button retains the original saved workspace address; it
-cannot guess another computer's corresponding path. Exact stored identity and
-scope checks still apply.
-
- There is no automatic vault discovery, note rewriting, content
-synchronization, Obsidian plugin or background server. The explicit bounded
-notes-folder index above supplies ordinary link lookup and backlinks only. The existing extension
-identity/storage and legacy `mrw-outline:v1` links remain compatible. Native
-Windows backend portability remains deferred. Navigation initiates no model,
-compiler, notebook, container or mathematical analysis.
-
-On Windows VS Code 1.141.2 / WSL Debian with Windows Obsidian 1.14.4, the same
-saved passage link was followed after normal application restart, and the complete
-wrong-workspace recovery sequence was observed with the exact retained selection.
-These scoped desktop checks used the existing temporary navigation fixture.
-See [validation and the tested configuration](OBSIDIAN_VALIDATION.md#desktop-follow-up--2026-10-18).
-Interoperability does not establish mathematical usefulness.
+MRW does not discover or rewrite a vault, synchronize its contents, or start a
+background server. Navigation starts no compiler, model, notebook or container.
+The [Obsidian validation report](OBSIDIAN_VALIDATION.md) records desktop
+round-trip and routing checks. [Reading repairs](READING_REPAIRS.md) describes
+the newer note navigation and rendering checks and their remaining limits.

@@ -4,6 +4,10 @@ MRW remains **private**. This task prepares inspection; it does not authorize a
 visibility change, release upload, Marketplace publication, credential rotation,
 history rewrite or contact with testers. No such action was performed.
 
+The findings below cover the 2026-11-05 review only. Later introduction updates
+do not extend that review to subsequent commits or resolve its publication
+decisions.
+
 ## Current introduction guidance — 2026-11-08
 
 The README introduction now leads with existing notes and papers, ordinary links,
@@ -15,9 +19,7 @@ as the next product increment; resumption first recovers existing documents,
 locations and unfinished work. Broader recovery remains planned. Optional
 source-study and proof tools are separate, explicitly chosen capabilities.
 
-This corrects product direction and introduction text. It does not expand the
-publication review below or resolve its outstanding disclosure decisions. Its
-scope and version references remain the historical 2026-11-05 review.
+These changes correct product direction and introduction text only.
 
 ## Reviewed scope
 
@@ -113,7 +115,8 @@ from the unresolved Euclid translation.
 session; [CHANGELOG.md](CHANGELOG.md) and
 [extension history](docs/VS_CODE_DEVELOPMENT_HISTORY.md) retain older accounts.
 Installation, extension README, bundled tutorial and optional SagePod build steps
-use 0.19.0 and the same package path. Legacy Qt/CLI setup is separate from first use.
+use 0.19.0 and the same package path. The earlier Qt/CLI setup is separate from
+first use.
 
 ## Remaining publication decisions
 
@@ -140,7 +143,7 @@ use 0.19.0 and the same package path. Legacy Qt/CLI setup is separate from first
    Keep the genuine source and checked bundle unchanged during that decision.
 3. **Approve disclosure of maintainer host/path metadata** above, or define a
    minimal redaction plan with retained private provenance. Removing a current
-   file would not remove its reachable historical versions. Any history change
+   file would not remove its reachable earlier versions. Any history change
    requires separate authorization; no rewrite is proposed for ordinary mistakes.
 
 No live third-party service, mathematical correctness or learning-effect claim

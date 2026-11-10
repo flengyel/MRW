@@ -27,7 +27,7 @@ semantics. Optional explicit Obsidian association/opening remains available.
 Manifest comparison confirms unchanged command/view IDs, settings, menus,
 enablement and placement; only the specified command titles, Contents name,
 welcome copy and version differ. Proof Outline and Studies keep their names.
-Serialized fields, event names, `mrw-outline:v1` and the legacy `whole outline`
+Serialized fields, event names, `mrw-outline:v1` and the existing `whole outline`
 status remain unchanged. Human messages and defaults for newly created passages
 change; existing source/note/study bytes do not. No storage migration was run.
 Earlier validation reports retain the labels they observed; current guides now

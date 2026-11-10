@@ -3,7 +3,7 @@
 For installation, [choose the reading or computation path](INSTALLATION.md).
 SagePod is MRW's optional computation companion. For a first notebook connection,
 follow [Install MRW and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
-This companion guide preserves the workflow boundaries and historical host
+This companion guide preserves the workflow boundaries and recorded host
 evidence. See [the installation guide](INSTALLATION.md) for the current MRW
 package and installation commands.
 

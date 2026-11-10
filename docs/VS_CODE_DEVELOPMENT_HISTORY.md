@@ -177,7 +177,7 @@ identities. Occupied stores are never merged or overwritten.
 
 Prepare each nested study separately before renaming a parent. This does not
 rename folders itself, infer identity by filenames or transfer editor recovery,
-unsent requests, live drafts or UI pins. Historical original-file paths stay
+unsent requests, live drafts or UI pins. Original-file paths stay
 unchanged; retained text stays available. [Steps](../docs/FOLDER_RENAME_WORKFLOW.md),
 [validation and host limits](../docs/FOLDER_RENAME_VALIDATION.md).
 
@@ -337,7 +337,8 @@ windows while keeping drafts. `mrw.artifactMoveDestination` is a suggestion only
 **MRW: Open Saved Work Directory…** verifies a complete synchronized copy
 and explicitly maps its projects into an empty/unbound workspace. It never
 merges stores or invents missing records. Logical store/project IDs and verified
-legacy mappings preserve `mrw-outline:v1` references and exact pinned ranges.
+mappings for the earlier format preserve `mrw-outline:v1` references and exact
+pinned ranges.
 On a different host, open the adopted mapped workspace and use **MRW: Open Link
 from Clipboard**; old saved routing is not a guessed local workspace address.
 
@@ -660,7 +661,7 @@ artifacts. The manifest records file hashes, upstream commit/time, source
 structure and original pinned spans. Rendering is rebuilt offline from these
 bytes. Imported source paths name capture-time private blobs, never a fabricated
 original user document. Navigation uses the retained view even after a move;
-historical paths remain provenance. No storage inventory/reference-format or
+original paths remain provenance. No storage inventory/reference-format or
 logical store identity changes are introduced. Host-local preparation tickets
 contain only workspace/scope/packet digest, never source prose or credentials.
 

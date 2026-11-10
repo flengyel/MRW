@@ -1,6 +1,12 @@
-# UX_SPEC.md
+# User experience specification
 
-## Current workflow — ordinary work, 0.23.4
+The current workflow below describes MRW 0.23.5. Later versioned sections record
+behavior at the named release; the numbered sections give design requirements
+and experiments, not a list of current VS Code features. The
+[README](README.md) and [reading workflow](docs/READING_OUTLINE_WORKFLOW.md)
+provide instructions for current use.
+
+## Current workflow — ordinary work, 0.23.5
 
 **Open Document…** offers **Original file** (current contents in place) and
 **Saved copy** (a retained revision with MRW annotations) in one native picker.
@@ -19,6 +25,15 @@ project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
 Command Palette. Opening an original does not import it; opening a saved copy
 does not refresh its source or replace annotations. PDFs use the existing host
 reader handoff. Shared backlink and note-ID completeness rules are unchanged.
+
+Contents identifies the selected document and indicates when another file is
+active. Supported WikiLinks reach exact headings and blocks within the selected
+notes folder. Reopen Document restores a recorded Markdown selection when its
+text still matches. Note-local macros render in the Markdown preview, and an
+explicit **Render diagram** action compiles a TikZ fence without changing the
+note. Opening a note does not compile its diagrams. PDF-page and preview-scroll
+restoration remain unsupported. See [reading repairs](docs/READING_REPAIRS.md)
+for the tested scope and remaining limits.
 
 Opening or following a note displays the note in place. Contents navigates its
 headings and links. The document Problems commands, preview link, Contents
@@ -41,7 +56,8 @@ Keep native Commands buttons, title/filename choice and cancellation. VS Code
 owns ordinary documents, Save, Undo, editor groups and both sidebars. Preserve
 0.23.1 Return/scope/presentation and 0.23.2 opening repairs. Installation does not
 reload the working window. General research resumption and integrated argument
-reconstruction remain later work. The sections below describe earlier releases.
+reconstruction remain later work. Preserve these rules when reading the earlier
+release sections below.
 
 ## Existing documents — 0.20.0
 
@@ -269,7 +285,7 @@ platform-dependent; they are not permanent workflow invariants.
 
 Patch **0.21.1** keeps each Kerodon text node together across parser callbacks
 before reading mathematical delimiters. Display bare equation arrays without
-executing source HTML or TeX. Validate the historical acquisition manifest first;
+executing source HTML or TeX. Validate the retained acquisition manifest first;
 derive the repaired display from the same retained bytes and exact spans without
 republishing the source, annotations or links.
 
@@ -328,8 +344,8 @@ be saved reports its actual location and the existing manual opening route.
 
 Reconnection shows the previous and current folder, verifies the selected store
 and explicitly maps the project. An occupied receiving workspace cannot merge
-or replace its work. No ordinary file, source provenance or historical path is
-rewritten; retained access remains available when an original-file jump becomes
+or replace its work. No ordinary file, source provenance or recorded source
+path is rewritten; retained access remains available when an original-file jump becomes
 unavailable. VS Code owns ordinary saving/recovery and the directory operation;
 editor/UI state and unsent drafts do not transfer. Nested study workspaces need
 their own preparation before a parent rename. [Workflow](docs/FOLDER_RENAME_WORKFLOW.md).
@@ -660,7 +676,7 @@ A mathematical objective describes the work, not a required data-entry field.
 A session can begin by opening an ordinary file to orient in a subject, solve a
 problem, study a theorem or proof, reconstruct earlier work, prepare to teach,
 or examine generated mathematics. The mathematician begins the mathematical
-work in the ordinary medium appropriate to it. Theorem Terminal supplies source
+work in the ordinary medium appropriate to it. MRW supplies source
 context, prior work, computations, and assistance when relevant.
 
 The interface supports work with mathematics whose justification exceeds the
@@ -920,6 +936,11 @@ is required.
 
 ### Proof outlines by vertex elimination
 
+The graph view delivered in 0.15.0 supports reversible vertex omission with
+original derivations available for expansion. See the
+[proof-graph workflow](docs/PROOF_GRAPH_WORKFLOW.md) for current behavior. The
+dated paragraphs below record the preceding reader and design work.
+
 **Delivered partial reader, updated 2026-10-15:** VS Code offers explicit manual
 source-region selection and revision, exact retained-source hide/expand,
 separate exact statement and context selections, editable attributed reader
@@ -970,7 +991,7 @@ links confer no checking status or verified dependency. Copying Markdown alone
 does not transfer private outline/source storage. Preview-click navigation and
 remaining broader outline tooling stay pending.
 
-**Accepted requirement, 2026-10-12; not implemented.** For a selected proof,
+**Requirement recorded 2026-10-12.** For a selected proof,
 retain mathematical milestones and hide intervening vertices while preserving
 dependency paths. Every summarized region shows a claim with its necessary
 assumptions and an explanation of the omitted argument and its purpose. Offer
@@ -1179,7 +1200,7 @@ not by itself establish that a human has understood the result.
 Task-mediated assistance begins when the mathematician requests help with active
 work: for example, asking for an explanation of a definition or result, a
 possible source, criticism of an attempted step, an intermediate lemma, a
-computation to perform, a proof outline, or a related problem. Theorem Terminal
+computation to perform, a proof outline, or a related problem. MRW
 constructs the request from the current problem or object, displayed source
 passages, and displayed `WorkArtifact`s. Before submission, the mathematician
 can inspect and reduce the exact outbound context. Nothing else is sent.
@@ -1381,7 +1402,7 @@ or abandonment of a proposal is recorded in `TaskEvidence`; none converts the
 proposal into a human judgment.
 
 **Non-goal.** Importing external AI content and making model requests from
-active mathematical work do not make Theorem Terminal a general chat client,
+active mathematical work do not make MRW a general chat client,
 prompt manager, conversation archive, provider-orchestration layer, or
 autonomous agent system.
 
@@ -1475,7 +1496,7 @@ The supplied September 14 evidence shows useful saved notes, reopened panes and
 one retained manuscript passage. The guidance came from the surrounding
 assistant interaction; it does not establish implemented GUI guidance.
 Five-anchor restoration and confirmed marker Return were not completed, and
-the unavailable historical seed prevents a historical reduction claim. No
+the missing earlier work prevents comparison with that starting point. No
 anchor persistence defect or crash follows from these observations.
 
 Use the actual saved work in a durable project, or begin a clearly identified
@@ -1494,7 +1515,7 @@ for this experiment; another current mathematical source is also legitimate.
    passage is optional and must give visible success feedback when used.
 5. Close and reopen; resume from the saved work and continue the mathematics.
    Compare consequential reconstruction effort prospectively, without claiming
-   an unavailable historical baseline.
+   an unavailable earlier baseline.
 
 **Acceptance.** The reader can continue meaningful work with the source, note
 and relevant locations available. Quality of the explanation or argument and

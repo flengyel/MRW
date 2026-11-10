@@ -66,7 +66,7 @@ Multiple-project stores use the existing [artifact move/open commands](ARTIFACT_
 with all projects explicitly mapped. This feature adds no cross-machine
 synchronization, Windows storage qualification or native Windows backend port.
 
-Historical source paths and immutable records are unchanged. Jumps to an original
+Original source paths and immutable records are unchanged. Jumps to an original
 file at its old path may therefore be unavailable after the rename; the exact
 retained source remains readable. VS Code recovery, unsent requests, return pins,
 reading-outline UI preferences and live webview drafts are not transferred by

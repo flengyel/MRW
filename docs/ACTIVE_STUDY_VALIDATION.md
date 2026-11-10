@@ -14,11 +14,11 @@ source selection and delivery. This implements
 | Review | Repair and checked boundary |
 | --- | --- |
 | R1 | Paste/Edit and continuation guard any pending response, including empty text. Original pasted bytes and attributed revisions survive. |
-| R2 | Explicit study/attempt/draft identities, per-study timers and dirty flush. Unknown/stale messages reject before mutation; delayed A and B persist to their original studies. Question save failure retains the form; failed cancellation restores a checkpointed form. Legacy renderer forms adopt identities without losing newer local text. |
+| R2 | Explicit study/attempt/draft identities, per-study timers and dirty flush. Unknown/stale messages reject before mutation; delayed A and B persist to their original studies. Question save failure retains the form; failed cancellation restores a checkpointed form. Earlier renderer forms adopt identities without losing newer local text. |
 | R3 | Complete synchronized temporary snapshots precede atomic no-overwrite publication. Final inode/bytes/digest/name are checked. Real partial-byte ENOSPC is retried; event order and later events survive. Mismatched existing/final/substituted files are preserved with a visible gap. |
 | R4 | Invocation captures saved editor B before asynchronous work and prioritizes its selection over remembered reader A. Reader-supplied exact references remain authoritative; ordinary focus does not change an active study. |
 | R5 | The retained active outcome plus bounded `pendingOwners` intent is authoritative. Owner retry/restart reconciles the same derived state once. Dirty owners flush before subsequent changes; a changed owner checkpoint is preserved and reported. |
-| R6 | Historical scheduler replay works while retired and retains original review IDs/times, including corrections away from and back to assessed recall. Selection stays suspended until re-enrollment. |
+| R6 | Replay of earlier scheduler events works while retired and retains original review IDs/times, including corrections away from and back to assessed recall. Selection stays suspended until re-enrollment. |
 | R7 | Correction withdraws/recomputes outstanding offers with the exact earlier effort response; original/withdrawal/supersession events remain. Obsolete offer choices and effort responses reject before mutation. |
 | R8 | Global task/offer/response resolution precedes version/session grouping. Task attribution, response UTC/version and supporting context stay separate. Supporting-only tasks do not add selected assessment/sample denominators; missing evidence stays unknown. |
 | R9 | Multiple requests require an explicit request/purpose or unassociated reply. Reverse-order replies and attributed reassociation retain original text and their own attempt/source/adaptation links through reopen/export. |
@@ -123,8 +123,8 @@ delay using assessment time, and allowed AI/unknown-assistance outcomes to suppo
 less-guidance offers. Focused regressions cover linked cross-release corrections,
 deduplicated events, distinct attempt/submission/assessment denominators, selected
 exports with supporting context and missing parents, delayed assessment, restart,
-multiple submissions, reversed clocks and legacy unknown timing. A further test
-found that late assessment could send an earlier time to FSRS after a subsequent
+multiple submissions, reversed clocks and unknown timing in earlier records.
+A further test found that late assessment could send an earlier time to FSRS after a subsequent
 shared-question review; chronological replay now preserves both observations.
 Adaptations use reader recall reports with explicit consultation and effort tied
 to that attempt. Application and AI evidence stay separate. Reports name selections,
@@ -306,7 +306,7 @@ attempt/question; and external assembly of a local descriptive comparison.
 Still manual: question/prerequisite choice, clipboard relay to/from Codex,
 reference-answer attribution/correction, reader outcomes, optional effort and
 review admission. The source is easy to reopen but remains a separate reader
-when expanded there. Legacy proof-study and current-material modes remain
+when expanded there. The earlier proof-study and current-material modes remain
 separate editor tabs. Adding prerequisites creates a separate source context;
 its earlier unfinished attempt remains in the preceding study. The native tree
 shows current/recent content only. The new learning history is local to the

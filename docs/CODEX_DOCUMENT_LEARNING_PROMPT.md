@@ -1,6 +1,6 @@
-# Historical handoff — withdrawn document Problems
+# Withdrawn handoff — document Problems
 
-Status: historical handoff. The document Problems subsystem implemented from
+Status: withdrawn handoff. The document Problems subsystem implemented from
 this task was withdrawn in 0.23.3. Do not execute these requirements again or
 replace them with Research Question registration. The
 [current ordinary-work rules](RESEARCH_WORKSTATION_DESIGN.md#rules-for-ordinary-mathematical-work)
@@ -27,7 +27,7 @@ Preserve:
 - `flengyel.mrw`, qualified source identifiers, exact retained revisions, notes, annotations, drafts and study history.
 - Existing Obsidian/Zettel links, SagePod and Lean workflows.
 
-Keep both sidebars, editor groups and view placement under VS Code’s control. Do not repeat identity migrations, restore archived studies, relocate work, or force a working-window reload.
+Keep both sidebars, editor groups and view placement under VS Code’s control. Do not repeat identity migrations, restore earlier studies, relocate work, or force a working-window reload.
 
 ## Connect the current document to problems
 
@@ -89,7 +89,7 @@ Run appropriate regression and package checks. Use one focused native workflow c
 
 Reconcile the governing next-increment statements in `CODEX_PLAN.md`, `UX_SPEC.md`, the research-workstation design and `docs/CODEX_CONTINUATION.md`. Put this learning workflow before general research resumption while preserving the broader research goals.
 
-Update the workflow documentation, README where affected, and bundled tutorial with the actual entry points and one short example. Consolidate current status instead of prepending another competing “current” section; preserve historical validation evidence.
+Update the workflow documentation, README where affected, and bundled tutorial with the actual entry points and one short example. Consolidate current status instead of prepending another competing “current” section; preserve earlier validation evidence.
 
 Keep implementation additions compatible with existing saved work. Avoid a new dashboard, project-management model or integration expansion.
 

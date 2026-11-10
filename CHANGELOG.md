@@ -1,7 +1,7 @@
 # MRW development history
 
 Current installation and first-session instructions are in [README.md](README.md).
-This file preserves the earlier README as a historical account through 0.18.0.
+This file preserves the earlier README as an account of development through 0.18.0.
 Versions, pending-status statements and installation commands below describe
 those earlier increments; they are not current instructions.
 
@@ -581,7 +581,7 @@ Appendix A supplied a corpus-neutral editor/build/render/re-entry smoke test.
 The supplied September 14 report and screenshot additionally show useful saved
 reading notes, two restored panes and one retained manuscript passage. The
 guidance was supplied outside the application. Five-anchor re-entry was
-incomplete, marker creation was unconfirmed, and no historical reduction or
+incomplete, marker creation was unconfirmed, and no earlier reduction or
 anchor defect was established. Study/re-entry, assistance and the optional
 warrant experiment now have separate criteria in UX_SPEC.md §§9.1–9.3.
 
@@ -816,11 +816,11 @@ Versions 3–8 migrate to version 9 at the next atomic checkpoint without readin
 source or retained-record files. Version 8 gains an empty investigation pointer;
 version 7 gains empty imported-PDF state and retains its generated PDF position.
 Migrated anchors have empty previews until explicitly opened or retained again.
-Versions 3–5 default to their historical wrapped display; version 6 preserves
+Versions 3–5 default to their original wrapped display; version 6 preserves
 its wrap setting. Version 3 gains an empty shelf; existing shelves are retained,
 keeping the first anchor when canonicalization makes old spellings equivalent.
-Legacy positions preserve the historically rendered selection in independent
-pane views. Recovery, unfinished marker, split, generated and imported PDF,
+Positions saved by earlier versions preserve the previously rendered selection
+in independent pane views. Recovery, unfinished marker, split, generated and imported PDF,
 build and window state are preserved.
 
 State, trusted tool settings, build outputs and private recovery are stored under:
@@ -1052,7 +1052,7 @@ service. Viewing or cancelling creates no record. Context facets keep provenance
 admission, contextual derivability and mathematical verification separate.
 
 The desktop has been exercised on Linux/WSL with real TeX and Vim and,
-historically, a disposable project on `/mnt/c`. R1's existing-PDF path was
+earlier, a disposable project on `/mnt/c`. R1's existing-PDF path was
 exercised without TeX beside a saved note using actual Qt widgets at 1280×820
 and 960×680. R2's question, exact preview, deterministic answer, passage and
 editable-note flow was exercised visibly at the same sizes with an injected

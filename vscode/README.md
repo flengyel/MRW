@@ -1,151 +1,99 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.5 opens existing mathematical documents in place and connects scoped
-note links, backlinks and return locations with retained sources, annotations
-and resumable study. The extension is experimental.
-[Opening repair checks](../docs/DOCUMENT_OPENING_REPAIR.md).
+MRW 0.23.5 opens mathematical notes and papers in place, follows references,
+and keeps a route back to the passage being read. It adds Contents, backlinks,
+retained source passages, reader annotations and explicit TikZ rendering to a
+VS Code workspace. The extension is experimental.
 
-The document Problems commands and forms are removed. Earlier document-linked
-work remains readable with its drafts, attributed text, Return and history/export.
-Opening or following a document never starts an exercise form. Questions,
-solutions and commentary can stay in ordinary linked notes. Resumption starts
-with existing documents, locations and unfinished work; additional interactions
-must remove a demonstrated obstacle without duplicate entry. No replacement
-Research Question registration system is planned. See
-[the removal checks](../docs/DOCUMENT_PROBLEMS_REMOVAL.md).
+Questions, solutions and commentary can stay in ordinary linked notes. Opening
+or following a document creates no exercise form. Work saved through the removed
+document Problems feature remains readable, including drafts and attribution;
+see [the preservation checks](../docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 
 ## Open existing work
 
-**Open Document…** offers **Original file** (current contents in place) and
-**Saved copy** (a retained revision with MRW annotations) in one native picker.
-**Browse for another document…** is usable immediately, before folder or saved-copy
-loading. The current folder lists filenames and subfolders without descending.
-YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
-Search by title, filename or path. Select a folder or **Parent folder** to navigate;
-**Search subfolders…** explicitly requests a wider, bounded search. Its path,
-progress and incomplete results are shown. Failed title/listing work leaves
-Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
-an indexing scope. Cancellation preserves the current view and drafts.
+1. Run **MRW: Open Document…** and choose an **Original file**. Markdown opens in
+   preview; other formats use a registered editor or reader.
+2. Open the MRW Activity Bar view. **Contents** lists the selected Markdown
+   document's headings and links. **Show Contents** selects or reveals that
+   document; **Choose Document…** selects another Markdown file.
+3. For note-ID links and backlinks, use **Choose Notes Folder…**. The folder can
+   be outside the workspace and need not be an Obsidian vault.
+4. Follow a WikiLink from preview, or an ordinary link through Contents or
+   **Follow Document Link**, then use **Return to Document** to return to its
+   originating occurrence. **Show Backlinks…** lists incoming
+   occurrences. **Reopen Document** restores the last opened file and its saved
+   exact Markdown selection after restart.
 
-Saved-copy rows show their title, source/path and retained revision. Discovery
-runs independently of ordinary browsing. **Saved copy…** also opens the existing
-project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
-Command Palette. Opening an original does not import it; opening a saved copy
-does not refresh its source or replace annotations. PDFs use the existing host
-reader handoff. Shared backlink and note-ID completeness rules are unchanged.
+The **Commands** view keeps opening and navigation controls available. Contents
+identifies its selected file; when another file is active, it hides the preceding
+Markdown tree and identifies the active file. Opening documents leaves editor
+layout and unsaved-buffer recovery under VS Code's control.
 
-Select **MRW: Choose Notes Folder…** to grant one explicit folder for note-ID
-lookup and backlinks; Obsidian is optional. Notes remain in place.
+The opening picker lists the current folder's files and subfolders first.
+Titles arrive in batches from YAML or the first heading; unsaved titles take
+precedence. Browse immediately with **Browse for another document…**, enter a
+subfolder, or choose **Search subfolders…** for a wider, bounded search. Folder
+browsing does not change the notes folder used for ID lookup and backlinks.
+Partial searches are identified; cancellation preserves the current document.
 
-Follow ordinary relative Markdown links or exact Zettel `[[ID]]` links from
-Contents, or use **MRW: Follow Document Link** at the cursor. **Show Backlinks…**
-opens incoming occurrences and **Return to Document** restores the origin. The
-selected folder/document and matching return pin persist in the workspace.
-**Reopen Document** explicitly opens the last opened/followed file after restart;
-activation does not open it automatically. Contents and backlinks respect dirty editor text; VS Code owns Save and Undo.
-Obsidian, Zettel metadata and text import are optional.
-A link changed during opening leaves the previous Return destination intact.
-Backlink targets are checked against the current file scope before loading.
-New notes use the active preview group; already-open notes retain their group.
-[Navigation repair evidence](../docs/DOCUMENT_NAVIGATION_REPAIR.md).
+To read a retained revision, choose a **Saved copy** in the same picker. Its row
+identifies the source and revision. Opening an original does not import it;
+opening a saved copy does not refresh its source or replace its annotations.
+**Open Saved Source…** remains available in the Command Palette.
 
-A Document may be a note, PDF paper, manuscript or notebook. Other formats use
-registered host editors/readers; a PDF uses a registered custom reader or an
-explicit **Open with system reader** handoff when none is registered. MRW does
-not extract PDF text, derive PDF Contents or supply PDF page restoration. It
-does not drop an unsupported exact selector to open a different target.
-**Show Contents** and **Choose Document…** select Markdown; **New Document…**
-creates Markdown. Leading delimited YAML is excluded from Contents without
-changing offsets. **Retain Document as Source** and **Import Markdown Text…**
-remain explicit text-copy operations, separate from opening a file.
+WikiLinks support note IDs, headings, paragraph/list block IDs and scoped paths.
+Ambiguous or missing targets are reported rather than guessed. Contents and
+backlinks use unsaved editor text. Return keeps an exact occurrence; a failed
+follow does not replace the preceding successful return location.
 
-Start with **MRW: Open Tutorial**. Its header reports the active extension
-version and available build identity; each activation snapshots its packaged
-guide and reopening refreshes the virtual document. A newer package on disk is
-not presented as active before adoption. Guide links work from the virtual URI.
-See [document navigation and limits](../docs/READING_OUTLINE_WORKFLOW.md) and
-[optional Obsidian associations](../docs/OBSIDIAN_WORKFLOW.md).
+PDF opening delegates to a registered reader, with an explicit **Open with
+system reader** fallback. MRW supplies no PDF text extraction, PDF Contents or
+page restoration. Markdown preview scrolling is not restored. See
+[document navigation](../docs/READING_OUTLINE_WORKFLOW.md) for supported selectors
+and return behavior.
 
-## Source display and Return repair (0.21.1)
+## Mathematics and diagrams
 
-Kerodon mathematical expressions remain whole across HTML parser callbacks,
-including literal comparison signs and entities. Bare equation arrays have an
-inert MathML display. The original retained HTML, source hashes, passage ranges,
-annotations and historical manifest remain unchanged; reopening existing imports
-uses the repaired display without importing again.
+The native Markdown preview renders equations and supported note-local macro
+definitions. A fenced `tikz` block offers **Render diagram**, which runs the
+isolated Linux compiler only on request. Successful light/dark views are cached
+outside the note. Opening or saving a note never compiles it; rendering leaves
+its source unchanged. TeX, Poppler and bubblewrap are separate dependencies for
+this optional action. See [TikZ setup](../docs/TIKZ_WORKFLOW.md).
 
-Successful Kerodon and Stacks Project import notifications no longer retain the
-reader-action lock while hidden in Notifications. Return to Document and refresh
-remain usable after new and repeated imports. **Open original source ↗** is visible
-in the reader toolbar and opens today's canonical page in the external browser;
-the reader continues to show its retained revision. [Checks and limits](../docs/READER_REPAIR_VALIDATION.md).
-
-## Study a difficult passage
-
-For your own work, select saved ordinary text and run **MRW: Study Current
-Material**, or choose **Study current material** in a retained reader.
-**MRW: Open Study Example** is an optional offline demonstration with two
-questions and separately marked `practice_demo` history. A graph
-claim with a source citation also has **Study this claim**.
-
-An empty study shows the source, **Enter a question** and **Request questions
-from Codex**. Manual entry works offline. The Codex question handoff contains
-exact selected source text, references/revisions and the question schema.
-**Import questions from clipboard** reviews proposed questions without enrolling
-them automatically for review.
-
-Start a question, type an answer or mark work done on paper, then **Submit answer**.
-Starting recall conceals source/answer inside the study; other editors remain
-untouched. Reveals create exposure opportunities, not observations that a reader
-consulted them. A submitted work snapshot stays immutable.
-
-**Copy help request for Codex** includes the exact task and identifies current
-draft versus submitted work. **Paste companion response… → Review pasted
-response → Retain response** keeps prose/equations beside the attempt. Correct
-the author if needed. The original and attributed revisions remain identifiable;
-manual paste authenticates neither origin nor mathematical correctness.
-
-Use **Submit revised work** during an unfinished attempt. After completion,
-**Continue with revised work** creates an explicitly linked attempt. Report the
-outcome and consultation separately; pending choices survive rerender and
-pause/reopen without submitting themselves. **Pause / save** and **Resume Study**
-restore unfinished work. Retaining help does not imply use or benefit.
-
-**Keep for review** explicitly admits a question to bounded source-scoped FSRS
-review. Defaults are three questions, about five minutes and one new question,
-adjustable through study settings. Effort reports are occasional, optional and
-linked to the preceding attempt. Missing reports remain missing. A schedule is
-not a mathematical assessment.
-
-The **Studies** sidebar lists studies, their source passages and questions.
-Its **…** menu and the Command Palette contain source operations and history
-inspection/export. See the [tutorial](media/first-steps.md),
-[workflow](../docs/ACTIVE_STUDY_WORKFLOW.md) and
-[validation and limits](../docs/ACTIVE_STUDY_VALIDATION.md).
+The saved-source reader has its own renderer and displays statements, proofs
+and reader notes separately. Imported Stacks Project and Kerodon sections retain
+source-qualified citations and their exact source revision. **Open original
+source ↗** opens the current published page while the reader keeps the retained
+revision. See [published-source import](../docs/STACKS_WORKFLOW.md).
 
 ## Workspace hosts and dependencies
 
-The workspace extension and shared Python core run on Linux: local Linux,
-WSL2 or Remote SSH. Windows VS Code can supply the interface. Required:
+The extension and shared Python core run on a **Linux workspace host**, including
+WSL2 or Remote SSH. Windows VS Code may provide the interface. Required:
 **VS Code 1.95+ and Python 3.11+ on the workspace host**, normally `python3`.
 `mrw.pythonExecutable` accepts one executable path in User/Remote settings.
-An installed VSIX requires no npm, Qt, Lean, SageMath, container or provider.
+An installed VSIX needs no npm, Qt, Lean, SageMath, container or AI account for
+ordinary reading.
 
 | Arrangement | Evidence |
 | --- | --- |
-| Windows VS Code + WSL2 Debian | Earlier scoped installed reader/restart checks |
-| Windows VS Code + SSH to Raspberry Pi 5, Debian 12 ARM64 | Earlier scoped installed reader/save/restart checks |
-| Local Linux / other Linux SSH | Intended arrangements; desktop validation separate |
+| Windows VS Code + WSL2 Debian | Current scoped reading and renderer checks |
+| Windows VS Code + SSH to Raspberry Pi 5, Debian 12 ARM64 | Earlier scoped reader/save/restart checks |
+| Local Linux / other Linux SSH | Intended arrangements; separate desktop validation required |
 | Native Windows / macOS backend | Not qualified |
 
-See [reader host evidence](../docs/VS_CODE_OUTLINE_VALIDATION.md) and the current
-[study validation](../docs/ACTIVE_STUDY_VALIDATION.md). Earlier checks do not
-establish current native-host acceptance. Use a trusted ordinary Linux workspace;
-untrusted/virtual workspaces and concurrent hosts writing one store are unsupported.
+The [0.23.5 reading report](../docs/READING_REPAIRS.md) identifies the observed
+Windows/WSL behavior and remaining limits. Earlier
+[reader checks](../docs/VS_CODE_OUTLINE_VALIDATION.md) and
+[study checks](../docs/ACTIVE_STUDY_VALIDATION.md) have their own scopes.
+Use a trusted file workspace. Virtual workspaces and concurrent hosts writing
+one private store are unsupported.
 
 ## Package and install a VSIX
 
-From a **repository-root checkout** with Python 3.11+, Linux Node.js 22+ and npm:
+From the repository root, with Python 3.11+, Linux Node.js 22+ and npm:
 
 ```sh
 npm ci --prefix vscode --ignore-scripts
@@ -154,42 +102,37 @@ npm run verify-vsix --prefix vscode -- mrw-0.23.5.vsix
 sha256sum vscode/mrw-0.23.5.vsix
 ```
 
-`npm run package` runs the Python bundling prepublish hook and pinned
-`@vscode/vsce` 4.0.0. It creates `vscode/mrw-0.23.5.vsix`; it does
-not publish it. The fixed epoch/UTC supplies stable archive timestamps. Record
-the hash of the actual archive and tool versions used; do not assume an older
-release's hash. Use Linux npm in WSL, not a Windows npm launcher.
+Packaging bundles the Python core and uses pinned `@vscode/vsce` 4.0.0 to create
+`vscode/mrw-0.23.5.vsix`. It publishes nothing. The fixed epoch and UTC make
+archive timestamps reproducible. Use Linux npm in WSL and record the resulting
+archive's hash rather than reusing an earlier package's hash.
 
-The verifier compares production manifest/runtime bytes against this checkout,
-checks bundled dependency notices/digests, and rejects missing/unexpected files.
-Tests, scripts, npm dependencies, caches, host-test configuration and generated
-VSIX archives are excluded. Python core copies and package files are Git-ignored.
+The verifier compares packaged runtime files with the checkout and checks
+bundled dependency notices and digests. Tests, build tools, dependencies,
+caches and generated archives are excluded from the package.
 
-In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…** or:
+In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…**, or:
 
 ```sh
 code --install-extension /absolute/path/to/mrw-0.23.5.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.5` is installed on the **workspace host**,
-not solely the Windows UI. Save documents/forms before a requested reload. Keep
-workspace storage for future updates of `flengyel.mrw`. The bridge
-uses the package's bundled core through `python3 -I`; it needs no editable Python
-install. Full Windows/WSL setup: [installation](../docs/INSTALLATION.md).
+Confirm `flengyel.mrw@0.23.5` is installed on the workspace host. Save unfinished
+work before a requested reload and retain workspace storage when upgrading.
+The bridge runs the bundled core through `python3 -I`; no editable Python
+installation is needed. See [installation](../docs/INSTALLATION.md).
 
 ## Run from this checkout
 
 1. Open the repository's `vscode/` directory in the intended workspace host.
 2. Run `python3 scripts/bundle-core.py`, or use the supplied F5 bundling task.
-3. Press F5 for an isolated Extension Development Host and open a trusted,
-   disposable ordinary workspace there.
-4. Run **MRW: Open Study Example** or another **MRW:** command.
+3. Press F5 for an Extension Development Host and open a disposable file workspace.
+4. Run **MRW: Open Document…** on a sample Markdown file, then **MRW: Open Tutorial**.
 
-Keep development state distinct from genuine studies. Source retention and
-publication tests require a filesystem supporting the existing private POSIX
-modes and atomic file operations. Do not weaken guards to make `/tmp`, DrvFS or
-synchronized storage pass. Use a disposable directory on a qualified Linux volume.
+Keep development state separate from working notes and saved studies. Tests of
+private source storage require a Linux filesystem supporting the specified POSIX
+modes and atomic file operations; do not weaken those checks for a test location.
 
 From the repository root, after bundling:
 
@@ -200,117 +143,121 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 python3 -m compileall -q src tests
 ```
 
-Run focused changed-module checks first. Node integration tests use the real
-bundled Python bridge with a VS Code API double; they are not native UI checks.
-Opt-in Qt/Lean checks have separate requirements. An isolated host runner is in
-`vscode/scripts/prepare-host-tests.py`; old host reproduction details are in the
-[development history](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#checks).
-Never treat a failed launch or incomplete runner report as a pass.
+Run checks appropriate to the change. Documentation edits need document and link
+validation; runtime changes need the relevant regression checks. Node integration
+tests use the bundled Python bridge with a VS Code API double, so they do not
+establish rendered-interface behavior. Qt and Lean checks have separate
+requirements. The isolated host runner is `vscode/scripts/prepare-host-tests.py`.
 
 ## Data and history
 
-Native files retain VS Code save, undo and recovery. Saved sources/annotations
-use the existing private source-store publication rules and explicit bindings.
-Current studies use `active-studies-v1/<study-id>.json`; the recorder uses
-`study-history-v1/`, both beneath the extension's `context.storageUri` (VS Code's
-workspace storage on the workspace host).
+VS Code owns ordinary-file editing, saving, undo and unsaved-buffer recovery.
+MRW keeps retained sources and annotations in its private source store. Optional
+studies use `active-studies-v1/<study-id>.json`; interaction history uses
+`study-history-v1/`, beneath the extension's workspace storage on the Linux host.
 
-History records meaningful MRW actions, software/build identity, source/question
-revisions, immutable submission/request/help snapshots, assessment/correction
-links, optional effort, cancellations, errors and persistence gaps. It does not
-record unrelated application activity. Snapshots can contain private mathematics.
-Practice and automated fixtures retain distinct origins from production work.
+History records MRW actions, versions, source/question revisions, submissions,
+requests, help, reported outcomes/effort and errors. It does not record unrelated
+application activity. **Inspect Study History** opens a local report;
+**Export Study History…** saves selected sessions as readable Markdown or JSON
+with linked snapshots. Exports may contain private mathematics. Missing context
+is identified, and corrections remain distinct from earlier records. These
+reports do not establish a learning benefit or causal comparison between releases.
 
-**Inspect Study History** reads a local report. **Export Study History…** selects
-sessions and saves readable Markdown or events plus snapshots through an ordinary
-new document. Required linked context is labeled separately; missing context is
-reported rather than fabricated. Corrections remain immutable events while
-reports attribute attempts to the version in which they occurred. The reports
-are descriptive: different tasks/exposure prevent a causal release comparison.
-
-Study companion requests/replies use deliberate clipboard actions. No clipboard
-monitoring, automatic provider request or background generation occurs. The
-separate **Ask… → exact preview → Send** API connector retains its own record
-lifecycle; see [reader AI](../docs/READER_AI_WORKFLOW.md).
+Study companion exchanges use explicit clipboard actions. The separate
+**Ask… → exact preview → Send** API connector has its own request and response
+records; see [reader AI](../docs/READER_AI_WORKFLOW.md).
 
 ### Saved artifact location (0.7.0)
 
 **Move Saved Work Directory…** transfers supported retained-source records;
-**Open Saved Work Directory…** connects a verified copied store. These commands
-currently do **not** transfer active-study checkpoints or interaction history.
-Ordinary Markdown or `.mrw-study.json` copies also do not transfer private source
-targets. Preserve workspace storage; see [storage/recovery](../docs/ARTIFACT_STORAGE.md).
-Windows-backed/synchronized storage remains unqualified.
+**Open Saved Work Directory…** connects a verified copied store. Neither
+transfers current-study checkpoints or interaction history. Copying an ordinary
+Markdown or `.mrw-study.json` file does not copy its private source targets.
+See [storage and recovery](../docs/ARTIFACT_STORAGE.md) before moving saved work.
+Windows-backed private artifact storage remains unqualified; ordinary notes may
+still be opened from a Windows folder.
+
+## Study a difficult passage
+
+Source study is optional and separately invoked. **Study Current Material**
+starts from selected saved text; **Study current material** starts from a retained
+reader passage. It supports entered questions, attempts, attributed companion
+responses and optional FSRS review. **Keep for spaced review** explicitly enrolls a
+question. **Pause / save** and **Resume Study** retain unfinished work.
+
+The Codex handoff copies the selected source, question and work. Pasted replies
+are reviewed before retention; a supplied author name does not authenticate
+origin or mathematical correctness. The [study guide](../docs/ACTIVE_STUDY_WORKFLOW.md)
+explains submissions, revisions, recall and optional effort reports.
+**Open Study Example** supplies an offline demonstration whose practice history
+is marked separately.
 
 ## Workflows
 
-- **Open Saved Source…** reopens a retained source offline. Statements,
-  proofs and reader notes have separate controls; annotation forms save explicitly.
-- **Show Contents** navigates Markdown headings, note links and exact saved
-  references. **Show Backlinks…** and **Return to Document** keep source-note
-  occurrences. [Document guide](../docs/READING_OUTLINE_WORKFLOW.md).
-- [Proof study with Codex](../docs/PROOF_STUDY_WORKFLOW.md) retains an unresolved
-  question, explicit prerequisite passages and attributed proposed graph.
-- [Proof graphs](../docs/PROOF_GRAPH_WORKFLOW.md) support source selection,
-  summary corrections, pan/zoom and reversible display deletion. Validation of
-  references and graph structure does not check the mathematics.
-- [Stacks Project / Kerodon import](../docs/STACKS_WORKFLOW.md) retains a bounded
-  section from pinned Git source or one official HTML snapshot on explicit import.
-  Qualified IDs distinguish sources; retained citations still pin revision and passage.
-- [Obsidian](../docs/OBSIDIAN_WORKFLOW.md), [TikZ](../docs/TIKZ_WORKFLOW.md) and
-  [SagePod/Jupyter](../docs/GETTING_STARTED_WSL_SAGEPOD.md) remain optional.
+- [Documents and Contents](../docs/READING_OUTLINE_WORKFLOW.md): headings, note
+  links, backlinks and Return.
+- [Stacks Project and Kerodon](../docs/STACKS_WORKFLOW.md): retain a section and
+  cite its revision and passage.
+- [Proof work](../docs/PROOF_STUDY_WORKFLOW.md): save a question and selected
+  prerequisites, exchange an explicit Codex handoff, and inspect a proposed graph.
+- [Proof graphs](../docs/PROOF_GRAPH_WORKFLOW.md): navigate claims, correct
+  summaries and simplify the displayed graph. Reference and graph validation
+  does not verify the argument.
+- [Obsidian](../docs/OBSIDIAN_WORKFLOW.md): use existing notes in place.
+- [SagePod/Jupyter](../docs/GETTING_STARTED_WSL_SAGEPOD.md): optional computation
+  through a separate notebook kernel.
 
-### Manual Markdown overviews across sources
+<a id="manual-markdown-overviews-across-sources"></a>
 
-Use **Insert Source or Passage Link…** in an ordinary note; **Follow Source or Passage Link at Cursor** opens the exact retained target. Copying a reference does not copy its
-private storage. VS Code owns the overview's editing, saving and recovery.
+### Link retained passages from a document
+
+Use **Insert Source or Passage Link…** in an ordinary note. **Follow Source or
+Passage Link at Cursor** opens its exact retained target. The note remains an
+ordinary editable document; copying its reference does not copy private storage.
+
+<a id="offline-source-region-reader"></a>
 
 ### Offline saved-source reader
 
-**Retain Document as Source** retains UTF-8 source bytes and selected
-scalar ranges. Original-file edits do not replace an earlier source revision.
-Source annotations and supplied evidence remain separately attributed. There is
-no PDF extractor, automatic corpus scan or inferred proof correspondence.
+**Retain Document as Source** retains UTF-8 source bytes and selected scalar
+ranges. Original-file edits do not replace that revision. Reader annotations
+and supplied evidence keep their separate attribution.
 
 ### Outline persistence boundary
 
-Exact references bind the workspace/source revision, outline and region. A changed
-association never silently redirects an earlier citation. See the
-[historical persistence details](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#outline-persistence-boundary)
-and [source-association checks](../docs/VS_CODE_OUTLINE_VALIDATION.md).
+Exact references bind a workspace, source revision, outline and region. Changing
+an association never silently redirects an earlier citation. The
+[persistence details](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#outline-persistence-boundary)
+and [association checks](../docs/VS_CODE_OUTLINE_VALIDATION.md) describe this rule.
 
 ### Investigation persistence boundary
 
 The separate bounded API investigation keeps a versioned private pointer and
 exact parent/child record bindings. It does not import Qt recovery state or own
-ordinary editor buffers. Its publication/restart rules and limits are preserved
-in [the original contract](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#investigation-persistence-boundary).
+ordinary editor buffers. Its contract is recorded in the
+[investigation persistence details](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#investigation-persistence-boundary).
 
 ### Obsidian companion notes
 
-Use [the Obsidian guide](../docs/OBSIDIAN_WORKFLOW.md) for optional supplied
-note/passage associations and import destinations. An explicitly selected notes
-folder has a bounded link/backlink index. MRW does not discover vaults,
-synchronize notes or infer an Obsidian mapping from the folder name.
+A selected notes folder provides bounded ID lookup and backlinks. Optional
+Obsidian handoffs open the same files in that application. Saved-reader
+associations are supplied separately. See [the Obsidian guide](../docs/OBSIDIAN_WORKFLOW.md).
+MRW does not discover vaults or synchronize their contents.
 
 ### Reproduce the bounded outline host checks
 
-The earlier reader runner and its required pinned source, seed/restart phases
-and offline guards are documented in
-[the historical reproduction steps](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#reproduce-the-bounded-outline-host-checks).
-Those scoped checks are separate from current study feedback validation.
+The earlier reader runner's pinned source, seed/restart phases and offline
+guards are recorded in the
+[reproduction steps](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#reproduce-the-bounded-outline-host-checks).
+Use the report for each release to identify which behavior was observed.
 
-## Legacy development and notices
+## Development records and notices
 
-[Development history](../docs/VS_CODE_DEVELOPMENT_HISTORY.md) retains older commands,
-implementation contracts and scoped host checks. [CHANGELOG](../CHANGELOG.md) keeps
-release history and the separate Qt/CLI prototype. These are historical accounts,
-not current installation instructions.
+[Development records](../docs/VS_CODE_DEVELOPMENT_HISTORY.md) retain earlier
+commands, implementation contracts and host checks. [CHANGELOG](../CHANGELOG.md)
+records releases and the separate Qt/CLI prototype.
 
-The package includes the MRW Apache-2.0 license and bundled KaTeX, markdown-it
-(and its dependencies) and ts-fsrs notices. Repository fixture rights and public
-exposure findings are listed in [PUBLIC_READINESS](../PUBLIC_READINESS.md).
-
-Reading repairs add exact heading/block WikiLinks, note-local macros and explicit
-isolated TikZ rendering, progressive titles and saved Markdown selections.
-See [reading repairs](../docs/READING_REPAIRS.md).
+The package includes the MRW Apache-2.0 license and notices for bundled KaTeX,
+markdown-it and its dependencies, ts-fsrs, and Quiver. Fixture rights and
+outstanding publication decisions are recorded in [PUBLIC_READINESS](../PUBLIC_READINESS.md).

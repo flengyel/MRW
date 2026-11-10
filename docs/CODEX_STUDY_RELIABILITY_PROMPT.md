@@ -79,7 +79,7 @@ once. Cover preexisting mismatched snapshots without destructive repair.
 
 Address R6, R7 and R8.
 
-- Historical review replay must work while a question is retired/suspended.
+- Replay of earlier reviews must work while a question is retired/suspended.
   Separate reconstruction from eligibility for a new review. Preserve the
   original observations, apply the linked correction and keep the question
   excluded from selection until explicitly re-enrolled.

@@ -161,7 +161,7 @@ implementation.
   history into a linked changelog and preserve material links.
 - Remove contradictory current instructions such as installing 0.14.4 when
   delivering a later version. Update INSTALLATION.md, the extension README,
-  the bundled tutorial and source-build instructions together. Separate legacy
+  the bundled tutorial and source-build instructions together. Separate earlier
   Qt/CLI material from the first VS Code session. Verify the documented build
   and package path from a clean checkout/profile where available.
 - Explain what history is recorded, where it lives, explicit exports, companion

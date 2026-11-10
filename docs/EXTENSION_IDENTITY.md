@@ -2,7 +2,7 @@
 
 MRW 0.22.0 uses `flengyel.mrw` and `mrw-0.22.0.vsix`. This is the user's explicit
 fresh start under the new application ID. There is no compatibility extension,
-forwarder, legacy activation adapter or automatic migration. Install only MRW;
+forwarder, adapter for the previous extension or automatic migration. Install only MRW;
 the earlier full `flengyel.theorem-terminal` extension is retired.
 
 VS Code supplies new workspace/global state and storage for the new ID. Old
