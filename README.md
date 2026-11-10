@@ -12,8 +12,10 @@ arguments. The current extension supplies reading, navigation, source retention
 and annotation tools. Broader research resumption and integrated argument
 reconstruction remain planned.
 
-**Current version: 0.23.5.** Obtain a maintainer VSIX or build from source; there
-is no Marketplace listing or GitHub release. The extension ID is `flengyel.mrw`.
+**MRW 0.23.6 — first public prerelease.**
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.6/mrw-0.23.6.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.6).
+There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
 
@@ -83,7 +85,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.5.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.6.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -93,13 +95,15 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.5.vsix
-sha256sum vscode/mrw-0.23.5.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.6.vsix
+sha256sum vscode/mrw-0.23.6.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
 See [development and checks](vscode/README.md#run-from-this-checkout) for F5
 launching, tests and package verification.
+[Release preparation](docs/RELEASING.md) records the source-marker and publication
+procedure. GitHub updates require downloading and installing the newer VSIX.
 
 ## Recommended extensions
 

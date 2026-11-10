@@ -1,8 +1,30 @@
 # Public readiness — 2026-11-05
 
-MRW remains **private**. This task prepares inspection; it does not authorize a
-visibility change, release upload, Marketplace publication, credential rotation,
-history rewrite or contact with testers. No such action was performed.
+## Current distribution — 2026-11-09
+
+The repository is now **public**. The separately authorized first GitHub
+prerelease distributes the packaged extension as **MRW 0.23.6**:
+[release page](https://github.com/flengyel/MRW/releases/tag/v0.23.6).
+This delivery changes neither repository visibility nor history and does not
+submit to the Marketplace. See [the release procedure](docs/RELEASING.md).
+
+Public visibility and package distribution do not clear the findings or
+unresolved rights/disclosure decisions below. No new repository-wide exposure
+audit is claimed. Package inventory and license checks cover the release archive
+separately from the November 5 review.
+
+The required pinned `npm ci` reported five vulnerable dependency entries
+(three high, two moderate). These include bundled `markdown-it` 14.1.0 and
+packaging dependencies. Dependency pins are unchanged for this release;
+these findings remain unresolved. This is npm's dependency-advisory report,
+not a new security audit or a claim that all listed paths are exercised by MRW.
+
+## Original review authorization — 2026-11-05
+
+MRW was **private** at this review. That task prepared inspection; it did not
+authorize a visibility change, release upload, Marketplace publication,
+credential rotation, history rewrite or contact with testers. No such action
+was performed as part of that task.
 
 The findings below cover the 2026-11-05 review only. Later introduction updates
 do not extend that review to subsequent commits or resolve its publication
