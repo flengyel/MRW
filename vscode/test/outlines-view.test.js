@@ -179,7 +179,7 @@ test('source collection, section and qualified identity stay visible above text 
     ['kerodon', 'Kerodon', 'Kerodon', '1.1', '0004']
   ]) {
     const h = reader(true), value = publishedModel();
-    Object.assign(value.model.outline.published, { source_id: source, chapter, section_number: section,
+    Object.assign(value.model.outline.published, { source_id: source, source_name: collection, chapter, section_number: section,
       title: 'Hausdorff spaces', qualified_tag: `${source}:${tag}`, source_revision: 'secret-hash' });
     value.returnDestination = { kind: 'citation', label: '← Return to reading-overview.md',
       path: '/notes/reading-overview.md', detail: 'From a document citation. Return to its exact occurrence in reading-overview.md.' };

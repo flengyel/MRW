@@ -245,8 +245,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
           if (!qualified || !qualified.startsWith(sourceId + ':') || !allowed.has(decodeURIComponent(qualified.slice(sourceId.length + 1)))) {
             throw new Error('This is not an identified citation in the retained section.');
           }
-          await sourcePlugins?.load();
-          const target=qualified===source.qualified_tag?source.citation:require('./sourceIdentifiers').canonicalCitation(qualified);
+          const target=source.citations?.[qualified] || (qualified===source.qualified_tag?source.citation:require('./sourceIdentifiers').canonicalCitation(qualified));
           if (!await vscode.env.openExternal(vscode.Uri.parse(target))) {
             throw new Error('The canonical source citation could not be opened.');
           }

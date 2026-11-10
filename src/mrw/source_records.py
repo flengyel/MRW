@@ -7,7 +7,7 @@ from pathlib import Path
 from uuid import uuid4,uuid5,NAMESPACE_URL
 from urllib.parse import urlsplit
 
-from .source_plugins import Registry,Acquisition,manifest,qualified,parse_qualified,LIMIT
+from .source_plugins import Registry,Acquisition,manifest,qualified,parse_qualified,page_url,LIMIT
 from .source_rendering import validate_tokens
 from .source import SourceDocument
 from .source_outlines import OutlineStore,SCHEMA,BIBLIOGRAPHY,encoded,directory,identity,now,validate_state,span_text
@@ -219,6 +219,8 @@ def enrich(store,value):
         value['published']=dict(source_id=spec['sourceId'],source_name=spec['name'],tag=saved['itemId'],qualified_tag=qualified(spec['sourceId'],saved['itemId']),title=saved['model']['title'],chapter=spec['name'],section_number=None,previous=None,next=None,chapter_tag=None,parts=parts,citation=saved['plan']['canonicalUrl'],authors=spec['attribution']['authors'],license=spec['attribution']['license'],commit=revision['label'] if revision['kind']=='git' else None,revision_metadata=revision,retrieved_at=saved['retrievedAt'],source_file=saved['plan']['primary'],source_revision=source.revision,reference_tags=sorted(refs),links=sorted(links),producer=saved['producer'],selected_scope=saved['selectedScope'],derived_from=saved['derivedFrom'],format=saved['model']['format'],capabilities=spec['capabilities'],limitation=None,error=None,
             online=dict(sourceId=spec['sourceId'],name=spec['name'],url=saved['plan']['canonicalUrl'],origins=['https://'+urlsplit(saved['plan']['canonicalUrl']).netloc],supported=spec['capabilities']['onlineView'],revision=source.revision,reason='This source does not permit an embedded original page. Use Saved text or Open in browser.'))
         value['published'].update(saved['model'].get('navigation',{}))
+        pub=value['published'];tags={pub['tag'],pub['chapter_tag'],*(p['tag'] for p in (pub['previous'],pub['next']) if p),*refs}
+        pub['citations']={qualified(spec['sourceId'],tag):page_url(spec,tag) for tag in tags if tag}
         value['source_status']='retained upstream page snapshot'
     except (OSError,ValueError,KeyError,TypeError,StopIteration) as exc:value['published']=dict(error='Retained source snapshot unavailable: '+str(exc))
     return value

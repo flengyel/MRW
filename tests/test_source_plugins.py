@@ -66,6 +66,7 @@ class SourcePluginTests(unittest.TestCase):
             self.assertEqual(reopened['outline']['regions'][1]['annotations'][0]['text'],'Keep my question')
             self.assertEqual(followed['reference']['qualified_id'],'external-example:000A')
             self.assertEqual(reopened['revision'],changed['revision'])
+            self.assertEqual(reopened['outline']['published']['citations']['external-example:000A'],'https://kerodon.net/tag/000A')
         store=OutlineStore(str(self.store),str(self.root),key);snap=records.snapshot(store)
         self.assertEqual(store.source().text.encode(),self.raw);self.assertEqual(snap['producer']['pluginId'],'example.profile')
         for p in snap['model']['parts']:self.assertTrue(span_text(store.source(),p['span']))
@@ -102,6 +103,25 @@ class SourcePluginTests(unittest.TestCase):
         ref=self.call('outline_reference',id=prior['outline']['id'],revision=prior['revision'],region=prior['outline']['regions'][1]['id'])['reference']
         current=self.imported();self.assertTrue(current['reused']);self.assertEqual(current['outline']['id'],prior['outline']['id'])
         self.assertEqual(self.call('outline_follow_reference',reference=ref)['reference']['qualified_id'],'kerodon:000A')
+    def test_managed_store_rejected_candidate_can_be_retried_without_losing_saved_notes(self):
+        # The suite's TMPDIR is a persistent fixture directory, as required by
+        # artifact relocation. No genuine source store is opened.
+        old=self.imported();key=old['outline']['id']
+        old=self.call('outline_mutate',id=key,revision=old['revision'],change=dict(kind='annotation',region=None,id=None,purpose='question',text='Managed source note',origin='human_work',author='Reader'))
+        destination=self.base/'managed'
+        plan=dispatch(dict(protocol=1,method='artifact_plan',artifact_home=str(self.home),destination=str(destination),roots=[str(self.root)]))
+        moved=dispatch(dict(protocol=1,method='artifact_move',artifact_home=str(self.home),destination=str(destination),roots=[str(self.root)],manifest=plan['source_manifest']))
+        self.raw=self.raw.replace(b'For every',b'For any')
+        def call(method,**kw):
+            return dispatch(dict(protocol=1,method=method,artifact_home=str(self.home),artifact_epoch=moved['epoch'],store=str(self.store),project_root=str(self.root),**kw))
+        with patch.object(Acquisition,'fetch',autospec=True,side_effect=self.fetch):prep=call('outline_source_prepare',source_id='kerodon',input='0004')
+        with patch.object(OutlineStore,'publish',side_effect=OSError('failed candidate')):
+            failed=call('outline_source_import',ticket=prep['ticket'],section='whole')
+        self.assertTrue(failed['blocked']);self.assertEqual(call('outline_load',id=key)['revision'],old['revision'])
+        self.assertEqual(len(call('outline_list')['outlines']),1)
+        self.assertEqual(call('outline_load',id=key)['outline']['annotations'][0]['text'],'Managed source note')
+        retried=call('outline_source_import',ticket=prep['ticket'],section='whole')
+        self.assertFalse(retried['reused']);self.assertEqual(len(call('outline_list')['outlines']),2)
     def test_invalid_registry_keeps_builtin_readers_and_preserves_registration_bytes(self):
         file=Registry().path;file.parent.mkdir();file.write_text('{broken')
         reg=Registry();self.assertTrue(reg.diagnostics);self.assertEqual(reg.adapter('kerodon')[0]['sourceId'],'kerodon')

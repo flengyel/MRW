@@ -117,6 +117,7 @@ def normalize(spec,value):
     if spec['urlRules']['identifier']=='tag':
         if not re.fullmatch(r'[a-zA-Z0-9]{4}',item):raise ValueError('Use a four-character tag or canonical section URL')
         item=item.upper()
+    if fragment and not spec['capabilities']['sectionSelection']:raise ValueError('This source does not support heading-fragment imports; use its whole section URL')
     encode_item(item)
     return dict(itemId=item,revision=revision,fragment=fragment,canonicalUrl=page_url(spec,item,revision,fragment))
 

@@ -24,7 +24,8 @@ SVG. Site sidebars, scripts and generated contents are excluded from the reading
 sequence, while the complete response stays available in **Open retained source**.
 Unsupported media has a visible fallback at its location; MRW neither downloads
 page scripts nor compiles its TeX. Local heading links scroll within the saved
-scope. Links outside that scope open the site explicitly.
+scope. A local anchor outside that scope reports its absence; use Open in browser to
+follow it on the site. Other website links open explicitly in the browser.
 
 nLab sends `X-Frame-Options: DENY`; **Original page** explains that embedding is
 unavailable. **Open in browser** opens its current official page. Offline reading,
