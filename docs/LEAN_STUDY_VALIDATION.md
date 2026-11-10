@@ -55,15 +55,35 @@ working window. The native scenario demonstrated:
 - An explicitly registered external pack opened its own working project without
   rebuilding the extension. The unrelated unsent test draft stayed dirty.
 
-The final native scenario completed with no MRW errors. The working VS Code
+An earlier isolated attempt timed out waiting for a positive Lean diagnostic;
+its failure log is retained. A fresh final native scenario completed with no MRW
+errors. Its pre-edit example revision was
+`2b5c05ce705ca14b41843c4a5ef098ec1e1ae8d89719032d6ae5c88e94673e2e`
+(the completed source plus retained test comments). The working VS Code
 window was not reloaded or installed into. The lesson and code use tabs with
 native InfoView beside code; MRW does not continually rearrange groups.
 
 ## Delivery status
 
-Full extension regressions and clean release packaging follow integration of
-these sources. The final package and release results will be recorded here
-before delivery; the focused/native results above do not stand for those checks.
+The full extension suite passed **378/378**, with zero skips, on implementation
+commit `7c7f78ca7e3e6d35db34ce4927c385368da8b31c`. All 46 production JavaScript
+files match the native-tested bytes. The first broad run recorded 14 assistance
+failures with bridge timeouts during unusually long host delays. The selected
+failure passed independently; the complete rerun then passed in 228.6 seconds.
+Both runs and their statuses are retained.
+
+Python/bridge behavior is unchanged from 0.23.9; the new increment uses native
+files rather than new backend methods. The earlier Python regression pass was
+not repeated. The extension suite includes real isolated Python bridge and
+source-store regressions. Release metadata changes only the Python version.
+The final extracted-package smoke check is separate from those source checks.
+
+The three tutorial checks passed for the release text; 316 local Markdown link
+targets resolved. The pinned Linux npm install succeeded. `npm audit` returned
+five findings: two moderate and three high, including bundled `markdown-it`
+and build-tool dependencies (`@azure/identity`, `@azure/msal-node`, `@vscode/vsce`,
+`minimatch`). Dependency pins were preserved. The release notes and external
+release evidence record the clean package, checksum and publication result.
 
 ## Limits
 

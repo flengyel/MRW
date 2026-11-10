@@ -5,8 +5,9 @@ It supplies no executable MRW hooks and does not implement another language
 integration. Registration is explicit; MRW never discovers packs by scanning
 an arbitrary workspace.
 
-The working example is [examples/lean-lesson-pack](../examples/lean-lesson-pack/pack.json).
-Copy that directory outside the installation, then run **MRW: Add Lean Lesson
+The working example is [examples/lean-lesson-pack](../examples/lean-lesson-pack/pack.json)
+in a source checkout (also available by downloading the repository). Copy that
+directory outside the installation, then run **MRW: Add Lean Lesson
 Pack…** and select it. **Study Lean 4…** immediately includes its identity-proof
 lesson. No extension edit, rebuild or reload is needed. **Manage Lean Lesson
 Packs…** enables, disables or removes registrations. Existing working copies
