@@ -2,8 +2,8 @@
 
 This design starts with mathematical work: open a document, follow its
 references, compare passages, add an explanation or calculation, and return to
-unfinished work. The current implementation is MRW 0.23.5; broader recovery and
-integrated argument reconstruction remain proposed work.
+unfinished work. Delivered features are listed in the [project README](../README.md);
+broader recovery and integrated argument reconstruction remain proposed work.
 
 Published-source implementations must preserve the distinction between a stable
 qualified item ID, an immutable content revision and an exact passage. Document
@@ -68,6 +68,76 @@ Design first for Florian's mathematical work and tools. Keep the
 implementation usable with ordinary files and folders, without Obsidian,
 Zettel conventions, a model account, Lean, or SageMath as entry requirements.
 No multi-user product framework is needed for this sequence.
+
+## Continuing study and a research lab notebook
+
+The intended workflow connects ordinary notes and source passages to
+calculations, proof attempts, results, unsuccessful approaches and the context
+needed to resume. Learning and research share this material; optional spaced
+review remains a study tool, not a prerequisite for research.
+
+[W3C PROV](PROVENANCE_DESIGN.md) governs the provenance model for proposed
+integrations. The core should preserve and expose versioned artifacts and their
+relationships; plugins handle the external systems. Do not replace source
+identities, rewrite saved records or adopt the VisTrails runtime to achieve this.
+
+The concrete next usability requirement is
+[Archive/Delete Studies](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
+These controls provide reversible archive/restore and deletion through Trash,
+including explicit permanent deletion. They do not require a general workflow
+engine and are not yet delivered.
+
+## Related systems and reuse
+
+MRW is experimenting with workflows that combine continuing mathematical
+study, a research lab notebook, linked Markdown/Zettelkasten notes, computation
+and formal proofs. The combination is a design direction, not a claim that
+comparable systems do not exist or that the complete workflow is implemented.
+
+The links below were checked on 2026-11-10. Documented capabilities and proposed
+uses in MRW are separate; this is not a hands-on evaluation of these systems.
+
+| System | Documented overlap | What MRW should investigate or reuse |
+| --- | --- | --- |
+| [CoCalc](https://doc.cocalc.com/) | Projects combining SageMath, Jupyter, Markdown, LaTeX, AI assistance and course tools. | Interoperate with existing projects, notebooks and computation rather than build another hosted computing environment. |
+| [Wolfram Notebooks](https://www.wolfram.com/notebooks/) | Documents combining text, executable code, results and interactive content. | Link calculations and notebooks to research notes, preserving available inputs, outputs and execution context. |
+| [Proofscape / PISE](https://docs.proofscape.org/en/stable/ref/library/dc.html) | A mathematical study environment connecting proof charts, annotations and source documents. | Study its [bidirectional linking](https://www.proofscape.org/en/stable/tutorials/users/linking.html), proof expansion and comparison before adding equivalent navigation. |
+| [GNU TeXmacs](https://www.texmacs.org/tmweb/home/welcome.en.html) | Mathematical writing, graphics and interfaces to computational systems. | Learn from its document-and-computation interaction; use existing editors and computational tools where they fit. |
+| [MathHub](https://kwarc.info/systems/mathhub/), [sTeX and FLAMS](https://kwarc.info/systems/sTeX/) | Mathematical archives, semantic document navigation and active course materials. | Investigate reusable source representations, concept links and document services. |
+| [ALeA](https://www.voll-ki.fau.de/ssfc/) | Adaptive learning from annotated course material; [published work](https://kwarc.info/people/dmueller/pubs/ws_alea_voll-ki.pdf) describes flashcards, quizzes and guided tours. | Examine its learning objects and prerequisite navigation before designing new study machinery. |
+| [VisTrails](https://www.vistrails.org/index.php/Main_Page) | Workflow versions, execution provenance, annotations and comparison of alternative results. | Use its [provenance design](https://aosabook.org/en/v1/vistrails.html) as a reference for retaining how an investigation developed. The original project reports no maintenance since 2018. |
+
+MathHub's ecosystem includes learning support, particularly through active
+course materials and the related ALeA work. The reviewed sources do not
+establish the complete combination sought for MRW: personal linked notes,
+continuing study, a research lab notebook, repository notes and Lean proofs,
+and external computation in one resumable workflow. This is a distinction of
+documented scope and intended use, not evidence that MathHub cannot be extended
+or that MRW is unique.
+
+For each proposed feature, first check these systems for an existing capability,
+interface or export format. Prefer interoperability or component reuse where it
+meets the task. Record the remaining gap with a concrete research or study
+example before adding another editor, kernel manager, scheduler or document
+format. A link here does not make a system a required dependency.
+
+### Current support and proposed integrations
+
+The [source plugins](SOURCE_PLUGINS.md) for Stacks Project, Kerodon and nLab,
+[optional source study](ACTIVE_STUDY_WORKFLOW.md), and the first
+[Lean study unit](LEAN_STUDY_WORKFLOW.md) with
+[local lesson packs](LEAN_LESSON_PACKS.md) are implemented. Notebook computation
+currently uses the separate [SagePod/Jupyter workflow](SAGEPOD_NOTEBOOK_WORKFLOW.md).
+
+Repository study imports, CoCalc and Wolfram interoperability plugins, a
+data-analysis plugin and broader lab-notebook provenance remain proposals.
+Clowder and PreTeXt source adapters also remain proposed. These are distinct
+from the delivered source-import and local lesson-pack interfaces.
+
+W3C PROV is the common model for the proposed lab notebook; see
+[the provenance design](PROVENANCE_DESIGN.md). VisTrails supplies ideas for
+workflow evolution and result comparison. Existing libraries, formats and
+interfaces should be assessed before implementing equivalent mechanisms.
 
 ## Vocabulary and interface labels
 

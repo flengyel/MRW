@@ -1,6 +1,8 @@
 # Active study, light review, and cognitive-load tracking
 
-Status: implemented through 0.19.1 within the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
+Status: the original study interaction was implemented through 0.19.1 within
+the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
+The Study lifecycle requirement added below on 2026-11-10 is not yet implemented.
 Role clarified 2026-11-06. Original design baseline: `db656402190c255afd6a296da6ef8e549cc0b293`.
 
 ## Role in the research workstation
@@ -19,7 +21,89 @@ documents, research resumption and mathematical tool use. The delivery language
 below describes the original bounded study increment, not a new instruction to
 repeat it or make it the whole workstation.
 
-## Purpose and next delivery
+## Archive and delete Studies
+
+Design requirement, 2026-11-10; not implemented in MRW 0.23.10. The Studies view
+can accumulate unwanted studies but exposes no Archive or Delete action.
+Retiring a question or archiving a help response does not manage the study.
+
+This is the next bounded usability requirement. It can be implemented with the
+existing study store and recorder; it must not wait for a general PROV service,
+new data-analysis plugin or replacement storage system.
+
+### Actions and states
+
+| Action | Required behavior |
+| --- | --- |
+| Archive Study | Remove it from active/recent and automatic Resume selection; suspend its review eligibility while preserving drafts, attempts, history, references and scheduler state. |
+| Show Archived Studies | List archived studies in the existing view or a native picker; allow inspection, Restore and Delete. |
+| Restore Study | Return an archived study to active listings with its identity and saved work intact. Restore prior review enrollment only; do not create a review event or silently change due dates. |
+| Delete Study… | After a concise scope confirmation, move it to Trash, hide it from active/archived lists and suspend review. Offer Undo and later Restore. |
+| Show Deleted Studies | Open Trash. Restore to the study's previous active/archived state. |
+| Permanently Delete Study… | From Trash, explicitly confirm and remove study-owned content and its unshared retained payloads. This is actual deletion, not just hiding or renaming a record. |
+
+Use native Studies row context menus and Command Palette pickers. Archive is
+reversible and needs no routine confirmation. Deletion identifies the selected
+study and the data affected; cancellation changes nothing. Avoid a new dashboard
+or study-registration form. Preserve the current Return destination.
+
+Scope this first implementation to the saved records represented by Studies,
+including preserved document-linked studies. Lean lesson files and proof-study
+documents remain ordinary files; removing a saved study must not delete its
+working directory, lesson pack or repository.
+
+### Preservation and deletion boundary
+
+Before a lifecycle transition, finish or safely cancel in-flight operations and
+settle pending draft/owner writes using the existing save rules. A failed save
+must leave the study available with its draft; do not report success or silently
+discard it. Stop timers and reject stale webview messages after the transition
+so they cannot recreate deleted content.
+
+Archive and Trash preserve all study data for restoration. Permanent deletion
+covers the selected study's questions, attempts, drafts, responses, scheduling
+state, study-specific history payloads and unshared snapshots. Show which shared
+records remain. Never cascade into source snapshots, separately attributed source
+annotations, ordinary notes, notebooks, Lean files or another study.
+
+History sessions and content-addressed snapshots may be shared. Determine
+ownership and references before deletion; do not delete an entire mixed-study
+session or a shared blob. Reuse the existing persistence primitives for a
+recoverable operation and publish completion only when the selected scope has
+been removed. An interrupted operation must have a bounded, idempotent recovery
+path; no silent partial success.
+
+Keep at most an opaque deleted-target marker needed to prevent resurrection and
+explain an old link. It must contain no title, source passage, answer or response.
+An old reference reports that its target was deleted; it must never resolve to
+different work. User exports, backups and external service copies are outside
+this local operation, and the confirmation must say so.
+
+Current studies are identified from their source selections. Revisiting the same
+material must not silently restore an archived/trashed study or recreate a
+permanently deleted one. Offer explicit Restore where possible or Start New;
+a new study after permanent deletion needs a distinct identity.
+
+[W3C PROV](PROVENANCE_DESIGN.md) describes provenance relationships, not mandatory
+retention. Keep immutable content unchanged while retained; explicit permanent
+deletion may remove it. Earlier prohibitions on unsolicited deletion still
+apply, but do not prohibit these user-invoked lifecycle controls. This design
+update itself deletes no genuine study.
+
+### Completion evidence
+
+Use disposable studies to check archive/restart/restore, Trash/Undo/restore,
+permanent deletion, cancellation and interrupted persistence. Include a pending
+draft, a mixed-study history session, shared question owners and a shared snapshot.
+Verify that shared sources and other studies are unchanged, deleted payloads are
+not recoverable through MRW's history/export, stale messages cannot resurrect
+them, and revisiting the same source requires an explicit choice. Check review
+eligibility and preserved scheduling after each transition. Update the bundled
+tutorial when these commands are delivered.
+
+<a id="purpose-and-next-delivery"></a>
+
+## Original study increment — delivered
 
 MRW should help absorb, investigate, generate and check mathematics while preserving the route through the literature. The next increment joins the existing reader, proof study, notes and Codex companion around the material currently open. Frequent attempts, feedback and spaced revisits belong in study mode. A proof graph is one useful representation, not the required result of every question.
 

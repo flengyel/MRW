@@ -1,5 +1,32 @@
 # CODEX_PLAN.md
 
+## Current design — W3C PROV and Study lifecycle, 2026-11-10
+
+MRW's direction combines continuing mathematical study with a research lab
+notebook, ordinary linked notes, computation and formal proofs. Use W3C PROV
+as the common provenance model for future integrations; see
+[the provenance design](docs/PROVENANCE_DESIGN.md). VisTrails is a design
+reference, not a new runtime dependency.
+
+The concrete next usability requirement is
+[Archive/Delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
+archive/restore, Trash/Undo and explicit permanent deletion of study-owned
+content, with shared sources, ordinary files and other studies preserved.
+It must not wait for a general provenance engine. Earlier preservation rules
+forbid unsolicited deletion; they do not prohibit these user-invoked controls.
+
+This is a design update, not a claim that these commands or PROV export are
+implemented. It performs no data deletion or migration. Preserve the delivered
+source plugins and Lean study unit. Consult
+[related systems](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
+before duplicating existing capabilities.
+
+Implement the Study lifecycle as one bounded change with the stated recovery
+and shared-data checks. A later provenance trial should follow two alternative
+calculations through save, restart, comparison and export. Repository study
+imports, CoCalc/Wolfram interoperability and data-analysis plugins remain
+proposed; keep Clowder and PreTeXt on the source-adapter list.
+
 
 ## Delivered — optional Lean study, 0.23.10
 

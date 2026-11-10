@@ -30,6 +30,21 @@ ordinary reading or outlining. These deployment choices preserve source
 identity, provenance and publication protections; they add no remote-access
 service, TypeScript rewrite, data migration or new domain entity.
 
+## Proposed extension — W3C PROV and Study lifecycle
+
+[W3C PROV](docs/PROVENANCE_DESIGN.md) governs the common provenance vocabulary for
+new integrations: versioned artifacts are entities, observed operations are
+activities, and responsible people/software are agents. Reuse existing exact
+source and artifact identities. Keep provenance, checking, premise admission,
+logical consequence and learning assessment separate.
+
+Study lifecycle state is distinct from mathematical content and recall state:
+active, archived, trashed, or permanently deleted. Archive suspends selection
+and review while retaining work; permanent deletion removes the selected
+study-owned data. Shared sources, other studies and ordinary files remain
+separate. Follow [the lifecycle contract](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
+This extends the design only; it is not a storage-schema version change.
+
 ## Earlier model revisions
 
 Changes from v8: the requested proof-outline view uses vertex elimination with
@@ -974,7 +989,11 @@ truth of the derivation's conclusion or discharge any premise admission.
 
 ### Provenance
 
-Origin only. Verification is recorded elsewhere.
+This existing record describes origin only. Verification is recorded elsewhere.
+The [PROV design](docs/PROVENANCE_DESIGN.md) extends provenance to relationships
+among versioned artifacts, activities and agents without changing this record's
+meaning. Immutability while retained does not prohibit explicit removal under
+the Study lifecycle contract.
 
 ```
 Provenance

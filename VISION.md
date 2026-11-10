@@ -6,7 +6,25 @@ evidence needed to assess them. The [README](README.md) describes current
 capabilities; the [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md)
 connects those capabilities to proposed work.
 
-## Current product direction — 2026-11-08
+## Current product direction — 2026-11-10
+
+MRW is an experiment in continuing mathematical study and research. Its intended
+lab notebook connects questions, source passages, linked notes, calculations,
+proofs, failed approaches and unfinished work. Zettelkasten conventions remain
+optional; scheduled review supports study without becoming a requirement for
+research.
+
+[W3C PROV](docs/PROVENANCE_DESIGN.md) supplies the common provenance model for
+future integrations. Plugins should connect existing tools, including proposed
+CoCalc and Wolfram integrations, while MRW preserves the work and its context.
+[Related systems](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
+identify overlap and reuse opportunities. This combination is a goal, not a
+claim of uniqueness or a completed workflow.
+
+Keeping work includes control over what remains:
+[archive, restore and delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
+is a concrete missing capability. Provenance must support deliberate deletion
+of private study data as well as retention.
 
 MRW should connect ongoing mathematical questions to ordinary documents,
 notes, calculations, proofs, checking evidence and unfinished work.
