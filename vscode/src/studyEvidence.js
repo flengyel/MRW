@@ -8,7 +8,7 @@ const attemptID = e => e.data?.attempt || e.identity?.attempt;
 const attemptKey = e => attemptID(e) ? JSON.stringify([e.origin,e.identity?.study||'',attemptID(e)]) : null;
 function uniqueEvents(events) {
   const byID=new Map();for(const e of events||[])if(e?.id&&!byID.has(e.id))byID.set(e.id,e);
-  return [...byID.values()].sort((a,b)=>(a.at||'').localeCompare(b.at||'')||(a.session||'').localeCompare(b.session||'')||(a.sequence||0)-(b.sequence||0)||a.id.localeCompare(b.id));
+  return [...byID.values()].sort((a,b)=>(a.session||'').localeCompare(b.session||'')||(a.sequence||0)-(b.sequence||0)||a.id.localeCompare(b.id));
 }
 function projectAttempts(events) {
   const rows=uniqueEvents(events), byID=new Map(rows.map(e=>[e.id,e])), attempts=new Map(), missing=[];
@@ -83,6 +83,10 @@ function projectEffort(events) {
     if(!record.response||response.evidence==='reader_report'||record.response.evidence!=='reader_report') {
       record.response=response;record.disposition=numeric?'answered':declined?'declined':'no_response';record.rating=numeric?response.data.rating:null;
     }
+  }
+  for(const record of offers){
+    const reports=new Set(record.responses.filter(e=>e.evidence==='reader_report').map(e=>JSON.stringify([e.data.rating,e.data.disposition||'answered'])));
+    if(reports.size>1){const reason='Conflicting reader effort responses have no explicit correction link.';record.supported=false;record.missing.push(reason);problem(record.offer,reason);}
   }
   return {events:rows,offers,missing};
 }

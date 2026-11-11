@@ -8,12 +8,16 @@ const { performance } = require('node:perf_hooks');
 const hash = text => crypto.createHash('sha256').update(text).digest('hex');
 const POLICY = 'study-feedback-2', SCHEMA = 1;
 const { projectAttempts, projectEffort, selectHistoryContext, readerRecall, unaidedRecall, attemptKey } = require('./studyEvidence');
+const {mergeEvents,portable,snapshotIDs}=require('./historyRecords');
+const {usageReport,UsageOperations}=require('./historyUsage');
 class StudyHistory {
-  constructor(directory, software, { io = fs, origin = 'production', onGap = () => {} } = {}) {
+  constructor(directory, software, { io = fs, origin = 'production', onGap = () => {}, sharing, usageRecording=true } = {}) {
     this.directory = directory; this.software = software; this.io = io; this.origin = origin; this.onGap = onGap;
     this.session = crypto.randomUUID(); this.sequence = 0; this.pending = []; this.snapshots = new Map();
     this.excluded=new Set();this.snapshotStudies=new Map();
     this.tail = Promise.resolve(); this.context = {}; this.gap = ''; this.started = false;
+    this.usageRecording=usageRecording;this.operations=new UsageOperations(this);
+    if(sharing)this.shared=new (require('./sharedHistory').SharedHistory)(path.join(directory,'sharing-v1'),sharing.installation,{io,...sharing});
   }
   init() {
     if (this.ready) return this.ready; this.started = true;this.record('session.start');
@@ -26,6 +30,15 @@ class StudyHistory {
         await this.io.unlink(path.join(this.directory, name));
       }
       await this.io.writeFile(path.join(this.directory, 'live-' + this.session + '.json'), JSON.stringify({ session: this.session }), { mode: 0o600 });
+      if(this.shared)try{
+        await this.shared.init();await this.refreshExcluded();
+        for(const id of this.excluded)await this.shared.deleteStudy(id);
+        await this.shared.stage(await this.readEvents(),id=>this.snapshotText(id));
+        this.sharedTimer=setInterval(()=>{void this.syncShared();},30000);this.sharedTimer.unref?.();
+        void this.syncShared();
+      }catch(e){this.sharedFailure();}
+      if(this.coverage)this.record('usage.coverage',{features:this.coverage});
+      this.record('usage.recording',{enabled:this.usageRecording});
     } catch (e) { this.failure(e); }})();return this.ready;
   }
   setContext(value) { this.context = structuredClone(value || {}); }
@@ -34,7 +47,8 @@ class StudyHistory {
       at: new Date().toISOString(), monotonic_ms: performance.now(), origin: this.origin==='production'&&identity?.practice?'practice_demo':this.origin,
       software: this.software, policy: POLICY, scheduler: require('./studyScheduler').IDENTITY,
       identity: structuredClone(identity), action, evidence, data: structuredClone(data) };
-    if(!this.excluded.has(identity?.study)){this.pending.push(e); this.schedule();} return e;
+    if(this.shared?.writer){e.writer=this.shared.writer;e.workspace=this.shared.workspace;}
+    if(!this.excluded.has(identity?.study)&&!(this.usageRecording===false&&/^(operation\.|usage.coverage$)/.test(action))){this.pending.push(e); this.schedule();} return e;
   }
   snapshot(value) {
     const text = JSON.stringify(value), id = hash(text);
@@ -146,6 +160,7 @@ class StudyHistory {
   eraseStudy(id,candidates,retained){
     this.excludeStudies([id]);
     const job=this.tail.then(async()=>{
+      if(this.shared)await this.shared.deleteStudy(id);
       // Complete lists are read before any removal. A malformed history file
       // stops cleanup, leaving the durable deletion intent for retry.
       const entries=[],batches=await this.historyFiles();
@@ -168,7 +183,7 @@ class StudyHistory {
         for(const name of await this.io.readdir(directory).catch(e=>{if(e.code==='ENOENT')return[];throw e;}))
           if(name.startsWith('.'+candidate+'-')&&name.endsWith('.pending'))await files.remove(this.io,path.join(directory,name));
       }
-    });this.tail=job.catch(e=>this.failure(e));return job;
+    });this.tail=job.catch(e=>this.failure(e));return job.then(()=>this.syncShared());
   }
   flush() {
     clearTimeout(this.timer); this.timer = undefined;
@@ -179,6 +194,7 @@ class StudyHistory {
       if (!this.pending.length && !this.snapshots.size) return;
       const events = this.pending.splice(0), snapshots = new Map(this.snapshots); this.snapshots.clear();
       try {
+        if(this.shared)try{await this.shared.init();for(const e of events){e.writer??=this.shared.writer;e.workspace??=this.shared.workspace;}}catch{this.sharedFailure();}
         await this.io.mkdir(path.join(this.directory, 'snapshots'), { recursive: true, mode: 0o700 });
         for (const [id, text] of snapshots) await this.publishSnapshot(id, text);
         if (events.length) {
@@ -188,6 +204,7 @@ class StudyHistory {
         }
         for(const id of snapshots.keys())if(!this.snapshots.has(id))this.snapshotStudies.delete(id);
         if (this.gap) { this.gap = ''; this.record('recorder.recovered', { missingness: 'A persistence gap was reported; retained buffered events now saved.' }); }
+        if(this.shared?.binding)try{await this.stageShared();}catch{this.sharedFailure();}
       } catch (e) { this.pending.unshift(...events); for (const [id, text] of snapshots) this.snapshots.set(id, text); this.failure(e); }
     }); return this.tail;
   }
@@ -200,12 +217,51 @@ class StudyHistory {
         for (const e of rows) if (e.schema === SCHEMA) events.push(e);
       }
     } catch (e) { this.failure(e); }
-    const byID = new Map([...events, ...this.pending].map(e => [e.id, e]));
-    return [...byID.values()].filter(e=>!this.excluded.has(e.identity?.study)&&!this.excluded.has(e.data?.study)).sort((a,b) => a.at.localeCompare(b.at) || a.session.localeCompare(b.session) || a.sequence-b.sequence);
+    const remote=await this.syncShared();
+    const local=this.shared?.binding?portable([...events,...this.pending]).map(e=>({...e,history_context:{writers:[e.writer||'imported:'+this.shared.workspace],workspaces:[e.workspace||this.shared.workspace]}})):[...events,...this.pending];
+    const merged=mergeEvents([...local,...remote.events],this.excluded);
+    this.historyStatus={...this.shared?.status,conflicts:[...new Set([...merged.conflicts,...remote.conflicts])].sort()};
+    return merged.events.filter(e=>!this.historyStatus.conflicts.includes(e.id));
   }
+  sharedFailure(){if(this.shared){this.shared.status.gaps=['Shared-history recovery needs retry; original private records remain.'];this.shared.onStatus(this.shared.status.gaps[0]);}}
+  async syncShared(){
+    if(!this.shared)return {events:[],conflicts:[]};
+    try{await this.shared.init();if(this.shared.binding)await this.stageShared();const result=await this.shared.sync();this.excludeStudies(this.shared.deleted);return result;}catch{this.sharedFailure();return {events:[],conflicts:[],unavailable:true};}
+  }
+  async stageShared(){
+    // Recover the window between private commit and durable outbox publication.
+    // Skip acknowledged batches by their local sequence range; do not repeatedly
+    // load the whole private history while the reader is open.
+    const cursors=await this.shared.cursors(),events=[];
+    for(const name of (await this.historyFiles()).records){
+      const m=/^([a-f0-9-]+)-(\d+)-(\d+)\.json$/.exec(name);if(!m||Number(m[3])<=(cursors[m[1]]||0))continue;
+      const rows=await files.json(this.io,path.join(this.directory,name));if(!Array.isArray(rows))throw Error('Private history is invalid.');events.push(...rows);
+    }
+    await this.shared.stage(events,id=>this.snapshotText(id));
+  }
+  async snapshotText(id){if(!/^[a-f0-9]{64}$/.test(id))throw Error('Invalid snapshot identity.');
+    const file=path.join(this.directory,'snapshots',id+'.json');await files.regular(this.io,file);const text=await this.io.readFile(file,'utf8');if(hash(text)!==id)throw Error('Snapshot digest differs.');return text;}
+  async exportSnapshots(events){
+    const ids=snapshotIDs(events),out={};
+    for(const id of ids){
+      if(this.shared?.status.snapshotConflicts?.includes(id)){out[id]={id,conflict:true,unavailable:true};continue;}
+      const shared=this.shared?.snapshots.get(id);
+      if(shared){out[id]={...shared,value:JSON.parse(shared.text)};snapshotIDs(out[id].value,ids);}
+      else try{const text=await this.snapshotText(id),value=this.shared?.binding?portable(JSON.parse(text)):JSON.parse(text);out[id]={id,representation:this.shared?.binding?'portable-v1':'original',sha256:this.shared?.binding?hash(JSON.stringify(value)):id,value};snapshotIDs(value,ids);}catch{out[id]={id,unavailable:true};}
+    }
+    return out;
+  }
+  async importHistory(directory){
+    await this.init();await this.flush();if(this.gap)throw Error(this.gap);if(!this.shared)throw Error('Host-local history identity is unavailable.');
+    // Serialize with flush/deletion; new UI events may queue but cannot be lost.
+    const job=this.tail.then(async()=>{await this.refreshExcluded();return this.shared.importFrom(directory,await this.readEvents(),id=>this.snapshotText(id),this.excluded);});
+    this.tail=job.catch(()=>{});return job;
+  }
+  report(events){return usageReport(events,this.historyStatus||this.shared?.status)+'\n\n'+summarize(events);}
   async close() {
     if (!this.started || this.closed) return;this.closed=true;
     await this.ready;this.record('session.end'); await this.flush();
+    clearInterval(this.sharedTimer);
     if (!this.gap) await this.io.unlink(path.join(this.directory, 'live-' + this.session + '.json')).catch(e => this.failure(e));
   }
 }

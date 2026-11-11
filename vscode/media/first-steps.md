@@ -261,6 +261,26 @@ optional. See [the study guide](https://github.com/flengyel/MRW/blob/main/docs/A
 submission and history details. Earlier document-linked work remains readable
 from Studies or Resume Study; its removed forms do not reopen.
 
+## History across computers
+
+Run **MRW: Configure History… → Choose shared history directory…** and select
+an MRW data directory. A vault subfolder such as `MRW` is convenient; Obsidian is
+optional. **Import and Connect** copies recorded interactions and required
+submitted snapshots, verifies them, and keeps the private originals. MRW uses
+only the directory's `History/` subtree. Syncthing/SyncTrayzor supplies file sync.
+
+**Inspect Study History** reports available sessions, feature use, conflicts and
+missing context. **Export Study History…** saves selected sessions as Markdown
+or JSON with a unique suggested filename. **Retry shared history** retries a
+pending publication; **Reimport private history** repairs a reported queue gap.
+**Turn off usage recording** stops new usage counts, while existing study
+records and saved work remain.
+
+This shares history, not active drafts, study checkpoints or scheduling. Other
+computers may be offline. A Study deletion marker suppresses later arrivals;
+MRW cannot erase disconnected copies or exported reports. See
+[history setup and recovery](https://github.com/flengyel/MRW/blob/main/docs/USAGE_HISTORY.md).
+
 ## Work through a proof
 
 **MRW: Work through a proof…** collects a saved proof, selected prerequisite

@@ -597,6 +597,11 @@
         "title": "Show Deleted Studies",
         "category": "MRW",
         "icon": "$(trash)"
+      },
+      {
+        "command": "mrw.configureHistory",
+        "title": "Configure History\u2026",
+        "category": "MRW"
       }
     ],
     "views": {
@@ -1046,6 +1051,18 @@
           "minimum": 0,
           "maximum": 3,
           "description": "Maximum new questions per block. Saved questions enter continuing review only by Keep for review."
+        },
+        "mrw.dataDirectory": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Suggested MRW data directory, independent of notes or Obsidian. Use Configure History to import and verify before connecting. Only its History subfolder is managed. Changing this setting alone does not change the active binding."
+        },
+        "mrw.usageRecording": {
+          "type": "boolean",
+          "default": true,
+          "scope": "machine",
+          "description": "Record MRW command, bridge and study action counts and durations. No arguments or prompt text are collected for counts. Disabling does not erase earlier history or stop the existing study evidence/snapshot records."
         }
       }
     },
@@ -1077,7 +1094,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js && node --check src/historyRecords.js && node --check src/sharedHistory.js && node --check src/historyUsage.js && node --check src/historyCommands.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },

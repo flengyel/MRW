@@ -9,17 +9,17 @@ rejection and external note files. TikZ rendering remains explicit after saving.
 native desktop acceptance. This repair does not implement the shared-history,
 Zotero or PROV follow-ups below.
 
-## Requested follow-up — configurable shared usage history
+## Implemented — configurable shared usage history
 
-Store shared usage/interaction history in a user-selected MRW data directory.
-It may be separate from, beneath, or identical to the Obsidian vault; a vault
-subdirectory is the preferred choice for this setup. Use the existing
-Syncthing/SyncTrayzor setup for synchronization. Extend the existing recorder
-and Inspect/Export report; use separate immutable batches per writer and
-distinguish unused features from uninstrumented ones. Preserve existing history,
-Study deletion and recovery. This is a design request, not shipped behavior;
-0.23.11 still uses private workspace storage. See
-[usage-history design](USAGE_HISTORY.md). Other roadmap items remain.
+The shared-history increment extends the existing recorder and Inspect/Export
+workflow. Configure History explicitly imports and verifies a chosen directory;
+private originals remain. Separate immutable writer batches, bounded pending
+publication, conflict reporting and deletion markers protect offline use.
+Active studies, drafts, scheduling and the source store remain host-local.
+See [the workflow](USAGE_HISTORY.md) and
+[delivery checks and limits](SHARED_HISTORY_DELIVERY.md).
+The published 0.23.12 package predates this increment. Zotero is next, then the
+small PROV trial; neither was implemented alongside history.
 
 
 ## Delivered implementation — Study lifecycle

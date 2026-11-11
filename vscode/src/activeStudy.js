@@ -139,7 +139,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(!panel){panel=vscode.window.createWebviewPanel('mrw.proofStudy','Study: '+s.title,vscode.ViewColumn.Active||1,{enableScripts:true,retainContextWhenHidden:true,localResourceRoots:[]});
       panel.onDidDispose(()=>{stopTimers();if(active){recorder.record('session.pause',{reason:'study-view-closed'});dirty.add(active.id);}panel=undefined;void enqueue(flushDirty).catch(e=>recorder.failure(e));});
       panel.onDidChangeViewState?.(e=>{if(!active)return;recorder.record(e.webviewPanel.active?'navigation.study_return':'navigation.study_away',{exposure_opportunity:!!e.webviewPanel.active});});
-      panel.webview.onDidReceiveMessage(m=>{const job=receive(m).catch(async e=>{recorder.record('operation.error',{operation:m?.type,message:e.message});await panel?.webview.postMessage({type:'study_error',message:e.message});}).finally(()=>{if(!['draft','form_draft','report_draft','help_draft'].includes(m?.type))return panel?.webview.postMessage({type:'study_idle'});});return job;});
+      panel.webview.onDidReceiveMessage(m=>{const job=receive(m).catch(async e=>{await panel?.webview.postMessage({type:'study_error',message:e.message});}).finally(()=>{if(!['draft','form_draft','report_draft','help_draft'].includes(m?.type))return panel?.webview.postMessage({type:'study_idle'});});return job;});
       const support=await Promise.all(['media/katex/katex.min.js','media/katex/auto-render.min.js','src/annotationView.js'].map(f=>fs.readFile(path.join(context.extensionPath,f),'utf8')));
       panel.webview.html=outlineHtml(await io.readFile(path.join(context.extensionPath,'src/activeStudyView.js'),'utf8'),support,'',{kind:'study'});
       context.subscriptions.push(panel);
@@ -298,8 +298,8 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     syncContext();keepControls(s,m);
     if(m.form!==undefined&&m.form!==null&&Buffer.byteLength(JSON.stringify(m.form))<=64*1024)s.formDraft=structuredClone(m.form);
     if(typeof m.draft==='string'&&s.current&&!s.current.finished&&Buffer.byteLength(m.draft)<=64*1024)s.current.draft=m.draft;
-    const started=Date.now();recorder.record('operation.start',{operation:m.type});
-    if(m.type==='form_cancel'){recorder.record('operation.cancel',{operation:'question.edit'});await finishForm(s,()=>persist(s));await send();}
+    return recorder.operations.run('study.'+m.type,async()=>{
+    if(m.type==='form_cancel'){recorder.operations.cancel();await finishForm(s,()=>persist(s));await send();}
     else if(m.type==='question_save'){
       if(s.current&&!s.current.finished)throw new Error('Finish or skip the attempt before revising a question.');
       const previous=m.previous?eligible(s).find(q=>q.revision===m.previous):null;
@@ -317,7 +317,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     }else if(await documentAction(s,m)){}
     else if(m.type==='prerequisites'){
       const selected=await selectPrerequisites(s.root,s.passages);
-      if(selected?.length){await startStudy([...s.passages,...selected],s.root,s.title);await send('Prerequisites added. Earlier unfinished work remains in the previous study.');}else recorder.record('operation.cancel',{operation:'study.prerequisites'});
+      if(selected?.length){await startStudy([...s.passages,...selected],s.root,s.title);await send('Prerequisites added. Earlier unfinished work remains in the previous study.');}else recorder.operations.cancel();
     }else if(m.type==='handoff')await copyHelp(m.purpose||'questions');
     else if(m.type==='help_paste'){
       help.assertReplaceable(s);
@@ -396,21 +396,20 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     else if(m.type==='source'){const p=passagesFor(s).find(p=>p.reference===m.reference);if(!p)throw new Error('Choose a source in this study.');recorder.record('navigation.source',{reference:p.reference});if(p.kind==='document_context')await returnToDocument(p.documentOrigin);else await followPassage(p.reference,s.root);}
     else if(m.type==='history')await inspect();
     else if(m.type==='export')await exportHistory();
-    recorder.record('operation.complete',{operation:m.type,duration_ms:Date.now()-started});
+    });
   }
-  async function inspect(){await load();const events=(await recorder.events()).filter(e=>!active||e.identity.study===active.id);
-    const latest=events.slice(-100);await show(summarize(events)+'\n\n## Event history (latest 100)\n\n'+latest.map(e=>`${e.at} #${e.sequence} ${e.action} [${e.evidence}]\n${JSON.stringify(e.data)}`).join('\n\n'),'Study-history');}
+  async function inspect(){await load();const events=await recorder.events();
+    const latest=events.slice(-100);await show(recorder.report(events)+'\n\n## Event sample (up to 100, in session/sequence order)\n\n'+latest.map(e=>`${e.at} #${e.sequence} ${e.action} [${e.evidence}]\n${JSON.stringify(e.data)}`).join('\n\n'),'Study-history');}
   async function exportHistory(){await load();const all=await recorder.events(),sessions=[...new Set(all.map(e=>e.session))];
-    const picked=await vscode.window.showQuickPick(sessions.map(id=>({label:all.find(e=>e.session===id).at+' · '+id.slice(0,8),description:all.find(e=>e.session===id).software.version,id,picked:id===recorder.session})),{canPickMany:true,placeHolder:'Export selected local sessions'});
+    const picked=await vscode.window.showQuickPick(sessions.map(id=>({label:all.find(e=>e.session===id).at+' · '+id.slice(0,8),description:all.find(e=>e.session===id).software.version,id,picked:id===recorder.session})),{canPickMany:true,placeHolder:'Export available sessions (other devices may be offline)'});
     if(!picked?.length){recorder.record('operation.cancel',{operation:'history.export'});return;}
     const selection=selectHistoryContext(all,picked.map(p=>p.id)),selected=selection.events;
     const kind=await vscode.window.showQuickPick([{label:'Readable comparison',kind:'md'},{label:'Events and submitted snapshots',kind:'json'}],{placeHolder:'Export format'});if(!kind)return;
-    const uri=await vscode.window.showSaveDialog({title:'Export selected study history',filters:{'Study history':[kind.kind]}});if(!uri)return;
-    let text=summarize(selected);if(selection.missing.length)text+='\n\nMissing linked context (unsupported derived values excluded):\n'+selection.missing.map(x=>JSON.stringify(x)).join('\n');
+    const uri=await vscode.window.showSaveDialog({title:'Export selected study history',defaultUri:vscode.Uri.file(path.join(recorder.shared?.binding?.directory||recorder.directory,'MRW-history-'+new Date().toISOString().replace(/[:.]/g,'-')+'-'+require('node:crypto').randomUUID().slice(0,8)+'.'+kind.kind)),filters:{'Study history':[kind.kind]}});if(!uri)return;
+    let text=recorder.report(selected);if(selection.missing.length)text+='\n\nMissing linked context (unsupported derived values excluded):\n'+selection.missing.map(x=>JSON.stringify(x)).join('\n');
     if(kind.kind==='json'){
-      const ids=new Set(selected.flatMap(e=>[e.data.snapshot,e.data.original_snapshot]).filter(Boolean)),snapshots={};
-      for(const id of ids)try{snapshots[id]=JSON.parse(await io.readFile(path.join(recorder.directory,'snapshots',id+'.json'),'utf8'));}catch{snapshots[id]={unavailable:true};}
-      text=JSON.stringify({schema:1,warning:'Descriptive, not causal. No pre-instrumentation baseline.',selected_sessions:selection.selected_sessions,missing_context:selection.missing,events:selected,snapshots},null,2);
+      const snapshots=await recorder.exportSnapshots(selected);
+      text=JSON.stringify({schema:1,warning:'Descriptive, not causal. No pre-instrumentation baseline.',history_status:recorder.historyStatus,selected_sessions:selection.selected_sessions,missing_context:selection.missing,events:selected,snapshots},null,2);
     }
     // Host-owned ordinary export: native creation/save, refusing overwrite.
     try{await io.lstat(uri.fsPath);throw new Error('Choose a new export filename.');}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -545,7 +544,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       const owned=[...candidates].filter(id=>blobs.has(id));
       const shared=`${owned.filter(id=>kept.has(id)).length} shared snapshots remain. `;
       const choice=await vscode.window.showWarningMessage('Permanently delete “'+s.title+'”?',{
-        modal:true,detail:`Removes this study’s ${s.questions.length} question revisions, attempts, drafts, responses, scheduling state, ${scope.events.length} history events and ${owned.filter(id=>!kept.has(id)).length} unshared snapshots. ${transfers.length} other studies retain shared questions. ${shared}Shared sources, source annotations, ordinary files and other studies remain. Exports, backups and external copies are outside this deletion. This cannot be undone.`
+        modal:true,detail:`Removes this study’s ${s.questions.length} question revisions, attempts, drafts, responses, scheduling state, ${scope.events.length} history events and ${owned.filter(id=>!kept.has(id)).length} unshared snapshots. ${transfers.length} other studies retain shared questions. ${shared}Shared sources, source annotations, ordinary files and other studies remain. Shared history batches are removed when their directory is available; deletion markers suppress late arrivals. Exports, backups and disconnected copies are outside this deletion. This cannot be undone.`
       },'Permanently Delete');if(choice!=='Permanently Delete')return;
       // Retain exact shared question revisions in surviving owners before the
       // deletion intent. Retrying after interruption is harmless and preserves

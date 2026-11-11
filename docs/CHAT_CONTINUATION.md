@@ -11,12 +11,17 @@ documents. This prompt summarizes the conversation; it does not replace the
 implementation roadmap. At preparation, `main` was
 `501484af2ac4f1f0b989a585f057d9c1c5b08ca4`, and the latest regular release was
 **0.23.11**. Recheck both before making current-state claims. Existing documents
-contain historical sections; compare their status with current code and
+contain older sections; compare their status with current code and
 delivery reports rather than repeating an obsolete task.
 
 Published afterward: **0.23.12** restores passage reader-note add/delete and
 Obsidian-link controls before Ask AI. Preserve the existing transactional store
 and explicit TikZ rendering. See [delivery and verification limits](READER_NOTES_REPAIR.md).
+
+Implemented afterward on the shared-history branch: configurable history,
+verified import, per-writer batches, feature reporting and deletion recovery.
+The published 0.23.12 release predates this change. See
+[the delivery record](SHARED_HISTORY_DELIVERY.md) before repeating work.
 
 ## Purpose and ownership
 
