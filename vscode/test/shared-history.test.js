@@ -197,3 +197,12 @@ test('coverage belongs to the workspace even if the first action selects a study
   h.setContext({study:STUDY});h.coverage=[{id:'mrw.fixture',status:'available'}];await h.init();await h.flush();
   await h.eraseStudy(STUDY,new Set(),new Set());assert.ok((await h.events()).some(e=>e.action==='usage.coverage'));
 });
+test('deletion removes interrupted staging, including late copies, and preserves unrelated staging and notes',async t=>{
+  const f=await fixture(t),h=await f.recorder('a');await publish(h,f.data);
+  const writer=path.join(f.data,'History','Writers',h.shared.writer),pending=path.join(h.shared.local,'pending');
+  const name='.mrw-'+STUDY+'-'+randomUUID()+'.pending',other='.mrw-'+OTHER+'-'+randomUUID()+'.pending';
+  for(const dir of [writer,pending]){await fs.writeFile(path.join(dir,name),'{"format":"mrw-history-batch","partial":');await fs.writeFile(path.join(dir,other),'Other study staging');await fs.writeFile(path.join(dir,'unrecognized.pending'),'Preserve');}
+  await h.eraseStudy(STUDY,new Set(),new Set());
+  for(const dir of [writer,pending]){await assert.rejects(fs.stat(path.join(dir,name)),{code:'ENOENT'});assert.equal(await fs.readFile(path.join(dir,other),'utf8'),'Other study staging');assert.equal(await fs.readFile(path.join(dir,'unrecognized.pending'),'utf8'),'Preserve');}
+  await fs.writeFile(path.join(writer,name),'{"format":"mrw-history-batch","partial":');await h.events();await assert.rejects(fs.stat(path.join(writer,name)),{code:'ENOENT'});
+});

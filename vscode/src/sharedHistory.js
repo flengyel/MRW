@@ -20,7 +20,7 @@ async function immutable(io,file,value){
   const text=canonical(value)+'\n';if(Buffer.byteLength(text)>MAX_BATCH)throw Error('History batch exceeds 2 MiB; originals remain private.');
   const same=async()=>{if(canonical(await read(io,file))!==canonical(value))throw Error('Immutable history file differs.');};
   try{await same();await files.syncDirectory(io,path.dirname(file));return;}catch(e){if(e.code!=='ENOENT')throw e;}
-  const temporary=path.join(path.dirname(file),'.'+randomUUID()+'.pending');let h,own;
+  const temporary=path.join(path.dirname(file),'.mrw-'+(ID.test(value.study)?value.study:'workspace')+'-'+randomUUID()+'.pending');let h,own;
   try{
     h=await io.open(temporary,'wx',0o600);own=await h.stat();await h.writeFile(text);await h.sync();
     const now=await io.lstat(temporary);if(now.ino!==own.ino||now.dev!==own.dev)throw Error('History staging file changed.');
@@ -144,10 +144,24 @@ class SharedHistory{
     }
     for(const study of this.deleted)await immutable(this.io,path.join(root,'Deleted',study+'.json'),this.deletion(study));
   }
+  async purgeStaging(dir){
+    // Publication staging is MRW-owned and names its opaque study before any
+    // payload is written. A crash can leave incomplete JSON; the reserved name
+    // lets deletion remove those bytes without guessing from note contents.
+    for(const name of await this.io.readdir(dir)){
+      const m=/^\.mrw-([a-f0-9]{64})-[a-f0-9]{8}-[a-f0-9-]{27}\.pending$/.exec(name);
+      if(!m||!this.deleted.has(m[1]))continue;
+      const file=path.join(dir,name);await files.regular(this.io,file);
+      try{const b=validateBatch(await read(this.io,file));if(b.study!==m[1])throw Error('Staging scope differs; cleanup stopped.');}
+      catch(e){if(!(e instanceof SyntaxError))throw e;}
+      await files.remove(this.io,file);
+    }
+  }
   async scan(root){
     await this.tombstones(root);const events=[],snapshots=new Map(),snapshotConflicts=new Set(),missing=new Set(),writers=new Set();
     for(const w of await this.io.readdir(path.join(root,'Writers'))){
       if(!UUID.test(w))continue;const dir=path.join(root,'Writers',w);await directory(this.io,dir);
+      await this.purgeStaging(dir);
       // Accept synchronizer conflict-copy names; content, not filename, identifies records.
       for(const n of await this.io.readdir(dir))if(n.endsWith('.json')){
         const file=path.join(dir,n),b=validateBatch(await read(this.io,file));if(b.writer!==w)throw Error('History writer directory differs.');
@@ -218,6 +232,7 @@ class SharedHistory{
       // This host-local marker is durable even while the selected folder is offline.
       await immutable(this.io,path.join(this.local,'deleted',id+'.json'),this.deletion(id));this.deleted.add(id);this.snapshots.clear();
       for(const {file,batch} of await this.pending())if(batch.study===id)await files.remove(this.io,file);
+      await this.purgeStaging(path.join(this.local,'pending'));
     });
   }
   async disconnect(){await this.init();return this.serial(async()=>{
