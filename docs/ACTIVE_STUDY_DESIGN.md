@@ -181,6 +181,11 @@ If a high-effort threshold is needed initially, 7–9 is a documented provisiona
 
 ## Instrumentation for two uses
 
+The 2026-11-10 [vault usage-history design](USAGE_HISTORY.md) extends this
+recorder to shared vault storage and per-feature reporting. It supersedes the
+private-workspace-only location for that future increment; current shipped
+behavior is unchanged. Preserve the single-recorder and evidence distinctions below.
+
 Record meaningful MRW interactions comprehensively; request subjective input sparingly. A shared recorder should cover existing command and webview boundaries so the next release can be evaluated against the current workflow, not only against the new review feature.
 
 ### Event envelope and categories

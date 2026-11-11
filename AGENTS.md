@@ -1,5 +1,16 @@
 # Codex instructions
 
+## Requested follow-up — usage history in the vault
+
+Store shared usage/interaction history in the Obsidian vault, synchronized by
+the user's existing Syncthing/SyncTrayzor setup. Extend the existing recorder
+and Inspect/Export report; use separate immutable batches per writer and
+distinguish unused features from uninstrumented ones. Preserve existing history,
+Study deletion and recovery. This is a design request, not shipped behavior;
+0.23.11 still uses private workspace storage. See
+[usage-history design](docs/USAGE_HISTORY.md). Other roadmap items remain.
+
+
 ## Delivered implementation — Study lifecycle
 
 Saved Studies now have Archive/Restore, Trash/Undo and explicit permanent

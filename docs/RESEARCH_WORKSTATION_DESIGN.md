@@ -371,6 +371,9 @@ and input revisions. A model proposal, reader report, observed event and derived
 estimate remain distinguishable. Use the history to adapt the current session
 and choose later improvements. Time away and tab switching alone establish no
 cognitive-load or comprehension result. Do not create a second telemetry system.
+The requested [vault history and feature-use report](USAGE_HISTORY.md) extends
+that recorder with shared, per-writer history synchronized by the user's
+Syncthing/SyncTrayzor setup. It remains unimplemented in 0.23.11.
 
 Use a supplied mathematical example and notes for read-only opening;
 new work has an explicit destination. Use disposable copies for destructive
