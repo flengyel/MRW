@@ -153,6 +153,13 @@ this state, and cross-machine or renamed-workspace migration is not implemented.
 Keep the original workspace storage when continuing work. One local writer per
 workspace is supported.
 
+The requested [shared usage-history follow-up](USAGE_HISTORY.md) will make history
+available across machines through the existing Syncthing/SyncTrayzor setup.
+Its data directory may be outside the vault, a vault subdirectory, or the vault
+root itself; the preferred location for this setup is a vault subdirectory.
+That storage change is not implemented in 0.23.11; copying a repository or
+synchronizing ordinary notes does not currently transfer this private history.
+
 A recorder failure displays a history gap and buffers events while keeping
 reading and drafts usable. A failed study checkpoint is reported separately;
 keep the view open or copy the draft. Recovery preserves conflicting stored
