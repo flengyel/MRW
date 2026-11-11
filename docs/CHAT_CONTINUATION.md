@@ -18,7 +18,7 @@ Published afterward: **0.23.12** restores passage reader-note add/delete and
 Obsidian-link controls before Ask AI. Preserve the existing transactional store
 and explicit TikZ rendering. See [delivery and verification limits](READER_NOTES_REPAIR.md).
 
-Implemented afterward on the shared-history branch: configurable history,
+Implemented afterward through PR #10: configurable history,
 verified import, per-writer batches, feature reporting and deletion recovery.
 The published 0.23.12 release predates this change. See
 [the delivery record](SHARED_HISTORY_DELIVERY.md) before repeating work.

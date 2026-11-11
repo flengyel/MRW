@@ -1,6 +1,6 @@
 # Shared usage and interaction history
 
-Implemented on the shared-history task branch after 0.23.12. The published
+Implemented after 0.23.12; delivered through [PR #10](https://github.com/flengyel/MRW/pull/10). The published
 0.23.12 package does not contain this increment. See
 [delivery and checks](SHARED_HISTORY_DELIVERY.md).
 
@@ -90,9 +90,10 @@ contradictory study evidence is not converted into a grade.
 
 Permanent Study deletion first retains an opaque local marker. It publishes
 that marker when the shared directory is available, removes accessible batches
-for the study, and filters later arrivals before exposing them. Other studies'
+for the study (including interrupted MRW staging files), and filters later arrivals before exposing them. Other studies'
 batches and shared snapshots survive. A host keeps markers it has already seen,
-including while offline. Deletion cannot erase disconnected machines, exported
+including while offline. A host that has not yet received the marker may still
+have an older copy. Deletion cannot erase disconnected machines, exported
 reports or backups. The confirmation states this limit. Pending deletion cannot
 be abandoned by changing or disconnecting the directory.
 

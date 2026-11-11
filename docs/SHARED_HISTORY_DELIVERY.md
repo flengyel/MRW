@@ -3,6 +3,11 @@
 Implementation branch: `feature/shared-history-20261111`, from
 `9ce47c6f292447bca56f9b0e900397e8e0873916` (clean main and fetched origin/main).
 Issue: [#9](https://github.com/flengyel/MRW/issues/9).
+Delivery: [PR #10](https://github.com/flengyel/MRW/pull/10).
+
+Implementation commits: `af60f5009e9fb6695a3635de7bdd296a588b9b79`,
+`de31790131ca65fdde22cbf93c91eff7264ee44b`, and `88631a8f8ef38d89b5ec8b4925cde3ae36e5efa7`
+(final runtime: study-scoped interrupted staging cleanup).
 
 ## Result
 
@@ -19,7 +24,7 @@ The source manifest and installed extension remain 0.23.12. This increment is
 not in its already-published VSIX; this task does not require another package or
 release. The Python core, dependency pins and mathematical checking are unchanged.
 
-## Checks so far
+## Verification
 
 - Existing history-reliability and measurement tests passed initially. The
   lifecycle check found a changed confirmation-string expectation; the message
@@ -32,18 +37,47 @@ release. The Python core, dependency pins and mathematical checking are unchange
   vscode/test/shared-history.test.js vscode/test/study-history-reliability.test.js
   vscode/test/study-lifecycle.test.js vscode/test/study-measurement.test.js`:
   **61 passed**, exit 0. Includes 21 new shared-history checks.
-- One disposable Windows-backed observation, with the private store on Linux:
-  shared import/readback/deletion passed under Windows Temp in a mock
-  `vault/MRW/History` arrangement; the neighboring note's bytes survived.
-  The successful temporary fixture was removed. No mount, sync or private-store
-  checks were changed. The three directory relationships were all tested on
-  Linux; this is not a Windows test of all three or a live Syncthing trial.
+- Final focused run after batch sizing, coverage ownership and interrupted-staging
+  corrections: **64 passed**, exit 0. Same four test files; includes **24 new
+  shared-history cases**. Source is the `88631a8` runtime commit.
+- One serial pass over all 33 extension test files at `af60f5009e9fb6695a3635de7bdd296a588b9b79`:
+  **421 tests, 411 passed, 10 failed, no cancellations**, driver exit 1. The ten
+  artifact checks correctly rejected tmpfs. A `TMPDIR` rerun also failed because
+  their helper fixes its directory relative to the checkout. A detached ext4
+  checkout of `de31790131ca65fdde22cbf93c91eff7264ee44b` then ran only those ten:
+  **10 passed**, exit 0. No storage checks were changed. The full suite was not
+  repeated. Together with the final focused run this gives passing coverage of
+  **424 checks across runs**, not one uninterrupted full-suite pass.
+- Final syntax command: `env PATH=/tmp/mrw-prerelease-tools:/usr/bin:/bin
+  /tmp/mrw-prerelease-tools/npm run check --prefix vscode`. Exit 0. The first
+  attempt lacked `node` on PATH and exited 127; the pinned host Node was then
+  supplied explicitly. `git diff --check` passed.
+- Documentation: all **233** local targets, anchors (including explicit HTML
+  anchors), same-repository guide links and MRW command links in the eight
+  changed Markdown files resolve. External-site HTTP status was not checked.
+  Tutorial tests passed in the serial regression (3/3).
+- Disposable Windows-backed observation at `de31790131ca65fdde22cbf93c91eff7264ee44b`:
+  import/readback/deletion passed for **separate data directory, vault
+  subdirectory and vault root**, with private storage on Linux. Neighboring note
+  bytes survived all three arrangements. Successful fixtures were removed.
+  The subsequent interrupted-staging cleanup was tested on Linux. No live
+  Syncthing trial or history-menu desktop acceptance is claimed. No mount, sync
+  configuration or private-store checks were changed.
 - Initial WSL memory: about 7.6 GiB available, no swap, pressure averages zero.
   The first serial run retained about 7.5 GiB available with zero pressure.
   No unrelated computation was stopped. Earlier memory exhaustion is not
   attributed to MRW.
 
-Full extension regression and final content/link checks remain to be recorded.
+During the serial campaign an unrelated Lean verification appeared in another
+repository. It was neither started nor stopped by this task. Available memory
+remained above 7 GiB in the recorded checks, with zero pressure averages.
+
+The serial driver ran each `vscode/test/*.test.js` file in its own Node process,
+one at a time, preserving each file's output and exit status. Logs, driver and
+Windows observations are retained outside the repository at
+`~/.cache/mrw-shared-history-20261111/`. No Python core code changed, so no new full
+Python, Lean or TeX campaign was run. The earlier evidence remains in
+[the reader-note report](READER_NOTES_REPAIR.md).
 
 ## Native reader-note acceptance
 
