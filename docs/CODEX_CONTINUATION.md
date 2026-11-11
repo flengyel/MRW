@@ -1,5 +1,14 @@
 # Codex continuation: reading and research
 
+## Delivered — reader-note controls, 0.23.12
+
+Expanded passages place Add reader note, Delete reader note and Link Obsidian
+note before Ask AI in one action row. Preserve passage scope, drafts, stale-write
+rejection and external note files. TikZ rendering remains explicit after saving.
+[Delivery and actual checks](READER_NOTES_REPAIR.md) records the published release and incomplete
+native desktop acceptance. This repair does not implement the shared-history,
+Zotero or PROV follow-ups below.
+
 ## Requested follow-up — configurable shared usage history
 
 Store shared usage/interaction history in a user-selected MRW data directory.

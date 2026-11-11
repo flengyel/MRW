@@ -14,6 +14,10 @@ implementation roadmap. At preparation, `main` was
 contain historical sections; compare their status with current code and
 delivery reports rather than repeating an obsolete task.
 
+Published afterward: **0.23.12** restores passage reader-note add/delete and
+Obsidian-link controls before Ask AI. Preserve the existing transactional store
+and explicit TikZ rendering. See [delivery and verification limits](READER_NOTES_REPAIR.md).
+
 ## Purpose and ownership
 
 MRW connects ordinary notes, retained sources, study, calculations and formal
