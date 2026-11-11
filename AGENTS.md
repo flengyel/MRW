@@ -1,9 +1,11 @@
 # Codex instructions
 
-## Requested follow-up — usage history in the vault
+## Requested follow-up — configurable shared usage history
 
-Store shared usage/interaction history in the Obsidian vault, synchronized by
-the user's existing Syncthing/SyncTrayzor setup. Extend the existing recorder
+Store shared usage/interaction history in a user-selected MRW data directory.
+It may be separate from, beneath, or identical to the Obsidian vault; a vault
+subdirectory is the preferred choice for this setup. Use the existing
+Syncthing/SyncTrayzor setup for synchronization. Extend the existing recorder
 and Inspect/Export report; use separate immutable batches per writer and
 distinguish unused features from uninstrumented ones. Preserve existing history,
 Study deletion and recovery. This is a design request, not shipped behavior;

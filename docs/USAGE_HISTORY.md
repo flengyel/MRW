@@ -1,8 +1,11 @@
-# Usage history in the Obsidian vault
+# Configurable shared usage-history storage
 
 Requested design, 2026-11-10. Not implemented in MRW 0.23.11.
 
-Store MRW's shared usage and interaction history in the user's Obsidian vault.
+Store MRW's shared usage and interaction history in a user-selected data directory.
+The directory may be separate from the Obsidian vault, a subdirectory of it, or
+identical to the vault root. Obsidian is optional. For this setup, the preferred
+choice is a subdirectory of the vault, such as `<vault>/MRW/`.
 Use the existing local recorder, extended for this storage location; do not add
 a second telemetry system. The selected arrangement uses Syncthing on the
 Raspberry Pi 5 and SyncTrayzor on the Windows machines. Synchronization remains
@@ -10,14 +13,20 @@ the responsibility of those applications, not a new MRW service.
 
 ## Location and ownership
 
-Use a configurable vault-relative directory, suggested as
-`MRW/History/`. Each workspace host resolves its own local vault path; do not
-synchronize machine-specific absolute paths. Associate history with stable
-logical workspace and source identities rather than the mount path.
+Configure the MRW data directory independently of the Obsidian vault setting.
+Keep history within its designated `History/` subtree. Each workspace host
+resolves its own local data-directory path; do not synchronize machine-specific
+absolute paths. Associate history with stable logical workspace and source
+identities rather than the mount path.
+
+Allow all three directory relationships without requiring a separate vault or
+moving notes. Selecting the vault root does not authorize scanning, rewriting
+or deleting unrelated files. Apply MRW history operations only to the designated
+subtree and identified MRW records.
 
 Keep credentials, process locks, writer identity, caches and UI state outside
 the synchronized directory. Give each installation a distinct writer ID,
-including WSL and remote hosts; cloning a vault must not clone the writer ID.
+including WSL and remote hosts; copying the data directory must not clone the writer ID.
 
 This change covers history and the immutable snapshots required to interpret
 it. It does not by itself synchronize active Study checkpoints, drafts, review
@@ -42,7 +51,7 @@ without requiring a restart.
 
 Keep reporting usable while other machines are offline. Show which writers and
 periods are represented; do not claim that MRW knows all devices have synchronized.
-If the vault is unavailable, retain a bounded host-local pending queue and expose
+If the data directory is unavailable, retain a bounded host-local pending queue and expose
 the recording gap; retry without duplicate events or blocking reading.
 
 Syncthing can preserve conflicting edits as conflict copies; it does not merge
@@ -66,7 +75,7 @@ rewrite a common report. Preserve the option to disable new usage recording.
 ## Migration and verification
 
 Offer an explicit, recoverable import of existing private history and its
-required snapshots into the chosen vault directory. Preserve IDs, original
+required snapshots into the chosen data directory. Preserve IDs, original
 versions, linked context and fixture/production distinctions. Importing the same
 history twice must not double-count it. Verify the copied history before
 activating the new binding and retain the original until recovery is established.
@@ -79,8 +88,10 @@ backups. Implement and test this boundary before enabling shared storage.
 
 Verify two writers offline and after synchronization, duplicate import,
 out-of-order batches, missing references, conflict copies, interrupted
-publication, unavailable vaults and late arrivals after deletion. Use disposable
-vaults on the intended Windows/WSL2 and Linux paths; do not infer Windows-backed
+publication, unavailable directories and late arrivals after deletion. Test
+separate directories, vault subdirectories and coincident vault/data roots, with
+unrelated notes preserved. Use disposable fixtures on the intended Windows/WSL2
+and Linux paths; do not infer Windows-backed
 filesystem behavior from a Linux-only test.
 
 The current implementation remains documented in

@@ -181,8 +181,9 @@ If a high-effort threshold is needed initially, 7–9 is a documented provisiona
 
 ## Instrumentation for two uses
 
-The 2026-11-10 [vault usage-history design](USAGE_HISTORY.md) extends this
-recorder to shared vault storage and per-feature reporting. It supersedes the
+The 2026-11-10 [shared usage-history design](USAGE_HISTORY.md) extends this
+recorder to a configurable data directory and per-feature reporting. The data
+directory may be separate from, beneath, or identical to the Obsidian vault. It supersedes the
 private-workspace-only location for that future increment; current shipped
 behavior is unchanged. Preserve the single-recorder and evidence distinctions below.
 
