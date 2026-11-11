@@ -3,7 +3,7 @@ const path=require('node:path');
 function registerHistory({vscode,context,register,recorder}){
   const configuration=()=>vscode.workspace.getConfiguration('mrw');
   const recording=()=>{recorder.usageRecording=configuration().get('usageRecording',true);};recording();
-  if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e=>{if(e.affectsConfiguration('mrw.usageRecording')){recording();recorder.record('usage.recording',{enabled:recorder.usageRecording});}}));
+  if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e=>{if(e.affectsConfiguration('mrw.usageRecording')){recording();recorder.record('usage.recording',{enabled:recorder.usageRecording},'observed_action',{});}}));
   register('mrw.configureHistory',async()=>{
     await recorder.init();const choice=await vscode.window.showQuickPick([
       {label:'Choose shared history directory…',action:'choose',description:'Verify and import private history before connecting'},

@@ -99,8 +99,8 @@ class SharedHistory{
   async batches(events,loadSnapshot){
     const groups=new Map();for(const e of events){validateEvent(e);const id=scope(e);if(this.deleted.has(id))continue;if(!groups.has(id))groups.set(id,[]);groups.get(id).push(e);}
     const result=[];
-    for(const [study,rows] of groups)for(let i=0;i<rows.length;i+=64){
-      const selected=rows.slice(i,i+64),snapshots={},missing=[];
+    const build=async(study,selected)=>{
+      const snapshots={},missing=[];
       const ids=snapshotIDs(selected);
       for(const id of ids){
         let text;try{text=await loadSnapshot(id);}catch(e){if(e.code!=='ENOENT')throw e;missing.push(id);continue;}
@@ -109,8 +109,11 @@ class SharedHistory{
         const projected=JSON.stringify(portable(original));snapshots[id]={id,representation:'portable-v1',sha256:hash(projected),text:projected};
       }
       const batch={format:FORMAT+'-batch',schema:1,writer:this.writer,workspace:this.workspace,study,events:portable(selected),snapshots,missing:missing.sort()};
-      validateBatch(batch);result.push(batch);
-    }
+      validateBatch(batch);
+      if(Buffer.byteLength(canonical(batch))+1>MAX_BATCH&&selected.length>1){const middle=Math.ceil(selected.length/2);await build(study,selected.slice(0,middle));await build(study,selected.slice(middle));}
+      else result.push(batch);
+    };
+    for(const [study,rows] of groups)for(let i=0;i<rows.length;i+=64)await build(study,rows.slice(i,i+64));
     return result;
   }
   async stage(events,loadSnapshot){

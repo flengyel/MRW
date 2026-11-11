@@ -186,3 +186,14 @@ test('conflicting reader effort responses are not resolved by unsynchronized clo
   const b=h.record('effort.response',{attempt:'one',offer:offer.id,rating:8,disposition:'answered'},'reader_report');a.at='2040-01-01T00:00:00Z';b.at='2020-01-01T00:00:00Z';
   const projection=require('../src/studyEvidence').projectEffort(await h.events());assert.equal(projection.offers[0].supported,false);assert.match(projection.missing[0].reason,/Conflicting/);
 });
+test('several ordinary submitted snapshots split into complete bounded batches instead of blocking import',async t=>{
+  const f=await fixture(t),h=await f.recorder('a');h.setContext({study:STUDY});
+  for(let i=0;i<40;i++)h.record('attempt.submit',{snapshot:h.snapshot({answer:String(i)+'x'.repeat(60*1024)})});
+  await h.importHistory(f.data);const events=await h.events();assert.equal(events.filter(e=>e.action==='attempt.submit').length,40);
+  for(const file of await sharedFiles(f.data))assert.ok((await fs.stat(file)).size<=2*1024*1024);
+});
+test('coverage belongs to the workspace even if the first action selects a study before initialization finishes',async t=>{
+  const f=await fixture(t),h=new StudyHistory(path.join(f.home,'late'),software);t.after(()=>h.close());
+  h.setContext({study:STUDY});h.coverage=[{id:'mrw.fixture',status:'available'}];await h.init();await h.flush();
+  await h.eraseStudy(STUDY,new Set(),new Set());assert.ok((await h.events()).some(e=>e.action==='usage.coverage'));
+});

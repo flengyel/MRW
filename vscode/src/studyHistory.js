@@ -37,8 +37,8 @@ class StudyHistory {
         this.sharedTimer=setInterval(()=>{void this.syncShared();},30000);this.sharedTimer.unref?.();
         void this.syncShared();
       }catch(e){this.sharedFailure();}
-      if(this.coverage)this.record('usage.coverage',{features:this.coverage});
-      this.record('usage.recording',{enabled:this.usageRecording});
+      if(this.coverage)this.record('usage.coverage',{features:this.coverage},'observed_action',{});
+      this.record('usage.recording',{enabled:this.usageRecording},'observed_action',{});
     } catch (e) { this.failure(e); }})();return this.ready;
   }
   setContext(value) { this.context = structuredClone(value || {}); }
