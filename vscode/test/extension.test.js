@@ -2082,6 +2082,32 @@ test('reader note deletion is confirmed, scoped, and announced only after core p
   assert.match(h.errors.at(-1),/Reader note changed/);
 });
 
+test('passage delete chooses only its own notes and cancellation preserves saved work', async t => {
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
+  await h.commands.get('mrw.createOutline')();const panel=h.panels[0];
+  const latest=()=>panel.webview.messages.findLast(m=>m.type==='outline');
+  const region=latest().model.outline.regions[0].id;
+  const add=async(scope,text)=>panel.receive({type:'edit',change:{kind:'annotation',region:scope,id:null,purpose:'question',text,origin:'human_work',author:'Reader'}});
+  await add(null,'Keep source note');await add(region,'Keep first');await add(region,'Delete second');
+  const second=latest().model.outline.regions[0].annotations[1].id;
+  const request={type:'delete_annotation',region,unsavedAnnotations:[second]},before=h.requests.length;
+  h.api.window.showQuickPick=async()=>undefined;await panel.receive(request);
+  assert.equal(h.requests.length,before);assert.equal(latest().model.outline.regions[0].annotations.length,2);
+  h.api.window.showQuickPick=async(items,options)=>{
+    assert.deepEqual(items.map(n=>n.label),['Keep first','Delete second']);
+    assert.match(options.title,/Delete reader note/);return items[1];
+  };
+  h.api.window.showWarningMessage=async(message)=>{assert.match(message,/Delete second/);assert.match(message,/Unsaved edits/);return 'Delete note';};
+  await panel.receive(request);
+  assert.deepEqual(latest().model.outline.regions[0].annotations.map(n=>n.text),['Keep first']);
+  assert.equal(latest().model.outline.annotations[0].text,'Keep source note');
+  h.api.window.showQuickPick=async()=>{throw new Error('One note needs no picker');};
+  h.api.window.showWarningMessage=async()=>undefined;const count=h.requests.length;
+  await panel.receive({type:'delete_annotation',region});assert.equal(h.requests.length,count);
+  assert.equal(latest().model.outline.regions[0].annotations.length,1);
+});
+
 test('reader note deletion rejection and uncertain publication preserve live notes without a success reply', async t => {
   for(const blocked of [false,true]){
     const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');

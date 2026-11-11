@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mrw"
-version = "0.23.11"
+version = "0.23.12"
 description = "Mathematical Research Workstation"
 readme = "README.md"
 requires-python = ">=3.11"

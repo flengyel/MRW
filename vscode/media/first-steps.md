@@ -147,9 +147,18 @@ Ordinary note opening does not require this step.
    Follow the inserted link to read the saved text; **Return to Document**
    restores that citation's originating occurrence.
 
-**MRW: Open Saved Source…** reopens retained material. Under a passage's **Notes
-and tools**, choose **Add reader explanation / question / repair**, enter text
-and attribution, then **Save annotation**. **Reader notes** displays it.
+**MRW: Open Saved Source…** reopens retained material. Each visible passage has
+**Add reader note**, **Delete reader note…**, **Link Obsidian note…** and **Ask AI about this passage…**
+on one line, in that order. **Add reader note** opens that passage's annotation
+editor. Enter your text and attribution, then **Save annotation**.
+**Reader notes** displays the saved text beside the passage. **Delete reader
+note…** selects a saved note when there are several, then asks for confirmation;
+it is disabled when there are none. Cancelling preserves notes and drafts.
+For a note kept in your vault, choose **Link Obsidian note…** and paste its
+Obsidian URL. **Linked reader notes** beside the passage opens those notes in
+Obsidian. **Change or remove link…** changes only the association; it never
+deletes or rewrites the vault file. The link pins this retained passage, while
+the external note remains editable in its vault.
 **Refresh saved source** reloads the saved state without acquiring a new revision.
 
 The reader identifies the source above the text and keeps storage details

@@ -2,13 +2,16 @@
 from copy import deepcopy
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from mrw.editor_bridge import dispatch
-from mrw.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE
+from mrw.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE, mutate
 
 
 class SourceOutlineTests(unittest.TestCase):
@@ -172,6 +175,53 @@ class SourceOutlineTests(unittest.TestCase):
         self.assertTrue(result['blocked'])
         self.assertEqual(self.saved, before)
         self.assertEqual(self.call('outline_load', id=before['outline']['id'])['outline']['annotations'], [])
+
+    def test_annotation_writers_cannot_overwrite_a_committed_deletion(self):
+        region = self.add()['id']; self.note(region, 'Delete this note'); self.note(None, 'Keep this note')
+        identity = self.saved['outline']['id']; note = self.saved['outline']['regions'][0]['annotations'][0]
+        stale = OutlineStore(str(self.private), str(self.project), identity)
+        self.edit(kind='remove_annotation', region=region, id=note['id'])
+        deleted = self.call('outline_load', id=identity)
+        result = mutate(stale, dict(kind='annotation', region=None, id=None, purpose='question',
+                                   text='Stale writer', origin='human_work', author=None))
+        self.assertTrue(result['blocked'])
+        self.assertEqual(self.call('outline_load', id=identity), deleted)
+        with self.assertRaisesRegex(ValueError, 'identity changed'):
+            self.edit(kind='annotation', region=region, id=note['id'], purpose='question',
+                      text='Late edit cannot resurrect', origin='human_work', author=None)
+        self.assertEqual(self.call('outline_load', id=identity), deleted)
+
+    def test_annotation_deletion_process_interruption_leaves_one_complete_revision(self):
+        identity = self.saved['outline']['id']
+        for phase in ('before', 'after'):
+            with self.subTest(phase=phase):
+                self.note(None, 'Delete at ' + phase); before = deepcopy(self.saved)
+                note = before['outline']['annotations'][-1]
+                request = dict(protocol=1, method='outline_mutate', **self.base, id=identity,
+                               revision=before['revision'], change=dict(kind='remove_annotation', region=None, id=note['id']))
+                code = '''
+import json, os, sys
+from mrw import mutable_files
+from mrw.editor_bridge import dispatch
+original = mutable_files.os.replace
+def interrupted(*args, **kwargs):
+    if sys.argv[1] == 'before': os._exit(77)
+    original(*args, **kwargs)
+    os._exit(78)
+mutable_files.os.replace = interrupted
+dispatch(json.loads(sys.argv[2]))
+'''
+                run = subprocess.run([sys.executable, '-c', code, phase, json.dumps(request)],
+                                     capture_output=True, timeout=30, env=dict(os.environ))
+                self.assertEqual(run.returncode, 77 if phase == 'before' else 78, run.stderr.decode())
+                reopened = self.call('outline_load', id=identity)
+                if phase == 'before': self.assertEqual(reopened, before)
+                else:
+                    expected = deepcopy(before['outline']); expected['annotations'].pop()
+                    self.assertEqual(reopened['outline'], expected)
+                self.saved = reopened
+                self.assertEqual(self.source.read_bytes(), self.raw)
+                self.note(None, 'Writer lock was released on process exit')
 
     def evidence(self, region, kind='goal_context'):
         artifact = self.home / 'capture.json'

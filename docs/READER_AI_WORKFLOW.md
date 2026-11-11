@@ -25,9 +25,8 @@ For a question about a passage:
    send the question from Codex. The link alone does not transfer the text or
    grant access to MRW's private store.
 4. Save a useful reply in an ordinary note or notebook with its source reference
-   and AI attribution. To keep it as a reader annotation, open **Source details
-   and tools → Notes and tools: [passage title] → Add reader explanation /
-   question / repair**. Choose **ai proposal** under **Supplied origin**, enter
+   and AI attribution. To keep it as a reader annotation, choose **Add reader
+   note** beside the passage. Choose **ai proposal** under **Supplied origin**, enter
    **Codex** under **Author / attribution**, paste the text and **Save annotation**.
    Wait for confirmed save feedback; edits typed during a save may remain
    unsaved. Keep later reader corrections separately attributed.
@@ -63,6 +62,15 @@ documents and reader forms before restarting the WSL VS Code server to load a
 changed environment. MRW does not edit this script or store the credential.
 
 ## Ask, preview and send
+
+Each visible passage places **Add reader note**, **Delete reader note…** and **Link Obsidian note…**
+before **Ask AI about this passage…**, on the same line. Reader notes work
+without AI. Add opens the passage's editor without changing its draft; Delete
+selects a saved note if needed and asks for confirmation. Saving or deleting
+one note preserves other annotations and retained source text.
+Linked reader notes stay in the vault and open in Obsidian. **Change or remove
+link…** removes only an MRW association, not the note file. It retains the exact
+source revision and passage target; it does not freeze the external note's text.
 
 1. Open the intended workspace and retained source with **MRW: Open Saved
    Source…**, or follow a source/passage link.

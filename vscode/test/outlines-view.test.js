@@ -30,7 +30,7 @@ test('reader webview permits only nonce code with no external resource fetch or 
 });
 
 function reader(published = false) {
-  const scrolled = [];
+  const scrolled = [], focused = [];
   class Node {
     constructor(tag) { this.tag = tag; this.children = []; this.dataset = {}; this.listeners = {}; this.textContent = ''; }
     append(node) { node.parent = this; this.children.push(node); }
@@ -41,6 +41,7 @@ function reader(published = false) {
     querySelectorAll(tag) { return this.all().filter(n => tag.split(',').includes(n.tag)); }
     querySelector() { return this.all().find(n => n.dataset.reference); }
     scrollIntoView() { scrolled.push(this); }
+    focus() { focused.push(this); }
     text() { return this.textContent + this.children.map(n => n.text()).join(' '); }
   }
   const root = new Node('main'), messages = [];
@@ -53,7 +54,7 @@ function reader(published = false) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/annotationView.js'), 'utf8'), globals);
   if (published) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/outlineView.js'), 'utf8'), globals);
-  return { root, messages, scrolled, send: data => receive({data}),
+  return { root, messages, scrolled, focused, send: data => receive({data}),
     scopes: () => root.all().filter(n => n.dataset.linkScope),
     button: (node, action) => node.all().find(n => n.dataset.action === action) };
 }
@@ -255,6 +256,65 @@ test('saved notes appear with their passage while annotation forms stay outside 
   reopened.open = false; h.send(publishedModel());
   assert.equal(h.root.all().find(n=>n.dataset.notesFor==='statement').open, false);
   assert.equal(h.messages.some(m=>['edit','toggle'].includes(m.type)), false, 'folding notes changes no saved text');
+});
+
+test('passage note actions precede AI on one row, including the first note; opening preserves drafts', () => {
+  for (const published of [false, true]) {
+    const h = reader(published), value = published ? publishedModel() : readingModel();
+    const region = value.model.outline.regions[0]; region.annotations = [];
+    h.send(value);
+    const card = () => h.root.children.find(n => n.dataset.region === region.id);
+    const row = card().children.find(n => n.className === 'proof-navigation passage-actions');
+    assert.deepEqual(row.children.map(n => n.dataset.action), ['add-reader-note', 'delete-reader-note', 'link-reader-note', 'ask-ai-passage']);
+    assert.equal(h.button(card(), 'delete-reader-note').disabled, true);
+    const key = `note:${region.id}:new`, find = () => h.root.all().find(n => n.dataset.draft === key);
+    let form = find(); const text = form.all().find(n => n.tag === 'textarea');
+    text.value = 'My own unsaved argument'; form.listeners.input();
+    const count = h.messages.length;
+    h.button(card(), 'add-reader-note').listeners.click();
+    assert.equal(h.messages.length, count, 'opening sends no AI request and makes no write');
+    assert.equal(h.focused.at(-1), text);
+    for (const key of ['source-tools', `passage:${region.id}`, `note:${region.id}:new`]) {
+      assert.equal(h.root.all().find(n => n.dataset.disclosure === key).open, true);
+    }
+    assert.equal(card().all().some(n => n.tag === 'form'), false);
+    h.send(value); form = find();
+    assert.equal(form.all().find(n => n.tag === 'textarea').value, 'My own unsaved argument');
+    h.button(form, 'save-note').listeners.click();
+    assert.equal(h.messages.at(-1).change.region, region.id);
+    assert.equal(h.messages.at(-1).change.text, 'My own unsaved argument');
+  }
+});
+
+test('passage delete freezes its drafts during selection and preserves all but the confirmed note', () => {
+  const h = reader(true), value = publishedModel(), r = value.model.outline.regions[0];
+  r.annotations[0].id = 'first'; r.annotations.push({...r.annotations[0], id:'second', text:'Keep saved second'});
+  h.send(value);
+  const forms = () => h.root.all().filter(n => n.tag === 'form' && n.dataset.draft.startsWith('note:statement:'));
+  for (const form of forms()) { form.all().find(n => n.tag === 'textarea').value = form.dataset.draft; form.listeners.input(); }
+  const remove = () => h.button(h.root.children.find(n => n.dataset.region === 'statement'), 'delete-reader-note');
+  remove().listeners.click();
+  assert.deepEqual(JSON.parse(JSON.stringify(h.messages.at(-1))), {type:'delete_annotation',region:'statement',unsavedAnnotations:['first','second','new']});
+  for (const f of forms()) assert.equal(f.all().find(n => n.tag === 'textarea').disabled, true);
+  h.send({type:'idle'});
+  for (const f of forms()) assert.equal(f.all().find(n => n.tag === 'textarea').disabled, false);
+  remove().listeners.click();
+  r.annotations.shift(); h.send({...value, deletedAnnotation:{region:'statement', id:'first'}});
+  assert.deepEqual(forms().map(f => f.all().find(n => n.tag === 'textarea').value), ['note:statement:second','note:statement:new']);
+  assert.equal(remove().disabled, false);
+});
+
+test('linked reader notes stay beside their exact passage and use link management, never file deletion', () => {
+  const h = reader(), value = readingModel(); h.send(value);
+  const card = id => h.root.children.find(n => n.dataset.region === id);
+  const linked = card('other').all().find(n => n.dataset.disclosure === 'linked-reader-notes:other');
+  assert.match(linked.text(), /Saved passage note <literal>/);
+  assert.doesNotMatch(linked.text(), /Saved earlier note|Saved outline note/);
+  assert.equal(card('changed').all().some(n => n.dataset.disclosure === 'linked-reader-notes:changed'), false);
+  h.button(linked, 'manage-notes').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'manage_notes',note:'c'}));
+  h.send({type:'idle'}); h.button(card('other'), 'link-reader-note').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'associate_note',region:'other',pinned:false}));
 });
 
 test('overview and passage annotation displays retain raw editable TeX and attribution', () => {

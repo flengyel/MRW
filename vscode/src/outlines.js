@@ -127,13 +127,28 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const region = value.region === null ? null : c.result.outline.regions.find(r => r.id === value.region);
     if (value.region !== null && !region) throw new Error('Unknown passage.');
     const notes = region ? region.annotations : c.result.outline.annotations;
-    const note = notes.find(n => n.id === value.annotation);
-    if (!note) throw new Error('Reader note changed; refresh the saved source.');
     const revision = c.result.revision;
+    let note;
+    if (value.annotation === undefined) {
+      if (!notes.length) throw new Error('This passage has no saved reader notes to delete.');
+      if (notes.length === 1) note = notes[0];
+      else {
+        const picked = await vscode.window.showQuickPick(notes.map(n => ({
+          label: Array.from(n.text.replace(/\s+/gu, ' ').trim()).slice(0, 120).join(''),
+          description: `${n.kind} · ${n.provenance.author || 'unknown author'}`,
+          detail: `${n.provenance.origin} · ${n.provenance.at}`, id: n.id
+        })), { title: `Delete reader note — ${region?.title || 'Source notes'}`, placeHolder: 'Choose the note to delete', matchOnDescription: true });
+        if (!picked) return;
+        note = notes.find(n => n.id === picked.id);
+      }
+    } else note = notes.find(n => n.id === value.annotation);
+    if (!note) throw new Error('Reader note changed; refresh the saved source.');
+    if (c.result.revision !== revision) throw new Error('The saved source changed while choosing a note; refresh and choose it again.');
+    const unsaved = value.unsaved || Array.isArray(value.unsavedAnnotations) && value.unsavedAnnotations.includes(note.id);
     const excerpt = Array.from(note.text.replace(/\s+/gu, ' ').trim()).slice(0, 180).join('');
     const choice = await vscode.window.showWarningMessage(
       `Delete this reader note from ${region?.title || 'Source notes'}?\n${excerpt}`
-      + (value.unsaved ? '\nUnsaved edits to this note will also be discarded.' : ''),
+      + (unsaved ? '\nUnsaved edits to this note will also be discarded.' : ''),
       { modal: true }, 'Delete note');
     if (choice !== 'Delete note') return;
     if (c.result.revision !== revision) throw new Error('The saved source changed while confirming deletion; refresh and choose the note again.');

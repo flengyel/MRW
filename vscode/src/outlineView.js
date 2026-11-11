@@ -16,6 +16,9 @@ let toolbarObserver;
 const helpText = {
   'study-current': 'Start or resume study of the selected retained passage. No questions or model requests are sent automatically.',
   'proof-study': 'Prepare an exact proof-passage handoff for study; this does not check a proof.',
+  'add-reader-note': 'Write your own explanation or question about this passage. Save it explicitly.',
+  'delete-reader-note': 'Choose an annotation stored in MRW and confirm its deletion. Linked vault notes are not deleted.',
+  'link-reader-note': 'Link a Zettelkasten note to this exact retained passage using its Obsidian URL. The file stays in your vault.',
   'ask-ai': 'Choose a retained passage and prepare a question with an exact preview. Send is a separate action.',
   'ask-ai-passage': 'Prepare an AI question about this exact retained passage. Review the preview before sending.',
   'ask-ai-pinned': 'Prepare a question about the earlier range pinned by the citation, even if the current passage changed.',
@@ -66,8 +69,10 @@ function el(tag, text, parent = root, className) {
 }
 function post(value) {
   if (value.type === 'delete_annotation') {
-    deletingDraft = `note:${value.region || 'overview'}:${value.annotation}`;
-    value.unsaved = drafts.has(deletingDraft);
+    const prefix = `note:${value.region || 'overview'}:`;
+    deletingDraft = prefix + (value.annotation || '*');
+    if (value.annotation) value.unsaved = drafts.has(deletingDraft);
+    else value.unsavedAnnotations = [...drafts.keys()].filter(key => key.startsWith(prefix)).map(key => key.slice(prefix.length));
   }
   if (value.draft) {
     submittedDrafts.set(value.draft, drafts.get(value.draft));
@@ -80,7 +85,9 @@ function controls() {
   for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || !!deletingDraft || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
   for (const input of root.querySelectorAll('input,textarea,select')) input.disabled = storageFrozen;
   if (deletingDraft) for (const form of root.querySelectorAll('form')) {
-    if (form.dataset.draft === deletingDraft) for (const input of form.querySelectorAll('input,textarea,select')) input.disabled = true;
+    if (form.dataset.draft === deletingDraft || deletingDraft.endsWith(':*') && form.dataset.draft?.startsWith(deletingDraft.slice(0, -1))) {
+      for (const input of form.querySelectorAll('input,textarea,select')) input.disabled = true;
+    }
   }
 }
 function button(parent, title, value, action, write = false) {
@@ -136,6 +143,7 @@ function noteForm(parent, region, note) {
   const saved = saveFeedback.get(key);
   if (saved) feedback(key, saved.text, saved.kind);
   else status.setAttribute('role', 'status');
+  return { box, text: f.node.querySelectorAll('textarea')[0] };
 }
 function renderNotes(parent, annotations, scope, title = 'Reader notes') {
   if (!annotations.length) return;
@@ -450,9 +458,17 @@ function render() {
     }
     if (publishedPart && !compactProof) proofNavigation(box, publishedPart);
     renderNotes(box, r.annotations, r.id);
-    if (!compactProof) {
-      const assistance = el('div', undefined, box, 'proof-navigation');
-      button(assistance, 'Ask AI about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
+    const linked = targetNotes(r.id, false);
+    if (linked.length && !noteError) {
+      const linkedNotes = el('details', undefined, box, 'reader-notes');
+      keepOpen(linkedNotes, `linked-reader-notes:${r.id}`);
+      el('summary', `Linked reader notes (${linked.length})`, linkedNotes);
+      for (const note of linked) {
+        el('p', note.label, linkedNotes, 'linked-note');
+        button(linkedNotes, 'Open in Obsidian', { type: 'open_note', note: note.id }, 'open-note');
+        button(linkedNotes, 'Change or remove link…', { type: 'manage_notes', note: note.id }, 'manage-notes', true).title =
+          'Change or remove this passage’s link. The vault note itself is not changed or deleted.';
+      }
     }
     // Editing forms live outside the statement/proof reading sequence. Opening
     // an annotation editor must not insert a panel between them.
@@ -477,7 +493,21 @@ function render() {
     button(rf.node, 'Save passage description', () => ({ type: 'edit', draft: key, change: { kind: 'region', region: r.id,
       title: rf.read().title, level: rf.read().level, collapsed: r.collapsed } }), 'save-region', true);
     for (const n of r.annotations) noteForm(passageTools, r.id, n);
-    noteForm(passageTools, r.id, null);
+    const editor = noteForm(passageTools, r.id, null);
+    if (!compactProof) {
+      const assistance = el('div', undefined, box, 'proof-navigation passage-actions');
+      const add = el('button', 'Add reader note', assistance);
+      add.type = 'button'; add.dataset.action = 'add-reader-note'; add.title = helpText['add-reader-note'];
+      add.addEventListener('click', () => {
+        for (const disclosure of [tools, passageTools, editor.box]) disclosure.open = true;
+        editor.box.scrollIntoView({ block: 'center' }); editor.text.focus({ preventScroll: true });
+      });
+      const remove = button(assistance, 'Delete reader note…', { type: 'delete_annotation', region: r.id }, 'delete-reader-note', true);
+      remove.dataset.empty = String(!r.annotations.length);
+      if (!r.annotations.length) remove.title = 'This passage has no MRW annotations to delete. Manage linked notes separately.';
+      button(assistance, 'Link Obsidian note…', { type: 'associate_note', region: r.id, pinned: false }, 'link-reader-note', true);
+      button(assistance, 'Ask AI about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
+    }
   }
   const help = el('p', '', root, 'control-help');
   help.id = 'reader-control-help'; help.hidden = true; help.setAttribute('role', 'status');
@@ -524,7 +554,7 @@ window.addEventListener('message', event => {
     if (value.deletedAnnotation) {
       const key = `note:${value.deletedAnnotation.region || 'overview'}:${value.deletedAnnotation.id}`;
       drafts.delete(key); submittedDrafts.delete(key); saveFeedback.delete(key); openDetails.delete(key);
-      if (deletingDraft === key) deletingDraft = undefined;
+      if (deletingDraft === key || deletingDraft === `note:${value.deletedAnnotation.region || 'overview'}:*`) deletingDraft = undefined;
     }
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
