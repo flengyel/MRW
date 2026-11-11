@@ -153,12 +153,13 @@ this state, and cross-machine or renamed-workspace migration is not implemented.
 Keep the original workspace storage when continuing work. One local writer per
 workspace is supported.
 
-The requested [shared usage-history follow-up](USAGE_HISTORY.md) will make history
-available across machines through the existing Syncthing/SyncTrayzor setup.
-Its data directory may be outside the vault, a vault subdirectory, or the vault
-root itself; the preferred location for this setup is a vault subdirectory.
-That storage change is not implemented in 0.23.11; copying a repository or
-synchronizing ordinary notes does not currently transfer this private history.
+**Configure History…** can now connect a separate data directory, a vault
+subdirectory (preferably `<vault>/MRW/`) or the vault root. It imports and verifies
+private history before changing the connection. Original files remain. Only
+`History/` is managed. Existing Syncthing/SyncTrayzor handles synchronization.
+Read the [shared-history workflow](USAGE_HISTORY.md) for offline recovery,
+conflicts, deletion and the recording switch. The published 0.23.12 package does
+not contain this increment. Active checkpoints and scheduling remain private.
 
 A recorder failure displays a history gap and buffers events while keeping
 reading and drafts usable. A failed study checkpoint is reported separately;
@@ -167,12 +168,12 @@ work rather than overwriting it. The [design](ACTIVE_STUDY_DESIGN.md) and
 [validation report](ACTIVE_STUDY_VALIDATION.md) describe persistence and recovery
 in detail.
 
-**Inspect history** shows a readable summary and the latest 100 events.
+**Inspect history** shows usage and study reports plus a sample of up to 100 events in session/sequence order.
 **Export history…** selects recorded sessions and creates a readable comparison
 or a JSON export with linked submission, request and help snapshots. Supporting
 context outside the selection is labeled; unrelated sessions are excluded, and
 missing context is reported. Exports use native document creation/save and refuse
-overwrites. Only explicit export writes personal history outside private storage.
+overwrites. Export and an explicitly connected history directory can write personal history outside private storage.
 
 Reports distinguish attempts, submitted revisions and assessments, with their
 missing values and denominators. They include delayed recall of at least one

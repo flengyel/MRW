@@ -26,8 +26,8 @@ function activate(context) {
   const windowFacade=new Proxy({},{get(_target,key){
     const value=Reflect.get(nativeWindow,key,nativeWindow);
     if(!dialogs.has(key)||typeof value!=='function')return value;
-    return async(...args)=>{const started=Date.now(),result=await value.apply(nativeWindow,args);
-      recorder?.record(result===undefined?'operation.cancel':'operation.complete',{operation:'dialog.'+key,duration_ms:Date.now()-started});return result;};
+    return async(...args)=>{const result=await value.apply(nativeWindow,args);
+      if(result===undefined||Array.isArray(result)&&!result.length)recorder?.operations.cancel();return result;};
   }});
   const vscode={...hostVscode,window:windowFacade};
   // Welcome buttons disappear when a tree gains rows or a message. Keep this
@@ -44,29 +44,27 @@ function activate(context) {
   let serial = 0, reviewGeneration = 0, currentReview;
   const software=JSON.parse(require('node:fs').readFileSync(path.join(context.extensionPath,'media/build-info.json'),'utf8'));
   recorder=new StudyHistory(path.join(context.storageUri?.fsPath||context.globalStorageUri?.fsPath||'/tmp/mrw-unavailable-storage','study-history-v1'),software,{origin:context.extensionMode!==undefined&&context.extensionMode===vscode.ExtensionMode?.Test?'automated_test':context.extensionMode!==undefined&&context.extensionMode===vscode.ExtensionMode?.Development?'developer_fixture':'production',onGap:message=>vscode.window.setStatusBarMessage?.('MRW: '+message)});
+  if(context.globalStorageUri?.fsPath)recorder.shared=new (require('./sharedHistory').SharedHistory)(path.join(recorder.directory,'sharing-v1'),path.join(context.globalStorageUri.fsPath,'history-host-v1'),{onStatus:message=>{if(message)vscode.window.setStatusBarMessage?.('MRW: '+message);}});
   context.subscriptions.push({dispose(){void recorder.close();}});
   let currentMaterial;
   const onMaterial=value=>{currentMaterial=value;};
-  const register = (name, action) => context.subscriptions.push(
+  const registered=[];
+  const register = (name, action) => {registered.push(name);return context.subscriptions.push(
     vscode.commands.registerCommand(name, async (...args) => {
-      const started=Date.now();
       try {
         if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
-        void recorder.init();recorder.record('operation.start',{operation:name});
-        const result=await action(...args);recorder.record('operation.complete',{operation:name,duration_ms:Date.now()-started});return result;
-      } catch (error) { recorder.record('operation.error',{operation:name,message:error.message,duration_ms:Date.now()-started});void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
-    }));
+        void recorder.init();return await recorder.operations.run(name,()=>action(...args));
+      } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
+    }));};
   const rawBridge = async (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
-    const started=Date.now(),operation='bridge.'+request.method;
+    const operation='bridge.'+request.method;
     const identity={...recorder.context,source_record:{outline:request.id,reference:request.reference,revision:request.source_revision||request.revision}};
-    recorder.record('operation.start',{operation},'observed_action',identity);
-    try{const result=await runBridge(context.extensionPath,
-      vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options);
-      recorder.record('operation.complete',{operation,duration_ms:Date.now()-started,status:result.status,revision:result.revision},'observed_action',identity);return result;
-    }catch(error){recorder.record('operation.error',{operation,duration_ms:Date.now()-started,message:error.message},'observed_action',identity);throw error;}
+    return recorder.operations.run(operation,()=>runBridge(context.extensionPath,
+      vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options),identity);
   };
   const artifactClients = [];
+  require('./historyCommands').registerHistory({vscode,context,register,recorder});
   const artifactStorage = createArtifactStorage({ vscode, context, rawBridge });
   const bridge = artifactStorage.bridge;
   const provider = {
@@ -314,6 +312,10 @@ function activate(context) {
       if(currentMaterial?.root===root&&currentMaterial.outline)return outlineRows.currentStudyPassage(root);
       return null;
     }});
+  recorder.coverage=[...registered.map(id=>({id,status:vscode.workspace.isTrusted?'available':'unavailable'})),
+    {id:'reader.webview.directActions',status:'uninstrumented'},
+    {id:'proofGraph.webview.directActions',status:'uninstrumented'},
+    {id:'study.typing',status:'uninstrumented'}];
   deactivateAction=async()=>{await studyController.flush();await recorder.close();};
   context.subscriptions.push(changed);
   // Activation registers UI only: no source reads, writes, subprocess or network.

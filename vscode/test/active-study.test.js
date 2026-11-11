@@ -50,7 +50,7 @@ test('recorder failure preserves event order and snapshots, exposes a gap and re
 async function host(t){
  const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));const state=new Map(),commands=new Map(),panels=[],shown=[];
  const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});t.after(()=>recorder.close());
- const api={ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
+ const api={Uri:{file:fsPath=>({fsPath,scheme:'file'})},ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
   env:{clipboard:{value:'',async readText(){return this.value;},async writeText(t){this.value=t;}}},
   workspace:{getConfiguration:()=>({get:(k,f)=>f})},commands:{executeCommand:async()=>{}},window:{registerTreeDataProvider(){return{dispose(){}};},
    createWebviewPanel(){const p={title:'',webview:{onDidReceiveMessage(f){p.receive=f;},async postMessage(m){p.messages.push(m);}},messages:[],onDidDispose(f){p.close=f;},onDidChangeViewState(){},reveal(){}};panels.push(p);return p;},showQuickPick:async a=>a[0]}};
