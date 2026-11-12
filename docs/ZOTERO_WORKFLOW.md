@@ -8,7 +8,10 @@ retains them for use in ordinary notes. No Study or question form is required.
 ## Connect and find a reference
 
 1. Start Zotero. In **Settings → Advanced**, enable **Allow other applications
-   on this computer to communicate with Zotero**.
+   on this computer to communicate with Zotero**. Set this once in the Zotero
+   application that holds your library (on Windows for the Windows/WSL setup).
+   Keep Zotero running for searches and new attachment reads; retained material
+   can reopen offline.
 2. Run **MRW: Connect Zotero…**. For Windows Zotero with Debian WSL, choose
    **Windows Zotero from WSL**, then **My Library** or a listed group library.
    Zotero on a Linux extension host uses **Zotero on this Linux host**.
@@ -20,6 +23,10 @@ This first increment uses Zotero's documented read-only local API. It does not
 require a cloud-synced library or an API key. MRW checks API version 3 and records
 the available server identity, schema version and client version. A disabled
 API reports the setting above; it does not fall back to reading SQLite.
+
+If connecting reports **Local API is not enabled** (HTTP 403), enable that
+setting in Zotero, then rerun **MRW: Connect Zotero…**. The setting is in Zotero,
+not VS Code.
 
 In WSL, requests run through a bounded Windows PowerShell process to Windows
 loopback. No port is forwarded, no service is installed, and no script text is

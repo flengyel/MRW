@@ -244,3 +244,8 @@ The source version adds read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 This increment is not included in the published 0.23.12 VSIX.
+
+Before connecting, open Zotero → **Settings → Advanced** and enable
+**Allow other applications on this computer to communicate with Zotero**.
+Keep Zotero running for searches and new attachment reads. With Windows Zotero
+and Debian WSL, select **Windows Zotero from WSL** in **MRW: Connect Zotero…**.

@@ -241,10 +241,13 @@ and [lesson-pack authoring](https://github.com/flengyel/MRW/blob/main/docs/LEAN_
 
 ## Use a Zotero reference
 
-Run **MRW: Connect Zotero…** and choose **Windows Zotero from WSL** if Zotero
-runs on Windows. Enable Zotero’s **Settings → Advanced → Allow other
-applications on this computer to communicate with Zotero**, then choose a library.
-**MRW: Find Zotero Reference…** searches that library.
+First, start Zotero and enable **Settings → Advanced → Allow other
+applications on this computer to communicate with Zotero**. This is a one-time
+setting in Zotero; keep it running for searches and new attachment reads.
+Then run **MRW: Connect Zotero…**, choose **Windows Zotero from WSL** if Zotero
+runs on Windows, and choose a library. **MRW: Find Zotero Reference…** searches
+that library. If you see **Local API is not enabled**, enable the setting above
+and run **MRW: Connect Zotero…** again.
 
 Select a reference, then **Open attachment…** to retain and read the chosen file,
 or **Insert citation in note** while a Markdown note is focused. Insertion uses
