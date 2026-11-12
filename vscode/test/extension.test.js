@@ -161,6 +161,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
+    if (name === './zotero') return require('../src/zotero');
     if (name === './leanStudy') return require('../src/leanStudy');
     if (name === './sourcePlugins') return require('../src/sourcePlugins');
     if (name === './outlines') return require('../src/outlines');

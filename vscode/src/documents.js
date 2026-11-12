@@ -244,6 +244,21 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     }
     folder = { uri: choices[0].toString(), canonical: actual }; await persist();
   }
+  // Explicit companion selection grants one verified file, never its parent.
+  // Reuse the document reader and exact Return pin, including dirty note text.
+  async function openLinkedDocument(uri, from) {
+    const attempt = supersede(), pending = from ? { location: structuredClone(from) } : undefined;
+    if (pending) candidates.add(pending);
+    try {
+      const doc = pending && await vscode.workspace.openTextDocument(vscode.Uri.parse(pending.location.uri));
+      if (pending) await check(doc.uri);
+      const validate = () => { if (pending) validateOrigin(doc, pending); };
+      validate(); await grant(uri);
+      if (!await display(uri, undefined, attempt, validate)) return false;
+      if (pending) origin = pending.location;
+      last = uri.toString(); await persist(); await onNavigated(); return true;
+    } finally { if (pending) candidates.delete(pending); }
+  }
   async function resolve(doc, node) {
     await check(doc.uri);
     if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || /^[/\\]/u.test(node.target))) throw new Error('MRW follows relative local file links here. Open other targets explicitly through the host.');
@@ -446,6 +461,6 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   });
   if (selectionChanged) context.subscriptions.push(selectionChanged);
   register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), lastLocation, supersede()); });
-  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
+  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, openLinkedDocument, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
 }
 module.exports = { createDocuments };

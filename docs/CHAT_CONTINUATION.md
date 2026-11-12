@@ -117,9 +117,9 @@ an active binding.
 
 ## Subsequent integrations
 
-**Zotero is an explicit priority**, still unimplemented. Link the existing
-library's references and attachments with MRW notes, retained sources and
-citations. Preserve bibliographic identity separately from attachment/content
+**Zotero’s first local API workflow is implemented** after 0.23.12; see
+[setup and limits](ZOTERO_WORKFLOW.md). It links the existing library’s references
+and retained attachments with ordinary notes and citations. Preserve bibliographic identity separately from attachment/content
 revisions. Use the repository's integration design; do not move managed files
 or make a bibliography association imply a mathematical dependency.
 
