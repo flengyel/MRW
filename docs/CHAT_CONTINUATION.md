@@ -117,9 +117,9 @@ an active binding.
 
 ## Subsequent integrations
 
-**Zotero is an explicit priority**, still unimplemented. Link the existing
-library's references and attachments with MRW notes, retained sources and
-citations. Preserve bibliographic identity separately from attachment/content
+**Zotero’s first local API workflow is implemented** after 0.23.12; see
+[setup and limits](ZOTERO_WORKFLOW.md). It links the existing library’s references
+and retained attachments with ordinary notes and citations. Preserve bibliographic identity separately from attachment/content
 revisions. Use the repository's integration design; do not move managed files
 or make a bibliography association imply a mathematical dependency.
 
@@ -185,7 +185,7 @@ notebook, W3C PROV and Zotero when relevant. Avoid marketing, uniqueness claims,
 internal-refactoring announcements and claims of learning benefit unsupported
 by observation.
 
-Begin by checking whether the shared-history increment has advanced since the
-recorded baseline. Continue its remaining authorized work, or prepare a precise
-local-Codex handoff, while retaining Zotero and the bounded PROV trial as the
-next integration priorities.
+Shared history and the first local Zotero workflow are implemented after the
+recorded 0.23.12 baseline. Check their delivery reports before repeating work.
+The bounded PROV trial is the next integration priority; publishing/installing
+a newer package remains separate from committed source delivery.

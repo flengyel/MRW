@@ -362,6 +362,6 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     const doc = await vscode.workspace.openTextDocument(vscode.Uri.parse(origin.uri));
     await checkDocument(doc); selected = undefined; await selectOverview(doc, ++generation, true); await showReadingView(doc, documentColumn(doc));
   }
-  return { currentLocation:()=>structuredClone(selected || (document && {uri:document.uri.toString(),revision:digest(document.getText()),start:0,end:0})), provider, refresh, checkFile, returnDestination, returnToStudy, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
+  return { currentLocation:()=>structuredClone(selected || (document && {uri:document.uri.toString(),revision:digest(document.getText()),start:0,end:0})), provider, refresh, checkFile, returnDestination, returnToStudy, openLinkedDocument:documents.openLinkedDocument, extendMarkdownIt: wikiLinks.extendMarkdownIt, handleDocumentUri: wikiLinks.handleUri };
 }
 module.exports = { registerReadingOutline, trackLocation };

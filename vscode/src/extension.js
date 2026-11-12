@@ -290,10 +290,11 @@ function activate(context) {
   const outlineRows = registerOutlines({sourcePlugins, vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
     askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
     readingDestination: location => readingController.returnDestination(location),
-    handleDocumentUri: uri => readingController.handleDocumentUri(uri) });
+    handleDocumentUri: async uri => await zotero.handleUri(uri) || readingController.handleDocumentUri(uri) });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
     compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
+  const zotero = require('./zotero').registerZotero({vscode,context,register,reading:readingController,show,onCancel:()=>recorder.operations.cancel()});
   registerLeanStudy({vscode,context,register,trackLocation:require('./readingOutline').trackLocation,
     readingLocation:()=>readingController.currentLocation(),
     returnToDocument:location=>vscode.commands.executeCommand('mrw.returnToReadingOutline',{retained:true,location})});

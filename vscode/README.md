@@ -299,3 +299,10 @@ installation, supported mathematics, revision evidence and limits.
 Saved Studies have Archive/Restore, Trash/Undo and confirmed permanent deletion.
 Use row context menus or the Command Palette; the Studies title menu opens
 archived studies and Trash. See [lifecycle and recovery](../docs/STUDY_LIFECYCLE.md).
+
+## Zotero references
+
+The source version adds read-only local Zotero lookup, citation insertion and
+retained attachment reopening. Windows Zotero is accessed from WSL through
+Windows loopback, without forwarding its API port. See the [workflow and limits](../docs/ZOTERO_WORKFLOW.md).
+This increment is not included in the published 0.23.12 VSIX.

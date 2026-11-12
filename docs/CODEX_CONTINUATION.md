@@ -9,6 +9,19 @@ rejection and external note files. TikZ rendering remains explicit after saving.
 native desktop acceptance. This repair does not implement the shared-history,
 Zotero or PROV follow-ups below.
 
+## Implemented — Zotero reference and attachment linking
+
+The local API workflow finds references in a chosen personal or group library,
+retains metadata and exact attachment bytes, inserts citations in ordinary notes,
+and reopens retained references offline. Windows/WSL uses Windows loopback through
+bounded read-only interop; no port forwarding, database access or Zotero writes.
+Preserve dirty notes, immutable earlier citations and the existing PDF/Return path.
+Study deletion does not own the Zotero records. See
+[workflow](ZOTERO_WORKFLOW.md) and
+[delivery checks](ZOTERO_DELIVERY.md).
+The published 0.23.12 package predates this increment. The small PROV notebook
+trial is next; no general PROV exporter was added here.
+
 ## Implemented — configurable shared usage history
 
 The shared-history increment extends the existing recorder and Inspect/Export
@@ -18,8 +31,8 @@ publication, conflict reporting and deletion markers protect offline use.
 Active studies, drafts, scheduling and the source store remain host-local.
 See [the workflow](USAGE_HISTORY.md) and
 [delivery checks and limits](SHARED_HISTORY_DELIVERY.md).
-The published 0.23.12 package predates this increment. Zotero is next, then the
-small PROV trial; neither was implemented alongside history.
+The published 0.23.12 package predates shared history. Zotero was implemented
+subsequently as described above; the small PROV trial remains next.
 
 
 ## Delivered implementation — Study lifecycle
@@ -32,9 +45,9 @@ tombstones. Shared questions/snapshots, source annotations, ordinary files and
 other studies are protected. Test deletion only on disposable records.
 
 The design section below records the requested scope. Zotero reference and
-attachment linking is next; the small PROV trial should then retain two alternative
-calculations through restart, comparison and provenance export. Neither is
-implemented by this lifecycle increment.
+attachment linking followed the lifecycle increment. The small PROV trial
+should next retain two alternative calculations through restart, comparison and
+provenance export; it remains unimplemented.
 
 
 ## Current design — W3C PROV and Study lifecycle, 2026-11-10
@@ -60,8 +73,8 @@ before duplicating existing capabilities.
 
 [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration)
 is an explicit requested feature: connect the existing library's references and
-attachments to MRW notes, retained sources and citations. It remains unimplemented.
-Study archive/delete is delivered; include Zotero in subsequent integration work.
+attachments to MRW notes, retained sources and citations. Its first local API
+workflow is implemented above. Study archive/delete and Zotero are independent.
 
 Preserve the existing Studies row/context actions and study persistence
 boundaries. Do not implement a new scheduler or alter genuine studies during

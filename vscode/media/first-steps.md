@@ -239,6 +239,24 @@ checking do not establish agreement with an intended informal theorem.
 See the [Lean workflow](https://github.com/flengyel/MRW/blob/main/docs/LEAN_STUDY_WORKFLOW.md)
 and [lesson-pack authoring](https://github.com/flengyel/MRW/blob/main/docs/LEAN_LESSON_PACKS.md).
 
+## Use a Zotero reference
+
+Run **MRW: Connect Zotero…** and choose **Windows Zotero from WSL** if Zotero
+runs on Windows. Enable Zotero’s **Settings → Advanced → Allow other
+applications on this computer to communicate with Zotero**, then choose a library.
+**MRW: Find Zotero Reference…** searches that library.
+
+Select a reference, then **Open attachment…** to retain and read the chosen file,
+or **Insert citation in note** while a Markdown note is focused. Insertion uses
+Zotero’s formatted citation and ordinary Undo; MRW never saves the note for you.
+**Copy citation** also works while reading a saved source.
+
+**MRW: Resume Zotero Reference…** reopens retained metadata and attachments
+offline. **Read current metadata** creates a new reference without redirecting
+an earlier citation. Zotero’s originals stay in place. The existing PDF reader
+and **Return to Document** apply; PDF page positions are not restored by MRW.
+See [Zotero setup, scope and limits](https://github.com/flengyel/MRW/blob/main/docs/ZOTERO_WORKFLOW.md).
+
 ## Work through a difficult step
 
 Optional source study keeps a selected passage beside questions and attempts.

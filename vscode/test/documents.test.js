@@ -125,6 +125,25 @@ function harness(f, state = new Map(), options = {}) {
   return apiHarness;
 }
 
+test('explicit companion attachment uses the PDF reader and preserves the dirty originating location', async t => {
+  const f=await fixture(t),state=new Map(),h=harness(f,state);await h.folder();const doc=await h.open('1a.md');
+  h.change(doc,doc.text.length,0,'unsaved working text');
+  const at=doc.text.indexOf('Second again'),from={uri:doc.uri.toString(),revision:require('../src/navigation').digest(doc.text),start:at,end:at+6};
+  const paper=path.join(f.outside,'retained.pdf');await fs.copyFile(f.file('paper.pdf'),paper);
+  assert.equal(await h.documents.openLinkedDocument(uri(paper),from),true);
+  assert.equal(h.hostCalls.at(-1).name,'vscode.openWith');assert.equal(h.hostCalls.at(-1).args[0].fsPath,paper);
+  const restarted=harness(f,state);await restarted.commands.get('mrw.reopenDocument')();assert.equal(restarted.hostCalls.at(-1).args[0].fsPath,paper);
+  assert.equal(await h.documents.returnToDocument(),true);assert.equal(h.selected(),'Second');assert.equal(doc.isDirty,true);
+  assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),f.contents['1a.md']);
+});
+
+test('cancelled companion PDF opening leaves the previous Return location intact', async t => {
+  const f=await fixture(t),h=harness(f,new Map(),{pdfReader:false});await h.folder();const doc=await h.open('1a.md');await h.follow(doc,'2b');
+  const at=doc.text.indexOf('Second again'),from={uri:doc.uri.toString(),revision:require('../src/navigation').digest(doc.text),start:at,end:at+6};
+  assert.equal(await h.documents.openLinkedDocument(uri(f.file('paper.pdf')),from),false);
+  await h.documents.returnToDocument();assert.equal(h.selected(),'[[2b]]');
+});
+
 test('external front-matter note follows an ID, registered PDF, backlink occurrence, return and restart without importing', async t => {
   const f = await fixture(t), state = new Map([['mrw.readingOutline.v1', { origin: { reference: 'retained-reader-origin' }, draft: 'genuine draft' }]]);
   const retained = structuredClone(state.get('mrw.readingOutline.v1')), h = harness(f, state);

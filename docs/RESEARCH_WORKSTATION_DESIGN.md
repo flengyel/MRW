@@ -131,9 +131,9 @@ The [source plugins](SOURCE_PLUGINS.md) for Stacks Project, Kerodon and nLab,
 [local lesson packs](LEAN_LESSON_PACKS.md) are implemented. Notebook computation
 currently uses the separate [SagePod/Jupyter workflow](SAGEPOD_NOTEBOOK_WORKFLOW.md).
 
-Zotero integration, repository study imports, CoCalc and Wolfram interoperability
-plugins, a data-analysis plugin and broader lab-notebook provenance remain
-unimplemented. Zotero is an explicit requested integration; its scope is below.
+Zotero’s first local reference/attachment workflow is implemented; its scope is
+below. Repository study imports, CoCalc and Wolfram interoperability plugins, a
+data-analysis plugin and broader lab-notebook provenance remain unimplemented.
 Clowder and PreTeXt source adapters also remain proposed. These are distinct
 from the delivered source-import and local lesson-pack interfaces.
 
@@ -144,7 +144,7 @@ interfaces should be assessed before implementing equivalent mechanisms.
 
 ### Zotero integration
 
-Requested feature, 2026-11-10; not implemented. Connect the existing Zotero
+First local API increment implemented after 0.23.12; see [workflow and limits](ZOTERO_WORKFLOW.md). The following scope governs the integration. Connect the existing Zotero
 library to mathematical study and the research lab notebook. Zotero continues
 to manage references; MRW links them to the passages, notes, calculations and
 proofs that use them.
