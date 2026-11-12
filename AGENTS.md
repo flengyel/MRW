@@ -1,5 +1,14 @@
 # Codex instructions
 
+## Delivery status
+
+Do not equate implemented or merged code with a delivered extension update.
+Complete the authorized build, verification, release and remote integration steps
+before ending the task. Report remote main, package/release and installation
+status separately; identify any unfinished stage explicitly. Preserve the working
+window: publication does not authorize installation or a forced reload.
+[0.23.13 delivery](docs/RELEASE_0_23_13.md) records the latest package.
+
 ## Delivered — reader-note controls, 0.23.12
 
 Expanded passages place Add reader note, Delete reader note and Link Obsidian

@@ -57,8 +57,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
-[Reading repairs for 0.23.5](READING_REPAIRS.md) records the latest delivery,
-checks and limits. Other validation and repair reports describe the versions,
+[Release 0.23.13](RELEASE_0_23_13.md) records the latest package, publication,
+checks and installation status. [Reading repairs for 0.23.5](READING_REPAIRS.md)
+records that earlier increment. Other validation and repair reports describe the versions,
 hosts and sources named in those reports; they do not establish that a later
 build passed the same checks.
 
