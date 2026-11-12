@@ -10,6 +10,10 @@ def verify(archive):
     extension = Path(__file__).resolve().parents[1]
     repository = extension.parent
     manifest = json.loads((extension / 'package.json').read_text())
+    containers = manifest.get('contributes', {}).get('viewsContainers', {}).get('activitybar', [])
+    mrw_container = next((item for item in containers if item.get('id') == 'mrw'), {})
+    if mrw_container.get('title') != f'MRW {manifest["version"]}':
+        raise ValueError('MRW Activity Bar title must match the package version')
     expected = {'extension/package.json', 'extension/readme.md', 'extension/LICENSE.txt',
                 'extension.vsixmanifest', '[Content_Types].xml'}
     exact = {'extension/LICENSE.txt': repository / 'LICENSE',

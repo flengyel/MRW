@@ -1867,7 +1867,7 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   const root=await temporary(t),h=await harness(root);
   const manifest=JSON.parse(await fs.readFile(path.resolve(__dirname,'../package.json'),'utf8'));
   const c=manifest.contributes,container=c.viewsContainers.activitybar.find(v=>v.id==='mrw');
-  assert.ok(container);assert.equal(container.title,'MRW');
+  assert.ok(container);assert.equal(container.title,`MRW ${manifest.version}`);
   const svg=await fs.readFile(path.resolve(__dirname,'..',container.icon),'utf8');
   assert.match(svg,/<svg[^>]*viewBox="0 0 24 24"/);
   assert.doesNotMatch(svg,/<script|<image|href=/i);

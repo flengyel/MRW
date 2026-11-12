@@ -1,8 +1,8 @@
 # Install Mathematical Research Workstation
 
-MRW 0.23.15 is installed from a VSIX.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.15/mrw-0.23.15.vsix)
-and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.15),
+MRW 0.23.16 is installed from a VSIX.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.16/mrw-0.23.16.vsix)
+and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.16),
 or [build from source](../vscode/README.md#package-and-install-a-vsix).
 There is no Marketplace listing. The extension identifier is `flengyel.mrw`.
 
@@ -51,22 +51,25 @@ workspace there and perform the same Python and extension-host checks.
 
 ### 2. Install the VSIX in that workspace host
 
-Run **Extensions: Install from VSIX…** and select `mrw-0.23.15.vsix`.
+Run **Extensions: Install from VSIX…** and select `mrw-0.23.16.vsix`.
 Alternatively, use that window's Linux terminal and substitute the package path:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.15.vsix
+code --install-extension /absolute/path/to/mrw-0.23.16.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.15` under the WSL/SSH host's installed extensions.
+Confirm `flengyel.mrw@0.23.16` under the WSL/SSH host's installed extensions.
+After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.16**;
+the sidebar heading shows the same version. **MRW: Open Tutorial** reports the
+active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
 extension. Save unfinished work before a requested reload. Keep workspace
 storage when upgrading `flengyel.mrw`.
 
 For upgrades from before the extension identity change, see
 [the conversion record](EXTENSION_IDENTITY.md). The upgrade from 0.23.12 to
-0.23.15 keeps the `flengyel.mrw` identity and existing saved work.
+0.23.16 keeps the `flengyel.mrw` identity and existing saved work.
 
 <a id="3-open-existing-work"></a>
 

@@ -1,5 +1,14 @@
 # Codex continuation: reading and research
 
+## Version on the MRW icon — 0.23.16
+
+The Activity Bar container title includes the package version, which VS Code
+uses for the icon hover and sidebar heading. Keep it synchronized at release;
+the VSIX verifier rejects a stale title. The tutorial still reports the active
+extension build. No command/view IDs or saved state changed. The small PROV
+trial remains the next product increment.
+
+
 ## Revised Lean introduction — pack 1.1.0
 
 The introduction now has three lessons: Functions and composition, Implication

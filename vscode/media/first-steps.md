@@ -9,6 +9,10 @@ and commentary can stay in their notes, connected by ordinary links.
 separately saved work; it is not required for reading. Opening or following a
 document never creates a problem record or launches an exercise form.
 
+Hover over the MRW Activity Bar icon to see its version. The sidebar heading
+shows it too. This tutorial reports the active extension build above. If an
+installed update is waiting for a reload, the active build can still be older.
+
 <a id="open-existing-work"></a>
 
 ## Open a document
