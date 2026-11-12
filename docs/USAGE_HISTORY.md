@@ -1,7 +1,6 @@
 # Shared usage and interaction history
 
-Implemented after 0.23.12; delivered through [PR #10](https://github.com/flengyel/MRW/pull/10). The published
-0.23.12 package does not contain this increment. See
+Included in MRW 0.23.13; implemented through [PR #10](https://github.com/flengyel/MRW/pull/10). See
 [delivery and checks](SHARED_HISTORY_DELIVERY.md).
 
 ## Connect a directory

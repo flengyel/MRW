@@ -20,7 +20,7 @@ and explicit TikZ rendering. See [delivery and verification limits](READER_NOTES
 
 Implemented afterward through PR #10: configurable history,
 verified import, per-writer batches, feature reporting and deletion recovery.
-The published 0.23.12 release predates this change. See
+The 0.23.13 VSIX includes this change and Zotero reference linking. See
 [the delivery record](SHARED_HISTORY_DELIVERY.md) before repeating work.
 
 ## Purpose and ownership

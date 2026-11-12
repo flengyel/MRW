@@ -10,6 +10,8 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | --- | --- |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
 | Use Markdown notes, WikiLinks and an optional Obsidian vault | [Notes and Obsidian](OBSIDIAN_WORKFLOW.md) |
+| Find Zotero references, insert citations and retain attachments | [Zotero](ZOTERO_WORKFLOW.md) |
+| Connect and inspect shared usage history | [Usage history](USAGE_HISTORY.md) |
 | Render TikZ in notes or reader annotations | [TikZ diagrams](TIKZ_WORKFLOW.md) |
 | Retain a Stacks Project or Kerodon section | [Published sources](STACKS_WORKFLOW.md) |
 | Distinguish a source item, its revision and a quoted passage | [Source identifiers](SOURCE_IDENTIFIERS.md) |
@@ -35,7 +37,7 @@ that version and the saved records it produced.
 - [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
   proposed lifecycle, shared-data boundaries and completion checks.
 - [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration): requested
-  reference, attachment and citation workflow; not yet implemented.
+  reference, attachment and citation design; the local API workflow is included in 0.23.13.
 - [Related systems and reuse](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse):
   Zotero, CoCalc, Wolfram, Proofscape, TeXmacs, MathHub/ALeA and VisTrails.
 

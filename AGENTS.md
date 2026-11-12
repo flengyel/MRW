@@ -19,8 +19,8 @@ Preserve dirty notes, immutable earlier citations and the existing PDF/Return pa
 Study deletion does not own the Zotero records. See
 [workflow](docs/ZOTERO_WORKFLOW.md) and
 [delivery checks](docs/ZOTERO_DELIVERY.md).
-The published 0.23.12 package predates this increment. The small PROV notebook
-trial is next; no general PROV exporter was added here.
+Included in the 0.23.13 VSIX. The small PROV notebook trial is next; no general
+PROV exporter was added here.
 
 ## Implemented — configurable shared usage history
 
@@ -31,8 +31,8 @@ publication, conflict reporting and deletion markers protect offline use.
 Active studies, drafts, scheduling and the source store remain host-local.
 See [the workflow](docs/USAGE_HISTORY.md) and
 [delivery checks and limits](docs/SHARED_HISTORY_DELIVERY.md).
-The published 0.23.12 package predates shared history. Zotero was implemented
-subsequently as described above; the small PROV trial remains next.
+Shared history and Zotero are included in the 0.23.13 VSIX; the small PROV
+trial remains next.
 
 
 ## Delivered implementation — Study lifecycle
