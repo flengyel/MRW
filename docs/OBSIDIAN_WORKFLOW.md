@@ -1,4 +1,4 @@
-# Obsidian and notes in place — 0.23.5
+# Obsidian and notes in place — 0.23.14
 
 MRW and Obsidian can open the same Markdown notes. MRW supplies Contents,
 links, backlinks and Return in VS Code; Obsidian retains its own editing and

@@ -1,4 +1,4 @@
-# Documents, Contents and saved sources — 0.23.5
+# Documents, Contents and saved sources — 0.23.14
 
 Open a note or paper with **MRW: Open Document…**. Markdown opens in
 VS Code's preview, and **Contents** lists its headings and links. The original
