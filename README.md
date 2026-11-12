@@ -56,6 +56,8 @@ argument remain distinct activities.
 4. For note-ID lookup and backlinks, choose **MRW: Choose Notes Folder…** for
    the intended folder. Use **MRW: Show Backlinks…** to inspect incoming
    references. Choosing a folder leaves its notes in place.
+   The chooser shows the current folder and recent choices with full paths,
+   remembered for this workspace after restart.
 
 The document picker lists the current folder before reading titles. Enter a
 subfolder to browse it, or choose **Search subfolders…** to search below it.

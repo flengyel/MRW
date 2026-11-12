@@ -14,6 +14,11 @@ Open the vault in Obsidian. In MRW, run **Choose Notes Folder…** and select th
 same vault root: the folder containing `.obsidian` and the notes, rather than
 `.obsidian` itself. Both settings can also be changed in VS Code Settings.
 
+The chooser shows the current folder and recent choices with full paths. Select
+a recent vault to switch back, or **Browse for notes folder…** to choose another.
+Recent choices are remembered for this workspace after restart. MRW reports the
+selected path; cancelling does not change it.
+
 | Setting | Value |
 | --- | --- |
 | `mrw.notesFolder` | Absolute vault-root path on the extension host. A Windows vault at `C:\Users\<user>\Zettelkasten` is `/mnt/c/Users/<user>/Zettelkasten` in WSL. |

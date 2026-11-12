@@ -73,6 +73,22 @@ folder mounted in WSL. The selection sets `mrw.notesFolder` in workspace
 settings; it accepts an absolute extension-host path. Ordinary Markdown needs
 neither Obsidian nor Zettel metadata.
 
+The chooser shows **Current** and **Recent** folders with their full paths.
+Select a recent entry to switch directly, or **Browse for notes folder…**.
+The ten most recent choices are remembered for this workspace after restart.
+Browse starts at the current folder; if it is unavailable, MRW tries an available
+recent folder, then the workspace or home folder. It does not reuse an unrelated
+file dialog's last location. A successful choice reports the selected path.
+Cancellation and an unavailable or redirected recent folder leave the selection
+unchanged. If the setting is saved but history cannot be saved, MRW reports both
+facts; selecting that folder again retries the history save.
+
+Temporary directories such as `/tmp/mrw-…` hold disposable development fixtures
+or intermediate TikZ rendering files. They are not a default location for notes.
+Opening a file or rendering a diagram does not change **MRW: Notes Folder**.
+Tests must use their own workspace and settings; they must not change a working
+workspace's notes folder.
+
 1. Click a WikiLink in preview, or Ctrl+click it in the source editor, subject
    to VS Code's configured link modifier. For ordinary links, select their
    Contents entry or place the cursor on the link and run **Follow Document Link**.

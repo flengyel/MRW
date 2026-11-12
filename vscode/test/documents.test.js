@@ -61,7 +61,7 @@ function harness(f, state = new Map(), options = {}) {
     } },
     workspace: {
       isTrusted: true,
-      getConfiguration: () => ({ get: (name, fallback) => configuration[name] ?? fallback, async update(name, value, target) { configurationWrites.push({ name, value, target }); configuration[name] = value; } }),
+      getConfiguration: () => ({ get: (name, fallback) => configuration[name] ?? fallback, async update(name, value, target) { configurationWrites.push({ name, value, target }); await options.updateConfiguration?.(name, value, target); configuration[name] = value; } }),
       workspaceFolders: [{ uri: uri(f.root) }],
       get textDocuments() { return [...stored.values()]; },
       async openTextDocument(location) {
@@ -90,14 +90,14 @@ function harness(f, state = new Map(), options = {}) {
         this.activeTextEditor = editor; shown.push({ doc, settings, editor }); return editor;
       },
       async withProgress(settings, callback) { return callback({}, { isCancellationRequested: !!options.cancelIndex }); },
-      async showQuickPick(choices, settings) { choices = await choices; picks.push({ choices, settings }); return pickHook ? pickHook(choices) : choices[0]; },
+      async showQuickPick(choices, settings) { choices = await choices; picks.push({ choices, settings }); return pickHook ? pickHook(choices, settings) : settings.title === 'Choose Notes Folder' ? choices.find(c => c.action === 'browse') : choices[0]; },
       async showInformationMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
       async showErrorMessage(message) { errors.push(message); },
       async showWarningMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
     },
   };
   const context = { subscriptions: [], workspaceState: {
-    get: key => state.get(key), async update(key, value) { state.set(key, structuredClone(value)); },
+    get: key => state.get(key), async update(key, value) { await options.updateState?.(key, value); state.set(key, structuredClone(value)); },
   } };
   documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
     onDisplayed: uri => displayed.push(uri.fsPath),
@@ -701,4 +701,109 @@ test('only successful non-Markdown opens publish their displayed identity', asyn
   await h.documents.returnToDocument(); assert.equal(h.displayed.at(-1), f.file('1a.md'));
   const before = [...h.displayed]; await assert.rejects(h.follow(a, 'missing.md'));
   assert.deepEqual(h.displayed, before);
+});
+
+test('notes folder chooser shows the current full path and restores recent folders after restart', async t => {
+  const f=await fixture(t),state=new Map(),h=harness(f,state,{notesFolder:f.notes});
+  const doc=await h.open('1a.md');h.change(doc,doc.text.length,0,'unsaved work');
+  const origin=structuredClone(state.get('mrw.documents.v1'));
+  h.openChoices.push([uri(f.outside)]);await h.commands.get('mrw.chooseNotesFolder')();
+  const menu=h.picks.find(p=>p.settings.title==='Choose Notes Folder');
+  assert.equal(menu.choices[0].description,'Current');assert.equal(menu.choices[0].detail,f.notes);
+  assert.match(menu.settings.placeHolder,new RegExp(f.notes));
+  assert.equal(h.dialogs.at(-1).defaultUri.fsPath,f.notes);
+  assert.deepEqual(state.get('mrw.documents.v1').recentFolders.map(x=>x.canonical),[f.outside,f.notes]);
+  assert.equal(h.informations.at(-1).message,`Notes folder: ${f.outside}`);
+  assert.equal(state.get('mrw.documents.v1').last,origin.last);assert.equal(doc.isDirty,true);
+  assert.equal(await fs.readFile(doc.uri.fsPath,'utf8'),f.contents['1a.md']);
+  const reopened=harness(f,state,{notesFolder:f.outside});
+  reopened.setPickHook(items=>items.find(i=>i.detail===f.notes));
+  await reopened.commands.get('mrw.chooseNotesFolder')();
+  assert.equal(reopened.dialogs.length,0,'a recent selection needs no file dialog');
+  assert.equal(reopened.configuration.notesFolder,f.notes);
+  assert.deepEqual(state.get('mrw.documents.v1').recentFolders.map(x=>x.canonical),[f.notes,f.outside]);
+});
+
+test('cancelled folder menu and Browse do not write settings, state or history', async t => {
+  const f=await fixture(t),h=harness(f,new Map(),{notesFolder:f.notes});
+  h.setPickHook(()=>undefined);await h.commands.get('mrw.chooseNotesFolder')();
+  assert.equal(h.state.size,0);assert.equal(h.configurationWrites.length,0);assert.equal(h.dialogs.length,0);
+  h.setPickHook(items=>items.find(i=>i.action==='browse'));h.openChoices.push(undefined);
+  await h.commands.get('mrw.chooseNotesFolder')();
+  assert.equal(h.dialogs[0].defaultUri.fsPath,f.notes);
+  assert.equal(h.state.size,0,'resolving Browse default must not persist scope');
+  assert.equal(h.configurationWrites.length,0);assert.equal(h.informations.length,0);
+});
+
+test('Browse always supplies a default and falls back from a missing folder to the workspace', async t => {
+  const f=await fixture(t),missing=path.join(f.base,'missing'),h=harness(f,new Map(),{notesFolder:missing});
+  await h.commands.get('mrw.chooseNotesFolder')();
+  assert.equal(h.dialogs[0].defaultUri.fsPath,f.root);
+  assert.equal(h.configuration.notesFolder,missing);assert.equal(h.state.size,0);
+});
+
+test('missing or redirected recent folders do not replace the selected folder', async t => {
+  const f=await fixture(t),h=harness(f);await h.folder();
+  h.openChoices.push([uri(f.outside)]);await h.commands.get('mrw.chooseNotesFolder')();
+  const before=structuredClone(h.state.get('mrw.documents.v1'));
+  const moved=path.join(f.base,'moved');await fs.rename(f.notes,moved);
+  h.setPickHook(items=>items.find(i=>i.detail===f.notes));
+  await assert.rejects(h.commands.get('mrw.chooseNotesFolder')(),/unavailable.*selected folder has not changed/);
+  assert.equal(h.configuration.notesFolder,f.outside);assert.deepEqual(h.state.get('mrw.documents.v1'),before);
+  await fs.symlink(moved,f.notes);
+  await assert.rejects(h.commands.get('mrw.chooseNotesFolder')(),/different location.*selected folder has not changed/);
+  assert.equal(h.configuration.notesFolder,f.outside);assert.deepEqual(h.state.get('mrw.documents.v1'),before);
+});
+
+test('notes folder settings failure preserves scope and history', async t => {
+  const f=await fixture(t);let fail=false;
+  const h=harness(f,new Map(),{updateConfiguration:async()=>{if(fail)throw Error('settings write failed');}});
+  await h.folder();const before=structuredClone(h.state.get('mrw.documents.v1'));fail=true;
+  h.openChoices.push([uri(f.outside)]);
+  await assert.rejects(h.commands.get('mrw.chooseNotesFolder')(),/settings write failed/);
+  assert.equal(h.configuration.notesFolder,f.notes);assert.deepEqual(h.state.get('mrw.documents.v1'),before);
+  assert.equal(h.informations.length,1,'no success message for a rejected change');
+});
+
+test('history save failure reports the selected folder and allows retry without losing earlier choices', async t => {
+  const f=await fixture(t);let fail=false;
+  const h=harness(f,new Map(),{updateState:async()=>{if(fail)throw Error('state write failed');}});
+  await h.folder();const before=structuredClone(h.state.get('mrw.documents.v1'));fail=true;
+  h.openChoices.push([uri(f.outside)]);
+  await assert.rejects(h.commands.get('mrw.chooseNotesFolder')(),/Notes folder selected:.*Folder history could not be saved: state write failed/);
+  assert.equal(h.configuration.notesFolder,f.outside);assert.deepEqual(h.state.get('mrw.documents.v1'),before);
+  fail=false;h.setPickHook(items=>items.find(i=>i.description==='Current'));
+  await h.commands.get('mrw.chooseNotesFolder')();
+  assert.deepEqual(h.state.get('mrw.documents.v1').recentFolders.map(x=>x.canonical),[f.outside,f.notes]);
+});
+
+test('delayed notes-folder writes cannot overwrite a newer accepted choice', async t => {
+  const f=await fixture(t),third=path.join(f.base,'third');await fs.mkdir(third);
+  const started=deferred(),release=deferred();let delay=false;
+  const h=harness(f,new Map(),{updateConfiguration:async(_name,value)=>{
+    if(delay&&value===f.outside){started.resolve();await release.promise;}
+  }});
+  await h.folder();delay=true;h.openChoices.push([uri(f.outside)]);
+  const first=h.commands.get('mrw.chooseNotesFolder')();await started.promise;
+  h.openChoices.push([uri(third)]);const second=h.commands.get('mrw.chooseNotesFolder')();
+  await new Promise(r=>setImmediate(r));release.resolve();await Promise.all([first,second]);
+  assert.equal(h.configuration.notesFolder,third);assert.equal(h.state.get('mrw.documents.v1').folder.canonical,third);
+  assert.equal(h.informations.at(-1).message,`Notes folder: ${third}`);
+  assert.ok(!h.informations.some(i=>i.message===`Notes folder: ${f.outside}`));
+});
+
+test('folder history is bounded, deduplicates canonical paths and does not leak between workspaces', async t => {
+  const f=await fixture(t),h=harness(f);await h.folder();
+  for(let i=0;i<12;i++){
+    const dir=path.join(f.base,`recent-${i}`);await fs.mkdir(dir);h.openChoices.push([uri(dir)]);
+    await h.commands.get('mrw.chooseNotesFolder')();
+  }
+  const selected=h.configuration.notesFolder,alias=path.join(f.base,'alias');await fs.symlink(selected,alias);
+  h.openChoices.push([uri(alias)]);await h.commands.get('mrw.chooseNotesFolder')();
+  const recent=h.state.get('mrw.documents.v1').recentFolders;
+  assert.equal(recent.length,10);assert.equal(new Set(recent.map(x=>x.canonical)).size,10);
+  const other=harness({...f,root:f.outside},h.state);
+  other.setPickHook(()=>undefined);await other.commands.get('mrw.chooseNotesFolder')();
+  assert.deepEqual(other.picks[0].choices.map(x=>x.action),['browse']);
+  assert.equal(other.configurationWrites.length,0);
 });

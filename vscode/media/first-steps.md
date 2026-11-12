@@ -52,7 +52,10 @@ notes retain their group.
    to navigate. It can be outside the workspace and need not be an Obsidian
    vault. In WSL, a Windows folder such as `C:\Users\you\Notes` is reached as
    `/mnt/c/Users/you/Notes`. The choice persists in **MRW: Notes Folder** and
-   becomes the starting folder for **Open Document…**.
+   becomes the starting folder for **Open Document…**. The chooser shows the
+   current folder and recent choices with full paths. Select a recent folder
+   directly, or **Browse for notes folder…**; MRW reports the chosen path.
+   Recent choices survive restart in this workspace. Cancelling changes nothing.
 2. Click a WikiLink in preview or **Ctrl+click** it in the source editor using
    the modifier shown by VS Code. For an ordinary Markdown link, select its
    Contents entry or run **MRW: Follow Document Link** at the cursor. These

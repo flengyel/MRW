@@ -19,7 +19,8 @@ see [the preservation checks](../docs/DOCUMENT_PROBLEMS_REMOVAL.md).
 2. Open the MRW Activity Bar view. **Contents** lists the selected Markdown
    document's headings and links. **Show Contents** selects or reveals that
    document; **Choose Document…** selects another Markdown file.
-3. For note-ID links and backlinks, use **Choose Notes Folder…**. The folder can
+3. For note-ID links and backlinks, use **Choose Notes Folder…**. Select a recent
+   folder or browse for another; full paths identify the choices. The folder can
    be outside the workspace and need not be an Obsidian vault.
 4. Follow a WikiLink from preview, or an ordinary link through Contents or
    **Follow Document Link**, then use **Return to Document** to return to its

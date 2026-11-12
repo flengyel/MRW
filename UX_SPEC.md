@@ -1,5 +1,14 @@
 # User experience specification
 
+## Notes-folder chooser — 0.23.14
+
+Show the current notes folder and up to ten recent choices with full paths.
+Remember choices within the workspace across restart. A recent row switches
+directly; Browse starts at a valid explicit location. Successful selection
+reports the path. Cancellation does not change scope or settings. Missing or
+redirected recent folders require a fresh choice; never silently substitute one.
+Opening documents and temporary rendering work do not change the notes folder.
+
 ## Proposed interaction — Study lifecycle and lab notebook
 
 The implemented Study lifecycle follows

@@ -24,6 +24,8 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   const saved = remembered?.workspace === workspace ? remembered : {};
   let grants = Array.isArray(saved.grants) ? saved.grants.filter(g => typeof g.uri === 'string' && typeof g.canonical === 'string').slice(-100) : [];
   let folder = saved.folder && typeof saved.folder.uri === 'string' && typeof saved.folder.canonical === 'string' ? saved.folder : undefined;
+  let recentFolders = Array.isArray(saved.recentFolders) ? saved.recentFolders.filter(validFolder).slice(0, 10) : [];
+  let folderPublication = Promise.resolve();
   let last = typeof saved.last === 'string' ? saved.last : undefined;
   let lastLocation = saved.location && saved.location.uri === last && /^[a-f0-9]{64}$/.test(saved.location.revision) &&
     Number.isSafeInteger(saved.location.start) && Number.isSafeInteger(saved.location.end) &&
@@ -37,7 +39,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   context.subscriptions.push({dispose:()=>chooser?.cancel()});
   const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
   function persist() {
-    const value = { workspace, grants: [...grants], folder, last, origin, location: lastLocation };
+    const value = { workspace, grants: [...grants], folder, recentFolders: [...recentFolders], last, origin, location: lastLocation };
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
     return publication;
   }
@@ -189,10 +191,36 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     onDisplayed(uri);
     return true;
   }
-  async function pickerFolder() {
-    if (!folder && !configuredFolder()) return undefined;
-    try { return vscode.Uri.file(await folderRoot()); }
-    catch (_) { return undefined; } // A moved folder must not prevent choosing a new document.
+  function validFolder(value) {
+    if (!value || typeof value.uri !== 'string' || typeof value.canonical !== 'string' ||
+        value.uri.length > 8192 || value.canonical.length > 4096 || !path.isAbsolute(value.canonical)) return false;
+    try { return vscode.Uri.parse(value.uri).scheme === 'file'; } catch (_) { return false; }
+  }
+  function currentFolderUri() {
+    const configured = configuredFolder();
+    if (configured) return typeof configured === 'string' && path.isAbsolute(configured) ? vscode.Uri.file(configured) : undefined;
+    return validFolder(folder) ? vscode.Uri.parse(folder.uri) : undefined;
+  }
+  async function selectedFolder(uri, expected) {
+    if (uri?.scheme !== 'file') throw Error('Choose a notes folder on this extension host.');
+    let actual;
+    try {
+      actual = await fs.realpath(uri.fsPath);
+      if (!(await fs.stat(actual)).isDirectory()) throw Error('Not a folder');
+    } catch (_) { throw Error(`Notes folder is unavailable: ${uri.fsPath}. Browse for its current location. The selected folder has not changed.`); }
+    if (expected && actual !== expected) throw Error(`Notes folder now resolves to a different location: ${uri.fsPath}. Browse to select it again. The selected folder has not changed.`);
+    return { uri: uri.toString(), canonical: actual };
+  }
+  async function pickerFolder(current) {
+    // Resolve suggestions without granting scope or changing persisted state.
+    // Always supply a default, so the host cannot reuse an unrelated file dialog.
+    const locations = [current, ...recentFolders.map(f => vscode.Uri.parse(f.uri)),
+      vscode.workspace.workspaceFolders?.[0]?.uri, vscode.Uri.file(os.homedir())];
+    for (const uri of locations) {
+      if (uri?.scheme !== 'file') continue;
+      try { if ((await fs.stat(uri.fsPath)).isDirectory()) return uri; } catch (_) { /* Try the next explicit location. */ }
+    }
+    return vscode.Uri.file(os.homedir());
   }
   function ordinaryUri() {
     return vscode.window.activeTextEditor?.document.uri || vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
@@ -231,18 +259,58 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (await display(selected, undefined, attempt)) { last = selected.toString(); await persist(); await onNavigated(); }
   }
   async function chooseFolder() {
-    const attempt = supersede();
-    const choices = await vscode.window.showOpenDialog({ title: 'Choose notes folder (Obsidian vault or ordinary folder)', openLabel: 'Use Notes Folder', defaultUri: await pickerFolder(), canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
-    if (!choices?.length || attempt !== generation) return;
-    const actual = await fs.realpath(choices[0].fsPath);
-    if (!(await fs.stat(actual)).isDirectory()) throw new Error('Choose a notes folder.');
-    if (attempt !== generation) return;
-    const configuration = vscode.workspace.getConfiguration?.('mrw');
-    if (configuration?.update) {
-      await configuration.update('notesFolder', choices[0].fsPath, vscode.ConfigurationTarget.Workspace);
-      if (attempt !== generation) return;
+    const attempt = supersede(), current = currentFolderUri();
+    const entries = [];
+    if (current) entries.push({ label: path.basename(current.fsPath) || current.fsPath,
+      description: 'Current', detail: current.fsPath, uri: current,
+      canonical: folder?.uri === current.toString() ? folder.canonical : undefined });
+    const seen = new Set(current ? [current.toString()] : []);
+    for (const item of recentFolders) {
+      if (seen.has(item.uri)) continue;
+      seen.add(item.uri);
+      const uri = vscode.Uri.parse(item.uri);
+      entries.push({ label: path.basename(uri.fsPath) || uri.fsPath, description: 'Recent',
+        detail: uri.fsPath, uri, canonical: item.canonical });
     }
-    folder = { uri: choices[0].toString(), canonical: actual }; await persist();
+    entries.push({ label: 'Browse for notes folder…', action: 'browse', detail: 'Select an Obsidian vault or an ordinary notes folder. Files stay in place.' });
+    const choice = await vscode.window.showQuickPick(entries, { title: 'Choose Notes Folder',
+      placeHolder: current ? `Current notes folder: ${current.fsPath}` : 'Choose a notes folder for note links and backlinks.',
+      matchOnDescription: true, matchOnDetail: true });
+    if (!choice || attempt !== generation) return;
+    let uri = choice.uri;
+    if (choice.action === 'browse') {
+      const defaultUri = await pickerFolder(current);
+      if (attempt !== generation) return;
+      const choices = await vscode.window.showOpenDialog({ title: 'Choose notes folder (Obsidian vault or ordinary folder)',
+        openLabel: 'Use Notes Folder', defaultUri, canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
+      uri = choices?.[0];
+    }
+    if (!uri || attempt !== generation) return;
+    const selected = await selectedFolder(uri, choice.canonical);
+    let previous;
+    if (current) {
+      try { previous = await selectedFolder(current, folder?.uri === current.toString() ? folder.canonical : undefined); }
+      catch (_) { if (folder?.uri === current.toString()) previous = folder; }
+    }
+    // Serialize settings writes so a delayed older choice cannot overwrite a newer one.
+    folderPublication = folderPublication.catch(() => {}).then(async () => {
+      if (attempt !== generation) return;
+      const configuration = vscode.workspace.getConfiguration?.('mrw');
+      if (configuration?.update && configuredFolder() !== uri.fsPath) {
+        await configuration.update('notesFolder', uri.fsPath, vscode.ConfigurationTarget.Workspace);
+      }
+      if (attempt !== generation) return;
+      folder = selected;
+      const distinct = new Set();
+      recentFolders = [selected, previous, ...recentFolders].filter(item => {
+        if (!validFolder(item) || distinct.has(item.canonical)) return false;
+        distinct.add(item.canonical); return true;
+      }).slice(0, 10);
+      try { await persist(); }
+      catch (error) { throw Error(`Notes folder selected: ${uri.fsPath}. Folder history could not be saved: ${error.message}. Choose this folder again to retry.`); }
+      if (attempt === generation) await vscode.window.showInformationMessage(`Notes folder: ${uri.fsPath}`);
+    });
+    return folderPublication;
   }
   // Explicit companion selection grants one verified file, never its parent.
   // Reuse the document reader and exact Return pin, including dirty note text.

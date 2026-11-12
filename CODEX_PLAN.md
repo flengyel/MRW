@@ -1,5 +1,15 @@
 # CODEX_PLAN.md
 
+## Delivered — recent notes folders, 0.23.14
+
+Choose Notes Folder shows the current path and up to ten recent choices in this
+workspace. Browse receives an explicit current/recent/workspace/home default;
+opening the chooser does not grant scope or write settings. Only an accepted
+folder selection changes the notes folder. Preserve cancellation, restart,
+canonical-path checks, serialized settings writes and explicit save-failure
+reporting. Tests use disposable workspaces; never point the working research
+window at a test folder. The small PROV trial remains the next product priority.
+
 ## Delivered — reader-note controls, 0.23.12
 
 Expanded passages place Add reader note, Delete reader note and Link Obsidian
