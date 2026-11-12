@@ -44,13 +44,14 @@ ${diagramStyle}
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, sourcePlugins, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri }) {
+function registerOutlines({ vscode, context, register, bridge, sourcePlugins, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri, relocateRoute = async value=>value }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
   }));
   let active, busy = false, focusSerial = 0;
   artifactClients?.push({
+    async cancelFreeze(){for(const c of panels.values())await c.panel.webview.postMessage({type:'storageRelease'});},
     async freeze(allowDirty = false) {
       if (busy) throw new Error('Wait for the current reader action before moving artifacts.');
       for (const c of panels.values()) {
@@ -436,7 +437,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     register(command, () => locked(async () => { const picked = await chooseTarget(); if (picked) return companionAction(action, picked.c, picked.target); }));
   }
   async function openExternalLink(value) {
-    const target = parseExternal(value, vscode.env.uriScheme);
+    const target = await relocateRoute(parseExternal(value, vscode.env.uriScheme));
     await bridge({ method: 'outline_parse_reference', reference: target.reference });
     let location;
     for (const folder of vscode.workspace.workspaceFolders || []) {

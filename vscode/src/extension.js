@@ -18,18 +18,27 @@ const { createArtifactStorage } = require('./artifactStorage');
 const { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer } = require('./navigation');
 
 let deactivateAction=async()=>{};
-function activate(context) {
+function activate(nativeContext) {
+  const moveHost=require("./workspaceMoveHost");
+  const moveSession=moveHost.session(hostVscode,nativeContext);
+  const context=moveSession.context;
   let recorder;
+  if(moveSession.blocked){
+    moveHost.registerWorkspaceMove({vscode:hostVscode,context,session:moveSession,register:(id,fn)=>context.subscriptions.push(hostVscode.commands.registerCommand(id,async()=>{try{return await fn();}catch(e){void hostVscode.window.showErrorMessage(e.message);}}))});
+    void hostVscode.window.showWarningMessage("MRW workspace relocation needs attention. Run MRW: Recover Workspace Move.");
+    return {extendMarkdownIt:md=>md};
+  }
   // Only MRW sees this facade; no instrumentation of other extensions' dialogs.
   const dialogs=new Set(['showInputBox','showQuickPick','showOpenDialog','showSaveDialog','showWarningMessage']);
-  const nativeWindow=hostVscode.window;
+  const nativeWindow=moveHost.guardWindow(hostVscode.window,moveSession);
   const windowFacade=new Proxy({},{get(_target,key){
     const value=Reflect.get(nativeWindow,key,nativeWindow);
     if(!dialogs.has(key)||typeof value!=='function')return value;
     return async(...args)=>{const result=await value.apply(nativeWindow,args);
       if(result===undefined||Array.isArray(result)&&!result.length)recorder?.operations.cancel();return result;};
   }});
-  const vscode={...hostVscode,window:windowFacade};
+  const workspaceFacade=new Proxy(hostVscode.workspace,{get(target,key){const value=target[key];if(typeof value==='function'&&String(key).startsWith('onDid'))return(fn,...args)=>value.call(target,moveSession.guardEvent(fn),...args);return typeof value==='function'?value.bind(target):value;}});
+  const vscode={...hostVscode,workspace:workspaceFacade,window:windowFacade};
   // Welcome buttons disappear when a tree gains rows or a message. Keep this
   // native command view empty so document/study updates never replace buttons.
   context.subscriptions.push(vscode.window.registerTreeDataProvider('mrw.commands', {
@@ -53,17 +62,24 @@ function activate(context) {
     vscode.commands.registerCommand(name, async (...args) => {
       try {
         if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
-        void recorder.init();return await recorder.operations.run(name,()=>action(...args));
+        if(['mrw.moveWorkspace','mrw.recoverWorkspaceMove'].includes(name))return await action(...args);
+        return await moveSession.run(async()=>{void recorder.init();return await recorder.operations.run(name,()=>action(...args));});
       } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));};
   const rawBridge = async (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
+    await moveSession.ready;moveSession.assertWritable();
     const operation='bridge.'+request.method;
     const identity={...recorder.context,source_record:{outline:request.id,reference:request.reference,revision:request.source_revision||request.revision}};
     return recorder.operations.run(operation,()=>runBridge(context.extensionPath,
       vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options),identity);
   };
-  require('./workspaceSetup').registerWorkspaceSetup({vscode, register});
+  require('./workspaceSetup').registerWorkspaceSetup({vscode, register,resolveDefault:moveSession.defaultWorkspace,beforeSwitch:async()=>{
+    if(moveHost.hasDirty(vscode))throw Error('Save your unsaved documents before switching workspaces.');
+    const settled=[];try{for(const client of artifactClients){try{await client.freeze(false);settled.push(client);}catch(e){await client.cancelFreeze?.();throw e;}}
+      await studyController.prepareMove();await recorder.flush();if(recorder.gap)throw Error(recorder.gap);
+    }finally{for(const client of settled)await client.release();}
+  }});
   const artifactClients = [];
   require('./historyCommands').registerHistory({vscode,context,register,recorder});
   const artifactStorage = createArtifactStorage({ vscode, context, rawBridge });
@@ -291,7 +307,7 @@ function activate(context) {
   const outlineRows = registerOutlines({sourcePlugins, vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
     askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
     readingDestination: location => readingController.returnDestination(location),
-    handleDocumentUri: async uri => await zotero.handleUri(uri) || readingController.handleDocumentUri(uri) });
+    handleDocumentUri: async uri => await zotero.handleUri(uri) || readingController.handleDocumentUri(uri), relocateRoute:moveSession.rebaseRoute });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
     compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
@@ -314,13 +330,15 @@ function activate(context) {
       if(currentMaterial?.root===root&&currentMaterial.outline)return outlineRows.currentStudyPassage(root);
       return null;
     }});
+  moveHost.registerWorkspaceMove({vscode,context,register,session:moveSession,clients:artifactClients,study:studyController,recorder,bridge:request=>runBridge(context.extensionPath,vscode.workspace.getConfiguration('mrw').get('pythonExecutable','python3'),request,{timeout:300000})});
   recorder.coverage=[...registered.map(id=>({id,status:vscode.workspace.isTrusted?'available':'unavailable'})),
     {id:'reader.webview.directActions',status:'uninstrumented'},
     {id:'proofGraph.webview.directActions',status:'uninstrumented'},
     {id:'study.typing',status:'uninstrumented'}];
-  deactivateAction=async()=>{await studyController.flush();await recorder.close();};
+  deactivateAction=async()=>{if(!moveSession.frozen){await studyController.flush();await recorder.close();}};
   context.subscriptions.push(changed);
-  // Activation registers UI only: no source reads, writes, subprocess or network.
+  void moveSession.restoreTabs().catch(e=>vscode.window.showErrorMessage('MRW: '+e.message));
+  // Activation registers UI and checks local relocation authority. No source acquisition or network access.
   return { extendMarkdownIt: readingController.extendMarkdownIt };
 }
 

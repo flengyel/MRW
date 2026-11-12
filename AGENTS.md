@@ -1,19 +1,23 @@
 # Codex instructions
 
-## Current setup and relocation priority
+## Workspace setup and relocation
 
-The general workspace is **MRW**, at `~/mrw-work/MRW.code-workspace` on Linux.
-It must not inherit a subject, fixture or command name. Set Up MRW Workspace
-prepares it idempotently, preserves existing settings and opens only on explicit
-request in a new window. Notes remain an independently selected folder; new
-Lean projects can use `mrw.leanStudyParent`. Preserve all existing sessions and
-saved work. See [setup](docs/WORKSPACE_SETUP.md).
+The general workspace is **MRW**, initially at `~/mrw-work/MRW.code-workspace`
+on Linux. Set Up MRW Workspace is idempotent and offers an explicit choice of
+this window or another. After a committed move it follows the recorded destination.
+Notes remain an independently selected folder; new Lean projects can use
+`mrw.leanStudyParent`. See [setup](docs/WORKSPACE_SETUP.md).
 
-The user also requests atomic workspace relocation. Existing artifact moves
-commit a saved-source binding; they do not move an entire workspace, its studies,
-history and VS Code state atomically. Do not advertise them as doing so. The
-[relocation contract](docs/WORKSPACE_RELOCATION_DESIGN.md) is the next setup priority before the PROV trial.
-No automatic migration, editor shutdown or live VS Code database editing.
+Move Workspace and Recover Workspace Move implement the
+[relocation contract](docs/WORKSPACE_RELOCATION_DESIGN.md): verify a complete
+candidate, publish one durable authority record, then reopen on explicit request.
+Preserve study identities, deletion markers, exact retained citations and original
+files. New saved locations are relative to the workspace or their recorded notes
+root. Changing the selected notes folder must not redirect older references.
+Do not edit live VS Code databases or test migration on genuine research data.
+The saved-source mover remains a separate, narrower operation.
+The next product increment is the small PROV trial; do not substitute unrelated
+infrastructure work for that workflow.
 
 
 ## Lean tutorial orientation — pack 1.1.1

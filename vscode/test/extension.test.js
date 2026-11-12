@@ -167,6 +167,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === './sourcePlugins') return require('../src/sourcePlugins');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');
+    if (name === './workspaceMoveHost') return require('../src/workspaceMoveHost');
     if (name === './activeStudy') return require('../src/activeStudy');
     if (name === './studyHistory') return {StudyHistory:class extends require('../src/studyHistory').StudyHistory{constructor(...a){super(a[0],a[1],{origin:'test'});}}};
     if (name === './sharedHistory') return require('../src/sharedHistory');
@@ -2449,7 +2450,7 @@ test('background saved-copy discovery never prompts for a project in an ambiguou
   h.api.workspace.workspaceFolders.push({uri:uri(path.join(root,'another-project'))});
   let prompts=0;h.api.window.showWorkspaceFolderPick=async()=>{prompts++;throw Error('background project prompt');};
   const opening=h.commands.get('mrw.openDocument')();
-  for(let i=0;i<100&&!h.api.lastDocumentPicker.items.some(row=>row.label.includes('Use Saved copy'));i++)await new Promise(r=>setImmediate(r));
+  for(let i=0;i<100&&!h.api.lastDocumentPicker?.items.some(row=>row.label.includes('Use Saved copy'));i++)await new Promise(r=>setTimeout(r,10));
   assert.ok(h.api.lastDocumentPicker.items.some(row=>row.action==='browse'));
   assert.ok(h.api.lastDocumentPicker.items.some(row=>row.label.includes('Use Saved copy')));
   assert.equal(prompts,0);assert.equal(h.requests.some(r=>r.method==='outline_list'),false);

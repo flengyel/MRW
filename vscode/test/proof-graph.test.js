@@ -16,7 +16,7 @@ const bridge = req => runBridge(extension, 'python3', req);
 class Position { constructor(line, character) { Object.assign(this, { line, character }); } }
 class Selection { constructor(start, end) { Object.assign(this, { start, end, active: end }); } }
 
-async function host(t, state = new Map()) {
+async function host(t, state = new Map(), options = {}) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'mrw-proof-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const file = path.join(root, 'test.mrw-proof.json'), raw = await fs.readFile(fixture, 'utf8');
@@ -36,7 +36,7 @@ async function host(t, state = new Map()) {
           onDidReceiveMessage(fn){p.receive=fn;},postMessage:async m=>p.messages.push(m)},messages:[]};
         panels.push(p);return p;
       }} };
-  const context={extensionPath:extension,subscriptions:[],workspaceState:{get:(k,d)=>state.get(k)??d,update:async(k,v)=>{if(failUpdates)throw new Error('State unavailable');state.set(k,v);}}};
+  const context={mrwIdentityRoot:options.identityRoot?v=>options.identityRoot(v,root):undefined,extensionPath:extension,subscriptions:[],workspaceState:{get:(k,d)=>state.get(k)??d,update:async(k,v)=>{if(failUpdates)throw new Error('State unavailable');state.set(k,v);}}};
   registerProofGraph({vscode,context,register:(n,fn)=>commands.set(n,fn),bridge:async req=>{requests.push(req);return service(req);},
     projectRoot:async()=>root,choosePath:async()=>file,show:async(...args)=>shown.push(args),
     askProof:async(...args)=>asks.push(args),followPinned:async(...args)=>follows.push(args),readPinned:(...args)=>reader(...args)});
@@ -276,4 +276,11 @@ test('summary form preserves typed corrections across local navigation and faile
   const graph=JSON.parse(JSON.stringify(h.model));graph.graph.nodes.find(n=>n.id==='closed-fiber').claim='Typed correction';
   h.receive({data:{type:'graph',...graph,sourceStatus:{},documentRevision:'new-pin'}});
   assert.equal(h.root.all().some(n=>n['aria-label']==='Claim'),false);assert.match(h.root.text(),/Typed correction/);
+});
+
+
+test('relocating a workspace retains the proof graph projection under its stable file identity',async t=>{
+ const h=await host(t),p=await h.open();await h.action(p,'proposal');assert.equal(h.model(p).projection.hidden.length,5);
+ const moved=await host(t,h.state,{identityRoot:(file,root)=>file.startsWith(root)?h.root+file.slice(root.length):file});
+ const reopened=await moved.open();assert.equal(moved.model(reopened).projection.hidden.length,5);assert.equal(await fs.readFile(moved.file,'utf8'),await fs.readFile(h.file,'utf8'));
 });

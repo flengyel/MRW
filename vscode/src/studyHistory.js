@@ -26,7 +26,8 @@ class StudyHistory {
       // Missing end markers are explicit inferences, never recall outcomes.
       for (const name of (await this.io.readdir(this.directory)).filter(n => /^live-[a-f0-9-]+\.json$/.test(n))) {
         const old = JSON.parse(await this.io.readFile(path.join(this.directory, name), 'utf8'));
-        this.record('session.unclean', { earlier_session: old.session, inference: 'No clean end marker at next launch.' }, 'derived_estimate');
+        if(old.workspaceMove)this.record('session.relocated',{earlier_session:old.session,move:old.workspaceMove});
+        else this.record('session.unclean', { earlier_session: old.session, inference: 'No clean end marker at next launch.' }, 'derived_estimate');
         await this.io.unlink(path.join(this.directory, name));
       }
       await this.io.writeFile(path.join(this.directory, 'live-' + this.session + '.json'), JSON.stringify({ session: this.session }), { mode: 0o600 });
@@ -43,6 +44,7 @@ class StudyHistory {
   }
   setContext(value) { this.context = structuredClone(value || {}); }
   record(action, data = {}, evidence = 'observed_action', identity = this.context) {
+    if(this.movePaused)return;
     const e = { schema: SCHEMA, id: crypto.randomUUID(), session: this.session, sequence: ++this.sequence,
       at: new Date().toISOString(), monotonic_ms: performance.now(), origin: this.origin==='production'&&identity?.practice?'practice_demo':this.origin,
       software: this.software, policy: POLICY, scheduler: require('./studyScheduler').IDENTITY,
@@ -51,6 +53,7 @@ class StudyHistory {
     if(!this.excluded.has(identity?.study)&&!(this.usageRecording===false&&/^(operation\.|usage.coverage$)/.test(action))){this.pending.push(e); this.schedule();} return e;
   }
   snapshot(value) {
+    if(this.movePaused)throw Error('History is paused for the workspace move.');
     const text = JSON.stringify(value), id = hash(text);
     if(!this.excluded.has(this.context?.study)){
       const owners=this.snapshotStudies.get(id)||new Set();owners.add(this.context?.study||null);this.snapshotStudies.set(id,owners);
@@ -186,6 +189,7 @@ class StudyHistory {
     });this.tail=job.catch(e=>this.failure(e));return job.then(()=>this.syncShared());
   }
   flush() {
+    if(this.movePaused)return this.tail;
     clearTimeout(this.timer); this.timer = undefined;
     this.tail = this.tail.then(async () => {
       try{await this.refreshExcluded();}catch(e){this.failure(e);return;}
@@ -225,8 +229,9 @@ class StudyHistory {
   }
   sharedFailure(){if(this.shared){this.shared.status.gaps=['Shared-history recovery needs retry; original private records remain.'];this.shared.onStatus(this.shared.status.gaps[0]);}}
   async syncShared(){
-    if(!this.shared)return {events:[],conflicts:[]};
-    try{await this.shared.init();if(this.shared.binding)await this.stageShared();const result=await this.shared.sync();this.excludeStudies(this.shared.deleted);return result;}catch{this.sharedFailure();return {events:[],conflicts:[],unavailable:true};}
+    if(this.movePaused||!this.shared)return {events:[],conflicts:[]};
+    if(!this.sharedSync)this.sharedSync=(async()=>{try{await this.shared.init();if(this.shared.binding)await this.stageShared();const result=await this.shared.sync();this.excludeStudies(this.shared.deleted);return result;}catch{this.sharedFailure();return {events:[],conflicts:[],unavailable:true};}})().finally(()=>{this.sharedSync=undefined;});
+    return this.sharedSync;
   }
   async stageShared(){
     // Recover the window between private commit and durable outbox publication.
@@ -258,7 +263,10 @@ class StudyHistory {
     this.tail=job.catch(()=>{});return job;
   }
   report(events){return usageReport(events,this.historyStatus||this.shared?.status)+'\n\n'+summarize(events);}
+  async pauseForMove(){await this.ready;await this.flush();if(this.gap)throw Error(this.gap);this.movePaused=true;clearTimeout(this.timer);this.timer=undefined;clearInterval(this.sharedTimer);await this.tail;await this.sharedSync;}
+  resumeAfterMove(){this.movePaused=false;clearInterval(this.sharedTimer);if(this.shared){this.sharedTimer=setInterval(()=>void this.syncShared(),30000);this.sharedTimer.unref?.();}}
   async close() {
+    if(this.movePaused)return;
     if (!this.started || this.closed) return;this.closed=true;
     await this.ready;this.record('session.end'); await this.flush();
     clearInterval(this.sharedTimer);

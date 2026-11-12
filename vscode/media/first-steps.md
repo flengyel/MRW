@@ -20,11 +20,22 @@ Use **MRW: Set Up MRW Workspace…** to create or reuse
 tied to a subject or command. **Choose Notes Folder…** connects notes stored
 elsewhere, including a Windows Obsidian vault reached through `/mnt/c/…`.
 
-Setup preserves existing settings and offers to open the saved workspace in a
-new window. It does not transfer earlier saved studies or close their window.
+Setup preserves existing settings. Choose **Open in this window** after saving
+your work, or **Open in new window** to keep both sessions. Creating the default
+workspace does not transfer work from other workspaces.
 Reopen this same `.code-workspace` file for later sessions. The
 [setup guide](https://github.com/flengyel/MRW/blob/main/docs/WORKSPACE_SETUP.md)
 explains installation, optional tools and recovery of earlier work.
+
+To relocate the current saved workspace, run **Move Workspace…** and choose a
+new Linux directory. MRW saves pending study work, verifies the complete copy,
+and commits the destination before offering **Open moved workspace**. Unsent
+reader/Ask drafts and unsaved editor buffers must be settled first. The original
+files remain available. After interruption, use **Recover Workspace Move**.
+External notes stay in place; their filenames are stored relative to their
+recorded notes folder. Workspace-owned locations are relative to the workspace.
+The [relocation guide](https://github.com/flengyel/MRW/blob/main/docs/WORKSPACE_RELOCATION_DESIGN.md)
+explains recovery and the limits of restoring other extensions' panels.
 
 <a id="open-existing-work"></a>
 

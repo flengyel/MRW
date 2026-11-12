@@ -15,7 +15,8 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   const stateOf=s=>lifecycle.state(typeof s==='string'?s:s.id);
   const activeStudy=s=>stateOf(s)==='active';
   const recent=()=>(context.workspaceState.get(recentKey)||[]).filter(r=>stateOf(r.id)==='active');
-  const sourceKey=s=>s.sourceKey||hash(JSON.stringify({root:s.root,sources:model.signature(s.passages)}));
+  const identityRoot=root=>context.mrwIdentityRoot?.(root)||root;
+  const sourceKey=s=>s.sourceKey||hash(JSON.stringify({root:identityRoot(s.root),sources:model.signature(s.passages)}));
   async function updateIndex(){
     const rows=[...studies.values()].filter(activeStudy).sort((a,b)=>b.updated.localeCompare(a.updated)).slice(0,30)
       .map(s=>({id:s.id,title:s.title,document:s.document?.uri,sources:s.passages.length,unfinished:!!s.current&&!s.current.finished}));
@@ -29,7 +30,8 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     // Read every study, including archived work and shared owners outside 30 recents.
     for(const name of await io.readdir(home))if(/^[a-f0-9]{64}\.json$/.test(name)){
       const id=name.slice(0,64);if(['deleted','deleting'].includes(stateOf(id)))continue;
-      const s=await files.json(io,path.join(home,name));
+      let s=await files.json(io,path.join(home,name));
+      if(context.mrwRebase)s=context.mrwRebase(s);
       if(s.version!==2||s.id!==id||!Array.isArray(s.questions)||!Array.isArray(s.passages))throw Error('Saved study is invalid; its files are preserved.');
       durable.set(id,structuredClone(s));normalizeDrafts(s);studies.set(id,s);
     }
@@ -42,7 +44,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     dirty.add(s.id);s.updated=new Date().toISOString();const snapshot=JSON.stringify({...s,...patch},null,2)+'\n';
     const job=saveTail.then(async()=>{try{
       await lifecycle.assertCurrent(s.id);
-      const dest=path.join(home,s.id+'.json');await files.write(io,dest,snapshot);
+      const dest=path.join(home,s.id+'.json');await files.write(io,dest,context.mrwStore?JSON.stringify(context.mrwStore(JSON.parse(snapshot)),null,2)+'\n':snapshot);
       durable.set(s.id,JSON.parse(snapshot));if(JSON.stringify(s,null,2)+'\n'===snapshot)dirty.delete(s.id);
       await updateIndex();
     }catch(e){recorder.failure(e);await send('Study save failed; keep this view open or copy your draft. '+e.message);throw e;}});saveTail=job.catch(()=>{});return job;
@@ -84,7 +86,8 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(['deleted','deleting'].includes(stateOf(id)))throw Error('The linked study was deleted.');
     if(studies.has(id))return studies.get(id);
     if(!/^[a-f0-9]{64}$/.test(id))throw new Error('Pending question owner identity is invalid.');
-    const owner=JSON.parse(await io.readFile(path.join(home,id+'.json'),'utf8'));
+    let owner=JSON.parse(await io.readFile(path.join(home,id+'.json'),'utf8'));
+    if(context.mrwRebase)owner=context.mrwRebase(owner);
     if(owner.version!==2||owner.id!==id||!Array.isArray(owner.questions))throw new Error('Pending question owner is unavailable.');
     durable.set(id,structuredClone(owner));normalizeDrafts(owner);studies.set(id,owner);return owner;
   }
@@ -147,7 +150,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     panel.title=(s.document?'Saved work: ':'Study: ')+s.title;await send();
   }
   async function startStudy(passages,root,title,prepare){
-    await load();const created=model.createStudy(passages,root,title),key=created.id;
+    await load();const created=model.createStudy(passages,identityRoot(root),title),key=created.id;created.root=root;
     const matches=[...studies.values()].filter(s=>sourceKey(s)===key);
     let s=matches.filter(activeStudy).sort((a,b)=>b.updated.localeCompare(a.updated))[0];
     if(!s){
@@ -624,6 +627,6 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     row.id=item.kind+':'+item.study+':'+(item.reference||item.revision||'');row.contextValue=item.kind==='study'?'mrw.study.'+stateOf(item.study):'mrw.'+item.kind;row.description=item.kind==='study'?[active?.id===item.study?'Current':null,item.sources?item.sources+' passages':null,item.unfinished?'unfinished':null].filter(Boolean).join(' · '):item.description;
     row.tooltip=item.reference||item.label||item.title;row.command={command:'mrw.openStudyItem',title:'Open '+item.kind,arguments:[item]};return row;}};
   context.subscriptions.push(vscode.window.registerTreeDataProvider('mrw.research',tree));
-  return {start:(...args)=>enqueue(()=>startStudy(...args)),documentChanged,tree,flush:async()=>{stopTimers();await queue;if(active)dirty.add(active.id);await flushDirty();},receive,get active(){return active;},hasRecent:()=>recent().length>0};
+  return {prepareMove:()=>enqueue(async()=>{if(active)await settle(active);await flushDirty();await saveTail;}),start:(...args)=>enqueue(()=>startStudy(...args)),documentChanged,tree,flush:async()=>{stopTimers();await queue;if(active)dirty.add(active.id);await flushDirty();},receive,get active(){return active;},hasRecent:()=>recent().length>0};
 }
 module.exports={registerActiveStudy};

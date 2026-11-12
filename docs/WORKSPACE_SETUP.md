@@ -38,9 +38,9 @@ notes can stay where Obsidian uses them. See
    on **WSL: Debian**, rather than only the Windows interface.
 5. Run **MRW: Set Up MRW Workspace…** from F1 or MRW's Commands view. It prepares
    `~/mrw-work/MRW.code-workspace` and reports the path and Python check. Choose
-   **Open in new window** to open it. The previous window stays open; close it
-   yourself when its work is saved. In the default workspace, repeating setup
-   offers no second workspace window.
+   **Open in this window** to switch after saving your work, or **Open in new
+   window** to keep both sessions open. Repeating setup in the default workspace
+   does not open another window.
 6. Use **Choose Notes Folder…** for your notes and **Open Document…** to read.
    No import, copied vault or study form is required.
 
@@ -64,7 +64,8 @@ sets `mrw.leanStudyParent` to the Linux working directory. Later runs do not
 reset either setting. The home and working directory are checked for known
 Windows/network filesystems and volatile memory-backed mounts; redirected target
 paths are rejected. Setup neither
-runs on activation nor moves data. It does not close or reload the working window.
+runs on activation nor moves data. It switches windows only after your explicit
+choice. Switching in this window checks unsaved documents and MRW drafts first.
 
 Reopen the same file from a Debian terminal:
 
@@ -73,7 +74,7 @@ code "$HOME/mrw-work/MRW.code-workspace"
 ```
 
 Opening `~/mrw-work` as a folder instead selects a different workspace identity.
-Keep the `.code-workspace` file at its established address. Different dedicated
+Use **Move Workspace…** to change its location. Different dedicated
 project workspaces remain possible, but a new topic or document does not require
 one. Reopen Document, sources, studies and history belong to the selected session.
 
@@ -92,9 +93,12 @@ history, editor recovery, Lean resumption state or all navigation state. The
 [folder preparation workflow](FOLDER_RENAME_WORKFLOW.md) has the same limits;
 it is not an atomic move of the whole workspace.
 
-[Complete workspace relocation](WORKSPACE_RELOCATION_DESIGN.md) is the next setup
-requirement. Until it is implemented and verified, retain the original workspace
-for earlier saved work rather than rename it and assume all records will follow.
+**Move Workspace…** copies and verifies the workspace and its private MRW work,
+then commits one destination. **Recover Workspace Move** resolves interruptions.
+Originals remain available. Opening the destination is explicit and uses this
+window. Setup follows the committed destination on subsequent runs. Read the
+[relocation guide](WORKSPACE_RELOCATION_DESIGN.md) for scope, root-relative locations
+and remaining limits. This relocates one workspace; it does not merge several.
 
 ## Optional companions
 

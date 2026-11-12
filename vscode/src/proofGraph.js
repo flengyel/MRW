@@ -61,7 +61,7 @@ function citedTags(passage) {
 
 function registerProofGraph({ vscode, context, register, bridge, projectRoot, choosePath, show, askProof, followPinned, readPinned, recorder, onMaterial }) {
   const panels = new Map();
-  const key = (file, revision) => 'mrw.proofGraph.v1.' + digest(file + '\0' + revision);
+  const key = (file, revision) => 'mrw.proofGraph.v1.' + digest((context.mrwIdentityRoot?.(file)||file) + '\0' + revision);
   async function render(c, hidden) {
     // Stage a complete projection and UI state before replacing the live view.
     const model = await bridge({ method: 'proof_graph', graph: c.graph, hidden });

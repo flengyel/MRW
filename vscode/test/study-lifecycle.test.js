@@ -5,9 +5,9 @@ const {message}=require('./study-message-fixture');
 const passage={reference:'mrw-outline:v2/fixture/exact',source_revision:'a'.repeat(64),label:'Retained fixture',text:'Exact selected source.'};
 const question={activity:'definition',prompt:'Fixture question',answer:{text:'Attributed answer.',author:'Reader',origin:'human'},hints:[],references:[passage.reference],author:'Reader',origin:'human'};
 async function fixture(t){
- const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-lifecycle-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));
+ let home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-lifecycle-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));
  const state=new Map(),commands=new Map(),panels=[],information=[],confirmations=[];let current,recorder;
- const h={home,state,commands,panels,information,confirmations,pick:[],confirm:[],info:[],io:fs,checkpoint:null};
+ const h={home,root:'/project',state,commands,panels,information,confirmations,pick:[],confirm:[],info:[],io:fs,checkpoint:null};
  const api={ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
   workspace:{getConfiguration:()=>({get:(k,f)=>f})},env:{clipboard:{readText:async()=>'',writeText:async()=>{}}},window:{
    registerTreeDataProvider(){return{dispose(){}};},
@@ -25,16 +25,17 @@ async function fixture(t){
  h.restart=async()=>{
    if(recorder)await recorder.close();
    recorder=new StudyHistory(path.join(home,'study-history-v1'),{version:'fixture',commit:'fixture'},{origin:'automated_test',io:h.io});t.after(()=>recorder.close());
-   current=registerActiveStudy({vscode:api,context,register:(n,f)=>commands.set(n,f),recorder,projectRoot:async()=>'/project',show:async()=>{},bridge:async()=>{},changed:{fire(){}},getCurrent:async()=>passage,readPassage:async()=>passage,followPassage:async()=>{},io:h.io});
+   current=registerActiveStudy({vscode:api,context,register:(n,f)=>commands.set(n,f),recorder,projectRoot:async()=>h.root,show:async()=>{},bridge:async()=>{},changed:{fire(){}},getCurrent:async()=>passage,readPassage:async()=>passage,followPassage:async()=>{},io:h.io});
    h.c=current;h.history=recorder;return current;
  };
- h.start=async(extra=[])=>current.start([passage,...extra],'/project');
+ h.start=async(extra=[])=>current.start([passage,...extra],h.root);
  h.run=(name,s)=>commands.get('mrw.'+name)(s?{study:s.id}:undefined);
  h.send=m=>current.receive({...message(current.active,m),lifecycleEpoch:h.epoch(current.active)});
- h.saved=s=>fs.readFile(path.join(home,'active-studies-v1',s.id+'.json'),'utf8').then(JSON.parse);
+ h.saved=s=>fs.readFile(path.join(home,'active-studies-v1',s.id+'.json'),'utf8').then(JSON.parse).then(s=>context.mrwRebase?context.mrwRebase(s):s);
  h.marker=s=>fs.readFile(path.join(home,'active-studies-v1',s.id+'.lifecycle.json'),'utf8').then(JSON.parse);
  h.trash=async s=>{h.confirm.push('Move to Trash');await h.run('deleteStudy',s);};
  h.delete=async s=>{h.confirm.push('Permanently Delete');await h.run('permanentlyDeleteStudy',s);};
+ h.relocate=async r=>{home=r.newHome;h.home=home;h.root=r.destination;context.storageUri.fsPath=home;const {rebase}=require('../src/workspaceMove');context.mrwRebase=v=>rebase(require('../src/workspacePaths').decode(v,r.destination),r.mappings);context.mrwStore=v=>require('../src/workspacePaths').encode(v,r.destination,'/external/notes');context.mrwIdentityRoot=v=>rebase(v,r.mappings.toReversed().map(([a,b])=>[b,a]));await h.restart();};
  await h.restart();return h;
 }
 const extra=n=>({...passage,reference:'extra-'+n,text:'Separate passage '+n});
@@ -198,4 +199,30 @@ test('partial mixed-session replacement recovers from its complete batch after r
  const events=await h.history.events();assert.ok(!events.some(e=>e.action==='mixed-a'));
  assert.equal(events.find(e=>e.action==='mixed-b').data.text,'Preserve exact other work');
  assert.ok(!(await fs.readdir(h.history.directory)).some(n=>n.endsWith('.pending')));
+});
+
+
+test('workspace relocation preserves unfinished drafts, archived schedules, Trash and deleted-study identities through restart',async t=>{
+ const {WorkspaceMove,scan}=require('../src/workspaceMove');const h=await fixture(t);
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-study-move-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+ const source=path.join(root,'workspace');await fs.mkdir(source);h.root=source;
+ const workspace=path.join(source,'MRW.code-workspace');await fs.writeFile(workspace,JSON.stringify({folders:[{path:'.'}]}));
+ const archived=await h.start([extra('archived')]);await h.send({type:'question_save',question});await h.send({type:'admit',revision:archived.questions[0].revision});
+ const schedule=structuredClone(archived.questions[0]);await h.run('archiveStudy',archived);
+ const trashed=await h.start([extra('trashed')]);await h.trash(trashed);
+ const deleted=await h.start([extra('deleted')]);await h.trash(deleted);await h.delete(deleted);
+ const active=await h.start();h.checkpoint={unresolvedDraft:'Unfinished mathematical question: α → β'};
+ await h.c.prepareMove();await h.history.pauseForMove();
+ const oldPrivate=await scan(h.home);
+ const moved=await new WorkspaceMove(path.join(root,'registry')).move({workspace,destination:path.join(root,'moved'),privateHome:h.home,historySession:h.history.session,state:Object.fromEntries(h.state),tabs:[],bridge:async()=>{throw Error('unexpected bridge');}});
+ const candidate=await scan(moved.newHome),live='study-history-v1/live-'+h.history.session+'.json';delete candidate[live];delete oldPrivate[live];assert.deepEqual(candidate,oldPrivate,'study, lifecycle and immutable history bytes copied exactly');
+ await h.relocate(moved);await h.run('resumeStudy',active);
+ assert.equal(h.c.active.id,active.id);assert.equal(h.c.active.root,moved.destination);assert.ok((await h.history.events()).some(e=>e.action==='session.relocated'));assert.ok(!(await h.history.events()).some(e=>e.action==='session.unclean'));
+ assert.equal(h.c.active.unresolved,'Unfinished mathematical question: α → β');await h.c.flush();assert.equal(JSON.parse(await fs.readFile(path.join(h.home,'active-studies-v1',active.id+'.json'))).root.$mrwPath,'workspace');
+ assert.deepEqual((await h.c.tree.getChildren()).map(x=>x.study),[active.id]);
+ assert.equal(await h.start([extra('deleted')]),undefined,'deleted source stays suppressed after root changes');
+ assert.equal((await h.marker(deleted)).state,'deleted');
+ await h.run('restoreStudy',archived);await h.run('resumeStudy',archived);assert.deepEqual(h.c.active.questions[0],schedule);
+ assert.equal((await h.marker(trashed)).state,'trashed');
+ await h.restart();await assert.rejects(h.run('resumeStudy',deleted),/unavailable|deleted/);
 });

@@ -18,8 +18,9 @@ const { noteIdentity } = require('./noteIdentity');
 const { createDocumentPicker } = require('./documentPicker');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins }) {
+  const identityRoot=value=>context.mrwIdentityRoot?.(value)||value;
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
-    workspace: vscode.workspace.workspaceFile?.toString(), folders: (vscode.workspace.workspaceFolders || []).map(f => f.uri.toString()) }));
+    workspace: identityRoot(vscode.workspace.workspaceFile?.toString()), folders: (vscode.workspace.workspaceFolders || []).map(f => identityRoot(f.uri.toString())) }));
   const remembered = context.workspaceState.get(KEY);
   const saved = remembered?.workspace === workspace ? remembered : {};
   let grants = Array.isArray(saved.grants) ? saved.grants.filter(g => typeof g.uri === 'string' && typeof g.canonical === 'string').slice(-100) : [];
@@ -495,7 +496,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   async function handleUri(uri) {
     if (uri.path !== '/note') return false;
     if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following the MRW note link.');
-    const value = uri.toString(true), target = parseNoteLink(value, vscode.env.uriScheme || 'vscode');
+    const value = uri.toString(true), target = await (context.mrwRoute|| (async x=>x))(parseNoteLink(value, vscode.env.uriScheme || 'vscode'));
     const attempt = supersede();
     const here = await noteWorkspace().catch(() => undefined);
     if (here !== target.workspace) {

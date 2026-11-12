@@ -169,7 +169,8 @@ function registerZotero({ vscode, context, register, reading, show, onCancel=()=
   register('mrw.resumeZoteroReference',()=>locked(()=>resume()));
   async function handleUri(uri) {
     if(uri.path!=='/zotero')return false;
-    const target=parseLink(uri.toString(),vscode.env.uriScheme||'vscode');
+    let target=parseLink(uri.toString(),vscode.env.uriScheme||'vscode');
+    if(context.mrwRoute)target=await context.mrwRoute(target);
     if(target.workspace!==route())throw Error('This retained Zotero link belongs to a different workspace. Open that workspace and use Open Link from Clipboard.');
     await locked(()=>resume(target.id));return true;
   }

@@ -96,7 +96,7 @@ function harness(f, state = new Map(), options = {}) {
       async showWarningMessage(message, ...choices) { informations.push({ message, choices }); return infoResponse; },
     },
   };
-  const context = { subscriptions: [], workspaceState: {
+  const context = { mrwIdentityRoot:options.identityRoot, subscriptions: [], workspaceState: {
     get: key => state.get(key), async update(key, value) { await options.updateState?.(key, value); state.set(key, structuredClone(value)); },
   } };
   documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
@@ -806,4 +806,14 @@ test('folder history is bounded, deduplicates canonical paths and does not leak 
   other.setPickHook(()=>undefined);await other.commands.get('mrw.chooseNotesFolder')();
   assert.deepEqual(other.picks[0].choices.map(x=>x.action),['browse']);
   assert.equal(other.configurationWrites.length,0);
+});
+
+
+test('a relocated workspace preserves its external note grants, last document and exact Return selection',async t=>{
+ const f=await fixture(t),state=new Map(),h=harness(f,state);await h.folder();const first=await h.open('1a.md');await h.follow(first,'2b');
+ const destination=path.join(f.base,'relocated');await fs.mkdir(destination);
+ const {rebase}=require('../src/workspaceMove');const reopened=harness({...f,root:destination},state,{identityRoot:v=>rebase(v,[[destination,f.root]])});
+ await reopened.commands.get('mrw.reopenDocument')();assert.equal(reopened.api.window.activeTextEditor.document.uri.fsPath,f.file('2b.md'));
+ assert.equal(await reopened.documents.returnToDocument(),true);assert.equal(reopened.selected(),'[[2b]]');
+ assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),f.contents['1a.md']);
 });
