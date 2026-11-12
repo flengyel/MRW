@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.14",
+  "version": "0.23.15",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
