@@ -2,6 +2,8 @@
 
 ## Document navigation — 0.23.21
 
+Published and pushed; [delivery checks](docs/RELEASE_0_23_21.md). Not installed into the working window.
+
 The MRW Document editor menu groups Return and backlinks for Markdown, PDF and
 text files. Markdown has Contents, source editing and Obsidian actions. Menu
 commands preserve the explicitly supplied tab; PDF reading remains delegated to
@@ -89,7 +91,7 @@ Complete the authorized build, verification, release and remote integration step
 before ending the task. Report remote main, package/release and installation
 status separately; identify any unfinished stage explicitly. Preserve the working
 window: publication does not authorize installation or a forced reload.
-[0.23.20 delivery](docs/RELEASE_0_23_20.md) records the latest package.
+[0.23.21 delivery](docs/RELEASE_0_23_21.md) records the latest package.
 
 ## Delivered — reader-note controls, 0.23.12
 
