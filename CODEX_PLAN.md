@@ -2,6 +2,8 @@
 
 ## Workspace setup and relocation
 
+Delivered in [MRW 0.23.19](docs/RELEASE_0_23_19.md); published and pushed, not installed into the working window.
+
 The general workspace is **MRW**, initially at `~/mrw-work/MRW.code-workspace`
 on Linux. Set Up MRW Workspace is idempotent and offers an explicit choice of
 this window or another. After a committed move it follows the recorded destination.

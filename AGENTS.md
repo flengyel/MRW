@@ -65,7 +65,7 @@ Complete the authorized build, verification, release and remote integration step
 before ending the task. Report remote main, package/release and installation
 status separately; identify any unfinished stage explicitly. Preserve the working
 window: publication does not authorize installation or a forced reload.
-[0.23.18 delivery](docs/RELEASE_0_23_18.md) records the latest package.
+[0.23.19 delivery](docs/RELEASE_0_23_19.md) records the latest package.
 
 ## Delivered — reader-note controls, 0.23.12
 
