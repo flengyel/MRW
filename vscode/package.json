@@ -965,7 +965,7 @@
       "editor/title": [
         {
           "submenu": "mrw.documentNavigation",
-          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown|pdf|txt)$/i)",
+          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown|pdf|txt)$/i)",
           "group": "navigation@10"
         },
         {
@@ -1044,22 +1044,22 @@
         },
         {
           "command": "mrw.openReadingOutline",
-          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown)$/i)",
           "group": "1_navigation@3"
         },
         {
           "command": "mrw.editDocumentSource",
-          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown)$/i)",
           "group": "2_note@1"
         },
         {
           "command": "mrw.openDocumentInObsidian",
-          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown)$/i)",
           "group": "2_note@2"
         },
         {
           "command": "mrw.copyDocumentLink",
-          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown)$/i)",
           "group": "2_note@3"
         }
       ]

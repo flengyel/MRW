@@ -1,4 +1,4 @@
-# Documents, Contents and saved sources — 0.23.14
+# Documents, Contents and saved sources — 0.23.21
 
 Open a note or paper with **MRW: Open Document…**. Markdown opens in
 VS Code's preview, and **Contents** lists its headings and links. The original
@@ -27,7 +27,8 @@ Cancelling leaves the current document and drafts unchanged. Browsing does not
 change the selected notes folder or its indexing scope.
 
 **Show Contents** uses the active Markdown document, the remembered selection
-or a Markdown picker. **Choose Document…** selects Markdown specifically for
+or a Markdown picker. An active PDF or other non-Markdown file is rejected;
+use **Reveal Contents Document** to return to the selected Markdown note. **Choose Document…** selects Markdown specifically for
 Contents. **Reveal Contents Document** returns to that document when another
 editor is active. While a different file is active, Contents hides the preceding
 tree and identifies the active file, with directions for selecting its Markdown

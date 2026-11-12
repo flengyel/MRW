@@ -3,7 +3,8 @@
 The editor toolbar has one book icon, **MRW Document**, for Markdown, PDF and
 text files. Its menu contains Return to Document and Show Backlinks. Markdown
 also offers Show Contents, Edit Document Source, Open Note in Obsidian and Copy
-Note Link for Obsidian. Existing command IDs and Command Palette entries remain.
+Note Link for Obsidian. Existing command IDs and Command Palette entries remain. Menu conditions cover
+local files and VS Code’s remote-file URIs used by WSL and SSH windows.
 Study Current Material is an editor overflow action; Lean's secondary InfoView
 action is in overflow beside its primary Study Actions button.
 
