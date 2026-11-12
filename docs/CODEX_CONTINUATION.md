@@ -1,5 +1,15 @@
 # Codex continuation: reading and research
 
+## Revised Lean introduction — pack 1.1.0
+
+The introduction now has three lessons: Functions and composition, Implication
+as a function on proofs, and Dependent application. Define type-theoretic terms
+before use; preserve the detailed typing and tactic arguments. The lessons share
+unchanged examples and notes, with a separate variation/error for each lesson.
+The original first lesson ID and filename remain. Ordinary updates preserve
+working copies. See [the writing review](LEAN_LESSON_REVISION_20261112.md).
+
+
 ## Delivered — recent notes folders, 0.23.14
 
 Choose Notes Folder shows the current path and up to ten recent choices in this

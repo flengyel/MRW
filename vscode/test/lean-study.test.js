@@ -68,3 +68,25 @@ test('pack updates keep the original working content and cannot break its resume
  const manifest=JSON.parse(await fs.readFile(path.join(source,'pack.json'),'utf8'));manifest.contentVersion='2.0.0';await fs.writeFile(path.join(source,'Example.lean'),original+'\n-- New pack content\n');await fs.writeFile(path.join(source,'pack.json'),JSON.stringify(manifest));h.picks.push(xs=>xs.find(x=>x.pack.manifest.packId==='external.identity-proof'));await h.commands.get('mrw.studyLean4')();assert.equal(await fs.readFile(path.join(first.root,'Example.lean'),'utf8'),original);assert.equal(h.state.get('mrw.leanStudy.v1').contentVersion,'1.0.0');
  manifest.lessons[0].id='new-unit';await fs.writeFile(path.join(source,'pack.json'),JSON.stringify(manifest));h.picks.push(xs=>xs.find(x=>x.pack.manifest.packId==='external.identity-proof'));await assert.rejects(h.commands.get('mrw.studyLean4')(),/not in the retained working copy/);assert.equal(h.state.get('mrw.leanStudy.v1').lessonId,'identity-proof');await h.commands.get('mrw.resumeLeanStudy')();
 });
+
+
+test('three introductory lessons reopen their own prose and actions while preserving shared code and notes',async t=>{
+ const root=await temporary(t),h=harness(root,{notesFolder:root});
+ const expected=[['functions-and-proofs','01-functions-and-proofs.md','Functions.lean','FunctionMistake.lean'],['implication','02-implication.md','Implication.lean','ImplicationMistake.lean'],['dependent-application','03-dependent-application.md','Specialization.lean','SpecializationMistake.lean']];
+ const pack=await loadPack(builtin);assert.deepEqual(pack.manifest.lessons.map(l=>l.id),expected.map(r=>r[0]));
+ let opened;
+ for(const [id,prose,exercise,mistake] of expected){
+  h.picks.push(items=>items.find(i=>i.lesson?.id===id));opened=await h.commands.get('mrw.studyLean4')();
+  assert.equal(opened.lessonId,id);assert.ok(h.docs.has(path.join(opened.root,'lessons',prose)));
+  h.picks.push(items=>{assert.equal(items.filter(i=>i.label.startsWith('Try: ')).length,1);assert.equal(items.find(i=>i.label.startsWith('Try: ')).file,'Practice/'+exercise);assert.equal(items.find(i=>i.label.startsWith('Deliberate error: ')).file,'Practice/'+mistake);return undefined;});
+  await h.commands.get('mrw.leanStudyActions')();
+  if(id==='functions-and-proofs'){
+   const doc=h.api.window.activeTextEditor.document;await h.change(doc,doc.text+'\n-- My ongoing Lean work\n');await fs.writeFile(doc.uri.fsPath,doc.text);
+   await fs.writeFile(path.join(opened.root,'Notes.md'),'# My observation\nKeep this note.\n');
+  }
+  assert.match(h.api.window.activeTextEditor.document.text,/My ongoing Lean work/);
+ }
+ const next=harness(root,{state:h.state,extensionPath:'/removed-pack'});const resumed=await next.commands.get('mrw.resumeLeanStudy')();
+ assert.equal(resumed.lessonId,'dependent-application');assert.ok(next.docs.has(path.join(opened.root,'lessons','03-dependent-application.md')));
+ assert.match(next.api.window.activeTextEditor.document.text,/My ongoing Lean work/);assert.match(await fs.readFile(path.join(opened.root,'Notes.md'),'utf8'),/Keep this note/);
+});

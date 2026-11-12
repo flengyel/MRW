@@ -1,12 +1,21 @@
 # Study Lean 4
 
 Choose **Study Lean 4…** in MRW's **Commands** area, or run **MRW: Study Lean
-4…** from the Command Palette. Choose **Functions, proofs and dependent
-application**. This first unit develops function composition, implication
-composition and universal instantiation, with explicit types and illustrated
-tactic states. Its primary text is
-[*Theorem Proving in Lean 4*](https://lean-lang.org/theorem_proving_in_lean4/).
-The MRW companion explanation is original, separately attributed material.
+4…** from the Command Palette. The introductory sequence has three lessons:
+
+1. **Functions and composition** defines terms, types, binders and scope before
+   constructing and evaluating a composite function.
+2. **Implication as a function on proofs** constructs a proof term, then follows
+   the same argument through `intro`, `have` and `exact`.
+3. **Dependent application** introduces proposition families and universal
+   instantiation, with substitution in the result type.
+
+The lessons link to one another and share the editable examples and associated
+note. Their primary text is
+[*Theorem Proving in Lean 4*](https://lean-lang.org/theorem_proving_in_lean4/),
+by Jeremy Avigad, Leonardo de Moura, Soonho Kong and Sebastian Ullrich, with
+contributions from the Lean Community. The companion text and examples were
+prepared with Codex for MRW and are separate from the book.
 
 ## Files and live goals
 
@@ -41,7 +50,9 @@ the installed extension remain untouched.
 
 | File | Purpose |
 | --- | --- |
-| `lessons/01-functions-and-proofs.md` | Companion lesson |
+| `lessons/01-functions-and-proofs.md` | Functions and composition |
+| `lessons/02-implication.md` | Implication and tactic proofs |
+| `lessons/03-dependent-application.md` | Dependent application |
 | `Study/Examples.lean` | Complete editable examples A, B and C |
 | `Study/Solutions.lean` | Complete solutions to the three variations |
 | `Notes.md` | Associated ordinary Markdown note |
@@ -51,7 +62,9 @@ the installed extension remain untouched.
 Save, undo and recover drafts through the native editors. The project and notes
 remain usable without MRW or the original lesson pack. An occupied unrelated
 folder is rejected. Reopening reuses the working copy, including its lesson
-version. A pack update never silently replaces these files.
+version. A pack update never silently replaces these files. Pack 1.1.0 supplies the three
+shorter lessons for new copies. Earlier copies keep their lesson files; updating
+the extension alone does not rewrite them.
 
 ## Actions and resumption
 

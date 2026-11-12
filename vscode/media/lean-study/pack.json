@@ -1,7 +1,7 @@
 {
   "apiVersion": 1,
   "packId": "lean-foundations",
-  "contentVersion": "1.0.0",
+  "contentVersion": "1.1.0",
   "title": "Lean foundations",
   "testedToolchain": "leanprover/lean4:v4.33.0",
   "projectFiles": [
@@ -13,7 +13,7 @@
   "lessons": [
     {
       "id": "functions-and-proofs",
-      "title": "Functions, proofs and dependent application",
+      "title": "Functions and composition",
       "order": 1,
       "explanation": "lessons/01-functions-and-proofs.md",
       "examples": "Study/Examples.lean",
@@ -21,11 +21,69 @@
         {
           "title": "A \u2014 three applications",
           "file": "Practice/Functions.lean"
-        },
+        }
+      ],
+      "solutions": [
+        {
+          "title": "A, B and C \u2014 complete solutions",
+          "file": "Study/Solutions.lean"
+        }
+      ],
+      "mistakes": [
+        {
+          "title": "A \u2014 wrong input type",
+          "file": "Practice/FunctionMistake.lean"
+        }
+      ],
+      "bookSections": [
+        {
+          "title": "Dependent Type Theory",
+          "url": "https://lean-lang.org/theorem_proving_in_lean4/Dependent-Type-Theory/"
+        }
+      ]
+    },
+    {
+      "id": "implication",
+      "title": "Implication as a function on proofs",
+      "order": 2,
+      "explanation": "lessons/02-implication.md",
+      "examples": "Study/Examples.lean",
+      "exercises": [
         {
           "title": "B \u2014 implication at a proof",
           "file": "Practice/Implication.lean"
+        }
+      ],
+      "solutions": [
+        {
+          "title": "A, B and C \u2014 complete solutions",
+          "file": "Study/Solutions.lean"
+        }
+      ],
+      "mistakes": [
+        {
+          "title": "B \u2014 wrong conclusion",
+          "file": "Practice/ImplicationMistake.lean"
+        }
+      ],
+      "bookSections": [
+        {
+          "title": "Propositions and Proofs",
+          "url": "https://lean-lang.org/theorem_proving_in_lean4/Propositions-and-Proofs/"
         },
+        {
+          "title": "Tactics",
+          "url": "https://lean-lang.org/theorem_proving_in_lean4/Tactics/"
+        }
+      ]
+    },
+    {
+      "id": "dependent-application",
+      "title": "Dependent application",
+      "order": 3,
+      "explanation": "lessons/03-dependent-application.md",
+      "examples": "Study/Examples.lean",
+      "exercises": [
         {
           "title": "C \u2014 specialize along a function",
           "file": "Practice/Specialization.lean"
@@ -39,34 +97,14 @@
       ],
       "mistakes": [
         {
-          "title": "A \u2014 wrong input type",
-          "file": "Practice/FunctionMistake.lean"
-        },
-        {
-          "title": "B \u2014 wrong conclusion",
-          "file": "Practice/ImplicationMistake.lean"
-        },
-        {
           "title": "C \u2014 wrong index",
           "file": "Practice/SpecializationMistake.lean"
         }
       ],
       "bookSections": [
         {
-          "title": "Dependent Type Theory",
-          "url": "https://lean-lang.org/theorem_proving_in_lean4/Dependent-Type-Theory/"
-        },
-        {
-          "title": "Propositions and Proofs",
-          "url": "https://lean-lang.org/theorem_proving_in_lean4/Propositions-and-Proofs/"
-        },
-        {
           "title": "Quantifiers and Equality",
           "url": "https://lean-lang.org/theorem_proving_in_lean4/Quantifiers-and-Equality/"
-        },
-        {
-          "title": "Tactics",
-          "url": "https://lean-lang.org/theorem_proving_in_lean4/Tactics/"
         }
       ]
     }

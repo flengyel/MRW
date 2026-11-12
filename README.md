@@ -133,7 +133,7 @@ preview choices; the PDF extension's cross-host MRW handoff remains unobserved.
 
 ## Other reading tools
 
-- [Lean study](docs/LEAN_STUDY_WORKFLOW.md): open the first companion unit for
+- [Lean study](docs/LEAN_STUDY_WORKFLOW.md): open three introductory companion lessons for
   *Theorem Proving in Lean 4*, keep notes and resume edited code. The optional
   official Lean extension runs on the workspace host, including WSL Debian.
   [Local lesson packs](docs/LEAN_LESSON_PACKS.md) add content without rebuilding MRW.

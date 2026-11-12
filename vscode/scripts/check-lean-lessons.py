@@ -33,7 +33,8 @@ with tempfile.TemporaryDirectory(prefix='mrw-lean-check-') as temp:
         if index==0:
             if 'does not depend on any axioms' not in result.stdout or ':13:0: 14' not in result.stdout:raise SystemExit('Expected computation and axiom reports missing')
             for kind in ['mistakes','exercises']:
-                for row in manifest['lessons'][0][kind]:
+                rows={row['file']:row for lesson in manifest['lessons'] for row in lesson[kind]}
+                for row in rows.values():
                     file=row['file'];result=subprocess.run([str(tool/'lake'),'env','lean',file],cwd=project,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
                     record=dict(file=file,sha256=sha256((project/file).read_bytes()).hexdigest(),exit=result.returncode)
                     (args.output/(Path(file).stem+'.log')).write_text(json.dumps(dict(toolchain=name,**record))+'\n'+result.stdout)

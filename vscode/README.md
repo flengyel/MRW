@@ -81,7 +81,7 @@ WSL2 or Remote SSH. Windows VS Code may provide the interface. Required:
 An installed VSIX needs no npm, Qt, Lean, SageMath, container or AI account for
 ordinary reading.
 
-**Study Lean 4…** opens the first companion unit for *Theorem Proving in Lean
+**Study Lean 4…** opens three introductory companion lessons for *Theorem Proving in Lean
 4*: functions, implication proofs and dependent application. It copies a
 core-only project pinned to Lean 4.33.0 into your selected notes/study parent,
 with editable examples, separate solutions and an ordinary notes file.
@@ -89,6 +89,9 @@ with editable examples, separate solutions and an ordinary notes file.
 opens variations, book links and Return. See the
 [workflow](../docs/LEAN_STUDY_WORKFLOW.md) and
 [local lesson-pack guide](../docs/LEAN_LESSON_PACKS.md).
+The companion text and examples were prepared with Codex for MRW; the linked
+book is by Jeremy Avigad, Leonardo de Moura, Soonho Kong and Sebastian Ullrich,
+with contributions from the Lean Community.
 
 For live goals and checking, install `leanprover.lean4` and Lean/elan on the
 workspace host. In WSL2, use **Install in WSL: Debian**. MRW calls its supported

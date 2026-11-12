@@ -214,12 +214,15 @@ saved sources, annotations, studies or history. Consult the
 
 ## Study Lean 4
 
-Choose **Study Lean 4…** in **Commands** and select **Functions, proofs and
-dependent application**. The completed first unit explains function composition,
-implication proofs and dependent application, with variations and separate
-solutions. The lesson preview and code use ordinary tabs; the official Lean
-InfoView opens beside the code. Put the cursor before `exact hQR hQ` to inspect
-the live context and remaining goal.
+Choose **Study Lean 4…** in **Commands** and begin with **Functions and
+composition**. Follow its link to **Implication as a function on proofs**, then
+**Dependent application**. Each lesson introduces its terminology before the
+construction and has a variation, a solution and a deliberate error. The three
+lessons share the editable examples and associated note.
+
+The lesson preview and code use ordinary tabs; the official Lean InfoView opens
+beside the code. In the implication lesson, put the cursor before `exact hQR hQ`
+to inspect the live context and remaining goal.
 
 Install the optional official **Lean 4** extension (`leanprover.lean4`) and
 Lean/elan on the workspace host. In WSL2, choose **Install in WSL: Debian**.
