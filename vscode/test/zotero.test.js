@@ -85,7 +85,7 @@ async function harness(t,{state=new Map(),failState=false}={}){
   async showQuickPick(choices){const selection=picks.shift();if(selection===null)return;return typeof selection==='function'?selection(choices):choices.find(x=>x.action===selection||x.transport===selection)||choices[0];},async showInputBox(){return inputs.shift();},async showInformationMessage(text){messages.push(text);},async withProgress(_o,action){return action({}, {isCancellationRequested:false});}}};
  const context={storageUri:{fsPath:store.root},workspaceState:{get:(k,f)=>state.get(k)||f,async update(k,v){if(failState)throw Error('state write failed');state.set(k,structuredClone(v));}}};
  const reading={currentLocation:()=>undefined,async checkFile(){},async openLinkedDocument(uri,from){opens.push({uri,from});return true;},async returnToStudy(from){calls.push({return:from});}};
- const controller=registerZotero({vscode,context,register:(id,f)=>commands.set(id,f),reading,records:store,apiFactory:()=>api,show:async(...args)=>calls.push({show:args})});
+ const controller=registerZotero({vscode,context,register:(id,f)=>commands.set(id,f),reading,records:store,apiFactory:()=>api,show:async(...args)=>calls.push({show:args}),onCancel:()=>calls.push('cancelled')});
  state.set('mrw.zotero.v1',{connection:{transport:'local',library,serverId:'fixture-instance'}});
  return {root,store,state,commands,picks,inputs,calls,opens,doc,editor,edits,reading,controller,source,messages,api,setItem:v=>currentItem=v,setAttachment:v=>currentAttachment=v};
 }
@@ -165,4 +165,15 @@ test('Study archive and permanent deletion preserve Zotero records, retained byt
  await lifecycle.change(study,'archived',source);await lifecycle.change(study,'trashed',source);await lifecycle.beginDelete(study,source,new Set());await lifecycle.finishDelete(study,new Map());
  assert.equal(lifecycle.state(study),'deleted');assert.equal((await h.store.load(id)).item.key,'ABCDEFGH');
  assert.equal(digest(await fs.readFile(await h.store.verifiedFile(bytes))),bytes.sha256);assert.equal(await fs.readFile(h.source,'utf8'),'%PDF-fixture');
+});
+
+test('progress cancellation is reported as cancellation and releases the command lock',async t=>{
+ const h=await harness(t),probe=h.api.probe;h.api.probe=async()=>{throw require('../src/zoteroApi').cancelled();};
+ await h.commands.get('mrw.findZoteroReference')();assert.equal(h.calls.at(-1),'cancelled');assert.equal(h.edits.length,0);
+ h.api.probe=probe;h.inputs.push('book');h.picks.push(null);await h.commands.get('mrw.findZoteroReference')();assert.equal(h.calls.includes('search'),true);
+});
+
+test('storage failures remain errors rather than being treated as cancellation',async t=>{
+ const h=await harness(t);h.inputs.push('book');h.picks.push(undefined);h.store.save=async()=>{throw Object.assign(Error('disk full'),{code:'ENOSPC'});};
+ await assert.rejects(h.commands.get('mrw.findZoteroReference')(),/disk full/);assert.equal(h.calls.includes('cancelled'),false);assert.equal(h.edits.length,0);
 });

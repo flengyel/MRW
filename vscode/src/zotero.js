@@ -1,17 +1,26 @@
 'use strict';
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const { ZoteroApi, attachmentPath } = require('./zoteroApi');
+const { ZoteroApi, attachmentPath, cancelled } = require('./zoteroApi');
 const { ZoteroRecords, validateItem, plain, markdown, zoteroLink, makeLink, parseLink, citation, digest } = require('./zoteroRecords');
 const { workspaceRoute } = require('./companionLinks');
 const STATE = 'mrw.zotero.v1';
-function registerZotero({ vscode, context, register, reading, show, apiFactory = transport => new ZoteroApi(transport), records }) {
+function registerZotero({ vscode, context, register, reading, show, onCancel=()=>{}, apiFactory = transport => new ZoteroApi(transport), records }) {
   records ||= new ZoteroRecords(path.join(context.storageUri?.fsPath || context.globalStorageUri.fsPath, 'zotero-v1'));
   let busy = false;
   const saved = () => context.workspaceState.get(STATE, {});
   async function persist(value) { await context.workspaceState.update(STATE, {...saved(), ...value}); }
-  const progress = action => vscode.window.withProgress({location:vscode.ProgressLocation.Notification, title:'Zotero', cancellable:true}, (_p,token)=>action(token));
-  async function locked(action) { if (busy) throw Error('A Zotero action is in progress. Finish or cancel it first.'); busy=true; try { return await action(); } finally { busy=false; } }
+  const progress = action => vscode.window.withProgress({location:vscode.ProgressLocation.Notification, title:'Zotero', cancellable:true}, async (_p,token)=>{
+    if(token.isCancellationRequested)throw cancelled();
+    const result=await action(token);if(token.isCancellationRequested)throw cancelled();return result;
+  });
+  async function locked(action) {
+    if (busy) throw Error('A Zotero action is in progress. Finish or cancel it first.');
+    busy=true;
+    try { return await action(); }
+    catch(error){if(error.code==='MRW_ZOTERO_CANCELLED'){onCancel();return;}throw error;}
+    finally { busy=false; }
+  }
   function route() {
     const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (!root) throw Error('Open a workspace before retaining Zotero references.');

@@ -76,9 +76,9 @@ attachments to MRW notes, retained sources and citations. Its first local API
 workflow is implemented above. Study archive/delete and Zotero are independent.
 
 The Study lifecycle implementation includes recovery and shared-data checks. A later provenance trial should follow two alternative
-calculations through save, restart, comparison and export. Zotero integration,
-repository study imports, CoCalc/Wolfram interoperability and data-analysis
-plugins remain unimplemented; keep Clowder and PreTeXt on the source-adapter list.
+calculations through save, restart, comparison and export. Repository study
+imports, CoCalc/Wolfram interoperability and data-analysis plugins remain
+unimplemented; keep Clowder and PreTeXt on the source-adapter list.
 
 
 ## Delivered — optional Lean study, 0.23.10

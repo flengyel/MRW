@@ -4,7 +4,7 @@ const path = require('node:path');
 const { constants } = require('node:fs');
 const { createHash, randomUUID } = require('node:crypto');
 const { validateWorkspaceRoute } = require('./companionLinks');
-const { itemPath } = require('./zoteroApi');
+const { itemPath, cancelled } = require('./zoteroApi');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const hash = /^[a-f0-9]{64}$/;
 const MAX_FILE = 128 * 1024 * 1024;
@@ -99,7 +99,7 @@ class ZoteroRecords {
       output = await fs.open(temp, 'wx', 0o400);
       const h = createHash('sha256'), buffer = Buffer.alloc(65536); let size = 0;
       for (;;) {
-        if (token?.isCancellationRequested) throw Error('Attachment retention cancelled.');
+        if (token?.isCancellationRequested) throw cancelled();
         const {bytesRead} = await source.read(buffer,0,buffer.length,null); if (!bytesRead) break;
         size += bytesRead; if (size > MAX_FILE) throw Error('Attachment exceeds 128 MiB.');
         const bytes = buffer.subarray(0,bytesRead); h.update(bytes); await output.writeFile(bytes);

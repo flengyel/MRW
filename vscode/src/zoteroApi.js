@@ -6,6 +6,7 @@ const { execFile } = require('node:child_process');
 const { fileURLToPath } = require('node:url');
 const MAX_RESPONSE = 4 * 1024 * 1024;
 const KEY = /^[A-Z0-9]{8}$/;
+function cancelled() { return Object.assign(Error('Zotero request cancelled.'), {code:'MRW_ZOTERO_CANCELLED'}); }
 function libraryPath(library) {
   if (!library || !['user', 'group'].includes(library.type) || !/^\d+$/.test(String(library.id))) throw Error('Invalid Zotero library.');
   return `/${library.type === 'group' ? 'groups' : 'users'}/${library.id}`;
@@ -20,7 +21,7 @@ function apiPath(value) {
 }
 function directGet(requestPath, serverId, token) {
   return new Promise((resolve, reject) => {
-    if (token?.isCancellationRequested) return reject(Error('Zotero request cancelled.'));
+    if (token?.isCancellationRequested) return reject(cancelled());
     const headers = { 'Zotero-API-Version': '3' };
     if (serverId) headers['Zotero-Server-ID'] = serverId;
     let subscription;
@@ -32,11 +33,11 @@ function directGet(requestPath, serverId, token) {
     });
     request.setTimeout(8000, () => request.destroy(Error('Zotero request timed out.')));
     request.on('error', reject); request.on('close', () => subscription?.dispose());
-    subscription = token?.onCancellationRequested?.(() => request.destroy(Error('Zotero request cancelled.')));
+    subscription = token?.onCancellationRequested?.(() => request.destroy(cancelled()));
   });
 }
 async function windowsGet(requestPath, serverId, token) {
-  if (token?.isCancellationRequested) throw Error('Zotero request cancelled.');
+  if (token?.isCancellationRequested) throw cancelled();
   const script = await fs.readFile(path.join(__dirname, '../media/zotero-read.ps1'), 'utf8');
   const executable = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe';
   return new Promise((resolve, reject) => {
@@ -44,7 +45,7 @@ async function windowsGet(requestPath, serverId, token) {
     const child = execFile(executable, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')],
       { windowsHide: true, timeout: 12000, maxBuffer: 12 * 1024 * 1024, encoding: 'utf8' }, (error, stdout) => {
         subscription?.dispose();
-        if (error) return reject(Error(token?.isCancellationRequested ? 'Zotero request cancelled.' : 'Windows Zotero connection failed. Check WSL Windows interop and Zotero.'));
+        if (error) return reject(token?.isCancellationRequested ? cancelled() : Error('Windows Zotero connection failed. Check WSL Windows interop and Zotero.'));
         try { resolve(JSON.parse(stdout.replace(/^\uFEFF/, ''))); } catch (_) { reject(Error('Invalid Windows Zotero response.')); }
       });
     subscription = token?.onCancellationRequested?.(() => child.kill());
@@ -59,7 +60,7 @@ class ZoteroApi {
   }
   async request(requestPath, token, json = true) {
     const r = await this.get(apiPath(requestPath), this.serverId, token);
-    if (token?.isCancellationRequested) throw Error('Zotero request cancelled.');
+    if (token?.isCancellationRequested) throw cancelled();
     if (!r || typeof r.body !== 'string' || Buffer.byteLength(r.body) > MAX_RESPONSE) throw Error('Invalid or oversized Zotero response.');
     const headers = Object.fromEntries(Object.entries(r.headers || {}).filter(([,v])=>v!==null&&v!==undefined&&v!=='').map(([k,v]) => [k.toLowerCase(), String(v)]));
     if (r.status === 403) throw Error('Enable Zotero → Settings → Advanced → Allow other applications on this computer to communicate with Zotero.');
@@ -96,4 +97,4 @@ function attachmentPath(value, transport) {
   }
   return fileURLToPath(url);
 }
-module.exports = { ZoteroApi, libraryPath, itemPath, apiPath, attachmentPath, directGet, windowsGet };
+module.exports = { ZoteroApi, libraryPath, itemPath, apiPath, attachmentPath, directGet, windowsGet, cancelled };

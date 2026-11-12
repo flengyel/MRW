@@ -185,7 +185,7 @@ notebook, W3C PROV and Zotero when relevant. Avoid marketing, uniqueness claims,
 internal-refactoring announcements and claims of learning benefit unsupported
 by observation.
 
-Begin by checking whether the shared-history increment has advanced since the
-recorded baseline. Continue its remaining authorized work, or prepare a precise
-local-Codex handoff, while retaining Zotero and the bounded PROV trial as the
-next integration priorities.
+Shared history and the first local Zotero workflow are implemented after the
+recorded 0.23.12 baseline. Check their delivery reports before repeating work.
+The bounded PROV trial is the next integration priority; publishing/installing
+a newer package remains separate from committed source delivery.
