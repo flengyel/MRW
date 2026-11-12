@@ -1,6 +1,6 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.20 opens mathematical notes and papers in place, follows references,
+MRW 0.23.21 opens mathematical notes and papers in place, follows references,
 and keeps a route back to the passage being read. It adds Contents, backlinks,
 retained source passages, reader annotations and explicit TikZ rendering to a
 VS Code workspace. The extension is experimental.
@@ -60,6 +60,10 @@ system reader** fallback. MRW supplies no PDF text extraction, PDF Contents or
 page restoration. Markdown preview scrolling is not restored. See
 [document navigation](../docs/READING_OUTLINE_WORKFLOW.md) for supported selectors
 and return behavior.
+
+The editor toolbar’s **MRW Document** menu provides Return and backlinks for
+PDFs, text files and Markdown, with note-editing actions for Markdown only.
+See [document navigation](../docs/DOCUMENT_NAVIGATION.md).
 
 ## Mathematics and diagrams
 
@@ -121,8 +125,8 @@ one private store are unsupported.
 
 ## Package and install a VSIX
 
-[Download MRW 0.23.20](https://github.com/flengyel/MRW/releases/download/v0.23.20/mrw-0.23.20.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.20).
+[Download MRW 0.23.21](https://github.com/flengyel/MRW/releases/download/v0.23.21/mrw-0.23.21.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.21).
 Updates from GitHub require installing the newer VSIX. For publication and build
 identity, follow [the release procedure](../docs/RELEASING.md).
 
@@ -131,12 +135,12 @@ From the repository root, with Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.20.vsix
-sha256sum vscode/mrw-0.23.20.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.21.vsix
+sha256sum vscode/mrw-0.23.21.vsix
 ```
 
 Packaging bundles the Python core and uses pinned `@vscode/vsce` 4.0.0 to create
-`vscode/mrw-0.23.20.vsix`. It publishes nothing. The fixed epoch and UTC make
+`vscode/mrw-0.23.21.vsix`. It publishes nothing. The fixed epoch and UTC make
 archive timestamps reproducible. Use Linux npm in WSL and record the resulting
 archive's hash rather than reusing an earlier package's hash.
 
@@ -147,11 +151,11 @@ caches and generated archives are excluded from the package.
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…**, or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.20.vsix
+code --install-extension /absolute/path/to/mrw-0.23.21.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.20` is installed on the workspace host. Save unfinished
+Confirm `flengyel.mrw@0.23.21` is installed on the workspace host. Save unfinished
 work before a requested reload and retain workspace storage when upgrading.
 The bridge runs the bundled core through `python3 -I`; no editable Python
 installation is needed. See [installation](../docs/INSTALLATION.md).
@@ -312,7 +316,7 @@ archived studies and Trash. See [lifecycle and recovery](../docs/STUDY_LIFECYCLE
 
 ## Zotero references
 
-MRW 0.23.20 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.21 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](../docs/ZOTERO_WORKFLOW.md).
 

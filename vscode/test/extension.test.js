@@ -2487,3 +2487,28 @@ test('notebook retention reaches the isolated bridge and reopens after a new ext
   assert.equal(await fs.readFile(file,'utf8'),'a later original revision');
   assert.equal(restored.saves.length,0);assert.ok(!restored.executed.some(x=>/execute|kernel|runAll/i.test(x)));
 });
+
+
+test('document menu targets its Markdown tab, preserves drafts and refuses PDF as Markdown', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const file = path.join(root, 'chosen.md'), other = path.join(root, 'other.md'), pdf = path.join(root, 'paper.pdf');
+  await fs.writeFile(file, '# Chosen\n'); await fs.writeFile(other, '# Other\n'); await fs.writeFile(pdf, '%PDF-1.4');
+  const chosen = h.document(file, '# Chosen\n'), unrelated = h.document(other, '# Other\nUnsent draft.');
+  chosen.languageId = unrelated.languageId = 'markdown'; unrelated.isDirty = true;
+  h.focus(h.editor(unrelated));
+  h.api.window.tabGroups = { activeTabGroup: { activeTab: { input: { uri: unrelated.uri } } } };
+  await h.commands.get('mrw.openReadingOutline')(chosen.uri);
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, chosen.uri.toString());
+  h.focus(h.editor(unrelated));
+  await h.commands.get('mrw.editDocumentSource')(chosen.uri);
+  assert.equal(h.api.window.activeTextEditor.document.uri.fsPath, file);
+  const before = h.saves.length;
+  h.api.window.tabGroups.activeTabGroup.activeTab.input.uri = h.api.Uri.file(pdf);
+  await h.commands.get('mrw.openReadingOutline')();
+  assert.match(h.errors.at(-1), /Contents is available for Markdown/);
+  await h.commands.get('mrw.editDocumentSource')();
+  assert.match(h.errors.at(-1), /Edit Document Source is available for Markdown/);
+  assert.equal(h.state.get('mrw.readingOutline.v1').uri, chosen.uri.toString());
+  assert.equal(h.saves.length, before); assert.equal(h.requests.length, 0);
+  assert.equal(unrelated.isDirty, true); assert.equal(unrelated.getText(), '# Other\nUnsent draft.');
+});

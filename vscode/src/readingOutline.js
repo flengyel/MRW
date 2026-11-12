@@ -160,13 +160,14 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   async function showReadingView(doc, column) {
     return showMarkdownPreview(vscode, doc, column);
   }
-  async function openReadingOutline(choose = false, fromReader = false, revealSelected = false) {
+  async function openReadingOutline(choose = false, fromReader = false, revealSelected = false, targetUri) {
     const attempt = ++generation; documents.supersede();
     // Return prefers the selected document, including after restart. A text
     // editor left active behind a reader need not be that overview.
     let doc = choose ? undefined : fromReader || revealSelected ? document : vscode.window.activeTextEditor?.document;
-    const previewUri = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
-    if (!choose && !fromReader && !revealSelected && !isOverview(doc) && previewUri?.scheme === 'file' && /\.(md|markdown)$/i.test(previewUri.path)) {
+    const previewUri = targetUri || vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+    if (!choose && !fromReader && !revealSelected && previewUri?.scheme === 'file') {
+      if (!/\.(md|markdown)$/i.test(previewUri.path)) throw new Error('Contents is available for Markdown documents. Use this file’s reader for its own navigation.');
       await checkFile(previewUri);
       if (attempt !== generation) return;
       doc = await vscode.workspace.openTextDocument(previewUri);
@@ -243,11 +244,15 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   });
   for (const listener of [tabsChanged, groupsChanged]) if (listener) context.subscriptions.push(listener);
   const wikiLinks = registerWikiLinks({ vscode, context, register, documents, compile });
-  register('mrw.openReadingOutline', () => openReadingOutline());
-  register('mrw.editDocumentSource', async () => {
-    const active = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
-    const doc = active?.scheme === 'file' && /\.(md|markdown)$/i.test(active.path)
-      ? await vscode.workspace.openTextDocument(active) : document || vscode.window.activeTextEditor?.document;
+  register('mrw.openReadingOutline', value => openReadingOutline(false, false, false, value?.scheme === 'file' ? value : undefined));
+  register('mrw.editDocumentSource', async value => {
+    const active = value?.scheme === 'file' ? value : vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+    let doc;
+    if (active?.scheme === 'file') {
+      if (!/\.(md|markdown)$/i.test(active.path)) throw new Error('Edit Document Source is available for Markdown documents.');
+      await checkFile(active);
+      doc = await vscode.workspace.openTextDocument(active);
+    } else doc = document || vscode.window.activeTextEditor?.document;
     await checkDocument(doc);
     await vscode.window.showTextDocument(doc, { preview: false, viewColumn: readingDocumentColumn(vscode, doc) });
   });

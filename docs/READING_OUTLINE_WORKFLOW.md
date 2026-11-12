@@ -44,6 +44,15 @@ offers **Open with system reader**. MRW does not install a viewer or display PDF
 bytes as text. PDF extraction, PDF Contents, page restoration and bookmarks are
 not implemented.
 
+Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
+text files offer **Return to Document** and **Show Backlinks…**. Markdown also
+offers **Show Contents**, **Edit Document Source**, **Open Note in Obsidian** and
+**Copy Note Link for Obsidian**. Backlinks search the selected notes folder;
+choose that folder first. Return uses the previous MRW navigation location, or
+the selected Contents document when no link was followed. A PDF return reopens
+the file; MRW does not restore its page. A system reader has no MRW toolbar, so
+use these commands in VS Code's Command Palette.
+
 ## Note title and Obsidian handoff
 
 The preview header and Contents show the YAML title beside the filename. A

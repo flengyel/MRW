@@ -70,6 +70,16 @@ MRW supplies neither a PDF reader nor text extraction, PDF Contents or page
 restoration. Other formats use their
 registered host editors. **MRW: New Document…** creates editable Markdown.
 
+
+Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
+text files offer **Return to Document** and **Show Backlinks…**. Markdown also
+offers **Show Contents**, **Edit Document Source**, **Open Note in Obsidian** and
+**Copy Note Link for Obsidian**. Backlinks search the selected notes folder;
+choose that folder first. Return uses the previous MRW navigation location, or
+the selected Contents document when no link was followed. A PDF return reopens
+the file; MRW does not restore its page. A system reader has no MRW toolbar, so
+use these commands in VS Code's Command Palette.
+
 Ordinary navigation and Return leave both sidebars and editor groups under
 VS Code's layout control. New notes use the active preview group; already-open
 notes retain their group.

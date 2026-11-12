@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.20",
+  "version": "0.23.21",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -964,19 +964,9 @@
       ],
       "editor/title": [
         {
-          "command": "mrw.copyDocumentLink",
-          "when": "resourceExtname == .md || resourceExtname == .markdown",
-          "group": "navigation"
-        },
-        {
-          "command": "mrw.openDocumentInObsidian",
-          "when": "resourceExtname == .md || resourceExtname == .markdown",
-          "group": "navigation"
-        },
-        {
-          "command": "mrw.editDocumentSource",
-          "when": "resourceExtname == .md || resourceExtname == .markdown",
-          "group": "navigation"
+          "submenu": "mrw.documentNavigation",
+          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown|pdf|txt)$/i)",
+          "group": "navigation@10"
         },
         {
           "command": "mrw.openProofOutline",
@@ -991,7 +981,7 @@
         {
           "command": "mrw.studyCurrent",
           "when": "editorHasSelection && resourceScheme == file && !(resourceFilename =~ /\\.mrw-(proof|study)\\.json$/)",
-          "group": "navigation"
+          "group": "4_mrw@1"
         },
         {
           "command": "mrw.leanStudyActions",
@@ -1001,7 +991,7 @@
         {
           "command": "mrw.leanStudyInfo",
           "when": "resourceExtname == .lean",
-          "group": "navigation@21"
+          "group": "4_mrw@2"
         }
       ],
       "view/item/context": [
@@ -1041,6 +1031,36 @@
           "command": "mrw.retainNotebookResult",
           "when": "notebookType == jupyter-notebook",
           "group": "mrw"
+        }
+      ],
+      "mrw.documentNavigation": [
+        {
+          "command": "mrw.returnToReadingOutline",
+          "group": "1_navigation@1"
+        },
+        {
+          "command": "mrw.showBacklinks",
+          "group": "1_navigation@2"
+        },
+        {
+          "command": "mrw.openReadingOutline",
+          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "group": "1_navigation@3"
+        },
+        {
+          "command": "mrw.editDocumentSource",
+          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "group": "2_note@1"
+        },
+        {
+          "command": "mrw.openDocumentInObsidian",
+          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "group": "2_note@2"
+        },
+        {
+          "command": "mrw.copyDocumentLink",
+          "when": "resourceScheme == file && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "group": "2_note@3"
         }
       ]
     },
@@ -1148,11 +1168,18 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.20",
+          "title": "MRW 0.23.21",
           "icon": "media/mrw.svg"
         }
       ]
-    }
+    },
+    "submenus": [
+      {
+        "id": "mrw.documentNavigation",
+        "label": "MRW Document",
+        "icon": "$(book)"
+      }
+    ]
   },
   "scripts": {
     "bundle-core": "python3 scripts/bundle-core.py",

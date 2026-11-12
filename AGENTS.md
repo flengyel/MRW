@@ -1,5 +1,16 @@
 # Codex instructions
 
+## Document navigation — 0.23.21
+
+The MRW Document editor menu groups Return and backlinks for Markdown, PDF and
+text files. Markdown has Contents, source editing and Obsidian actions. Menu
+commands preserve the explicitly supplied tab; PDF reading remains delegated to
+the installed reader, without page restoration. Preserve scope checks, dirty
+buffers and exact backlink return locations. See [navigation](docs/DOCUMENT_NAVIGATION.md).
+The editor-command grouping review is addressed here; sidebar grouping remains
+a separate follow-up. This increment does not authorize installation or reload.
+
+
 ## Notebook result trial — 0.23.20
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_20.md). Not installed into the working window.
@@ -12,7 +23,7 @@ that distinction and the deletion markers. The quadratic-discriminant trial uses
 two Sage methods and one failed construction. See [the workflow](docs/NOTEBOOK_RESULTS.md)
 and [profile](docs/NOTEBOOK_PROVENANCE_PROFILE.md). Do not introduce a registration
 form or expand the provenance profile without a concrete research obstacle.
-The command-grouping review remains a separate interface follow-up.
+The remaining sidebar grouping review is a separate interface follow-up.
 
 
 ## Workspace setup and relocation

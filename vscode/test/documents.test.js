@@ -817,3 +817,37 @@ test('a relocated workspace preserves its external note grants, last document an
  assert.equal(await reopened.documents.returnToDocument(),true);assert.equal(reopened.selected(),'[[2b]]');
  assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),f.contents['1a.md']);
 });
+
+
+test('PDF editor menu keeps its explicit tab through focus changes, cancellation and restart', async t => {
+  const f = await fixture(t), state = new Map(), h = harness(f, state, { notesFolder: f.notes, preview: true });
+  const a = await h.doc('1a.md'); await h.follow(a, '2b');
+  const original = structuredClone(state.get('mrw.documents.v1').origin);
+  const unrelated = await h.doc('3c.md'); await h.focus(unrelated);
+  h.api.window.tabGroups = { activeTabGroup: { activeTab: { input: { uri: unrelated.uri } } } };
+  h.setPickHook(() => undefined);
+  await h.commands.get('mrw.showBacklinks')(uri(f.file('paper.pdf')));
+  assert.deepEqual(state.get('mrw.documents.v1').origin, original, 'cancel leaves the previous return intact');
+  h.setPickHook(async choices => {
+    await h.focus(unrelated); h.change(unrelated, 0, 0, 'Unsent text.\n');
+    return choices.find(c => c.hit.node.target === 'paper.pdf');
+  });
+  await h.commands.get('mrw.showBacklinks')(uri(f.file('paper.pdf')));
+  const shown = h.shown.at(-1);
+  assert.equal(shown.doc.getText().slice(shown.doc.offsetAt(shown.editor.selection.start), shown.doc.offsetAt(shown.editor.selection.end)), '[Paper](paper.pdf)');
+  assert.equal(state.get('mrw.documents.v1').origin.uri, uri(f.file('paper.pdf')).toString());
+  assert.equal(state.get('mrw.documents.v1').origin.fileOnly, true);
+  const reopened = harness(f, state);
+  await reopened.documents.returnToDocument();
+  const call = reopened.hostCalls.at(-1);
+  assert.equal(call.name, 'vscode.openWith'); assert.equal(call.args[0].fsPath, f.file('paper.pdf'));
+  assert.equal(unrelated.isDirty, true); assert.match(unrelated.getText(), /^Unsent text/);
+  for (const [name, contents] of Object.entries(f.contents)) assert.deepEqual(await fs.readFile(f.file(name)), Buffer.from(contents));
+});
+
+test('an editor-menu URI is not authorization to read an external document', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes });
+  const external = path.join(f.outside, 'paper.pdf'); await fs.writeFile(external, '%PDF-1.4');
+  await assert.rejects(h.commands.get('mrw.showBacklinks')(uri(external)), /outside|Choose|selected|authorized/i);
+  assert.equal(h.picks.length, 0); assert.equal(h.hostCalls.length, 0);
+});

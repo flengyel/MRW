@@ -224,7 +224,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     return vscode.Uri.file(os.homedir());
   }
   function ordinaryUri() {
-    return vscode.window.activeTextEditor?.document.uri || vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
+    return vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri || vscode.window.activeTextEditor?.document.uri;
   }
   async function open() {
     const attempt = supersede(), invocation = ordinaryUri();
@@ -391,14 +391,17 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     return follow(doc, node);
   }
   async function showBacklinks(identifier) {
-    const qualified = qualifiedIdentifier(identifier);
-    if (identifier !== undefined && !qualified) throw new Error('Choose a complete source-qualified identifier.');
+    // Editor-title menus pass the clicked tab's URI, which can differ from
+    // the active editor after focus changes. Preserve that explicit target.
+    const targetUri = identifier?.scheme === 'file' ? identifier : undefined;
+    const qualified = targetUri ? undefined : qualifiedIdentifier(identifier);
+    if (identifier !== undefined && !targetUri && !qualified) throw new Error('Choose a complete source-qualified identifier.');
     const attempt = supersede();
     const invocationEditor = vscode.window.activeTextEditor;
     // A rendered Markdown custom editor has no activeTextEditor. Use its URI,
     // not an unrelated text editor left visible in another group.
     const previewUri = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
-    const active = previewUri || invocationEditor?.document?.uri;
+    const active = targetUri || previewUri || invocationEditor?.document?.uri;
     const uri = active?.scheme === 'file' ? active : last && vscode.Uri.parse(last);
     if (!uri && !qualified) throw new Error('Open a document before inspecting backlinks.');
     const invocationDoc = active?.scheme === 'file' && markdown(active.fsPath) && invocationEditor?.document.uri.toString() === active.toString() ? invocationEditor.document : undefined;
