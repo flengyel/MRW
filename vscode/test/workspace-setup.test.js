@@ -1,7 +1,7 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {prepareWorkspace,pythonStatus,registerWorkspaceSetup}=require('../src/workspaceSetup');
-async function fixture(t){const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-setup-test-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));return home;}
+async function fixture(t){const parent=path.resolve(__dirname,'../../.codex-work/workspace-setup-tests');await fs.mkdir(parent,{recursive:true});const home=await fs.mkdtemp(path.join(parent,'mrw-setup-test-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));return home;}
 function fakeIO(overrides={}){return {...fs,...overrides};}
 test('repeat setup preserves settings, README, notes and unrelated files byte-for-byte',async t=>{
  const home=await fixture(t),notesFolder=path.join(home,'vault');await fs.mkdir(notesFolder);await fs.writeFile(path.join(notesFolder,'note.md'),'# My work\n');
@@ -59,4 +59,8 @@ test('rerunning setup in the default workspace offers no duplicate window',async
  const home=await fixture(t),result=await prepareWorkspace({home}),commands=new Map();let buttons;
  const vscode={workspace:{workspaceFile:{scheme:'file',fsPath:result.workspace},getConfiguration:()=>({get:(_k,f)=>f})},window:{async showInformationMessage(_m,...b){buttons=b;}},commands:{executeCommand(){assert.fail('must not reopen');}}};
  registerWorkspaceSetup({vscode,register:(n,f)=>commands.set(n,f),prepare:async()=>result,checkPython:async()=>({text:'Python 3.13.5'})});await commands.get('mrw.setupWorkspace')();assert.deepEqual(buttons,['Setup guide']);
+});
+
+test('volatile and network homes are rejected before any workspace is created',async t=>{
+ const home=await fixture(t);for(const type of [0x01021994,0x858458f6,0x6969])await assert.rejects(prepareWorkspace({home,io:fakeIO({statfs:async()=>({type})})}),/persistent Linux home/);assert.deepEqual(await fs.readdir(home),[]);
 });

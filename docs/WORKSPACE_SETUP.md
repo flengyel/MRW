@@ -62,7 +62,8 @@ A preexisting malformed workspace file is preserved for you to repair in VS Code
 On first creation, setup carries over the configured notes folder, if any, and
 sets `mrw.leanStudyParent` to the Linux working directory. Later runs do not
 reset either setting. The home and working directory are checked for known
-Windows/network filesystems; redirected target paths are rejected. Setup neither
+Windows/network filesystems and volatile memory-backed mounts; redirected target
+paths are rejected. Setup neither
 runs on activation nor moves data. It does not close or reload the working window.
 
 Reopen the same file from a Debian terminal:

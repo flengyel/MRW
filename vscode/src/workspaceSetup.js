@@ -46,16 +46,16 @@ async function createOnce(io, file, text) {
 async function prepareWorkspace({home = os.homedir(), notesFolder = '', platform = process.platform, io = fs} = {}) {
   if (platform !== 'linux') throw Error('Connect VS Code to WSL: Debian or a Linux SSH host, then run Set Up MRW Workspace again.');
   const canonicalHome = await io.realpath(home);
-  const type = Number((await io.statfs(canonicalHome)).type);
-  if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b].includes(type)) {
-    throw Error('Your home is on a Windows or network filesystem. Set up a Linux home before creating the MRW workspace.');
+  const type = (Number((await io.statfs(canonicalHome)).type) >>> 0);
+  if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b, 0x6969, 0x01021994, 0x858458f6].includes(type)) {
+    throw Error('Your home is on a Windows, network or volatile filesystem. Set up a persistent Linux home before creating the MRW workspace.');
   }
   const {directory, workspace} = workspacePaths(canonicalHome);
   await io.mkdir(directory, {recursive: true, mode: 0o700});
   const stat = await io.lstat(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('The default MRW directory must be a Linux directory, not a redirected path.');
-  if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b].includes(Number((await io.statfs(directory)).type))) {
-    throw Error('The default MRW directory must be on the Linux filesystem.');
+  if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b, 0x6969, 0x01021994, 0x858458f6].includes((Number((await io.statfs(directory)).type) >>> 0))) {
+    throw Error('The default MRW directory must be on a persistent Linux filesystem.');
   }
   await syncDirectory(io, canonicalHome);
   if (typeof notesFolder !== 'string' || (notesFolder && !path.isAbsolute(notesFolder))) throw Error('The notes folder must be an absolute path on the workspace host.');
