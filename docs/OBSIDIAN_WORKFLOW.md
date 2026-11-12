@@ -10,6 +10,13 @@ or passages. Those links are optional and are described below.
 
 ## Configure Obsidian with MRW
 
+Use [the general MRW workspace](WORKSPACE_SETUP.md),
+`~/mrw-work/MRW.code-workspace`, for a new installation. The vault is an external
+notes folder; it need not be the VS Code workspace or move onto Linux. Existing
+Obsidian-to-MRW links still route to their recorded workspace. Keep that workspace
+available until its retained references and saved work have been accounted for;
+setup does not rewrite notes or `.obsidian/mrw.json`.
+
 Open the vault in Obsidian. In MRW, run **Choose Notes Folder…** and select the
 same vault root: the folder containing `.obsidian` and the notes, rather than
 `.obsidian` itself. Both settings can also be changed in VS Code Settings.

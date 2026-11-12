@@ -45,8 +45,11 @@ and offers the official setup link.
 
 ## Your working copy
 
-If **MRW: Notes Folder** is configured, the first lesson uses it as the parent.
-Otherwise an ordinary folder picker asks for a parent. The project is created
+**MRW: Lean Study Parent** selects the parent for new projects. The default
+[MRW workspace setup](WORKSPACE_SETUP.md) sets it to `~/mrw-work` on Linux,
+independently of the notes folder. If empty, **MRW: Notes Folder** supplies the
+parent; otherwise a folder picker asks. Resuming a study keeps its existing
+location, even after either setting changes. The project is created
 at `<parent>/Lean Study/lean-foundations/`. No new vault is required. Files in
 the installed extension remain untouched.
 

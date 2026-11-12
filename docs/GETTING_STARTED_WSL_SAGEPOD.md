@@ -6,15 +6,13 @@ That path also points to the existing AI connector; SagePod is an optional
 computation companion with its own installation.
 
 This tutorial gets you from Windows VS Code to a mathematical reading workspace
-with an ordinary notebook running SageMath. It describes **MRW 0.19.2**. The
+with an ordinary notebook running SageMath. It describes **MRW 0.23.18**. The
 SagePod helper instructions use revision `4bc1bc3`, reviewed on **2026-11-03**.
 
-MRW is the **Mathematical Research Workstation** VS Code extension, sometimes
-called the plugin. Install it from a `.vsix` package. There is currently no
-project-published Marketplace installation or GitHub release download; if you
-do not already have the package, use [Build the VSIX](#build-the-vsix) below.
-This tutorial is hosted in the private project repository; viewing it and
-cloning the source require repository access. Publication is a separate decision.
+MRW is the **Mathematical Research Workstation** VS Code extension. Download
+its VSIX from the [current GitHub release](https://github.com/flengyel/MRW/releases/latest)
+and follow [installation](INSTALLATION.md). There is no Marketplace listing.
+Building from source is optional.
 
 The connection to SagePod belongs to **Microsoft's Jupyter extension**. There is
 no separate SagePod connection setting in MRW.
@@ -36,16 +34,18 @@ Use a WSL2 Linux distribution; the recorded companion workflow used Debian.
 In Windows PowerShell, `wsl --list --verbose` shows each distribution's WSL
 version.
 
-Open your existing study workspace in WSL. Its identity matters: if it already
-has MRW sources and annotations, keep using that folder or saved workspace.
-For a new notebook workspace, first use SagePod's existing persistent notebook
-directory, normally `~/Jupyter`. After SagePod setup, you can create a study
-subdirectory there. All shell commands below run **in WSL**, except the
-PowerShell check above. For example, to open the persistent notebook directory:
+For new MRW sessions, use [the default workspace](WORKSPACE_SETUP.md) at
+`~/mrw-work/MRW.code-workspace`. Existing sessions keep their own saved records.
+SagePod's persistent notebook directory, normally `~/Jupyter`, is independent
+of this workspace. Open its notebooks in place from the MRW window; do not
+change workspace merely to open a notebook. A separate notebook project is
+still possible when you deliberately want separate workspace state.
+
+All shell commands below run **in WSL**, except the PowerShell check above.
+Reopen the default saved workspace with:
 
 ```bash
-cd ~/Jupyter
-code .
+code "$HOME/mrw-work/MRW.code-workspace"
 ```
 
 The bottom-left corner must show **WSL: Debian**, or your chosen distribution.
@@ -76,17 +76,17 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`mrw-0.19.2.vsix`. Alternatively, in that window's WSL integrated
+`mrw-0.23.18.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/mrw-0.19.2.vsix
+code --install-extension /absolute/path/to/mrw-0.23.18.vsix
 code --list-extensions --show-versions
 ```
 
-Check that **Mathematical Research Workstation 0.19.2** appears under
+Check that **Mathematical Research Workstation 0.23.18** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.mrw@0.19.2`. If an extension appears
+The CLI identity is `flengyel.mrw@0.23.18`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
@@ -259,36 +259,11 @@ host paths for VS Code files.
 
 ## Build the VSIX
 
-Skip this section if you already have a trusted MRW package. The repository
-does not commit its generated VSIX files. To build **0.19.2** yourself, use
-**Linux Node.js 22+, npm, Python 3.11+ and Git in WSL**. Node/npm are only
-packaging requirements. Check `node --version`, `npm --version` and
-`command -v node npm`; Windows npm launchers cannot run the Linux build chain.
-These package filenames describe 0.19.2. If the checkout's version has advanced,
-use the version in `vscode/package.json` in the package and install commands.
-
-Use a **new directory**, leaving existing checkouts and study work alone:
-
-```bash
-mkdir -p ~/src
-git clone https://github.com/flengyel/MRW.git ~/src/mrw-install
-cd ~/src/mrw-install
-git rev-parse HEAD
-npm ci --prefix vscode --ignore-scripts
-TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.19.2.vsix
-sha256sum vscode/mrw-0.19.2.vsix
-```
-
-This creates `~/src/mrw-install/vscode/mrw-0.19.2.vsix` and verifies
-its runtime bytes against that checkout. Record the commit printed by
-`git rev-parse HEAD` and the archive's actual SHA-256. The
-[terminology validation record](DOCUMENT_TERMINOLOGY_VALIDATION.md) identifies
-the delivered 0.19.2 package and its build revision. Byte-identical reproduction
-also depends on the source revision and recorded packaging tool versions.
-See [packaging details](../vscode/README.md#package-and-install-a-vsix).
-Return to your **study workspace's WSL window** and [install the VSIX in step 2](#2-install-mrw-and-the-notebook-extensions).
-This builds locally and publishes nothing.
+Use the current [installation and build instructions](INSTALLATION.md) and
+[VSIX packaging procedure](../vscode/README.md#package-and-install-a-vsix).
+Linux Node.js, npm and Git are build dependencies, not notebook-reading
+requirements. Keep the source checkout separate from your MRW workspace and
+SagePod's notebook directory.
 
 ## Roadmap and further help
 

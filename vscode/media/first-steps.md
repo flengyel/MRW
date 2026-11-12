@@ -13,6 +13,19 @@ Hover over the MRW Activity Bar icon to see its version. The sidebar heading
 shows it too. This tutorial reports the active extension build above. If an
 installed update is waiting for a reload, the active build can still be older.
 
+## First-time workspace setup
+
+Use **MRW: Set Up MRW Workspace…** to create or reuse
+`~/mrw-work/MRW.code-workspace` on the Linux host. Its name is **MRW**; it is not
+tied to a subject or command. **Choose Notes Folder…** connects notes stored
+elsewhere, including a Windows Obsidian vault reached through `/mnt/c/…`.
+
+Setup preserves existing settings and offers to open the saved workspace in a
+new window. It does not transfer earlier saved studies or close their window.
+Reopen this same `.code-workspace` file for later sessions. The
+[setup guide](https://github.com/flengyel/MRW/blob/main/docs/WORKSPACE_SETUP.md)
+explains installation, optional tools and recovery of earlier work.
+
 <a id="open-existing-work"></a>
 
 ## Open a document

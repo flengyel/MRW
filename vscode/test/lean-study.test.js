@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {loadPack,validate,workingCopy}=require('../src/lessonPacks'),{registerLeanStudy}=require('../src/leanStudy'),{trackLocation}=require('../src/readingOutline');
 const builtin=path.resolve(__dirname,'../media/lean-study');
 async function temporary(t){const root=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-lean-unit-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));return root;}
-function harness(root,{state=new Map(),global=new Map(),lean=true,extensionPath=path.resolve(__dirname,'..'),notesFolder=''}={}){
+function harness(root,{state=new Map(),global=new Map(),lean=true,extensionPath=path.resolve(__dirname,'..'),notesFolder='',leanStudyParent=''}={}){
  const commands=new Map(),calls=[],messages=[],picks=[],folders=[],answers=[],docs=new Map();let selectionChanged,changed,returned,activation=0;
  const uri=file=>({scheme:'file',fsPath:file,path:file,toString:()=>'file:'+file});
  class Position{constructor(line,character){this.line=line;this.character=character;}}
@@ -14,7 +14,7 @@ function harness(root,{state=new Map(),global=new Map(),lean=true,extensionPath=
   extensions:{getExtension:id=>id==='leanprover.lean4'&&lean?{async activate(){activation++;}}:undefined},
   env:{async openExternal(u){calls.push({name:'external',url:u.toString()});}},
   commands:{async getCommands(){return ['markdown.reopenAsPreview','lean4.displayGoal'];},async executeCommand(name,...args){calls.push({name,args});return commands.get(name)?.(...args);}},
-  workspace:{getConfiguration:()=>({get:(k,f)=>k==='notesFolder'?notesFolder:f}),onDidChangeTextDocument:f=>{changed=f;return {dispose(){}};},async openTextDocument(u){
+  workspace:{getConfiguration:()=>({get:(k,f)=>k==='notesFolder'?notesFolder:k==='leanStudyParent'?leanStudyParent:f}),onDidChangeTextDocument:f=>{changed=f;return {dispose(){}};},async openTextDocument(u){
    if(!docs.has(u.fsPath)){const doc={uri:u,version:1,isDirty:false,languageId:u.fsPath.endsWith('.md')?'markdown':'lean4',text:await fs.readFile(u.fsPath,'utf8'),getText(){return this.text;},offsetAt(pos){return offsets(this.text,pos);},positionAt(at){const xs=this.text.slice(0,at).split('\n');return new Position(xs.length-1,xs.at(-1).length);}};docs.set(u.fsPath,doc);}return docs.get(u.fsPath);
   }},window:{visibleTextEditors:[],onDidChangeTextEditorSelection:f=>{selectionChanged=f;return {dispose(){}};},async showQuickPick(items){return picks.length?picks.shift()(items):items[0];},async showOpenDialog(){return folders.shift()?.map(uri);},async showInformationMessage(message){messages.push(message);return answers.shift();},async showWarningMessage(message){messages.push(message);return answers.shift();},async showTextDocument(doc,options={}){
    let ed=api.window.visibleTextEditors.find(e=>e.document===doc);
@@ -89,4 +89,11 @@ test('three introductory lessons reopen their own prose and actions while preser
  const next=harness(root,{state:h.state,extensionPath:'/removed-pack'});const resumed=await next.commands.get('mrw.resumeLeanStudy')();
  assert.equal(resumed.lessonId,'dependent-application');assert.ok(next.docs.has(path.join(opened.root,'lessons','03-dependent-application.md')));
  assert.match(next.api.window.activeTextEditor.document.text,/My ongoing Lean work/);assert.match(await fs.readFile(path.join(opened.root,'Notes.md'),'utf8'),/Keep this note/);
+});
+
+test('new Lean projects use the configured Linux parent; resume retains prior working paths and edits',async t=>{
+ const root=await temporary(t),notes=path.join(root,'windows-notes'),linux=path.join(root,'linux-work');await fs.mkdir(notes);await fs.mkdir(linux);
+ const h=harness(root,{notesFolder:notes,leanStudyParent:linux});const opened=await h.commands.get('mrw.studyLean4')();assert.ok(opened.root.startsWith(linux+path.sep));assert.deepEqual(await fs.readdir(notes),[]);
+ const edited=path.join(opened.root,'Notes.md');await fs.writeFile(edited,'My retained working note');
+ const next=harness(root,{state:h.state,notesFolder:notes,leanStudyParent:notes});const resumed=await next.commands.get('mrw.studyLean4')();assert.equal(resumed.root,opened.root);assert.equal(await fs.readFile(edited,'utf8'),'My retained working note');assert.deepEqual(await fs.readdir(notes),[]);
 });

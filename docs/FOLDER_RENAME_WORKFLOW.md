@@ -73,8 +73,8 @@ reading-outline UI preferences and live webview drafts are not transferred by
 this workflow. Save first and reopen the ordinary documents; no similar-text
 search, guessed pin or automatic prose rewrite is supplied.
 
-The genuine Stacks study currently remains at
-`/home/flengyel/src/mrw/.codex-work/stacks-import-20261021/reading-workspace`.
-Its existing 08ZG explanation is preserved. This delivery does not move it or
-rename `/home/flengyel/src/mrw`. MRW API-key setup and Windows-backed
-storage qualification remain deferred. See [validation and host limits](FOLDER_RENAME_VALIDATION.md).
+For a new general workspace, use [the MRW default](WORKSPACE_SETUP.md), not a
+subject-specific study or validation directory. Earlier
+[validation and host limits](FOLDER_RENAME_VALIDATION.md) describe that delivery.
+The [complete workspace relocation contract](WORKSPACE_RELOCATION_DESIGN.md)
+adds obligations beyond this saved-source preparation workflow.

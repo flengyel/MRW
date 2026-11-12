@@ -1,8 +1,8 @@
 # Install Mathematical Research Workstation
 
-MRW 0.23.17 is installed from a VSIX.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.17/mrw-0.23.17.vsix)
-and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.17),
+MRW 0.23.18 is installed from a VSIX.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.18/mrw-0.23.18.vsix)
+and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.18),
 or [build from source](../vscode/README.md#package-and-install-a-vsix).
 There is no Marketplace listing. The extension identifier is `flengyel.mrw`.
 
@@ -17,22 +17,19 @@ Ordinary reading needs no Qt, npm, separate MRW Python installation, Lean,
 SageMath or AI account. Additional tools are needed only for the corresponding
 optional features.
 
-### 1. Open the intended Linux workspace
+### 1. Connect to the Linux host
 
 Install Microsoft's WSL extension (`ms-vscode-remote.remote-wsl`) in Windows
 VS Code if needed. Follow [Microsoft's WSL setup](https://code.visualstudio.com/docs/remote/wsl#_installation)
 to connect the window. `wsl --list --verbose` in Windows PowerShell identifies
 which distributions use WSL2.
 
-Reopen the folder or saved workspace containing the current research session.
-MRW's saved sources and annotations belong to that workspace. For a new workspace,
-run in a WSL terminal:
-
-```sh
-mkdir -p ~/mrw-work
-cd ~/mrw-work
-code .
-```
+For a fresh installation, use **WSL: Connect to WSL using Distro…** and choose
+Debian. An empty connected window is sufficient for installing MRW. For ongoing
+work, keep the current window open; install no update until its drafts are safe.
+Do not use a Stacks study, a temporary test folder or the MRW source checkout as
+the general default. After installation, setup creates the saved workspace
+`~/mrw-work/MRW.code-workspace` as described below.
 
 In that window's integrated terminal, check:
 
@@ -51,16 +48,16 @@ workspace there and perform the same Python and extension-host checks.
 
 ### 2. Install the VSIX in that workspace host
 
-Run **Extensions: Install from VSIX…** and select `mrw-0.23.17.vsix`.
+Run **Extensions: Install from VSIX…** and select `mrw-0.23.18.vsix`.
 Alternatively, use that window's Linux terminal and substitute the package path:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.17.vsix
+code --install-extension /absolute/path/to/mrw-0.23.18.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.17` under the WSL/SSH host's installed extensions.
-After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.17**;
+Confirm `flengyel.mrw@0.23.18` under the WSL/SSH host's installed extensions.
+After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.18**;
 the sidebar heading shows the same version. **MRW: Open Tutorial** reports the
 active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
@@ -69,11 +66,20 @@ storage when upgrading `flengyel.mrw`.
 
 For upgrades from before the extension identity change, see
 [the conversion record](EXTENSION_IDENTITY.md). The upgrade from 0.23.12 to
-0.23.17 keeps the `flengyel.mrw` identity and existing saved work.
+0.23.18 keeps the `flengyel.mrw` identity and existing saved work.
 
 <a id="3-open-existing-work"></a>
 
-### 3. Open a document
+### 3. Set up MRW and open a document
+
+Run **MRW: Set Up MRW Workspace…**. It creates or reuses
+`~/mrw-work/MRW.code-workspace`, checks Python and offers to open that exact
+workspace in a new window. It does not close the current window or transfer its
+saved records. Subsequent runs preserve your settings and files. Reopen this
+saved workspace for later sessions; opening `~/mrw-work` as a folder selects a
+different VS Code workspace identity. See [workspace setup](WORKSPACE_SETUP.md)
+for the layout, optional tools and existing-work recovery.
+
 
 1. Open the MRW Activity Bar view and choose **Open Document…**, or run
    **MRW: Open Document…** from the Command Palette (**F1**).

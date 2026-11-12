@@ -1,5 +1,21 @@
 # Codex continuation: reading and research
 
+## Current setup and relocation priority
+
+The general workspace is **MRW**, at `~/mrw-work/MRW.code-workspace` on Linux.
+It must not inherit a subject, fixture or command name. Set Up MRW Workspace
+prepares it idempotently, preserves existing settings and opens only on explicit
+request in a new window. Notes remain an independently selected folder; new
+Lean projects can use `mrw.leanStudyParent`. Preserve all existing sessions and
+saved work. See [setup](WORKSPACE_SETUP.md).
+
+The user also requests atomic workspace relocation. Existing artifact moves
+commit a saved-source binding; they do not move an entire workspace, its studies,
+history and VS Code state atomically. Do not advertise them as doing so. The
+[relocation contract](WORKSPACE_RELOCATION_DESIGN.md) is the next setup priority before the PROV trial.
+No automatic migration, editor shutdown or live VS Code database editing.
+
+
 ## Lean tutorial orientation — pack 1.1.1
 
 The three lessons now include a brief starting orientation, linked tutorial

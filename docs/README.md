@@ -8,6 +8,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 
 | Task | Guide |
 | --- | --- |
+| Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
 | Use Markdown notes, WikiLinks and an optional Obsidian vault | [Notes and Obsidian](OBSIDIAN_WORKFLOW.md) |
 | Find Zotero references, insert citations and retain attachments | [Zotero](ZOTERO_WORKFLOW.md) |

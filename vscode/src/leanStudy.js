@@ -56,7 +56,8 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
   if(!items.length)throw Error('No valid enabled Lean lesson pack is available.');
   const picked=await vscode.window.showQuickPick(items,{placeHolder:'Study Lean 4: choose a completed lesson'});if(!picked)return;
   if(state?.packId===picked.pack.manifest.packId){const retained=await loadPack(state.root);if(!retained.manifest.lessons.some(l=>l.id===picked.lesson.id))throw Error('That lesson is not in the retained working copy. Resume the existing lesson; its files and notes are unchanged.');state={...state,code:state.lessonId===picked.lesson.id?state.code:undefined,lessonId:picked.lesson.id,origin:origin||state.origin};await persist();return openLesson();}
-  let parent=vscode.workspace.getConfiguration('mrw').get('notesFolder','')||state?.parent||'';
+  const config=vscode.workspace.getConfiguration('mrw');
+  let parent=config.get('leanStudyParent','')||config.get('notesFolder','')||state?.parent||'';
   if(!parent){const chosen=await vscode.window.showOpenDialog({title:'Choose a parent folder for your editable Lean study project',canSelectFiles:false,canSelectFolders:true,canSelectMany:false});if(!chosen?.length)return;if(chosen[0].scheme!=='file')throw Error('Choose a local folder on the workspace host.');parent=chosen[0].fsPath;}
   const copy=await workingCopy(picked.pack,parent);
   if(!copy.manifest.lessons.some(l=>l.id===picked.lesson.id))throw Error('That lesson is not in this earlier working copy. Its files and notes were preserved.');

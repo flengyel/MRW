@@ -63,6 +63,7 @@ function activate(context) {
     return recorder.operations.run(operation,()=>runBridge(context.extensionPath,
       vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options),identity);
   };
+  require('./workspaceSetup').registerWorkspaceSetup({vscode, register});
   const artifactClients = [];
   require('./historyCommands').registerHistory({vscode,context,register,recorder});
   const artifactStorage = createArtifactStorage({ vscode, context, rawBridge });
