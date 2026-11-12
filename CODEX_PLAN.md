@@ -17,7 +17,8 @@ and reopens retained references offline. Windows/WSL uses Windows loopback throu
 bounded read-only interop; no port forwarding, database access or Zotero writes.
 Preserve dirty notes, immutable earlier citations and the existing PDF/Return path.
 Study deletion does not own the Zotero records. See
-[workflow](docs/ZOTERO_WORKFLOW.md).
+[workflow](docs/ZOTERO_WORKFLOW.md) and
+[delivery checks](docs/ZOTERO_DELIVERY.md).
 The published 0.23.12 package predates this increment. The small PROV notebook
 trial is next; no general PROV exporter was added here.
 

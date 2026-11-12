@@ -1,7 +1,8 @@
 # Zotero references and attachments
 
 Implemented on main after 0.23.12. The published 0.23.12 VSIX does not contain
-this increment. Zotero manages the library; MRW reads selected references and
+this increment. [Delivery checks](ZOTERO_DELIVERY.md) distinguish live API
+observations from native desktop acceptance. Zotero manages the library; MRW reads selected references and
 retains them for use in ordinary notes. No Study or question form is required.
 
 ## Connect and find a reference
