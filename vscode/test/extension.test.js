@@ -161,6 +161,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
+    if (name === './notebookResults') return require('../src/notebookResults');
     if (name === './zotero') return require('../src/zotero');
     if (name === './workspaceSetup') return require('../src/workspaceSetup');
     if (name === './leanStudy') return require('../src/leanStudy');
@@ -2467,4 +2468,22 @@ test('Contents hides the preceding Markdown tree for a text document and restore
   assert.equal(h.state.get('mrw.readingOutline.v1').uri, doc.uri.toString());
   await h.commands.get('mrw.returnToReadingOutline')(); assert.equal(h.api.readingProvider.getChildren()[0].label, 'Mathematics');
   assert.match(h.api.readingTree.message, /Contents: .*a.md/); assert.deepEqual(h.errors, []);
+});
+
+test('notebook retention reaches the isolated bridge and reopens after a new extension session',async t=>{
+  const root=await temporary(t),file=path.join(root,'calculation.ipynb');
+  const bytes=JSON.stringify({nbformat:4,metadata:{},cells:[{cell_type:'code',source:'print(5)',outputs:[{output_type:'stream',name:'stdout',text:['5\n']}]}]});
+  await fs.writeFile(file,bytes);
+  const h=await harness(root);h.api.window.activeNotebookEditor={notebook:{uri:uri(file),isDirty:false}};
+  h.api.workspace.notebookDocuments=[h.api.window.activeNotebookEditor.notebook];h.picks.push({action:'retain'},undefined);
+  await h.commands.get('mrw.retainNotebookResult')();assert.deepEqual(h.errors,[]);
+  assert.match(h.shown.at(-1).getText(),/execution context unknown/);
+  const store=path.join(root,'..','private-state','calculations-v1');
+  const {results}=await runBridge(path.resolve(__dirname,'..'),'python3',{method:'notebook_list',store});assert.equal(results.length,1);
+  await fs.writeFile(file,'a later original revision');
+  const restored=await harness(root);restored.picks.push({result:results[0]},undefined);
+  await restored.commands.get('mrw.openNotebookResult')();assert.deepEqual(restored.errors,[]);
+  assert.match(restored.shown.at(-1).getText(),/print\(5\)/);assert.equal(restored.shown.at(-1).languageId,'plaintext');
+  assert.equal(await fs.readFile(file,'utf8'),'a later original revision');
+  assert.equal(restored.saves.length,0);assert.ok(!restored.executed.some(x=>/execute|kernel|runAll/i.test(x)));
 });

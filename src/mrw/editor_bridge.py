@@ -66,6 +66,12 @@ def _dispatch(request):
         raise ValueError('Unsupported editor bridge protocol')
     method = request.get('method')
     fields = {
+        'notebook_retain': ({'store', 'paths'}, {'software'}),
+        'notebook_list': ({'store'}, set()),
+        'notebook_read': ({'store', 'id'}, set()),
+        'notebook_companion': ({'store', 'id', 'index'}, set()),
+        'notebook_delete': ({'store', 'id'}, set()),
+        'notebook_export': ({'store', 'ids', 'destination'}, set()),
         'prepare_assistance': ({'draft'}, set()),
         'send_assistance': ({'draft', 'preview', 'confirmation'}, set()),
         'inspect': ({'path', 'format'}, {'companion', 'revision'}),
@@ -123,6 +129,9 @@ def _dispatch(request):
     required = required | {'protocol', 'method'}
     if not required <= request.keys() or request.keys() - required - optional:
         raise ValueError('Invalid editor action fields')
+    if method.startswith('notebook_'):
+        from .notebook_results import action
+        return action(request)
     if method in ('prepare_assistance', 'send_assistance'):
         return assistance_action(request)
     if method == 'proof_graph':

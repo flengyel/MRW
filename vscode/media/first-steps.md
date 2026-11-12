@@ -409,3 +409,20 @@ If saving fails, the lifecycle action stops and preserves the draft. If deletion
 is interrupted, run **Show Deleted Studies** to retry cleanup. Returning to the
 same source does not resurrect removed work; **Start new study** explicitly
 creates a new identity.
+
+## Retain and compare notebook results
+
+Run and save your notebook with its normal Jupyter kernel. **MRW: Retain Notebook
+Result…** keeps an exact copy, with optional companion notes or input files.
+**Open Retained Notebook Result…** reopens the transcript and offers comparison,
+companion reading, a link, export and deletion of that copy. Your original files
+stay where they are. Escape closes the action picker while leaving the result open.
+
+**Export Notebook Provenance…** can select both alternatives. The ZIP includes
+exact files and separate attributed PROV accounts. Saved outputs alone have unknown
+execution context; a producer receipt is a reported execution, not independent
+verification. Opening, comparison and export run no code. The transcript shows
+plain text and errors; rich outputs remain in the retained notebook.
+
+See the [notebook guide](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md)
+for a worked example using two Sage calculations.

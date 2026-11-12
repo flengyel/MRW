@@ -1,7 +1,9 @@
 # W3C PROV for the mathematical lab notebook
 
-Design direction, 2026-11-10. This specifies future work; MRW 0.23.10 does not
-implement a general lab-notebook provenance service or PROV export.
+Design direction, 2026-11-10, with the bounded notebook profile implemented in
+0.23.20. See the [profile](NOTEBOOK_PROVENANCE_PROFILE.md) and
+[workflow](NOTEBOOK_RESULTS.md). A general lab-notebook provenance service remains
+outside this increment.
 
 **W3C PROV is the common provenance model for new research and study
 integrations.** Use its concepts and relations across plugins, with a documented
@@ -124,8 +126,8 @@ deleted-target marker separate from retained mathematical content.
 
 ## First bounded implementation
 
-First address the missing Study archive/delete controls independently of PROV
-export. Then use one real SagePod/Jupyter investigation to test this profile:
+Study archive/delete and Zotero linking are delivered. The first bounded
+[notebook workflow](NOTEBOOK_RESULTS.md) tests this profile with one SagePod/Jupyter investigation:
 retain two alternative calculations, their input and method revisions, outputs
 and an explanatory note; reopen and compare them after restart. Export the
 selected account without executing it or needing the producer plugin.
@@ -135,7 +137,7 @@ revision-specific links, readable retained results, explicit missing context,
 and a documented validation scope. Exercise one failed run and the deletion
 boundary. Do not claim complete PROV conformance from a subset validator.
 
-Zotero integration, CoCalc and Wolfram adapters, repository-based study imports
+CoCalc and Wolfram adapters, repository-based study imports
 and data-analysis workflows remain unimplemented follow-on work. Compare their available interfaces
 against this profile before adding new machinery; see
 [related systems](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse).

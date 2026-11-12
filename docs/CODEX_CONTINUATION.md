@@ -1,5 +1,18 @@
 # Codex continuation: reading and research
 
+## Notebook result trial — 0.23.20
+
+The bounded PROV workflow now retains saved notebooks with optional companion
+files, reopens and compares exact results, and exports named Turtle accounts plus
+an artifact manifest. Producer-reported execution is distinct from MRW-observed
+capture; saved outputs without a receipt have unknown execution context. Preserve
+that distinction and the deletion markers. The quadratic-discriminant trial uses
+two Sage methods and one failed construction. See [the workflow](NOTEBOOK_RESULTS.md)
+and [profile](NOTEBOOK_PROVENANCE_PROFILE.md). Do not introduce a registration
+form or expand the provenance profile without a concrete research obstacle.
+The command-grouping review remains a separate interface follow-up.
+
+
 ## Workspace setup and relocation
 
 Delivered in [MRW 0.23.19](RELEASE_0_23_19.md); published and pushed, not installed into the working window.

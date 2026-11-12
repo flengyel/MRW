@@ -78,3 +78,5 @@ for present commands and installation.
 
 - [Study lifecycle](STUDY_LIFECYCLE.md): Archive/Restore, Trash/Undo,
   permanent deletion and interrupted-operation recovery.
+
+- [Retain, compare and export notebook results](NOTEBOOK_RESULTS.md).

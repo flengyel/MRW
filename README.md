@@ -9,14 +9,13 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.19 — recoverable workspace relocation.**
-**Move Workspace…** verifies a complete copy and commits its destination;
-**Recover Workspace Move** resolves interruptions. Studies, drafts, history,
-source annotations and document return locations follow the workspace. Original
-files are retained. **Set Up MRW Workspace…** offers this window or another.
-[Workspace setup](docs/WORKSPACE_SETUP.md) · [Relocation](docs/WORKSPACE_RELOCATION_DESIGN.md).
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.19/mrw-0.23.19.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.19).
+**MRW 0.23.20 — retained notebook results.**
+Retain saved notebooks and companion files, reopen and compare alternatives,
+and export their provenance. Saved outputs and producer-reported execution
+remain distinct. Original notebooks and notes stay in place.
+[Notebook workflow](docs/NOTEBOOK_RESULTS.md) · [Provenance profile](docs/NOTEBOOK_PROVENANCE_PROFILE.md).
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.20/mrw-0.23.20.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.20).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -98,7 +97,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.19.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.20.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -108,8 +107,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.19.vsix
-sha256sum vscode/mrw-0.23.19.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.20.vsix
+sha256sum vscode/mrw-0.23.20.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -249,7 +248,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.19 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.20 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 
@@ -257,3 +256,10 @@ Before connecting, open Zotero → **Settings → Advanced** and enable
 **Allow other applications on this computer to communicate with Zotero**.
 Keep Zotero running for searches and new attachment reads. With Windows Zotero
 and Debian WSL, select **Windows Zotero from WSL** in **MRW: Connect Zotero…**.
+
+### Notebook results
+
+Retain a saved Jupyter notebook with optional companion notes, reopen its exact
+results, compare alternatives and export their provenance. Saved outputs and
+producer-reported execution remain distinct. See the
+[notebook workflow](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md).

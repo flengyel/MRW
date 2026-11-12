@@ -117,7 +117,7 @@ function activate(nativeContext) {
     const activeEditor = vscode.window.activeTextEditor;
     const existing = activeEditor?.document.uri.scheme === 'mrw-record' ? activeEditor :
       vscode.window.visibleTextEditors?.find(editor => editor.document.uri.scheme === 'mrw-record');
-    await vscode.window.showTextDocument(document, { preview: false,
+    if (presentation.show !== false) await vscode.window.showTextDocument(document, { preview: false,
       viewColumn: presentation.viewColumn ?? existing?.viewColumn ?? vscode.ViewColumn.Beside });
     return uri;
   }
@@ -307,10 +307,11 @@ function activate(nativeContext) {
   const outlineRows = registerOutlines({sourcePlugins, vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
     askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
     readingDestination: location => readingController.returnDestination(location),
-    handleDocumentUri: async uri => await zotero.handleUri(uri) || readingController.handleDocumentUri(uri), relocateRoute:moveSession.rebaseRoute });
+    handleDocumentUri: async uri => await notebooks.handleUri(uri) || await zotero.handleUri(uri) || readingController.handleDocumentUri(uri), relocateRoute:moveSession.rebaseRoute });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
     compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
+  const notebooks = require('./notebookResults').registerNotebookResults({vscode,context,register,bridge:rawBridge,show,recorder});
   const zotero = require('./zotero').registerZotero({vscode,context,register,reading:readingController,show,onCancel:()=>recorder.operations.cancel()});
   registerLeanStudy({vscode,context,register,trackLocation:require('./readingOutline').trackLocation,
     readingLocation:()=>readingController.currentLocation(),
