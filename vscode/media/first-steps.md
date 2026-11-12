@@ -219,8 +219,10 @@ saved sources, annotations, studies or history. Consult the
 ## Study Lean 4
 
 Choose **Study Lean 4…** in **Commands** and begin with **Functions and
-composition**. Follow its link to **Implication as a function on proofs**, then
-**Dependent application**. Each lesson introduces its terminology before the
+composition**. Its opening explains how to use the examples and InfoView and
+lists the three lessons. Follow the contents links to **Implication as a function
+on proofs**, then **Dependent application**. Each lesson also links to its
+sections and back to the tutorial contents. Each lesson introduces its terminology before the
 construction and has a variation, a solution and a deliberate error. The three
 lessons share the editable examples and associated note.
 

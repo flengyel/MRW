@@ -1,6 +1,6 @@
 # Mathematical Research Workstation for VS Code
 
-MRW 0.23.16 opens mathematical notes and papers in place, follows references,
+MRW 0.23.17 opens mathematical notes and papers in place, follows references,
 and keeps a route back to the passage being read. It adds Contents, backlinks,
 retained source passages, reader annotations and explicit TikZ rendering to a
 VS Code workspace. The extension is experimental.
@@ -82,7 +82,9 @@ An installed VSIX needs no npm, Qt, Lean, SageMath, container or AI account for
 ordinary reading.
 
 **Study Lean 4…** opens three introductory companion lessons for *Theorem Proving in Lean
-4*: functions, implication proofs and dependent application. It copies a
+4*: functions, implication proofs and dependent application. The first lesson
+gives a brief orientation and tutorial contents; each lesson links to its sections
+and back to the contents. MRW copies a
 core-only project pinned to Lean 4.33.0 into your selected notes/study parent,
 with editable examples, separate solutions and an ordinary notes file.
 **Resume Lean Study** preserves code edits and the cursor; **Lean Study Actions…**
@@ -115,8 +117,8 @@ one private store are unsupported.
 
 ## Package and install a VSIX
 
-[Download MRW 0.23.16](https://github.com/flengyel/MRW/releases/download/v0.23.16/mrw-0.23.16.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.16).
+[Download MRW 0.23.17](https://github.com/flengyel/MRW/releases/download/v0.23.17/mrw-0.23.17.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.17).
 Updates from GitHub require installing the newer VSIX. For publication and build
 identity, follow [the release procedure](../docs/RELEASING.md).
 
@@ -125,12 +127,12 @@ From the repository root, with Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.16.vsix
-sha256sum vscode/mrw-0.23.16.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.17.vsix
+sha256sum vscode/mrw-0.23.17.vsix
 ```
 
 Packaging bundles the Python core and uses pinned `@vscode/vsce` 4.0.0 to create
-`vscode/mrw-0.23.16.vsix`. It publishes nothing. The fixed epoch and UTC make
+`vscode/mrw-0.23.17.vsix`. It publishes nothing. The fixed epoch and UTC make
 archive timestamps reproducible. Use Linux npm in WSL and record the resulting
 archive's hash rather than reusing an earlier package's hash.
 
@@ -141,11 +143,11 @@ caches and generated archives are excluded from the package.
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…**, or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.16.vsix
+code --install-extension /absolute/path/to/mrw-0.23.17.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.16` is installed on the workspace host. Save unfinished
+Confirm `flengyel.mrw@0.23.17` is installed on the workspace host. Save unfinished
 work before a requested reload and retain workspace storage when upgrading.
 The bridge runs the bundled core through `python3 -I`; no editable Python
 installation is needed. See [installation](../docs/INSTALLATION.md).
@@ -306,7 +308,7 @@ archived studies and Trash. See [lifecycle and recovery](../docs/STUDY_LIFECYCLE
 
 ## Zotero references
 
-MRW 0.23.16 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.17 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](../docs/ZOTERO_WORKFLOW.md).
 

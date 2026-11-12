@@ -4,11 +4,21 @@ Let $A$ be a type. A **family of propositions indexed by $A$** assigns a
 proposition to each term of type $A$. Lean writes such a family as
 `S : A → Prop`; for `a : A`, its value `S a` is a proposition.
 
+A proof that covers every input can be applied to a chosen input. We shall
+account for the result type of this application.
+
+[Tutorial contents](01-functions-and-proofs.md#tutorial-contents) ·
 [Previous: implication](02-implication.md) ·
 [Working examples](../Study/Examples.lean) · [Your notes](../Notes.md)
 
 This lesson uses terms, types and application from the first lesson, and
 propositions and proofs from the second. In the examples, begin at `specialize`.
+
+**In this lesson**
+
+- [A proof for each input](#a-proof-for-each-input)
+- [Substitution in the result type](#substitution-in-the-result-type)
+- [Variation and error](#variation-and-error)
 
 ## A proof for each input
 
@@ -86,3 +96,6 @@ Using `h a` supplies a proof at the required input.
 Further reading: *Theorem Proving in Lean 4*,
 [Quantifiers and Equality](https://lean-lang.org/theorem_proving_in_lean4/Quantifiers-and-Equality/),
 especially The Universal Quantifier.
+
+[Previous: implication](02-implication.md) ·
+[Tutorial contents](01-functions-and-proofs.md#tutorial-contents)

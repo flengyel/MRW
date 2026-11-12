@@ -10,8 +10,10 @@ Choose **Study Lean 4…** in MRW's **Commands** area, or run **MRW: Study Lean
 3. **Dependent application** introduces proposition families and universal
    instantiation, with substitution in the result type.
 
-The lessons link to one another and share the editable examples and associated
-note. Their primary text is
+The first lesson opens with a brief orientation and a linked
+[tutorial contents](../vscode/media/lean-study/lessons/01-functions-and-proofs.md#tutorial-contents).
+Each lesson has links to its sections and back to those contents. The lessons
+share the editable examples and associated note. Their primary text is
 [*Theorem Proving in Lean 4*](https://lean-lang.org/theorem_proving_in_lean4/),
 by Jeremy Avigad, Leonardo de Moura, Soonho Kong and Sebastian Ullrich, with
 contributions from the Lean Community. The companion text and examples were
@@ -62,9 +64,9 @@ the installed extension remain untouched.
 Save, undo and recover drafts through the native editors. The project and notes
 remain usable without MRW or the original lesson pack. An occupied unrelated
 folder is rejected. Reopening reuses the working copy, including its lesson
-version. A pack update never silently replaces these files. Pack 1.1.0 supplies the three
-shorter lessons for new copies. Earlier copies keep their lesson files; updating
-the extension alone does not rewrite them.
+version. A pack update never silently replaces these files. Pack 1.1.1 supplies
+the three lessons, orientation and contents for new copies. Earlier copies keep
+their lesson files; updating the extension alone does not rewrite them.
 
 ## Actions and resumption
 

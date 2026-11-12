@@ -1,7 +1,7 @@
 {
   "apiVersion": 1,
   "packId": "lean-foundations",
-  "contentVersion": "1.1.0",
+  "contentVersion": "1.1.1",
   "title": "Lean foundations",
   "testedToolchain": "leanprover/lean4:v4.33.0",
   "projectFiles": [

@@ -1,15 +1,41 @@
 # Functions and composition
 
+Lean checks definitions and proofs written in its language. These three lessons
+assume familiarity with functions and elementary logic; no Lean syntax is assumed.
+
+## Tutorial contents
+
+1. [Functions and composition](#names-types-and-binders) — define a composite
+   function and account for the type of each expression.
+2. [Implication as a function on proofs](02-implication.md) — compose two
+   implications, then express the proof as instructions to Lean.
+3. [Dependent application](03-dependent-application.md) — obtain a proof for
+   a chosen input from a proof that covers every input.
+
+Read the lessons in this order, with the [working examples](../Study/Examples.lean)
+beside the text. The examples are complete. Each lesson ends with an optional
+variation and a deliberate error, with links to their files and a solution.
+[Your notes](../Notes.md) is an ordinary Markdown file for questions and calculations.
+
+Lean's **InfoView** is the panel showing the available assumptions and what
+remains to be proved at the cursor. The second lesson explains its display.
+The project uses Lean 4.33.0 and its core library. **MRW: Lean Study Actions…**
+opens the files for the selected lesson; **MRW: Resume Lean Study** returns
+to the saved lesson and code location. **MRW: Return from Lean Study** returns
+to the document from which the study was opened.
+
+**In this lesson**
+
 Given functions $f:A\to B$ and $g:B\to C$, their composite sends $x$ to
 $g(f(x))$. We shall define this function in Lean and account for the type of
-each expression in its definition.
+each expression in its definition. Begin at `compose` in the working examples.
 
-[Working examples](../Study/Examples.lean) · [Your notes](../Notes.md) ·
-[Next: implication](02-implication.md)
-
-Use the declaration `compose` in the working examples. The project uses Lean
-4.33.0 and its core library. **MRW: Lean Study Actions…** opens the associated
-files; **MRW: Resume Lean Study** returns to your lesson and code location.
+- [Names, types and binders](#names-types-and-binders)
+- [Application and abstraction](#application-and-abstraction)
+- [Defining the composite](#defining-the-composite)
+- [Checking the body](#checking-the-body)
+- [Checking a type and computing a value](#checking-a-type-and-computing-a-value)
+- [Variation and error](#variation-and-error)
 
 ## Names, types and binders
 
@@ -169,4 +195,5 @@ Further reading: *Theorem Proving in Lean 4*,
 [Dependent Type Theory](https://lean-lang.org/theorem_proving_in_lean4/Dependent-Type-Theory/),
 especially Function Abstraction and Evaluation, and Definitions.
 
-[Next: implication as a function on proofs](02-implication.md).
+[Tutorial contents](#tutorial-contents) ·
+[Next: implication as a function on proofs](02-implication.md)

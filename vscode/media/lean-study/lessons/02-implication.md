@@ -1,16 +1,26 @@
 # Implication as a function on proofs
 
+We shall compose two implications, then express the same proof as a sequence
+of instructions to Lean. This uses application and abstraction from the first
+lesson.
+
 A **proposition** is a statement to be proved. Lean expresses a proposition
 as a term of type `Prop`. A **proof** of a proposition `P` is a term of type
 `P`. Thus `P : Prop` declares a proposition, whereas `hP : P` declares a proof
 of that proposition.
 
+[Tutorial contents](01-functions-and-proofs.md#tutorial-contents) ·
 [Previous: functions](01-functions-and-proofs.md) ·
 [Working examples](../Study/Examples.lean) · [Your notes](../Notes.md) ·
 [Next: dependent application](03-dependent-application.md)
 
-This lesson uses application and abstraction from the preceding lesson.
 In the working examples, begin at `implication_comp`.
+
+**In this lesson**
+
+- [Composing implications](#composing-implications)
+- [Constructing the proof with tactics](#constructing-the-proof-with-tactics)
+- [Variation and error](#variation-and-error)
 
 ## Composing implications
 
@@ -132,4 +142,6 @@ Further reading: *Theorem Proving in Lean 4*,
 [Propositions and Proofs](https://lean-lang.org/theorem_proving_in_lean4/Propositions-and-Proofs/)
 and [Tactics](https://lean-lang.org/theorem_proving_in_lean4/Tactics/).
 
-[Next: dependent application](03-dependent-application.md).
+[Previous: functions](01-functions-and-proofs.md) ·
+[Tutorial contents](01-functions-and-proofs.md#tutorial-contents) ·
+[Next: dependent application](03-dependent-application.md)

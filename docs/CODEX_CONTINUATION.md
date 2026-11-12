@@ -1,5 +1,14 @@
 # Codex continuation: reading and research
 
+## Lean tutorial orientation — pack 1.1.1
+
+The three lessons now include a brief starting orientation, linked tutorial
+contents, section links and return navigation. Preserve the detailed definitions,
+typing rules and proof explanations. IDs, code, toolchain and runtime behavior
+are unchanged. Ordinary updates preserve working copies. See
+[the review](LEAN_TUTORIAL_ORIENTATION_20261112.md).
+The small PROV trial remains the next product increment.
+
 ## Version on the MRW icon — 0.23.16
 
 The Activity Bar container title includes the package version, which VS Code
