@@ -57,7 +57,7 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
-[Release 0.23.14](RELEASE_0_23_14.md) records the latest package, publication,
+[Release 0.23.15](RELEASE_0_23_15.md) records the latest package, publication,
 checks and installation status. [Reading repairs for 0.23.5](READING_REPAIRS.md)
 records that earlier increment. Other validation and repair reports describe the versions,
 hosts and sources named in those reports; they do not establish that a later
