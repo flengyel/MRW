@@ -2,6 +2,8 @@
 
 ## Notebook result trial — 0.23.20
 
+Published and pushed; [delivery checks](RELEASE_0_23_20.md). Not installed into the working window.
+
 The bounded PROV workflow now retains saved notebooks with optional companion
 files, reopens and compares exact results, and exports named Turtle accounts plus
 an artifact manifest. Producer-reported execution is distinct from MRW-observed
@@ -31,8 +33,8 @@ files. New saved locations are relative to the workspace or their recorded notes
 root. Changing the selected notes folder must not redirect older references.
 Do not edit live VS Code databases or test migration on genuine research data.
 The saved-source mover remains a separate, narrower operation.
-The next product increment is the small PROV trial; do not substitute unrelated
-infrastructure work for that workflow.
+The notebook trial is delivered above. Continue from demonstrated research
+obstacles rather than adding unrelated infrastructure.
 
 
 ## Lean tutorial orientation — pack 1.1.1
@@ -42,15 +44,13 @@ contents, section links and return navigation. Preserve the detailed definitions
 typing rules and proof explanations. IDs, code, toolchain and runtime behavior
 are unchanged. Ordinary updates preserve working copies. See
 [the review](LEAN_TUTORIAL_ORIENTATION_20261112.md).
-The small PROV trial remains the next product increment.
 
 ## Version on the MRW icon — 0.23.16
 
 The Activity Bar container title includes the package version, which VS Code
 uses for the icon hover and sidebar heading. Keep it synchronized at release;
 the VSIX verifier rejects a stale title. The tutorial still reports the active
-extension build. No command/view IDs or saved state changed. The small PROV
-trial remains the next product increment.
+extension build. No command/view IDs or saved state changed. The notebook trial followed in 0.23.20.
 
 
 ## Revised Lean introduction — pack 1.1.0
@@ -71,7 +71,7 @@ opening the chooser does not grant scope or write settings. Only an accepted
 folder selection changes the notes folder. Preserve cancellation, restart,
 canonical-path checks, serialized settings writes and explicit save-failure
 reporting. Tests use disposable workspaces; never point the working research
-window at a test folder. The small PROV trial remains the next product priority.
+window at a test folder. The notebook trial followed in 0.23.20.
 
 ## Delivered — reader-note controls, 0.23.12
 
@@ -92,8 +92,7 @@ Preserve dirty notes, immutable earlier citations and the existing PDF/Return pa
 Study deletion does not own the Zotero records. See
 [workflow](ZOTERO_WORKFLOW.md) and
 [delivery checks](ZOTERO_DELIVERY.md).
-Included in the 0.23.13 VSIX. The small PROV notebook trial is next; no general
-PROV exporter was added here.
+Included in the 0.23.13 VSIX. The bounded notebook exporter followed in 0.23.20.
 
 ## Implemented — configurable shared usage history
 
@@ -104,8 +103,8 @@ publication, conflict reporting and deletion markers protect offline use.
 Active studies, drafts, scheduling and the source store remain host-local.
 See [the workflow](USAGE_HISTORY.md) and
 [delivery checks and limits](SHARED_HISTORY_DELIVERY.md).
-Shared history and Zotero are included in the 0.23.13 VSIX; the small PROV
-trial remains next.
+Shared history and Zotero are included in the 0.23.13 VSIX; the notebook trial
+followed in 0.23.20.
 
 
 ## Delivered implementation — Study lifecycle
@@ -118,9 +117,9 @@ tombstones. Shared questions/snapshots, source annotations, ordinary files and
 other studies are protected. Test deletion only on disposable records.
 
 The design section below records the requested scope. Zotero reference and
-attachment linking followed the lifecycle increment. The small PROV trial
-should next retain two alternative calculations through restart, comparison and
-provenance export; it remains unimplemented.
+attachment linking followed the lifecycle increment. The notebook trial now
+retains alternative calculations through restart, comparison and provenance
+export, as described above.
 
 
 ## Current design — W3C PROV and Study lifecycle, 2026-11-10
@@ -138,8 +137,8 @@ content, with shared sources, ordinary files and other studies preserved.
 It remains independent of a general provenance engine. Earlier preservation rules
 forbid unsolicited deletion; they do not prohibit these user-invoked controls.
 
-The lifecycle commands are implemented as described above. PROV export remains
-a design goal. No genuine study was deleted during implementation. Preserve the delivered
+The lifecycle commands are implemented as described above. Bounded notebook PROV export is delivered above; a general provenance service
+remains outside this increment. No genuine study was deleted during implementation. Preserve the delivered
 source plugins and Lean study unit. Consult
 [related systems](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
 before duplicating existing capabilities.

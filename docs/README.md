@@ -19,6 +19,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Ask about a passage using Codex or MRW's separate API connector | [AI assistance](READER_AI_WORKFLOW.md) |
 | Inspect and edit a proof outline | [Proof outlines](PROOF_GRAPH_WORKFLOW.md) |
 | Use SageMath through Jupyter and SagePod | [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md) |
+| Retain, compare and export notebook results | [Notebook results](NOTEBOOK_RESULTS.md) |
 | Study Lean with editable examples, native goals and Return | [Lean study](LEAN_STUDY_WORKFLOW.md) |
 | Choose companion extensions | [Recommended extensions](RECOMMENDED_EXTENSIONS.md) |
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
@@ -78,5 +79,3 @@ for present commands and installation.
 
 - [Study lifecycle](STUDY_LIFECYCLE.md): Archive/Restore, Trash/Undo,
   permanent deletion and interrupted-operation recovery.
-
-- [Retain, compare and export notebook results](NOTEBOOK_RESULTS.md).
