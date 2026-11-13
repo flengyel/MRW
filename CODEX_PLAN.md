@@ -2,6 +2,8 @@
 
 ## Delegate document creation — 0.23.26
 
+Published and pushed; [delivery checks](docs/RELEASE_0_23_26.md). Not installed into the working window.
+
 Document creation belongs to the authoring application. New Reading Document,
 its command registration and fixed reading template are removed. Do not restore
 a parallel creation form, renamed starter command or note-template engine.
