@@ -11,6 +11,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
 | Use Markdown notes, WikiLinks and an optional Obsidian vault | [Notes and Obsidian](OBSIDIAN_WORKFLOW.md) |
+| Understand New Note, New Reading Document and companion boundaries | [Notes applications](NOTE_COMPANIONS.md) |
 | Configure Obsidian note creation | [Obsidian New Note command](OBSIDIAN_WORKFLOW.md#new-note) |
 | Find Zotero references, insert citations and retain attachments | [Zotero](ZOTERO_WORKFLOW.md) |
 | Connect and inspect shared usage history | [Usage history](USAGE_HISTORY.md) |
@@ -36,6 +37,8 @@ that version and the saved records it produced.
 
 ## Design and development
 
+- [Optional notes adapters](NOTE_COMPANIONS.md#proposed-optional-adapters): current
+  Obsidian handoff, possible Org capture and The Archive routes, and format limits.
 - [W3C PROV lab-notebook design](PROVENANCE_DESIGN.md): shared provenance model,
   plugin responsibilities and a bounded implementation trial.
 - [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
