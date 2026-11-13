@@ -2,6 +2,8 @@
 
 ## Sidebar — 0.23.28
 
+Published and pushed; [delivery checks](docs/RELEASE_0_23_28.md). Not installed into the working window.
+
 The Studies sidebar, its tree provider and row menus are removed. MRW's sidebar
 contains Contents and Commands. Preserve saved records, drafts and history:
 Resume Study, Inspect/Export Study History and lifecycle commands remain in the

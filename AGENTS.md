@@ -2,6 +2,8 @@
 
 ## Sidebar — 0.23.28
 
+Published and pushed; [delivery checks](docs/RELEASE_0_23_28.md). Not installed into the working window.
+
 The Studies sidebar, its tree provider and row menus are removed. MRW's sidebar
 contains Contents and Commands. Preserve saved records, drafts and history:
 Resume Study, Inspect/Export Study History and lifecycle commands remain in the
@@ -190,7 +192,7 @@ Complete the authorized build, verification, release and remote integration step
 before ending the task. Report remote main, package/release and installation
 status separately; identify any unfinished stage explicitly. Preserve the working
 window: publication does not authorize installation or a forced reload.
-[0.23.23 delivery](docs/RELEASE_0_23_23.md) records the latest package.
+[0.23.28 delivery](docs/RELEASE_0_23_28.md) records the latest package.
 
 ## Delivered — reader-note controls, 0.23.12
 
