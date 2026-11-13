@@ -46,10 +46,10 @@ available for this increment, and the working window was not reloaded.
 ## Zettels and recent notes
 
 **New Zettel** creates an unsaved Markdown draft in **MRW: Notes Folder**, beside
-the active document. The title is stored in YAML and an H1 heading; the filename
-is an ID formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
-`YYYYMMDDHHmm`. Occupied names receive a numeric suffix. The **Research** section
-links to the source document by a relative path. Keep both files in their
+the active document. By default it contains an H1 heading and a source link.
+The proposed filename is formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
+`YYYYMMDDHHmm`. Occupied names receive a numeric suffix. The source link uses a
+relative path. Keep both files in their
 relative locations or update that ordinary link after moving one. No PDF page
 or exact quotation is inferred. Save with Ctrl+S; VS Code owns conflicts, Undo
 and draft recovery. The source and other open drafts are preserved.
@@ -66,3 +66,25 @@ Returning from a new or recent note preserves the source location where it is
 known. A PDF return is file-level. Existing reader annotations and retained
 sources are unchanged. These commands also appear in the Command Palette and
 the MRW sidebar.
+
+**MRW: Zettel Template** is user-configurable Markdown, with literal placeholders
+`{{title}}`, `{{titleYaml}}` (a quoted YAML scalar), `{{id}}` (the proposed filename
+without `.md`), `{{source}}` (a Markdown link), and `{{cursor}}` (the insertion
+position). No template code executes. For example, a user who wants a YAML title
+can choose:
+
+```text
+---
+title: {{titleYaml}}
+---
+# {{title}}
+
+{{cursor}}
+
+{{source}}
+```
+
+This controls only newly created drafts. Existing notes can use any Markdown
+layout; YAML fields, matching title/ID conventions, `SEE ALSO` and `Research`
+headings are not required. The independent `flengyel/Zettel` specification is one
+optional set of conventions, not MRW's note schema or a runtime dependency.

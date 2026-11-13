@@ -7,6 +7,11 @@ assigned-path untitled Markdown buffers; VS Code owns Save, Undo, conflicts and
 draft recovery. The bounded recent list stores only paths and labels in existing
 workspace state. Preserve recorded roots, canonical-path checks, cancellation,
 source Return pins and dirty buffers. Do not silently convert reader annotations.
+The default note has a heading and source link only. `mrw.zettelTemplate` is a
+user-configurable literal Markdown template, not executable Templater code.
+No particular Zettel format, YAML fields or section headings are required.
+Keep MRW integration instructions in MRW; the independent `flengyel/Zettel`
+format specification must not acquire MRW requirements or editorial commentary.
 
 The 0.23.22 activation repair is published; preserve its read-only native host
 checks. Deliver this increment without installing or reloading the user's window.

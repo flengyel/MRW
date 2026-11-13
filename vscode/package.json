@@ -1183,6 +1183,13 @@
           "default": "Note",
           "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,31}$",
           "description": "ID prefix for New Zettel filenames. MRW appends the local date and time (YYYYMMDDHHmm), adding a suffix if occupied. Notes are created in MRW: Notes Folder."
+        },
+        "mrw.zettelTemplate": {
+          "type": "string",
+          "default": "# {{title}}\n\n{{cursor}}\n\n{{source}}\n",
+          "maxLength": 65536,
+          "editPresentation": "multilineText",
+          "description": "Markdown for New Zettel. Literal placeholders: {{title}}, {{titleYaml}} (quoted YAML scalar), {{id}} (proposed filename without .md), {{source}} (Markdown link), and {{cursor}}. No template code runs. Existing notes need not use this template, YAML fields or any particular section names."
         }
       }
     },

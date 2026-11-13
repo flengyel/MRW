@@ -6,10 +6,19 @@ const {noteIdentity} = require('./noteIdentity');
 const KEY = 'mrw.recentNotes.v1';
 const LIMIT = 30;
 
-function zettelText(id, title, source, root) {
+const DEFAULT_TEMPLATE = '# {{title}}\n\n{{cursor}}\n\n{{source}}\n';
+function zettelText(id, title, source, root, template = DEFAULT_TEMPLATE) {
   const label = value => value.replace(/[\\[\]]/g, '\\$&');
   const link = source ? `[${label(source.label.replace(/\s+/gu, ' '))}](<${path.relative(root, source.uri.fsPath).split(path.sep).map(encodeURIComponent).join('/')}>)` : '';
-  return `---\nid: ${JSON.stringify(id)}\ntitle: ${JSON.stringify(id + ' ' + title)}\nreference-section-title: References\n---\n# ${title}\n\n\n## SEE ALSO\n\n## Research\n${link ? '\n' + link + '\n' : ''}`;
+  const values = {'{{id}}':id, '{{title}}':title, '{{titleYaml}}':JSON.stringify(title), '{{source}}':link};
+  let text = '', cursor;
+  // One literal substitution pass: note text is never interpreted as code or
+  // recursively expanded. No vault format, fields or section names are required.
+  for (const part of template.split(/(\{\{(?:id|title|titleYaml|source|cursor)\}\})/g)) {
+    if (part === '{{cursor}}') { if (cursor === undefined) cursor = text.length; }
+    else text += values[part] ?? part;
+  }
+  return {text, cursor: cursor ?? text.length};
 }
 
 function createZettelNotes({vscode, context, folderRoot, open, eligible = () => true, now = () => new Date()}) {
@@ -76,7 +85,10 @@ function createZettelNotes({vscode, context, folderRoot, open, eligible = () => 
   }
   async function newDraft({source, validate = () => {}} = {}) {
     const root = await folderRoot();
-    const prefix = vscode.workspace.getConfiguration('mrw').get('zettelPrefix', 'Note');
+    const configuration = vscode.workspace.getConfiguration('mrw');
+    const prefix = configuration.get('zettelPrefix', 'Note');
+    const template = configuration.get('zettelTemplate', DEFAULT_TEMPLATE);
+    if (typeof template !== 'string' || !template.trim() || template.length > 65536) throw Error('MRW: Zettel Template must contain Markdown text (at most 65536 characters).');
     if (typeof prefix !== 'string' || !/^[A-Za-z][A-Za-z0-9._-]{0,31}$/.test(prefix)) throw Error('MRW: Zettel Prefix must start with a letter and contain only letters, digits, dots, underscores or hyphens (at most 32 characters).');
     const title = await vscode.window.showInputBox({title: 'New Zettel', prompt: `Title — save in ${root}`, ignoreFocusOut: true,
       validateInput: value => !value.trim() || value.length > 500 || /[\r\n\x00-\x1f]/.test(value) ? 'Enter a title on one line (at most 500 characters).' : undefined});
@@ -110,10 +122,9 @@ function createZettelNotes({vscode, context, folderRoot, open, eligible = () => 
       const editor = await vscode.window.showTextDocument(doc, {preview: false, viewColumn: vscode.ViewColumn.Beside});
       validate();
       if (doc.getText()) throw Error('This Zettel draft acquired text while opening. Its contents were preserved.');
-      const text = zettelText(id, title.trim(), source, root);
+      const {text, cursor} = zettelText(id, title.trim(), source, root, template);
       if (!await editor.edit(edit => edit.insert(new vscode.Position(0, 0), text))) throw Error('The editor declined the new note text. No note was saved.');
-      const start = text.indexOf('\n\n\n## SEE ALSO') + 2;
-      editor.selection = new vscode.Selection(doc.positionAt(start), doc.positionAt(start));
+      editor.selection = new vscode.Selection(doc.positionAt(cursor), doc.positionAt(cursor));
       return doc;
     } finally { reserved.delete(uri.fsPath); }
   }
@@ -130,4 +141,4 @@ function createZettelNotes({vscode, context, folderRoot, open, eligible = () => 
   ]) if (disposable) context.subscriptions.push(disposable);
   return {remember, recent, newDraft};
 }
-module.exports = {createZettelNotes, zettelText};
+module.exports = {createZettelNotes, zettelText, DEFAULT_TEMPLATE};

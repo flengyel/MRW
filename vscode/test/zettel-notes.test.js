@@ -2,7 +2,7 @@
 const test = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os');
 const {pathToFileURL, fileURLToPath} = require('node:url');
-const {createZettelNotes} = require('../src/zettelNotes');
+const {createZettelNotes, zettelText} = require('../src/zettelNotes');
 const KEY = 'mrw.recentNotes.v1';
 const fileUri = file => ({scheme:'file', fsPath:file, toString:()=>pathToFileURL(file).href});
 class Position { constructor(line, character) { Object.assign(this,{line,character}); } }
@@ -16,7 +16,7 @@ function host(root, state = new Map()) {
   const h={root, title:'A calculation', prefix:'Num', state, docs, events, picks, shown, errors, opened};
   const vscode={Position, Selection:class {constructor(start,end){Object.assign(this,{start,end});}}, ViewColumn:{Beside:-2},
     Uri:{file:fileUri, parse:value=>fileUri(fileURLToPath(value)), from:({scheme,path:p})=>({scheme,path:p,fsPath:p,toString:()=>scheme+':'+p})},
-    workspace:{textDocuments:docs,getConfiguration:()=>({get:()=>h.prefix}),
+    workspace:{textDocuments:docs,getConfiguration:()=>({get:(key,fallback)=>key==='zettelPrefix'?h.prefix:key==='zettelTemplate'?(h.template??fallback):fallback}),
       onDidSaveTextDocument(fn){events.save=fn;return {dispose(){}};},
       async openTextDocument(uri){
         const prior=docs.find(d=>d.uri.toString()===uri.toString()); if(prior)return prior;
@@ -37,8 +37,8 @@ test('Zettel is an ordinary unsaved draft in the selected folder with an encoded
   const root=await fixture(t),h=host(root),source=path.join(root,'papers','a #1.pdf');
   const doc=await h.notes.newDraft({source:{uri:fileUri(source),label:'Paper [1]'}});
   assert.equal(doc.uri.scheme,'untitled');assert.equal(path.basename(doc.uri.fsPath),'Num202611130907.md');
-  assert.match(doc.text,/title: "Num202611130907 A calculation"/);assert.match(doc.text,/reference-section-title: References/);
-  assert.match(doc.text,/## Research\n\n\[Paper \\\[1\\\]\]\(<papers\/a%20%231.pdf>\)/);
+  assert.match(doc.text,/^# A calculation\n/);assert.doesNotMatch(doc.text,/^---|id:|title:|Research|SEE ALSO|References/m);
+  assert.match(doc.text,/\[Paper \\\[1\\\]\]\(<papers\/a%20%231.pdf>\)/);
   assert.equal(h.shown[0].options.viewColumn,-2);assert.equal(doc.isDirty,true);
   assert.deepEqual(await fs.readdir(root),[]);assert.equal(h.state.has(KEY),false);
 });
@@ -90,4 +90,18 @@ test('recent list stays bounded and excludes files outside the selected folder',
   for(let n=0;n<35;n++){const file=path.join(root,n+'.md');await fs.writeFile(file,'# '+n);await h.notes.remember(fileUri(file));}
   assert.equal(h.state.get(KEY).length,30);assert.match(h.state.get(KEY)[0].uri,/34.md$/);
   h.pickHook=()=>undefined;await h.notes.recent();assert.equal(h.opened.length,0);
+});
+
+
+test('custom templates are optional literal text, with YAML quoting and no recursive execution',()=>{
+  const title = 'A "title" {{source}}';
+  const template = '---\nname: {{titleYaml}}\nkey: {{id}}\n---\n# {{title}}\n{{cursor}}<% executable? %>\n{{unknown}}';
+  const result = zettelText('id-1',title,undefined,'/tmp',template);
+  assert.ok(result.text.includes('name: '+JSON.stringify(title)));
+  assert.ok(result.text.includes('key: id-1'));assert.ok(result.text.includes('# '+title));
+  assert.equal(result.text.slice(result.cursor),'<% executable? %>\n{{unknown}}');
+});
+test('invalid templates fail before opening a draft or prompting for a title',async t=>{
+  const root=await fixture(t),h=host(root);h.template='';
+  await assert.rejects(h.notes.newDraft(),/Zettel Template/);assert.equal(h.input,undefined);assert.equal(h.docs.length,0);
 });

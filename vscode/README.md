@@ -348,8 +348,9 @@ producer-reported execution remain distinct. See the
 ### Zettels while reading
 
 Choose the Zettelkasten with **MRW: Choose Notes Folder**. **New Zettel** opens an
-ordinary Markdown draft beside the current document, with its title, ID filename
-and a source link under **Research**. Save with Ctrl+S. **Recent Notes** reopens
+ordinary Markdown draft beside the current document, with a heading and source
+link. **MRW: Zettel Template** controls the layout; no YAML fields or section
+names are required. Save with Ctrl+S. **Recent Notes** reopens
 up to thirty notes by title and ID across restarts. Notes stay in the selected
 folder; existing reader annotations are preserved. No OCR is needed to write a
 separate note about a scanned PDF.

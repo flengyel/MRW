@@ -452,8 +452,9 @@ from the MRW workspace; an Obsidian installation is optional.
 From the document's **MRW Document** menu, choose **New Zettel** and enter a title.
 An ordinary Markdown draft opens beside the document. Its proposed filename uses
 an ID such as `Note202611130907.md`; change the prefix in **MRW: Zettel Prefix**
-if desired. The draft includes a YAML title, an H1 heading and a **Research**
-section containing a relative link to the document. Write your note and press
+if desired. The default draft has an H1 heading and a relative source link.
+Change its layout in **MRW: Zettel Template**; existing notes need not use that
+template or any particular metadata or headings. Write your note and press
 **Ctrl+S** to save it in the selected notes folder. Nothing is written to the
 vault before Save. VS Code handles editing, Undo and unsaved-draft recovery.
 
@@ -466,3 +467,9 @@ the note. For a PDF it reopens the file; MRW does not preserve the PDF page.
 A separate note needs no OCR. Selecting or searching text in a scanned PDF does.
 Existing inline reader annotations remain in their saved sources; this command
 does not convert or remove them.
+
+The template substitutes `{{title}}`, `{{id}}` (the proposed filename without
+`.md`), `{{source}}` (a Markdown link), and `{{cursor}}` (the insertion position).
+Use `{{titleYaml}}` for a quoted YAML title if your own format uses YAML. These
+are literal substitutions; no Obsidian Templater code runs. MRW does not require
+the `flengyel/Zettel` conventions or alter that format specification.
