@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.26 — Delegate document creation.**
-MRW delegates creation to the authoring application. New Note opens Obsidian
-or a blank VS Code editor; the separate reading-template command is removed.
-This release includes the 0.23.22 startup repair.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.26/mrw-0.23.26.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.26).
+**MRW 0.23.27 — Start a note from MRW.**
+Choose **New Note…** in MRW to invoke your configured Obsidian creation command,
+or open a blank VS Code editor for another notes folder. This documentation
+update makes that starting point explicit; runtime behavior is unchanged.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.27/mrw-0.23.27.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.27).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -73,8 +73,12 @@ its retained source.
 
 PDFs open in a registered reader or, on request, the system reader.
 MRW does not extract PDF text, build PDF Contents or restore PDF pages.
-Create documents in their authoring application, then open them in MRW.
-[New Note](docs/NOTE_COMPANIONS.md) delegates to Obsidian or the VS Code editor.
+To start a note from MRW, choose **New Note…** in **Commands** or the
+**MRW Document** menu. For a configured Obsidian vault, MRW brings Obsidian
+forward and runs your selected creation command. Other notes folders use a blank
+VS Code Markdown editor. Your current document stays open.
+See [note creation and setup](docs/NOTE_COMPANIONS.md).
+For other document types, use their authoring application and **Open Document**.
 Ordinary reading requires no problem record or exercise form.
 
 Start with **MRW: Open Tutorial**, or read the
@@ -97,7 +101,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.26.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.27.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -107,8 +111,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.26.vsix
-sha256sum vscode/mrw-0.23.26.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.27.vsix
+sha256sum vscode/mrw-0.23.27.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -248,7 +252,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.26 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.27 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 
@@ -266,9 +270,10 @@ producer-reported execution remain distinct. See the
 
 ### Notes while reading
 
-Choose your notes folder with **MRW: Choose Notes Folder**. For an Obsidian
-vault, **New Note** invokes your configured Obsidian command; Obsidian handles
-the template and filename. See [setup](docs/OBSIDIAN_WORKFLOW.md#new-note).
+Choose your notes folder with **MRW: Choose Notes Folder**. Then choose
+**New Note…** in MRW's **Commands** view or **MRW Document** menu. For an
+Obsidian vault, MRW brings Obsidian forward and runs your configured creation
+command; Obsidian handles the template and filename. See [setup](docs/OBSIDIAN_WORKFLOW.md#new-note).
 For other folders it opens a blank Markdown editor beside the document.
 Use VS Code's Save to choose its filename and location.
 

@@ -4,7 +4,9 @@
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_26.md). Not installed into the working window.
 
-Document creation belongs to the authoring application. New Reading Document,
+Present New Note as a way to start note creation from MRW: it invokes the
+configured Obsidian command or opens a blank VS Code editor. Make this entry
+point explicit in guides; the invoked application owns creation. New Reading Document,
 its command registration and fixed reading template are removed. Do not restore
 a parallel creation form, renamed starter command or note-template engine.
 New Note delegates to the configured Obsidian command or a blank VS Code editor;

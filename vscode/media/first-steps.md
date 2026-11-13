@@ -4,6 +4,12 @@ Start with **Open Document…** in MRW's **Commands** view, or press **F1** and 
 **MRW: Open Document…**. Choose a note or paper. Questions, solutions
 and commentary can stay in their notes, connected by ordinary links.
 
+To start a new note from MRW, choose **New Note…** in **Commands**, or run
+**MRW: New Note…** from the Command Palette. For a configured Obsidian vault,
+MRW brings Obsidian forward and runs your selected creation command. Other notes
+folders use a blank VS Code Markdown editor. Your current document stays open.
+See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
+
 **Contents** lists headings and links in the selected Markdown document.
 **Commands** keeps opening and navigation controls available. **Studies** lists
 separately saved work; it is not required for reading. Opening or following a
@@ -68,8 +74,9 @@ A PDF opens in an available registered reader. If none is available, MRW offers
 **Open with system reader**. PDF page restoration depends on the external reader;
 MRW supplies neither a PDF reader nor text extraction, PDF Contents or page
 restoration. Other formats use their
-registered host editors. Create documents in the application you use to write
-them, then open them in MRW. **New Note** delegates to Obsidian or the VS Code editor.
+registered host editors. **New Note…** starts note creation from MRW as described
+above. To create other kinds of documents, use their authoring application or
+VS Code extension, then **Open Document**.
 
 
 Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
@@ -451,9 +458,10 @@ for the activation error. Notes and saved research do not need to be recreated.
 Choose your Zettelkasten with **Choose Notes Folder**. The folder stays separate
 from the MRW workspace; an Obsidian installation is optional.
 
-From the document's **MRW Document** menu, choose **New Note**. If the selected
-folder is an Obsidian vault, MRW runs your Obsidian new-note command. Obsidian
-handles the template, filename and prompts; MRW creates no preliminary file.
+Choose **New Note…** in MRW's **Commands** view or the document's **MRW Document**
+menu. If the selected folder is an Obsidian vault, MRW brings Obsidian forward
+and runs your configured new-note command. Complete its prompts in Obsidian;
+Obsidian supplies the template and filename.
 Enable Obsidian's **Settings → General → Command line interface** and set
 **MRW: Obsidian New Note Command** to your template's creation command.
 See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
@@ -469,9 +477,8 @@ source link. Existing notes and other open drafts are preserved.
 A failed Obsidian handoff reports the error; it does not create a fallback file
 or repeat the command.
 
-**New Note** hands creation to the notes application or host editor. For papers,
-notebooks, Lean files and other documents, use the corresponding application,
-then **Open Document** in MRW. MRW supplies no reading-document starter template.
+For papers, notebooks, Lean files and other documents, use the corresponding
+application or VS Code extension, then **Open Document** in MRW.
 
 Use **Recent Notes** to reopen a note by title and ID. It lists up to thirty
 notes opened or saved in this workspace, scoped to the selected notes folder,

@@ -8,9 +8,11 @@ work can remain in scans, PDFs or other attachments linked from a note.
 MRW also supports links between Obsidian notes and separately retained sources
 or passages. Those links are optional and are described below.
 
-For new notes, see [New Note](#new-note). No format is imposed on existing notes.
-[Notes applications](NOTE_COMPANIONS.md) explains New Note versus New Reading
-Document and the proposed optional adapters for other editors.
+To start a note from MRW, choose **New Note…** in its **Commands** view or
+**MRW Document** menu. MRW brings Obsidian forward and invokes your configured
+creation command; see [setup](#new-note). No format is imposed on existing notes.
+[Notes applications](NOTE_COMPANIONS.md) describes the supported routes and
+proposed adapters for other editors.
 
 ## Configure Obsidian with MRW
 
@@ -72,7 +74,9 @@ editor buffers. The current document stays open in MRW.
    called `Templates/NewFileTemplate.md`, use
    `templater-obsidian:create-Templates/NewFileTemplate.md`. Enable the template
    in Templater's template hotkeys so that this command is registered.
-3. Run **New Note** and complete the prompts in Obsidian. Use your **Open in MRW**
+3. In MRW, choose **New Note…** or run **MRW: New Note…** from the Command Palette.
+   MRW brings Obsidian forward and runs the chosen command. Complete its prompts
+   in Obsidian. Use your **Open in MRW**
    command to bring the completed note back. It enters MRW's Recent Notes when
    MRW opens it; that list does not read Obsidian's recent-file history.
 

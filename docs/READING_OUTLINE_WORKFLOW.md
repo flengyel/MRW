@@ -35,10 +35,13 @@ tree and identifies the active file, with directions for selecting its Markdown
 or returning to the selected document. It does not display an unrelated note's
 headings beneath a PDF or text file.
 
-Create documents in their authoring application, then use **Open Document**.
-**New Note** delegates to Obsidian or the VS Code editor; see
-[notes applications](NOTE_COMPANIONS.md). Untitled Markdown works for the
-current session. MRW keeps the chosen editor groups and sidebars; it does not
+To start a note from MRW, choose **New Note…** in **Commands** or the
+**MRW Document** menu. For a configured Obsidian vault, MRW brings Obsidian
+forward and runs your selected creation command; other notes folders use a blank
+VS Code Markdown editor. The current document stays open. See
+[note creation and setup](NOTE_COMPANIONS.md). Create other kinds of documents
+with their authoring application or VS Code extension, then use **Open Document**.
+Untitled Markdown works for the current session. MRW keeps the chosen editor groups and sidebars; it does not
 maximize reading or hide Codex and other editors automatically.
 
 Other formats use a registered host editor. If no PDF reader is available, MRW

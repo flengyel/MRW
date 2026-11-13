@@ -4,13 +4,22 @@ A note is a document used for working thoughts, arguments or references. It is
 not a separate MRW file type. A Markdown note can have Contents, links and
 backlinks just like another Markdown document.
 
-## Creation belongs to the authoring application
+## Start a note from MRW
 
-**New Note** is a handoff. For a selected Obsidian vault it invokes the configured
-Obsidian command; for another notes folder it opens a blank VS Code Markdown
-editor. The application owns its prompts, templates, filename and save operation.
-For other documents, use the corresponding authoring application and then
-**Open Document** in MRW.
+Choose **New Note…** in MRW's **Commands** view or **MRW Document** menu, or run
+**MRW: New Note…** from the Command Palette.
+
+- For a configured Obsidian vault, MRW brings Obsidian forward and runs your
+  selected creation command. Complete its prompts in Obsidian; it supplies the
+  template and filename. See [configuration](OBSIDIAN_WORKFLOW.md#new-note).
+- For another notes folder, MRW opens a blank VS Code Markdown editor beside
+  the current document. Use Save to choose its filename and location.
+
+Your current MRW document stays open. Use **Open in MRW** from Obsidian to return
+with the note, or select it through **Open Document**. For other kinds of
+documents, use their authoring application or VS Code extension, then open the
+file in MRW. The integrations available now are Obsidian and the VS Code editor;
+MRW does not yet invoke Emacs or The Archive.
 
 **New Reading Document** and its fixed reading headings were removed in 0.23.26.
 Previously created documents remain ordinary Markdown files and continue to open
