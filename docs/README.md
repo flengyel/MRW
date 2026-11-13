@@ -37,6 +37,9 @@ that version and the saved records it produced.
 
 ## Design and development
 
+- [Interface and companion audit — 13 November](INTERFACE_AUDIT_20261113.md): current
+  tool access, missing integrations, observed limits and the next interface repairs.
+
 - [Optional notes adapters](NOTE_COMPANIONS.md#proposed-optional-adapters): current
   Obsidian handoff, possible Org capture and The Archive routes, and format limits.
 - [W3C PROV lab-notebook design](PROVENANCE_DESIGN.md): shared provenance model,

@@ -1,5 +1,17 @@
 # Codex continuation: reading and research
 
+## Interface audit — next repair
+
+The [13 November audit](INTERFACE_AUDIT_20261113.md) distinguishes implemented tools hidden in the
+interface from proposed integrations. It is an audit, not a delivered UI repair.
+Prioritize access to notebook results and companion setup, context-bound Lean
+lesson actions, and coherent command grouping. Review the remaining study-creation
+entry points separately from preserving saved work. Keep reader notes before AI
+actions and identify the API versus Codex handoff route. Do not create another
+registration system or claim a proposed adapter is installed. Preserve existing
+IDs, notes, drafts, saved sources and the working window.
+
+
 ## Sidebar — 0.23.28
 
 Published and pushed; [delivery checks](RELEASE_0_23_28.md). Not installed into the working window.
