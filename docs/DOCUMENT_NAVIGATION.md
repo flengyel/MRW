@@ -47,19 +47,13 @@ available for this increment, and the working window was not reloaded.
 
 ## Notes while reading
 
-For configuration steps, placeholder details and portable examples, see
-[Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md).
+For Obsidian command configuration, see [New Note](OBSIDIAN_WORKFLOW.md#new-note).
 
-**New Note** uses **MRW: Notes Folder**. In an Obsidian vault, it invokes your
-configured Obsidian new-note command, leaving the current MRW document open.
-Obsidian owns creation and the template; see [setup](OBSIDIAN_WORKFLOW.md#new-note). In an ordinary folder, it opens an unsaved draft beside the document;
-Ctrl+S saves it. The default text contains an H1 heading and a source link.
-For the ordinary-folder draft, the proposed filename is formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
-`YYYYMMDDHHmm`. Occupied names receive a numeric suffix. The source link uses a
-relative path. Keep both files in their
-relative locations or update that ordinary link after moving one. No PDF page
-or exact quotation is inferred. For the Markdown editor path, Save, conflicts,
-Undo and draft recovery belong to VS Code. The source and other open drafts are preserved.
+**New Note** uses **MRW: Notes Folder** to choose the companion. For a vault,
+Obsidian handles the configured command, template and filename. For an ordinary
+folder, MRW opens a blank native Markdown editor beside the document. VS Code
+owns Save, filename selection, Undo and draft recovery. No title prompt, generated
+ID, default text or source link is added by MRW.
 
 **Recent Notes** lists the thirty most recently opened or saved Markdown notes
 seen by MRW in this workspace. It shows the YAML title, or H1 fallback, beside
@@ -74,24 +68,5 @@ known. A PDF return is file-level. Existing reader annotations and retained
 sources are unchanged. These commands also appear in the Command Palette and
 the MRW sidebar.
 
-**MRW: Zettel Template** is user-configurable Markdown, with literal placeholders
-`{{title}}`, `{{titleYaml}}` (a quoted YAML scalar), `{{id}}` (the proposed filename
-without `.md`), `{{source}}` (a Markdown link), and `{{cursor}}` (the insertion
-position). No template code executes. For example, a user who wants a YAML title
-can choose:
-
-```text
----
-title: {{titleYaml}}
----
-# {{title}}
-
-{{cursor}}
-
-{{source}}
-```
-
-This controls only newly created drafts. Existing notes can use any Markdown
-layout; YAML fields, matching title/ID conventions, `SEE ALSO` and `Research`
-headings are not required. The independent `flengyel/Zettel` specification is one
-optional set of conventions, not MRW's note schema or a runtime dependency.
+The independent `flengyel/Zettel` specification describes one optional set of
+conventions. MRW does not define a note schema or require those conventions.

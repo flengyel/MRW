@@ -460,17 +460,13 @@ Your current MRW document stays open. The existing
 **Open in MRW** Obsidian command brings that same file back to MRW. Obsidian
 runs as a separate application, not inside the MRW pane.
 
-For an ordinary notes folder, enter a title; the command opens an unsaved Markdown draft beside
-the document. Use **Ctrl+S** to save it. VS Code handles editing, Undo and draft
-recovery. No other open note is saved by this command.
+For an ordinary notes folder, the command opens a blank Markdown editor beside
+the document. Use **Ctrl+S** to choose its filename and location. VS Code handles
+editing, Undo and draft recovery. MRW adds no title prompt, generated ID or
+source link. Existing notes and other open drafts are preserved.
 
-The filename uses an ID such as `Note202611130907.md`; change the prefix in
-**MRW: Zettel Prefix** if desired. The default text has a heading and relative
-source link. Configure the layout with **MRW: Zettel Template**; existing notes
-need not use that template or any particular metadata or headings.
-These template settings apply only to the ordinary-folder draft. They do not
-change Obsidian's template. A failed Obsidian handoff reports the error; it does
-not create a fallback note or repeat the command.
+A failed Obsidian handoff reports the error; it does not create a fallback file
+or repeat the command.
 
 **New Note** is the creation action in MRW's main controls. The older **New
 Reading Document…** command remains in the Command Palette for creating a

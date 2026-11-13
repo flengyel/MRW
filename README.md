@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.24 — Lean introduction and New Note.**
-The Lean study begins with an introduction and reading route. New Note opens
-Obsidian when your notes folder is a vault, keeping the MRW document open.
+**MRW 0.23.25 — Reuse companion note creation.**
+MRW delegates note creation to Obsidian or a blank VS Code Markdown editor.
+Its redundant note template and filename generator have been removed.
 This release includes the 0.23.22 startup repair.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.24/mrw-0.23.24.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.24).
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.25/mrw-0.23.25.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.25).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -96,7 +96,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.24.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.25.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -106,8 +106,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.24.vsix
-sha256sum vscode/mrw-0.23.24.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.25.vsix
+sha256sum vscode/mrw-0.23.25.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -247,7 +247,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.24 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.25 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 
@@ -265,13 +265,12 @@ producer-reported execution remain distinct. See the
 
 ### Notes while reading
 
-Choose a folder with **MRW: Choose Notes Folder**. **New Note** creates a Markdown
-note there, using your template and a link to the document being read. For an
-Obsidian vault, MRW saves the new file and opens it in Obsidian, leaving the
-current MRW document open. Other folders open an unsaved Markdown draft beside
-the document; use Ctrl+S to save it. **MRW: Zettel Template** controls the layout;
-no YAML fields or section names are required. **Recent Notes** reopens notes
-by title and ID. A separate note about a scanned PDF needs no OCR.
+Choose your notes folder with **MRW: Choose Notes Folder**. For an Obsidian
+vault, **New Note** invokes your configured Obsidian command; Obsidian handles
+the template and filename. See [setup](docs/OBSIDIAN_WORKFLOW.md#new-note).
+For other folders it opens a blank Markdown editor beside the document.
+Use VS Code's Save to choose its filename and location.
 
-See [Markdown note templates](docs/MARKDOWN_NOTE_TEMPLATES.md) for configuration,
-placeholders, examples and interoperability with Obsidian and The Archive.
+**Recent Notes** reopens notes MRW has seen by title and filename. The current
+document and saved notes are preserved. A separate note about a scanned PDF
+needs no OCR.

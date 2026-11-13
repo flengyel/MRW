@@ -65,6 +65,11 @@ function harness(f, state = new Map(), options = {}) {
       workspaceFolders: [{ uri: uri(f.root) }],
       get textDocuments() { return [...stored.values()]; },
       async openTextDocument(location) {
+        if (!location.scheme) {
+          assert.deepEqual(location,{language:'markdown'});
+          const name='Untitled-'+(stored.size+1);
+          location={scheme:'untitled',fsPath:name,toString:()=>`untitled:${name}`};
+        }
         reads.push(location.fsPath); assert.ok(!/\.pdf$/i.test(location.fsPath), 'PDF bytes must not be opened as text');
         if (openHook) await openHook(location);
         if (stored.has(location.toString())) return stored.get(location.toString());
@@ -126,13 +131,13 @@ function harness(f, state = new Map(), options = {}) {
   return apiHarness;
 }
 
-test('new Zettel from a PDF keeps the reader, names an unsaved vault draft and restores the PDF after restart', async t => {
+test('New Note in an ordinary folder opens blank native Markdown and restores the PDF after restart', async t => {
   const f=await fixture(t),state=new Map(),h=harness(f,state,{preview:true,notesFolder:f.notes});
   await h.open('paper.pdf');
   const before=await fs.readFile(f.file('paper.pdf'));
   const draft=await h.commands.get('mrw.newZettel')();
-  assert.equal(draft.uri.scheme,'untitled');assert.equal(path.dirname(draft.uri.fsPath),f.notes);
-  assert.match(draft.getText(),/\[paper.pdf\]\(<paper.pdf>\)/);assert.equal(h.shown.at(-1).settings.viewColumn,-2);
+  assert.equal(draft.uri.scheme,'untitled');assert.equal(draft.getText(),'');
+  assert.equal(draft.languageId,'markdown');assert.equal(h.shown.at(-1).settings.viewColumn,-2);
   await assert.rejects(fs.stat(draft.uri.fsPath),/ENOENT/);
   const restarted=harness(f,state,{preview:true,notesFolder:f.notes});assert.equal(await restarted.documents.returnToDocument(),true);
   assert.equal(restarted.hostCalls.at(-1).args[0].fsPath,f.file('paper.pdf'));
@@ -151,14 +156,16 @@ test('recent notes use dirty text and preserve the originating PDF without openi
   assert.equal(await fs.readFile(f.file('2b.md'),'utf8'),f.contents['2b.md']);
 });
 
-test('Zettel cancellation and changed origin preserve earlier return state and do not create files',async t=>{
-  const f=await fixture(t);let input,answer;
-  const h=harness(f,new Map(),{notesFolder:f.notes,titleInput:()=>input?input():answer});
+test('changed origin preserves earlier Return and creates no file while opening a native draft',async t=>{
+  const f=await fixture(t),h=harness(f,new Map(),{notesFolder:f.notes});
   const source=await h.open('1a.md');await h.follow(source,'2b');const prior=structuredClone(h.state.get('mrw.documents.v1').origin);
-  await h.focus(source);await h.commands.get('mrw.newZettel')();
-  assert.deepEqual(h.state.get('mrw.documents.v1').origin,prior);
-  h.selection(0,5);input=()=>{h.change(source,1,1,'X');return 'Title';};
+  await h.focus(source);h.selection(0,5);h.setOpenHook(location=>{if(location.scheme==='untitled')h.change(source,1,1,'X');});
   await assert.rejects(h.commands.get('mrw.newZettel')(),/originating document location changed/);
+  const kept=h.state.get('mrw.documents.v1').origin;
+  assert.equal(kept.uri,prior.uri);assert.equal(kept.start,prior.start);assert.equal(kept.end,prior.end);
+  assert.deepEqual(kept.initial,prior.initial);assert.equal(kept.invalid,false);
+  assert.equal(kept.revision,require('../src/navigation').digest(source.text));
+  assert.equal(await h.documents.returnToDocument(),true);
   assert.equal(h.shown.some(x=>x.doc.uri.scheme==='untitled'),false);
   assert.deepEqual((await fs.readdir(f.notes)).sort(),Object.keys(f.contents).sort());
 });

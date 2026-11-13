@@ -108,9 +108,8 @@ Zettelkasten note format, templates and supporting scripts. Its
 software and working conventions. These are companion references; MRW does not
 require the Zettel format, its scripts or its Obsidian plugins.
 
-The [Markdown note template guide](MARKDOWN_NOTE_TEMPLATES.md) documents the
-New Note setting and examples. It distinguishes ordinary Markdown files from
-Obsidian's template engine and The Archive's search-based WikiLinks; The Archive
+[New Note](OBSIDIAN_WORKFLOW.md#new-note) invokes the configured Obsidian command
+and its template. Other folders use a blank VS Code Markdown editor. The Archive's
 desktop integration has not been tested.
 
 ## Zotero

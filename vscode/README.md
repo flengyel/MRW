@@ -1,11 +1,11 @@
 # Mathematical Research Workstation for VS Code
 
-0.23.24 adds a distinct Lean study introduction and clarifies the reading route.
-New Note invokes your Obsidian note-creation command when the notes folder is a vault;
-ordinary folders use a Markdown draft. Recent Notes reopens saved notes.
+0.23.25 removes MRW's redundant note template and filename generator. New Note
+invokes your Obsidian note-creation command for a vault; ordinary folders use a
+blank VS Code Markdown editor. Recent Notes reopens saved notes.
 This version also includes the 0.23.22 startup repair. No saved-data migration is required.
 
-MRW 0.23.24 opens mathematical notes and papers in place, follows references,
+MRW 0.23.25 opens mathematical notes and papers in place, follows references,
 and keeps a route back to the passage being read. It adds Contents, backlinks,
 retained source passages, reader annotations and explicit TikZ rendering to a
 VS Code workspace. The extension is experimental.
@@ -130,8 +130,8 @@ one private store are unsupported.
 
 ## Package and install a VSIX
 
-[Download MRW 0.23.24](https://github.com/flengyel/MRW/releases/download/v0.23.24/mrw-0.23.24.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.24).
+[Download MRW 0.23.25](https://github.com/flengyel/MRW/releases/download/v0.23.25/mrw-0.23.25.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.25).
 Updates from GitHub require installing the newer VSIX. For publication and build
 identity, follow [the release procedure](../docs/RELEASING.md).
 
@@ -140,12 +140,12 @@ From the repository root, with Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.24.vsix
-sha256sum vscode/mrw-0.23.24.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.25.vsix
+sha256sum vscode/mrw-0.23.25.vsix
 ```
 
 Packaging bundles the Python core and uses pinned `@vscode/vsce` 4.0.0 to create
-`vscode/mrw-0.23.24.vsix`. It publishes nothing. The fixed epoch and UTC make
+`vscode/mrw-0.23.25.vsix`. It publishes nothing. The fixed epoch and UTC make
 archive timestamps reproducible. Use Linux npm in WSL and record the resulting
 archive's hash rather than reusing an earlier package's hash.
 
@@ -156,11 +156,11 @@ caches and generated archives are excluded from the package.
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…**, or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.24.vsix
+code --install-extension /absolute/path/to/mrw-0.23.25.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.24` is installed on the workspace host. Save unfinished
+Confirm `flengyel.mrw@0.23.25` is installed on the workspace host. Save unfinished
 work before a requested reload and retain workspace storage when upgrading.
 The bridge runs the bundled core through `python3 -I`; no editable Python
 installation is needed. See [installation](../docs/INSTALLATION.md).
@@ -321,7 +321,7 @@ archived studies and Trash. See [lifecycle and recovery](../docs/STUDY_LIFECYCLE
 
 ## Zotero references
 
-MRW 0.23.24 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.25 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](../docs/ZOTERO_WORKFLOW.md).
 
@@ -348,11 +348,12 @@ producer-reported execution remain distinct. See the
 
 ### Notes while reading
 
-Choose a folder with **MRW: Choose Notes Folder**. **New Note** opens a new note
-there. For an
-Obsidian vault, MRW invokes your configured Obsidian new-note command, leaving
-the current MRW document open. Obsidian owns the template and filename; see
-[setup](../docs/OBSIDIAN_WORKFLOW.md#new-note). Other folders open an unsaved Markdown draft beside
-the document with a source link; use Ctrl+S to save it. **MRW: Zettel Template** controls that draft's layout;
-no YAML fields or section names are required. **Recent Notes** reopens notes
-by title and ID. A separate note about a scanned PDF needs no OCR.
+Choose your notes folder with **MRW: Choose Notes Folder**. For an Obsidian
+vault, **New Note** invokes your configured Obsidian command; Obsidian handles
+the template and filename. See [setup](../docs/OBSIDIAN_WORKFLOW.md#new-note).
+For other folders it opens a blank Markdown editor beside the document.
+Use VS Code's Save to choose its filename and location.
+
+**Recent Notes** reopens notes MRW has seen by title and filename. The current
+document and saved notes are preserved. A separate note about a scanned PDF
+needs no OCR.

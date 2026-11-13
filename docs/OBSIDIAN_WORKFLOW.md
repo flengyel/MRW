@@ -8,8 +8,7 @@ work can remain in scans, PDFs or other attachments linked from a note.
 MRW also supports links between Obsidian notes and separately retained sources
 or passages. Those links are optional and are described below.
 
-For new notes, see [New Note](#new-note). Ordinary folders use the optional
-[MRW template](MARKDOWN_NOTE_TEMPLATES.md); no format is imposed on existing notes.
+For new notes, see [New Note](#new-note). No format is imposed on existing notes.
 
 ## Configure Obsidian with MRW
 
@@ -90,8 +89,9 @@ or the standard Windows user installation from WSL. The vault remains on the
 Windows filesystem in the WSL case. A custom installation needs this setting.
 The workspace must be trusted before its configured command can run.
 
-For a folder without `.obsidian`, New Note instead opens a Markdown draft in
-VS Code using the [MRW template](MARKDOWN_NOTE_TEMPLATES.md). Obsidian is optional.
+For a folder without `.obsidian`, New Note opens a blank Markdown editor in
+VS Code. Use Save to choose the filename and location. MRW supplies no template
+or generated filename. Obsidian is optional.
 
 ## Open a notes folder without import
 

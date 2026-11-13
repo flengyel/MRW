@@ -16,7 +16,7 @@ const { workspaceRoute } = require('./companionLinks');
 const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
 const { createDocumentPicker } = require('./documentPicker');
-const { createZettelNotes } = require('./zettelNotes');
+const { createRecentNotes } = require('./recentNotes');
 const { createObsidianNote } = require('./obsidianNotes');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins, obsidianNote = createObsidianNote }) {
@@ -41,7 +41,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   const candidates = new Set();
   context.subscriptions.push({dispose:()=>chooser?.cancel()});
   const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
-  const notes = createZettelNotes({ vscode, context, folderRoot, eligible: isNote });
+  const notes = createRecentNotes({ vscode, context, folderRoot, eligible: isNote });
   function persist() {
     const value = { workspace, grants: [...grants], folder, recentFolders: [...recentFolders], last, origin, location: lastLocation };
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
@@ -558,8 +558,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
         if (pending) { origin = pending.location; await persist(); await onNavigated(); }
         return;
       }
-      const source = uri && {uri, label: markdown(uri.fsPath) ? noteIdentity(await vscode.workspace.openTextDocument(uri), {headingFallback:true}).label : path.basename(uri.fsPath)};
-      const doc = await notes.newDraft({source, validate});
+      validate();
+      const doc = await vscode.workspace.openTextDocument({language:'markdown'});
+      validate();
+      await vscode.window.showTextDocument(doc, {preview:false, viewColumn:vscode.ViewColumn.Beside});
       validate();
       if (doc && pending) { origin = pending.location; await persist(); await onNavigated(); }
       return doc;

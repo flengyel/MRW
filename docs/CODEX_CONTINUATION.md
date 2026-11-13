@@ -1,5 +1,20 @@
 # Codex continuation: reading and research
 
+## Reuse companion note creation — 0.23.25
+
+MRW's note template, filename generator, title prompt and their configuration
+settings are removed. New Note delegates to the configured Obsidian command for
+a vault, or opens a blank native Markdown editor for other folders. Preserve the
+Obsidian template and naming rules; VS Code owns ordinary Save and filenames.
+Do not reconstruct a reduced copy of either workflow. Check existing companion
+commands before implementing another note-creation feature.
+
+Recent Notes retains its existing store and behavior. Preserve saved notes,
+dirty buffers, source Return locations, private records and the working window.
+The descriptions below of MRW templates and assigned-path drafts describe older
+releases and do not authorize restoring that implementation. Publication does
+not authorize installation or reload.
+
 ## Lean introduction and New Note — 0.23.24
 
 Published and pushed; [delivery checks](RELEASE_0_23_24.md). Not installed into the working window.
@@ -15,8 +30,8 @@ file, insert its own template, duplicate the title prompt, or retry an uncertain
 command. Preserve vault-path verification, command availability checks, workspace
 trust and the current document. See [configuration](OBSIDIAN_WORKFLOW.md#new-note).
 
-Ordinary folders retain the assigned-path Markdown draft and configurable MRW
-template described below. New Reading Document remains in the Command Palette;
+The ordinary-folder template path introduced here was removed in 0.23.25.
+New Reading Document remains in the Command Palette;
 New Note is the creation action in the main controls. Command IDs and existing
 notes, private records and study data are unchanged. Publication does not authorize
 installation into or reloading the working window.
@@ -25,14 +40,11 @@ installation into or reloading the working window.
 
 Published and pushed; [delivery checks](RELEASE_0_23_23.md). Not installed into the working window.
 
-New Zettel and Recent Notes use the selected notes folder. New notes are ordinary
-assigned-path untitled Markdown buffers; VS Code owns Save, Undo, conflicts and
-draft recovery. The bounded recent list stores only paths and labels in existing
+The bounded Recent Notes list stores only paths and labels in existing
 workspace state. Preserve recorded roots, canonical-path checks, cancellation,
 source Return pins and dirty buffers. Do not silently convert reader annotations.
-The default note has a heading and source link only. `mrw.zettelTemplate` is a
-user-configurable literal Markdown template, not executable Templater code.
-No particular Zettel format, YAML fields or section headings are required.
+The note-template path from this release was removed in 0.23.25.
+No particular note format, YAML fields or section headings are required.
 Keep MRW integration instructions in MRW; the independent `flengyel/Zettel`
 format specification must not acquire MRW requirements or editorial commentary.
 
@@ -50,11 +62,10 @@ must model read-only host properties; plain writable doubles missed this defect.
 The user confirms 0.23.21 is installed. Preserve the working window; publication
 does not authorize installation or reload.
 
-The following increment creates ordinary Zettelkasten notes in the
-selected notes folder and reopens recent notes by title and ID. The current
-user's vault is already configured. Preserve existing inline reader annotations;
-do not migrate them silently or add a research registration form. Complete the
-startup repair before adding these commands.
+The note-creation implementation that followed this repair was replaced in
+0.23.25 by the companion command and blank editor described above. Recent Notes
+remains. Preserve inline reader annotations; do not migrate them silently or
+add a research registration form.
 
 
 ## Notebook result trial — 0.23.20
