@@ -2,6 +2,8 @@
 
 ## Lean introduction and New Note — 0.23.24
 
+Published and pushed; [delivery checks](docs/RELEASE_0_23_24.md). Not installed into the working window.
+
 The Lean foundations pack 1.1.2 now begins with a distinct introduction and
 reading route. Definitions precede their technical use; existing code, lesson
 IDs and mathematical rules are preserved. See [the writing review](docs/LEAN_INTRODUCTION_REVIEW_20261113.md).
