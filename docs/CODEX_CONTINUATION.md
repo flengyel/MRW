@@ -2,6 +2,8 @@
 
 ## Delegate document creation — 0.23.26
 
+The guide clarification is published in [0.23.27](RELEASE_0_23_27.md); runtime behavior is unchanged.
+
 Published and pushed; [delivery checks](RELEASE_0_23_26.md). Not installed into the working window.
 
 Present New Note as a way to start note creation from MRW: it invokes the
