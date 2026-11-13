@@ -2,6 +2,8 @@
 
 ## Reuse companion note creation — 0.23.25
 
+Published and pushed; [delivery checks](RELEASE_0_23_25.md). Not installed into the working window.
+
 MRW's note template, filename generator, title prompt and their configuration
 settings are removed. New Note delegates to the configured Obsidian command for
 a vault, or opens a blank native Markdown editor for other folders. Preserve the
