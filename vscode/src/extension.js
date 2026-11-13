@@ -37,7 +37,7 @@ function activate(nativeContext) {
     return async(...args)=>{const result=await value.apply(nativeWindow,args);
       if(result===undefined||Array.isArray(result)&&!result.length)recorder?.operations.cancel();return result;};
   }});
-  const workspaceFacade=new Proxy(hostVscode.workspace,{get(target,key){const value=target[key];if(typeof value==='function'&&String(key).startsWith('onDid'))return(fn,...args)=>value.call(target,moveSession.guardEvent(fn),...args);return typeof value==='function'?value.bind(target):value;}});
+  const workspaceFacade=moveHost.hostFacade(hostVscode.workspace,{get(target,key){const value=target[key];if(typeof value==='function'&&String(key).startsWith('onDid'))return(fn,...args)=>value.call(target,moveSession.guardEvent(fn),...args);return typeof value==='function'?value.bind(target):value;}});
   const vscode={...hostVscode,workspace:workspaceFacade,window:windowFacade};
   // Welcome buttons disappear when a tree gains rows or a message. Keep this
   // native command view empty so document/study updates never replace buttons.

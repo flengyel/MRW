@@ -1,5 +1,22 @@
 # CODEX_PLAN.md
 
+## Startup repair — 0.23.22
+
+The native WSL host rejected a Proxy over its read-only ExtensionContext,
+leaving later commands unregistered. Host facades now use separate proxy
+objects and forward methods/accessors to the native receiver. Preserve the
+workspace guards, state encoding and webview message checks. Activation tests
+must model read-only host properties; plain writable doubles missed this defect.
+The user confirms 0.23.21 is installed. Preserve the working window; publication
+does not authorize installation or reload.
+
+The requested next interaction creates ordinary Zettelkasten notes in the
+selected notes folder and reopens recent notes by title and ID. The current
+user's vault is already configured. Preserve existing inline reader annotations;
+do not migrate them silently or add a research registration form. Complete the
+startup repair before adding these commands.
+
+
 ## Document navigation — 0.23.21
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_21.md). Not installed into the working window.

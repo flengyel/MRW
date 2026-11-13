@@ -436,3 +436,10 @@ plain text and errors; rich outputs remain in the retained notebook.
 
 See the [notebook guide](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md)
 for a worked example using two Sage calculations.
+
+## When commands do not respond
+
+Version 0.23.22 fixes a startup failure that left several commands unregistered.
+After installing the update, save drafts before reloading when you are ready.
+If commands remain unavailable, check **Output → Log (Remote Extension Host)**
+for the activation error. Notes and saved research do not need to be recreated.

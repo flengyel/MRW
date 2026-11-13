@@ -155,6 +155,9 @@ async function harness(root, state = new Map(), options = {}) {
     get: (key, fallback) => state.get(key) ?? fallback, keys: () => [...state.keys()],
     async update(key, value) { if (value === undefined) state.delete(key); else state.set(key, value); },
   } };
+  // Actual ExtensionContext exposes these as non-configurable, read-only data
+  // properties. Keep that contract in every activation test, including restart.
+  for (const key of Object.keys(context)) Object.defineProperty(context,key,{writable:false,configurable:false});
   const source = await fs.readFile(path.join(extension, 'src/extension.js'), 'utf8');
   const module = { exports: {} };
   const requires = name => {

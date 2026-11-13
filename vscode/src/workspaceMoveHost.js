@@ -3,6 +3,19 @@ const fs=require('node:fs'),fsp=require('node:fs/promises'),path=require('node:p
 const {randomUUID}=require('node:crypto');
 const {WorkspaceMove,lookup,records,rebase,write,hash,MARKER,DATA,lockRegistry,verifyCandidate}=require('./workspaceMove');
 const locations=require('./workspacePaths');
+// VS Code freezes parts of its API and ExtensionContext. A Proxy directly on
+// such an object cannot replace a non-configurable, read-only property. Keep
+// the proxy target separate; accessors and methods still run on the real host.
+function hostFacade(target,handler){return new Proxy({}, {
+  get:(_empty,key)=>handler.get(target,key),
+  set:(_empty,key,value)=>handler.set?handler.set(target,key,value):Reflect.set(target,key,value,target),
+  has:(_empty,key)=>Reflect.has(target,key),
+  ownKeys:()=>Reflect.ownKeys(target),
+  getOwnPropertyDescriptor:(_empty,key)=>Reflect.has(target,key)?{
+    configurable:true,enumerable:!!Reflect.getOwnPropertyDescriptor(target,key)?.enumerable,
+    get:()=>handler.get(target,key)
+  }:undefined
+});}
 function session(vscode,nativeContext){
   const workspace=nativeContext.storageUri&&vscode.workspace.workspaceFile?.fsPath;
   const registry=nativeContext.globalStorageUri?.fsPath&&path.join(nativeContext.globalStorageUri.fsPath,'workspace-moves-v1');
@@ -43,7 +56,15 @@ function session(vscode,nativeContext){
       if(result.notes)result.notes=rebase(result.notes,[[r.source,r.destination]]);
     }throw Error('Workspace routing cycle.');
   };
-  const context=new Proxy(nativeContext,{get:(target,key)=>key==='workspaceState'?state:key==='storageUri'&&relocated?vscode.Uri.file(record.newHome):key==='mrwRoute'?route:key==='mrwStore'?encode:key==='mrwIdentityRoot'?value=>rebase(value,(record?.mappings||[]).toReversed().map(([a,b])=>[b,a])):key==='mrwRebase'?value=>rebase(decode(value),record?.mappings||[]):Reflect.get(target,key,target)});
+  const context=hostFacade(nativeContext,{get:(target,key)=>{
+    if(key==='workspaceState')return state;
+    if(key==='storageUri'&&relocated)return vscode.Uri.file(record.newHome);
+    if(key==='mrwRoute')return route;
+    if(key==='mrwStore')return encode;
+    if(key==='mrwIdentityRoot')return value=>rebase(value,(record?.mappings||[]).toReversed().map(([a,b])=>[b,a]));
+    if(key==='mrwRebase')return value=>rebase(decode(value),record?.mappings||[]);
+    const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;
+  }});
   let ready=Promise.resolve();
   if(workspace&&registry&&!blocked&&vscode.workspace.isTrusted!==false){
     ready=(async()=>{
@@ -91,12 +112,12 @@ function session(vscode,nativeContext){
   };
   return api;
 }
-function guardWindow(window,owner){return new Proxy(window,{get(target,key){
-  if(key==='registerTreeDataProvider')return(id,provider)=>target.registerTreeDataProvider(id,id==='mrw.research'?new Proxy(provider,{get(p,k){if(k==='getChildren')return(...args)=>owner.run(()=>p.getChildren(...args)).catch(()=>[]);const v=p[k];return typeof v==='function'?v.bind(p):v;}}):provider);
+function guardWindow(window,owner){return hostFacade(window,{get(target,key){
+  if(key==='registerTreeDataProvider')return(id,provider)=>target.registerTreeDataProvider(id,id==='mrw.research'?hostFacade(provider,{get(p,k){if(k==='getChildren')return(...args)=>owner.run(()=>p.getChildren(...args)).catch(()=>[]);const v=p[k];return typeof v==='function'?v.bind(p):v;}}):provider);
   if(key==='registerUriHandler')return handler=>target.registerUriHandler({handleUri:uri=>owner.run(()=>handler.handleUri(uri)).catch(e=>target.showErrorMessage('MRW: '+e.message))});
   if(key==='createWebviewPanel')return (...args)=>{
     const panel=target.createWebviewPanel(...args);owner.panels.add(panel);panel.onDidDispose(()=>owner.panels.delete(panel));
-    const webview=new Proxy(panel.webview,{get(w,k){if(k==='onDidReceiveMessage')return(fn,...rest)=>w.onDidReceiveMessage(m=>{
+    const webview=hostFacade(panel.webview,{get(w,k){if(k==='onDidReceiveMessage')return(fn,...rest)=>w.onDidReceiveMessage(m=>{
       if(['storageStatus','lifecycle_checkpoint'].includes(m?.type))return fn(m);
       if(owner.frozen)return;
       return owner.run(()=>fn(m)).catch(e=>w.postMessage({type:'error',message:e.message,writesBlocked:true}));
@@ -104,7 +125,7 @@ function guardWindow(window,owner){return new Proxy(window,{get(target,key){
       if(k==='html'&&typeof value==='string'){const nonce=/<script nonce="([^"]+)"/.exec(value)?.[1];if(nonce)value=value.replace('</body>',`<script nonce="${nonce}">window.addEventListener('message',e=>{if(e.data?.type==='workspace_freeze')document.body.inert=!!e.data.frozen;});</script></body>`);}
       w[k]=value;return true;
     }});
-    return new Proxy(panel,{get(p,k){if(k==='webview')return webview;if(typeof p[k]==='function'&&String(k).startsWith('onDid'))return(fn,...args)=>p[k](owner.guardEvent(fn),...args);const v=p[k];return typeof v==='function'?v.bind(p):v;}});
+    return hostFacade(panel,{get(p,k){if(k==='webview')return webview;if(typeof p[k]==='function'&&String(k).startsWith('onDid'))return(fn,...args)=>p[k](owner.guardEvent(fn),...args);const v=p[k];return typeof v==='function'?v.bind(p):v;}});
   };
   const v=target[key];if(typeof v==='function'&&String(key).startsWith('onDid'))return(fn,...args)=>v.call(target,owner.guardEvent(fn),...args);
   return typeof v==='function'?v.bind(target):v;
@@ -168,4 +189,4 @@ function registerWorkspaceMove({vscode,context,register,session:owner,clients,st
     }
   });
 }
-module.exports={session,registerWorkspaceMove,guardWindow,hasDirty};
+module.exports={session,registerWorkspaceMove,guardWindow,hasDirty,hostFacade};
