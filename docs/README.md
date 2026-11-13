@@ -21,7 +21,8 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Use SageMath through Jupyter and SagePod | [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md) |
 | Retain, compare and export notebook results | [Notebook results](NOTEBOOK_RESULTS.md) |
 | Study Lean with editable examples, native goals and Return | [Lean study](LEAN_STUDY_WORKFLOW.md) |
-| Choose companion extensions | [Recommended extensions](RECOMMENDED_EXTENSIONS.md) |
+| Choose extensions, OCR and computation tools | [Companion software](RECOMMENDED_EXTENSIONS.md) |
+| Queue SageMath batch jobs using SagePod | [SageQueue and component roles](RECOMMENDED_EXTENSIONS.md#sagemath-sagepod-jupyter-and-sagequeue) |
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
 | Prepare to rename a folder containing an MRW workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
 

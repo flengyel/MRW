@@ -15,6 +15,17 @@ and Contents for Markdown documents. Its Python backend stays on the workspace
 host.
 No new MRW runtime, notebook controller or container service is required.
 
+## Batch jobs with SageQueue
+
+[SageQueue](https://github.com/flengyel/sagequeue) is the separate SageMath job
+queueing system. Its current implementation uses a running SagePod instance
+for batch scripts; it manages submissions, partitions, workers, resource limits
+and logs. It does not provide another SageMath container. Use Jupyter for the
+interactive notebook workflow below and SageQueue for batch jobs. See the
+[companion guide](RECOMMENDED_EXTENSIONS.md#sagemath-sagepod-jupyter-and-sagequeue)
+and SageQueue's current setup instructions. MRW does not submit or monitor queue
+jobs, and opening MRW starts neither workers nor notebook execution.
+
 ## Open the existing environment
 
 Install **Jupyter** (`ms-toolsai.jupyter`) in the VS Code workspace environment

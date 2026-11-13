@@ -5,6 +5,11 @@ companion for a specific task: writing LaTeX, running a SageMath notebook,
 checking Lean proofs or using another PDF reader. Ordinary Markdown navigation
 and retained-source reading work without these companions.
 
+This guide distinguishes task recommendations from observed compatibility.
+An available extension is not automatically a tested MRW integration. Where
+MRW has host observations, the linked workflow records them; keep a working
+reader or previewer unless another supplies a needed capability.
+
 ## Start with Markdown already in VS Code
 
 Run **Markdown: Open Preview** or **Markdown: Open Preview to the Side**.
@@ -45,6 +50,47 @@ that host. A Windows MiKTeX installation alone does not configure the WSL
 toolchain. MRW's [diagram renderer](TIKZ_WORKFLOW.md), used for note fences and reader
 annotations, has its own Linux requirements.
 
+## OCR for scanned PDFs
+
+A PDF reader can search embedded text; an image-only scan needs OCR first.
+These options were checked against their maintainers' documentation on
+**2026-11-13**. The two extensions below have not been tested in MRW's WSL window.
+
+| Tool | Function | Status and requirements |
+| --- | --- | --- |
+| [OCRmyPDF](https://ocrmypdf.readthedocs.io/en/latest/introduction.html) | Add a searchable text layer to a PDF, then open the resulting copy in the current reader. | A command-line tool, not a VS Code extension. Its [installation guide](https://ocrmypdf.readthedocs.io/en/latest/installation.html) supports Debian and WSL. Run it from the integrated terminal; no MRW OCR command is implemented. |
+| [Werkbank / PDF Workbench](https://marketplace.visualstudio.com/items?itemName=juurpa.pdf-workbench) — `juurpa.pdf-workbench` | Local OCR with a searchable, selectable text layer, alongside PDF editing and annotation. | Candidate, not an observed MRW integration. Its documentation warns that formulas are not recognized reliably. |
+| [PDF Extractor Plus](https://marketplace.visualstudio.com/items?itemName=kathirvel-labs.pdf-extractor-plus) — `kathirvel-labs.pdf-extractor-plus` | **OCR Scanned PDF** uses Tesseract and supplies text preview and export. | Candidate, not an observed MRW integration. Requires VS Code 1.115 or later; language data may download on first use. |
+
+For a scanned mathematical book, start with a few representative pages and write
+a separate output file. Keep the original scan and compare copied formulas,
+subscripts and superscripts against it. Searchable OCR text is useful for finding
+passages; it is not an exact retained quotation of the scan or a mathematical
+check. OCRmyPDF does not supply MRW with PDF Contents or page-position recovery.
+
+## SageMath: SagePod, Jupyter and SageQueue
+
+| Component | Role |
+| --- | --- |
+| [SagePod](https://github.com/flengyel/sagepod) | Run SageMath and Jupyter in a rootless Podman container. It supplies the computation environment. |
+| [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) | Edit notebooks and connect VS Code to SagePod's SageMath kernel. |
+| [SageQueue](https://github.com/flengyel/sagequeue) | Queue SageMath batch jobs in a running SagePod instance, with task submission, partitions, workers, resource limits and logs. |
+| MRW | Connect reading and retained sources with ordinary working files; [retain, compare and export saved notebook results](NOTEBOOK_RESULTS.md). |
+
+SageQueue has been rewritten to use SagePod's runtime. It is a job queueing
+system, not another SageMath image or a VS Code extension. Its current
+[README](https://github.com/flengyel/sagequeue/blob/main/README.md), reviewed on
+**2026-11-13**, documents Python 3.10+, rootless Podman and Linux/WSL2 ACL tools,
+with scripts under the shared notebook directory. Queue commands do not build,
+restart or remove SagePod. Use the upstream [command reference](https://github.com/flengyel/sagequeue/blob/main/docs/commands.md)
+for submission, cancellation, retries and worker management.
+
+Choose Jupyter for interactive notebook work and SageQueue for batch jobs.
+They share SagePod's resources; set worker concurrency accordingly. MRW has no
+SageQueue submission or job-monitoring controls. This documentation review did
+not run a queue job or change a container. Follow the
+[SagePod notebook guide](GETTING_STARTED_WSL_SAGEPOD.md) for interactive setup.
+
 ## Obsidian
 
 [Obsidian](https://obsidian.md) is a separate application for editing and reading
@@ -61,6 +107,13 @@ Zettelkasten note format, templates and supporting scripts. Its
 [wiki](https://github.com/flengyel/Zettel/wiki) documents Obsidian configuration,
 software and working conventions. These are companion references; MRW does not
 require the Zettel format, its scripts or its Obsidian plugins.
+
+## Zotero
+
+[Zotero](https://www.zotero.org/) manages bibliographic references and attachments.
+MRW's [Zotero workflow](ZOTERO_WORKFLOW.md) uses its local API for reference lookup,
+citation insertion and retained attachments. It requires the desktop application's
+local API setting; no Zotero VS Code extension is required.
 
 ## WSL and remote hosts
 

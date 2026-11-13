@@ -17,6 +17,11 @@ Building from source is optional.
 The connection to SagePod belongs to **Microsoft's Jupyter extension**. There is
 no separate SagePod connection setting in MRW.
 
+For batch jobs, [SageQueue](https://github.com/flengyel/sagequeue) now uses the
+same SagePod runtime. It supplies queueing, workers and job logs; it is optional
+and is not needed for the notebook setup below. See the
+[component roles](RECOMMENDED_EXTENSIONS.md#sagemath-sagepod-jupyter-and-sagequeue).
+
 | Component | Where it runs | What it supplies |
 | --- | --- | --- |
 | VS Code | Windows | Windows, tabs, editing, saving and undo |
