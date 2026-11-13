@@ -76,7 +76,7 @@ function createZettelNotes({vscode, context, folderRoot, open, eligible = () => 
         return {label: info.label, description: path.relative(root, uri.fsPath), entry};
       } catch (_) { return {label: entry.label, description: 'Unavailable — moved or missing', entry}; }
     }));
-    if (!choices.length) { await vscode.window.showInformationMessage(`No recent notes in ${root}. Open a note or create a Zettel.`); return; }
+    if (!choices.length) { await vscode.window.showInformationMessage(`No recent notes in ${root}. Open or create a note.`); return; }
     const selected = await vscode.window.showQuickPick(choices, {title: 'Recent Notes', placeHolder: root, matchOnDescription: true});
     if (!selected) return;
     const uri = await checkEntry(selected.entry, root);
@@ -90,7 +90,7 @@ function createZettelNotes({vscode, context, folderRoot, open, eligible = () => 
     const template = configuration.get('zettelTemplate', DEFAULT_TEMPLATE);
     if (typeof template !== 'string' || !template.trim() || template.length > 65536) throw Error('MRW: Zettel Template must contain Markdown text (at most 65536 characters).');
     if (typeof prefix !== 'string' || !/^[A-Za-z][A-Za-z0-9._-]{0,31}$/.test(prefix)) throw Error('MRW: Zettel Prefix must start with a letter and contain only letters, digits, dots, underscores or hyphens (at most 32 characters).');
-    const title = await vscode.window.showInputBox({title: 'New Zettel', prompt: `Title — save in ${root}`, ignoreFocusOut: true,
+    const title = await vscode.window.showInputBox({title: 'New Note', prompt: `Title — save in ${root}`, ignoreFocusOut: true,
       validateInput: value => !value.trim() || value.length > 500 || /[\r\n\x00-\x1f]/.test(value) ? 'Enter a title on one line (at most 500 characters).' : undefined});
     if (title === undefined) return;
     if (!title.trim() || title.length > 500 || /[\r\n\x00-\x1f]/.test(title)) throw Error('Enter a title on one line (at most 500 characters).');
@@ -118,10 +118,10 @@ function createZettelNotes({vscode, context, folderRoot, open, eligible = () => 
       validate();
       const doc = await vscode.workspace.openTextDocument(uri);
       validate();
-      if (doc.getText()) throw Error('This Zettel draft already has text. Its contents were preserved.');
+      if (doc.getText()) throw Error('This note draft already has text. Its contents were preserved.');
       const editor = await vscode.window.showTextDocument(doc, {preview: false, viewColumn: vscode.ViewColumn.Beside});
       validate();
-      if (doc.getText()) throw Error('This Zettel draft acquired text while opening. Its contents were preserved.');
+      if (doc.getText()) throw Error('This note draft acquired text while opening. Its contents were preserved.');
       const {text, cursor} = zettelText(id, title.trim(), source, root, template);
       if (!await editor.edit(edit => edit.insert(new vscode.Position(0, 0), text))) throw Error('The editor declined the new note text. No note was saved.');
       editor.selection = new vscode.Selection(doc.positionAt(cursor), doc.positionAt(cursor));

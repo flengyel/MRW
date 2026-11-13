@@ -4,13 +4,14 @@ We shall compose two implications, then express the same proof as a sequence
 of instructions to Lean. This uses application and abstraction from the first
 lesson.
 
-A **proposition** is a statement to be proved. Lean expresses a proposition
+A **proposition** expresses a mathematical claim. Lean represents a proposition
 as a term of type `Prop`. A **proof** of a proposition `P` is a term of type
 `P`. Thus `P : Prop` declares a proposition, whereas `hP : P` declares a proof
 of that proposition.
 
+[Introduction](01-functions-and-proofs.md#introduction) ·
 [Tutorial contents](01-functions-and-proofs.md#tutorial-contents) ·
-[Previous: functions](01-functions-and-proofs.md) ·
+[Previous: functions](01-functions-and-proofs.md#functions-and-composition) ·
 [Working examples](../Study/Examples.lean) · [Your notes](../Notes.md) ·
 [Next: dependent application](03-dependent-application.md)
 
@@ -142,6 +143,7 @@ Further reading: *Theorem Proving in Lean 4*,
 [Propositions and Proofs](https://lean-lang.org/theorem_proving_in_lean4/Propositions-and-Proofs/)
 and [Tactics](https://lean-lang.org/theorem_proving_in_lean4/Tactics/).
 
-[Previous: functions](01-functions-and-proofs.md) ·
+[Previous: functions](01-functions-and-proofs.md#functions-and-composition) ·
+[Introduction](01-functions-and-proofs.md#introduction) ·
 [Tutorial contents](01-functions-and-proofs.md#tutorial-contents) ·
 [Next: dependent application](03-dependent-application.md)

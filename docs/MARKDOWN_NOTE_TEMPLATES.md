@@ -1,24 +1,30 @@
 # Markdown note templates
 
-Available in MRW 0.23.23. **New Zettel** creates an ordinary Markdown draft in
-the selected notes folder. Its layout is configurable; no particular YAML
-fields, ID convention or section headings are required for reading notes.
+**New Note** uses the selected notes folder. For an Obsidian vault, it runs
+your configured Obsidian command; Obsidian chooses the filename and applies
+your template. MRW does not create a file first or insert its own template.
+See [Obsidian setup](OBSIDIAN_WORKFLOW.md#new-note).
 
-## Set the template
+For an ordinary folder, New Note opens a Markdown draft using the MRW template
+below. No particular YAML fields, ID convention or section headings are required
+for reading notes.
+
+## Set the template for an ordinary notes folder
 
 1. Run **MRW: Choose Notes Folder…** and select the folder in which new notes
-   should be saved. An Obsidian vault or an ordinary folder both work.
+   should be saved. These template settings apply to folders without `.obsidian`.
 2. Open VS Code **Settings** (`Ctrl+,`) and select the **Workspace** tab to use
    this template for the current MRW workspace.
 3. Search for **MRW Zettel Template**. Paste Markdown text into **MRW: Zettel
    Template** (`mrw.zettelTemplate`). This setting holds the template text,
    not a path to a template file.
-4. While reading, run **MRW: New Zettel…** from the Command Palette or the
-   document's **MRW Document** menu. Enter a title, write the note and save
-   with **Ctrl+S**. The draft opens beside the source document.
+4. While reading, run **MRW: New Note…** from the Command Palette or the
+   document's **MRW Document** menu. Enter a title. A draft opens beside the
+   source; save it with **Ctrl+S**.
 
 Changing the setting affects subsequent drafts. It does not rewrite saved notes
-or open buffers. VS Code owns editing, Save, Undo and unsaved-draft recovery.
+or open buffers. VS Code owns Save, Undo and recovery of these drafts.
+The settings below do not change Obsidian templates.
 
 ## Placeholders
 
@@ -28,7 +34,7 @@ or open buffers. VS Code owns editing, Save, Undo and unsaved-draft recovery.
 | `{{titleYaml}}` | The same title as a quoted YAML scalar, including escapes for embedded quotes and backslashes. Write `title: {{titleYaml}}` without adding another pair of quotes. |
 | `{{id}}` | The proposed filename without `.md`, including any collision suffix. This does not add an `id` property unless the template requests one. |
 | `{{source}}` | A Markdown link to the originating document, relative to the new note's folder. Empty when no ordinary source document is selected. |
-| `{{cursor}}` | The initial typing position; the marker is removed from the draft. If omitted, typing starts at the end. If repeated, the first marker sets the position and all are removed. |
+| `{{cursor}}` | The initial typing position in the VS Code draft; the marker is removed. If omitted, typing starts at the end. If repeated, the first marker sets the position and all are removed. |
 
 Substitution happens once. Unknown placeholders remain literal text; no
 JavaScript, shell code, Obsidian Templater code or other template engine runs.
@@ -127,7 +133,7 @@ MRW does not install plugins or change the vault's settings.
 
 Obsidian's core Templates plugin has its own variables, including `{{title}}`,
 `{{date}}` and `{{time}}`. MRW supports only the placeholders listed above.
-Its `{{title}}` comes from MRW's title prompt; it does not acquire Obsidian's
+For ordinary-folder drafts, `{{title}}` comes from MRW's title prompt; it does not acquire Obsidian's
 template semantics. [Obsidian Templates](https://help.obsidian.md/plugins/templates).
 
 **The Archive** documents plain-text notes, Markdown formatting and WikiLinks

@@ -1457,12 +1457,15 @@ test('the MRW starting view offers New, Open, saved sources and tutorial as regi
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents;
-  for (const command of ['mrw.openDocument', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newReadingOverview', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
+  for (const command of ['mrw.openDocument', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newZettel', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
     assert.ok(welcome.includes('(command:' + command + ' ')); assert.ok(h.commands.has(command));
   }
   assert.ok(h.commands.has('mrw.openOutline'));
   assert.ok(!welcome.includes('(command:mrw.openOutline '));
-  for (const command of ['mrw.newReadingOverview', 'mrw.openTutorial']) {
+  assert.ok(h.commands.has('mrw.newReadingOverview'));
+  assert.ok(!welcome.includes('(command:mrw.newReadingOverview '));
+  assert.ok(!manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.newReadingOverview'));
+  for (const command of ['mrw.openTutorial']) {
     assert.ok(manifest.contributes.menus['view/title'].some(item => item.when === 'view == mrw.readingOutline' && item.command === command));
   }
   assert.equal(h.requests.length, 0); assert.equal(h.reads.length, 0);

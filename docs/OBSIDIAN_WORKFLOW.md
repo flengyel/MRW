@@ -1,4 +1,4 @@
-# Obsidian and notes in place — 0.23.14
+# Obsidian and notes in place
 
 MRW and Obsidian can open the same Markdown notes. MRW supplies Contents,
 links, backlinks and Return in VS Code; Obsidian retains its own editing and
@@ -8,8 +8,8 @@ work can remain in scans, PDFs or other attachments linked from a note.
 MRW also supports links between Obsidian notes and separately retained sources
 or passages. Those links are optional and are described below.
 
-To configure newly created notes, see [Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md).
-The template is optional and does not impose a format on existing notes.
+For new notes, see [New Note](#new-note). Ordinary folders use the optional
+[MRW template](MARKDOWN_NOTE_TEMPLATES.md); no format is imposed on existing notes.
 
 ## Configure Obsidian with MRW
 
@@ -48,13 +48,50 @@ separate Linux or SSH copy.
 The maintainer's [Zettel repository](https://github.com/flengyel/Zettel) describes
 a note format, templates and scripts. Its [wiki](https://github.com/flengyel/Zettel/wiki)
 describes Obsidian configuration and conventions. These are optional companion
-resources; MRW does not install their plugins, run their scripts or configure
-the vault.
+resources; MRW does not install their plugins or configure the vault. New Note
+invokes only the Obsidian command selected in your MRW settings.
 
 MRW's native Markdown preview supports note-local mathematical macros and
 explicit rendering of `tikz` fences. See [TikZ diagrams](TIKZ_WORKFLOW.md).
 Obsidian embeds and arbitrary LaTeX preambles remain unsupported; a note that
 uses them may render differently in the two applications.
+
+## New Note
+
+With MRW 0.23.24, **New Note** runs an Obsidian command when the selected notes
+folder is a vault. Obsidian creates the file and applies its template. MRW does
+not ask for another title, prefill a file, insert a source link, or save other
+editor buffers. The current document stays open in MRW.
+
+1. Enable **Settings → General → Command line interface** in Obsidian. Use an
+   installer that supports the CLI; see [Obsidian's CLI setup](https://help.obsidian.md/cli).
+2. In VS Code's workspace settings, set **MRW: Obsidian New Note Command**
+   (`mrw.obsidianNewNoteCommand`) to the command ID used to create notes.
+   The default is Obsidian's `file-explorer:new-file`. For a Templater template
+   called `Templates/NewFileTemplate.md`, use
+   `templater-obsidian:create-Templates/NewFileTemplate.md`. Enable the template
+   in Templater's template hotkeys so that this command is registered.
+3. Run **New Note** and complete the prompts in Obsidian. Use your **Open in MRW**
+   command to bring the completed note back. It enters MRW's Recent Notes when
+   MRW opens it; that list does not read Obsidian's recent-file history.
+
+Use the creation command, not Templater's `insert-…` command, which edits the
+active note. To inspect the registered IDs, run
+`obsidian vault="Your vault" commands` in a terminal where the CLI is available.
+
+MRW checks the vault's actual path and registered commands before dispatch.
+An unavailable CLI or command produces an error, without a fallback file.
+After an uncertain command timeout, check Obsidian before retrying: the command
+may already have run. MRW never retries it automatically.
+
+**MRW: Obsidian Executable** (`mrw.obsidianExecutable`) can name the CLI executable
+without arguments. Empty uses `obsidian` on PATH, `Obsidian.com` on Windows,
+or the standard Windows user installation from WSL. The vault remains on the
+Windows filesystem in the WSL case. A custom installation needs this setting.
+The workspace must be trusted before its configured command can run.
+
+For a folder without `.obsidian`, New Note instead opens a Markdown draft in
+VS Code using the [MRW template](MARKDOWN_NOTE_TEMPLATES.md). Obsidian is optional.
 
 ## Open a notes folder without import
 

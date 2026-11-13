@@ -791,8 +791,8 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     await send(c, result); c.panel.reveal(c.panel.viewColumn);
   }));
-  const rows = () => [['New Zettel…', 'mrw.newZettel'], ['Recent notes…', 'mrw.recentNotes'], ['Open document…', 'mrw.openDocument'], ['Choose notes folder…', 'mrw.chooseNotesFolder'],
-    ['Follow document link', 'mrw.followDocumentLink'], ['Show backlinks…', 'mrw.showBacklinks'], ['Reopen document', 'mrw.reopenDocument'], ['New document…', 'mrw.newReadingOverview'], ['Show contents', 'mrw.openReadingOutline'],
+  const rows = () => [['New Note…', 'mrw.newZettel'], ['Recent notes…', 'mrw.recentNotes'], ['Open document…', 'mrw.openDocument'], ['Choose notes folder…', 'mrw.chooseNotesFolder'],
+    ['Follow document link', 'mrw.followDocumentLink'], ['Show backlinks…', 'mrw.showBacklinks'], ['Reopen document', 'mrw.reopenDocument'], ['Show contents', 'mrw.openReadingOutline'],
     ['Open tutorial', 'mrw.openTutorial'],
     ['Return to document', 'mrw.returnToReadingOutline'], ['Import Stacks Project section…', 'mrw.importStacksSection'], ['Import Kerodon section…', 'mrw.importKerodonSection'],
     ['Import source…','mrw.importSource'], ['Add source plugin…','mrw.addSourcePlugin'], ['Manage source plugins…','mrw.manageSourcePlugins'], ['Reparse saved source…','mrw.reparseSource'],

@@ -1,5 +1,24 @@
 # CODEX_PLAN.md
 
+## Lean introduction and New Note — 0.23.24
+
+The Lean foundations pack 1.1.2 now begins with a distinct introduction and
+reading route. Definitions precede their technical use; existing code, lesson
+IDs and mathematical rules are preserved. See [the writing review](docs/LEAN_INTRODUCTION_REVIEW_20261113.md).
+
+**New Note** replaces the user-facing **New Zettel** label. For an Obsidian vault,
+it invokes `mrw.obsidianNewNoteCommand` through the Obsidian CLI: Obsidian owns
+creation, prompts, filenames and templates. MRW must not create a preliminary
+file, insert its own template, duplicate the title prompt, or retry an uncertain
+command. Preserve vault-path verification, command availability checks, workspace
+trust and the current document. See [configuration](docs/OBSIDIAN_WORKFLOW.md#new-note).
+
+Ordinary folders retain the assigned-path Markdown draft and configurable MRW
+template described below. New Reading Document remains in the Command Palette;
+New Note is the creation action in the main controls. Command IDs and existing
+notes, private records and study data are unchanged. Publication does not authorize
+installation into or reloading the working window.
+
 ## Zettels while reading — 0.23.23
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_23.md). Not installed into the working window.

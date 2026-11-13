@@ -109,7 +109,7 @@ software and working conventions. These are companion references; MRW does not
 require the Zettel format, its scripts or its Obsidian plugins.
 
 The [Markdown note template guide](MARKDOWN_NOTE_TEMPLATES.md) documents the
-New Zettel setting and examples. It distinguishes ordinary Markdown files from
+New Note setting and examples. It distinguishes ordinary Markdown files from
 Obsidian's template engine and The Archive's search-based WikiLinks; The Archive
 desktop integration has not been tested.
 

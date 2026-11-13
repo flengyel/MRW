@@ -1,7 +1,7 @@
 {
   "apiVersion": 1,
   "packId": "lean-foundations",
-  "contentVersion": "1.1.1",
+  "contentVersion": "1.1.2",
   "title": "Lean foundations",
   "testedToolchain": "leanprover/lean4:v4.33.0",
   "projectFiles": [
@@ -13,7 +13,7 @@
   "lessons": [
     {
       "id": "functions-and-proofs",
-      "title": "Functions and composition",
+      "title": "Introduction and functions",
       "order": 1,
       "explanation": "lessons/01-functions-and-proofs.md",
       "examples": "Study/Examples.lean",

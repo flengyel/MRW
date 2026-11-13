@@ -11,7 +11,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
 | Use Markdown notes, WikiLinks and an optional Obsidian vault | [Notes and Obsidian](OBSIDIAN_WORKFLOW.md) |
-| Configure the Markdown used by New Zettel | [Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md) |
+| Configure the Markdown used by New Note | [Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md) |
 | Find Zotero references, insert citations and retain attachments | [Zotero](ZOTERO_WORKFLOW.md) |
 | Connect and inspect shared usage history | [Usage history](USAGE_HISTORY.md) |
 | Render TikZ in notes or reader annotations | [TikZ diagrams](TIKZ_WORKFLOW.md) |

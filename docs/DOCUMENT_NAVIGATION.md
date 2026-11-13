@@ -1,7 +1,7 @@
 # Document navigation
 
 The editor toolbar has one book icon, **MRW Document**, for Markdown, PDF and
-text files. Its menu contains Return to Document, Show Backlinks, New Zettel and Recent Notes. Markdown
+text files. Its menu contains Return to Document, Show Backlinks, New Note and Recent Notes. Markdown
 also offers Show Contents, Edit Document Source, Open Note in Obsidian and Copy
 Note Link for Obsidian. Existing command IDs and Command Palette entries remain. Menu conditions cover
 local files and VS Code’s remote-file URIs used by WSL and SSH windows.
@@ -32,8 +32,8 @@ The [VS Code editor-action guidance](https://code.visualstudio.com/api/ux-guidel
 asks extensions to keep actions contextual, use one toolbar icon and put
 secondary actions in overflow. This increment groups document actions in one
 native submenu, supported by the [menu contribution API](https://code.visualstudio.com/api/references/contribution-points#contributesmenus).
-It removes the three separate Markdown toolbar icons. New Zettel opens a
-separate note beside a PDF; it does not edit the PDF. Proof study and AI requests
+It removes the three separate Markdown toolbar icons. New Note opens a
+separate note in Obsidian or the Markdown editor; it does not edit the PDF. Proof study and AI requests
 are not included in this document menu. The wider sidebar grouping
 remains a separate review; this patch does not change saved view placement.
 
@@ -43,19 +43,23 @@ rejection and dirty-buffer preservation. These are command-level checks, not an
 observation of the native desktop menu. No connected document session was
 available for this increment, and the working window was not reloaded.
 
-## Zettels and recent notes
+<a id="zettels-and-recent-notes"></a>
+
+## Notes while reading
 
 For configuration steps, placeholder details and portable examples, see
 [Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md).
 
-**New Zettel** creates an unsaved Markdown draft in **MRW: Notes Folder**, beside
-the active document. By default it contains an H1 heading and a source link.
-The proposed filename is formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
+**New Note** uses **MRW: Notes Folder**. In an Obsidian vault, it invokes your
+configured Obsidian new-note command, leaving the current MRW document open.
+Obsidian owns creation and the template; see [setup](OBSIDIAN_WORKFLOW.md#new-note). In an ordinary folder, it opens an unsaved draft beside the document;
+Ctrl+S saves it. The default text contains an H1 heading and a source link.
+For the ordinary-folder draft, the proposed filename is formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
 `YYYYMMDDHHmm`. Occupied names receive a numeric suffix. The source link uses a
 relative path. Keep both files in their
 relative locations or update that ordinary link after moving one. No PDF page
-or exact quotation is inferred. Save with Ctrl+S; VS Code owns conflicts, Undo
-and draft recovery. The source and other open drafts are preserved.
+or exact quotation is inferred. For the Markdown editor path, Save, conflicts,
+Undo and draft recovery belong to VS Code. The source and other open drafts are preserved.
 
 **Recent Notes** lists the thirty most recently opened or saved Markdown notes
 seen by MRW in this workspace. It shows the YAML title, or H1 fallback, beside

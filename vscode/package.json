@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.23",
+  "version": "0.23.24",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -378,7 +378,7 @@
       },
       {
         "command": "mrw.newReadingOverview",
-        "title": "New Document\u2026",
+        "title": "New Reading Document\u2026",
         "category": "MRW",
         "icon": "$(new-file)"
       },
@@ -479,7 +479,7 @@
       },
       {
         "command": "mrw.newZettel",
-        "title": "New Zettel\u2026",
+        "title": "New Note\u2026",
         "category": "MRW",
         "icon": "$(new-file)"
       },
@@ -721,16 +721,6 @@
           "command": "mrw.returnToReadingOutline",
           "when": "view == mrw.readingOutline",
           "group": "navigation"
-        },
-        {
-          "command": "mrw.newReadingOverview",
-          "when": "view == mrw.readingOutline",
-          "group": "navigation@0"
-        },
-        {
-          "command": "mrw.newReadingOverview",
-          "when": "view == mrw.readingOutline",
-          "group": "0_start@1"
         },
         {
           "command": "mrw.openTutorial",
@@ -1101,7 +1091,7 @@
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Obsidian vault name or ID used by Open Note in Obsidian. Empty uses the selected notes folder's name. The notes folder must be the vault root."
+          "description": "Obsidian vault name or ID used by New Note and Open Note in Obsidian. Empty uses the selected notes folder's name. The notes folder must be the vault root."
         },
         "mrw.notesFolder": {
           "type": "string",
@@ -1182,21 +1172,33 @@
           "type": "string",
           "default": "Note",
           "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,31}$",
-          "description": "ID prefix for New Zettel filenames. MRW appends the local date and time (YYYYMMDDHHmm), adding a suffix if occupied. Notes are created in MRW: Notes Folder."
+          "description": "ID prefix for New Note filenames in ordinary folders (Obsidian vaults use their own creation command). MRW appends the local date and time (YYYYMMDDHHmm), adding a suffix if occupied. Notes are created in MRW: Notes Folder."
         },
         "mrw.zettelTemplate": {
           "type": "string",
           "default": "# {{title}}\n\n{{cursor}}\n\n{{source}}\n",
           "maxLength": 65536,
           "editPresentation": "multilineText",
-          "description": "Markdown for New Zettel. Literal placeholders: {{title}}, {{titleYaml}} (quoted YAML scalar), {{id}} (proposed filename without .md), {{source}} (Markdown link), and {{cursor}}. No template code runs. Existing notes need not use this template, YAML fields or any particular section names."
+          "description": "Markdown for New Note in ordinary folders; Obsidian vaults use their own template. Literal placeholders: {{title}}, {{titleYaml}} (quoted YAML scalar), {{id}} (proposed filename without .md), {{source}} (Markdown link), and {{cursor}}. No template code runs. Existing notes need not use this template, YAML fields or any particular section names."
+        },
+        "mrw.obsidianNewNoteCommand": {
+          "type": "string",
+          "default": "file-explorer:new-file",
+          "scope": "machine-overridable",
+          "description": "Obsidian command ID run by New Note when Notes Folder is a vault. Set this to your template creation command (for example templater-obsidian:create-Templates/NewFileTemplate.md). Requires Obsidian CLI; Obsidian owns naming and template execution."
+        },
+        "mrw.obsidianExecutable": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "Obsidian CLI executable, without arguments. Empty uses obsidian on PATH, Obsidian.com on Windows, or the standard Windows user installation from WSL. Enable Obsidian Settings \u2192 General \u2192 Command line interface."
         }
       }
     },
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[New Zettel\u2026](command:mrw.newZettel \"Start an editable note in the selected notes folder, linked to the document being read. Save with Ctrl+S.\")\n[Recent Notes\u2026](command:mrw.recentNotes \"Reopen notes by title and ID from this workspace\u2019s recent list.\")\n[Choose notes folder\u2026](command:mrw.chooseNotesFolder \"Select a notes folder for note links and backlinks. Files stay in place.\")\n[New document\u2026](command:mrw.newReadingOverview \"Create an editable Markdown document.\")\n[Open Document\u2026](command:mrw.openDocument \"Browse original files in place or choose a saved copy with its retained revision and annotations.\")\n[Reopen document](command:mrw.reopenDocument \"Open the last document used in this workspace.\")\n[Show Contents](command:mrw.openReadingOutline \"Show the document navigator. Choose Markdown if none is selected.\")\n[Tutorial](command:mrw.openTutorial \"Open instructions for the active MRW build.\")\n[Import Stacks Project Section\u2026](command:mrw.importStacksSection \"Retain a section at a pinned source revision for offline reading and annotation.\")\n[Import Kerodon Section\u2026](command:mrw.importKerodonSection \"Retain an official section page for offline reading and annotation.\")\n[Import Source\u2026](command:mrw.importSource \"Choose an enabled source plugin and retain a source snapshot.\")\n[Add Source Plugin\u2026](command:mrw.addSourcePlugin \"Register a local data profile or trusted installed Python adapter.\")\n[Manage Source Plugins\u2026](command:mrw.manageSourcePlugins \"Enable, disable or remove source registrations; saved snapshots stay readable.\")\n[Study Lean 4\u2026](command:mrw.studyLean4 \"Open a lesson and your editable Lean study files. No quiz or AI account is required.\")\n[Resume Lean Study](command:mrw.resumeLeanStudy \"Reopen your lesson and code location without replacing edits or notes.\")\n[Find Zotero Reference\u2026](command:mrw.findZoteroReference \"Find a reference in your chosen local Zotero library, open its attachment or insert a citation.\")\n[Resume Zotero Reference\u2026](command:mrw.resumeZoteroReference \"Reopen retained bibliographic metadata and exact attachment bytes, including offline.\")\n[Set Up MRW Workspace\u2026](command:mrw.setupWorkspace \"Create or reopen the MRW workspace in your Linux home. Existing settings and the current window are preserved.\")\n[Move Workspace\u2026](command:mrw.moveWorkspace \"Move the workspace and private MRW work with verification and recoverable commit. External notes stay in place.\")\n[Recover Workspace Move](command:mrw.recoverWorkspaceMove \"Resolve an interrupted workspace move from its recorded authority.\")"
+        "contents": "[New Note\u2026](command:mrw.newZettel \"Run your Obsidian new-note command for a vault, or create a Markdown draft with a source link in an ordinary notes folder.\")\n[Recent Notes\u2026](command:mrw.recentNotes \"Reopen notes by title and ID from this workspace\u2019s recent list.\")\n[Choose notes folder\u2026](command:mrw.chooseNotesFolder \"Select a notes folder for note links and backlinks. Files stay in place.\")\n[Open Document\u2026](command:mrw.openDocument \"Browse original files in place or choose a saved copy with its retained revision and annotations.\")\n[Reopen document](command:mrw.reopenDocument \"Open the last document used in this workspace.\")\n[Show Contents](command:mrw.openReadingOutline \"Show the document navigator. Choose Markdown if none is selected.\")\n[Tutorial](command:mrw.openTutorial \"Open instructions for the active MRW build.\")\n[Import Stacks Project Section\u2026](command:mrw.importStacksSection \"Retain a section at a pinned source revision for offline reading and annotation.\")\n[Import Kerodon Section\u2026](command:mrw.importKerodonSection \"Retain an official section page for offline reading and annotation.\")\n[Import Source\u2026](command:mrw.importSource \"Choose an enabled source plugin and retain a source snapshot.\")\n[Add Source Plugin\u2026](command:mrw.addSourcePlugin \"Register a local data profile or trusted installed Python adapter.\")\n[Manage Source Plugins\u2026](command:mrw.manageSourcePlugins \"Enable, disable or remove source registrations; saved snapshots stay readable.\")\n[Study Lean 4\u2026](command:mrw.studyLean4 \"Open a lesson and your editable Lean study files. No quiz or AI account is required.\")\n[Resume Lean Study](command:mrw.resumeLeanStudy \"Reopen your lesson and code location without replacing edits or notes.\")\n[Find Zotero Reference\u2026](command:mrw.findZoteroReference \"Find a reference in your chosen local Zotero library, open its attachment or insert a citation.\")\n[Resume Zotero Reference\u2026](command:mrw.resumeZoteroReference \"Reopen retained bibliographic metadata and exact attachment bytes, including offline.\")\n[Set Up MRW Workspace\u2026](command:mrw.setupWorkspace \"Create or reopen the MRW workspace in your Linux home. Existing settings and the current window are preserved.\")\n[Move Workspace\u2026](command:mrw.moveWorkspace \"Move the workspace and private MRW work with verification and recoverable commit. External notes stay in place.\")\n[Recover Workspace Move](command:mrw.recoverWorkspaceMove \"Resolve an interrupted workspace move from its recorded authority.\")"
       },
       {
         "view": "mrw.readingOutline",
@@ -1211,7 +1213,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.23",
+          "title": "MRW 0.23.24",
           "icon": "media/mrw.svg"
         }
       ]

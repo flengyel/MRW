@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.23 — Zettels while reading.**
-New Zettel opens a Markdown draft in your selected notes folder, linked to the
-document being read. Recent Notes reopens notes by title and ID across restarts.
+**MRW 0.23.24 — Lean introduction and New Note.**
+The Lean study begins with an introduction and reading route. New Note opens
+Obsidian when your notes folder is a vault, keeping the MRW document open.
 This release includes the 0.23.22 startup repair.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.23/mrw-0.23.23.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.23).
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.24/mrw-0.23.24.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.24).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -73,7 +73,7 @@ its retained source.
 
 PDFs open in a registered reader or, on request, the system reader.
 MRW does not extract PDF text, build PDF Contents or restore PDF pages.
-**New Document…** creates Markdown. Ordinary reading requires no problem record
+**New Reading Document…** creates Markdown. Ordinary reading requires no problem record
 or exercise form.
 
 Start with **MRW: Open Tutorial**, or read the
@@ -96,7 +96,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.23.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.24.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -106,8 +106,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.23.vsix
-sha256sum vscode/mrw-0.23.23.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.24.vsix
+sha256sum vscode/mrw-0.23.24.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -247,7 +247,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.23 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.24 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 
@@ -263,15 +263,15 @@ results, compare alternatives and export their provenance. Saved outputs and
 producer-reported execution remain distinct. See the
 [notebook workflow](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md).
 
-### Zettels while reading
+### Notes while reading
 
-Choose the Zettelkasten with **MRW: Choose Notes Folder**. **New Zettel** opens an
-ordinary Markdown draft beside the current document, with a heading and source
-link. **MRW: Zettel Template** controls the layout; no YAML fields or section
-names are required. Save with Ctrl+S. **Recent Notes** reopens
-up to thirty notes by title and ID across restarts. Notes stay in the selected
-folder; existing reader annotations are preserved. No OCR is needed to write a
-separate note about a scanned PDF.
+Choose a folder with **MRW: Choose Notes Folder**. **New Note** creates a Markdown
+note there, using your template and a link to the document being read. For an
+Obsidian vault, MRW saves the new file and opens it in Obsidian, leaving the
+current MRW document open. Other folders open an unsaved Markdown draft beside
+the document; use Ctrl+S to save it. **MRW: Zettel Template** controls the layout;
+no YAML fields or section names are required. **Recent Notes** reopens notes
+by title and ID. A separate note about a scanned PDF needs no OCR.
 
 See [Markdown note templates](docs/MARKDOWN_NOTE_TEMPLATES.md) for configuration,
 placeholders, examples and interoperability with Obsidian and The Archive.

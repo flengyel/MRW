@@ -68,7 +68,7 @@ A PDF opens in an available registered reader. If none is available, MRW offers
 **Open with system reader**. PDF page restoration depends on the external reader;
 MRW supplies neither a PDF reader nor text extraction, PDF Contents or page
 restoration. Other formats use their
-registered host editors. **MRW: New Document…** creates editable Markdown.
+registered host editors. **MRW: New Reading Document…** creates editable Markdown.
 
 
 Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
@@ -252,9 +252,9 @@ saved sources, annotations, studies or history. Consult the
 
 ## Study Lean 4
 
-Choose **Study Lean 4…** in **Commands** and begin with **Functions and
-composition**. Its opening explains how to use the examples and InfoView and
-lists the three lessons. Follow the contents links to **Implication as a function
+Choose **Study Lean 4…** in **Commands** and begin with **Introduction and
+functions**. Its introduction explains formalization and the purpose of the
+three lessons, followed by contents and instructions for the examples and InfoView. Follow the contents links to **Implication as a function
 on proofs**, then **Dependent application**. Each lesson also links to its
 sections and back to the tutorial contents. Each lesson introduces its terminology before the
 construction and has a variation, a solution and a deliberate error. The three
@@ -270,9 +270,10 @@ The dedicated project pins Lean 4.33.0 and needs no Mathlib download. Ordinary
 MRW activation starts no Lean build or download. Without Lean, the lesson and
 code remain readable, with a route to official setup through MRW's notice.
 
-The working project goes in `<notes folder>/Lean Study/lean-foundations/`, or
-under the parent selected on first opening. **Lean Study Actions…** opens your
-associated `Notes.md`, official book links, variations, solutions and deliberate
+New projects use **MRW: Lean Study Parent**, or the notes folder when that
+setting is empty. The project is stored in `Lean Study/lean-foundations/`
+beneath that parent. Resume keeps the current working location.
+**Lean Study Actions…** opens your associated `Notes.md`, official book links, variations, solutions and deliberate
 errors. The book opens in the external browser. **Return from Lean Study**
 recovers the prior MRW document range; **Resume Lean Study** reuses your edited
 files and code location. Save and undo in their native editors. Explicit reset
@@ -449,14 +450,31 @@ for the activation error. Notes and saved research do not need to be recreated.
 Choose your Zettelkasten with **Choose Notes Folder**. The folder stays separate
 from the MRW workspace; an Obsidian installation is optional.
 
-From the document's **MRW Document** menu, choose **New Zettel** and enter a title.
-An ordinary Markdown draft opens beside the document. Its proposed filename uses
-an ID such as `Note202611130907.md`; change the prefix in **MRW: Zettel Prefix**
-if desired. The default draft has an H1 heading and a relative source link.
-Change its layout in **MRW: Zettel Template**; existing notes need not use that
-template or any particular metadata or headings. Write your note and press
-**Ctrl+S** to save it in the selected notes folder. Nothing is written to the
-vault before Save. VS Code handles editing, Undo and unsaved-draft recovery.
+From the document's **MRW Document** menu, choose **New Note**. If the selected
+folder is an Obsidian vault, MRW runs your Obsidian new-note command. Obsidian
+handles the template, filename and prompts; MRW creates no preliminary file.
+Enable Obsidian's **Settings → General → Command line interface** and set
+**MRW: Obsidian New Note Command** to your template's creation command.
+See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
+Your current MRW document stays open. The existing
+**Open in MRW** Obsidian command brings that same file back to MRW. Obsidian
+runs as a separate application, not inside the MRW pane.
+
+For an ordinary notes folder, enter a title; the command opens an unsaved Markdown draft beside
+the document. Use **Ctrl+S** to save it. VS Code handles editing, Undo and draft
+recovery. No other open note is saved by this command.
+
+The filename uses an ID such as `Note202611130907.md`; change the prefix in
+**MRW: Zettel Prefix** if desired. The default text has a heading and relative
+source link. Configure the layout with **MRW: Zettel Template**; existing notes
+need not use that template or any particular metadata or headings.
+These template settings apply only to the ordinary-folder draft. They do not
+change Obsidian's template. A failed Obsidian handoff reports the error; it does
+not create a fallback note or repeat the command.
+
+**New Note** is the creation action in MRW's main controls. The older **New
+Reading Document…** command remains in the Command Palette for creating a
+workspace Markdown file with reading headings; it creates no special document type.
 
 Use **Recent Notes** to reopen a note by title and ID. It lists up to thirty
 notes opened or saved in this workspace, scoped to the selected notes folder,

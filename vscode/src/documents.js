@@ -17,8 +17,9 @@ const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
 const { createDocumentPicker } = require('./documentPicker');
 const { createZettelNotes } = require('./zettelNotes');
+const { createObsidianNote } = require('./obsidianNotes');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins, obsidianNote = createObsidianNote }) {
   const identityRoot=value=>context.mrwIdentityRoot?.(value)||value;
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: identityRoot(vscode.workspace.workspaceFile?.toString()), folders: (vscode.workspace.workspaceFolders || []).map(f => identityRoot(f.uri.toString())) }));
@@ -538,14 +539,32 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       return await action({uri, attempt, pending, validate});
     } finally { if (pending) candidates.delete(pending); }
   }
-  register('mrw.newZettel', value => withNoteOrigin(value, async ({uri, pending, validate}) => {
-    const source = uri && {uri, label: markdown(uri.fsPath) ? noteIdentity(await vscode.workspace.openTextDocument(uri), {headingFallback:true}).label : path.basename(uri.fsPath)};
-    const doc = await notes.newDraft({source, validate});
-    if (!doc) return;
-    validate();
-    if (pending) { origin = pending.location; await persist(); await onNavigated(); }
-    return doc;
-  }));
+  let creatingNote = false;
+  register('mrw.newZettel', async value => {
+    if (creatingNote) return;
+    creatingNote = true;
+    try { return await withNoteOrigin(value, async ({uri, pending, validate}) => {
+      const root = await folderRoot();
+      const useObsidian = (await fs.stat(path.join(root, '.obsidian')).catch(error => {
+        if (error.code === 'ENOENT') return undefined;
+        throw error;
+      }))?.isDirectory() === true;
+      if (useObsidian) {
+        await obsidianNote({vscode, root, validate: async () => {
+          validate();
+          if (await folderRoot() !== root) throw Error('The notes folder changed. Use New Note again.');
+        }});
+        validate();
+        if (pending) { origin = pending.location; await persist(); await onNavigated(); }
+        return;
+      }
+      const source = uri && {uri, label: markdown(uri.fsPath) ? noteIdentity(await vscode.workspace.openTextDocument(uri), {headingFallback:true}).label : path.basename(uri.fsPath)};
+      const doc = await notes.newDraft({source, validate});
+      validate();
+      if (doc && pending) { origin = pending.location; await persist(); await onNavigated(); }
+      return doc;
+    }); } finally { creatingNote = false; }
+  });
   register('mrw.recentNotes', value => withNoteOrigin(value, async ({attempt, pending, validate}) => notes.recent({validate, openSelected:async uri => {
     await grant(uri); validate();
     if (!await display(uri, undefined, attempt, validate)) return;

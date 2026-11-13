@@ -7,6 +7,7 @@ proposition to each term of type $A$. Lean writes such a family as
 A proof that covers every input can be applied to a chosen input. We shall
 account for the result type of this application.
 
+[Introduction](01-functions-and-proofs.md#introduction) ·
 [Tutorial contents](01-functions-and-proofs.md#tutorial-contents) ·
 [Previous: implication](02-implication.md) ·
 [Working examples](../Study/Examples.lean) · [Your notes](../Notes.md)
@@ -27,9 +28,8 @@ input. The proposition `∀ x : A, S x` says that `S x` holds for every `x : A`.
 The binder `x : A` has scope `S x`.
 
 A proof `h : ∀ x : A, S x` supplies, for each `a : A`, a proof of `S a`.
-A **dependent
-function type** specifies an input and a result type that may depend on that
-input. Here it is written `(x : A) → S x`, equivalently `∀ x : A, S x`. A term
+A **dependent function type** specifies an input and a result type that may
+depend on that input. Here it is written `(x : A) → S x`, equivalently `∀ x : A, S x`. A term
 of such a type is a **dependent function**.
 
 **Universal instantiation** obtains a proof at a specified input from a proof
@@ -81,6 +81,11 @@ accepts a proof of `P` and returns a proof of the fixed proposition `Q`.
 Dependent application also substitutes into the result type: `h a : S a`
 and `h b : S b` may prove different propositions.
 
+An **axiom** is a statement accepted without a proof. The command
+`#print axioms specialize` lists the axioms used by this theorem, including
+those used by declarations on which it depends. Lean reports that `specialize`
+depends on no axioms.
+
 ## Variation and error
 
 Add a type `B`, a function `f : B → A`, and an input `b : B`. Use `h` to prove
@@ -98,4 +103,5 @@ Further reading: *Theorem Proving in Lean 4*,
 especially The Universal Quantifier.
 
 [Previous: implication](02-implication.md) ·
+[Introduction](01-functions-and-proofs.md#introduction) ·
 [Tutorial contents](01-functions-and-proofs.md#tutorial-contents)

@@ -3,14 +3,15 @@
 Choose **Study Lean 4…** in MRW's **Commands** area, or run **MRW: Study Lean
 4…** from the Command Palette. The introductory sequence has three lessons:
 
-1. **Functions and composition** defines terms, types, binders and scope before
-   constructing and evaluating a composite function.
+1. **Introduction and functions** explains what formalization entails and how
+   the three constructions are related. It then defines terms, types, binders
+   and scope before constructing and evaluating a composite function.
 2. **Implication as a function on proofs** constructs a proof term, then follows
    the same argument through `intro`, `have` and `exact`.
 3. **Dependent application** introduces proposition families and universal
    instantiation, with substitution in the result type.
 
-The first lesson opens with a brief orientation and a linked
+The first entry opens with an [introduction](../vscode/media/lean-study/lessons/01-functions-and-proofs.md#introduction), followed by linked
 [tutorial contents](../vscode/media/lean-study/lessons/01-functions-and-proofs.md#tutorial-contents).
 Each lesson has links to its sections and back to those contents. The lessons
 share the editable examples and associated note. Their primary text is
@@ -55,7 +56,7 @@ the installed extension remain untouched.
 
 | File | Purpose |
 | --- | --- |
-| `lessons/01-functions-and-proofs.md` | Functions and composition |
+| `lessons/01-functions-and-proofs.md` | Introduction, contents, functions and composition |
 | `lessons/02-implication.md` | Implication and tactic proofs |
 | `lessons/03-dependent-application.md` | Dependent application |
 | `Study/Examples.lean` | Complete editable examples A, B and C |
@@ -67,8 +68,8 @@ the installed extension remain untouched.
 Save, undo and recover drafts through the native editors. The project and notes
 remain usable without MRW or the original lesson pack. An occupied unrelated
 folder is rejected. Reopening reuses the working copy, including its lesson
-version. A pack update never silently replaces these files. Pack 1.1.1 supplies
-the three lessons, orientation and contents for new copies. Earlier copies keep
+version. A pack update never silently replaces these files. Pack 1.1.2 supplies
+the introduction, contents and three lessons for new copies. Earlier copies keep
 their lesson files; updating the extension alone does not rewrite them.
 
 ## Actions and resumption

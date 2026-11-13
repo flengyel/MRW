@@ -100,7 +100,7 @@ function harness(f, state = new Map(), options = {}) {
   const context = { mrwIdentityRoot:options.identityRoot, subscriptions: [], workspaceState: {
     get: key => state.get(key), async update(key, value) { await options.updateState?.(key, value); state.set(key, structuredClone(value)); },
   } };
-  documents = createDocuments({ vscode: api, context, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
+  documents = createDocuments({ vscode: api, context, obsidianNote: options.obsidianNote, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
     onDisplayed: uri => displayed.push(uri.fsPath),
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
@@ -888,4 +888,22 @@ test('an editor-menu URI is not authorization to read an external document', asy
   const external = path.join(f.outside, 'paper.pdf'); await fs.writeFile(external, '%PDF-1.4');
   await assert.rejects(h.commands.get('mrw.showBacklinks')(uri(external)), /outside|Choose|selected|authorized/i);
   assert.equal(h.picks.length, 0); assert.equal(h.hostCalls.length, 0);
+});
+
+test('New Note delegates vault creation without a title prompt or file write and preserves the reader through restart',async t=>{
+ const f=await fixture(t);await fs.mkdir(path.join(f.notes,'.obsidian'));
+ const state=new Map(),sent=[];const h=harness(f,state,{preview:true,notesFolder:f.notes,obsidianNote:async request=>{await request.validate();sent.push(request.root);}});
+ await h.open('paper.pdf');const before=await fs.readdir(f.notes),shown=h.shown.length,reader=h.api.window.tabGroups.activeTabGroup.activeTab.input.uri;
+ await h.commands.get('mrw.newZettel')();assert.deepEqual(sent,[f.notes]);assert.equal(h.shown.length,shown);
+ assert.equal(h.api.window.tabGroups.activeTabGroup.activeTab.input.uri,reader);assert.deepEqual(await fs.readdir(f.notes),before);
+ const restart=harness(f,state);assert.equal(await restart.documents.returnToDocument(),true);
+ assert.equal(restart.hostCalls.at(-1).args[0].fsPath,f.file('paper.pdf'));
+});
+test('a pending or failed Obsidian handoff creates no duplicate draft and preserves dirty text',async t=>{
+ const f=await fixture(t);await fs.mkdir(path.join(f.notes,'.obsidian'));const gate=deferred();let count=0;
+ const h=harness(f,new Map(),{notesFolder:f.notes,obsidianNote:async()=>{count++;await gate.promise;throw Error('CLI unavailable');}});
+ const doc=await h.open('1a.md');h.change(doc,0,0,'Unsent text\n');const before=await fs.readdir(f.notes);
+ const first=h.commands.get('mrw.newZettel')();await new Promise(resolve=>setTimeout(resolve,10));
+ await h.commands.get('mrw.newZettel')();gate.resolve();await assert.rejects(first,/CLI unavailable/);
+ assert.equal(count,1);assert.equal(doc.isDirty,true);assert.match(doc.text,/^Unsent text/);assert.deepEqual(await fs.readdir(f.notes),before);
 });
