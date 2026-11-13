@@ -35,11 +35,11 @@ test('read-only host window, provider and panel retain guarded callbacks and nat
   const panel = Object.freeze({webview, onDidDispose() {}, reveal() { assert.equal(this, panel); }});
   const window = Object.freeze({
     createWebviewPanel() { assert.equal(this, window); return panel; },
-    registerTreeDataProvider(_id, provider) { selectedProvider = provider; },
+    registerTreeDataProvider(_id, provider) { assert.equal(this, window); selectedProvider = provider; },
   });
   const guarded = guardWindow(window, owner);
-  guarded.registerTreeDataProvider('mrw.research', Object.freeze({getChildren() { return ['Study']; }}));
-  assert.deepEqual(await selectedProvider.getChildren(), ['Study']);
+  guarded.registerTreeDataProvider('mrw.readingOutline', Object.freeze({getChildren() { return ['Heading']; }}));
+  assert.deepEqual(await selectedProvider.getChildren(), ['Heading']);
   const opened = guarded.createWebviewPanel();
   opened.reveal();
   opened.webview.html = '<body><script nonce="test"></script></body>';

@@ -2,7 +2,9 @@
 
 Status: the original study interaction was implemented through 0.19.1 within
 the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
-The Study lifecycle requirement added below on 2026-11-10 is not yet implemented.
+The [lifecycle controls](STUDY_LIFECYCLE.md) are delivered. The Studies sidebar
+was removed in 0.23.28; saved-work and lifecycle commands remain in the Command
+Palette. This supersedes references below to tree rows or a study content view.
 Role clarified 2026-11-06. Original design baseline: `db656402190c255afd6a296da6ef8e549cc0b293`.
 
 ## Role in the research workstation
@@ -41,7 +43,7 @@ general PROV service, data-analysis plugin or replacement storage system.
 | Show Deleted Studies | Open Trash. Restore to the study's previous active/archived state. |
 | Permanently Delete Study… | From Trash, explicitly confirm and remove study-owned content and its unshared retained payloads. This is actual deletion, not just hiding or renaming a record. |
 
-Use native Studies row context menus and Command Palette pickers. Archive is
+Use the existing Command Palette pickers. Archive is
 reversible and needs no routine confirmation. Deletion identifies the selected
 study and the data affected; cancellation changes nothing. Avoid a new dashboard
 or study-registration form. Preserve the current Return destination.

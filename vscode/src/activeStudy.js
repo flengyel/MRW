@@ -5,7 +5,7 @@ const documentStudy=require('./studyDocument'),{trackLocation}=require('./readin
 const {outlineHtml}=require('./outlines');
 const files=require('./studyFiles'),{StudyLifecycle,digests}=require('./studyLifecycle');
 const {hash,summarize,selectHistoryContext}=require('./studyHistory');
-function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,changed,getCurrent,readPassage,followPassage,selectPrerequisites,loadExample,returnToDocument,io=fs}){
+function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge,getCurrent,readPassage,followPassage,selectPrerequisites,loadExample,returnToDocument,io=fs}){
   let active,panel,loaded=false,loading,queue=Promise.resolve(),saveTail=Promise.resolve();
   const dirty=new Set(),draftTimers=new Map(),durable=new Map();
   const studies=new Map(),recentKey='mrw.lightStudy.recent.v1';
@@ -20,7 +20,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   async function updateIndex(){
     const rows=[...studies.values()].filter(activeStudy).sort((a,b)=>b.updated.localeCompare(a.updated)).slice(0,30)
       .map(s=>({id:s.id,title:s.title,document:s.document?.uri,sources:s.passages.length,unfinished:!!s.current&&!s.current.finished}));
-    await context.workspaceState.update(recentKey,rows);changed.fire();
+    await context.workspaceState.update(recentKey,rows);
   }
   function load(){if(loaded)return Promise.resolve();if(!loading)loading=restore().catch(e=>{loading=undefined;throw e;});return loading;}
   async function restore(){if(!home)throw new Error('Open a folder to save study continuity.');await recorder.init();
@@ -565,7 +565,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
         active=undefined;recorder.setContext({});const old=panel;panel=undefined;old?.dispose();
       }
       dirty.delete(s.id);durable.delete(s.id);studies.delete(s.id);
-      await updateIndex();await lifecycle.finishDelete(s.id,studies);changed.fire();
+      await updateIndex();await lifecycle.finishDelete(s.id,studies);
       await vscode.window.showInformationMessage('Study permanently deleted.');
     }catch(e){
       if(['deleting','deleted'].includes(stateOf(s))){dirty.delete(s.id);studies.delete(s.id);if(active===s){await panel?.webview.postMessage({type:'study_deleted',study:s.id});active=undefined;recorder.setContext({});const old=panel;panel=undefined;old?.dispose();}await updateIndex();throw Error('Deletion is incomplete. Run Show Deleted Studies to retry cleanup, or reopen the workspace. '+e.message);}
@@ -603,30 +603,12 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     recorder.record('example.open',{attribution:'Codex companion (OpenAI)',license:'CC0-1.0'});await persist(s);await send();
   });
   registerQueued('mrw.resumeStudy',async item=>{await load();let id=item?.study;
-    if(!id&&active&&activeStudy(active))id=active.id;if(!id&&recent().length===1)id=recent()[0].id;
+    if(!id&&recent().length===1)id=recent()[0].id;
     if(!id){const picked=await vscode.window.showQuickPick(recent().map(x=>({label:x.title,id:x.id})),{placeHolder:'Resume a saved study'});id=picked?.id;}
     const s=studies.get(id);if(s&&!activeStudy(s))throw Error('This study is '+stateOf(s)+'. Use Show Archived Studies or Show Deleted Studies.');if(s)await open(s,'resume');else if(id)throw new Error('This study is unavailable; its history is preserved.');
   });
   registerQueued('mrw.inspectStudyHistory',inspect);registerQueued('mrw.exportStudyHistory',exportHistory);
-  registerQueued('mrw.openStudyItem',async item=>{
-    await load();const s=studies.get(item.study);if(!s){if(item.study)throw Error('This study was deleted or is unavailable.');return;}await open(s,'resume');
-    if(item.reference){const p=s.passages.find(p=>p.reference===item.reference);
-      if(p?.kind==='document_context')await returnToDocument(p.documentOrigin);else await followPassage(item.reference,s.root);}
-    if(item.revision&&activeStudy(s)){const q=eligible(s).find(q=>q.revision===item.revision);if(q){
-      if(s.document){await send();}
-      else{if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected question row');await persist(s);await send();}
-    }}
-  });
   function registerQueued(name,fn){register(name,(...args)=>enqueue(()=>fn(...args)));}
-  const tree={onDidChangeTreeData:changed.event,getChildren:async item=>{
-    await load();if(!item)return recent().sort((a,b)=>Number(b.id===active?.id)-Number(a.id===active?.id)).map(r=>({...r,study:r.id,kind:'study'}));
-    const s=studies.get(item.study);
-    if(item.kind==='study')return [...(s?.passages||[]).map(p=>({label:p.label,reference:p.reference,study:item.study,kind:'source'})),...(s?eligible(s):[]).filter(q=>!q.retired).slice(-10).map(q=>({label:q.prompt,study:item.study,revision:q.revision,kind:'question',description:q.kept?'kept for review':'available'}))];return[];
-  },getTreeItem:item=>{
-    const row=new vscode.TreeItem(item.title||item.label,item.kind==='study'?vscode.TreeItemCollapsibleState.Collapsed:vscode.TreeItemCollapsibleState.None);
-    row.id=item.kind+':'+item.study+':'+(item.reference||item.revision||'');row.contextValue=item.kind==='study'?'mrw.study.'+stateOf(item.study):'mrw.'+item.kind;row.description=item.kind==='study'?[active?.id===item.study?'Current':null,item.sources?item.sources+' passages':null,item.unfinished?'unfinished':null].filter(Boolean).join(' · '):item.description;
-    row.tooltip=item.reference||item.label||item.title;row.command={command:'mrw.openStudyItem',title:'Open '+item.kind,arguments:[item]};return row;}};
-  context.subscriptions.push(vscode.window.registerTreeDataProvider('mrw.research',tree));
-  return {prepareMove:()=>enqueue(async()=>{if(active)await settle(active);await flushDirty();await saveTail;}),start:(...args)=>enqueue(()=>startStudy(...args)),documentChanged,tree,flush:async()=>{stopTimers();await queue;if(active)dirty.add(active.id);await flushDirty();},receive,get active(){return active;},hasRecent:()=>recent().length>0};
+  return {prepareMove:()=>enqueue(async()=>{if(active)await settle(active);await flushDirty();await saveTail;}),start:(...args)=>enqueue(()=>startStudy(...args)),documentChanged,flush:async()=>{stopTimers();await queue;if(active)dirty.add(active.id);await flushDirty();},receive,get active(){return active;},hasRecent:()=>recent().length>0};
 }
 module.exports={registerActiveStudy};

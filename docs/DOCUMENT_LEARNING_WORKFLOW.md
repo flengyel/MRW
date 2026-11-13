@@ -2,8 +2,8 @@
 
 The user rejected this interface. Its commands and document creation path are
 removed. Open notes with **Open Document…**, follow links and use Contents and
-Return. Earlier saved work and pending drafts remain readable through Studies
-or Resume Study. The saved-work view retains Return and history/export without
+Return. Earlier saved work and pending drafts remain readable through
+**MRW: Resume Study** in the Command Palette. The saved-work view retains Return and history/export without
 problem entry, grading or scheduling controls.
 [Current reading workflow](READING_OUTLINE_WORKFLOW.md) ·
 [Removal and preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md).

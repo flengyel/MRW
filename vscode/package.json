@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.27",
+  "version": "0.23.28",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -456,11 +456,6 @@
         "category": "MRW"
       },
       {
-        "command": "mrw.openStudyItem",
-        "title": "Open Study Item",
-        "category": "MRW"
-      },
-      {
         "command": "mrw.openStudyExample",
         "title": "Open Study Example",
         "category": "MRW"
@@ -665,12 +660,6 @@
         {
           "id": "mrw.commands",
           "name": "Commands"
-        },
-        {
-          "id": "mrw.research",
-          "name": "Studies",
-          "visibility": "collapsed",
-          "icon": "media/mrw.svg"
         }
       ]
     },
@@ -687,24 +676,9 @@
           "group": "0_documents@6"
         },
         {
-          "command": "mrw.openReadingOutline",
-          "when": "view == mrw.research",
-          "group": "navigation@0"
-        },
-        {
           "command": "mrw.editDocumentSource",
           "when": "view == mrw.readingOutline",
           "group": "0_documents@5"
-        },
-        {
-          "command": "mrw.mark",
-          "when": "view == mrw.research",
-          "group": "navigation"
-        },
-        {
-          "command": "mrw.return",
-          "when": "view == mrw.research",
-          "group": "navigation"
         },
         {
           "command": "mrw.revealReadingDocument",
@@ -758,26 +732,6 @@
         },
         {
           "command": "mrw.openReadingOutline",
-          "when": "view == mrw.research",
-          "group": "1_reading@1"
-        },
-        {
-          "command": "mrw.openOutline",
-          "when": "view == mrw.research",
-          "group": "1_reading@2"
-        },
-        {
-          "command": "mrw.importStacksSection",
-          "when": "view == mrw.research",
-          "group": "1_reading@3"
-        },
-        {
-          "command": "mrw.artifactLocation",
-          "when": "view == mrw.research",
-          "group": "2_storage@1"
-        },
-        {
-          "command": "mrw.openReadingOutline",
           "when": "view == mrw.readingOutline",
           "group": "1_reading@0"
         },
@@ -785,41 +739,6 @@
           "command": "mrw.openProofOutline",
           "when": "view == mrw.readingOutline",
           "group": "2_sources@4"
-        },
-        {
-          "command": "mrw.studyCurrent",
-          "when": "view == mrw.research",
-          "group": "navigation"
-        },
-        {
-          "command": "mrw.resumeStudy",
-          "when": "view == mrw.research",
-          "group": "1_study@1"
-        },
-        {
-          "command": "mrw.inspectStudyHistory",
-          "when": "view == mrw.research",
-          "group": "1_study@2"
-        },
-        {
-          "command": "mrw.exportStudyHistory",
-          "when": "view == mrw.research",
-          "group": "1_study@3"
-        },
-        {
-          "command": "mrw.prepareProofStudy",
-          "when": "view == mrw.research",
-          "group": "2_sources@4"
-        },
-        {
-          "command": "mrw.resumeProofStudy",
-          "when": "view == mrw.research",
-          "group": "2_sources@5"
-        },
-        {
-          "command": "mrw.openStudyExample",
-          "when": "view == mrw.research",
-          "group": "4_help@1"
         },
         {
           "command": "mrw.openDocument",
@@ -850,21 +769,6 @@
           "command": "mrw.importKerodonSection",
           "when": "view == mrw.readingOutline",
           "group": "2_sources@3"
-        },
-        {
-          "command": "mrw.importKerodonSection",
-          "when": "view == mrw.research",
-          "group": "1_reading@3"
-        },
-        {
-          "command": "mrw.showArchivedStudies",
-          "when": "view == mrw.research",
-          "group": "1_study@4"
-        },
-        {
-          "command": "mrw.showDeletedStudies",
-          "when": "view == mrw.research",
-          "group": "1_study@5"
         },
         {
           "command": "mrw.setupWorkspace",
@@ -962,10 +866,6 @@
         {
           "command": "mrw.selectReadingOutlineItem",
           "when": "false"
-        },
-        {
-          "command": "mrw.openStudyItem",
-          "when": "false"
         }
       ],
       "editor/title": [
@@ -1000,38 +900,7 @@
           "group": "4_mrw@2"
         }
       ],
-      "view/item/context": [
-        {
-          "command": "mrw.archiveStudy",
-          "when": "view == mrw.research && viewItem == mrw.study.active",
-          "group": "study_lifecycle"
-        },
-        {
-          "command": "mrw.restoreStudy",
-          "when": "view == mrw.research && viewItem == mrw.study.archived",
-          "group": "study_lifecycle"
-        },
-        {
-          "command": "mrw.restoreStudy",
-          "when": "view == mrw.research && viewItem == mrw.study.trashed",
-          "group": "study_lifecycle"
-        },
-        {
-          "command": "mrw.deleteStudy",
-          "when": "view == mrw.research && viewItem == mrw.study.active",
-          "group": "study_lifecycle"
-        },
-        {
-          "command": "mrw.deleteStudy",
-          "when": "view == mrw.research && viewItem == mrw.study.archived",
-          "group": "study_lifecycle"
-        },
-        {
-          "command": "mrw.permanentlyDeleteStudy",
-          "when": "view == mrw.research && viewItem == mrw.study.trashed",
-          "group": "study_lifecycle"
-        }
-      ],
+      "view/item/context": [],
       "notebook/toolbar": [
         {
           "command": "mrw.retainNotebookResult",
@@ -1184,17 +1053,13 @@
       {
         "view": "mrw.readingOutline",
         "contents": "Open a Markdown document using Commands below. Contents shows its headings and links, including unsaved edits."
-      },
-      {
-        "view": "mrw.research",
-        "contents": "Saved studies appear here. To start one, select a passage and run [Study Current Material](command:mrw.studyCurrent)."
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.27",
+          "title": "MRW 0.23.28",
           "icon": "media/mrw.svg"
         }
       ]

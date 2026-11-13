@@ -50,8 +50,10 @@ Later exposure does not change an earlier submission. The source may still be
 visible in another pane or application: MRW does not monitor those applications
 or infer consultation from tab focus. Report consultation explicitly.
 
-**Pause / save** saves the current work. **MRW: Resume Study**, or its row in
-**Studies**, restores the question and draft. After recording an outcome or
+**Pause / save** saves the current work. **MRW: Resume Study** in the Command
+Palette restores the question and draft. When several saved records exist, it
+offers a picker even if one is already open; cancelling leaves that work in place.
+After recording an outcome or
 skipping, **Continue with revised work** starts a linked, assisted attempt;
 **Next question** starts independently. Submission or Pause alone does not finish
 an attempt. Finish or skip it before switching questions.
@@ -135,8 +137,10 @@ reported outcomes to force a review interval.
 
 ## History and export
 
-**Studies** contains recent studies, sources and questions. Its **…** menu and
-the Command Palette provide Resume, Inspect, Export and source operations.
+The Studies sidebar was removed in 0.23.28. Use **MRW: Resume Study**,
+**MRW: Inspect Study History** and **MRW: Export Study History…** in the Command
+Palette. Saved records, drafts, references and history remain in their existing
+stores. Ordinary notes and the Lean tutorial need no study record.
 
 MRW records its navigation, submissions, question/review decisions, exposure,
 effort reports, help offers, cancellations, errors, operation times and

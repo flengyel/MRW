@@ -42,8 +42,10 @@ async function run(context) {
     await stage('documents');
     await vscode.commands.executeCommand('mrw.openStudyExample');
     if (context.workspaceState.get('mrw.lightStudy.recent.v1')?.length !== 1) throw Error('Disposable saved study missing');
-    await vscode.commands.executeCommand('mrw.research.focus');
-    report.checks.push('saved example populated native Studies');
+    await vscode.commands.executeCommand('mrw.resumeStudy');
+    await vscode.commands.executeCommand('mrw.commands.focus');
+    if ((await vscode.commands.getCommands(true)).includes('mrw.research.focus')) throw Error('Studies sidebar remains registered');
+    report.checks.push('saved example resumes without a Studies sidebar');
     if (draft.getText() !== before || !draft.isDirty || await fs.readFile(first.fsPath, 'utf8') !== disk) throw Error('Dirty fixture changed');
     report.checks.push('dirty buffer and saved Markdown bytes preserved');
     await stage('study');

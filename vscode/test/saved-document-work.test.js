@@ -83,8 +83,8 @@ test('saved explicit associations expose only the chosen revision without changi
  const saved=legacy(),chosen=owner.questions[0];saved.questions=[];saved.passages.push(p);saved.problemLinks=[{owner:owner.id,question:chosen.id,revision:chosen.revision,origin:saved.documentContext.origin}];
  await h.seed(owner);await h.seed(saved);const s=await h.reopen(saved.id),file=path.join(h.home,'active-studies-v1',owner.id+'.json'),bytes=await fs.readFile(file,'utf8');
  const view=h.panels[0].messages.at(-1).study;assert.equal(view.questions.length,1);assert.equal(view.questions[0].revision,chosen.revision);
- await h.commands.get('mrw.openStudyItem')({study:s.id,revision:chosen.revision});assert.equal(s.current,null);assert.equal(await fs.readFile(file,'utf8'),bytes);
- await h.commands.get('mrw.openStudyItem')({study:s.id,reference:s.passages[0].reference});assert.equal(h.returns.at(-1).origin.section,'Odd sums');
+ await h.commands.get('mrw.resumeStudy')({study:s.id});assert.equal(s.current,null);assert.equal(await fs.readFile(file,'utf8'),bytes);
+ await send(h,{type:'source',reference:s.passages[0].reference});assert.equal(h.returns.at(-1).origin.section,'Odd sums');
  await h.c.flush();
 });
 

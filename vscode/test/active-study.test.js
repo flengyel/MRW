@@ -58,14 +58,14 @@ async function host(t){
  const options={vscode:api,context,register:(n,f)=>commands.set(n,f),recorder,projectRoot:async()=>'/project',show:async text=>shown.push(text),bridge:r=>runBridge(context.extensionPath,'python3',r),changed:{fire(){}},getCurrent:async()=>passage,readPassage:async()=>passage,followPassage:async()=>{}};
  const c=registerActiveStudy(options);return{home,c,commands,panels,recorder,api,state,shown,options};
 }
-test('current-material interaction preserves draft on source switch, resumes offline and exposes content rows',async t=>{
+test('current-material interaction preserves draft on source switch, resumes offline with its saved passages and questions',async t=>{
  const h=await host(t);await h.commands.get('mrw.studyCurrent')();const first=h.c.active;
  await h.c.receive({type:'question_save',question:value});await h.c.receive({type:'next'});const attempt=first.current.id;
  await h.c.receive({type:'draft',attempt,text:'unfinished λ',paper:false});
  await h.c.start([{...passage,text:'Second source.',reference:'second'}],'/project');assert.equal(first.current.draft,'unfinished λ');
  await h.commands.get('mrw.resumeStudy')({study:first.id});assert.equal(h.c.active.current.id,attempt);assert.equal(h.c.active.current.draft,'unfinished λ');
  const next=registerActiveStudy({...h.options});await h.commands.get('mrw.resumeStudy')({study:first.id});assert.equal(next.active.current.draft,'unfinished λ');
- const rows=await next.tree.getChildren({study:first.id,kind:'study'});assert.equal(rows[0].kind,'source');assert.equal(rows[1].kind,'question');
+ const resumed=h.panels.at(-1).messages.findLast(m=>m.type==='active_study').study;assert.deepEqual(resumed.passages,first.passages);assert.equal(resumed.questions[0].revision,first.questions[0].revision);
  await next.receive({type:'submit',text:'Exact submitted work',paper:false});await next.receive({type:'outcome',report:{outcome:'unresolved',assessor:'reader',consulted:false}});
  await next.receive({type:'effort_offer'});await next.receive({type:'effort_response',rating:null});assert.equal(next.active.current.effortOffer.disposition,'declined');
  await next.receive({type:'history'});assert.match(h.shown.at(-1),/attempt.submit/);
@@ -128,14 +128,28 @@ test('a missing recent-study locator never replaces a saved study or unfinished 
 });
 
 
-test('Studies recovers saved work without opening it or creating a study from a stale cache entry',async t=>{
- const h=await host(t),tree=h.c.tree,s=study(),home=path.join(h.home,'active-studies-v1');
- await fs.mkdir(home,{recursive:true});const text=JSON.stringify(s);await fs.writeFile(path.join(home,s.id+'.json'),text);
+test('Resume recovers saved work from a stale index; cancelling its picker preserves files and drafts without a sidebar',async t=>{
+ const h=await host(t),s=study(),other=model.createStudy([{...passage,reference:'second',text:'Another saved passage.'}],'/project'),home=path.join(h.home,'active-studies-v1');
+ s.unresolved='An unfinished mathematical question';other.unresolved='Independent work';
+ await fs.mkdir(home,{recursive:true});const originals=new Map([s,other].map(x=>[x.id,JSON.stringify(x)]));
+ for(const [id,text] of originals)await fs.writeFile(path.join(home,id+'.json'),text);
  h.state.set('mrw.lightStudy.recent.v1',[{id:'a'.repeat(64),title:'Stale cache entry',sources:1}]);
- const populated=await tree.getChildren();assert.equal(populated.length,1);
- const saved=populated[0];assert.equal(saved.kind,'study');
- assert.equal(tree.getTreeItem(saved).command.command,'mrw.openStudyItem');
- assert.equal(tree.getTreeItem(saved).command.arguments[0].study,s.id);
+ let choices;h.api.window.showQuickPick=async rows=>{choices=rows;return undefined;};
+ await h.commands.get('mrw.resumeStudy')();
+ assert.deepEqual(choices.map(x=>x.id).sort(),[s.id,other.id].sort());
  assert.equal(h.c.active,undefined);assert.equal(h.panels.length,0);
- assert.deepEqual(await fs.readdir(home),[s.id+'.json']);assert.equal(await fs.readFile(path.join(home,s.id+'.json'),'utf8'),text);
+ assert.deepEqual((await fs.readdir(home)).sort(),[s.id+'.json',other.id+'.json'].sort());
+ for(const [id,text] of originals)assert.equal(await fs.readFile(path.join(home,id+'.json'),'utf8'),text);
+ h.api.window.showQuickPick=async rows=>rows.find(x=>x.id===s.id);
+ await h.commands.get('mrw.resumeStudy')();assert.equal(h.c.active.id,s.id);assert.equal(h.c.active.unresolved,s.unresolved);
+ await h.c.receive({type:'unresolved',text:'Revised unfinished question'});
+ const currentBytes=await fs.readFile(path.join(home,s.id+'.json'),'utf8');
+ h.api.window.showQuickPick=async rows=>{assert.equal(rows.length,2);return undefined;};
+ await h.commands.get('mrw.resumeStudy')();assert.equal(h.c.active.id,s.id);assert.equal(h.c.active.unresolved,'Revised unfinished question');
+ assert.equal(await fs.readFile(path.join(home,s.id+'.json'),'utf8'),currentBytes);
+ h.api.window.showQuickPick=async rows=>rows.find(x=>x.id===other.id);
+ await h.commands.get('mrw.resumeStudy')();assert.equal(h.c.active.id,other.id);assert.equal(h.c.active.unresolved,'Independent work');
+ h.api.window.showQuickPick=async rows=>rows.find(x=>x.id===s.id);
+ await h.commands.get('mrw.resumeStudy')();assert.equal(h.c.active.id,s.id);assert.equal(h.c.active.unresolved,'Revised unfinished question');
+ assert.equal(h.commands.has('mrw.openStudyItem'),false);
 });

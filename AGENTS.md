@@ -1,5 +1,15 @@
 # Codex instructions
 
+## Sidebar — 0.23.28
+
+The Studies sidebar, its tree provider and row menus are removed. MRW's sidebar
+contains Contents and Commands. Preserve saved records, drafts and history:
+Resume Study, Inspect/Export Study History and lifecycle commands remain in the
+Command Palette. Keep Study Lean 4 and ordinary Lean files independent.
+Fleeting notes and notes intended for later review remain ordinary documents;
+do not introduce a replacement view, registration form or new note schema.
+Preserve the working window. Publication does not authorize installation or reload.
+
 ## Delegate document creation — 0.23.26
 
 The guide clarification is published in [0.23.27](docs/RELEASE_0_23_27.md); runtime behavior is unchanged.
@@ -219,8 +229,8 @@ followed in 0.23.20.
 ## Delivered implementation — Study lifecycle
 
 Saved Studies now have Archive/Restore, Trash/Undo and explicit permanent
-deletion. Native row context actions and Command Palette pickers use the existing
-study/history stores. See [docs/STUDY_LIFECYCLE.md](docs/STUDY_LIFECYCLE.md).
+deletion. Command Palette pickers use the existing study/history stores.
+The sidebar and its row actions were removed in 0.23.28. See [docs/STUDY_LIFECYCLE.md](docs/STUDY_LIFECYCLE.md).
 Preserve pending-write checks, lifecycle epochs, deletion recovery and opaque
 tombstones. Shared questions/snapshots, source annotations, ordinary files and
 other studies are protected. Test deletion only on disposable records.

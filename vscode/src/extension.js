@@ -321,7 +321,7 @@ function activate(nativeContext) {
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   registerProofStudy({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });
-  const studyController=registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge:rawBridge,changed,
+  const studyController=registerActiveStudy({vscode,context,register,recorder,projectRoot,show,bridge:rawBridge,
     readPassage:outlineRows.studyPassage,followPassage:outlineRows.followPinned,
     returnToDocument: (origin, fileOnly) => readingController.returnToStudy(origin, fileOnly),selectPrerequisites:outlineRows.selectStudyPrerequisites,loadExample:outlineRows.loadStudyExample,
     getCurrent:async(root,invocation)=>{

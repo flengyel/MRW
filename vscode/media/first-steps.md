@@ -11,9 +11,9 @@ folders use a blank VS Code Markdown editor. Your current document stays open.
 See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
 
 **Contents** lists headings and links in the selected Markdown document.
-**Commands** keeps opening and navigation controls available. **Studies** lists
-separately saved work; it is not required for reading. Opening or following a
-document never creates a problem record or launches an exercise form.
+**Commands** keeps opening and navigation controls available. Fleeting notes and
+notes for later review can remain ordinary linked documents. Opening or following
+a document never creates a problem record or launches an exercise form.
 
 Hover over the MRW Activity Bar icon to see its version. The sidebar heading
 shows it too. This tutorial reports the active extension build above. If an
@@ -241,7 +241,7 @@ Reopen an imported section offline with **Open Saved Source…**. See
 | --- | --- | --- |
 | Original document | **Ctrl+S** in its editor | **Reopen Document**, or **Open Document…** for another file |
 | Reader annotation | **Save annotation** | **Open Saved Source…**, then **Reader notes** |
-| Optional study attempt | **Pause / save** | **Resume Study** or its row in **Studies** |
+| Optional study attempt | **Pause / save** | **MRW: Resume Study** in the Command Palette |
 | Optional proof-work question | **Save question** in **Proof work** | **Continue proof work** |
 | Lean lesson code and notes | **Ctrl+S** in ordinary editors | **Resume Lean Study** |
 
@@ -335,7 +335,7 @@ linked attempt after completion. **Keep for spaced review** opts a question into
 source-scoped review; saving alone does not enroll it. Effort reports are
 optional. See [the study guide](https://github.com/flengyel/MRW/blob/main/docs/ACTIVE_STUDY_WORKFLOW.md) for recall,
 submission and history details. Earlier document-linked work remains readable
-from Studies or Resume Study; its removed forms do not reopen.
+through **MRW: Resume Study** in the Command Palette; its removed forms do not reopen.
 
 ## History across computers
 
@@ -409,11 +409,11 @@ for the working external examples and trust boundary.
 
 ## Put a study aside or remove it
 
-In **Studies**, right-click a study and choose **Archive Study**. It leaves the
-active list and stops reviews while keeping drafts, attempts, responses and
-review dates. Use the Studies **…** menu → **Show Archived Studies**, select the
-study, then **Restore study** to continue it. These commands also appear in the
-Command Palette.
+For saved study records, run **MRW: Archive Study** from the Command Palette
+and select the record. It leaves Resume selection and stops reviews while keeping
+drafts, attempts, responses and review dates. Run **MRW: Show Archived Studies**,
+select the record, then **Restore study** to continue it. These commands do not
+manage your ordinary notes or Lean lesson files.
 
 **Delete Study…** moves the selected study to Trash after showing its scope.
 Choose **Undo** in the notification, or later use **Show Deleted Studies** →

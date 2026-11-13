@@ -1,5 +1,15 @@
 # User experience specification
 
+## Sidebar — 0.23.28
+
+The Studies sidebar, its tree provider and row menus are removed. MRW's sidebar
+contains Contents and Commands. Preserve saved records, drafts and history:
+Resume Study, Inspect/Export Study History and lifecycle commands remain in the
+Command Palette. Keep Study Lean 4 and ordinary Lean files independent.
+Fleeting notes and notes intended for later review remain ordinary documents;
+do not introduce a replacement view, registration form or new note schema.
+Preserve the working window. Publication does not authorize installation or reload.
+
 ## Notes-folder chooser — 0.23.14
 
 Show the current notes folder and up to ten recent choices with full paths.
@@ -13,8 +23,8 @@ Opening documents and temporary rendering work do not change the notes folder.
 
 The implemented Study lifecycle follows
 [Archive and delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
-Add native Studies row actions and Command Palette pickers for archive/restore,
-Trash/Undo and explicit permanent deletion. Preserve drafts, Return and shared
+Use Command Palette pickers for archive/restore, Trash/Undo and explicit
+permanent deletion. The Studies row actions were removed with the sidebar in 0.23.28. Preserve drafts, Return and shared
 records; do not turn archive or deletion into a recall outcome. See the [delivered workflow](docs/STUDY_LIFECYCLE.md).
 
 The proposed [W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) links results to

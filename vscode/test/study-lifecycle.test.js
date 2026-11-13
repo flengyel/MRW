@@ -30,6 +30,7 @@ async function fixture(t){
  };
  h.start=async(extra=[])=>current.start([passage,...extra],h.root);
  h.run=(name,s)=>commands.get('mrw.'+name)(s?{study:s.id}:undefined);
+ h.recent=async()=>{await h.run('inspectStudyHistory');return h.state.get('mrw.lightStudy.recent.v1')||[];};
  h.send=m=>current.receive({...message(current.active,m),lifecycleEpoch:h.epoch(current.active)});
  h.saved=s=>fs.readFile(path.join(home,'active-studies-v1',s.id+'.json'),'utf8').then(JSON.parse).then(s=>context.mrwRebase?context.mrwRebase(s):s);
  h.marker=s=>fs.readFile(path.join(home,'active-studies-v1',s.id+'.lifecycle.json'),'utf8').then(JSON.parse);
@@ -47,27 +48,27 @@ test('Archive checkpoints live prose, suspends selection and preserves schedulin
  const q=structuredClone(s.questions[0]);h.checkpoint={unresolvedDraft:'Latest unsent question'};
  const stale={...message(s,{type:'pause'}),lifecycleEpoch:h.epoch(s)};
  await h.run('archiveStudy',s);assert.equal((await h.saved(s)).unresolved,'Latest unsent question');assert.deepEqual(s.questions[0],q);
- assert.deepEqual(await h.c.tree.getChildren(),[]);assert.equal((await h.marker(s)).state,'archived');
+ assert.deepEqual(await h.recent(),[]);assert.equal((await h.marker(s)).state,'archived');
  await assert.rejects(h.c.receive(stale),/stale|changed/);
- await h.restart();assert.deepEqual(await h.c.tree.getChildren(),[]);await assert.rejects(h.run('resumeStudy',s),/archived/);
+ await h.restart();assert.deepEqual(await h.recent(),[]);await assert.rejects(h.run('resumeStudy',s),/archived/);
  await h.run('restoreStudy',s);await h.run('resumeStudy',s);assert.equal(h.c.active.id,s.id);assert.equal(JSON.stringify(h.c.active.questions[0]),JSON.stringify(q));
- assert.equal(h.c.active.unresolved,'Latest unsent question');assert.equal((await h.c.tree.getChildren()).length,1);
+ assert.equal(h.c.active.unresolved,'Latest unsent question');assert.equal((await h.recent()).length,1);
  const events=await h.history.events();assert.equal(events.filter(e=>e.action==='review.mapping').length,1,'restoration does not reschedule');
 });
 
 test('Trash cancellation, Undo, restart and Restore keep the prior active or archived state',async t=>{
  const h=await fixture(t),s=await h.start();h.checkpoint={unresolvedDraft:'Keep this'};
- await h.run('deleteStudy',s);assert.equal((await h.saved(s)).unresolved,'Keep this');assert.equal((await h.c.tree.getChildren()).length,1);
+ await h.run('deleteStudy',s);assert.equal((await h.saved(s)).unresolved,'Keep this');assert.equal((await h.recent()).length,1);
  h.info.push('Undo');await h.trash(s);await h.c.flush();assert.equal((await h.marker(s)).state,'active');
  await h.run('archiveStudy',s);await h.trash(s);assert.equal((await h.marker(s)).previous,'archived');
- await h.restart();assert.deepEqual(await h.c.tree.getChildren(),[]);await h.run('restoreStudy',s);assert.equal((await h.marker(s)).state,'archived');
+ await h.restart();assert.deepEqual(await h.recent(),[]);await h.run('restoreStudy',s);assert.equal((await h.marker(s)).state,'archived');
  await h.run('restoreStudy',s);assert.equal((await h.marker(s)).state,'active');
 });
 
 test('failed draft/owner publication prevents lifecycle transitions without discarding the pending prose',async t=>{
  const h=await fixture(t);let fail=false;h.io={...fs,writeFile:async(f,...args)=>{if(fail&&String(f).includes('active-studies-v1'))throw Error('disk full');return fs.writeFile(f,...args);}};await h.restart();
  const s=await h.start();h.checkpoint={unresolvedDraft:'Unsent draft survives'};fail=true;
- await assert.rejects(h.run('archiveStudy',s),/disk full/);assert.equal(s.unresolved,'Unsent draft survives');assert.equal((await h.c.tree.getChildren()).length,1);
+ await assert.rejects(h.run('archiveStudy',s),/disk full/);assert.equal(s.unresolved,'Unsent draft survives');assert.equal((await h.recent()).length,1);
  assert.equal(await exists(path.join(h.home,'active-studies-v1',s.id+'.lifecycle.json')),false);
  fail=false;await h.run('archiveStudy',s);assert.equal((await h.saved(s)).unresolved,'Unsent draft survives');
 });
@@ -76,7 +77,7 @@ test('inventory recovery ignores a lost/old recent index, including more than 30
  const h=await fixture(t),first=await h.start();await h.run('archiveStudy',first);
  // Records beyond the UI recent limit remain discoverable without reopening sources.
  for(let n=0;n<32;n++){const s=require('../src/studyModel').createStudy([extra(n)],'/project');await fs.writeFile(path.join(h.home,'active-studies-v1',s.id+'.json'),JSON.stringify(s));}
- h.state.clear();await h.restart();assert.equal((await h.c.tree.getChildren()).length,30);
+ h.state.clear();await h.restart();assert.equal((await h.recent()).length,30);
  await h.run('restoreStudy',first);await h.run('resumeStudy',first);assert.equal(h.c.active.id,first.id);
 });
 
@@ -111,12 +112,12 @@ test('interrupted deletion resumes idempotently after restart and cannot be resu
  const h=await fixture(t);let fail=false;h.io={...fs,unlink:async(file)=>{if(fail&&String(file).includes('/snapshots/'))throw Error('interrupted unlink');return fs.unlink(file);}};await h.restart();
  const a=await h.start();h.history.setContext({study:a.id});const blob=h.history.snapshot({text:'private'});h.history.record('attempt.submit',{snapshot:blob});await h.history.flush();
  const stale=h.c,oldHistory=h.history;await h.trash(a);fail=true;await assert.rejects(h.delete(a),/incomplete/);assert.equal((await h.marker(a)).state,'deleting');
- assert.ok(!h.information.some(x=>x.text==='Study permanently deleted.'));assert.deepEqual(await h.c.tree.getChildren(),[]);
- fail=false;await h.restart();assert.deepEqual(await h.c.tree.getChildren(),[]);assert.equal((await h.marker(a)).state,'deleted');
+ assert.ok(!h.information.some(x=>x.text==='Study permanently deleted.'));assert.deepEqual(await h.recent(),[]);
+ fail=false;await h.restart();assert.deepEqual(await h.recent(),[]);assert.equal((await h.marker(a)).state,'deleted');
  await assert.rejects(stale.receive({...message(a,{type:'draft',text:'stale'}),lifecycleEpoch:'old'}),/deleted|unavailable/);
  oldHistory.setContext({study:a.id});oldHistory.snapshot({text:'private'});oldHistory.record('late',{snapshot:blob});await oldHistory.flush();
  assert.equal(await exists(path.join(oldHistory.directory,'snapshots',blob+'.json')),false);
- await h.restart();assert.deepEqual(await h.c.tree.getChildren(),[]);assert.ok(!(await h.history.events()).some(e=>e.identity.study===a.id));
+ await h.restart();assert.deepEqual(await h.recent(),[]);assert.ok(!(await h.history.events()).some(e=>e.identity.study===a.id));
 });
 
 test('failure after lifecycle rename keeps the published state authoritative and reports failure',async t=>{
@@ -125,7 +126,7 @@ test('failure after lifecycle rename keeps the published state authoritative and
  await h.restart();const a=await h.start(); // No pending draft save: fail specifically after the lifecycle rename.
  h.io.rename=async(from,to)=>{await fs.rename(from,to);if(String(to).endsWith('.lifecycle.json'))fail=true;};
  await assert.rejects(h.run('archiveStudy',a),/sync interrupted/);assert.equal((await h.marker(a)).state,'archived');
- fail=false;h.io.rename=fs.rename;await h.restart();assert.deepEqual(await h.c.tree.getChildren(),[]);await h.run('restoreStudy',a);assert.equal((await h.marker(a)).state,'active');
+ fail=false;h.io.rename=fs.rename;await h.restart();assert.deepEqual(await h.recent(),[]);await h.run('restoreStudy',a);assert.equal((await h.marker(a)).state,'active');
 });
 
 test('archiving a shared question owner suspends its reviews in other studies without changing its card',async t=>{
@@ -150,7 +151,7 @@ test('pending owner writes are settled before Archive; a rejected owner save lea
  const owner=await h.start();await h.send({type:'question_save',question});await h.send({type:'admit',revision:owner.questions[0].revision});
  const b=await h.start([extra(4)]);await h.send({type:'next'});await h.send({type:'submit',text:'Attempt',paper:false});failID=owner.id;
  await assert.rejects(h.send({type:'outcome',report:{outcome:'unaided_success',assessor:'reader',consulted:false}}),/owner save/);
- await assert.rejects(h.run('archiveStudy',b),/owner save/);assert.equal((await h.c.tree.getChildren()).length,2);assert.ok(b.pendingOwners.length);
+ await assert.rejects(h.run('archiveStudy',b),/owner save/);assert.equal((await h.recent()).length,2);assert.ok(b.pendingOwners.length);
  failID=null;await h.run('archiveStudy',b);assert.deepEqual(b.pendingOwners,[]);assert.equal((await h.saved(owner)).questions[0].reviews.length,1);
 });
 
@@ -195,7 +196,7 @@ test('partial mixed-session replacement recovers from its complete batch after r
  await h.trash(a);fail=true;await assert.rejects(h.delete(a),/partial history replacement/);
  assert.equal((await h.marker(a)).state,'deleting');
  assert.ok((await fs.readdir(h.history.directory)).some(n=>n.endsWith('.pending')));
- fail=false;await h.restart();await h.c.tree.getChildren();assert.equal((await h.marker(a)).state,'deleted');
+ fail=false;await h.restart();await h.recent();assert.equal((await h.marker(a)).state,'deleted');
  const events=await h.history.events();assert.ok(!events.some(e=>e.action==='mixed-a'));
  assert.equal(events.find(e=>e.action==='mixed-b').data.text,'Preserve exact other work');
  assert.ok(!(await fs.readdir(h.history.directory)).some(n=>n.endsWith('.pending')));
@@ -219,7 +220,7 @@ test('workspace relocation preserves unfinished drafts, archived schedules, Tras
  await h.relocate(moved);await h.run('resumeStudy',active);
  assert.equal(h.c.active.id,active.id);assert.equal(h.c.active.root,moved.destination);assert.ok((await h.history.events()).some(e=>e.action==='session.relocated'));assert.ok(!(await h.history.events()).some(e=>e.action==='session.unclean'));
  assert.equal(h.c.active.unresolved,'Unfinished mathematical question: α → β');await h.c.flush();assert.equal(JSON.parse(await fs.readFile(path.join(h.home,'active-studies-v1',active.id+'.json'))).root.$mrwPath,'workspace');
- assert.deepEqual((await h.c.tree.getChildren()).map(x=>x.study),[active.id]);
+ assert.deepEqual((await h.recent()).map(x=>x.id),[active.id]);
  assert.equal(await h.start([extra('deleted')]),undefined,'deleted source stays suppressed after root changes');
  assert.equal((await h.marker(deleted)).state,'deleted');
  await h.run('restoreStudy',archived);await h.run('resumeStudy',archived);assert.deepEqual(h.c.active.questions[0],schedule);

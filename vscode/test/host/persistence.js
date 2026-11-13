@@ -88,7 +88,7 @@ async function activate(context) {
     await vscode.window.showTextDocument(note, { preview: false, viewColumn: vscode.ViewColumn.One });
     await vscode.commands.executeCommand('workbench.action.focusSecondEditorGroup');
     await vscode.window.showTextDocument(passage, { preview: false, viewColumn: vscode.ViewColumn.Two });
-    await vscode.commands.executeCommand('mrw.research.focus');
+    await vscode.commands.executeCommand('mrw.commands.focus');
     await new Promise(resolve => setTimeout(resolve, 1000));
     report.complete = true;
     report.view = passage.uri.toString();

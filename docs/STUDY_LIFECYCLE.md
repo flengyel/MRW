@@ -2,18 +2,18 @@
 
 Delivered in [0.23.11](STUDY_LIFECYCLE_VALIDATION.md).
 
-These controls manage saved records in **Studies**, including preserved
-records from the removed document Problems interface. They do not manage Lean
+These commands manage saved study records, including preserved records from
+the removed document Problems interface. The Studies sidebar was removed in
+0.23.28; saved records remain accessible through the Command Palette. They do not manage Lean
 lesson directories, proof-outline documents or ordinary notes.
 
-Right-click a study to choose **Archive Study** or **Delete Study…**. The same
-commands are available in the Command Palette with a study picker.
+Run **MRW: Archive Study** or **MRW: Delete Study…** from the Command Palette
+and select the saved record. **MRW: Resume Study** reopens active saved work.
 
 - **Archive Study** removes the study from active lists and automatic Resume
   selection. Its drafts, questions, attempts, responses, history, review
   enrollment and due dates remain saved. Reviews are suspended.
-- **Show Archived Studies** is available from the Studies title menu and
-  Command Palette. Select a study to inspect, restore or delete it.
+- **Show Archived Studies** is available from the Command Palette. Select a study to inspect, restore or delete it.
 - **Restore Study** restores an archived study to active use. It creates no
   recall observation and does not change review dates.
 - **Delete Study…** shows the scope, then moves the study to Trash. The

@@ -81,11 +81,12 @@ integrations. The core should preserve and expose versioned artifacts and their
 relationships; plugins handle the external systems. Do not replace source
 identities, rewrite saved records or adopt the VisTrails runtime to achieve this.
 
-The concrete next usability requirement is
-[Archive/Delete Studies](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
-These controls provide reversible archive/restore and deletion through Trash,
-including explicit permanent deletion. They do not require a general workflow
-engine and are not yet delivered.
+[Archive/Delete Studies](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
+is delivered through Command Palette pickers. The Studies sidebar was removed
+in 0.23.28. Preserve saved work through Resume Study and history/export; retain
+the lifecycle controls without restoring a study tree or a renamed registration
+system. Fleeting notes and notes intended for later review are ordinary documents.
+The sidebar provides Contents and Commands; the Lean tutorial remains separate.
 
 ## Related systems and reuse
 

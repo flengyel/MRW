@@ -19,6 +19,11 @@ async function run() {
     const commands = new Set(await vscode.commands.getCommands(true));
     const expected = extension.packageJSON.contributes.commands.map(c => c.command);
     assert.ok(!commands.has('mrw.newReadingOverview'), 'Removed creator must not be registered');
+    assert.ok(!commands.has('mrw.research.focus'), 'Removed Studies sidebar must not be registered');
+    assert.ok(!commands.has('mrw.openStudyItem'), 'Removed tree action must not be registered');
+    assert.deepEqual(extension.packageJSON.contributes.views.mrw.map(v=>v.id), ['mrw.readingOutline','mrw.commands']);
+    for(const id of ['mrw.resumeStudy','mrw.inspectStudyHistory','mrw.exportStudyHistory','mrw.archiveStudy','mrw.showArchivedStudies','mrw.showDeletedStudies'])assert.ok(commands.has(id));
+    report.checks.push({name:'Studies sidebar absent; saved-work commands retained',passed:true});
     assert.deepEqual(expected.filter(id => !commands.has(id)), []);
     report.checks.push({name: 'native activation registers every contributed command', count: expected.length, passed: true});
     const note = await vscode.workspace.openTextDocument(vscode.Uri.file(path.join(root, 'reading.md')));

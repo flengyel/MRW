@@ -113,7 +113,6 @@ function session(vscode,nativeContext){
   return api;
 }
 function guardWindow(window,owner){return hostFacade(window,{get(target,key){
-  if(key==='registerTreeDataProvider')return(id,provider)=>target.registerTreeDataProvider(id,id==='mrw.research'?hostFacade(provider,{get(p,k){if(k==='getChildren')return(...args)=>owner.run(()=>p.getChildren(...args)).catch(()=>[]);const v=p[k];return typeof v==='function'?v.bind(p):v;}}):provider);
   if(key==='registerUriHandler')return handler=>target.registerUriHandler({handleUri:uri=>owner.run(()=>handler.handleUri(uri)).catch(e=>target.showErrorMessage('MRW: '+e.message))});
   if(key==='createWebviewPanel')return (...args)=>{
     const panel=target.createWebviewPanel(...args);owner.panels.add(panel);panel.onDidDispose(()=>owner.panels.delete(panel));

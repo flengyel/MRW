@@ -1406,8 +1406,11 @@ test('the MRW starting view offers note handoff, Open, saved sources and tutoria
   await fs.writeFile(path.join(studyHome,saved.id+'.json'),JSON.stringify(saved));
   h.state.set('mrw.lightStudy.recent.v1', [{id:'a'.repeat(64),title:'Stale cache entry',sources:1}]);
   assert.deepEqual(await buttons.getChildren(), []);
-  const studies=await h.api.treeProviders['mrw.research'].getChildren();
-  assert.equal(studies.length, 1);assert.equal(studies[0].study,saved.id);
+  assert.equal(h.api.treeProviders['mrw.research'], undefined);
+  await h.commands.get('mrw.resumeStudy')();
+  const panel=h.panels.at(-1);await panel.receive({type:'ready'});
+  assert.equal(panel.webview.messages.findLast(m=>m.type==='active_study').study.id,saved.id);
+  assert.equal(h.commands.has('mrw.openStudyItem'), false);
   assert.equal(h.requests.length, 0);
 });
 
@@ -1804,7 +1807,7 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   const svg=await fs.readFile(path.resolve(__dirname,'..',container.icon),'utf8');
   assert.match(svg,/<svg[^>]*viewBox="0 0 24 24"/);
   assert.doesNotMatch(svg,/<script|<image|href=/i);
-  assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.commands','mrw.research']);
+  assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.commands']);
   assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
   const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
   for(const command of ['mrw.chooseReadingOverview','mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.importStacksSection','mrw.artifactLocation']){
@@ -2173,8 +2176,9 @@ test('Study Current Material uses the selected retained passage without a questi
  assert.ok(view);assert.equal(view.study.passages.length,1);assert.ok(view.study.passages[0].reference.startsWith('mrw-outline:v1/'));assert.equal(view.study.questions.length,0);
  assert.ok(h.panels.includes(reader));assert.equal(saved.outline.regions.some(r=>r.id===region),true);
  const manifest=JSON.parse(await fs.readFile(path.resolve(__dirname,'../package.json'),'utf8'));
- assert.equal(manifest.contributes.views.mrw.find(v=>v.id==='mrw.research').name,'Studies');
- assert.ok(manifest.contributes.menus['view/title'].some(v=>v.command==='mrw.studyCurrent'&&v.group==='navigation'));
+ assert.ok(!manifest.contributes.views.mrw.some(v=>v.id==='mrw.research'));
+ assert.ok(!JSON.stringify(manifest.contributes).includes('mrw.research'));
+ for(const id of ['mrw.resumeStudy','mrw.inspectStudyHistory','mrw.exportStudyHistory','mrw.studyLean4'])assert.ok(h.commands.has(id));
 });
 
 test('Open Study Example retains the bundled source explicitly and reuses the saved practice without replacing research',async t=>{

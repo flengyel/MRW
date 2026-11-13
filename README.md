@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.27 — Start a note from MRW.**
-Choose **New Note…** in MRW to invoke your configured Obsidian creation command,
-or open a blank VS Code editor for another notes folder. This documentation
-update makes that starting point explicit; runtime behavior is unchanged.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.27/mrw-0.23.27.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.27).
+**MRW 0.23.28 — Contents and Commands.**
+The Studies sidebar is removed. Saved work remains available through
+**Resume Study** and history/export commands. **Study Lean 4…** and ordinary
+notes are unchanged. **New Note…** still invokes Obsidian or a blank VS Code editor.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.28/mrw-0.23.28.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.28).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -101,7 +101,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.27.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.28.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -111,8 +111,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.27.vsix
-sha256sum vscode/mrw-0.23.27.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.28.vsix
+sha256sum vscode/mrw-0.23.28.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -172,9 +172,11 @@ Opening or following notes does not create a study. Earlier document-linked
 work remains readable after removal of the
 document Problems interface.
 
-Right-click a study for **Archive Study** or **Delete Study…**. Use the Studies
-title menu for archived studies and Trash. [Restore and permanent deletion](docs/STUDY_LIFECYCLE.md)
-preserve shared sources, annotations and other studies.
+To reopen saved study work, run **MRW: Resume Study** from the Command Palette.
+**Inspect Study History** and **Export Study History…** retain access to its history.
+**Archive Study**, **Delete Study…**, **Show Archived Studies** and **Show Deleted
+Studies** are also available there; see [lifecycle controls](docs/STUDY_LIFECYCLE.md).
+Fleeting notes and notes for later review can remain ordinary linked documents.
 
 [Source-study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
 [Proof-study workflow](docs/PROOF_STUDY_WORKFLOW.md) ·
@@ -252,7 +254,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.27 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.28 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 

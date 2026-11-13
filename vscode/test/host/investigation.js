@@ -187,7 +187,7 @@ async function activate(context) {
       });
       await vscode.commands.executeCommand('workbench.action.closeAuxiliaryBar');
       await vscode.commands.executeCommand('notifications.hideToasts');
-      await vscode.commands.executeCommand('mrw.research.focus');
+      await vscode.commands.executeCommand('mrw.commands.focus');
     } else throw new Error('Unknown R3 host phase');
     await check('ordinary source intact and no unexpected command errors', async () => {
       assert.equal(note.getText(), sourceText); assert.equal(await fs.readFile(note.uri.fsPath, 'utf8'), sourceText);
