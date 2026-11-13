@@ -1,8 +1,8 @@
 # Install Mathematical Research Workstation
 
-MRW 0.23.25 is installed from a VSIX.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.25/mrw-0.23.25.vsix)
-and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.25),
+MRW 0.23.26 is installed from a VSIX.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.26/mrw-0.23.26.vsix)
+and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.26),
 or [build from source](../vscode/README.md#package-and-install-a-vsix).
 There is no Marketplace listing. The extension identifier is `flengyel.mrw`.
 
@@ -48,16 +48,16 @@ workspace there and perform the same Python and extension-host checks.
 
 ### 2. Install the VSIX in that workspace host
 
-Run **Extensions: Install from VSIX…** and select `mrw-0.23.25.vsix`.
+Run **Extensions: Install from VSIX…** and select `mrw-0.23.26.vsix`.
 Alternatively, use that window's Linux terminal and substitute the package path:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.25.vsix
+code --install-extension /absolute/path/to/mrw-0.23.26.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.25` under the WSL/SSH host's installed extensions.
-After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.25**;
+Confirm `flengyel.mrw@0.23.26` under the WSL/SSH host's installed extensions.
+After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.26**;
 the sidebar heading shows the same version. **MRW: Open Tutorial** reports the
 active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
@@ -66,7 +66,7 @@ storage when upgrading `flengyel.mrw`.
 
 For upgrades from before the extension identity change, see
 [the conversion record](EXTENSION_IDENTITY.md). The upgrade from 0.23.12 to
-0.23.25 keeps the `flengyel.mrw` identity and existing saved work.
+0.23.26 keeps the `flengyel.mrw` identity and existing saved work.
 
 <a id="3-open-existing-work"></a>
 

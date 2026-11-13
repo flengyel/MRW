@@ -4,20 +4,23 @@ A note is a document used for working thoughts, arguments or references. It is
 not a separate MRW file type. A Markdown note can have Contents, links and
 backlinks just like another Markdown document.
 
-## The two creation commands today
+## Creation belongs to the authoring application
 
-| Command in 0.23.25 | What it does |
-| --- | --- |
-| New Note | For a selected Obsidian vault, invokes the configured Obsidian creation command. For another notes folder, opens a blank Markdown editor; VS Code Save chooses the filename and location. |
-| New Reading Document | Offers a Markdown Save dialog, initially in the workspace folder, then creates a file with Current question, Sources and passages, Working notes and Next step headings. It remains in the Command Palette. |
+**New Note** is a handoff. For a selected Obsidian vault it invokes the configured
+Obsidian command; for another notes folder it opens a blank VS Code Markdown
+editor. The application owns its prompts, templates, filename and save operation.
+For other documents, use the corresponding authoring application and then
+**Open Document** in MRW.
 
-Both can produce ordinary Markdown. Neither registers a problem, creates a study
-or introduces a special document format. **Open Document** opens material already
-present, including notes and PDFs; it is a separate operation from creation.
+**New Reading Document** and its fixed reading headings were removed in 0.23.26.
+Previously created documents remain ordinary Markdown files and continue to open
+with Contents, links and Return. There is no data conversion. A custom keybinding
+for the removed command should be removed or changed to the chosen application's
+creation command.
 
-The recommendation is one creation action, **New Note**, delegated to the chosen
-notes application or the host editor. The separate reading-starter command is a
-candidate for removal. This recommendation has not changed the commands in 0.23.25.
+MRW's saved sources, annotations and research records remain part of its reading
+and research functions. Delegating document creation does not remove that saved
+work or change its format.
 
 ## Obsidian now
 

@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.25 — Reuse companion note creation.**
-MRW delegates note creation to Obsidian or a blank VS Code Markdown editor.
-Its redundant note template and filename generator have been removed.
+**MRW 0.23.26 — Delegate document creation.**
+MRW delegates creation to the authoring application. New Note opens Obsidian
+or a blank VS Code editor; the separate reading-template command is removed.
 This release includes the 0.23.22 startup repair.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.25/mrw-0.23.25.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.25).
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.26/mrw-0.23.26.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.26).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -73,8 +73,9 @@ its retained source.
 
 PDFs open in a registered reader or, on request, the system reader.
 MRW does not extract PDF text, build PDF Contents or restore PDF pages.
-**New Reading Document…** creates Markdown. Ordinary reading requires no problem record
-or exercise form.
+Create documents in their authoring application, then open them in MRW.
+[New Note](docs/NOTE_COMPANIONS.md) delegates to Obsidian or the VS Code editor.
+Ordinary reading requires no problem record or exercise form.
 
 Start with **MRW: Open Tutorial**, or read the
 [document workflow](docs/READING_OUTLINE_WORKFLOW.md). The
@@ -96,7 +97,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.25.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.26.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -106,8 +107,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.25.vsix
-sha256sum vscode/mrw-0.23.25.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.26.vsix
+sha256sum vscode/mrw-0.23.26.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -247,7 +248,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.25 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.26 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 

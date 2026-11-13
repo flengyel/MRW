@@ -18,6 +18,7 @@ async function run() {
     report.extensionPath = extension.extensionPath;
     const commands = new Set(await vscode.commands.getCommands(true));
     const expected = extension.packageJSON.contributes.commands.map(c => c.command);
+    assert.ok(!commands.has('mrw.newReadingOverview'), 'Removed creator must not be registered');
     assert.deepEqual(expected.filter(id => !commands.has(id)), []);
     report.checks.push({name: 'native activation registers every contributed command', count: expected.length, passed: true});
     const note = await vscode.workspace.openTextDocument(vscode.Uri.file(path.join(root, 'reading.md')));

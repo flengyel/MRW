@@ -68,7 +68,8 @@ A PDF opens in an available registered reader. If none is available, MRW offers
 **Open with system reader**. PDF page restoration depends on the external reader;
 MRW supplies neither a PDF reader nor text extraction, PDF Contents or page
 restoration. Other formats use their
-registered host editors. **MRW: New Reading Document…** creates editable Markdown.
+registered host editors. Create documents in the application you use to write
+them, then open them in MRW. **New Note** delegates to Obsidian or the VS Code editor.
 
 
 Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
@@ -468,9 +469,9 @@ source link. Existing notes and other open drafts are preserved.
 A failed Obsidian handoff reports the error; it does not create a fallback file
 or repeat the command.
 
-**New Note** is the creation action in MRW's main controls. The older **New
-Reading Document…** command remains in the Command Palette for creating a
-workspace Markdown file with reading headings; it creates no special document type.
+**New Note** hands creation to the notes application or host editor. For papers,
+notebooks, Lean files and other documents, use the corresponding application,
+then **Open Document** in MRW. MRW supplies no reading-document starter template.
 
 Use **Recent Notes** to reopen a note by title and ID. It lists up to thirty
 notes opened or saved in this workspace, scoped to the selected notes folder,
@@ -481,9 +482,3 @@ the note. For a PDF it reopens the file; MRW does not preserve the PDF page.
 A separate note needs no OCR. Selecting or searching text in a scanned PDF does.
 Existing inline reader annotations remain in their saved sources; this command
 does not convert or remove them.
-
-The template substitutes `{{title}}`, `{{id}}` (the proposed filename without
-`.md`), `{{source}}` (a Markdown link), and `{{cursor}}` (the insertion position).
-Use `{{titleYaml}}` for a quoted YAML title if your own format uses YAML. These
-are literal substitutions; no Obsidian Templater code runs. MRW does not require
-the `flengyel/Zettel` conventions or alter that format specification.

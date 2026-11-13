@@ -1,5 +1,9 @@
 # Codex task: existing documents, note navigation, and a usable tutorial
 
+> The creation-command instructions below are superseded by 0.23.26.
+> New Reading Document is removed; creation is delegated to the authoring
+> application. Preserve existing documents. See [notes applications](NOTE_COMPANIONS.md).
+
 Status: next authorized implementation increment, 2026-11-06.
 Reviewed baseline: MRW 0.19.2 at `42b465f2fbdab96445e4c59cc5c3818cb735b4e7`.
 Implement increment 2 of [RESEARCH_WORKSTATION_DESIGN](RESEARCH_WORKSTATION_DESIGN.md).

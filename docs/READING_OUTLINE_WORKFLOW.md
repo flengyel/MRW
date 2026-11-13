@@ -35,8 +35,9 @@ tree and identifies the active file, with directions for selecting its Markdown
 or returning to the selected document. It does not display an unrelated note's
 headings beneath a PDF or text file.
 
-**New Reading Document…**, in the Command Palette, creates a `.md` or `.markdown` file through the host Save dialog
-and refuses to overwrite an existing file. Untitled Markdown works for the
+Create documents in their authoring application, then use **Open Document**.
+**New Note** delegates to Obsidian or the VS Code editor; see
+[notes applications](NOTE_COMPANIONS.md). Untitled Markdown works for the
 current session. MRW keeps the chosen editor groups and sidebars; it does not
 maximize reading or hide Codex and other editors automatically.
 

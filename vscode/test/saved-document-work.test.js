@@ -10,9 +10,9 @@ const content=(s,extra={})=>({activity:'argument',prompt:'Why is the sum of the 
 function envelope(c,m){const s=c.active;return {study:s.id,attempt:s.current?.id||null,formEpoch:s.formEpoch,formDraftId:s.formDraft?.draftId||null,helpDraftId:s.helpDraft?.id||null,...m};}
 const send=(h,m)=>h.c.receive(envelope(h.c,m));
 async function host(t){
- const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-document-learning-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));
+ const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-document-learning-'));
  const state=new Map(),commands=new Map(),panels=[],returns=[];let fail=false;
- const recorder=new StudyHistory(path.join(home,'history'),{version:'0.23.0',commit:'test'},{origin:'automated_test'});t.after(()=>recorder.close());
+ const recorder=new StudyHistory(path.join(home,'history'),{version:'0.23.0',commit:'test'},{origin:'automated_test'});t.after(async()=>{await recorder.close();await fs.rm(home,{recursive:true,force:true});});
  const vscode={Uri:{parse:value=>({scheme:'file',path:value.slice(7),toString:()=>value})},ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
    env:{clipboard:{text:'',async readText(){return this.text;},async writeText(text){this.text=text;}}},workspace:{getConfiguration:()=>({get:(key,fallback)=>fallback})},window:{registerTreeDataProvider:()=>({dispose(){}}),showQuickPick:async choices=>choices[0],
     createWebviewPanel(){const p={messages:[],webview:{onDidReceiveMessage(){},async postMessage(m){p.messages.push(m);}},onDidDispose(){},onDidChangeViewState(){},reveal(){}};panels.push(p);return p;}}};

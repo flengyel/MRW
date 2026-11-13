@@ -9,7 +9,6 @@ const { noteIdentity } = require('./noteIdentity');
 const { showMarkdownPreview, documentColumn: readingDocumentColumn } = require('./documentPresentation');
 const { registerTutorial } = require('./tutorial');
 const KEY = 'mrw.readingOutline.v1';
-const STARTER = '# Document\n\n## Current question\n\n## Sources and passages\n\n## Working notes\n\n## Next step\n';
 
 // A location follows only edits wholly outside its exact selected syntax.
 // Overlap blocks return; undo restoring the original text restores the pin.
@@ -109,8 +108,8 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     changed.fire();
   }
   const isOverview = doc => doc && !doc.isClosed && doc.languageId === 'markdown' && ['file', 'untitled'].includes(doc.uri.scheme);
-  async function checkFile(uri, newFile = false) {
-    return documents.check(uri, newFile);
+  async function checkFile(uri) {
+    return documents.check(uri);
   }
   async function checkDocument(doc) {
     if (!isOverview(doc) || /\.pdf$/i.test(doc.uri.path)) throw new Error('Choose an ordinary Markdown document.');
@@ -258,31 +257,6 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   });
   register('mrw.chooseReadingOverview', () => openReadingOutline(true));
   register('mrw.revealReadingDocument', () => openReadingOutline(false, false, true));
-  register('mrw.newReadingOverview', async () => {
-    const attempt = ++generation; documents.supersede();
-    const root = vscode.workspace.workspaceFolders?.[0]?.uri;
-    if (!root || root.scheme !== 'file') throw new Error('Open a project folder before creating a document.');
-    const uri = await vscode.window.showSaveDialog({ title: 'New Markdown document', saveLabel: 'Create Markdown document',
-      filters: { Markdown: ['md', 'markdown'] }, defaultUri: vscode.Uri.file(path.join(root.fsPath, 'document.md')) });
-    if (!uri || attempt !== generation) return;
-    if (!/\.(md|markdown)$/i.test(uri.path)) throw new Error('Choose a .md or .markdown filename for the document.');
-    await checkFile(uri, true);
-    let existing = false;
-    try { await fs.lstat(uri.fsPath); existing = true; }
-    catch (error) { if (error.code !== 'ENOENT') throw error; }
-    if (existing) throw new Error('A file already exists there. Choose another name, or use Show Contents.');
-    if (attempt !== generation) return;
-    // The explicit creation uses the host's file edit and Save operations.
-    // Do not introduce another ordinary-file writer or overwrite an existing file.
-    const edit = new vscode.WorkspaceEdit();
-    edit.createFile(uri, { overwrite: false, ignoreIfExists: false });
-    edit.insert(uri, new vscode.Position(0, 0), STARTER);
-    if (!await vscode.workspace.applyEdit(edit)) throw new Error('The document could not be created. Check the editor for any draft left by VS Code.');
-    const doc = await vscode.workspace.openTextDocument(uri);
-    await vscode.window.showTextDocument(doc, { preview: false });
-    if (!await doc.save()) throw new Error('The new document is open but was not saved. Keep its draft and use Save to finish.');
-    return selectOverview(doc, attempt);
-  });
   registerTutorial({ vscode, context, register });
   register('mrw.refreshReadingOutline', () => { refresh(); return model; });
   register('mrw.selectReadingOutlineItem', async node => {

@@ -7,8 +7,8 @@ const registerActiveStudy=options=>scopedController(registerStudy(options));
 const passage={reference:'mrw-outline:v1/exact-selected-reference',label:'Selected proof passage',text:'For every x, f(x) = x.',source_revision:'a'.repeat(64),authors:'Source author'};
 const value={activity:'missing_step',prompt:'Explain the missing step.',answer:{text:'Apply the hypothesis.',author:'Codex companion',origin:'ai_proposal'},hints:['Check the hypothesis.'],references:[passage.reference],author:'Codex companion',origin:'ai_proposal'};
 async function host(t){
- const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));const state=new Map(),commands=new Map(),panels=[],shown=[];
- const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});t.after(()=>recorder.close());
+ const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));const state=new Map(),commands=new Map(),panels=[],shown=[];
+ const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});t.after(async()=>{await recorder.close();await fs.rm(home,{recursive:true,force:true});});
  const api={ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
   env:{clipboard:{value:'',async readText(){return this.value;},async writeText(t){this.value=t;}}},
   workspace:{getConfiguration:()=>({get:(k,f)=>f})},commands:{executeCommand:async()=>{}},window:{registerTreeDataProvider(){return{dispose(){}};},

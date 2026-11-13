@@ -261,8 +261,9 @@ from document reading. Preserve the existing Obsidian workflow while considering
 an optional adapter; the companion owns templates, naming and editing. Org capture
 and The Archive are candidate integrations, not delivered capabilities. A note
 may be an entry in a file. Do not infer a separate note schema or require a new
-registration form. The New Note/New Reading Document overlap is documented there;
-removing the older starter command remains a recommendation.
+registration form. Document creation belongs to the authoring application.
+MRW hands New Note to Obsidian or the host editor and opens the resulting files;
+the separate reading-starter command was removed in 0.23.26.
 
 ### Zettelkasten
 

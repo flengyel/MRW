@@ -1250,101 +1250,24 @@ test('cancelled Stacks preview publishes no outline and invalid input cannot acq
   assert.equal(h.panels.length, 0);
 });
 
-test('new reading overview uses the native Save choice and host editing, then remembers an editable saved page', async t => {
-  const root = await temporary(t), h = await harness(root), file = path.join(root, 'my-study.md');
+test('saved reading documents remain usable after removing the document creator', async t => {
+  const root = await temporary(t), h = await harness(root), file = path.join(root, 'reading-overview.md');
+  const text = '# Document\n\n## Current question\n\nMy unfinished argument.\n';
+  await fs.writeFile(file, text);
   const draft = h.document(path.join(root, 'other.md'), 'Unfinished work α😀'); draft.isDirty = true;
-  h.focus(h.editor(draft)); h.saveChoices.push(uri(file));
-  const model = await h.commands.get('mrw.newReadingOverview')();
-  assert.ok(model, h.errors.join('\n'));
-  assert.equal(h.saveDialogs.length, 1);
-  assert.equal(h.saveDialogs[0].title, 'New Markdown document');
-  assert.deepEqual(h.saveDialogs[0].filters, { Markdown: ['md', 'markdown'] });
-  assert.equal(h.workspaceEdits.length, 1);
-  assert.deepEqual(h.workspaceEdits[0].operations[0].options, { overwrite: false, ignoreIfExists: false });
-  const doc = h.api.window.activeTextEditor.document;
-  assert.equal(doc.uri.toString(), uri(file).toString());
-  assert.equal(doc.languageId, 'markdown'); assert.equal(doc.isDirty, false);
-  assert.match(doc.getText(), /^# Document\n/);
+  h.focus(h.editor(draft)); h.opens.push([uri(file)]);
+  const model = await h.commands.get('mrw.openReadingOutline')();
   assert.ok(model.all.some(node => node.label === 'Current question'));
-  assert.equal(await fs.readFile(file, 'utf8'), doc.getText());
-  assert.deepEqual(h.saves, [uri(file).toString()]);
   assert.equal(draft.getText(), 'Unfinished work α😀'); assert.equal(draft.isDirty, true);
   assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(file).toString());
   const restarted = await harness(root, h.state);
   assert.equal((await restarted.commands.get('mrw.openReadingOutline')()).all[0].label, 'Document');
+  assert.equal(await fs.readFile(file, 'utf8'), text);
+  assert.deepEqual(await fs.readdir(root), ['reading-overview.md']);
+  assert.equal(h.workspaceEdits.length + restarted.workspaceEdits.length, 0);
+  assert.equal(h.saves.length + restarted.saves.length, 0);
   assert.equal(h.requests.length + restarted.requests.length, 0);
   assert.deepEqual([...h.errors, ...restarted.errors], []);
-});
-
-test('cancelling a new overview leaves the selected overview, files and drafts intact', async t => {
-  const root = await temporary(t), h = await harness(root), file = path.join(root, 'existing.md');
-  await fs.writeFile(file, '# Existing\n'); h.opens.push([uri(file)]);
-  await h.commands.get('mrw.openReadingOutline')();
-  const before = structuredClone(h.state.get('mrw.readingOutline.v1'));
-  await h.commands.get('mrw.newReadingOverview')();
-  assert.deepEqual(h.state.get('mrw.readingOutline.v1'), before);
-  assert.equal(h.api.readingProvider.getChildren()[0].label, 'Existing');
-  assert.equal(h.workspaceEdits.length, 0); assert.equal(h.saves.length, 0);
-  assert.deepEqual(await fs.readdir(root), ['existing.md']);
-  assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
-});
-
-test('new overview refuses an existing filename, a non-Markdown name and a symlink outside the workspace', async t => {
-  const root = await temporary(t), h = await harness(root), file = path.join(root, 'existing.md');
-  await fs.writeFile(file, 'Existing work α😀'); h.saveChoices.push(uri(file));
-  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /already exists/);
-  assert.equal(await fs.readFile(file, 'utf8'), 'Existing work α😀');
-  h.saveChoices.push(uri(path.join(root, 'wrong.txt')));
-  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /\.md or \.markdown/);
-  const outside = path.join(root, '..', 'outside'); await fs.mkdir(outside);
-  await fs.symlink(outside, path.join(root, 'escape'));
-  h.saveChoices.push(uri(path.join(root, 'escape', 'new.md')));
-  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /outside the selected scope/);
-  assert.deepEqual(await fs.readdir(outside), []);
-  assert.equal(h.workspaceEdits.length, 0); assert.equal(h.saves.length, 0); assert.equal(h.state.size, 0);
-});
-
-test('a host creation failure preserves the prior navigator and never attempts Save', async t => {
-  const root = await temporary(t), h = await harness(root), original = path.join(root, 'original.md');
-  await fs.writeFile(original, '# Original\n'); h.opens.push([uri(original)]);
-  await h.commands.get('mrw.openReadingOutline')();
-  const before = structuredClone(h.state.get('mrw.readingOutline.v1'));
-  h.api.workspace.applyEdit = async () => false;
-  h.saveChoices.push(uri(path.join(root, 'new.md')));
-  await h.commands.get('mrw.newReadingOverview')(); assert.match(h.errors.pop(), /could not be created/);
-  assert.deepEqual(h.state.get('mrw.readingOutline.v1'), before);
-  assert.equal(h.api.readingProvider.getChildren()[0].label, 'Original');
-  assert.equal(h.saves.length, 0); assert.equal(h.requests.length, 0);
-});
-
-test('a failed first Save keeps the new editor draft without claiming a selected saved overview', async t => {
-  const root = await temporary(t), options = { save: false }, h = await harness(root, new Map(), options);
-  const file = path.join(root, 'new.md'); h.saveChoices.push(uri(file));
-  await h.commands.get('mrw.newReadingOverview')();
-  assert.match(h.errors.pop(), /open but was not saved/);
-  const doc = h.api.window.activeTextEditor.document;
-  assert.equal(doc.isDirty, true); assert.match(doc.getText(), /## Current question/);
-  assert.equal(h.state.size, 0);
-  assert.equal(await fs.readFile(file, 'utf8'), '');
-  options.save = true; await doc.save();
-  assert.ok(await h.commands.get('mrw.openReadingOutline')());
-  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(file).toString());
-  assert.equal(h.requests.length, 0); assert.deepEqual(h.errors, []);
-});
-
-test('a delayed New dialog cannot create a file after a newer overview selection', async t => {
-  const root = await temporary(t), h = await harness(root), file = path.join(root, 'late.md');
-  let resolve;
-  h.api.window.showSaveDialog = () => new Promise(done => { resolve = done; });
-  const pending = h.commands.get('mrw.newReadingOverview')();
-  const original = path.join(root, 'original.md'); await fs.writeFile(original, '# Original\n');
-  const doc = await h.api.workspace.openTextDocument(uri(original)); h.focus(h.editor(doc));
-  await h.commands.get('mrw.openReadingOutline')();
-  resolve(uri(file)); await pending;
-  assert.equal(h.workspaceEdits.length, 0);
-  await assert.rejects(fs.lstat(file), { code: 'ENOENT' });
-  assert.equal(h.state.get('mrw.readingOutline.v1').uri, uri(original).toString());
-  assert.deepEqual(h.errors, []);
 });
 
 test('the offline tutorial opens a read-only Markdown preview without creating files or invoking services', async t => {
@@ -1453,7 +1376,7 @@ test('Obsidian overview import refuses a changed cursor or document without over
   }
 });
 
-test('the MRW starting view offers New, Open, saved sources and tutorial as registered commands', async t => {
+test('the MRW starting view offers note handoff, Open, saved sources and tutorial without a document creator', async t => {
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents;
@@ -1462,7 +1385,8 @@ test('the MRW starting view offers New, Open, saved sources and tutorial as regi
   }
   assert.ok(h.commands.has('mrw.openOutline'));
   assert.ok(!welcome.includes('(command:mrw.openOutline '));
-  assert.ok(h.commands.has('mrw.newReadingOverview'));
+  assert.ok(!h.commands.has('mrw.newReadingOverview'));
+  assert.ok(!manifest.contributes.commands.some(item => item.command === 'mrw.newReadingOverview'));
   assert.ok(!welcome.includes('(command:mrw.newReadingOverview '));
   assert.ok(!manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.newReadingOverview'));
   for (const command of ['mrw.openTutorial']) {

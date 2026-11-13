@@ -6,7 +6,7 @@ const {scopedController}=require('./study-message-fixture');
 const registerActiveStudy=options=>scopedController(registerStudy(options));
 const passage={reference:'mrw-outline:v1/exact-selected-reference',label:'Selected proof passage',text:'For every x, f(x) = x.',source_revision:'a'.repeat(64),authors:'Source author'};
 const value={activity:'missing_step',prompt:'Explain the missing step.',answer:{text:'Apply the hypothesis.',author:'Codex companion',origin:'ai_proposal'},hints:['Check the hypothesis.'],references:[passage.reference],author:'Codex companion',origin:'ai_proposal'};
-async function history(t,io){const directory=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-events-'));t.after(()=>fs.rm(directory,{recursive:true,force:true}));const h=new StudyHistory(directory,{version:'0.18.0',commit:'test'},{origin:'test',io});await h.init();t.after(()=>h.close());return h;}
+async function history(t,io){const directory=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-events-'));const h=new StudyHistory(directory,{version:'0.18.0',commit:'test'},{origin:'test',io});await h.init();t.after(async()=>{await h.close();await fs.rm(directory,{recursive:true,force:true});});return h;}
 function study(){return model.createStudy([passage],'/project');}
 function begin(s,h,q=model.question(value,[passage])){s.questions.push(q);s.block=model.block();model.begin(s,q,'test',h);return q;}
 test('submission snapshots and exposure ordering remain exact after later reveals and corrections',async t=>{
@@ -48,8 +48,8 @@ test('recorder failure preserves event order and snapshots, exposes a gap and re
  fail=false;await h.flush();assert.equal(h.gap,'');const rows=await h.events();assert.ok(rows.find(e=>e.id===first.id));assert.equal(rows.filter(e=>e.id===first.id).length,1);assert.equal(JSON.parse(await fs.readFile(path.join(h.directory,'snapshots',id+'.json'),'utf8')).answer,'retained');
 });
 async function host(t){
- const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));const state=new Map(),commands=new Map(),panels=[],shown=[];
- const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});t.after(()=>recorder.close());
+ const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));const state=new Map(),commands=new Map(),panels=[],shown=[];
+ const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});t.after(async()=>{await recorder.close();await fs.rm(home,{recursive:true,force:true});});
  const api={Uri:{file:fsPath=>({fsPath,scheme:'file'})},ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
   env:{clipboard:{value:'',async readText(){return this.value;},async writeText(t){this.value=t;}}},
   workspace:{getConfiguration:()=>({get:(k,f)=>f})},commands:{executeCommand:async()=>{}},window:{registerTreeDataProvider(){return{dispose(){}};},

@@ -1,5 +1,9 @@
 # Codex task: clear document and source terminology
 
+> The creation-command instructions below are superseded by 0.23.26.
+> New Reading Document is removed; creation is delegated to the authoring
+> application. Preserve existing documents. See [notes applications](NOTE_COMPANIONS.md).
+
 Status: completed terminology handoff (0.19.2). Its later-roadmap paragraphs
 describe an earlier proposal; they do not authorize Research Question registration
 or a new Research view. Follow the

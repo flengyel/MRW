@@ -1,5 +1,18 @@
 # Codex instructions
 
+## Delegate document creation — 0.23.26
+
+Document creation belongs to the authoring application. New Reading Document,
+its command registration and fixed reading template are removed. Do not restore
+a parallel creation form, renamed starter command or note-template engine.
+New Note delegates to the configured Obsidian command or a blank VS Code editor;
+the application owns templates, filenames and Save. Open Document reads the
+resulting files. Preserve earlier documents, dirty buffers, Contents, Return,
+notes, annotations and retained research records. The optional companion-adapter
+proposal remains unimplemented. Publication does not authorize installation or
+reload of the working window.
+
+
 ## Reuse companion note creation — 0.23.25
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_25.md). Not installed into the working window.
@@ -33,7 +46,7 @@ command. Preserve vault-path verification, command availability checks, workspac
 trust and the current document. See [configuration](docs/OBSIDIAN_WORKFLOW.md#new-note).
 
 The ordinary-folder template path introduced here was removed in 0.23.25.
-New Reading Document remains in the Command Palette;
+New Reading Document was subsequently removed in 0.23.26;
 New Note is the creation action in the main controls. Command IDs and existing
 notes, private records and study data are unchanged. Publication does not authorize
 installation into or reloading the working window.
