@@ -8,7 +8,12 @@ async function check(root, extension) {
   const title = 'Native Zettel save check';
   // Supply a deterministic answer only for the title prompt. Native Uri,
   // document editing, save and file-change events remain the real VS Code API.
-  const api = {...vscode, window:{...vscode.window,showInputBox:async()=>title}};
+  const {hostFacade} = require(path.join(extension.extensionPath,'src/workspaceMoveHost'));
+  const window = hostFacade(vscode.window, {get(target,key){
+    if(key==='showInputBox') return async()=>title;
+    const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;
+  }});
+  const api = {...vscode, window};
   const notes = createZettelNotes({vscode:api,context:{subscriptions,workspaceState:{get:(k,d)=>state.get(k)??d,async update(k,v){state.set(k,v);}}},folderRoot:async()=>root});
   try {
     const source = vscode.Uri.file(path.join(root,'reading.md'));
