@@ -2,6 +2,8 @@
 
 ## Zettels while reading — 0.23.23
 
+Published and pushed; [delivery checks](docs/RELEASE_0_23_23.md). Not installed into the working window.
+
 New Zettel and Recent Notes use the selected notes folder. New notes are ordinary
 assigned-path untitled Markdown buffers; VS Code owns Save, Undo, conflicts and
 draft recovery. The bounded recent list stores only paths and labels in existing
@@ -14,7 +16,7 @@ Keep MRW integration instructions in MRW; the independent `flengyel/Zettel`
 format specification must not acquire MRW requirements or editorial commentary.
 
 The 0.23.22 activation repair is published; preserve its read-only native host
-checks. Deliver this increment without installing or reloading the user's window.
+checks. Preserve the user's window; publication does not authorize installation or reload.
 
 
 ## Startup repair — 0.23.22
@@ -125,7 +127,7 @@ Complete the authorized build, verification, release and remote integration step
 before ending the task. Report remote main, package/release and installation
 status separately; identify any unfinished stage explicitly. Preserve the working
 window: publication does not authorize installation or a forced reload.
-[0.23.21 delivery](docs/RELEASE_0_23_21.md) records the latest package.
+[0.23.23 delivery](docs/RELEASE_0_23_23.md) records the latest package.
 
 ## Delivered — reader-note controls, 0.23.12
 
