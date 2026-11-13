@@ -1,7 +1,7 @@
 # Document navigation
 
 The editor toolbar has one book icon, **MRW Document**, for Markdown, PDF and
-text files. Its menu contains Return to Document and Show Backlinks. Markdown
+text files. Its menu contains Return to Document, Show Backlinks, New Zettel and Recent Notes. Markdown
 also offers Show Contents, Edit Document Source, Open Note in Obsidian and Copy
 Note Link for Obsidian. Existing command IDs and Command Palette entries remain. Menu conditions cover
 local files and VS Code’s remote-file URIs used by WSL and SSH windows.
@@ -32,8 +32,9 @@ The [VS Code editor-action guidance](https://code.visualstudio.com/api/ux-guidel
 asks extensions to keep actions contextual, use one toolbar icon and put
 secondary actions in overflow. This increment groups document actions in one
 native submenu, supported by the [menu contribution API](https://code.visualstudio.com/api/references/contribution-points#contributesmenus).
-It removes the three separate Markdown toolbar icons and does not expose note
-editing, proof study or AI requests as PDF actions. The wider sidebar grouping
+It removes the three separate Markdown toolbar icons. New Zettel opens a
+separate note beside a PDF; it does not edit the PDF. Proof study and AI requests
+are not included in this document menu. The wider sidebar grouping
 remains a separate review; this patch does not change saved view placement.
 
 The regression checks use disposable files and a VS Code API facade. They cover
@@ -41,3 +42,27 @@ PDF backlink selection, focus changes, cancellation, restart Return, scope
 rejection and dirty-buffer preservation. These are command-level checks, not an
 observation of the native desktop menu. No connected document session was
 available for this increment, and the working window was not reloaded.
+
+## Zettels and recent notes
+
+**New Zettel** creates an unsaved Markdown draft in **MRW: Notes Folder**, beside
+the active document. The title is stored in YAML and an H1 heading; the filename
+is an ID formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
+`YYYYMMDDHHmm`. Occupied names receive a numeric suffix. The **Research** section
+links to the source document by a relative path. Keep both files in their
+relative locations or update that ordinary link after moving one. No PDF page
+or exact quotation is inferred. Save with Ctrl+S; VS Code owns conflicts, Undo
+and draft recovery. The source and other open drafts are preserved.
+
+**Recent Notes** lists the thirty most recently opened or saved Markdown notes
+seen by MRW in this workspace. It shows the YAML title, or H1 fallback, beside
+the filename ID. The list survives restart, belongs to its recorded notes root,
+and never redirects entries when another folder is selected. Missing or
+redirected notes must be selected again through Open Document. Failed history
+saves are reported; reopening retries them. Recent Notes does not scan the
+vault, copy note content or read Obsidian's recent-file history.
+
+Returning from a new or recent note preserves the source location where it is
+known. A PDF return is file-level. Existing reader annotations and retained
+sources are unchanged. These commands also appear in the Command Palette and
+the MRW sidebar.

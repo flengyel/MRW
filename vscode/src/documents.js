@@ -16,6 +16,7 @@ const { workspaceRoute } = require('./companionLinks');
 const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
 const { createDocumentPicker } = require('./documentPicker');
+const { createZettelNotes } = require('./zettelNotes');
 const KEY = 'mrw.documents.v1';
 function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins }) {
   const identityRoot=value=>context.mrwIdentityRoot?.(value)||value;
@@ -39,6 +40,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   const candidates = new Set();
   context.subscriptions.push({dispose:()=>chooser?.cancel()});
   const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
+  const notes = createZettelNotes({ vscode, context, folderRoot, eligible: isNote });
   function persist() {
     const value = { workspace, grants: [...grants], folder, recentFolders: [...recentFolders], last, origin, location: lastLocation };
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
@@ -190,6 +192,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     latestDisplay = { uri, location: shownLocation };
     lastLocation = shownLocation;
     onDisplayed(uri);
+    await notes.remember(uri).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
     return true;
   }
   function validFolder(value) {
@@ -518,6 +521,37 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (await display(destination, undefined, attempt)) { last = destination.toString(); await persist(); await onNavigated(); }
     return true;
   }
+  async function withNoteOrigin(value, action) {
+    const attempt = supersede(), selected = value?.scheme ? value : ordinaryUri();
+    const uri = selected?.scheme === 'file' ? selected : undefined;
+    const editor = vscode.window.activeTextEditor;
+    const doc = uri && editor?.document.uri.toString() === uri.toString() ? editor.document : undefined;
+    const pending = uri ? {location: doc ? snapshot(doc, doc.offsetAt(editor.selection.start), doc.offsetAt(editor.selection.end)) : {uri:uri.toString(), fileOnly:true}} : undefined;
+    if (pending) candidates.add(pending);
+    const validate = () => {
+      if (attempt !== generation) throw Error('Another document action took precedence. Open the notes command again.');
+      if (pending) validateOrigin(doc, pending);
+    };
+    try {
+      if (uri) await check(uri);
+      validate();
+      return await action({uri, attempt, pending, validate});
+    } finally { if (pending) candidates.delete(pending); }
+  }
+  register('mrw.newZettel', value => withNoteOrigin(value, async ({uri, pending, validate}) => {
+    const source = uri && {uri, label: markdown(uri.fsPath) ? noteIdentity(await vscode.workspace.openTextDocument(uri), {headingFallback:true}).label : path.basename(uri.fsPath)};
+    const doc = await notes.newDraft({source, validate});
+    if (!doc) return;
+    validate();
+    if (pending) { origin = pending.location; await persist(); await onNavigated(); }
+    return doc;
+  }));
+  register('mrw.recentNotes', value => withNoteOrigin(value, async ({attempt, pending, validate}) => notes.recent({validate, openSelected:async uri => {
+    await grant(uri); validate();
+    if (!await display(uri, undefined, attempt, validate)) return;
+    if (pending) origin = pending.location;
+    last = uri.toString(); await persist(); await onNavigated();
+  }})));
   register('mrw.copyDocumentLink', copyLink);
   register('mrw.openDocumentInObsidian', openInObsidian);
   register('mrw.openDocument', open);

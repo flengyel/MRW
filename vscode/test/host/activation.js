@@ -31,6 +31,7 @@ async function run() {
     try { await Promise.race([vscode.commands.executeCommand('mrw.studyLean4'), timeout]); }
     finally { clearInterval(timer); clearTimeout(report.timeout); delete report.timeout; }
     report.checks.push({name: 'Study Lean command settles after chooser cancellation', passed: true});
+    report.checks.push(await require('./zettel').check(root, extension));
   } catch (error) { report.error = error.stack; throw error; }
   finally { await fs.writeFile(path.join(root, 'activation-report.json'), JSON.stringify(report, null, 2)); }
 }

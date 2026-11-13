@@ -443,3 +443,26 @@ Version 0.23.22 fixes a startup failure that left several commands unregistered.
 After installing the update, save drafts before reloading when you are ready.
 If commands remain unavailable, check **Output → Log (Remote Extension Host)**
 for the activation error. Notes and saved research do not need to be recreated.
+
+## Notes while reading
+
+Choose your Zettelkasten with **Choose Notes Folder**. The folder stays separate
+from the MRW workspace; an Obsidian installation is optional.
+
+From the document's **MRW Document** menu, choose **New Zettel** and enter a title.
+An ordinary Markdown draft opens beside the document. Its proposed filename uses
+an ID such as `Note202611130907.md`; change the prefix in **MRW: Zettel Prefix**
+if desired. The draft includes a YAML title, an H1 heading and a **Research**
+section containing a relative link to the document. Write your note and press
+**Ctrl+S** to save it in the selected notes folder. Nothing is written to the
+vault before Save. VS Code handles editing, Undo and unsaved-draft recovery.
+
+Use **Recent Notes** to reopen a note by title and ID. It lists up to thirty
+notes opened or saved in this workspace, scoped to the selected notes folder,
+and survives restart. It does not list every note recently edited in Obsidian.
+**Return to Document** returns to the document from which you opened or created
+the note. For a PDF it reopens the file; MRW does not preserve the PDF page.
+
+A separate note needs no OCR. Selecting or searching text in a scanned PDF does.
+Existing inline reader annotations remain in their saved sources; this command
+does not convert or remove them.

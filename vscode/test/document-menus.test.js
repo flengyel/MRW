@@ -8,7 +8,7 @@ test('PDF and text readers have navigation without Markdown or study controls', 
   assert.equal(entry.group, 'navigation@10');
   assert.match(entry.when, /pdf\|txt/);
   const menu = c.menus[entry.submenu];
-  assert.deepEqual(menu.filter(item => !item.when).map(item => item.command), ['mrw.returnToReadingOutline', 'mrw.showBacklinks']);
+  assert.deepEqual(menu.filter(item => !item.when).map(item => item.command), ['mrw.returnToReadingOutline', 'mrw.showBacklinks', 'mrw.newZettel', 'mrw.recentNotes']);
   assert.ok(menu.filter(item => item.when).every(item => item.when.includes('(md|markdown)')));
   assert.equal(menu.some(item => /study|ask|create/i.test(item.command)), false);
   const toolbar = c.menus['editor/title'].filter(item => item.group.startsWith('navigation'));

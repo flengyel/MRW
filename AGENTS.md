@@ -1,5 +1,17 @@
 # Codex instructions
 
+## Zettels while reading — 0.23.23
+
+New Zettel and Recent Notes use the selected notes folder. New notes are ordinary
+assigned-path untitled Markdown buffers; VS Code owns Save, Undo, conflicts and
+draft recovery. The bounded recent list stores only paths and labels in existing
+workspace state. Preserve recorded roots, canonical-path checks, cancellation,
+source Return pins and dirty buffers. Do not silently convert reader annotations.
+
+The 0.23.22 activation repair is published; preserve its read-only native host
+checks. Deliver this increment without installing or reloading the user's window.
+
+
 ## Startup repair — 0.23.22
 
 The native WSL host rejected a Proxy over its read-only ExtensionContext,
@@ -10,7 +22,7 @@ must model read-only host properties; plain writable doubles missed this defect.
 The user confirms 0.23.21 is installed. Preserve the working window; publication
 does not authorize installation or reload.
 
-The requested next interaction creates ordinary Zettelkasten notes in the
+The following increment creates ordinary Zettelkasten notes in the
 selected notes folder and reopens recent notes by title and ID. The current
 user's vault is already configured. Preserve existing inline reader annotations;
 do not migrate them silently or add a research registration form. Complete the

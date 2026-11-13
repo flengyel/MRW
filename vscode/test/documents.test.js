@@ -44,7 +44,7 @@ function harness(f, state = new Map(), options = {}) {
   const configuration = { notesFolder: options.notesFolder || '' }, configurationWrites = [];
   let linkProvider;
   const api = {
-    CancellationTokenSource, Position, Range, Selection, Uri: { from: fields => ({...fields,toString:()=>fields.scheme+'://'+(fields.authority||'')+fields.path.split('/').map(encodeURIComponent).join('/')}), file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
+    ViewColumn:{Beside:-2}, CancellationTokenSource, Position, Range, Selection, Uri: { from: fields => ({...fields,fsPath:fields.path,toString:()=>fields.scheme+'://'+(fields.authority||'')+fields.path.split('/').map(encodeURIComponent).join('/')}), file: uri, parse: value => value.startsWith('file:') ? uri(fileURLToPath(value)) : { scheme: value.split(':')[0], path: new URL(value).pathname, toString: () => value } },
     ConfigurationTarget: { Workspace: 2 }, DocumentLink: class { constructor(range, target) { Object.assign(this, { range, target }); } },
     languages: { registerDocumentLinkProvider(_selector, provider) { linkProvider = provider; return { dispose() {} }; } },
     ProgressLocation: { Notification: 15 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 },
@@ -68,7 +68,7 @@ function harness(f, state = new Map(), options = {}) {
         reads.push(location.fsPath); assert.ok(!/\.pdf$/i.test(location.fsPath), 'PDF bytes must not be opened as text');
         if (openHook) await openHook(location);
         if (stored.has(location.toString())) return stored.get(location.toString());
-        const text = await fs.readFile(location.fsPath, 'utf8');
+        const text = location.scheme === 'untitled' ? '' : await fs.readFile(location.fsPath, 'utf8');
         const doc = {
           uri: location, version: 1, isDirty: false, isClosed: false, languageId: 'markdown', text,
           getText() { return this.text; },
@@ -81,12 +81,13 @@ function harness(f, state = new Map(), options = {}) {
     window: {
       onDidChangeTextEditorSelection(callback) { selectionChanged = callback; return { dispose() {} }; },
       activeTextEditor: undefined,
+      async showInputBox(){return options.titleInput ? options.titleInput() : 'A working calculation';},
       createQuickPick(){const picker=quickPicker((items,settings)=>pickHook&&picker.placeholder==='Choose an original file or a saved copy.'?WAIT:this.showQuickPick(items,settings));latestPicker=picker;return picker;},
       async showOpenDialog(settings) { dialogs.push(settings); return openChoices.shift(); },
       async showTextDocument(doc, settings) {
         if (showHook) await showHook(doc);
         const editor = { document: doc, selection: new Selection(doc.positionAt(0), doc.positionAt(0)),
-          revealRange(range) { this.revealed = range; } };
+          revealRange(range) { this.revealed = range; }, async edit(action){action({insert:(_p,text)=>{doc.text=text;doc.isDirty=true;doc.version++;}});return true;} };
         this.activeTextEditor = editor; shown.push({ doc, settings, editor }); return editor;
       },
       async withProgress(settings, callback) { return callback({}, { isCancellationRequested: !!options.cancelIndex }); },
@@ -124,6 +125,43 @@ function harness(f, state = new Map(), options = {}) {
   };
   return apiHarness;
 }
+
+test('new Zettel from a PDF keeps the reader, names an unsaved vault draft and restores the PDF after restart', async t => {
+  const f=await fixture(t),state=new Map(),h=harness(f,state,{preview:true,notesFolder:f.notes});
+  await h.open('paper.pdf');
+  const before=await fs.readFile(f.file('paper.pdf'));
+  const draft=await h.commands.get('mrw.newZettel')();
+  assert.equal(draft.uri.scheme,'untitled');assert.equal(path.dirname(draft.uri.fsPath),f.notes);
+  assert.match(draft.getText(),/\[paper.pdf\]\(<paper.pdf>\)/);assert.equal(h.shown.at(-1).settings.viewColumn,-2);
+  await assert.rejects(fs.stat(draft.uri.fsPath),/ENOENT/);
+  const restarted=harness(f,state,{preview:true,notesFolder:f.notes});assert.equal(await restarted.documents.returnToDocument(),true);
+  assert.equal(restarted.hostCalls.at(-1).args[0].fsPath,f.file('paper.pdf'));
+  assert.deepEqual(await fs.readFile(f.file('paper.pdf')),before);
+});
+
+test('recent notes use dirty text and preserve the originating PDF without opening it as text',async t=>{
+  const f=await fixture(t),state=new Map(),h=harness(f,state,{preview:true,notesFolder:f.notes});
+  await h.open('2b.md');const note=await h.doc('2b.md');h.change(note,note.text.length,0,'unsaved calculation');
+  await h.open('paper.pdf');await h.commands.get('mrw.recentNotes')();
+  assert.equal(h.shown.at(-1).doc,note);assert.equal(note.isDirty,true);
+  assert.match(h.picks.at(-1).choices[0].label,/Second.*2b.md/);
+  assert.equal(await h.documents.returnToDocument(),true);assert.equal(h.hostCalls.at(-1).args[0].fsPath,f.file('paper.pdf'));
+  const restarted=harness(f,state,{preview:true,notesFolder:f.notes});await restarted.commands.get('mrw.recentNotes')();
+  assert.equal(restarted.shown.at(-1).doc.uri.fsPath,f.file('2b.md'));
+  assert.equal(await fs.readFile(f.file('2b.md'),'utf8'),f.contents['2b.md']);
+});
+
+test('Zettel cancellation and changed origin preserve earlier return state and do not create files',async t=>{
+  const f=await fixture(t);let input,answer;
+  const h=harness(f,new Map(),{notesFolder:f.notes,titleInput:()=>input?input():answer});
+  const source=await h.open('1a.md');await h.follow(source,'2b');const prior=structuredClone(h.state.get('mrw.documents.v1').origin);
+  await h.focus(source);await h.commands.get('mrw.newZettel')();
+  assert.deepEqual(h.state.get('mrw.documents.v1').origin,prior);
+  h.selection(0,5);input=()=>{h.change(source,1,1,'X');return 'Title';};
+  await assert.rejects(h.commands.get('mrw.newZettel')(),/originating document location changed/);
+  assert.equal(h.shown.some(x=>x.doc.uri.scheme==='untitled'),false);
+  assert.deepEqual((await fs.readdir(f.notes)).sort(),Object.keys(f.contents).sort());
+});
 
 test('explicit companion attachment uses the PDF reader and preserves the dirty originating location', async t => {
   const f=await fixture(t),state=new Map(),h=harness(f,state);await h.folder();const doc=await h.open('1a.md');

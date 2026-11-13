@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.22 — startup repair.**
-Fixes a startup failure that left Study Lean 4, Open Document and other
-commands unavailable when VS Code supplies a read-only extension context.
-Workspace relocation, saved records and ordinary notes are preserved.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.22/mrw-0.23.22.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.22).
+**MRW 0.23.23 — Zettels while reading.**
+New Zettel opens a Markdown draft in your selected notes folder, linked to the
+document being read. Recent Notes reopens notes by title and ID across restarts.
+This release includes the 0.23.22 startup repair.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.23/mrw-0.23.23.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.23).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -96,7 +96,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.22.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.23.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -106,8 +106,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.22.vsix
-sha256sum vscode/mrw-0.23.22.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.23.vsix
+sha256sum vscode/mrw-0.23.23.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -247,7 +247,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.22 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.23 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 
@@ -262,3 +262,12 @@ Retain a saved Jupyter notebook with optional companion notes, reopen its exact
 results, compare alternatives and export their provenance. Saved outputs and
 producer-reported execution remain distinct. See the
 [notebook workflow](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md).
+
+### Zettels while reading
+
+Choose the Zettelkasten with **MRW: Choose Notes Folder**. **New Zettel** opens an
+ordinary Markdown draft beside the current document, with its title, ID filename
+and a source link under **Research**. Save with Ctrl+S. **Recent Notes** reopens
+up to thirty notes by title and ID across restarts. Notes stay in the selected
+folder; existing reader annotations are preserved. No OCR is needed to write a
+separate note about a scanned PDF.
