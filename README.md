@@ -272,3 +272,6 @@ names are required. Save with Ctrl+S. **Recent Notes** reopens
 up to thirty notes by title and ID across restarts. Notes stay in the selected
 folder; existing reader annotations are preserved. No OCR is needed to write a
 separate note about a scanned PDF.
+
+See [Markdown note templates](docs/MARKDOWN_NOTE_TEMPLATES.md) for configuration,
+placeholders, examples and interoperability with Obsidian and The Archive.

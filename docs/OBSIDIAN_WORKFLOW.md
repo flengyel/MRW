@@ -8,6 +8,9 @@ work can remain in scans, PDFs or other attachments linked from a note.
 MRW also supports links between Obsidian notes and separately retained sources
 or passages. Those links are optional and are described below.
 
+To configure newly created notes, see [Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md).
+The template is optional and does not impose a format on existing notes.
+
 ## Configure Obsidian with MRW
 
 Use [the general MRW workspace](WORKSPACE_SETUP.md),

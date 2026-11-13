@@ -45,6 +45,9 @@ available for this increment, and the working window was not reloaded.
 
 ## Zettels and recent notes
 
+For configuration steps, placeholder details and portable examples, see
+[Markdown note templates](MARKDOWN_NOTE_TEMPLATES.md).
+
 **New Zettel** creates an unsaved Markdown draft in **MRW: Notes Folder**, beside
 the active document. By default it contains an H1 heading and a source link.
 The proposed filename is formed from **MRW: Zettel Prefix** (default `Note`) and local date/time
