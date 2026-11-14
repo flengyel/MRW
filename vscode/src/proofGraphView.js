@@ -153,7 +153,7 @@
     button(bar, graph.description.origin === 'ai_proposal' ? 'Use AI outline' : 'Use proposed outline', 'proposal', {}, 'Apply the proposed selection.');
     button(bar, 'Restore all vertices', 'restore_all', {}, 'Display every original claim and inference.');
     button(bar, 'Edit outline', 'edit', {}, 'Edit claims and summaries in the ordinary JSON document.');
-    button(bar, 'Ask AI…', 'ask', {}, 'Prepare an exact request; Send remains separate.'); button(bar, 'Refresh', 'refresh');
+    button(bar, 'Ask OpenAI API…', 'ask', {}, 'Prepare an exact request; Send remains separate.'); button(bar, 'Refresh', 'refresh');
     local(bar, 'Conclusion', () => selectNode(graph.goals[0], true), 'Read the conclusion and its corresponding Stacks tag.');
     count.textContent = `${projection.order.length} visible claims · ${projection.hidden.length} deleted from display`;
     if (changed) { mapHost.replaceChildren(); map = window.MRWProofMap.create(mapHost, selectNode); }

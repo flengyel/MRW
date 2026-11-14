@@ -92,13 +92,13 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     });
   });
   register('mrw.addContext', () => change(async () => {
-    if (!draft) throw new Error('Start with Ask About Selected Work.');
+    if (!draft) throw new Error('Start with Ask OpenAI API about Selection.');
     if (draft.contexts.length >= 8) throw new Error('At most eight contexts can be included.');
     draft.contexts.push(capture(vscode.window.activeTextEditor));
     await prepare();
   }));
   register('mrw.removeContext', () => change(async () => {
-    if (!draft) throw new Error('Start with Ask About Selected Work.');
+    if (!draft) throw new Error('Start with Ask OpenAI API about Selection.');
     const selected = await vscode.window.showQuickPick(draft.contexts.map((c, index) => ({
       label: `${index + 1}. ${path.basename(c.source_identity)} ${c.start}–${c.end}`, index,
     })), { placeHolder: 'Remove a selected context from this request' });
@@ -112,7 +112,7 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     await prepare();
   }));
   register('mrw.previewRequest', () => change(async () => {
-    if (!draft) throw new Error('Start with Ask About Selected Work.');
+    if (!draft) throw new Error('Start with Ask OpenAI API about Selection.');
     await prepare();
   }));
   register('mrw.discardRequest', () => {
@@ -164,7 +164,7 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     }
   });
   const rows = () => {
-    const rows = [['Ask about selected work…', 'mrw.ask'], ...investigation.rows()];
+    const rows = [['Ask OpenAI API about selection…', 'mrw.ask'], ...investigation.rows()];
     if (draft) rows.push(['Add selected context', 'mrw.addContext'], ['Remove context…', 'mrw.removeContext'],
       ['Edit question…', 'mrw.editQuestion'], ['Show exact request preview', 'mrw.previewRequest'],
       ['Discard unsent request', 'mrw.discardRequest']);

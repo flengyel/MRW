@@ -60,7 +60,7 @@
       },
       {
         "command": "mrw.askReader",
-        "title": "Ask About Reader Passage\u2026",
+        "title": "Ask OpenAI API About Reader Passage\u2026",
         "category": "MRW"
       },
       {
