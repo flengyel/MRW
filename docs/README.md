@@ -93,6 +93,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Release 0.23.35](RELEASE_0_23_35.md) records the document-reopen repair,
+exact source, native checks, package and publication.
+
 [Working source cleanup](SOURCE_CLEANUP_20261114.md) records removal of the
 confirmed test/demo clutter, its recoverable backup and preserved source links.
 
