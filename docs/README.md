@@ -41,6 +41,10 @@ that version and the saved records it produced.
   adopted decisions, unresolved repairs and their completion evidence.
 - [Codex maintenance from reports](CODEX_MAINTENANCE.md): compare periodic findings
   with current design, make bounded corrections and retain unresolved work.
+- [Selective contract formalization](CONTRACT_FORMALIZATION.md): proposed Lean
+  invariants, toolchain choices and the implementation-correspondence requirement.
+- [Existing-note citation rendering](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes):
+  current Obsidian/Pandoc citation limitation and required read-only follow-up.
 
 - [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md):
   creation, editing, execution, synchronization and reference responsibilities

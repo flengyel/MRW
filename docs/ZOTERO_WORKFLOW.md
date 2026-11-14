@@ -79,6 +79,42 @@ citation. A DOI, item key or bibliographic citation is not a content revision or
 a mathematical warrant. The separate **Zotero** link opens the library's current
 item and may show later metadata.
 
+## Citation rendering in existing notes
+
+The current connector's formatted Markdown citations are distinct from
+Obsidian/Pandoc citation syntax such as `[@key]`, `@key`, citation locators and
+a bibliography supplied through note metadata or an Obsidian plugin. MRW
+0.23.31 does not run a citation processor for these forms. Connecting Zotero
+does not make them resolve in the MRW Markdown viewer or generate a bibliography.
+This is a reader capability gap, not evidence that the Zotero library is empty.
+
+The required follow-up is optional read-only citation rendering through an
+existing compatible processor. [Pandoc's citation documentation](https://pandoc.org/MANUAL.html#citations)
+describes supported syntax and bibliographic data. Evaluate the existing host
+renderer/extension and Pandoc/CSL interfaces before implementing a parser or
+formatter. Reuse supported note metadata (`bibliography`, `csl`, or inline
+`references` where supported) or an explicitly configured local bibliography
+export and style, without a second mandatory setup form. Resolve relative paths
+against the note under the existing scope checks. The export may be managed by
+Zotero or its existing plugins. MRW must not write
+the library, invent citekeys or require conversion to its own citation format.
+
+Preserve note bytes, YAML, citation syntax, source offsets, Return and unsaved
+editor contents. Generated citations/bibliography are a view, not appended
+edits. Respect supported bibliography/style declarations and report missing,
+ambiguous or demonstrably stale data explicitly; freshness is unknown without
+reliable revision information. Keep unresolved citations visible. Do not
+scan an entire vault or issue a live Zotero/model request merely on opening;
+honor workspace trust and scoped file access. Run only the selected citation
+processor, with no arbitrary filters, template code or automatic downloads.
+
+Verify an isolated note and bibliography with single/multiple citations,
+locators, missing keys, duplicate keys, changed bibliography, escaped citations,
+literal code examples, offline use and dirty buffers. Native Markdown preview and the retained-source annotation
+renderer are separate surfaces: the latter currently displays Markdown links
+literally. Do not claim that verifying one renderer fixes the other. The
+separate Contents custom-URI navigation gap is also not a citation-rendering fix.
+
 ## Resume and inspect
 
 **MRW: Resume Zotero Reference…** lists retained references, with the last one
