@@ -12,7 +12,7 @@ function createInspection({storageRoots=[],usage,version='unknown',scope='worksp
       const budget=Object.fromEntries(Object.entries(DEFAULTS).map(([k,v])=>[k,Number.isFinite(limits[k])&&limits[k]>0?Math.min(v,Math.floor(limits[k])):v]));
       const started=Date.now(),findings=[],verified=[],roots=[],classes={},digests=new Map();let files=0,bytes=0,stop,omitted=0;
       const check=()=>{if(signal?.aborted){stop='cancelled';throw Error('Inspection cancelled');}if(Date.now()-started>budget.milliseconds||files>=budget.files||bytes>=budget.bytes){stop='resource-limit';throw Error('Inspection resource limit reached');}};
-      function finding(kind,state,locator,detail){if(findings.length>=budget.findings){omitted++;return;}findings.push({id:hash(kind+'\0'+locator).slice(0,24),kind,state,locator,detail});}
+      function finding(kind,state,locator,detail){if(findings.length>=budget.findings){omitted++;return;}findings.push({id:hash(kind+'\0'+locator).slice(0,24),kind,state,locator:String(locator).slice(0,2048),detail:String(detail).slice(0,1024)});}
       async function read(file,metadata=false){
         check();if(await io.realpath(file)!==file)throw Error('Redirected file is outside inspection scope');const before=await io.lstat(file);if(!before.isFile()||before.isSymbolicLink())throw Error('Unsupported redirected or nonregular file');
         if(metadata&&before.size>budget.jsonBytes){finding('metadata','unsupported',file,'Metadata exceeds the bounded parser limit');return;}
@@ -27,9 +27,8 @@ function createInspection({storageRoots=[],usage,version='unknown',scope='worksp
       async function inspectRoot(spec){
         const root=typeof spec==='string'?spec:spec.path,label=typeof spec==='string'?'MRW storage':spec.label||'MRW storage';
         const row={label,path:root,status:'complete',files:0,bytes:0,checks:['streamed byte hashes','content-addressed object digests','bounded metadata','active generation manifests'],unchecked:['external note/proof targets','remote replicas','semantic correctness','full schema/dependency validation']};roots.push(row);
-        let pin;
+        const authorityPins=[];
         try{check();if(typeof root!=='string'||!path.isAbsolute(root)||await io.realpath(root)!==root)throw Error('Unsupported storage root');
-          try{pin=await read(path.join(root,'HEAD.json'),true);}catch(e){if(e.code!=='ENOENT')throw e;}
           const beforeBytes=bytes;
           async function walk(dir){check();if(await io.realpath(dir)!==dir)throw Error('Directory changed during inspection');const folder=await io.opendir(dir);try{for await(const entry of folder){check();const file=path.join(dir,entry.name);
             if(entry.isSymbolicLink()){finding('path','unsupported',file,'Symlinks are not followed');row.status='partial';continue;}
@@ -51,21 +50,23 @@ function createInspection({storageRoots=[],usage,version='unknown',scope='worksp
             if(Array.isArray(data?.continuations))for(const record of data.continuations.slice(0,256)){if(record.phase==='pending')finding('pending-association','review',file+'#'+record.association,'An external note association is pending; inspection does not retry it.');else verified.push(hash('pending-association'+'\0'+file+'#'+record.association).slice(0,24));}
             if(['deleting','deleted'].includes(data?.state)||/\.deleted\.json$/.test(entry.name))finding('deletion-marker','observed',file,'Deletion marker retained; inspection does not apply or remove it.');
             if(entry.name==='HEAD.json'&&data?.version===1&&typeof data.generation==='string'&&data.files&&typeof data.files==='object'){
+              authorityPins.push({file,digest:captured.sha256});
               if(!/^[a-f0-9-]{36}$/.test(data.generation)){finding('manifest','failure',file,'Invalid generation locator');continue;}
               let n=0;for(const [name,item] of Object.entries(data.files)){check();if(++n>budget.files){stop='resource-limit';throw Error('Manifest entry limit reached');}
                 if(!safeRelative(name)||!item||!/^([a-f0-9]{64})$/.test(item.sha256)||!Number.isSafeInteger(item.size)||item.size<0){finding('manifest','failure',file,'Invalid bounded manifest entry');continue;}
-                const target=path.join(root,'versions',data.generation,'payload',name);
+                const target=path.join(dir,'versions',data.generation,'payload',name);
                 try{if(await io.realpath(target)!==target)throw Error('Redirected manifest target');const actual=await read(target);if(actual.sha256!==item.sha256||actual.size!==item.size)finding('manifest-digest','failure',target,'Target differs from active generation manifest');else {verified.push(hash('manifest-digest'+'\0'+target).slice(0,24));verified.push(hash('manifest-target'+'\0'+target).slice(0,24));}}
                 catch(e){if(stop)throw e;finding('manifest-target',e.code==='ENOENT'?'failure':e.message==='changed-during-inspection'?'changed-during-inspection':'unchecked',target,e.message);row.status='partial';}
               }
             }
           }}finally{await folder.close().catch(()=>{});}}
           await walk(root);
-          if(pin){const end=await read(path.join(root,'HEAD.json'),true);if(!end||end.sha256!==pin.sha256){row.status='changed-during-inspection';verified.length=0;for(const f of findings)if(f.locator.startsWith(root)&&f.state==='failure')f.state='changed-during-inspection';finding('generation','changed-during-inspection',root,'Authority changed during inspection; observed mismatches are inconclusive.');}}
+          for(const pin of authorityPins){const end=await read(pin.file,true);if(!end||end.sha256!==pin.digest){row.status='changed-during-inspection';verified.length=0;for(const f of findings)if(f.locator.startsWith(root)&&f.state==='failure')f.state='changed-during-inspection';finding('generation','changed-during-inspection',path.dirname(pin.file),'Authority changed during inspection; observed mismatches are inconclusive.');}}
+
           row.ioBytes=bytes-beforeBytes;
         }catch(e){row.status=stop|| (e.message==='changed-during-inspection'?'changed-during-inspection':e.code==='ENOENT'?'unavailable':'partial');if(row.status==='changed-during-inspection'){verified.length=0;for(const f of findings)if(f.locator.startsWith(root)&&f.state==='failure')f.state='changed-during-inspection';}finding('coverage',row.status,root||label,e.message);}
       }
-      const selected=typeof storageRoots==='function'?await storageRoots():storageRoots;
+      const candidates=typeof storageRoots==='function'?await storageRoots():storageRoots;const selected=[...new Map(candidates.map(r=>[typeof r==='string'?r:r.path,r])).values()];
       for(const root of selected.slice(0,8)){if(stop)break;await inspectRoot(root);}
       if(selected.length>8)finding('coverage','unchecked',scope,'More than eight roots supplied; extra roots were not inspected');
       const status=stop||(!roots.length||roots.some(r=>r.status!=='complete')||omitted?'partial':findings.some(f=>f.state==='failure')?'failures':'completed-supported-checks');

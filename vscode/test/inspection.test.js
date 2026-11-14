@@ -30,7 +30,7 @@ test('positive rechecks report stable finding identities and usage is a separate
 });
 test('generation changes are inconclusive and cannot resolve earlier findings',async t=>{
  const f=await fixture(t),file=path.join(f.root,'HEAD.json'),head={version:1,generation:'11111111-1111-1111-1111-111111111111',files:{}};await fs.writeFile(file,JSON.stringify(head));let opens=0;
- const io={...fs,open:async(p,...args)=>{if(p===file&&++opens===3)await fs.writeFile(file,JSON.stringify({...head,generation:'22222222-2222-2222-2222-222222222222'}));return fs.open(p,...args);}};
+ const io={...fs,open:async(p,...args)=>{if(p===file&&++opens===2)await fs.writeFile(file,JSON.stringify({...head,generation:'22222222-2222-2222-2222-222222222222'}));return fs.open(p,...args);}};
  const r=await createInspection({storageRoots:[f.root],io}).inspect();assert.equal(r.status,'partial');assert.equal(r.roots[0].status,'changed-during-inspection');assert.deepEqual(r.verified,[]);
 });
 test('large owned files stay under an explicit streaming I/O budget',async t=>{
@@ -40,4 +40,9 @@ test('large owned files stay under an explicit streaming I/O budget',async t=>{
 test('retained source references are checked without opening external originals',async t=>{
  const f=await fixture(t),key=digest('source'),file=path.join(f.root,'outline.json');await fs.writeFile(file,JSON.stringify({schema:'mrw.source-outline',source:{revision:key,path:'/outside/original.md'}}));const r=await f.api.inspect();assert.ok(r.findings.some(x=>x.kind==='source-reference'&&x.state==='failure'));
  await fs.writeFile(path.join(f.root,'source-'+key+'.bin'),'source');const next=await f.api.inspect();assert.equal(next.findings.filter(x=>x.kind==='source-reference').length,0);assert.ok(next.verified.includes(r.findings.find(x=>x.kind==='source-reference').id));
+});
+
+test('nested managed manifests resolve against their own store and duplicate roots do not duplicate counts',async t=>{
+ const f=await fixture(t),store=path.join(f.root,'managed'),generation='11111111-1111-1111-1111-111111111111',payload=path.join(store,'versions',generation,'payload');await fs.mkdir(payload,{recursive:true});await fs.writeFile(path.join(payload,'one.bin'),'payload');await fs.writeFile(path.join(store,'HEAD.json'),JSON.stringify({version:1,generation,files:{'one.bin':{sha256:digest('payload'),size:7}}}));
+ const api=createInspection({storageRoots:[f.root,f.root]}),r=await api.inspect();assert.equal(r.roots.length,1);assert.equal(r.status,'completed-supported-checks');assert.equal(r.findings.length,0);
 });
