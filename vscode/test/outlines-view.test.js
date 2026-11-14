@@ -482,7 +482,7 @@ test('annotation save feedback preserves open editors and distinguishes newer un
   for(const node of h.root.all().filter(n=>n.dataset.disclosure))node.open=true;
   text.value='Submitted α explanation';form.listeners.input();
   h.button(form,'save-note').listeners.click();
-  assert.match(form.text(),/Saving annotation/);
+  assert.match(form.text(),/Saving note/);
   text.value='Newer unsaved β explanation';form.listeners.input();
   h.send({...value,clearDraft:key,annotationSaved:true});
   form=find();assert.equal(form.all().find(n=>n.tag==='textarea').value,'Newer unsaved β explanation');
@@ -490,7 +490,7 @@ test('annotation save feedback preserves open editors and distinguishes newer un
   for(const node of h.root.all().filter(n=>n.dataset.disclosure))assert.ok(node.open);
   h.button(form,'save-note').listeners.click();
   h.send({...value,clearDraft:key,annotationSaved:true});
-  assert.match(find().text(),/Annotation saved\./);
+  assert.match(find().text(),/Note saved\./);
   assert.equal(find().all().find(n=>n.dataset.saveFeedback===key).role,'status');
   h.send({type:'storageCheck'});assert.equal(h.messages.at(-1).dirty,false);
 });
@@ -504,7 +504,7 @@ test('failed or uncertain annotation saving keeps text and announces no confirme
   form=h.root.all().find(n=>n.dataset.draft===key);
   assert.equal(form.all().find(n=>n.tag==='textarea').value,'Keep this unsaved explanation');
   assert.match(form.text(),/Save not confirmed.*Directory synchronization failed/);
-  assert.doesNotMatch(form.text(),/Annotation saved\./);
+  assert.doesNotMatch(form.text(),/Note saved\./);
   assert.equal(form.all().find(n=>n.dataset.saveFeedback===key).role,'alert');
   assert.equal(h.button(form,'save-note').disabled,true);
 });
@@ -524,9 +524,62 @@ test('associations keep source editing and immutable linking snapshots visible',
   assert.ok(h.root.text().includes('Exact original α'));
   assert.ok(h.root.text().includes('Reader'));
   assert.ok(h.root.text().includes('Note missing or renamed'));
-  assert.ok(h.root.text().includes('Edit reader note:'));
+  assert.ok(h.root.text().includes('Edit note'));
   assert.ok(h.root.text().includes('Manage note association'));
   value.continuations[0].phase='pending';h.send(value);
-  assert.ok(h.root.text().includes('Edit reader note:'));
+  assert.ok(h.root.text().includes('Edit note'));
   assert.ok(h.root.text().includes('Resume pending association'));
+});
+
+
+test('plain note writing has text first, optional attribution, and no purpose classification', () => {
+  const h=reader();h.send(readingModel());
+  const f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:new');
+  assert.equal(f.children[0].tag,'textarea');
+  assert.equal(f.all().some(n=>n.name==='purpose'),false);
+  assert.deepEqual(f.children.filter(n=>n.tag==='details').map(n=>[n.children[0].textContent,n.open]),[['Attribution',false],['Help',false]]);
+  h.button(f,'save-note').listeners.click();assert.equal(h.messages.some(m=>m.type==='edit'),false);
+  const text=f.all().find(n=>n.name==='text');text.value='Why does \\(f(x)=g(y)\\) hold?';f.listeners.input();
+  h.button(f,'save-note').listeners.click();const edit=h.messages.at(-1);
+  assert.equal(edit.change.purpose,'note');assert.equal(edit.change.origin,'unknown');assert.equal(edit.change.author,null);
+  assert.equal(edit.change.text,text.value);
+});
+
+test('editing a quoted note preserves its kind and known attribution without visiting details',()=>{
+  const h=reader(),v=readingModel();v.model.outline.regions[1].annotations=[{id:'old',kind:'cited_dependency',text:'Quoted text',provenance:{origin:'source_quotation',author:'Original author',at:'2026-11-01T00:00:00Z'}}];h.send(v);
+  const f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');
+  f.all().find(n=>n.name==='text').value='Quoted text, with a question.';f.listeners.input();h.button(f,'save-note').listeners.click();
+  assert.equal(h.messages.at(-1).change.purpose,'cited_dependency');assert.equal(h.messages.at(-1).change.origin,'source_quotation');assert.equal(h.messages.at(-1).change.author,'Original author');
+});
+
+test('Cancel closes an untouched note locally and confirms a nonempty draft without any save',()=>{
+  const h=reader();h.send(readingModel());let f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:new');
+  h.button(f,'cancel-note').listeners.click();assert.equal(h.messages.some(m=>m.type==='cancel_note'||m.type==='edit'),false);
+  f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:new');const text=f.all().find(n=>n.name==='text');text.value='Keep this draft';f.listeners.input();
+  h.button(f,'cancel-note').listeners.click();let m=h.messages.at(-1);assert.equal(m.type,'cancel_note');
+  h.send({type:'noteCancel',draft:m.draft,request:m.request,discard:false});assert.equal(text.value,'Keep this draft');
+  h.button(f,'cancel-note').listeners.click();m=h.messages.at(-1);h.send({type:'noteCancel',draft:m.draft,request:m.request,discard:true});
+  f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:new');assert.equal(f.all().find(n=>n.name==='text').value,'');
+  assert.equal(h.messages.some(m=>m.type==='edit'),false);h.send({type:'storageCheck'});assert.equal(h.messages.at(-1).dirty,false);
+});
+
+test('a discard reply cannot clear typing made while the confirmation was open',()=>{
+  const h=reader();h.send(readingModel());const f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:new');const text=f.all().find(n=>n.name==='text');
+  text.value='Earlier draft';f.listeners.input();h.button(f,'cancel-note').listeners.click();const m=h.messages.at(-1);
+  text.value='Newer draft';f.listeners.input();h.send({type:'noteCancel',draft:m.draft,request:m.request,discard:true});
+  assert.equal(text.value,'Newer draft');assert.match(f.text(),/Newer changes kept/);h.send({type:'storageCheck'});assert.equal(h.messages.at(-1).dirty,true);
+});
+
+
+test('a text draft does not overwrite attribution refreshed by another writer',()=>{
+ const h=reader(),v=readingModel();const n={id:'old',kind:'question',text:'Question',provenance:{origin:'unknown',author:null,at:'earlier'}};v.model.outline.regions[1].annotations=[n];h.send(v);
+ let f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');f.all().find(n=>n.name==='text').value='Unsaved question';f.listeners.input();
+ v.model.outline.regions[1].annotations=[{...n,provenance:{origin:'ai_proposal',author:'Recorded model attribution',at:'later'}}];h.send(v);
+ f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');h.button(f,'save-note').listeners.click();assert.equal(h.messages.at(-1).change.origin,'ai_proposal');assert.equal(h.messages.at(-1).change.author,'Recorded model attribution');assert.equal(h.messages.at(-1).change.text,'Unsaved question');
+});
+
+test('an explicitly edited author survives refresh with the text draft',()=>{
+ const h=reader(),v=readingModel();v.model.outline.regions[1].annotations=[{id:'old',kind:'note',text:'Note',provenance:{origin:'human_work',author:'Original',at:'earlier'}}];h.send(v);
+ let f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');const author=f.all().find(n=>n.name==='author');author.value='Explicit correction';author.listeners.input();f.listeners.input();h.send(v);
+ f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');h.button(f,'save-note').listeners.click();assert.equal(h.messages.at(-1).change.author,'Explicit correction');
 });

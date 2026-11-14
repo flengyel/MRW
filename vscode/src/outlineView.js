@@ -6,8 +6,6 @@ const api = acquireVsCodeApi();
 const root = document.getElementById('reader');
 const sourceReader = window.MRWSourceReader?.create({root, onBrowser:()=>post({type:'stacks_citation', tag:model?.outline.published?.qualified_tag}), onReturn:()=>post({type:'reading_return'})});
 const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail'];
-const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
-  'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 let continuations = [], continuationErrors = {}, citationViews = {};
 let notes = [], noteTargets = {}, noteError, lastReadingFocus;
@@ -17,7 +15,7 @@ let toolbarObserver;
 const helpText = {
   'study-current': 'Start or resume study of the selected retained passage. No questions or model requests are sent automatically.',
   'proof-study': 'Prepare an exact proof-passage handoff for study; this does not check a proof.',
-  'add-reader-note': 'Write your own explanation or question about this passage. Save it explicitly.',
+  'add-reader-note': 'Write a note about this passage.',
   'delete-reader-note': 'Choose an annotation stored in MRW and confirm its deletion. Linked vault notes are not deleted.',
   'link-reader-note': 'Link a Zettelkasten note to this exact retained passage using its Obsidian URL. The file stays in your vault.',
   'ask-ai': 'Choose a retained passage and prepare a question with an exact preview. Send is a separate action.',
@@ -28,7 +26,7 @@ const helpText = {
   source: 'Open the exact retained source as text. This does not open today’s upstream revision.',
   navigate: 'Open this exact source range as text; changed associations keep the earlier cited range.',
   'navigate-context': 'Open the exact retained range for this shared context.',
-  'save-note': 'Save the submitted annotation with its supplied attribution; newer typing remains unsaved.',
+  'save-note': 'Save this note; newer typing remains unsaved.',
   'save-metadata': 'Save this reader-supplied source description without changing retained source bytes.',
   'save-region': 'Save this passage’s label and reading level without changing its exact range.',
   'save-context': 'Save this context label without changing its quoted range.',
@@ -42,6 +40,9 @@ const helpText = {
 let deletingDraft;
 const drafts = new Map();
 const submittedDrafts = new Map();
+const cancelledDrafts = new Map();
+const attributionEdits = new Map();
+let cancelSequence = 0;
 const revealed = new Set();
 const hiddenDetails = new Set();
 let proofsHidden = false, proofPreferenceLoaded = false;
@@ -81,7 +82,7 @@ function post(value) {
   }
   if (value.draft) {
     submittedDrafts.set(value.draft, drafts.get(value.draft));
-    if (noteDraft(value.draft)) feedback(value.draft, 'Saving annotation…', 'pending');
+    if (noteDraft(value.draft)) feedback(value.draft, 'Saving note…', 'pending');
   }
   if (value.type !== 'reading_return') { busy = true; controls(); }
   api.postMessage(value);
@@ -99,7 +100,7 @@ function button(parent, title, value, action, write = false) {
   const node = el('button', title, parent); node.type = 'button';
   node.dataset.action = action; node.dataset.write = String(write);
   if (helpText[action]) node.title = helpText[action];
-  node.addEventListener('click', () => post(typeof value === 'function' ? value() : value));
+  node.addEventListener('click', () => { const message = typeof value === 'function' ? value() : value; if (message) post(message); });
   return node;
 }
 function form(parent, key, values) {
@@ -125,31 +126,61 @@ function field(f, name, title, options) {
   if (options) for (const option of options) { const o = el('option', label(option), node); o.value = option; }
   node.value = f.current[name] ?? ''; return node;
 }
+function closeNoteDraft(key) {
+  for (const box of root.querySelectorAll('details')) if (box.dataset.disclosure === key) box.open = false;
+  drafts.delete(key); submittedDrafts.delete(key); saveFeedback.delete(key); openDetails.delete(key); attributionEdits.delete(key);
+  api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();
+}
 function noteForm(parent, region, note) {
   if (note && noteError) return;
   const key = `note:${region || 'overview'}:${note?.id || 'new'}`;
-  const box = el('details', undefined, parent, 'note'); keepOpen(box, key);
-  el('summary', note ? `Edit reader note: ${label(note.kind)}` : 'Add reader explanation / question / repair', box);
-  el('p', 'Reader reconstruction and supplied attribution. This text carries no proof-checking status.', box, 'muted');
-  if (note) el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, box, 'muted');
-  const f = form(box, key, { purpose: note?.kind || 'explanation', text: note?.text || '',
-    origin: note?.provenance.origin || 'human_work', author: note?.provenance.author || '' });
-  field(f, 'purpose', 'Purpose', purposes);
-  field(f, 'origin', 'Supplied origin', ['human_work', 'ai_proposal', 'source_quotation', 'unknown']);
-  field(f, 'author', 'Author / attribution (blank means unknown)'); field(f, 'text', 'Explanation or other reader material');
-  el('p', 'Math: \\( ... \\) inline; \\[ ... \\] or $$ ... $$ for a displayed equation.', f.node, 'muted');
-  el('p', 'For diagrams, add a fenced tikz block, save the annotation, then choose Render diagram in Reader notes.', f.node, 'muted');
-  button(f.node, 'Save annotation', () => {
-    const v = f.read(); return { type: 'edit', draft: key, change: { kind: 'annotation', region,
-      id: note?.id || null, purpose: v.purpose, text: v.text, origin: v.origin, author: v.author || null } };
+  const box = el('details', undefined, parent, 'note-editor'); keepOpen(box, key);
+  const summary = el('summary', note ? 'Edit note' : 'Add a note', box);
+  const defaults = { text: note?.text || '', origin: note?.provenance.origin || 'unknown', author: note?.provenance.author || '' };
+  const f = form(box, key, defaults);
+  // A refresh can supply newer attribution while preserving a text draft.
+  // Only fields deliberately edited in Attribution may override that metadata.
+  for (const name of ['origin', 'author']) if (!attributionEdits.get(key)?.has(name)) f.current = { ...f.current, [name]: defaults[name] };
+  const purpose = note?.kind || f.current.purpose || 'note';
+  const text = el('textarea', undefined, f.node); text.name = 'text'; text.value = f.current.text;
+  text.rows = 6; text.setAttribute('aria-label', 'Note');
+  summary.addEventListener('click', () => { if (!box.open) Promise.resolve().then(() => text.focus({preventScroll:true})); });
+  const actions = el('div', undefined, f.node, 'toolbar');
+  const save = button(actions, 'Save', () => {
+    const v = f.read();
+    if (!v.text.trim()) { feedback(key, 'Write a note before saving.', 'error'); text.focus(); return; }
+    return { type: 'edit', draft: key, change: { kind: 'annotation', region,
+      id: note?.id || null, purpose, text: v.text, origin: v.origin, author: v.author || null } };
   }, 'save-note', true);
+  const cancel = button(actions, 'Cancel', () => {
+    if (!drafts.has(key) || !note && !f.read().text.trim()) { closeNoteDraft(key); return; }
+    const request = ++cancelSequence;
+    cancelledDrafts.set(request, { key, value: drafts.get(key) });
+    busy = true; controls(); api.postMessage({ type: 'cancel_note', draft: key, request });
+  }, 'cancel-note');
+  text.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); save.click(); }
+    else if (event.key === 'Escape') { event.preventDefault(); cancel.click(); }
+  });
   const status = el('p', '', f.node, 'save-feedback');
   status.dataset.saveFeedback = key; status.setAttribute('aria-live', 'polite');
   feedbackNodes.set(key, status);
   const saved = saveFeedback.get(key);
   if (saved) feedback(key, saved.text, saved.kind);
   else status.setAttribute('role', 'status');
-  return { box, text: f.node.querySelectorAll('textarea')[0] };
+  const attribution = el('details', undefined, f.node); keepOpen(attribution, key + ':attribution');
+  el('summary', 'Attribution', attribution);
+  if (note) el('p', `Recorded ${note.provenance.at} · ${label(note.kind)}`, attribution, 'muted');
+  const origin = field({ ...f, node: attribution }, 'origin', 'Origin', ['unknown', 'human_work', 'ai_proposal', 'source_quotation']);
+  const author = field({ ...f, node: attribution }, 'author', 'Author');
+  for (const [control, event] of [[origin, 'change'], [author, 'input']]) control.addEventListener(event, () => {
+    const edited = attributionEdits.get(key) || new Set(); edited.add(control.name); attributionEdits.set(key, edited);
+  });
+  const help = el('details', undefined, f.node); keepOpen(help, key + ':help'); el('summary', 'Help', help);
+  el('p', 'Use Markdown and LaTeX: \\( ... \\) inline; \\[ ... \\] or $$ ... $$ for a displayed equation.', help, 'muted');
+  el('p', 'For diagrams, use a fenced tikz block, save the note, then choose Render diagram beside its code.', help, 'muted');
+  el('p', 'Saving a note records no proof check or premise admission.', help, 'muted');
+  return { box, text };
 }
 function renderNotes(parent, annotations, scope, title = 'Reader notes') {
   if (!annotations.length) return;
@@ -159,7 +190,8 @@ function renderNotes(parent, annotations, scope, title = 'Reader notes') {
   el('summary', `${title} (${annotations.length})`, notes);
   for (const note of annotations) {
     el('h3', label(note.kind), notes);
-    el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
+    const attribution = el('details', undefined, notes); el('summary', 'Attribution', attribution);
+    el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, attribution, 'muted');
     const linked = continuations.filter(c=>c.annotation===note.id);
     const content = notes;
     for (const continuation of linked) {
@@ -333,6 +365,9 @@ function render() {
   sourceReader?.update(model.outline.published?.online);
   toolbarObserver?.disconnect();
   const o = model.outline;
+  const focused = document.activeElement;
+  const focusedForm = focused?.name && [...root.querySelectorAll('form')].find(f => f.contains?.(focused));
+  const caret = focusedForm ? { key: focusedForm.dataset.draft, name: focused.name, start: focused.selectionStart, end: focused.selectionEnd } : null;
   for (const node of root.querySelectorAll('details')) if (node.dataset.disclosure) openDetails.set(node.dataset.disclosure, !!node.open);
   feedbackNodes.clear(); root.replaceChildren();
   el('h1', o.source.bibliography.title || 'Saved source');
@@ -519,11 +554,11 @@ function render() {
     const editor = noteForm(passageTools, r.id, null);
     if (!compactProof) {
       const assistance = el('div', undefined, box, 'proof-navigation passage-actions');
-      const add = el('button', 'Add reader note', assistance);
+      const add = el('button', 'Add a note', assistance);
       add.type = 'button'; add.dataset.action = 'add-reader-note'; add.title = helpText['add-reader-note'];
       add.addEventListener('click', () => {
         for (const disclosure of [tools, passageTools, editor.box]) disclosure.open = true;
-        editor.box.scrollIntoView({ block: 'center' }); editor.text.focus({ preventScroll: true });
+        editor.box.scrollIntoView({ block: 'start' }); editor.text.focus({ preventScroll: true });
       });
       const remove = button(assistance, 'Delete reader note…', { type: 'delete_annotation', region: r.id }, 'delete-reader-note', true);
       remove.dataset.empty = String(!r.annotations.length);
@@ -555,10 +590,23 @@ function render() {
     toolbarObserver = new ResizeObserver(measureToolbar); toolbarObserver.observe(readingBar); measureToolbar();
   }
   controls();
+  if (caret) {
+    const form = [...root.querySelectorAll('form')].find(f => f.dataset.draft === caret.key);
+    const field = form && [...form.querySelectorAll('input,textarea,select')].find(f => f.name === caret.name);
+    if (field && !field.disabled) { field.focus({preventScroll:true}); if (Number.isInteger(caret.start)) field.setSelectionRange?.(caret.start, caret.end); }
+  }
 }
 window.addEventListener('message', event => {
   if (event.origin !== window.origin || sourceReader?.fromFrame(event)) return;
   const value = event.data;
+  if (value.type === 'noteCancel') {
+    const pending = cancelledDrafts.get(value.request);
+    if (!pending || pending.key !== value.draft) return;
+    cancelledDrafts.delete(value.request); busy = false;
+    if (value.discard && drafts.get(pending.key) === pending.value) closeNoteDraft(pending.key);
+    else { if (value.discard) feedback(pending.key, 'Newer changes kept.', 'draft'); controls(); }
+    return;
+  }
   if (value.type === 'return_destination') { returnDestination = value.destination; updateReturnDestination(); return; }
   if (value.type === 'storageCheck') {
     storageFrozen = true; controls(); api.postMessage({ type: 'storageStatus', dirty: drafts.size > 0 }); return;
@@ -579,16 +627,16 @@ window.addEventListener('message', event => {
     }
     if (value.deletedAnnotation) {
       const key = `note:${value.deletedAnnotation.region || 'overview'}:${value.deletedAnnotation.id}`;
-      drafts.delete(key); submittedDrafts.delete(key); saveFeedback.delete(key); openDetails.delete(key);
+      drafts.delete(key); submittedDrafts.delete(key); saveFeedback.delete(key); openDetails.delete(key); attributionEdits.delete(key);
       if (deletingDraft === key || deletingDraft === `note:${value.deletedAnnotation.region || 'overview'}:*`) deletingDraft = undefined;
     }
     if (value.clearDraft) {
       // Text fields stay editable while publication is in flight. A reply may
       // clear only the submitted draft, not newer typing in the same form.
       const latest = drafts.get(value.clearDraft) === submittedDrafts.get(value.clearDraft);
-      if (latest) drafts.delete(value.clearDraft);
+      if (latest) { drafts.delete(value.clearDraft); attributionEdits.delete(value.clearDraft); }
       if (value.annotationSaved && noteDraft(value.clearDraft)) feedback(value.clearDraft,
-        latest ? 'Annotation saved.' : 'Submitted version saved. Your newer edits are still unsaved.', latest ? 'saved' : 'newer');
+        latest ? 'Note saved.' : 'Submitted version saved. Your newer edits are still unsaved.', latest ? 'saved' : 'newer');
       submittedDrafts.delete(value.clearDraft);
     }
     api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();

@@ -26,7 +26,7 @@ MAX_STATE = 512 * 1024
 MAX_REGION = 256 * 1024
 TEXT_FORMATS = {'.txt', '.md', '.markdown', '.tex', '.rst', '.org', '.lean'}
 LEVELS = ('orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail')
-NOTE_KINDS = ('explanation', 'orientation', 'governing_idea', 'intermediate_claim',
+NOTE_KINDS = ('note', 'explanation', 'orientation', 'governing_idea', 'intermediate_claim',
               'reconstruction', 'intended_inference', 'cited_dependency',
               'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair')
 CONTEXT_KINDS = ('hypothesis', 'definition', 'local_assumption', 'cited_result', 'source_reference')

@@ -35,9 +35,9 @@ Markdown file. A failed render leaves the code and earlier cached views intact.
 
 Saved-source annotations use the same fenced syntax, with an explicit save:
 
-1. Open a saved source and its annotation editor under **Source details and
-   tools**, or the relevant passage. Keep the appropriate author and origin.
-2. Add the `tikz` block and choose **Save annotation**.
+1. Open a saved source and choose **Add a note** beside a passage.
+   Attribution is available in optional details.
+2. Add the `tikz` block and choose **Save**.
 3. Expand **Reader notes (N)** and choose **Render diagram** beneath the saved
    block. Newer text in an annotation editor is not included until it is saved.
 4. The SVG appears beside **Exact TikZ code**. Use **Render diagram again** to

@@ -43,7 +43,7 @@ h1{font-size:1.35em}h2{font-size:1.1em}h3{font-size:1em}button,input,select,text
 button{color:var(--vscode-button-foreground);background:var(--vscode-button-background);border:0;padding:6px 9px;margin:3px;cursor:pointer}
 button:disabled{opacity:.55;cursor:default}input,textarea,select{color:var(--vscode-input-foreground);background:var(--vscode-input-background);border:1px solid var(--vscode-input-border);padding:5px;max-width:100%;box-sizing:border-box}
 textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:100%}label{display:block;margin:6px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;tab-size:4;font-family:var(--vscode-editor-font-family);font-size:var(--vscode-editor-font-size)}
-.region,.context,.evidence,.note{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.statement{border-left:3px solid var(--vscode-focusBorder);padding-left:9px}.note{border-left:3px solid var(--vscode-editorWarning-foreground)}.muted{opacity:.8;font-size:.9em}.warning{color:var(--vscode-editorWarning-foreground)}.toolbar{display:flex;flex-wrap:wrap;gap:3px}.selected{outline:2px solid var(--vscode-focusBorder)}.metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:8px}
+.region,.context,.evidence,.note{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.statement{border-left:3px solid var(--vscode-focusBorder);padding-left:9px}.note{border-left:3px solid var(--vscode-editorWarning-foreground)}.note-editor{scroll-margin-top:var(--reader-toolbar-height,60px);border:1px solid var(--vscode-panel-border);padding:12px;margin:12px 0}.note-editor>summary{cursor:pointer}.note-editor textarea{margin:8px 0;min-height:8em}.note-editor details{margin-top:10px}@media(max-width:480px){.reading-bar{position:static!important}.note-editor{scroll-margin-top:12px}}.muted{opacity:.8;font-size:.9em}.warning{color:var(--vscode-editorWarning-foreground)}.toolbar{display:flex;flex-wrap:wrap;gap:3px}.selected{outline:2px solid var(--vscode-focusBorder)}.metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:8px}
 .companion{border:1px solid var(--vscode-panel-border);padding:10px;margin:12px 0}.companion h3{margin:0 0 6px}.companion p{margin:6px 0}.companion-directions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.linked-note{font-weight:600;unicode-bidi:plaintext}.linked-note-row{padding:8px 0;border-bottom:1px solid var(--vscode-panel-border)}
 .published-content{line-height:1.65;font-size:1.05em;margin:12px 0}.published-math math{font-size:1.15em}.source-reference{display:inline;padding:1px 4px;margin:0 2px}.published-toc{display:flex;flex-wrap:wrap;margin:12px 0}.source-slogan{border-left:2px solid var(--vscode-panel-border);padding:8px;margin:10px 0}
 .reading-bar{position:sticky;top:0;z-index:2;background:var(--vscode-editor-background);padding:4px 0}.reading-bar button{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground);padding:5px 8px}.reader-tools{margin:10px 0 20px}.reader-tools>summary,.passage-tools>summary{cursor:pointer;font-size:.9em;opacity:.8}.region{scroll-margin-top:60px;border:0;border-top:1px solid var(--vscode-panel-border);padding:12px 0;margin:18px 0}.region>h2{font-size:1.15em}.passage-tools{margin:12px 0}.published-content{font-size:1.15em;line-height:1.75}
@@ -150,7 +150,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     const deleted = change.kind === 'remove_annotation' ? { region: change.region, id: change.id } : undefined;
     const saved = await send(c, result, clearDraft, change.kind === 'annotation', deleted);
-    if (change.kind === 'annotation') vscode.window.setStatusBarMessage('MRW: Submitted annotation saved.', 6000);
+    if (change.kind === 'annotation') vscode.window.setStatusBarMessage('MRW: Submitted note saved.', 6000);
     if (deleted) vscode.window.setStatusBarMessage('MRW: Reader note deleted.', 6000);
     return saved;
   }
@@ -247,6 +247,12 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         active = c.result.outline.id;
         if (value.type === 'ask_ai') await askPassage(c, value);
         else if(value.type==='copy_companion')await askPassage(c,{...value,companion:true});
+        else if (value.type === 'cancel_note') {
+          if (typeof value.draft !== 'string' || !value.draft.startsWith('note:') || value.draft.length > 256 || !Number.isSafeInteger(value.request) || value.request < 1) throw Error('Invalid note draft.');
+          const choice = await vscode.window.showWarningMessage('Discard unsaved note changes?',
+            { modal: true, detail: 'Saved notes remain unchanged.' }, 'Discard');
+          await c.panel.webview.postMessage({ type: 'noteCancel', draft: value.draft, request: value.request, discard: choice === 'Discard' });
+        }
         else if (value.type === 'edit') await mutate(c, value.change, value.draft);
         else if (value.type === 'continue_annotation') {
           try {

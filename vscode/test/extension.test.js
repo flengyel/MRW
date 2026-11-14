@@ -1795,7 +1795,7 @@ test('annotation success feedback follows core publication and is absent after r
   const saved=panel.webview.messages.findLast(m=>m.type==='outline');
   assert.equal(saved.annotationSaved,true);assert.equal(saved.clearDraft,draft);
   assert.equal(saved.model.outline.annotations[0].text,'Saved reader explanation');
-  assert.deepEqual(notices,['MRW: Submitted annotation saved.']);
+  assert.deepEqual(notices,['MRW: Submitted note saved.']);
   const before=panel.webview.messages.length;
   h.setService(async()=>{const e=new Error('Revision conflict');e.code='ACTION_REJECTED';throw e});
   await panel.receive(value);
@@ -2490,4 +2490,16 @@ test('saved sources are searchable by author and nested passage after restart, w
   assert.ok(row); assert.equal(row.description, choice.description); assert.equal(row.detail, choice.detail);
   reopened.api.lastDocumentPicker.hide(); await opening;
   assert.deepEqual(reopened.errors, []);
+});
+
+
+test('reader Cancel uses native discard confirmation and never publishes a saved-source change',async t=>{
+  const root=await temporary(t),file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
+  const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));await h.commands.get('mrw.createOutline')();const panel=h.panels[0],before=h.requests.length;
+  await panel.receive({type:'cancel_note',draft:'note:overview:new',request:1});
+  assert.equal(panel.webview.messages.at(-2)?.type==='noteCancel'||panel.webview.messages.at(-1)?.type==='noteCancel',true);
+  assert.equal(panel.webview.messages.findLast(m=>m.type==='noteCancel').discard,false);
+  h.endings.push('Discard');await panel.receive({type:'cancel_note',draft:'note:overview:new',request:2});
+  assert.equal(panel.webview.messages.findLast(m=>m.type==='noteCancel').discard,true);
+  assert.equal(h.requests.length,before);
 });

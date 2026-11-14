@@ -150,6 +150,15 @@ not change the selected notes folder or extend backlink indexing. If a link
 changes while another note opens, select
 its current occurrence again; the previous Return destination remains available.
 
+### Write a reader note
+
+Choose **Add a note** beside a passage. Write prose, Markdown or LaTeX, then
+choose **Save**. **Cancel** closes an unchanged editor; discarding unsaved text
+requires confirmation. Attribution and math/TikZ **Help** are optional details.
+For a diagram, save a fenced `tikz` block and choose **Render diagram** beside
+its saved code. Saving does not run TeX. Existing source and model attribution
+is preserved when editing; unspecified attribution stays unknown.
+
 ### Use the same notes in Obsidian
 
 Choose the vault root as the notes folder. The Obsidian vault name defaults to
@@ -211,9 +220,9 @@ Ordinary note opening does not require this step.
    restores that citation's originating occurrence.
 
 **MRW: Open Saved Source…** reopens retained material. Each visible passage has
-**Add reader note**, **Delete reader note…**, **Link Obsidian note…** and **Ask AI about this passage…**
-on one line, in that order. **Add reader note** opens that passage's annotation
-editor. Enter your text and attribution, then **Save annotation**.
+**Add a note**, **Delete reader note…**, **Link Obsidian note…** and **Ask AI about this passage…**
+on one line, in that order. **Add a note** opens that passage's annotation
+editor. Enter your text and attribution, then **Save**.
 **Reader notes** displays the saved text beside the passage. **Delete reader
 note…** selects a saved note when there are several, then asks for confirmation;
 it is disabled when there are none. Cancelling preserves notes and drafts.
@@ -273,7 +282,7 @@ Reopen an imported section offline with **Open Saved Source…**. See
 | Work | Save | Resume |
 | --- | --- | --- |
 | Original document | **Ctrl+S** in its editor | **Reopen Document**, or **Open Document…** for another file |
-| Reader annotation | **Save annotation** | **Open Saved Source…**, then **Reader notes** |
+| Reader annotation | **Save** | **Open Saved Source…**, then **Reader notes** |
 | Optional study attempt | **Pause / save** | **MRW: Resume Study** in the Command Palette |
 | Optional proof-work question | **Save question** in **Proof work** | **Continue proof work** |
 | Lean lesson code and notes | **Ctrl+S** in ordinary editors | **Resume Lean Study** |

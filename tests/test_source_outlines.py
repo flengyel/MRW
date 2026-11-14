@@ -359,6 +359,20 @@ dispatch(json.loads(sys.argv[2]))
             self.edit(kind='remove_context', context=context['id'])
             self.action('outline_document', artifact=artifact['id'])
 
+    def test_plain_note_keeps_unknown_origin_and_reopens_without_execution(self):
+        with patch('subprocess.Popen', side_effect=AssertionError('unexpected child process')), \
+             patch('socket.socket.connect', side_effect=AssertionError('unexpected network')):
+            content = r'For \(x\in X\), why?'
+            self.edit(kind='annotation', region=None, id=None, purpose='note',
+                      text=content, origin='unknown', author=None)
+            note = self.saved['outline']['annotations'][0]
+            self.assertEqual(note['kind'], 'note')
+            self.assertEqual(note['provenance']['origin'], 'unknown')
+            self.assertIsNone(note['provenance']['author'])
+            reopened = self.call('outline_load', id=self.saved['outline']['id'])
+            self.assertEqual(reopened['outline']['annotations'][0], note)
+            self.assertEqual(note['text'], content)
+
     def test_private_snapshot_unknown_provenance_and_no_project_writes(self):
         self.assertEqual(list(self.project.iterdir()), [self.source])
         self.assertEqual(self.source.read_bytes(), self.raw)
