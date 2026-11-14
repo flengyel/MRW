@@ -93,6 +93,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Working source cleanup](SOURCE_CLEANUP_20261114.md) records removal of the
+confirmed test/demo clutter, its recoverable backup and preserved source links.
+
 [Release 0.23.34](RELEASE_0_23_34.md) records the live Zotero citation repair,
 exact sources, native observations, package checks and publication.
 
