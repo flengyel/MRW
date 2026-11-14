@@ -2,6 +2,8 @@
 
 ## Obsidian note creation — required
 
+Published in [0.23.31](RELEASE_0_23_31.md). Not installed into the working window.
+
 Creating a note in the user's Zettelkasten must go through Obsidian and its
 configured note-creation template. This includes development and validation
 work: do not write a placeholder or fixture Markdown file into the vault,
@@ -17,7 +19,7 @@ internal behavior or completion of template prompts. Preserve existing notes,
 drafts, templates and the working window. Do not apply one user's Zettel format
 to every vault. Non-vault folders keep their ordinary VS Code editor route.
 
-Current increment: [reader-note continuation in CODEX_PLAN](../CODEX_PLAN.md#reader-note-continuation--02330).
+Current repair: [Obsidian template creation in CODEX_PLAN](../CODEX_PLAN.md#obsidian-note-creation--required).
 Preserve pending transfers, native note creation and the separate current/original distinction.
 
 ## Saved-source access — 0.23.29

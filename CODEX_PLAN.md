@@ -2,6 +2,8 @@
 
 ## Obsidian note creation — required
 
+Published in [0.23.31](docs/RELEASE_0_23_31.md). Not installed into the working window.
+
 Creating a note in the user's Zettelkasten must go through Obsidian and its
 configured note-creation template. This includes development and validation
 work: do not write a placeholder or fixture Markdown file into the vault,
