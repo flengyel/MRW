@@ -195,7 +195,7 @@ Zotero's library and attachments intact.
 | Source | A document or other material used as a reference for a particular question or claim. This is a role, not a file format. |
 | Saved source | An explicitly retained source revision, with reader selections and annotations where present. The Open Document picker labels this choice **Saved copy**. |
 | Passage | A selected part of a document or saved source; retained references identify the exact revision and range. |
-| Note | A document used for working thoughts, arguments or references. Workspace working notes serve as fleeting notes. |
+| Note | A document used for working thoughts, arguments or references. Workspace working notes serve as source notes. |
 | Zettel | A note the reader selects, develops and links within their Zettelkasten, using their editor and format. The [Zettel convention](https://github.com/flengyel/Zettel) is one optional format. |
 | Research question | The mathematical question under investigation; it may already be written in an ordinary note. This term does not require an MRW registration object or recall item. |
 | Study question | A task used to test or develop comprehension of particular material. Keeping it for scheduled review remains explicit. |
@@ -270,13 +270,13 @@ the separate reading-starter command was removed in 0.23.26.
 
 ### Zettelkasten
 
-Workspace working notes serve as fleeting notes. They preserve material from
+Workspace working notes serve as source notes. They preserve material from
 which the reader may develop Zettels, without requiring every observation or
 calculation to enter a Zettelkasten. The reader selects material, formulates it
 and chooses its links; the Zettelkasten editor and configured template own note
 creation. MRW retains working material, exact source references and return
 locations. This separation preserves the reader's own format and authoring
-practice. See [fleeting notes and Zettels](NOTE_COMPANIONS.md#fleeting-notes-and-zettels).
+practice. See [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
 Keep the effort of selection and linking while removing repeated entry and
 navigation obstacles. Do not turn that effort into a registration form or

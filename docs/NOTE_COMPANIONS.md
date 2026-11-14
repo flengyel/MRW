@@ -4,14 +4,13 @@ A note is a document used for working thoughts, arguments or references. It is
 not a separate MRW file type. A Markdown note can have Contents, links and
 backlinks just like another Markdown document.
 
-## Fleeting notes and Zettels
+## Source notes and Zettels
 
-Following Sönke Ahrens’s terminology, working notes in the MRW workspace serve
-as **fleeting notes**: observations, questions, calculations and tentative
-arguments kept while reading or working.
-They can remain useful in the workspace without becoming Zettels. This describes
-their role; it introduces no record type, required classification or automatic
-deletion. Retained sources and their citations keep their separate meanings.
+**Source notes** are working notes kept in MRW: observations, questions,
+calculations and tentative arguments. They provide material from which the
+reader may develop Zettels and can remain useful in their own right. Keep them
+as ordinary documents. Retained source snapshots and exact citations have
+their separate meanings.
 
 The reader decides which material to develop into a Zettel, formulates the note
 and chooses its connections to other notes. MRW's notes, annotations, sources and

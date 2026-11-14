@@ -251,7 +251,7 @@ range has since changed.
 
 ## Continue a reader annotation
 
-An annotation or fleeting workspace note can supply material for a Zettel.
+An annotation or workspace source note can supply material for a Zettel.
 The reader chooses what to retain and how to develop and link it in the
 Zettelkasten editor. This command preserves an exact annotation and its source
 as a starting point; verification checks the saved transfer and any selected
@@ -259,7 +259,7 @@ format. It does not establish that the resulting note is developed or that its
 connections are useful. Continue writing in the external note after transfer.
 Other workspace notes and results can be used through ordinary authoring;
 this command handles one saved reader annotation. See
-[fleeting notes and Zettels](NOTE_COMPANIONS.md#fleeting-notes-and-zettels).
+[source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
 In **Reader notes**, choose **Continue this note in Obsidian…** beside the saved
 annotation. This action concerns that annotation, not the source quotation or
