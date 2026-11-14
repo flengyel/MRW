@@ -72,6 +72,11 @@ Linked reader notes stay in the vault and open in Obsidian. **Change or remove
 link…** removes only an MRW association, not the note file. It retains the exact
 source revision and passage target; it does not freeze the external note's text.
 
+A saved annotation also offers **Continue this note in Obsidian…**. After its
+text and attribution are saved and verified in a selected note, edit that note;
+the source reader retains the original for inspection. This makes no AI request.
+See [continuation and recovery](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
+
 1. Open the intended workspace and retained source with **MRW: Open Saved
    Source…**, or follow a source/passage link.
 2. Beside the passage, choose **Ask AI about this passage…**. Alternatively use

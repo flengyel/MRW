@@ -214,6 +214,9 @@ available, and qualified identifier. Source and storage details stay under
 **Source details and tools**. Hover or Tab-focus reader controls for help;
 Escape dismisses it. Destination labels remain visible without hovering.
 Annotations use **Save annotation** and remain separate from the source text.
+To continue one in an ordinary note, use **Continue this note in Obsidian…**
+beside its saved text. After verification, the external note is current and the
+original remains inspectable. See [the handoff](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
 Copying a Markdown link does not copy its private retained target.
 `mrw-outline:v1` references remain valid.
 

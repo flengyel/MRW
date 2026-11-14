@@ -443,11 +443,16 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         const fresh = await bridge({ method: 'outline_notes', store: c.store, project_root: c.root, id: c.result.outline.id });
         const selected = fresh.links.find(n => n.id === existing.id && n.reference === existing.reference && n.url === existing.url);
         if (!selected) throw new Error('Note association changed or is missing. Refresh the reader and choose it again.');
+        const continued=fresh.continuations?.find(n=>n.association===selected.id);
+        if(continued) return continuation.open(continued);
         if (!await vscode.env.openExternal(obsidianTarget(vscode, selected.url))) throw new Error('Obsidian could not open the URL. Start Windows Obsidian, then try Open linked note in Obsidian again.');
         vscode.window.setStatusBarMessage('Sent to Obsidian. If it reports a missing note/vault, replace this association using that note’s current Obsidian URL.', 12000);
         return;
       }
     }
+    const continued=c.notes?.continuations?.find(n=>n.association===existing?.id);
+    const present=continued && [...c.result.outline.annotations,...c.result.outline.regions.flatMap(r=>r.annotations)].some(n=>n.id===continued.annotation);
+    if(present) return continuation.manage(c,{annotation:continued.annotation});
     writable(c);
     let choice = 'Replace linked note';
     if (existing) choice = await vscode.window.showQuickPick(['Replace linked note', 'Remove note link'], { placeHolder: existing.label });

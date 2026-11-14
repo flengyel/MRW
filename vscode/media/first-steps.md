@@ -222,6 +222,26 @@ Obsidian URL. **Linked reader notes** beside the passage opens those notes in
 Obsidian. **Change or remove link…** changes only the association; it never
 deletes or rewrites the vault file. The link pins this retained passage, while
 the external note remains editable in its vault.
+
+To develop one saved annotation in an ordinary note, choose **Continue this note
+in Obsidian…** beside it. Select a saved note, or create one through your configured
+Obsidian command and then select its saved file. Choose ordinary Markdown or the
+optional Zettel format. For Zettel, complete the title index link in SEE ALSO;
+the template alone leaves it empty.
+
+Use **Copy annotation for the note body**, paste before SEE ALSO, and save.
+Then use **Resume pending transfer… → Copy source attribution and return link**,
+paste in Research, and save. Preserve the copied blank lines and existing text.
+An ordinary Markdown note keeps its own chosen body and attribution locations.
+Finally choose **Verify saved note and finish continuation**. Zettel validation
+uses your selected existing validator, not an MRW note template.
+
+After verification, **Open continuation** opens the editable external note and
+**Inspect retained original annotation** preserves the earlier text. Repeat the
+action to resume a pending transfer, not to copy it again. A missing note offers
+explicit relinking. No transfer opens an AI request or compiles TikZ.
+See [continuation and recovery](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
+
 **Refresh saved source** reloads the saved state without acquiring a new revision.
 
 The reader identifies the source above the text and keeps storage details

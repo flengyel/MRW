@@ -21,7 +21,7 @@ def destination(value, *, read=False):
     from .outline_notes import obsidian_url
     root, file = value['root'], value['file']
     text(root, 'notes root', 4096); text(file, 'note path', 4096)
-    if (not Path(root).is_absolute() or str(Path(root)) != root or '\\' in root
+    if (re.search(r'[\x00-\x1f\x7f]', root + file) or not Path(root).is_absolute() or str(Path(root)) != root or '\\' in root
             or not file or '\\' in file or ':' in file or Path(file).is_absolute()
             or any(p in ('', '.', '..') or p in EXCLUDED for p in file.split('/'))
             or Path(file).suffix.lower() not in ('.md', '.markdown')):
@@ -94,7 +94,11 @@ def validate_record(record, store):
     return_link(record['return_link'], record['reference'])
     if record['return_link'] not in record['research']: raise ValueError('Missing return link')
     identity(record['association'])
+    if record['phase'] != 'pending' and record['destination_revision'] is None:
+        raise ValueError('Completed continuation has no verified destination revision')
     if record['destination_revision'] is not None: revision(record['destination_revision'])
+    if record['phase'] != 'pending' and record['policy'] == 'zettel' and record['validation'] is None:
+        raise ValueError('Completed Zettel has no validation record')
     if record['validation'] is not None:
         fields(record['validation'], {'tool', 'revision', 'section'}, 'destination validation')
         text(record['validation']['tool'], 'validator path', 4096)
@@ -110,6 +114,27 @@ def body_text(original, presentation):
     return '\n\n' + value + '\n\n'
 
 
+def section_offsets(content):
+    """Locate insertion sections without treating a fenced example as a section.
+
+    The external validator owns Zettel conformance; this only bounds insertion.
+    """
+    fence = None
+    offset = 0
+    for line in content.splitlines(keepends=True):
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if fence:
+            if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence) and not line[marker.end():].strip():
+                fence = None
+        elif marker:
+            fence = marker[1]
+        else:
+            heading = re.match(r"^## ([^\n]+?)\s*$", line)
+            if heading:
+                yield heading[1], offset
+        offset += len(line)
+
+
 def verify_text(record, content, validation=None):
     # Native editors can change line endings. Original annotation bytes remain in
     # the private record. No mathematical text, whitespace within lines or links
@@ -120,10 +145,12 @@ def verify_text(record, content, validation=None):
     if content.count(body) != 1 or content.count(research) != 1:
         raise ValueError('Save exactly one copy of the prepared body and attribution before verifying; do not paste them again')
     if record['policy'] == 'zettel':
-        see = re.search(r'^## SEE ALSO\s*$', content, re.M)
+        headings = list(section_offsets(content))
         section = (validation or {}).get('section', 'Research')
-        manual = re.search(r'^## ' + re.escape(section) + r'\s*$', content, re.M)
-        if not see or not manual or not content.index(body) < see.start() < manual.start() < content.index(research):
+        see = next((at for title, at in headings if title == 'SEE ALSO'), None)
+        manual = next((at for title, at in headings if title == section), None)
+        end = next((at for _, at in headings if manual is not None and at > manual), len(content))
+        if see is None or manual is None or not content.index(body) < see < manual < content.index(research) or content.index(research) + len(research) > end:
             raise ValueError('Place the annotation in the body before SEE ALSO, and its attribution in Research (or the accepted older manual section)')
     # Both chunks are inserted without replacing prior text. This is a compact
     # baseline check, not a second copy of the ordinary note in private storage.

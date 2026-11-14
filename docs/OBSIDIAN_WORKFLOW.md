@@ -244,6 +244,80 @@ not a copy of the note. Multiple notes produce a chooser. **All linked notes
 and earlier passage ranges** retains access to associations whose passage
 range has since changed.
 
+## Continue a reader annotation
+
+In **Reader notes**, choose **Continue this note in Obsidian…** beside the saved
+annotation. This action concerns that annotation, not the source quotation or
+all notes on the passage. Save reader drafts first.
+
+1. Select an existing note, or invoke the configured Obsidian creation command.
+   For a new note, finish the template and save in Obsidian, then select that
+   file explicitly. MRW does not guess its name or treat command dispatch as a
+   completed Save. One note may collect several annotations.
+2. Select this destination's format: ordinary Markdown, or **Zettel —
+   flengyel/Zettel**. The Zettel choice runs the existing validator on that one
+   saved note. Set **MRW: Zettel Validator** (`mrw.zettelValidator`) to its
+   `python/zettel_validate.py`, or select it when prompted. The configured
+   `mrw.pythonExecutable` must have PyYAML. The wrapper calls that tool's
+   validator and index helpers; MRW contains no replacement Zettel template.
+3. Use **Copy annotation for the note body**. Paste at the chosen body location
+   in Obsidian without replacing existing text. For Zettel, this is before
+   `## SEE ALSO`. Keep the copied blank lines; they delimit the insertion during
+   verification. Save in the authoring application.
+4. Use **Resume pending transfer… → Copy source attribution and return link**.
+   Paste into `## Research`, or the accepted older manual section. Save again.
+   Ordinary Markdown keeps its own layout and chosen attribution location.
+5. Choose **Verify saved note and finish continuation**. MRW checks both exact
+   insertions, preservation of the existing note text, current annotation and
+   destination revisions, and the selected format's validation. Only then does
+   it publish the continuation and its passage association.
+
+For the selected Zettel format, filename stem and YAML `id` remain identical.
+YAML `title` remains `ID Human title`; the unique H1 contains only the human
+title. The validator checks ordered SEE ALSO/Research sections and a
+**title-appropriate index link** in SEE ALSO. The Obsidian template leaves that
+link empty: complete it through ordinary editing before preparing the transfer.
+Validation reports index choices from the existing helper; it invents no topical
+relations. Keep `reference-section-title: References` for exported bibliographies.
+Existing notes retain the older section forms accepted by the validator; no
+other notes are converted or reindexed. These rules apply only when selected.
+
+An annotation with its own H1 or reserved heading offers an explicit quotation
+wrapper. It remains **reader commentary**, with its attribution in Research.
+The original text stays exact in MRW. Relative links, WikiLinks and TeX macros
+may depend on the original context; MRW identifies these for review, without
+rewriting them. Raw TikZ fences survive transfer, but Obsidian's ability to
+render them depends on its plugins. No transfer, open or Save runs TeX, a kernel
+or AI.
+
+After completion, **Open continuation** opens the ordinary note. Continue editing
+there. **Inspect retained original annotation** shows its earlier text and
+attribution; it is no longer offered as another current editor. That attribution
+does not describe later writing in the external note. Its return link opens the
+exact retained passage, including its qualified identifier and source revision.
+Opening the whole external note is supported; heading/block routing is not.
+
+### Pending transfers and missing notes
+
+The pending record survives MRW restart in the existing private source store.
+Resume it beside the annotation. Repeated invocation neither creates another
+file nor inserts text. An already saved chunk is not copied again. If saving
+failed, the annotation remains current. If note text was saved but link
+publication failed, keep that text and recover/reload the private store as
+instructed; verify the same pending destination without pasting again.
+
+Verification rejects other changes made to the destination during transfer.
+Keep both texts and reconcile them before explicitly cancelling and preparing
+a new transfer. Cancellation never removes already pasted text. MRW never
+writes around an application's unsaved buffer; the authoring application owns
+editing and Save. The two stores are not a distributed atomic transaction.
+
+A missing or renamed note is labelled in the reader. **Manage continuation… →
+Relink to a selected note…** selects its new location explicitly. Removing the
+link leaves the external file and retained original intact; it does not make
+the original current again. Deleting the MRW annotation also leaves vault files
+alone. No background synchronization or search for a similarly named file runs.
+
 ## Put an MRW link in the Obsidian note
 
 1. In the saved-source reader, choose **Copy link to this source** under
@@ -299,7 +373,7 @@ replace the association.
 
 Associations persist beside saved-source state in
 `outlines-…/OUTLINE_ID/obsidian-links.json`, with up to 64 associations and
-128 KiB per outline. Removing an association deletes neither the note nor
+512 KiB per outline, including optional annotation continuations. Removing an association deletes neither the note nor
 retained material. Failed or uncertain publication blocks further private
 writes until host reload; keep unsaved text before reloading. Concurrent writing
 from multiple installations is unsupported.

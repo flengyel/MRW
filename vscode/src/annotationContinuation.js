@@ -73,7 +73,12 @@ async function availability(vscode, records) {
   const result = {};
   for (const item of records) {
     if (item.phase === 'unlinked') { result[item.annotation] = 'Link removed — relink explicitly'; continue; }
-    try { await snapshot(vscode,item.destination); }
+    try {
+      const d=item.destination, file=path.join(d.root,d.file);
+      validateTarget({notes:d.root,file:d.file,workspace:'file:///validation'});
+      if(await fs.realpath(d.root)!==d.root || await fs.realpath(file)!==file) throw Error('Note path redirected — relink explicitly');
+      if(!(await fs.lstat(file)).isFile()) throw Error('The continuation is not a file — relink explicitly');
+    }
     catch (error) { result[item.annotation] = error.code === 'ENOENT' ? 'Note missing or renamed — relink explicitly' : error.message; }
   }
   return result;

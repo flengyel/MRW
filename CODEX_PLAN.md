@@ -1,5 +1,20 @@
 # CODEX_PLAN.md
 
+## Reader-note continuation — 0.23.30
+
+The focused increment lets one saved annotation continue in a selected ordinary
+note through native editing and verified Save. Obsidian owns creation; original
+text, attribution and exact retained references remain recoverable. See the
+[workflow](docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation). Complete the
+serial regression, native fixture and release checks before reporting delivery.
+Do not install into or reload the working window.
+
+This does not complete the [interface audit](docs/INTERFACE_AUDIT_20261113.md).
+Command grouping/notebook-result access, context-bound Lean lesson actions,
+API-versus-Codex labels, richer notebook display/comparison, instruction-history
+consolidation, and the broader lesson/code/notes, notebook-export and Zotero
+attachment trials remain separate work. No such repair is started by this task.
+
 ## Saved-source access — 0.23.29
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_29.md). Not installed into the working window.

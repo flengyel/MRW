@@ -9,12 +9,12 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.29 — Find saved sources.**
-**Open Saved Source…** is back in Commands, beside Open Document. Search by
-source title, author or passage tag; each result shows its reader-note count
-and retained revision. Opening a result preserves its source and annotations.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.29/mrw-0.23.29.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.29).
+**MRW 0.23.30 — Continue a reader note in Obsidian.**
+Continue a selected annotation in an ordinary note, with its attribution and
+exact retained-passage link. After the saved transfer is verified, edit the
+external note; MRW keeps the original available for inspection.
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.30/mrw-0.23.30.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.30).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -101,7 +101,7 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Native Windows or macOS backend | Not qualified |
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.29.vsix`. Confirm installation on the workspace host. Save work
+select `mrw-0.23.30.vsix`. Confirm installation on the workspace host. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
@@ -111,8 +111,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.29.vsix
-sha256sum vscode/mrw-0.23.29.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.30.vsix
+sha256sum vscode/mrw-0.23.30.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -254,7 +254,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.29 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.30 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
 

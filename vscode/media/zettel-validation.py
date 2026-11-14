@@ -11,7 +11,11 @@ import sys
 spec = importlib.util.spec_from_file_location('mrw_selected_zettel_validator', sys.argv[1])
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
-spec.loader.exec_module(module)
+try:
+    spec.loader.exec_module(module)
+except ModuleNotFoundError as error:
+    print(json.dumps(dict(valid=False, issues=[f"The selected validator requires {error.name}. Install its dependencies in MRW: Python Executable, then retry."], index_suggestions=[], section=None)))
+    sys.exit(1)
 validator = module.ZettelValidator()
 note = Path(sys.argv[2])
 content = note.read_text(encoding='utf-8')

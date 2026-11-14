@@ -1,5 +1,8 @@
 # Codex continuation: reading and research
 
+Current increment: [reader-note continuation in CODEX_PLAN](../CODEX_PLAN.md#reader-note-continuation--02330).
+Preserve pending transfers, native note creation and the separate current/original distinction.
+
 ## Saved-source access — 0.23.29
 
 Published and pushed; [delivery checks](RELEASE_0_23_29.md). Not installed into the working window.

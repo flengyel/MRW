@@ -106,7 +106,8 @@ def note_action(request):
         change = request['change']
         fields(change, {'id', 'reference', 'url', 'label'}, 'association change')
         existing = next((i for i in value['links'] if i['id'] == change['id']), None)
-        if any(r['association'] == change['id'] for r in value.get('continuations', [])):
+        annotation_ids = {n['id'] for n in store.state['annotations']} | {n['id'] for r in store.state['regions'] for n in r['annotations']}
+        if any(r['association'] == change['id'] and r['annotation'] in annotation_ids for r in value.get('continuations', [])):
             raise ValueError('Manage this link beside its continued reader annotation')
         if change['id'] is not None and existing is None:
             raise ValueError('The note association is missing; refresh the reader')

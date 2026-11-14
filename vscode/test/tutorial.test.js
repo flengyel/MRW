@@ -80,7 +80,12 @@ test('the bundled task-first help resolves every advanced guide from its virtual
   assert.equal(targets.filter(target => target === zettelGuide).length, 1, 'the companion template guide keeps its explicit external repository address');
   for (const target of targets) {
     if (target === zettelGuide) continue;
-    assert.match(target, /^https:\/\/github\.com\/flengyel\/MRW\/blob\/main\/docs\/[A-Z_]+\.md$/);
-    await fs.access(path.resolve(__dirname, '../../docs', target.split('/').at(-1)));
+    assert.match(target, /^https:\/\/github\.com\/flengyel\/MRW\/blob\/main\/docs\/[A-Z_]+\.md(?:#[a-z0-9-]+)?$/);
+    const url = new URL(target);
+    const guide = await fs.readFile(path.resolve(__dirname, '../../docs', url.pathname.split('/').at(-1)), 'utf8');
+    if (url.hash) {
+      const anchors = [...guide.matchAll(/^#{1,6} (.+)$/gm)].map(m => m[1].toLowerCase().replace(/[^\w -]/g, '').replace(/ /g, '-'));
+      assert.ok(anchors.includes(url.hash.slice(1)), 'Guide section exists: '+target);
+    }
   }
 });

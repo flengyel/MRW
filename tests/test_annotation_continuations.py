@@ -137,6 +137,22 @@ class AnnotationContinuationTests(unittest.TestCase):
             self.change('complete',dict(destination_revision=sha256(self.file.read_bytes()).hexdigest(),validation=None))
         self.finish();self.assertEqual(self.notes()['continuations'][0]['original'],self.note)
 
+    def test_fenced_section_examples_do_not_move_the_insertion_scope(self):
+        self.before = self.before.replace('Earlier prose', '```text\n## SEE ALSO\n## Research\n```\n\nEarlier prose')
+        self.file.write_text(self.before)
+        r = self.prepare()
+        self.file.write_text(self.before.replace('Earlier prose', r['body']+'Earlier prose').replace('Earlier reference.', r['research']+'Earlier reference.'))
+        self.finish()
+
+    def test_attribution_must_stay_inside_the_selected_manual_section(self):
+        self.before += '\n## Unrelated section\nKeep this too.\n'
+        self.file.write_text(self.before)
+        r = self.prepare()
+        self.file.write_text(self.before.replace('Earlier prose', r['body']+'Earlier prose')+r['research'])
+        with self.assertRaisesRegex(ValueError, 'Place the annotation'):
+            self.finish()
+        self.assertEqual(self.notes()['continuations'][0]['phase'], 'pending')
+
     def test_generic_link_management_cannot_redirect_continuation(self):
         r=self.prepare();self.paste(r);self.finish()
         with self.assertRaisesRegex(ValueError,'beside'):
