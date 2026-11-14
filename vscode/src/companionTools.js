@@ -7,7 +7,7 @@ const GROUPS={
  calculationTools:[['Open notebook…','openNotebook'],['Retain saved notebook result…','retainNotebookResult'],['Open / compare retained results…','openNotebookResult'],['Export notebook provenance…','exportNotebookProvenance'],['SagePod and Jupyter setup',null,'GETTING_STARTED_WSL_SAGEPOD.md']],
  proofTools:[['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Study Lean 4…','studyLean4'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],
  earlierWork:[['Resume saved study','resumeStudy'],['Inspect study history','inspectStudyHistory'],['Export study history…','exportStudyHistory'],['Show archived studies','showArchivedStudies'],['Show trashed studies','showDeletedStudies'],['Resume investigation','resumeInvestigation'],['Archive study…','archiveStudy'],['Restore study…','restoreStudy'],['Trash study…','deleteStudy'],['Permanently delete study…','permanentlyDeleteStudy']],
- companionTools:[['Companions and setup status',null,'RECOMMENDED_EXTENSIONS.md'],['Obsidian note settings',null,null,'mrw.obsidian'],['Choose notes folder…','chooseNotesFolder'],['Connect Zotero…','connectZotero'],['Add source plugin…','addSourcePlugin'],['Manage source plugins…','manageSourcePlugins'],['Add Lean lesson pack…','addLeanLessonPack'],['Manage Lean lesson packs…','manageLeanLessonPacks'],['Set up MRW workspace…','setupWorkspace'],['Move workspace…','moveWorkspace'],['Recover workspace move','recoverWorkspaceMove'],['Configure history…','configureHistory'],['Show saved-work location','artifactLocation']]
+ companionTools:[['Companions and setup status',null,'RECOMMENDED_EXTENSIONS.md'],['Obsidian note settings',null,null,'mrw.obsidian'],['Choose notes folder…','chooseNotesFolder'],['Connect Zotero…','connectZotero'],['Add source plugin…','addSourcePlugin'],['Manage source plugins…','manageSourcePlugins'],['Add Lean lesson pack…','addLeanLessonPack'],['Manage Lean lesson packs…','manageLeanLessonPacks'],['Set up MRW workspace…','setupWorkspace'],['Move workspace…','moveWorkspace'],['Recover workspace move','recoverWorkspaceMove'],['Configure history…','configureHistory'],['Show saved-work location','artifactLocation'],['Feature use…','mrwDiagnostics.featureUse'],['Integrity and data hygiene…','mrwDiagnostics.integrity'],['Copy Codex maintenance handoff','mrwDiagnostics.maintenance'],['Diagnostics report settings',null,null,'mrwDiagnostics']]
 };
 function companionStatus(vscode){
  const c=vscode.workspace.getConfiguration('mrw'),ext=id=>vscode.extensions?.getExtension(id)?'extension installed; connection not checked':'extension not installed';
@@ -17,6 +17,7 @@ function companionStatus(vscode){
   {label:'Jupyter / SagePod',description:ext('ms-toolsai.jupyter')+'; SagePod server not checked',guide:'GETTING_STARTED_WSL_SAGEPOD.md'},
   {label:'Lean 4',description:ext('leanprover.lean4')+'; toolchain not checked',guide:'LEAN_STUDY_WORKFLOW.md'},
   {label:'LaTeX Workshop / PDFs',description:ext('James-Yu.latex-workshop'),guide:'RECOMMENDED_EXTENSIONS.md'},
+  {label:'MRW Diagnostics',description:ext('flengyel.mrw-diagnostics')+'; weekly reporting opt-in is configured separately',guide:'DIAGNOSTICS_PLUGIN.md'},
   {label:'Codex and companion plugins',description:'Separate application; manual reviewable handoff',guide:'READER_AI_WORKFLOW.md'},
   {label:'SageQueue / Wolfram / Emacs / The Archive',description:'No MRW adapter delivered',guide:'INTEGRATION_BOUNDARIES.md'}
  ];
@@ -24,8 +25,9 @@ function companionStatus(vscode){
 function registerCompanionTools({vscode,register}){
  for(const [id,rows] of Object.entries(GROUPS))register('mrw.'+id,async()=>{
   const commands=await vscode.commands.getCommands?.(true);
-  const choices=rows.map(([label,command,guide,setting])=>({label,command:command?'mrw.'+command:undefined,guide,setting,
-   description:command&&commands&&!commands.includes('mrw.'+command)?'Unavailable in this host':undefined}));
+  const commandId=command=>command?.startsWith('mrwDiagnostics.')?command:'mrw.'+command;
+  const choices=rows.filter(row=>!row[1]?.startsWith('mrwDiagnostics.')||vscode.extensions?.getExtension('flengyel.mrw-diagnostics')).map(([label,command,guide,setting])=>({label,command:command?commandId(command):undefined,guide,setting,
+   description:command&&commands&&!commands.includes(commandId(command))?'Unavailable in this host':undefined}));
   const selected=await vscode.window.showQuickPick(choices,{title:({readingTools:'Reading and notes',sourceTools:'Sources and references',calculationTools:'Calculation',proofTools:'Proofs',companionTools:'Tools and setup',earlierWork:'Earlier saved work'})[id],matchOnDescription:true,placeHolder:'Choose an action; Escape leaves the current work open.'});
   if(!selected)return;
   if(selected.command){if(selected.description?.startsWith('Unavailable'))throw Error(selected.description);return vscode.commands.executeCommand(selected.command);}

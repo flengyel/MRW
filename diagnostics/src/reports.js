@@ -1,6 +1,17 @@
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto'),os=require('node:os');
-const WEEK=7*24*60*60*1000;
+const DAY=24*60*60*1000,WEEK=7*DAY;
+const PERIODS=[
+  {label:'Last 7 days',period:'last7'},
+  {label:'Last 30 days',period:'last30'},
+  {label:'Previous 30 days',period:'previous30',description:'The 30 days before the last 30 days'},
+  {label:'Compare last 30 days with previous 30 days',period:'compare30',description:'Two bounded read-only observations, read in sequence'}
+];
+function usagePeriod(period='last30',at=Date.now()){
+  const selected=PERIODS.find(row=>row.period===period);if(!selected||!Number.isFinite(at))throw Error('Choose a supported feature-use period.');
+  const stamp=value=>new Date(value).toISOString(),current={from:stamp(at-30*DAY),to:stamp(at)},previous={from:stamp(at-60*DAY),to:stamp(at-30*DAY-1)};
+  return {label:selected.label,period,...(period==='last7'?{from:stamp(at-7*DAY),to:stamp(at)}:period==='previous30'?previous:current),...(period==='compare30'?{comparison:{label:'Previous 30 days',...previous}}:{})};
+}
 const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
 const safe=value=>String(value??'unknown').replace(/[\r\n\x00-\x1f\x7f]/g,' ').replace(/[\\`*_[\]{}()<>#+.!|]/g,c=>'\\'+c).slice(0,4096);
 async function write(file,data){await fs.mkdir(path.dirname(file),{recursive:true,mode:0o700});const tmp=file+'.'+crypto.randomUUID()+'.pending';try{await fs.writeFile(tmp,JSON.stringify(data,null,2)+'\n',{flag:'wx',mode:0o600});await fs.rename(tmp,file);}finally{await fs.unlink(tmp).catch(e=>{if(e.code!=='ENOENT')throw e;});}}
@@ -23,7 +34,19 @@ function markdown(report){
     lines.push('','## Check coverage','');for(const root of r.roots||[])lines.push(`- ${safe(root.label)}: ${safe(root.status)}; unchecked: ${(root.unchecked||[]).map(safe).join(', ')}.`);
   }
   if(r?.classes){lines.push('','## Observed storage bytes','','| Class | Bytes in inspected scope |','| --- | ---: |');for(const [name,bytes] of Object.entries(r.classes))lines.push('| '+safe(name)+' | '+bytes+' |');lines.push('','Partial scans describe the observed subset and cannot establish total growth or safe cleanup.');}
-  lines.push('','## Feature use','',typeof report.usage?.markdown==='string'?report.usage.markdown:safe(JSON.stringify(report.usage||{status:'unsupported'})),'','## Finding changes','',`New: ${report.changes.new.length}; persistent: ${report.changes.persistent.length}; rechecked and resolved: ${report.changes.resolved.length}; carried without recheck: ${(report.openFindings||[]).filter(f=>!f.rechecked).length}.`,'',report.openFindingsTruncated?'The unresolved-finding rollup is truncated. Unrepresented findings are not resolved.':'Unresolved-finding rollup is within its limit.', 'This report makes no repair, deletion, execution or mathematical claim. Unsupported and unobserved checks remain open. Equal bytes and old research are not disposable.');return lines.join('\n');
+  lines.push('','## Feature use','',safe(report.usagePeriod?.label||'Last 30 days'),'',typeof report.usage?.markdown==='string'?report.usage.markdown:safe(JSON.stringify(report.usage||{status:'unsupported'})));
+  if(report.usageComparison){
+    const prior=report.usageComparison;
+    lines.push('','### Comparison period','',safe(prior.label||'Previous 30 days'),'',typeof prior.markdown==='string'?prior.markdown:safe(JSON.stringify(prior)));
+    const nowRows=new Map((report.usage?.features||[]).map(f=>[f.id,f])),beforeRows=new Map((prior.features||[]).map(f=>[f.id,f]));
+    lines.push('','### Observed invocations by period','','Counts describe the recorded subsets. Differences in coverage, versions or availability can make periods incomparable. An absent feature is unobserved, not zero use.','','| Feature | Selected period | Invocations | Comparison period | Invocations |','| --- | --- | ---: | --- | ---: |');
+    for(const id of [...new Set([...nowRows.keys(),...beforeRows.keys()])].sort()){
+      const current=nowRows.get(id),previous=beforeRows.get(id);
+      lines.push('| '+[id,current?.status||'unobserved',current?.invocations??'unobserved',previous?.status||'unobserved',previous?.invocations??'unobserved'].map(safe).join(' | ')+' |');
+    }
+    lines.push('','Selected versions: '+(report.usage?.versions||[]).map(safe).join(', ')+'. Comparison versions: '+(prior.versions||[]).map(safe).join(', ')+'.');
+  }
+  lines.push('','## Finding changes','',`New: ${report.changes.new.length}; persistent: ${report.changes.persistent.length}; rechecked and resolved: ${report.changes.resolved.length}; carried without recheck: ${(report.openFindings||[]).filter(f=>!f.rechecked).length}.`,'',report.openFindingsTruncated?'The unresolved-finding rollup is truncated. Unrepresented findings are not resolved.':'Unresolved-finding rollup is within its limit.', 'This report makes no repair, deletion, execution or mathematical claim. Unsupported and unobserved checks remain open. Equal bytes and old research are not disposable.');return lines.join('\n');
 }
 function changes(current,previous){
   const before=new Map((previous?.openFindings||previous?.inspection?.findings||[]).map(f=>[f.id,f])),after=new Map((current.inspection?.findings||[]).map(f=>[f.id,f]));
@@ -39,20 +62,26 @@ function createReports({directory,locks,scope,api,now=()=>Date.now(),historyLimi
   let running=false;
   async function state(){return await read(path.join(directory,'schedule.json'))||{version:1,nextDue:0,lastCompleted:null};}
   async function latest(){const s=await state();return s.lastReport?read(path.join(directory,s.lastReport)):undefined;}
-  async function run({signal,origin='human',kind='all'}={}){
+  async function run({signal,origin='human',kind='all',period='last30'}={}){
+    const selectedPeriod=usagePeriod(period,now());
     if(running)throw Error('A diagnostics report is already running.');running=true;let release;
     try{
       release=await lock(locks,scope);const s=await state(),previous=await latest(),started=new Date(now()).toISOString(),id=crypto.randomUUID();
       await write(path.join(directory,'schedule.json'),{...s,pending:{id,started},lastInterrupted:s.pending||s.lastInterrupted||null});
-      const report={schema:'mrw.diagnostics-report',version:1,id,scope,origin,started,status:'partial',inspection:null,usage:null};
+      const report={schema:'mrw.diagnostics-report',version:1,id,scope,origin,started,status:'partial',inspection:null,usage:null,usagePeriod:selectedPeriod};
       if(!api||api.version!==1){report.inspection={status:'unsupported',coverage:'MRW inspection API 1 is unavailable.',findings:[],roots:[]};}
       else {
         if(kind!=='usage')try{report.inspection=await api.inspect({signal});}catch(e){report.inspection={status:signal?.aborted?'cancelled':'unchecked',coverage:e.message,findings:[],roots:[]};}
-        if(!signal?.aborted)try{report.usage=await api.featureUse({signal,from:new Date(now()-30*24*60*60*1000).toISOString(),to:new Date(now()).toISOString(),origin});}catch(e){report.usage={status:'unchecked',error:e.message};}
+        if(!signal?.aborted)try{report.usage=await api.featureUse({signal,from:selectedPeriod.from,to:selectedPeriod.to,origin});}catch(e){report.usage={status:'unchecked',error:e.message};}
+        if(selectedPeriod.comparison&&!signal?.aborted){
+          const comparison=selectedPeriod.comparison;
+          try{report.usageComparison={...await api.featureUse({signal,from:comparison.from,to:comparison.to,origin}),label:comparison.label};}
+          catch(e){report.usageComparison={status:'unchecked',error:e.message,label:comparison.label,period:{from:comparison.from,to:comparison.to}};}
+        }
       }
       report.ended=new Date(now()).toISOString();report.status=signal?.aborted?'cancelled':(report.inspection?.status||'feature-use-only');report.changes=changes(report,previous);
       const file=id+'.json';await write(path.join(directory,file),report);
-      const completed=['completed-supported-checks','failures'].includes(report.status) || kind==='usage'&&!signal?.aborted&&report.usage?.status!=='unchecked'&&report.usage?.status!=='unsupported';
+      const completed=['completed-supported-checks','failures'].includes(report.status) || kind==='usage'&&!signal?.aborted&&report.usage?.status!=='unchecked'&&report.usage?.status!=='unsupported'&&(!report.usageComparison||!['unchecked','unsupported'].includes(report.usageComparison.status));
       await write(path.join(directory,'schedule.json'),{version:1,nextDue:now()+WEEK,lastCompleted:completed?report.ended:s.lastCompleted,lastRun:report.ended,lastReport:file,lastStatus:report.status,lastInterrupted:s.pending||s.lastInterrupted||null,pending:null});
       // Only this plugin's own old reports are subject to bounded retention.
       const names=(await fs.readdir(directory)).filter(n=>/^[a-f0-9-]{36}\.json$/.test(n));const rows=[];for(const name of names){const st=await fs.stat(path.join(directory,name));rows.push({name,at:st.mtimeMs});}rows.sort((a,b)=>b.at-a.at);for(const row of rows.slice(Math.max(1,Math.min(20,historyLimit))))if(row.name!==file)await fs.unlink(path.join(directory,row.name));
@@ -62,4 +91,4 @@ function createReports({directory,locks,scope,api,now=()=>Date.now(),historyLimi
   async function due(enabled){const s=await state();return !!enabled&&(!s.nextDue||s.nextDue<=now()||!!s.pending);}
   return {run,state,latest,due};
 }
-module.exports={createReports,markdown,maintenance,changes,lock,WEEK};
+module.exports={createReports,markdown,maintenance,changes,lock,WEEK,PERIODS,usagePeriod};

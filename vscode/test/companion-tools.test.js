@@ -19,3 +19,13 @@ test('group selection delegates one existing action and native notebook opening 
  const h=harness();h.picks.push(rows=>rows.find(x=>x.command==='mrw.openNotebookResult'));await h.handlers.get('mrw.calculationTools')();assert.deepEqual(h.calls,[['mrw.openNotebookResult']]);
  h.vscode.window.showOpenDialog=async()=>[{scheme:'file',fsPath:'/isolated/example.ipynb'}];await h.handlers.get('mrw.openNotebook')();assert.equal(h.calls[1][0],'vscode.openWith');assert.equal(h.calls[1][2],'jupyter-notebook');assert.ok(h.calls.every(x=>!/kernel|executeCell|runAll/i.test(x[0])));
 });
+
+
+test('optional diagnostics status and supported actions are discoverable without a plugin registry',async()=>{
+ const h=harness();assert.ok(companionStatus(h.vscode).find(x=>x.label==='MRW Diagnostics').description.includes('not installed'));
+ h.picks.push(rows=>{assert.ok(!rows.some(x=>x.command==='mrwDiagnostics.featureUse'));return undefined;});await h.handlers.get('mrw.companionTools')();
+ h.vscode.extensions.getExtension=id=>id==='flengyel.mrw-diagnostics'?{}:undefined;
+ h.vscode.commands.getCommands=async()=>['mrwDiagnostics.featureUse','mrwDiagnostics.integrity','mrwDiagnostics.maintenance'];
+ h.picks.push(rows=>rows.find(x=>x.command==='mrwDiagnostics.featureUse'));await h.handlers.get('mrw.companionTools')();
+ assert.deepEqual(h.calls,[['mrwDiagnostics.featureUse']]);
+});
