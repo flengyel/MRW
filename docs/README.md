@@ -37,6 +37,11 @@ that version and the saved records it produced.
 
 ## Design and development
 
+- [Design reconciliation register](DESIGN_RECONCILIATION.md): complete evaluation,
+  adopted decisions, unresolved repairs and their completion evidence.
+- [Codex maintenance from reports](CODEX_MAINTENANCE.md): compare periodic findings
+  with current design, make bounded corrections and retain unresolved work.
+
 - [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md):
   creation, editing, execution, synchronization and reference responsibilities
   across notes, notebooks, runtimes, queues and external services.

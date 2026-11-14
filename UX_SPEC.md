@@ -5,6 +5,44 @@ governs optional integrations: creation and execution stay with the responsible
 system; MRW supports explicit delegation, native editing, retained references and
 coordinated synchronization. Current implementation limits remain explicit.
 
+## Evaluation follow-up — interface and continuity
+
+These accepted requirements implement the [reconciled evaluation](docs/DESIGN_RECONCILIATION.md),
+building on the [dated interface audit](docs/INTERFACE_AUDIT_20261113.md).
+They remain pending where current behavior does not satisfy them.
+
+- Keep Contents and Commands; group secondary actions by reading/notes,
+  sources/references, calculation, proofs, tools/setup and earlier saved work.
+  Use few primary actions, native contextual menus and keyboard access, with
+  no duplicate command wall or additional research-registration view.
+- Expose existing notebook-result actions and companion setup. State whether
+  software is installed, configured or reachable, and identify proposed
+  integrations. Opening the list must not install software or submit work.
+- Bind Lean lesson actions to the selected lesson Markdown or associated code.
+  An unrelated Lean file uses normal native controls and must not inherit the
+  last lesson's actions. Preserve lesson, example, notes and Return together.
+- Remove unsolicited study-creation prompts from ordinary reading controls.
+  Keep deliberate study available separately and preserve saved work,
+  history/export, review/lifecycle controls, Proof Outline and Lean study.
+- Name the AI destination at the action point, distinguish API preview/Send
+  from a Codex/companion handoff, and keep proposed changes inspectable before
+  application. Reader notes precede optional AI actions; copying exact context
+  must not require a Study or transmit it automatically.
+- Reuse native notebook rendering and investigate notebook-aware comparison
+  for retained cells/outputs before writing a new engine. Keep retained and
+  live notebooks distinct; reading/comparison does not execute them.
+
+Acceptance exercises four complete routes: note → saved source → Return;
+lesson → code → notes → Return; retained calculation → comparison → export;
+Zotero reference → attachment → Return. Include dirty buffers, missing or
+changed targets, two lessons, error/plot outputs, cancellation, keyboard access
+and restart. Link calculations to input/method revisions and relevant note or
+proof context. Registration tests alone do not establish these routes.
+
+Broader resumption must recover existing conclusions, gaps and next work from
+their documents and links without requesting duplicate fields. A paused route
+must not require reconstruction of its context from a chat transcript.
+
 ## Proposed diagnostics and feature-use reports
 
 The optional [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) provides direct
@@ -59,7 +97,8 @@ The proposed [W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) links results to
 inputs, method revisions and notes. It supports comparison and resumption
 without a mandatory workflow canvas, question registration or duplicate prose.
 Expose useful actions such as inspecting a result's inputs; keep PROV syntax
-in export/developer documentation. Opening or restoring work executes nothing.
+in export/developer documentation. Opening or restoring work makes MRW submit
+no execution or replay; native editor diagnostics retain their normal behavior.
 
 The current workflow below describes MRW 0.23.5. Later versioned sections record
 behavior at the named release; the numbered sections give design requirements

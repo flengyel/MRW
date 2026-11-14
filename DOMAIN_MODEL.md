@@ -37,6 +37,10 @@ service, TypeScript rewrite, data migration or new domain entity.
 
 ## Operational observations and diagnostic findings
 
+[Maintenance dispositions](docs/CODEX_MAINTENANCE.md) relate observed findings to
+design requirements and verified outcomes. They are development records, not
+new research-question objects, grades or mathematical evidence.
+
 [Feature-use observations](docs/OPERATIONAL_USAGE.md) describe actions and their
 coverage; they are not mathematical claims or learning assessments. External
 operation state remains qualified by its observing subsystem. A feature ID,

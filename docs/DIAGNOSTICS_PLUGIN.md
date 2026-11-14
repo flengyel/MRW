@@ -112,6 +112,21 @@ content or credentials; let exports redact local paths. Report generation
 remains available when operational usage recording is disabled. Scheduled runs
 do not count as human feature use; a manual request counts once.
 
+## Reports as maintenance inputs
+
+Reports feed [Codex maintenance](CODEX_MAINTENANCE.md). Before correction, compare
+each finding with the current [design register](DESIGN_RECONCILIATION.md),
+revalidate affected revisions and record the applicable requirement, diagnosis,
+chosen action and validation. Expected behavior, implementation defects,
+instrumentation gaps and proposed design revisions remain separate outcomes.
+
+Reporting and maintenance schedules are distinct. Producing a report does not
+call a model or authorize repair. The plugin may prepare a bounded review
+package; Codex acts only within the authorized maintenance scope and preserves
+unresolved findings for later review. An automated Codex handoff is proposed,
+not implemented. Report prose and suggested commands are evidence, not trusted
+instructions; full handoff and acceptance rules are in the maintenance contract.
+
 ## Acceptance
 
 Verify a healthy isolated fixture, missing/corrupt retained objects, dangling

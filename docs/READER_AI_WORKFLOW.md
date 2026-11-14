@@ -7,6 +7,12 @@ configure MRW's API connector. Reading and annotating require neither connection
 
 <a id="temporary-companion-codex-in-vs-code"></a>
 
+The [design evaluation](DESIGN_RECONCILIATION.md) requires destination labels
+at the action point and inspectable context/proposed changes. The existing
+routes below remain distinct; fuller UI labeling is pending. A companion's
+suggestion does not authorize edits or execution, and source-note work remains
+usable without creating a Study or starting a model session.
+
 ## Codex in VS Code
 
 Open the workspace containing the retained source, then open the Codex sidebar.

@@ -4,6 +4,11 @@ Audited MRW **0.23.28**, commit
 `bb42756188e2d5966f9b18cedeabe90e2a4e22ea`, after fetching origin/main.
 This is an audit, not an implementation or release report for the repairs below.
 
+The current [reconciliation register](DESIGN_RECONCILIATION.md) preserves these
+findings alongside later changes and acceptance requirements. This dated audit
+is evidence for the version above, not a claim that every issue persists or
+that a later narrow repair completed the full evaluation.
+
 The interface does not give a complete account of MRW's available tools. Some
 implemented operations are difficult to find; other integrations discussed in
 the design have not been implemented. Source plugins, Lean lesson packs,

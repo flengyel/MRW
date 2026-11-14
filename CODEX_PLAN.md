@@ -1,21 +1,28 @@
 # CODEX_PLAN.md
 
+## Current authority and maintenance
+
+Use the [design reconciliation register](docs/DESIGN_RECONCILIATION.md) for
+current decisions, pending work and acceptance evidence, and
+[Codex maintenance](docs/CODEX_MAINTENANCE.md) to compare reports with design
+before making changes. Record new status there once rather than duplicating it
+across instruction files. Intervening questions refine the active task unless
+they explicitly cancel it. Carry unresolved work forward.
+
+Dated accounts below preserve version-specific evidence and enduring invariants.
+Their old priorities and task-specific stopping clauses do not override current
+user instructions or the register. Preserve work, exact identities, subsystem
+ownership, explicit execution and isolated testing; do not drop those constraints
+when consolidating history. Verify source, release and installation separately.
+
 ## Operational usage and periodic diagnostics — design requirements
 
-Follow [Operational feature use](docs/OPERATIONAL_USAGE.md) and the
-[optional diagnostics plugin design](docs/DIAGNOSTICS_PLUGIN.md). Feature use
-has been a requirement from the start: retain core recording, make coverage
-explicit, and report used/unused features over a stated period. Current
-command/history counts are partial; direct reports and fuller instrumentation
-remain pending. Do not interpret missing observations as zero use.
-
-The optional plugin owns report analysis, periodic scheduling and presentation.
-Core retains necessary storage checks and bounded read-only inspection
-interfaces. Reporting must not mutate inspected data, run computations or
-bypass a subsystem's repair/creation workflow. Source plugin API 1 is not a
-maintenance API. Keep routine reporting bounded in memory and I/O, separate
-test/automated activity, and never remove features or retained work merely for
-low use. These are design updates, not claims of a shipped plugin or schedule.
+Follow [feature-use measurement](docs/OPERATIONAL_USAGE.md) and the optional
+[diagnostics plugin design](docs/DIAGNOSTICS_PLUGIN.md). Core retains recording
+and essential checks; the plugin owns bounded reports. Reports feed
+[design-guided Codex maintenance](docs/CODEX_MAINTENANCE.md), not automatic
+retirement, deletion or mutation. Fuller instrumentation and scheduling remain
+pending; missing observations are not zero use.
 
 ## Governing integration boundary
 
@@ -75,7 +82,9 @@ This does not complete the [interface audit](docs/INTERFACE_AUDIT_20261113.md).
 Command grouping/notebook-result access, context-bound Lean lesson actions,
 API-versus-Codex labels, richer notebook display/comparison, instruction-history
 consolidation, and the broader lesson/code/notes, notebook-export and Zotero
-attachment trials remain separate work. No such repair is started by this task.
+attachment trials were outside the scope of the 0.23.30 increment. That historical
+scope does not stop later authorized work; current requirements and status are
+recorded in the [reconciliation register](docs/DESIGN_RECONCILIATION.md).
 
 ## Saved-source access — 0.23.29
 
@@ -1502,10 +1511,10 @@ continuation handoffs.
 
 ### Observation handoff and status
 
-[docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) contains the active
-extension handoff followed by the separate Qt mathematical-use observation.
-This roadmap controls priority; advance the handoff when implementation or
-observation evidence changes.
+[docs/CODEX_CONTINUATION.md](docs/CODEX_CONTINUATION.md) retains extension
+handoffs and the separate Qt mathematical-use observation. Current priorities
+and status are in the [reconciliation register](docs/DESIGN_RECONCILIATION.md);
+update that record when implementation or observation evidence changes.
 
 | Qt milestone | Qt implementation status at 2026-09-20 | Product evidence |
 |---|---|---|
@@ -2512,8 +2521,9 @@ for it.
 
 ## Order and stopping
 
-The controlling delivery order is R1 readable study, R2 task-local assistance,
-then R3 continued investigation and resumption. Evaluate usefulness within each
+The original delivery order was R1 readable study, R2 task-local assistance,
+then R3 continued investigation and resumption. Current work follows the
+[reconciliation register](docs/DESIGN_RECONCILIATION.md). Evaluate usefulness within each
 increment. Preserve the detailed contracts above for the components actually
 changed; earlier numbered stages are not a serial release gate.
 

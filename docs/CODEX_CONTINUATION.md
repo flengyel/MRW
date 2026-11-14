@@ -1,21 +1,28 @@
 # Codex continuation: reading and research
 
+## Current authority and maintenance
+
+Use the [design reconciliation register](DESIGN_RECONCILIATION.md) for
+current decisions, pending work and acceptance evidence, and
+[Codex maintenance](CODEX_MAINTENANCE.md) to compare reports with design
+before making changes. Record new status there once rather than duplicating it
+across instruction files. Intervening questions refine the active task unless
+they explicitly cancel it. Carry unresolved work forward.
+
+Dated accounts below preserve version-specific evidence and enduring invariants.
+Their old priorities and task-specific stopping clauses do not override current
+user instructions or the register. Preserve work, exact identities, subsystem
+ownership, explicit execution and isolated testing; do not drop those constraints
+when consolidating history. Verify source, release and installation separately.
+
 ## Operational usage and periodic diagnostics — design requirements
 
-Follow [Operational feature use](OPERATIONAL_USAGE.md) and the
-[optional diagnostics plugin design](DIAGNOSTICS_PLUGIN.md). Feature use
-has been a requirement from the start: retain core recording, make coverage
-explicit, and report used/unused features over a stated period. Current
-command/history counts are partial; direct reports and fuller instrumentation
-remain pending. Do not interpret missing observations as zero use.
-
-The optional plugin owns report analysis, periodic scheduling and presentation.
-Core retains necessary storage checks and bounded read-only inspection
-interfaces. Reporting must not mutate inspected data, run computations or
-bypass a subsystem's repair/creation workflow. Source plugin API 1 is not a
-maintenance API. Keep routine reporting bounded in memory and I/O, separate
-test/automated activity, and never remove features or retained work merely for
-low use. These are design updates, not claims of a shipped plugin or schedule.
+Follow [feature-use measurement](OPERATIONAL_USAGE.md) and the optional
+[diagnostics plugin design](DIAGNOSTICS_PLUGIN.md). Core retains recording
+and essential checks; the plugin owns bounded reports. Reports feed
+[design-guided Codex maintenance](CODEX_MAINTENANCE.md), not automatic
+retirement, deletion or mutation. Fuller instrumentation and scheduling remain
+pending; missing observations are not zero use.
 
 ## Governing integration boundary
 
@@ -62,8 +69,9 @@ internal behavior or completion of template prompts. Preserve existing notes,
 drafts, templates and the working window. Do not apply one user's Zettel format
 to every vault. Non-vault folders keep their ordinary VS Code editor route.
 
-Current repair: [Obsidian template creation in CODEX_PLAN](../CODEX_PLAN.md#obsidian-note-creation--required).
-Preserve pending transfers, native note creation and the separate current/original distinction.
+Current repair scope follows the [reconciliation register](DESIGN_RECONCILIATION.md).
+Template-command delegation shipped in 0.23.31; source-to-Zettel semantics remain
+pending. Preserve transfer evidence and the current/original distinction.
 
 ## Saved-source access — 0.23.29
 
@@ -2644,8 +2652,10 @@ R3/R3.1 is implemented in VS Code; proof-outline vertex elimination is not.
 
 ## Separate Qt study observation and evidence for that version
 
-The active roadmap is
+The roadmap for this observation was
 [CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
+Current decisions and pending work are in the
+[reconciliation register](DESIGN_RECONCILIATION.md).
 In the standalone Qt application, R1's PDF-plus-note workflow, R2's single
 task-local assistance exchange and
 R3's one linked, resumable continuation are implemented and technically

@@ -1,21 +1,28 @@
 # Continuation prompt: Mathematical Research Workstation
 
+## Current authority and maintenance
+
+Use the [design reconciliation register](DESIGN_RECONCILIATION.md) for
+current decisions, pending work and acceptance evidence, and
+[Codex maintenance](CODEX_MAINTENANCE.md) to compare reports with design
+before making changes. Record new status there once rather than duplicating it
+across instruction files. Intervening questions refine the active task unless
+they explicitly cancel it. Carry unresolved work forward.
+
+Dated accounts below preserve version-specific evidence and enduring invariants.
+Their old priorities and task-specific stopping clauses do not override current
+user instructions or the register. Preserve work, exact identities, subsystem
+ownership, explicit execution and isolated testing; do not drop those constraints
+when consolidating history. Verify source, release and installation separately.
+
 ## Operational usage and periodic diagnostics — design requirements
 
-Follow [Operational feature use](OPERATIONAL_USAGE.md) and the
-[optional diagnostics plugin design](DIAGNOSTICS_PLUGIN.md). Feature use
-has been a requirement from the start: retain core recording, make coverage
-explicit, and report used/unused features over a stated period. Current
-command/history counts are partial; direct reports and fuller instrumentation
-remain pending. Do not interpret missing observations as zero use.
-
-The optional plugin owns report analysis, periodic scheduling and presentation.
-Core retains necessary storage checks and bounded read-only inspection
-interfaces. Reporting must not mutate inspected data, run computations or
-bypass a subsystem's repair/creation workflow. Source plugin API 1 is not a
-maintenance API. Keep routine reporting bounded in memory and I/O, separate
-test/automated activity, and never remove features or retained work merely for
-low use. These are design updates, not claims of a shipped plugin or schedule.
+Follow [feature-use measurement](OPERATIONAL_USAGE.md) and the optional
+[diagnostics plugin design](DIAGNOSTICS_PLUGIN.md). Core retains recording
+and essential checks; the plugin owns bounded reports. Reports feed
+[design-guided Codex maintenance](CODEX_MAINTENANCE.md), not automatic
+retirement, deletion or mutation. Fuller instrumentation and scheduling remain
+pending; missing observations are not zero use.
 
 ## Governing integration boundary
 
@@ -164,8 +171,8 @@ and their history; it is not a runtime dependency. The bounded notebook profile
 is implemented in 0.23.20: retain two alternative calculations and one failed
 run, reopen them after restart, compare them and export the selected account.
 See [notebook results](NOTEBOOK_RESULTS.md); do not describe this as a pending
-first implementation. Opening or
-exporting work executes nothing. PROV consistency does not establish
+first implementation. Opening or exporting work makes MRW submit no execution
+or replay; normal native editor diagnostics remain available. PROV consistency does not establish
 mathematical correctness.
 
 Keep CoCalc, Wolfram, data analysis, repository imports of notes and Lean proofs,
@@ -221,5 +228,6 @@ by observation.
 
 Shared history and the first local Zotero workflow are implemented after the
 recorded 0.23.12 baseline. Check their delivery reports before repeating work.
-The bounded PROV trial is the next integration priority; publishing/installing
-a newer package remains separate from committed source delivery.
+The bounded notebook PROV trial shipped in 0.23.20. Current priorities and
+unresolved work are in the [reconciliation register](DESIGN_RECONCILIATION.md);
+publishing/installing a package remains separate from committed source delivery.

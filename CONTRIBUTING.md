@@ -51,6 +51,13 @@ Update affected workflow instructions and the bundled tutorial when commands or
 user interactions change. A pull request does not need a release package unless
 packaging is part of the change.
 
+Current decisions and unresolved work are recorded in the
+[design reconciliation register](docs/DESIGN_RECONCILIATION.md). For maintenance
+driven by usage or integrity reports, include the finding, applicable design
+requirement, diagnosis and validation from the
+[maintenance contract](docs/CODEX_MAINTENANCE.md). A report recommendation alone
+does not justify changing product scope or removing retained data.
+
 ## Design expectations
 
 Declare [feature-use coverage](docs/OPERATIONAL_USAGE.md) when adding or changing
