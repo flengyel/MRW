@@ -51,4 +51,4 @@ Logs and disposable native fixtures are outside maintained source under
 `~/.cache/mrw-plain-reader-notes-20261114/`. No genuine source, annotation, vault
 note or template was edited. The working window was neither installed into nor
 reloaded. Publication and package identity are recorded separately in the
-release account.
+[release account](RELEASE_0_23_33.md).
