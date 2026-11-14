@@ -174,11 +174,14 @@ successful origin.
 
 The notes folder, selected document and return location persist in this
 workspace. **Reopen Document** opens the last opened or followed
-file and restores its last exact Markdown selection after restart. This covers
+file. It restores the last Markdown selection when the saved position still
+matches. After edits, it opens the current text without applying the obsolete
+range and records a fresh position. Dirty buffers remain unsaved. This covers
 source-editor selections and followed heading/block locations, not native
-preview scrolling. Activation does not open a document automatically. A missing
-file or mismatching revision requires a new choice rather than a similar-text
-substitute. VS Code separately owns unsaved-buffer and window recovery.
+preview scrolling. Exact-passage Return still requires its target to match.
+Activation does not open a document automatically. Missing or redirected files
+still require a new choice; MRW does not guess a replacement by title or similar
+text. VS Code separately owns unsaved-buffer and window recovery.
 
 ## Front matter and Contents
 

@@ -143,8 +143,8 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (latest) await display(latest.uri, latest.location, generation);
     return false;
   }
-  async function display(uri, location, attempt, validate) {
-    let shownLocation;
+  async function display(uri, location, attempt, validate, { exactLocation = true } = {}) {
+    let shownLocation, positionUnavailable = false;
     await check(uri);
     if (attempt !== generation) return false;
     validate?.();
@@ -153,7 +153,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       if (attempt !== generation) return false;
       validate?.();
       if (location && (location.invalid || digest(doc.getText()) !== location.revision || location.end > doc.getText().length)) {
-        throw new Error('The exact document location changed. Restore its text or select the intended location again.');
+        if (exactLocation) throw new Error('The exact document location changed. Open the current document and select the intended location again.');
+        // Reopen chooses a file. Its saved cursor is optional; it must not
+        // prevent reading current text or be mistaken for an exact Return pin.
+        location = undefined; positionUnavailable = true;
       }
       const version = doc.version;
       const editor = await vscode.window.showTextDocument(doc, { preview: false, viewColumn: documentColumn(vscode, doc) });
@@ -194,6 +197,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     lastLocation = shownLocation;
     onDisplayed(uri);
     await notes.remember(uri).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+    if (positionUnavailable) vscode.window.setStatusBarMessage?.('MRW: Opened the current document; the previous position no longer matches.', 8000);
     return true;
   }
   function validFolder(value) {
@@ -587,7 +591,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
   });
   if (selectionChanged) context.subscriptions.push(selectionChanged);
-  register('mrw.reopenDocument', async () => { if (!last) throw new Error('No document has been opened here. Use Open Document.'); await display(vscode.Uri.parse(last), lastLocation, supersede()); });
+  register('mrw.reopenDocument', async () => {
+    if (!last) throw new Error('No document has been opened here. Use Open Document.');
+    if (await display(vscode.Uri.parse(last), lastLocation, supersede(), undefined, { exactLocation: false })) await persist();
+  });
   return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, openLinkedDocument, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
 }
 module.exports = { createDocuments };

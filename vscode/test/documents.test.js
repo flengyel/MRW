@@ -38,7 +38,7 @@ async function fixture(t) {
 
 function harness(f, state = new Map(), options = {}) {
   const commands = new Map(), stored = new Map(), openChoices = [], dialogs = [], picks = [], informations = [], errors = [];
-  const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [], displayed = [];
+  const reads = [], shown = [], hostCalls = [], markdownSelections = [], external = [], displayed = [], statuses = [];
   let selectionChanged;
   let documents, openHook, showHook, pickHook, infoResponse, externalResult = true,latestPicker;
   const configuration = { notesFolder: options.notesFolder || '' }, configurationWrites = [];
@@ -86,6 +86,7 @@ function harness(f, state = new Map(), options = {}) {
     window: {
       onDidChangeTextEditorSelection(callback) { selectionChanged = callback; return { dispose() {} }; },
       activeTextEditor: undefined,
+      setStatusBarMessage(message) { statuses.push(message); return {dispose(){}}; },
       async showInputBox(){return options.titleInput ? options.titleInput() : 'A working calculation';},
       createQuickPick(){const picker=quickPicker((items,settings)=>pickHook&&picker.placeholder==='Choose an original file or a saved copy.'?WAIT:this.showQuickPick(items,settings));latestPicker=picker;return picker;},
       async showOpenDialog(settings) { dialogs.push(settings); return openChoices.shift(); },
@@ -109,7 +110,7 @@ function harness(f, state = new Map(), options = {}) {
     onDisplayed: uri => displayed.push(uri.fsPath),
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
-    api, context, commands, state, documents, configuration, configurationWrites, get linkProvider() { return linkProvider; }, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external, displayed,
+    api, context, commands, state, documents, configuration, configurationWrites, get linkProvider() { return linkProvider; }, openChoices, dialogs, picks, informations, errors, reads, shown, hostCalls, markdownSelections, external, displayed, statuses,
     selection(at, end = at) { const editor = api.window.activeTextEditor; editor.selection = new Selection(editor.document.positionAt(at), editor.document.positionAt(end)); selectionChanged({ textEditor: editor, selections: [editor.selection] }); },
     setOpenHook(value) { openHook = value; }, setShowHook(value) { showHook = value; }, setPickHook(value) { pickHook = value; },
     setInfoResponse(value) { infoResponse = value; }, setExternalResult(value) { externalResult = value; },
@@ -729,15 +730,18 @@ test('heading and block WikiLinks follow current dirty text and Return preserves
   assert.ok(source.isDirty); assert.deepEqual(h.errors, []);
 });
 
-test('reopen restores an exact selection after restart and refuses changed text without guessing', async t => {
+test('reopen restores a matching selection after restart and opens changed text without applying an obsolete range', async t => {
   const f = await fixture(t), state = new Map(), h = harness(f, state); const source = await h.open('1a.md');
   const at = source.text.indexOf('[Second]'); h.selection(at, at + 8);
   await new Promise(resolve => setImmediate(resolve));
   const restarted = harness(f, state); await restarted.commands.get('mrw.reopenDocument')(); assert.equal(restarted.selected(), '[Second]');
   await fs.appendFile(f.file('1a.md'), '\nExternal revision\n');
   const changed = harness(f, state);
-  await assert.rejects(changed.commands.get('mrw.reopenDocument')(), /exact document location changed/);
-  assert.equal(changed.shown.length, 0);
+  await changed.commands.get('mrw.reopenDocument')();
+  assert.equal(changed.api.window.activeTextEditor.document.getText(), f.contents['1a.md']+'\nExternal revision\n');
+  assert.equal(changed.selected(), '', 'An obsolete range must not be applied or searched for');
+  assert.match(changed.statuses.at(-1), /previous position no longer matches/);
+  assert.equal(changed.informations.length, 0, 'Reopen requires no extra dialog');
 });
 
 test('only successful non-Markdown opens publish their displayed identity', async t => {
@@ -913,4 +917,54 @@ test('a pending or failed Obsidian handoff creates no duplicate draft and preser
  const first=h.commands.get('mrw.newZettel')();await new Promise(resolve=>setTimeout(resolve,10));
  await h.commands.get('mrw.newZettel')();gate.resolve();await assert.rejects(first,/CLI unavailable/);
  assert.equal(count,1);assert.equal(doc.isDirty,true);assert.match(doc.text,/^Unsent text/);assert.deepEqual(await fs.readdir(f.notes),before);
+});
+
+
+test('Reopen Document restores a valid position and persists the current location', async t => {
+  const f=await fixture(t),h=harness(f);await h.folder();const doc=await h.open('2b.md');
+  const start=doc.getText().indexOf('Proof text.');h.selection(start,start+'Proof text.'.length);
+  await new Promise(resolve=>setImmediate(resolve));
+  const restarted=harness(f,h.state);await restarted.commands.get('mrw.reopenDocument')();
+  assert.equal(restarted.selected(),'Proof text.');
+  assert.equal(restarted.state.get('mrw.documents.v1').location.revision,parseReadingMarkdown(doc.getText()).revision);
+});
+
+test('Reopen Document opens a changed file after restart without weakening exact Return', async t => {
+  const f=await fixture(t),h=harness(f);await h.folder();const source=await h.open('1a.md');
+  await h.follow(source,'2b.md#target');
+  const pin=structuredClone(h.state.get('mrw.documents.v1').origin);
+  const current='# Current note\nExternally revised text.\n';await fs.writeFile(f.file('2b.md'),current);
+  const restarted=harness(f,h.state);await restarted.commands.get('mrw.reopenDocument')();
+  assert.equal(restarted.api.window.activeTextEditor.document.getText(),current);
+  assert.deepEqual(restarted.state.get('mrw.documents.v1').origin,pin);
+  assert.equal(restarted.state.get('mrw.documents.v1').location.revision,parseReadingMarkdown(current).revision);
+  assert.equal(await fs.readFile(f.file('2b.md'),'utf8'),current);
+  const again=harness(f,h.state);await again.commands.get('mrw.reopenDocument')();
+  assert.equal(again.api.window.activeTextEditor.document.getText(),current);
+  await again.documents.returnToDocument();assert.equal(again.selected(),'[Second](2b.md#target)');
+  await fs.writeFile(f.file('1a.md'),'Changed origin\n'+source.getText());
+  await assert.rejects(()=>harness(f,h.state).documents.returnToDocument(),/exact document location changed/);
+});
+
+test('Reopen Document preserves dirty text when its former selected range was edited', async t => {
+  const f=await fixture(t),h=harness(f);await h.folder();const source=await h.open('1a.md');
+  await h.follow(source,'2b.md#target');const doc=h.api.window.activeTextEditor.document;
+  h.change(doc,doc.getText().indexOf('# Target')+2,1,'Revised');
+  const current=doc.getText(),version=doc.version,pin=structuredClone(h.state.get('mrw.documents.v1').origin);
+  await h.commands.get('mrw.reopenDocument')();
+  assert.equal(h.api.window.activeTextEditor.document,doc);assert.equal(doc.getText(),current);
+  assert.equal(doc.version,version);assert.equal(doc.isDirty,true);
+  assert.equal(await fs.readFile(f.file('2b.md'),'utf8'),f.contents['2b.md']);
+  assert.deepEqual(h.state.get('mrw.documents.v1').origin,pin);
+  await h.documents.returnToDocument();assert.equal(h.selected(),'[Second](2b.md#target)');
+});
+
+test('Reopen Document still rejects a missing file or a changed file grant', async t => {
+  for(const redirected of [false,true]){
+    const f=await fixture(t),h=harness(f);await h.open('2b.md');await fs.unlink(f.file('2b.md'));
+    if(redirected){const other=path.join(f.outside,'other.md');await fs.writeFile(other,'# Outside\n');await fs.symlink(other,f.file('2b.md'));}
+    const before=structuredClone(h.state.get('mrw.documents.v1'));
+    await assert.rejects(()=>harness(f,h.state).commands.get('mrw.reopenDocument')(),redirected?/different file/:/ENOENT/);
+    assert.deepEqual(h.state.get('mrw.documents.v1'),before);
+  }
 });

@@ -15,6 +15,12 @@ file, including after restart; MRW does not record its page. A dirty note stays
 dirty and is never saved by these actions. File scope and current link text are
 checked again before opening a backlink.
 
+**Reopen Document** opens the last document's current text. It restores the
+saved Markdown selection when it still matches; a stale position produces a
+brief status message and does not block opening. Unsaved text stays unsaved.
+This differs from an exact-passage Return, which checks its target before
+selecting it. See the [reopen repair](DOCUMENT_REOPEN_REPAIR.md).
+
 Editor menus use the tab that supplied the action, even if another pane has
 focus. Show Contents and Edit Document Source refuse a PDF or other non-Markdown
 file rather than switching to an unrelated Markdown note. The selected Contents

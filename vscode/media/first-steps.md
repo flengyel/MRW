@@ -289,10 +289,13 @@ Reopen an imported section offline with **Open Saved Source…**. See
 
 The selected document, notes folder and usable Return location survive an
 ordinary restart in this workspace. **MRW: Reopen Document** restores the last
-opened or followed file and its last exact Markdown selection. Contents,
-heading/block targets and source-editor selections are recorded; preview scroll
-positions and PDF pages are not. MRW does not reopen the file automatically at
-activation. If its saved location no longer matches, select the file again.
+opened or followed file. If its saved Markdown position still matches, that
+selection is restored. After edits, Reopen shows the current file without
+applying the obsolete range; a brief status message explains the missing
+position. Dirty text stays unsaved. Exact-passage Return still checks its target.
+Preview scroll positions and PDF pages are not restored. MRW does not reopen
+the file automatically at activation. Missing or redirected files need a new
+choice through Open Document.
 
 There is no general research-session restore command. Keep unfinished reasoning
 and the next step in the working document. An external notes folder is separate

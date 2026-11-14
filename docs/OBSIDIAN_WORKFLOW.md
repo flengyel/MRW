@@ -166,8 +166,10 @@ Link** at the source cursor. Supported links include `[[ID]]`, aliases such as
 `[[ID|Label]]`, exact headings, paragraph/list block IDs and scoped paths.
 **Show Backlinks…** opens an incoming source occurrence; **Return to Document**
 returns to the originating occurrence. **Reopen Document** restores the last
-opened or followed file and its exact Markdown selection after restart.
-Native preview scrolling and PDF pages are not restored.
+opened or followed file. A matching saved Markdown selection is restored;
+after edits, the current file opens without applying the obsolete range.
+Your unsaved text is preserved. Exact Return still checks the originating
+occurrence. Native preview scrolling and PDF pages are not restored.
 
 Lookup and backlinks stay inside the explicitly selected notes folder and use
 unsaved editor text where available. Missing or duplicate targets and incomplete

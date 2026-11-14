@@ -9,7 +9,8 @@ test('PDF and text readers have navigation without Markdown or study controls', 
   assert.match(entry.when, /pdf\|txt/);
   const menu = c.menus[entry.submenu];
   assert.deepEqual(menu.filter(item => !item.when).map(item => item.command), ['mrw.returnToReadingOutline', 'mrw.showBacklinks', 'mrw.newZettel', 'mrw.recentNotes']);
-  assert.ok(menu.filter(item => item.when).every(item => item.when.includes('(md|markdown)')));
+  assert.ok(menu.filter(item => item.when && item.command !== 'mrw.refreshCitations').every(item => item.when.includes('(md|markdown)')));
+  assert.equal(menu.find(item => item.command === 'mrw.refreshCitations').when, 'resourceExtname == .md');
   assert.equal(menu.some(item => /study|ask|create/i.test(item.command)), false);
   const toolbar = c.menus['editor/title'].filter(item => item.group.startsWith('navigation'));
   for (const command of ['mrw.copyDocumentLink', 'mrw.openDocumentInObsidian', 'mrw.editDocumentSource', 'mrw.studyCurrent', 'mrw.leanStudyInfo']) {
@@ -23,7 +24,8 @@ test('document menu conditions admit local, WSL and SSH files without admitting 
   const entry = c.menus['editor/title'].find(item => item.submenu === 'mrw.documentNavigation');
   // Evaluate the two regex predicates contributed to VS Code, including flags.
   const visible = (when, scheme, extension) => [...when.matchAll(/(resourceScheme|resourceExtname) =~ \/((?:\\.|[^/])+)\/([a-z]*)/g)]
-    .every(([, key, expression, flags]) => new RegExp(expression, flags).test(key === 'resourceScheme' ? scheme : extension));
+    .every(([, key, expression, flags]) => new RegExp(expression, flags).test(key === 'resourceScheme' ? scheme : extension)) &&
+    [...when.matchAll(/(resourceScheme|resourceExtname) == ([^ &()]+)/g)].every(([,key,value]) => (key === 'resourceScheme' ? scheme : extension) === value);
   assert.equal([...entry.when.matchAll(/ =~ /g)].length, 2);
   for (const scheme of ['file', 'vscode-remote']) {
     for (const extension of ['.pdf', '.PDF', '.md', '.markdown', '.txt']) assert.equal(visible(entry.when, scheme, extension), true);
