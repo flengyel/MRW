@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1420" viewBox="0 0 1800 1420" role="img" aria-labelledby="title desc">
-<title id="title">MRW hexagonal architecture</title>
-<desc id="desc">A VS Code facade leads to the MRW core: workflow coordination, a canonical data model, storage integrity and usage recording. Six capability groups connect through ports and adapters to documents and notes, sources and references, computation, proof checking, AI assistance and optional diagnostics. External systems retain ownership. Dashed elements are proposed. Diagnostic reports feed Codex review against the design before corrections.</desc>
+<title id="title">MRW architecture: ports, adapters and justification</title>
+<desc id="desc">The VS Code facade leads to MRW's core, which contains workflow coordination, a canonical data model, the integral justification logic engine, storage integrity and usage recording. The existing bounded Lean engine checks J0 and J(CS) certificates relative to explicit admissions; the broader inference workflow remains pending. Ports and adapters connect documents and notes, sources and references, computation, external proof checking, AI assistance and optional diagnostics. Provenance, external checking and contextual justification remain distinct. Dashed elements are proposed. Diagnostic reports feed Codex review against the design before corrections.</desc>
 <defs>
   <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8" fill="none" stroke="#638198" stroke-width="1.5"/></marker>
 </defs>
@@ -19,7 +19,7 @@ text { font-family: 'DejaVu Sans', sans-serif; fill:#18364c; }
 </style>
 <rect width="1800" height="1420" rx="24" fill="#f7f9fc"/>
 <text x="60" y="73" class="title">Mathematical Research Workstation</text>
-<text x="60" y="116" class="subtitle">A hexagonal workbench for continuing mathematical work across tools</text>
+<text x="60" y="116" class="subtitle">Ports and adapters for continuing mathematical work across tools</text>
 <rect x="1360" y="48" width="380" height="49" rx="24" fill="#e8eef6"/>
 <text x="1550" y="80" text-anchor="middle" class="small">DESIGN OVERVIEW · 14 NOV 2026</text>
 <rect x="635" y="156" width="530" height="138" rx="20" fill="#163c58"/>
@@ -32,18 +32,21 @@ text { font-family: 'DejaVu Sans', sans-serif; fill:#18364c; }
 <text x="900" y="440" text-anchor="middle" class="eyebrow">MRW CORE</text>
 <text x="900" y="479" text-anchor="middle" class="small">Independent of the external tools</text>
 
-<rect x="625" y="511" width="550" height="114" rx="17" fill="#ffffff" stroke="#d3deec" stroke-width="1.5"/>
-<text x="900" y="550" class="heading" text-anchor="middle">Workflow coordination</text>
-<text x="900" y="587" class="body" text-anchor="middle">Read · compare · annotate · link · resume</text>
-<rect x="625" y="650" width="550" height="174" rx="17" fill="#fff" stroke="#b4c7de" stroke-width="1.5"/>
-<text x="900" y="689" class="heading" text-anchor="middle">Canonical data model</text>
-<text x="900" y="726" class="body" text-anchor="middle">Identity · revision · capture</text>
-<text x="900" y="757" class="body" text-anchor="middle">Associations · provenance</text>
-<text x="900" y="788" class="body" text-anchor="middle">Observed outcomes</text>
-<rect x="680" y="844" width="440" height="125" rx="17" fill="#ffffff" stroke="#d3deec" stroke-width="1.5"/>
-<text x="900" y="883" class="heading" text-anchor="middle">Core services</text>
-<text x="900" y="920" class="body" text-anchor="middle">Storage integrity</text>
-<text x="900" y="951" class="body" text-anchor="middle">Lightweight usage recording</text>
+<rect x="625" y="500" width="550" height="90" rx="17" fill="#fff" stroke="#d3deec" stroke-width="1.5"/>
+<text x="900" y="534" class="heading" text-anchor="middle">Workflow coordination</text>
+<text x="900" y="570" class="body" text-anchor="middle">Read · compare · annotate · link · resume</text>
+<rect x="625" y="606" width="550" height="142" rx="17" fill="#fff" stroke="#b4c7de" stroke-width="1.5"/>
+<text x="900" y="641" class="heading" text-anchor="middle">Canonical data model</text>
+<text x="900" y="674" class="body" text-anchor="middle">Identity · revision · capture</text>
+<text x="900" y="704" class="small" text-anchor="middle">Associations · provenance · outcomes</text>
+<text x="900" y="732" class="small" text-anchor="middle">Claims · admissions · contexts · derivations</text>
+<rect x="625" y="764" width="550" height="124" rx="17" fill="#f3edfa" stroke="#967bb5" stroke-width="2"/>
+<text x="900" y="801" class="heading" text-anchor="middle" style="fill:#563773">Justification logic engine</text>
+<text x="900" y="835" class="body" text-anchor="middle">J₀ / J(CS) · checked certificates</text>
+<text x="900" y="864" class="small" text-anchor="middle">Bounded cases exist; general inference pending</text>
+<rect x="680" y="904" width="440" height="70" rx="17" fill="#fff" stroke="#d3deec" stroke-width="1.5"/>
+<text x="900" y="934" text-anchor="middle" style="font-size:24px;font-weight:700">Core services</text>
+<text x="900" y="962" class="small" text-anchor="middle">Storage integrity · usage recording</text>
 <text x="900" y="1010" class="small" text-anchor="middle">Native files stay native</text>
 <path d="M480 420 H720" class="link"/>
 <path d="M1080 420 H1320" class="link"/>
@@ -96,7 +99,7 @@ text { font-family: 'DejaVu Sans', sans-serif; fill:#18364c; }
 <rect x="61" y="1056" width="418" height="43" rx="16" fill="#fff4df"/>
 <text x="85" y="1084" class="small">Optional inspection plugin</text>
 <rect x="1320" y="910" width="420" height="190" rx="18" fill="#ffffff" stroke="#d0ddea" stroke-width="2"/>
-<text x="1345" y="950" class="heading">Proof checking</text>
+<text x="1345" y="950" class="heading">External proof checking</text>
 <text x="1345" y="990" class="body">Lean · native goals &amp; diagnostics</text>
 <text x="1345" y="1022" class="body">Retain scoped checking evidence</text>
 <rect x="1321" y="1056" width="418" height="43" rx="16" fill="#edf4f8"/>
