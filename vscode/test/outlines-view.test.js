@@ -508,3 +508,22 @@ test('failed or uncertain annotation saving keeps text and announces no confirme
   assert.equal(form.all().find(n=>n.dataset.saveFeedback===key).role,'alert');
   assert.equal(h.button(form,'save-note').disabled,true);
 });
+
+
+test('continuation hides the second current editor and preserves a labelled original with attribution', () => {
+  const h=reader();const value=readingModel();
+  const note={id:'annotation',kind:'explanation',text:'Exact original α',provenance:{origin:'human_work',author:'Reader',at:'retained time'}};
+  value.model.outline.regions[0].annotations=[note];
+  value.continuations=[{annotation:note.id,phase:'complete',destination:{label:'Ordinary note',file:'N.md'}}];
+  value.continuationErrors={annotation:'Note missing or renamed — relink explicitly'};
+  h.send(value);
+  assert.ok(h.root.text().includes('Inspect retained original annotation'));
+  assert.ok(h.root.text().includes('Exact original α'));
+  assert.ok(h.root.text().includes('Reader'));
+  assert.ok(h.root.text().includes('Note missing or renamed'));
+  assert.ok(!h.root.text().includes('Edit reader note:'));
+  assert.ok(h.root.text().includes('Manage continuation'));
+  value.continuations[0].phase='pending';h.send(value);
+  assert.ok(h.root.text().includes('Edit reader note:'));
+  assert.ok(h.root.text().includes('Resume pending transfer'));
+});

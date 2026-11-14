@@ -12,7 +12,7 @@ from .source_outlines import OutlineStore, encoded, fields, identity, revision, 
 from .workspace import strict_json
 
 SCHEMA = 'mrw.outline-note-links'
-MAX_BYTES = 128 * 1024
+MAX_BYTES = 512 * 1024
 
 
 def obsidian_url(value):
@@ -47,7 +47,7 @@ def note_action(request):
         value = dict(schema=SCHEMA, version=1, project_root=str(store.root), outline=store.id, links=[])
     else:
         value = strict_json(raw)
-    fields(value, {'schema', 'version', 'project_root', 'outline', 'links'}, 'Obsidian associations')
+    fields(value, {'schema', 'version', 'project_root', 'outline', 'links'} | ({'continuations'} if 'continuations' in value else set()), 'Obsidian associations')
     if (value['schema'] != SCHEMA or type(value['version']) is not int or value['version'] != 1
             or value['project_root'] != str(store.root) or value['outline'] != store.id
             or not isinstance(value['links'], list) or len(value['links']) > 64):
@@ -69,7 +69,16 @@ def note_action(request):
         text(item['label'], 'note label', 640)
         if not item['label'].strip() or len(item['label']) > 160 or any(not c.isprintable() for c in item['label']):
             raise ValueError('Use a readable note label of at most 160 characters')
+    from .annotation_continuations import validate_record
+    if 'continuations' in value:
+        records = value['continuations']
+        if not isinstance(records, list) or len(records) > 256:
+            raise ValueError('Invalid annotation continuations')
+        if len({r.get('annotation') for r in records}) != len(records):
+            raise ValueError('Duplicate annotation continuation')
+        for record in records: validate_record(record, store)
     result = dict(links=value['links'], revision=sha256(raw).hexdigest() if raw is not None else None)
+    if 'continuations' in value: result['continuations'] = value['continuations']
     if request['method'] == 'outline_notes':
         result = dict(**result, targets=targets)
         if 'reference' in request:
@@ -89,40 +98,47 @@ def note_action(request):
         revision(expected)
     if expected != result['revision']:
         raise ValueError('Obsidian associations changed; refresh the reader before editing')
-    change = request['change']
-    fields(change, {'id', 'reference', 'url', 'label'}, 'association change')
     value = deepcopy(value)
-    existing = next((i for i in value['links'] if i['id'] == change['id']), None)
-    if change['id'] is not None and existing is None:
-        raise ValueError('The note association is missing; refresh the reader')
-    # Removal requires the same pinned target too; a region edit never redirects it.
-    if existing and existing['reference'] != change['reference']:
-        raise ValueError('The selected note association belongs to another retained target')
-    if change['url'] is None:
-        if existing is None or change['label'] is not None:
-            raise ValueError('Choose an existing note association to remove')
-        value['links'].remove(existing)
+    if request['method'] == 'outline_continue_note':
+        from .annotation_continuations import change_continuation
+        change_continuation(store, value, request['change'])
     else:
-        reference_action(dict(method='outline_follow_reference', store=str(store.base),
-                              project_root=str(store.root), reference=change['reference']))
-        if parse_reference(change['reference'])['outline'] != store.id:
-            raise ValueError('Note association belongs to another saved source')
-        label = text(change['label'], 'note label', 640)
-        if not label.strip() or len(label) > 160 or any(not c.isprintable() for c in label):
-            raise ValueError('Use a readable note label of at most 160 characters')
-        item = dict(id=existing['id'] if existing else str(uuid4()), reference=change['reference'],
-                    url=obsidian_url(change['url']), label=label.strip())
-        if existing:
-            value['links'][value['links'].index(existing)] = item
+        change = request['change']
+        fields(change, {'id', 'reference', 'url', 'label'}, 'association change')
+        existing = next((i for i in value['links'] if i['id'] == change['id']), None)
+        if any(r['association'] == change['id'] for r in value.get('continuations', [])):
+            raise ValueError('Manage this link beside its continued reader annotation')
+        if change['id'] is not None and existing is None:
+            raise ValueError('The note association is missing; refresh the reader')
+        # Removal requires the same pinned target too; a region edit never redirects it.
+        if existing and existing['reference'] != change['reference']:
+            raise ValueError('The selected note association belongs to another retained target')
+        if change['url'] is None:
+            if existing is None or change['label'] is not None:
+                raise ValueError('Choose an existing note association to remove')
+            value['links'].remove(existing)
         else:
-            value['links'].append(item)
-        if len(value['links']) > 64:
-            raise ValueError('At most 64 note associations per saved source are supported')
+            reference_action(dict(method='outline_follow_reference', store=str(store.base),
+                                  project_root=str(store.root), reference=change['reference']))
+            if parse_reference(change['reference'])['outline'] != store.id:
+                raise ValueError('Note association belongs to another saved source')
+            label = text(change['label'], 'note label', 640)
+            if not label.strip() or len(label) > 160 or any(not c.isprintable() for c in label):
+                raise ValueError('Use a readable note label of at most 160 characters')
+            item = dict(id=existing['id'] if existing else str(uuid4()), reference=change['reference'],
+                        url=obsidian_url(change['url']), label=label.strip())
+            if existing:
+                value['links'][value['links'].index(existing)] = item
+            else:
+                value['links'].append(item)
+            if len(value['links']) > 64:
+                raise ValueError('At most 64 note associations per saved source are supported')
     candidate = encoded(value)
     if len(candidate) > MAX_BYTES:
-        raise ValueError('Obsidian associations exceed the 128 KiB limit')
+        raise ValueError('Obsidian associations exceed the 512 KiB limit')
     try:
         save_mutable(path, candidate, previous=raw, lock_root=store.base / 'locks')
     except (OSError, ValueError) as exc:
         return dict(blocked=True, write_error=str(exc), **result)
-    return dict(links=value['links'], revision=sha256(candidate).hexdigest())
+    return dict(links=value['links'], revision=sha256(candidate).hexdigest(),
+                **({'continuations': value['continuations']} if 'continuations' in value else {}))

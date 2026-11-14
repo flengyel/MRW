@@ -4,6 +4,7 @@ const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 const { sourceSnapshot, digest } = require('./navigation');
 const { referenceAt } = require('./outlineReferences');
+const {createContinuation, availability} = require('./annotationContinuation');
 const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require('./companionLinks');
 
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
@@ -120,10 +121,18 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
       diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v2', 'theme'),
       returnDestination: readingDestination?.(c.returnContext?.location || null),
-      reference: c.reference, readingFocus: c.readingFocus, notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
+      reference: c.reference, readingFocus: c.readingFocus, continuations: c.notes?.continuations || [], continuationErrors: await availability(vscode,c.notes?.continuations || []), notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
     return result;
   }
+  const continuation = createContinuation({vscode,bridge,show,refresh,publish:async(c,change)=>{
+    writable(c);
+    let result;
+    try { result = await bridge({method:'outline_continue_note',store:c.store,project_root:c.root,id:c.result.outline.id,revision:c.notes.revision,change}); }
+    catch(error) { if(error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
+    if(result.blocked) { blockedStores.add(c.store); throw Error('Continuation publication failed: '+result.write_error+'. The transfer can be recovered after reload. Do not paste again.'); }
+    return refresh(c);
+  }});
   async function refresh(c) {
     return send(c, await bridge({ method: 'outline_load', store: c.store, project_root: c.root, id: c.result.outline.id }));
   }
@@ -231,6 +240,17 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         active = c.result.outline.id;
         if (value.type === 'ask_ai') await askPassage(c, value);
         else if (value.type === 'edit') await mutate(c, value.change, value.draft);
+        else if (value.type === 'continue_annotation') {
+          try {
+            const dirty = await new Promise((resolve,reject)=>{
+              const timer=setTimeout(()=>{c.storageCheck=undefined;reject(Error('Reader draft check timed out. Keep its text and try again.'));},5000);
+              c.storageCheck=value=>{clearTimeout(timer);c.storageCheck=undefined;resolve(value);};
+              c.panel.webview.postMessage({type:'storageCheck'});
+            });
+            if(dirty) throw Error('Save or discard the reader drafts before continuing an annotation. Their text is kept.');
+            await continuation.manage(c,value);
+          } finally { await c.panel.webview.postMessage({type:'storageRelease'}); }
+        }
         else if (value.type === 'delete_annotation') await deleteAnnotation(c, value);
         else if (value.type === 'render_diagram') {
           writable(c);

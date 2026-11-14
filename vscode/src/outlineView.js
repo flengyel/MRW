@@ -9,6 +9,7 @@ const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument',
 const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
+let continuations = [], continuationErrors = {};
 let notes = [], noteTargets = {}, noteError, lastReadingFocus;
 let storageFrozen = false;
 let returnDestination;
@@ -68,6 +69,10 @@ function el(tag, text, parent = root, className) {
   parent.append(node); return node;
 }
 function post(value) {
+  if (value.type === 'continue_annotation') {
+    const key = `note:${value.region || 'overview'}:${value.annotation}`;
+    value.unsaved = drafts.has(key);
+  }
   if (value.type === 'delete_annotation') {
     const prefix = `note:${value.region || 'overview'}:`;
     deletingDraft = prefix + (value.annotation || '*');
@@ -121,6 +126,7 @@ function field(f, name, title, options) {
   node.value = f.current[name] ?? ''; return node;
 }
 function noteForm(parent, region, note) {
+  if (note && (noteError || continuations.some(c=>c.annotation===note.id && c.phase!=='pending'))) return;
   const key = `note:${region || 'overview'}:${note?.id || 'new'}`;
   const box = el('details', undefined, parent, 'note'); keepOpen(box, key);
   el('summary', note ? `Edit reader note: ${label(note.kind)}` : 'Add reader explanation / question / repair', box);
@@ -154,12 +160,27 @@ function renderNotes(parent, annotations, scope, title = 'Reader notes') {
   for (const note of annotations) {
     el('h3', label(note.kind), notes);
     el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
-    if (window.MRWAnnotations) window.MRWAnnotations.render(notes, note.text, { fragments: note.fragments,
+    const continuation = continuations.find(c=>c.annotation===note.id);
+    let content = notes;
+    if (continuation) {
+      el('p', (continuation.phase==='pending'?'Transfer pending — inline annotation is still current.':'Continue editing in: '+continuation.destination.label)+ ' · '+continuation.destination.file, notes, 'muted');
+      if (continuationErrors[note.id]) el('p',continuationErrors[note.id],notes,'warning');
+      if (continuation.phase!=='pending') {
+        button(notes,'Open continuation',{type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope,action:'open'},'open-continuation');
+        content=el('details',undefined,notes);
+        el('summary','Inspect retained original annotation',content);
+        el('p','Original attribution applies to this retained text, not to later writing in the external note.',content,'muted');
+      }
+    }
+    const action = button(notes, continuation ? (continuation.phase==='pending'?'Resume pending transfer…':'Manage continuation…') : 'Continue this note in Obsidian…',
+      {type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope},'continue-annotation',true);
+    action.title='Continue this saved annotation in a selected ordinary note. Save and verify before making that note the editable continuation.';
+    if (window.MRWAnnotations) window.MRWAnnotations.render(content, note.text, { fragments: note.fragments,
       appearance: diagramAppearance,
       onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),
       onAppearance: value => { diagramAppearance = ['paper', 'dark'].includes(value) ? value : 'theme';
         api.postMessage({ type: 'diagram_appearance', value: diagramAppearance }); render(); } });
-    else el('p', note.text, notes, 'reader-note-text');
+    else el('p', note.text, content, 'reader-note-text');
     const remove = button(notes, 'Delete note…', { type: 'delete_annotation',
       region: scope === 'overview' ? null : scope, annotation: note.id }, 'delete-note', true);
     remove.dataset.annotation = note.id;
@@ -542,6 +563,7 @@ window.addEventListener('message', event => {
   if (value.type === 'storageRelease') { storageFrozen = false; controls(); return; }
   if (value.type === 'outline') {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
+    continuations = value.continuations || []; continuationErrors = value.continuationErrors || {};
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
     returnDestination = value.returnDestination;
     if (!proofPreferenceLoaded) { proofsHidden = value.proofsHidden === true; proofPreferenceLoaded = true; }

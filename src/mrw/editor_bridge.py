@@ -107,6 +107,7 @@ def _dispatch(request):
         'outline_follow_reference': ({'store', 'project_root', 'reference'}, set()),
         'outline_assistance_context': ({'store', 'project_root', 'reference'}, set()),
         'outline_notes': ({'store', 'project_root', 'id'}, {'reference'}),
+        'outline_continue_note': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
         'outline_update_note': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
         'outline_mutate': ({'store', 'project_root', 'id', 'revision', 'change'}, set()),
         'outline_inspect_artifact': ({'path'}, set()),
@@ -158,7 +159,7 @@ def _dispatch(request):
         return reference_action(request)
     if method == 'outline_assistance_context':
         return assistance_context_action(request)
-    if method in ('outline_notes', 'outline_update_note'):
+    if method in ('outline_notes', 'outline_update_note', 'outline_continue_note'):
         return note_action(request)
     if method.startswith(('source_plugins_', 'outline_source_')):
         from .source_records import action

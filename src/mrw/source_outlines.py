@@ -481,6 +481,10 @@ def mutate(store, change):
             old = item_by_id(target, change['id'])
             if old is None:
                 raise ValueError('Annotation identity changed; reopen it')
+            from .outline_notes import note_action
+            associations = note_action(dict(method='outline_notes', store=str(store.base), project_root=str(store.root), id=store.id))
+            if any(r['annotation'] == old['id'] and r['phase'] != 'pending' for r in associations.get('continuations', [])):
+                raise ValueError('This annotation is retained as an original; edit its external continuation')
             target[target.index(old)] = updated
     elif kind == 'remove_annotation':
         fields(change, {'kind', 'region', 'id'}, 'annotation removal')

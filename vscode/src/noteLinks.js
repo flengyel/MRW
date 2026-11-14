@@ -36,4 +36,4 @@ function parseNoteLink(value, scheme = 'vscode') {
   if (bytes.toString('base64url') !== params.target) throw new Error('Malformed MRW note encoding.');
   return validateTarget(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
 }
-module.exports = { makeNoteLink, parseNoteLink };
+module.exports = { makeNoteLink, parseNoteLink, validateTarget };
