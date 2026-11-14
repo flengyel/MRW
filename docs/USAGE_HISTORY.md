@@ -3,6 +3,13 @@
 Included in MRW 0.23.13; implemented through [PR #10](https://github.com/flengyel/MRW/pull/10). See
 [delivery and checks](SHARED_HISTORY_DELIVERY.md).
 
+Operational counts are already available through **MRW: Inspect Study History**,
+even without creating a Study. This report is partial coverage, not a complete
+feature-adoption review. The standing [feature-use requirements](OPERATIONAL_USAGE.md)
+specify direct access, stable feature IDs, coverage over time and bounded period
+analysis. The [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md) is proposed;
+its periodic reports are not implemented by the existing history sync timer.
+
 ## Connect a directory
 
 Run **MRW: Configure History… → Choose shared history directory…**. Select an

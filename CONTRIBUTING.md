@@ -53,6 +53,17 @@ packaging is part of the change.
 
 ## Design expectations
 
+Declare [feature-use coverage](docs/OPERATIONAL_USAGE.md) when adding or changing
+an interaction. Map its entry points to a stable feature ID, distinguish child
+operations and exclude test activity from ordinary-use reports. Missing
+observations must not become zero use. Keep recording lightweight and reporting
+bounded; low counts alone do not justify removal.
+
+The proposed [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) owns periodic
+integrity/hygiene reporting, while core keeps required storage checks. Inspection
+must not mutate inspected data or silently repair findings. Source plugin API 1
+does not authorize maintenance operations.
+
 Follow [the integration contract](docs/INTEGRATION_BOUNDARIES.md) when connecting
 another subsystem. State its owner, supported creation/execution route, external
 identities, synchronization behavior and evidence limits. Do not bypass the

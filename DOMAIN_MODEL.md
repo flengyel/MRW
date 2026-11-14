@@ -35,6 +35,20 @@ ordinary reading or outlining. These deployment choices preserve source
 identity, provenance and publication protections; they add no remote-access
 service, TypeScript rewrite, data migration or new domain entity.
 
+## Operational observations and diagnostic findings
+
+[Feature-use observations](docs/OPERATIONAL_USAGE.md) describe actions and their
+coverage; they are not mathematical claims or learning assessments. External
+operation state remains qualified by its observing subsystem. A feature ID,
+user invocation and child operation are distinct identities.
+
+The proposed [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) derives findings
+from scoped checks. Each finding identifies the object, check and observation;
+an unavailable target or unperformed check is not corruption. Reports do not
+change source identity, retention, ownership or mathematical status. Derived
+aggregates and reports are separate from authoritative history and research
+artifacts; no duplicate research schema is required.
+
 ## Proposed extension — W3C PROV and Study lifecycle
 
 [W3C PROV](docs/PROVENANCE_DESIGN.md) governs the common provenance vocabulary for

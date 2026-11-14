@@ -94,10 +94,12 @@ not replicas whose text must be synchronized.
 
 ## Execution and evidence
 
-Ordinary opening, reading, synchronization, comparison and recovery start no
-new computation, job, proof check, model request or Wolfram query. Scoped reads
-of metadata, external identities and status may support synchronization without
-submitting work. An explicit Run,
+Ordinary opening, reading, synchronization, comparison and recovery do not make
+MRW independently submit a computation, job, proof check, model request or
+Wolfram query. Native editors retain their normal behavior: opening a Lean file
+may trigger the Lean extension's elaboration and diagnostics. That is distinct
+from an MRW-initiated Check or rerun. Scoped reads of metadata, external
+identities and status may support synchronization without submitting work. An explicit Run,
 Submit, Retry, Query or Check action may delegate the named operation. Make its
 destination and scope visible and preserve the subsystem's confirmation and
 resource rules. Do not retry an uncertain submission unless the subsystem's
@@ -112,9 +114,28 @@ mathematical truth or the authenticity of a producer's account.
 
 ## Integration review and testing
 
-For each adapter, state the owner, supported operations, identities, authorized
-write/execution route, synchronization behavior, conflict handling and evidence
-limits. Missing optional software must not prevent unrelated MRW work.
+MRW is an integration workbench. Use ports and adapters: core expresses the
+needed capability; each adapter translates it into its subsystem's supported
+operations. Keep the common model limited to references, captures, provenance
+and observable outcomes. A query service, notebook editor and job queue need
+different capability contracts, not an artificial universal create/run/sync API.
+
+Each adapter supplies a compact, versioned contract:
+
+| Contract item | Required statement |
+| --- | --- |
+| Ownership and capabilities | Responsible system, supported operations, authorized write/execution route, host/API versions and prerequisites. |
+| Identity and scope | External logical ID, current locator, revision and MRW capture ID; selected workspace, account, kernel or queue as applicable. |
+| Outcomes and recovery | What dispatch, acceptance and completion establish; correlation, cancellation, uncertain outcomes, safe retry and reconciliation. |
+| Synchronization | Freshness, concurrent edits, conflict/rename/deletion handling, and limits when the owner is unavailable. |
+| Observation | User-facing feature ID, instrumentation owner, availability/coverage, observable outcomes and unobservable intervals. |
+| Inspection and repair | Bounded read-only checks, ownership of findings and supported recovery routes; inspection must not invoke a mutating sync operation. |
+| Tests | Isolated targets and evidence for success, failure, cancellation, interruption and missing optional software. |
+
+Missing optional software must not prevent unrelated MRW work. Lightweight
+[usage recording](OPERATIONAL_USAGE.md) remains in core; the optional
+[diagnostics plugin](DIAGNOSTICS_PLUGIN.md) owns periodic reports and their
+presentation. Core integrity checks remain necessary without that plugin.
 
 Use isolated vaults, workspaces, kernels, containers and queues for automated
 mutation tests. Read-only identity inspection may establish the target; verify

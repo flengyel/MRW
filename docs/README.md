@@ -41,6 +41,11 @@ that version and the saved records it produced.
   creation, editing, execution, synchronization and reference responsibilities
   across notes, notebooks, runtimes, queues and external services.
 
+- [Operational feature use](OPERATIONAL_USAGE.md): existing counts, coverage gaps
+  and required reports of used and persistently unused features.
+- [Optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md): proposed periodic
+  integrity/data-hygiene reports, bounded inspections and reviewed repair.
+
 - [Interface and companion audit — 13 November](INTERFACE_AUDIT_20261113.md): current
   tool access, missing integrations, observed limits and the next interface repairs.
 
@@ -71,7 +76,7 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
-[Release 0.23.29](RELEASE_0_23_29.md) records the latest package, publication,
+[Release 0.23.31](RELEASE_0_23_31.md) records the latest package, publication,
 checks and installation status. [Reading repairs for 0.23.5](READING_REPAIRS.md)
 records that earlier increment. Other validation and repair reports describe the versions,
 hosts and sources named in those reports; they do not establish that a later

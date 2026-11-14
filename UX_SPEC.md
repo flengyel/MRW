@@ -5,6 +5,21 @@ governs optional integrations: creation and execution stay with the responsible
 system; MRW supports explicit delegation, native editing, retained references and
 coordinated synchronization. Current implementation limits remain explicit.
 
+## Proposed diagnostics and feature-use reports
+
+The optional [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) provides direct
+**Feature Use** and **Integrity and Data Hygiene** actions, independent of Study
+creation. Keep **Inspect Study History** available in core. Its present usage
+table is partial implementation of the
+[feature-use requirement](docs/OPERATIONAL_USAGE.md), not a delivered plugin UI.
+
+Show period, scope and missing observations before usage totals. Integrity
+findings distinguish failure, unavailable targets and incomplete checks, with
+links to evidence and owner-system recovery. Configure periodic runs and show
+last-completed, due and interrupted status. Scheduled reports do not interrupt
+reading with forms or automatically repair data. A low-use feature or an old
+source note is not a cleanup recommendation. Report export is explicit.
+
 ## Obsidian creation command — 0.23.31
 
 For a vault, New Note and reader-note continuation require an explicitly
