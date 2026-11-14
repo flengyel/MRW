@@ -1,5 +1,13 @@
 # Obsidian and notes in place
 
+This guide describes delivered commands. [The integration contract](INTEGRATION_BOUNDARIES.md)
+also specifies the pending source-to-Zettel correction: source material may be
+reformulated and remain editable, independently of the derived Zettel. The
+exact-copy continuation below still has its documented transfer restrictions.
+Obsidian owns creation through its configured template; existing notes may be
+edited in either application's native editor. Shared-file refresh is implemented;
+automatic cross-system rename/move reconciliation is not claimed.
+
 MRW and Obsidian can open the same Markdown notes. MRW supplies Contents,
 links, backlinks and Return in VS Code; Obsidian retains its own editing and
 rendering. No conversion, import or Zettel metadata is required. Handwritten

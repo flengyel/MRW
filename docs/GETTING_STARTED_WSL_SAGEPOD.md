@@ -1,5 +1,10 @@
 # Install MRW and use SagePod in WSL2
 
+[Subsystem ownership](INTEGRATION_BOUNDARIES.md) applies throughout: use Jupyter
+for notebook creation/editing and explicit execution, and SagePod's documented
+tools for its runtime. MRW retains selected results and links without taking
+over either system. This guide's versioned checks describe the named builds.
+
 This is **path B: MRW with SagePod**. For reading and mathematical review, start
 with [path A in the installation guide](INSTALLATION.md#a-mrw-for-reading).
 That path also points to the existing AI connector; SagePod is an optional
@@ -104,7 +109,7 @@ Run controls; **Run SageMath File** is a separate command requiring its own
 setup. Sage does not need to be installed directly on the WSL host.
 
 **You should now see the MRW book icon in the left Activity Bar.** Click it to
-open **Studies** and **Contents**. MRW's **…** menu and **F1 → MRW:**
+open **Contents** and **Commands**. MRW's **…** menu and **F1 → MRW:**
 commands remain available. An installed VSIX needs no Node/npm, Qt, Lean or
 separate Python-package installation. Upgrading it does not require deleting
 workspace storage.

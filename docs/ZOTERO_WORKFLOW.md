@@ -1,5 +1,11 @@
 # Zotero references and attachments
 
+Zotero remains the maintaining system for the library. Follow
+[the integration contract](INTEGRATION_BOUNDARIES.md): supported lookup and
+retained copies do not authorize direct database or attachment-store writes.
+Reference synchronization is a design responsibility; the current local API
+workflow and its limits are specified below.
+
 Included in MRW 0.23.13. [Delivery checks](ZOTERO_DELIVERY.md) distinguish live API
 observations from native desktop acceptance. Zotero manages the library; MRW reads selected references and
 retains them for use in ordinary notes. No Study or question form is required.

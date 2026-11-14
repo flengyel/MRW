@@ -37,6 +37,10 @@ that version and the saved records it produced.
 
 ## Design and development
 
+- [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md):
+  creation, editing, execution, synchronization and reference responsibilities
+  across notes, notebooks, runtimes, queues and external services.
+
 - [Interface and companion audit — 13 November](INTERFACE_AUDIT_20261113.md): current
   tool access, missing integrations, observed limits and the next interface repairs.
 

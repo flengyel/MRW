@@ -1,5 +1,10 @@
 # Study notebooks with VS Code Jupyter and SagePod
 
+Follow [the integration contract](INTEGRATION_BOUNDARIES.md): Jupyter owns native
+notebook operations, SagePod its runtime, and SageQueue its jobs. An explicit
+future adapter may delegate supported operations; it must not duplicate these
+systems. Current MRW capabilities are described below.
+
 For installation, [choose the reading or computation path](INSTALLATION.md).
 SagePod is MRW's optional computation companion. For a first notebook connection,
 follow [Install MRW and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
@@ -25,6 +30,10 @@ interactive notebook workflow below and SageQueue for batch jobs. See the
 [companion guide](RECOMMENDED_EXTENSIONS.md#sagemath-sagepod-jupyter-and-sagequeue)
 and SageQueue's current setup instructions. MRW does not submit or monitor queue
 jobs, and opening MRW starts neither workers nor notebook execution.
+A future queue adapter must use SageQueue's commands/API and retain its task IDs,
+status and cancellation/retry semantics. It must not edit queue internals or
+invent a second scheduler. Synchronizing notebook files or MRW references does
+not synchronize running kernels, worker state or the container environment.
 
 ## Open the existing environment
 

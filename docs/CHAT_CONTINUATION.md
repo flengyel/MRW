@@ -1,5 +1,20 @@
 # Continuation prompt: Mathematical Research Workstation
 
+## Governing integration boundary
+
+Follow [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md) for all current
+and future adapters: external systems own their creation and execution workflows;
+MRW delegates through supported interfaces, supports native editing of existing
+work, and maintains scoped references and synchronization. Do not duplicate the
+owner's template, evaluator, kernel manager, queue or managed database writer.
+Preserve subsystem identities separately from MRW captures. Missing companions
+must not block unrelated MRW work; isolate native mutation tests before dispatch.
+
+The source-to-Zettel correction remains pending: exact-copy continuation and
+freezing an annotation are not requirements for developing a Zettel. Preserve
+existing records while repairing that distinction. The current runtime and its
+verification limits remain documented separately.
+
 Continue **MRW — Mathematical Research Workstation**, the experimental VS Code
 console for mathematical study and research, in `flengyel/MRW`. This is the
 application project. Keep mathematical manuscript development and theorem/model
@@ -80,12 +95,12 @@ package, distribution and CLI are `mrw`, and the Lean namespace is `MRW`.
   requests. Update SagePod documentation when an actual integration change
   affects it, without claiming those capabilities are implemented by MRW.
 
-## Immediate follow-up: shared history and feature use
+## Delivered shared history and feature use
 
-The latest requested increment is [configurable shared usage history](USAGE_HISTORY.md).
-It is **not implemented in 0.23.11**; current study checkpoints/history use
-private workspace storage. Extend the existing recorder and Inspect/Export
-report rather than introducing another telemetry system.
+[Configurable shared usage history](USAGE_HISTORY.md) is included in 0.23.13.
+Preserve the existing recorder, verified import and Inspect/Export workflow;
+do not reimplement it from the earlier 0.23.11 baseline. Drafts and active
+checkpoints remain distinct from shared history.
 
 Configure the MRW data directory independently of the Obsidian vault. Permit a
 separate directory, a vault subdirectory, or the vault root itself. The preferred
@@ -128,9 +143,11 @@ General PROV storage/export is a design goal, not a shipped service. Follow
 [PROVENANCE_DESIGN.md](PROVENANCE_DESIGN.md): entities, activities, agents,
 derivations, plans and bundles, with exact source/method revisions and explicit
 missing context. VisTrails informs the treatment of alternative investigations
-and their history; it is not a runtime dependency. The first bounded trial
-should retain two alternative calculations and one failed run, reopen them
-after restart, compare them and export the selected account. Opening or
+and their history; it is not a runtime dependency. The bounded notebook profile
+is implemented in 0.23.20: retain two alternative calculations and one failed
+run, reopen them after restart, compare them and export the selected account.
+See [notebook results](NOTEBOOK_RESULTS.md); do not describe this as a pending
+first implementation. Opening or
 exporting work executes nothing. PROV consistency does not establish
 mathematical correctness.
 

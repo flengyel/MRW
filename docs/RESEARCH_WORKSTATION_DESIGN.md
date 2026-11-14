@@ -1,5 +1,9 @@
 # Documents, research continuity, and argument reconstruction
 
+All integrations follow [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md).
+That contract covers notes, Jupyter, SagePod, SageQueue, Wolfram services, Zotero
+and Lean, including native editing, explicit delegation and referential integrity.
+
 This design starts with mathematical work: open a document, follow its
 references, compare passages, add an explanation or calculation, and return to
 unfinished work. Delivered features are listed in the [project README](../README.md);
@@ -244,8 +248,10 @@ Opening, reading, extracting selected text, restoring an exact position, and
 running a computation are different capabilities. Detect what the host exposes
 and describe missing operations locally. A filename supplies neither PDF text
 nor notebook kernel state. Prefer host integrations over new readers,
-editors, kernel managers or tool runtimes. Opening/resuming work starts no
+editors, kernel managers or tool runtimes. Ordinary opening/resuming starts no
 container, executes no cells, invokes no checker, and sends no model request.
+A separately requested execution or lifecycle action may delegate through its
+owner's supported interface; this does not authorize a competing implementation.
 
 Support navigation to a selected external document or notes folder without
 weakening the private-store, workspace, trust and exact-reference checks used
@@ -260,7 +266,9 @@ Windows-backed vault into the WSL repository to read it.
 
 The [notes-companion proposal](NOTE_COMPANIONS.md) separates application handoff
 from document reading. Preserve the existing Obsidian workflow while considering
-an optional adapter; the companion owns templates, naming and editing. Org capture
+an optional adapter; the companion owns creation, templates and naming.
+Existing notes may also be edited through an appropriate native MRW/VS Code
+editor. Org capture
 and The Archive are candidate integrations, not delivered capabilities. A note
 may be an entry in a file. Do not infer a separate note schema or require a new
 registration form. The reader can start note creation from MRW with New Note:
@@ -276,7 +284,10 @@ calculation to enter a Zettelkasten. The reader selects material, formulates it
 and chooses its links; the Zettelkasten editor and configured template own note
 creation. MRW retains working material, exact source references and return
 locations. This separation preserves the reader's own format and authoring
-practice. See [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
+practice. Source notes and developed Zettels may have many-to-many associations;
+they need not have identical text or a single editing location. Linking a Zettel
+must not retire its source material. The current exact-copy continuation requires
+correction to meet this rule; see [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
 Keep the effort of selection and linking while removing repeated entry and
 navigation obstacles. Do not turn that effort into a registration form or
@@ -406,7 +417,9 @@ The requested [shared history and feature-use report](USAGE_HISTORY.md) extends
 that recorder with per-writer history in a configurable data directory, synchronized
 by the user's Syncthing/SyncTrayzor setup. The directory may be separate from,
 beneath, or identical to the Obsidian vault; a vault subdirectory is the preferred
-choice for this setup. It remains unimplemented in 0.23.11.
+choice for this setup. Shared history is included in 0.23.13; its scope and limits
+are documented in the linked workflow. It does not synchronize live execution
+state or every MRW store.
 
 Use a supplied mathematical example and notes for read-only opening;
 new work has an explicit destination. Use disposable copies for destructive

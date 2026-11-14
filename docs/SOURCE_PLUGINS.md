@@ -1,5 +1,10 @@
 # Source plugins: use and authoring (API 1)
 
+Source acquisition follows [the integration contract](INTEGRATION_BOUNDARIES.md).
+An adapter retains separately identified source snapshots; it does not obtain
+authority to edit an external library or execute computations. Source, lesson
+and execution capabilities remain separate.
+
 **Import Source…** lists enabled sources. Stacks Project and Kerodon retain their
 direct Commands buttons. nLab is a built-in named-page adapter. **Add Source
 Plugin…** registers either a local JSON profile or an explicitly selected

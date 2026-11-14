@@ -71,7 +71,7 @@ Validation of a PROV record checks its consistency, not the mathematics or the
 truth of its supplied account. A Lean checking result retains its exact subject,
 environment and checking scope.
 
-The planned [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration)
+The implemented [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration)
 adds a bibliographic connection to retained sources. Identify metadata snapshots
 and attachment revisions separately, retaining the library and item identity,
 API-instance context, available version and exact content hash. A later metadata
@@ -80,6 +80,13 @@ as an activity; a citation or item association alone does not establish
 `prov:wasDerivedFrom`.
 
 ## Core and plugin responsibilities
+
+Follow [the integration contract](INTEGRATION_BOUNDARIES.md). External systems
+own document creation, execution and lifecycle; MRW may explicitly delegate
+through supported interfaces and retain separately identified evidence. Keep
+external object, request and task identities beside MRW capture identities.
+Distinguish dispatch, acceptance, running and terminal outcomes when the adapter
+can observe them; never manufacture missing states from a saved output.
 
 The core validates the common profile, assigns or resolves scoped identities,
 retains artifacts and their relationships, and supplies inspection, comparison,

@@ -1,5 +1,11 @@
 # Retained notebook results
 
+Notebook creation, editing and execution belong to Jupyter and the selected
+native editor; [the integration contract](INTEGRATION_BOUNDARIES.md) governs
+MRW's capture and reference role. A retained result is a separate snapshot, not
+the live notebook or kernel. Synchronizing its files does not restore execution
+state or authorize rerunning cells.
+
 Run and save a notebook using its normal Jupyter editor and kernel. **MRW:
 Retain Notebook Result…** saves a separate exact copy in this workspace's private
 storage. The notebook toolbar exposes the same action. You may include a working

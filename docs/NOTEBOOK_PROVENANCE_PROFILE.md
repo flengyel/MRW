@@ -7,7 +7,12 @@ mathematics or claim complete PROV-CONSTRAINTS conformance.
 ## Identity and accounts
 
 A retention has a random UUID, independent of its filename, workspace and content
-hash. Repeated retention creates distinct accounts. Each artifact has a SHA-256
+hash. This is an MRW capture identity; it does not replace the run UUID in a
+producer receipt. A future profile extension for external notebook or queue-task
+identities must retain their producer and scope without inferring them from paths
+or cell counters. Those additional fields are not supplied by profile 1.
+The [integration contract](INTEGRATION_BOUNDARIES.md) governs this distinction.
+Repeated retention creates distinct accounts. Each artifact has a SHA-256
 revision and an account-local entity URI. Paths are locators, never identities.
 The private record contains exact bytes; reopening requires neither Jupyter nor
 the original files. An export ZIP contains a manifest, exact artifacts, a readable

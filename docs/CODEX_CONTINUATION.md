@@ -1,5 +1,20 @@
 # Codex continuation: reading and research
 
+## Governing integration boundary
+
+Follow [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md) for all current
+and future adapters: external systems own their creation and execution workflows;
+MRW delegates through supported interfaces, supports native editing of existing
+work, and maintains scoped references and synchronization. Do not duplicate the
+owner's template, evaluator, kernel manager, queue or managed database writer.
+Preserve subsystem identities separately from MRW captures. Missing companions
+must not block unrelated MRW work; isolate native mutation tests before dispatch.
+
+The source-to-Zettel correction remains pending: exact-copy continuation and
+freezing an annotation are not requirements for developing a Zettel. Preserve
+existing records while repairing that distinction. The current runtime and its
+verification limits remain documented separately.
+
 ## Source notes and the Zettelkasten
 
 Treat MRW workspace working notes as source notes: preserve them as material
