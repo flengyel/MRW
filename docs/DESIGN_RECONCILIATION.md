@@ -5,7 +5,8 @@ interface, integration, usage and maintenance recommendations. It records
 accepted requirements and remaining work; a recorded decision does not mean
 its runtime implementation is complete. The implementation batch below starts from main
 `ba2db577b1ab8bf512daf63300e2eedf4232d907` and is checked on 2026-11-14.
-Its package and installation evidence is recorded in the delivery report.
+Its package and installation evidence is recorded in the
+[0.23.32 delivery report](RELEASE_0_23_32.md).
 Update this record as implementation and evidence change.
 
 ## Authority and continuity
