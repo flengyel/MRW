@@ -9,9 +9,10 @@ editing rules. Treat the reported friction as an observed usability defect.
 
 ## Required interaction
 
-Selecting Add note opens a passage-linked writing area with focus in the text.
-Make Save and Cancel the primary controls. Use ordinary mathematical prose,
-questions, calculations and Markdown without a preliminary classification.
+Use the exact entry label **Add a note**. It opens a passage-linked writing
+area with focus in the text. Make **Save** and **Cancel** the primary controls.
+Allow free-form prose, questions, calculations and Markdown with LaTeX notation
+and TikZ support, without a preliminary classification.
 Do not introduce a separate title, purpose, study, assessment or claim form.
 
 Move attribution controls into optional collapsed details and math/TikZ
@@ -35,6 +36,17 @@ adding a routine confirmation before every operation. Keep source notes and
 linked Zettels independently editable. Do not create files directly in a vault
 or automate Obsidian's live authoring prompts.
 
+## LaTeX and TikZ
+
+Preserve editable LaTeX source and the existing mathematical rendering.
+Support fenced `tikz` blocks and the existing explicit **Render diagram** action
+for a saved note. Keep rendering accessible without opening attribution fields.
+Saving or reopening a note must not automatically execute a TeX process.
+Retain the current isolated renderer, source/digest binding and failure behavior:
+a failed render preserves the source and any earlier valid diagram.
+See [the existing rendering workflow](TIKZ_WORKFLOW.md).
+Syntax guidance belongs in optional Help; the entry label remains **Add a note**.
+
 ## Implementation and validation
 
 Inspect vscode/src/outlineView.js noteForm, form/draft handling, its host
@@ -42,7 +54,8 @@ messages in vscode/src/outlines.js, annotation validation/persistence and
 existing regressions. Implement locally in VS Code connected to WSL2, following
 AGENTS.md and the normal branch/review/release procedure.
 
-Verify blank/new and existing notes, plain text and math, preserved metadata,
+Verify blank/new and existing notes, inline/displayed LaTeX, a saved TikZ diagram
+and failed rerender, preserved editable source and metadata,
 keyboard focus, Save/Cancel, failure/retry and drafts across refresh. Use
 isolated retained sources and research stores. Observe the affected native
 writing interaction at normal and narrow window widths. Component tests alone
