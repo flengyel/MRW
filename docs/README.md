@@ -51,7 +51,8 @@ that version and the saved records it produced.
 - [Selective contract formalization](CONTRACT_FORMALIZATION.md): the first
   relocation pilot, later models and the implementation-correspondence requirement.
 - [Existing-note citation rendering](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes):
-  current Obsidian/Pandoc citation limitation and required read-only follow-up.
+  local bibliography and read-only Zotero / Better BibTeX lookup, with
+  [native verification](CITATION_ZOTERO_REPAIR.md).
 
 - [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md):
   creation, editing, execution, synchronization and reference responsibilities

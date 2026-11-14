@@ -120,8 +120,8 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const citationViews={};
     const citationConfig=vscode.workspace.getConfiguration('mrw'),citationRoot=citationConfig.get('notesFolder','');
     if(citationRoot&&vscode.workspace.isTrusted!==false)for(const note of [...result.outline.annotations,...result.outline.regions.flatMap(r=>r.annotations)]){
-      if(!/\[@/.test(note.text))continue;
-      try{citationViews[note.id]=await require('./citations').prepare({text:note.text,file:path.join(citationRoot,'MRW-source-annotation.md'),root:citationRoot,configuration:{executable:citationConfig.get('citationExecutable',''),bibliography:citationConfig.get('citationBibliography',''),style:citationConfig.get('citationStyle','')}});}
+      if(!require('./citations').candidates(note.text).length)continue;
+      try{citationViews[note.id]=await require('./citations').prepare({text:note.text,file:path.join(citationRoot,'MRW-source-annotation.md'),root:citationRoot,configuration:{executable:citationConfig.get('citationExecutable',''),bibliography:citationConfig.get('citationBibliography',''),style:citationConfig.get('citationStyle',''),source:citationConfig.get('citationSource','auto'),zoteroLibraries:citationConfig.get('citationZoteroLibraries',[]),zoteroConnection:context.workspaceState.get('mrw.zotero.v1',{})?.connection,host:vscode.env.remoteName}});}
       catch(e){citationViews[note.id]={citations:{},status:e.message};}
     }
     await c.panel.webview.postMessage({ type: 'outline', citationViews, model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,

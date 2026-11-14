@@ -554,9 +554,12 @@ through the authoring application's configured template, then select the saved
 file. Linking retains a source snapshot; it does not certify a completed Zettel.
 See [note associations](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
 
-Bracketed Pandoc citations render through a trusted local Pandoc processor and
-scoped bibliography. Missing keys remain visible; opening triggers no live
-Zotero query or remote style download. See [citation setup](https://github.com/flengyel/MRW/blob/main/docs/ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes).
+Bracketed Pandoc citations render through a trusted Pandoc processor and either
+an explicit bibliography or the selected Zotero / Better BibTeX library. MRW
+reuses an Obsidian Pandoc Reference List live selection; Zotero and Better
+BibTeX must be running. Missing or ambiguous keys stay visible. Formatting
+changes only the preview. Returning to MRW refreshes the metadata snapshot;
+**MRW: Refresh Citation Preview** also retries. Remote styles are not downloaded. See [citation setup](https://github.com/flengyel/MRW/blob/main/docs/ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes).
 
 The optional MRW Diagnostics companion adds Feature Use and Integrity and Data
 Hygiene reports, export and a reviewable Codex handoff. Weekly reporting is opt-in;

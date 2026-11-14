@@ -81,52 +81,77 @@ item and may show later metadata.
 
 ## Citation rendering in existing notes
 
-Native Markdown preview uses the existing Pandoc/CSL processor for bracketed
-citations such as `[@key]` and `[@first, p. 4; @second]`. Note text, YAML,
-positions, dirty buffers and Return remain native. The generated bibliography
-belongs to the view and is never appended to the note.
+Native Markdown preview formats bracketed Pandoc citations such as `[@key]`,
+`[see @key, p. 4]` and `[@first; @second]` through Pandoc/CSL. It generates a
+bibliography in the view. Note text, YAML, positions, dirty buffers and Return
+remain unchanged; no bibliography is appended to the file.
 
-Set **MRW: Citation Executable** to a trusted Pandoc executable on the workspace
-host; empty uses pandoc on PATH. From WSL, Windows Pandoc can be selected by its
-/mnt/c/.../pandoc.exe path. Executables never come from note or vault metadata.
-Pandoc reads bibliography, local independent csl, and inline references metadata.
-**MRW: Citation Bibliography** and **Citation Style** supply explicit fallbacks.
-Relative resources resolve beside the note inside its selected notes/workspace
-root. CSL-JSON and BibTeX/BibLaTeX are processor inputs, not a new MRW format.
+Install a trusted Pandoc executable on the workspace host. An empty **MRW:
+Citation Executable** uses `pandoc` on PATH. If that command is missing under
+WSL, MRW tries `pandoc.exe` on the host PATH; a Windows installation can therefore
+be reused. An explicit executable path remains available in trusted settings.
+Executable paths in notes or Obsidian configuration are never run.
 
-If no bibliography is declared, the selected vault's existing Pandoc Reference
-List data.json bibliography can be reused. Its live Zotero lookup, executable
-and remote style URL are not followed. Empty style uses Pandoc's default;
-styles are not hard-coded in MRW. A local independent CSL style may be selected.
-Freshness relative to Zotero is unknown. Missing and duplicate keys remain
-visible, labelled unresolved or ambiguous. Opening queries no Zotero API,
-downloads no styles, invokes no filters and scans no vault.
+**MRW: Citation Source** selects `auto` (the default), `bibliography` or `zotero`:
 
-The current preview replaces bracketed citation groups. Standalone narrative
-@key and dependent/remote CSL styles remain unsupported. Markdown links,
-escaped examples, inline code and fenced examples retain their behavior.
-Processing is serialized, bounded to 4 MiB notes/resources/output and 128
-citation groups, with a 15-second subprocess timeout. Stale results cannot
-replace a newer document version. Citation-file notifications, configuration
-changes and **MRW: Refresh Citation Preview** update derived rendering. External selected
-notes folders are watched separately from the workspace.
+- A note's `bibliography` or inline `references`, or an explicit **Citation
+  Bibliography** setting, takes precedence in every mode. It can select a fixed
+  local export. Resources resolve beside the note within its selected
+  notes/workspace root. CSL-JSON and BibTeX/BibLaTeX are processor inputs.
+- In `auto`, MRW reads the selected vault's Pandoc Reference List configuration.
+  If that companion selects live Zotero lookup, MRW uses its selected Better
+  BibTeX library IDs. A connected personal Zotero library can also select this
+  route. Otherwise MRW uses the companion's scoped local bibliography.
+- `zotero` explicitly selects live lookup. **Citation Zotero Libraries** can
+  select up to eight Better BibTeX library IDs; these are not Zotero Web API
+  group IDs. An empty setting reuses the companion selection, or Better
+  BibTeX's My Library default when no companion selection applies. An empty
+  companion library selection is reported rather than broadened silently.
 
-Reader annotations are checked separately: the same processor uses the explicit
-notes-folder bibliography, while saved text and attribution remain exact. Safe
-Markdown links become links; unsupported content remains visible. No automatic
-source-to-Zettel association is created.
+Live formatting requires Zotero running with **Better BibTeX** enabled. MRW asks
+its documented read-only `item.pandoc_filter` method for only the keys in the
+note, within the selected libraries. It neither searches by title nor exports
+the whole library. Under WSL the Windows transport uses fixed Windows loopback;
+it does not forward the Zotero port. The lookup records when metadata was read.
+A citekey or library ID is not an immutable revision: this preview is a current
+metadata snapshot, separate from MRW's retained reference records.
 
-Evaluation: the native extendMarkdownIt hook preserves VS Code's editor and
-navigation. Existing academic-preview and Pandoc cite extensions were considered;
-some fetch dependent styles or add export machinery. The chosen small adapter
-reuses Pandoc parsing and CSL formatting in the existing preview. See
-[Pandoc citations](https://pandoc.org/MANUAL.html#citations) and
+If live lookup is unavailable in `auto`, a configured local export may be used
+with an explicit unavailable/stale-snapshot notice. `zotero` reports the failure.
+A successful live reply reporting a missing key never substitutes an older
+export. Missing and duplicate keys remain visible and labelled unresolved or
+ambiguous. Open Zotero, correct the selected library or export, then choose
+**MRW: Refresh Citation Preview**. Returning focus to MRW also refreshes open
+notes. Lookup and formatting are asynchronous; the raw citation can appear
+briefly before the result arrives.
+
+**Citation Style**, or the note's `csl` metadata, can select a local independent
+CSL style inside the same scope. Empty style uses Pandoc's default. MRW does not
+download remote or dependent styles, execute document filters, rewrite citekeys,
+or write to Zotero. Standalone narrative `@key` remains unsupported. Markdown
+links, escaped examples, inline code and fenced examples keep their behavior.
+
+Processing is serialized and bounded to 4 MiB notes/resources/output, 128 citation
+groups and 128 distinct keys. Pandoc subprocesses time out after 15 seconds;
+the Windows lookup has a 12-second outer timeout. Results for an older buffer
+version, closed document or disposed extension are discarded. Citation-file and
+configuration notifications refresh derived rendering. External selected notes
+folders are watched separately from the workspace.
+
+Reader annotations use the same selected source and processor in the saved
+source reader. Their text and attribution remain exact. Safe Markdown links
+remain links; no automatic source-to-Zettel association is created.
+
+The maintainer's unchanged Number Fields note now displays **(Marcus 2018)** for
+`[@marcusNumberFields2018]` through Windows Zotero / Better BibTeX. Its local
+export lacks that key; live lookup resolves the selected item. Native WSL preview
+and dirty-buffer preservation were observed in an isolated window. See the
+[repair and verification account](CITATION_ZOTERO_REPAIR.md).
+
+The adapter reuses Pandoc parsing and CSL formatting in VS Code's existing
+preview. API contracts: [Better BibTeX JSON-RPC](https://retorque.re/zotero-better-bibtex/exporting/json-rpc/),
+[Pandoc citations](https://pandoc.org/MANUAL.html#citations), and
 [VS Code Markdown extensions](https://code.visualstudio.com/api/extension-guides/markdown-extension).
-
-Read-only inspection of the maintainer's Number Fields note found its key
-marcusNumberFields2018 absent from the configured local export. It remains
-unresolved; MRW does not fabricate a reference from newer live Obsidian data.
-Current evidence is in the [register](DESIGN_RECONCILIATION.md).
 
 ## Resume and inspect
 
@@ -162,9 +187,10 @@ API versions. Older local APIs without a server ID are labelled with a missing
 identity, not assigned an invented one. Their metadata bytes are still retained;
 automatic cross-instance matching is unavailable.
 
-This increment has no Web API transport, library writes, two-way synchronization,
-bibliography refresh, user-selected citation style, shared reference store or
-general PROV exporter. Resume displays at most 500 retained references; exact
+The retained-reference workflow has no Web API transport, library writes,
+two-way synchronization, shared reference store or general PROV exporter.
+Citation-preview refresh and local CSL selection are separate from retaining
+references. Resume displays at most 500 retained references; exact
 links remain usable beyond that list. Library selection lists at most 100 groups.
 Read operations and records are bounded; narrowing a search is required if a
 response exceeds 4 MiB. Attachment tabs currently display digest filenames.
