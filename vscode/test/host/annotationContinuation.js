@@ -68,7 +68,7 @@ editor.replaceRange(${JSON.stringify(text)},editor.offsetToPos(offset));await vi
         const timer=setTimeout(()=>void vscode.commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem'),300);
         try{return await result;}finally{clearTimeout(timer);picker.dispose();}
       }
-      const api={...vscode,window:{...vscode.window,showQuickPick:pick,
+      const api={workspace:vscode.workspace,env:vscode.env,Uri:vscode.Uri,window:{showWarningMessage:vscode.window.showWarningMessage,setStatusBarMessage:vscode.window.setStatusBarMessage,showQuickPick:pick,
         showOpenDialog:async()=>[vscode.Uri.file(path.join(config.notesRoot,config.note))],
         showInformationMessage:async(_,...args)=>typeof args.at(-1)==='string'?args.at(-1):undefined}};
       const continuation=createContinuation({vscode:api,bridge,publish:async(_,change)=>{
