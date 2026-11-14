@@ -93,6 +93,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Release 0.23.34](RELEASE_0_23_34.md) records the live Zotero citation repair,
+exact sources, native observations, package checks and publication.
+
 [Release 0.23.31](RELEASE_0_23_31.md) records that package's publication,
 checks and installation status. The [0.23.32 implementation account](MAINTENANCE_20261114.md)
 records the subsequent repairs and limits; use the [README](../README.md) for
