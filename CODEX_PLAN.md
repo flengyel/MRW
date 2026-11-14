@@ -1,5 +1,15 @@
 # CODEX_PLAN.md
 
+## Saved-source access — 0.23.29
+
+Published and pushed; [delivery checks](docs/RELEASE_0_23_29.md). Not installed into the working window.
+Open Saved Source is directly available beside Open Document. Its picker and
+Open Document's saved results include authors, passage titles and reader-note
+counts; description/detail search finds tags inside retained sections. Preserve
+this access, qualified identifiers, retained revisions and annotations. No storage
+migration was needed. The broader interface audit below remains outstanding.
+
+
 ## Interface audit — next repair
 
 The [13 November audit](docs/INTERFACE_AUDIT_20261113.md) distinguishes implemented tools hidden in the
