@@ -15,6 +15,14 @@ user instructions or the register. Preserve work, exact identities, subsystem
 ownership, explicit execution and isolated testing; do not drop those constraints
 when consolidating history. Verify source, release and installation separately.
 
+## Reader-note interaction — observed repair
+
+Apply [the reader-note repair](CODEX_READER_NOTE_REPAIR.md) before expanding
+reader forms. The ordinary writing path must begin with the note, preserve
+attribution and drafts, and require no purpose classification. D07 records
+current status. This refines the existing interface task and preserves the
+remaining work.
+
 ## Justification engine and architecture
 
 Preserve the integral engine in the [architecture overview](ARCHITECTURE.md)
