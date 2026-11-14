@@ -193,6 +193,16 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       return result;
     }, result => `${result.message}. Effective location: ${result.location}.`, true));
   }
-  return { bridge, registerCommands };
+  async function inspectionRoots(){
+    const original=home(),binding=path.join(original,'artifact-runtime','active-store.json');
+    async function bounded(file){const h=await fs.open(file,require('node:fs').constants.O_RDONLY|require('node:fs').constants.O_NOFOLLOW);try{const before=await h.stat();if(!before.isFile()||before.size>1024*1024)throw Error('Artifact inspection metadata exceeds its budget');const buffer=Buffer.alloc(before.size+1);let offset=0;while(offset<buffer.length){const {bytesRead}=await h.read(buffer,offset,buffer.length-offset,null);if(!bytesRead)break;offset+=bytesRead;}const after=await h.stat();if(offset!==before.size||before.size!==after.size||before.mtimeMs!==after.mtimeMs)throw Error('Artifact inspection metadata changed');return buffer.subarray(0,offset);}finally{await h.close();}}
+    let raw;try{raw=await bounded(binding);}catch(e){if(e.code==='ENOENT')return [{path:original,label:'Workspace MRW storage'}];throw e;}
+    const value=JSON.parse(raw);if(value.version!==1||typeof value.location!=='string'||!path.isAbsolute(value.location)||typeof value.store_id!=='string'||!/^[a-f0-9]{64}$/.test(value.identity_hash))throw Error('Artifact binding cannot be inspected safely');
+    if(await fs.realpath(value.location)!==value.location)throw Error('Bound artifact location was redirected');
+    const identityRaw=await bounded(path.join(value.location,'store.json')),identity=JSON.parse(identityRaw);
+    if(identity.id!==value.store_id||require('node:crypto').createHash('sha256').update(identityRaw).digest('hex')!==value.identity_hash)throw Error('Bound artifact identity differs');
+    return [{path:original,label:'Workspace MRW storage'},{path:value.location,label:'Verified bound saved-work store'}];
+  }
+  return { bridge, registerCommands, inspectionRoots };
 }
 module.exports = { createArtifactStorage };

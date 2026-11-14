@@ -121,3 +121,18 @@ relocation/restart, late external outcomes, duplicate shared events and large
 histories under a measured memory limit. Tests remain outside the ordinary-use
 population. Verify discoverability in the native interface separately from
 counts in a test report.
+
+## Bounded report interface
+
+The optional diagnostics companion consumes inspection API 1. Routine reports
+read bounded local history batches and pending observations, without calling
+the mutating shared-history synchronization scan or loading the whole history.
+Root actions count once; correlated children remain diagnostic detail. Tests,
+development and scheduled origins are excluded from human totals. Coverage
+refreshes on configuration/trust changes. Workspace move actions are observed
+before relocation; a missing ending remains pending/unobserved.
+
+Limits and local/shared/unobserved coverage precede counts. Command registration
+establishes entry-point availability, not companion reachability or continuous
+availability while VS Code is closed. Unknown intervals are not zero use.
+Remaining adoption/availability evidence stays in the [register](DESIGN_RECONCILIATION.md).

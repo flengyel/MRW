@@ -17,17 +17,19 @@ const safe=value=>String(value??'unknown').replace(/[\r\n\x00-\x1f\x7f]/g,' ').r
 async function write(file,data){await fs.mkdir(path.dirname(file),{recursive:true,mode:0o700});const tmp=file+'.'+crypto.randomUUID()+'.pending';try{await fs.writeFile(tmp,JSON.stringify(data,null,2)+'\n',{flag:'wx',mode:0o600});await fs.rename(tmp,file);}finally{await fs.unlink(tmp).catch(e=>{if(e.code!=='ENOENT')throw e;});}}
 async function read(file){try{const s=await fs.lstat(file);if(!s.isFile()||s.isSymbolicLink()||s.size>8*1024*1024)throw Error('Report metadata is redirected or exceeds 8 MiB');const raw=await fs.readFile(file,'utf8');if(Buffer.byteLength(raw)>8*1024*1024)throw Error('Report metadata grew beyond its limit');return JSON.parse(raw);}catch(e){if(e.code==='ENOENT')return;throw e;}}
 async function lock(directory,scope){
-  await fs.mkdir(directory,{recursive:true,mode:0o700});const file=path.join(directory,hash(scope)+'.lock'),token=crypto.randomUUID();
-  for(let i=0;i<2;i++)try{
-    await fs.writeFile(file,JSON.stringify({token,pid:process.pid,host:os.hostname(),started:new Date().toISOString()}),{flag:'wx',mode:0o600});
-    return async()=>{const value=await read(file);if(value?.token===token)await fs.unlink(file);};
-  }catch(e){if(e.code!=='EEXIST')throw e;const prior=await read(file).catch(()=>undefined);if(!prior||typeof prior.pid!=='number'||prior.host!==os.hostname())throw Error('A report lock needs review; its owner is unknown. No payload was changed.');
-    let alive=true;try{process.kill(prior.pid,0);}catch(e){if(e.code==='ESRCH')alive=false;else throw e;}
-    if(alive)throw Error('A diagnostics report is already running for this scope.');
-    const again=await read(file);if(again?.token!==prior.token)throw Error('Report lock changed. Try again later.');await fs.unlink(file);
-  }
-  throw Error('Could not acquire the diagnostics report lock.');
+  await fs.mkdir(directory,{recursive:true,mode:0o700});const file=path.join(directory,hash(scope)+'.lock');
+  // A kernel-held lock releases on process exit. Never remove/recreate its inode:
+  // token-check/unlink stale recovery races across windows.
+  const script="import os,sys,fcntl,stat\np=sys.argv[1]\nf=os.open(p,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)\nassert stat.S_ISREG(os.fstat(f).st_mode)\ntry: fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)\nexcept BlockingIOError: sys.exit(73)\nprint('ready',flush=True)\nsys.stdin.read()\n";
+  const child=require('node:child_process').spawn('python3',['-u','-c',script,file],{shell:false,stdio:['pipe','pipe','pipe']});
+  return new Promise((resolve,reject)=>{let ready=false,settled=false;const timer=setTimeout(()=>{child.kill();reject(Error('Diagnostics lock helper timed out'));},5000);timer.unref?.();
+    const closed=new Promise(done=>child.once('close',done));
+    child.once('error',e=>{clearTimeout(timer);reject(e);});child.stdin.on('error',()=>{});child.stderr.on('data',()=>{});
+    child.stdout.on('data',data=>{if(ready||!data.toString().includes('ready'))return;ready=true;clearTimeout(timer);resolve(async()=>{if(settled)return;settled=true;child.stdin.end();await closed;});});
+    child.once('close',code=>{clearTimeout(timer);if(!ready)reject(Error(code===73?'A diagnostics report is already running for this scope.':'Diagnostics lock helper unavailable.'));});
+  });
 }
+
 function markdown(report){
   const r=report.inspection,lines=['# MRW diagnostics','',`Scope: ${safe(report.scope)} · origin: ${safe(report.origin)}`,`Run: ${safe(report.id)} · ${safe(report.started)} to ${safe(report.ended)}`,`Status: ${safe(report.status)}`,'',safe(r?.coverage||'No integrity coverage established.'),''];
   if(r){lines.push(`Read ${r.resources?.files||0} files / ${r.resources?.bytes||0} bytes in ${r.resources?.milliseconds||0} ms.`,`Omitted findings: ${r.resources?.omittedFindings||0}.`,'','| Check | State | Target | Observation |','| --- | --- | --- | --- |');for(const f of r.findings||[])lines.push('| '+[f.kind,f.state,f.locator,f.detail].map(safe).join(' | ')+' |');

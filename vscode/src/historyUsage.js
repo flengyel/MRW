@@ -7,7 +7,8 @@ class UsageOperations{
   cancel(){const current=this.context.getStore();if(current)current.cancelled=true;}
   async run(operation,action,identity){
     const recorder=this.recorder,parent=this.context.getStore(),start=performance.now();
-    const event=recorder.record('operation.start',{operation,parent:parent?.event.id},'observed_action',identity);
+    const event=recorder.record('operation.start',{operation,feature:require('./featureInspection').featureID(operation),actor:identity?.actor||'human',parent:parent?.event?.id},'observed_action',identity);
+    if(!event)return action();
     identity=event.identity;
     const current={event,cancelled:false};
     return this.context.run(current,async()=>{

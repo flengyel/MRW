@@ -117,7 +117,14 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     } catch (error) { c.notes = null; c.noteError = error.message; }
     if (c.selected === undefined) c.selected = result.outline.regions.at(-1)?.id;
     c.panel.title = `Source: ${result.outline.source.bibliography.title || path.basename(result.outline.source.path)}`;
-    await c.panel.webview.postMessage({ type: 'outline', model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
+    const citationViews={};
+    const citationConfig=vscode.workspace.getConfiguration('mrw'),citationRoot=citationConfig.get('notesFolder','');
+    if(citationRoot&&vscode.workspace.isTrusted!==false)for(const note of [...result.outline.annotations,...result.outline.regions.flatMap(r=>r.annotations)]){
+      if(!/\[@/.test(note.text))continue;
+      try{citationViews[note.id]=await require('./citations').prepare({text:note.text,file:path.join(citationRoot,'MRW-source-annotation.md'),root:citationRoot,configuration:{executable:citationConfig.get('citationExecutable',''),bibliography:citationConfig.get('citationBibliography',''),style:citationConfig.get('citationStyle','')}});}
+      catch(e){citationViews[note.id]={citations:{},status:e.message};}
+    }
+    await c.panel.webview.postMessage({ type: 'outline', citationViews, model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
       diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v2', 'theme'),
       returnDestination: readingDestination?.(c.returnContext?.location || null),
@@ -239,6 +246,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       await locked(async () => {
         active = c.result.outline.id;
         if (value.type === 'ask_ai') await askPassage(c, value);
+        else if(value.type==='copy_companion')await askPassage(c,{...value,companion:true});
         else if (value.type === 'edit') await mutate(c, value.change, value.draft);
         else if (value.type === 'continue_annotation') {
           try {
@@ -336,7 +344,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
           localResourceRoots: [] });
       c = { panel, result, store, root, selected: result.outline.regions.at(-1)?.id, pending: 0 };
       panels.set(id, c);
-      context.subscriptions.push(panel, panel.webview.onDidReceiveMessage(value => message(c, value)),
+      context.subscriptions.push(panel, panel.webview.onDidReceiveMessage(value => {const action=()=>message(c,value);return recorder?.operations&&['ask_ai','edit','continue_annotation','delete_annotation','link_note','reading_return','render_diagram','stacks_citation'].includes(value?.type)?recorder.operations.run('reader.'+value.type,action):action();}),
         panel.onDidChangeViewState(event => {
           if (event.webviewPanel.active) active = id;
           if (event.webviewPanel.visible && !c.pending) void panel.webview.postMessage({ type: 'idle' });
@@ -345,7 +353,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
       const support = [];
-      for (const name of ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
+      for (const name of ['media/markdown-it/markdown-it.js', 'media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
         support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
       }
       for(const name of ['sourceReader.js','sourceRendering.js'])support.push(await fs.readFile(path.join(context.extensionPath, 'src',name), 'utf8'));
@@ -398,7 +406,8 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const target = await readerTarget(c, { region, pinned: value.pinned === true });
     const result = await bridge({ method: 'outline_assistance_context', store: c.store,
       project_root: c.root, reference: target.reference });
-    await askRetained(result.context, c.root);
+    if(value.companion){await vscode.env.clipboard.writeText(result.context.text+'\n\nRetained source: '+target.reference+'\nRevision: '+result.context.source_revision);await vscode.window.showInformationMessage('Exact passage and retained reference copied. Paste into Codex or your chosen companion. Nothing was sent.');}
+    else await askRetained(result.context, c.root);
   }
   register('mrw.askReader', () => locked(() => askPassage(current())));
   async function chooseTarget(passagesOnly = false, location) {

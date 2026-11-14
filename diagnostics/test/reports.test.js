@@ -16,7 +16,7 @@ test('partial findings remain open; resolution requires explicit positive rechec
 });
 test('cross-window lock coordinates runs and stale process lock recovers without payload writes',async t=>{
  const f=await fixture(t),release=await lock(f.opts.locks,'fixture');await assert.rejects(lock(f.opts.locks,'fixture'),/already running/);await release();
- const file=path.join(f.opts.locks,crypto.createHash('sha256').update('fixture').digest('hex')+'.lock');await fs.writeFile(file,JSON.stringify({pid:99999999,host:os.hostname(),token:'older'}));const done=await lock(f.opts.locks,'fixture');await done();assert.equal((await fs.readdir(f.opts.locks)).length,0);
+ const file=path.join(f.opts.locks,crypto.createHash('sha256').update('fixture').digest('hex')+'.lock');await fs.writeFile(file,JSON.stringify({pid:99999999,host:os.hostname(),token:'older'}));const done=await lock(f.opts.locks,'fixture');await done();assert.equal((await fs.readdir(f.opts.locks)).length,1); // Stable lock inode is retained; kernel ownership is released.
 });
 test('cancellation, unsupported API and interrupted schedule remain recoverable and never make model requests',async t=>{
  const f=await fixture(t),c=new AbortController();c.abort();const report=await f.r.run({signal:c.signal});assert.equal(report.status,'cancelled');assert.equal((await f.r.state()).pending,null);

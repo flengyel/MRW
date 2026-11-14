@@ -9,7 +9,7 @@ const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument',
 const purposes = ['explanation', 'orientation', 'governing_idea', 'intermediate_claim', 'reconstruction',
   'intended_inference', 'cited_dependency', 'reusable_lemma', 'question', 'suspected_gap', 'proposed_repair'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
-let continuations = [], continuationErrors = {};
+let continuations = [], continuationErrors = {}, citationViews = {};
 let notes = [], noteTargets = {}, noteError, lastReadingFocus;
 let storageFrozen = false;
 let returnDestination;
@@ -179,7 +179,7 @@ function renderNotes(parent, annotations, scope, title = 'Reader notes') {
     const action = button(notes,'Link another note…',
       {type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope,action:'new'},'continue-annotation',true);
     action.title='Link this source annotation to an independently maintained note. Select, paraphrase or combine its material; exact copying is optional.';
-    if (window.MRWAnnotations) window.MRWAnnotations.render(content, note.text, { fragments: note.fragments,
+    if (window.MRWAnnotations) window.MRWAnnotations.render(content, note.text, {citationView:citationViews[note.id], fragments: note.fragments,
       appearance: diagramAppearance,
       onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),
       onAppearance: value => { diagramAppearance = ['paper', 'dark'].includes(value) ? value : 'theme';
@@ -350,9 +350,7 @@ function render() {
       { type: 'stacks_citation', tag: o.published.qualified_tag || o.published.tag }, 'original-source').title =
       'Open the current published page in your browser. The retained source revision and annotations stay unchanged.';
   }
-  button(readingBar, 'Study current material', { type: 'study_current' }, 'study-current');
-  button(readingBar, 'Work through a proof…', { type: 'proof_study' }, 'proof-study');
-  button(readingBar, 'Ask AI about a passage…', { type: 'ask_ai' }, 'ask-ai');
+  button(readingBar, 'Ask OpenAI API about a passage…', { type: 'ask_ai' }, 'ask-ai');
   button(readingBar, 'Refresh saved source', { type: 'refresh' }, 'refresh').title =
     'Reload saved reader state and annotations; this does not reacquire the original document.';
   if (Object.values(o.published?.parts || {}).some(p => p.role === 'proof' && o.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)))) {
@@ -367,7 +365,7 @@ function render() {
   updateReturnDestination();
   if (reference?.status === 'changed or removed') {
     el('p', reference.notice, root, 'warning').dataset.reference = 'true';
-    button(root, 'Ask AI about the earlier linked passage…', { type: 'ask_ai', pinned: true }, 'ask-ai-pinned');
+    button(root, 'Ask OpenAI API about the earlier linked passage…', { type: 'ask_ai', pinned: true }, 'ask-ai-pinned');
   }
   if (o.retained_error) el('p', `Retained source unavailable: ${o.retained_error}. No source text was guessed.`, root, 'warning');
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
@@ -531,7 +529,8 @@ function render() {
       remove.dataset.empty = String(!r.annotations.length);
       if (!r.annotations.length) remove.title = 'This passage has no MRW annotations to delete. Manage linked notes separately.';
       button(assistance, 'Link Obsidian note…', { type: 'associate_note', region: r.id, pinned: false }, 'link-reader-note', true);
-      button(assistance, 'Ask AI about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
+      button(assistance, 'Ask OpenAI API about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
+      button(assistance, 'Copy passage for Codex…', { type: 'copy_companion', region: r.id }, 'copy-companion');
     }
   }
   const help = el('p', '', root, 'control-help');
@@ -566,6 +565,7 @@ window.addEventListener('message', event => {
   }
   if (value.type === 'storageRelease') { storageFrozen = false; controls(); return; }
   if (value.type === 'outline') {
+      citationViews=value.citationViews||{};
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     continuations = value.continuations || []; continuationErrors = value.continuationErrors || {};
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;

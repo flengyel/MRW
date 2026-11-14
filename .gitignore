@@ -20,3 +20,5 @@ __pycache__/
 /.codex-work/tikz-*/
 /.codex-work/reader-ai-*/
 /.codex-work/folder-rename-*/
+
+/diagnostics/*.vsix

@@ -229,17 +229,16 @@ Obsidian command and then select its saved file. Choose ordinary Markdown or the
 optional Zettel format. For Zettel, complete the title index link in SEE ALSO;
 the template alone leaves it empty.
 
-Use **Copy annotation for the note body**, paste before SEE ALSO, and save.
-Then use **Resume pending transfer… → Copy source attribution and return link**,
-paste in Research, and save. Preserve the copied blank lines and existing text.
-An ordinary Markdown note keeps its own chosen body and attribution locations.
-Finally choose **Verify saved note and finish continuation**. Zettel validation
-uses your selected existing validator, not an MRW note template.
+Copying annotation text and its attribution/return link is optional. The note
+can paraphrase the annotation or combine several sources. Save it, then choose
+**Confirm selected saved note and link**. The selected external validator checks
+the Zettel format when requested; it does not judge the note's content.
 
-After verification, **Open continuation** opens the editable external note and
-**Inspect retained original annotation** preserves the earlier text. Repeat the
-action to resume a pending transfer, not to copy it again. A missing note offers
-explicit relinking. No transfer opens an AI request or compiles TikZ.
+**Open continuation** opens the external note. The source annotation remains
+editable and the snapshot captured when linking stays inspectable. **Link another
+note…** preserves existing associations. Pending links resume without creating a
+second file; missing notes offer explicit relinking. No link opens an AI request
+or compiles TikZ.
 See [continuation and recovery](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
 
 **Refresh saved source** reloads the saved state without acquiring a new revision.
@@ -525,3 +524,32 @@ the note. For a PDF it reopens the file; MRW does not preserve the PDF page.
 A separate note needs no OCR. Selecting or searching text in a scanned PDF does.
 Existing inline reader annotations remain in their saved sources; this command
 does not convert or remove them.
+
+## Grouped tools and companion routes
+
+Commands has Open Document and Open Saved Source, then purpose menus: Reading
+and Notes, Sources and References, Calculation, Proofs, Tools and Setup, and
+Earlier Saved Work. Type in the native picker or use arrows and Enter. Escape
+preserves the current work. Setup distinguishes installed, configured and
+unchecked companions and opens their existing guides.
+
+Calculation opens native notebooks, retained results, comparison and provenance
+export. Retained notebooks are read-only; comparison submits no cell execution.
+Proofs contains Lean lessons and Proof Outline. Lesson actions apply to the
+selected lesson or associated code; shared code offers a choice. Unrelated Lean
+files keep native Lean controls.
+
+Source annotations stay editable after linking an external note. Copying is
+optional: the note can paraphrase or combine sources. Create new vault notes
+through the authoring application's configured template, then select the saved
+file. Linking retains a source snapshot; it does not certify a completed Zettel.
+See [note associations](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
+
+Bracketed Pandoc citations render through a trusted local Pandoc processor and
+scoped bibliography. Missing keys remain visible; opening triggers no live
+Zotero query or remote style download. See [citation setup](https://github.com/flengyel/MRW/blob/main/docs/ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes).
+
+The optional MRW Diagnostics companion adds Feature Use and Integrity and Data
+Hygiene reports, export and a reviewable Codex handoff. Weekly reporting is opt-in;
+missed runs coalesce while VS Code is active. Reports do not repair or delete
+research or invoke Codex. See [diagnostics](https://github.com/flengyel/MRW/blob/main/docs/DIAGNOSTICS_PLUGIN.md).

@@ -259,88 +259,55 @@ range has since changed.
 
 ## Continue a reader annotation
 
-An annotation or workspace source note can supply material for a Zettel.
-The reader chooses what to retain and how to develop and link it in the
-Zettelkasten editor. This command preserves an exact annotation and its source
-as a starting point; verification checks the saved transfer and any selected
-format. It does not establish that the resulting note is developed or that its
-connections are useful. Continue writing in the external note after transfer.
-Other workspace notes and results can be used through ordinary authoring;
-this command handles one saved reader annotation. See
-[source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
+In Reader notes, choose **Continue this note in Obsidian…** or **Link another
+note…** beside a saved annotation. Select an existing note, or invoke your
+configured Obsidian template creation command. Complete creation in Obsidian
+and explicitly select the saved file. Existing notes can also be edited and
+saved in the native VS Code editor.
 
-In **Reader notes**, choose **Continue this note in Obsidian…** beside the saved
-annotation. This action concerns that annotation, not the source quotation or
-all notes on the passage. Save reader drafts first.
+The source annotation remains editable. The linked note may paraphrase it,
+combine several sources, or contain independently written work. Multiple notes
+can link to one annotation and the same note to several annotations. Source
+identity, original attribution, exact retained-passage reference and the snapshot
+captured when linking remain available separately.
 
-1. Select an existing note, or invoke the configured Obsidian creation command.
-   For a new note, finish the template and save in Obsidian, then select that
-   file explicitly. MRW does not guess its name or treat command dispatch as a
-   completed Save. One note may collect several annotations.
-2. Select this destination's format: ordinary Markdown, or **Zettel —
-   flengyel/Zettel**. The Zettel choice runs the existing validator on that one
-   saved note. Set **MRW: Zettel Validator** (`mrw.zettelValidator`) to its
-   `python/zettel_validate.py` in User or Remote settings, or select it when
-   prompted. Executable settings are not read from Workspace settings. The configured
-   `mrw.pythonExecutable` must have PyYAML. The wrapper calls that tool's
-   validator and index helpers; MRW contains no replacement Zettel template.
-3. Use **Copy annotation for the note body**. Paste at the chosen body location
-   in Obsidian without replacing existing text. For Zettel, this is before
-   `## SEE ALSO`. Keep the copied blank lines; they delimit the insertion during
-   verification. Save in the authoring application.
-4. Use **Resume pending transfer… → Copy source attribution and return link**.
-   Paste into `## Research`, or the accepted older manual section. Save again.
-   Ordinary Markdown keeps its own layout and chosen attribution location.
-5. Choose **Verify saved note and finish continuation**. MRW checks both exact
-   insertions, preservation of the existing note text, current annotation and
-   destination revisions, and the selected format's validation. Only then does
-   it publish the continuation and its passage association.
+Copying the annotation and its attribution/return link is optional. Use the copy
+actions when useful, then save in the authoring application. **Confirm selected
+saved note and link** verifies the saved destination and selected format without
+requiring an exact-text replica or special marker. If **Zettel — flengyel/Zettel**
+is selected, the existing external validator checks that note only. Other notes
+keep their own format. Format validation does not establish intellectual
+completeness or useful conceptual links. See [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
-For the selected Zettel format, filename stem and YAML `id` remain identical.
-YAML `title` remains `ID Human title`; the unique H1 contains only the human
-title. The validator checks ordered SEE ALSO/Research sections and a
-**title-appropriate index link** in SEE ALSO. The Obsidian template leaves that
-link empty: complete it through ordinary editing before preparing the transfer.
-Validation reports index choices from the existing helper; it invents no topical
-relations. Keep `reference-section-title: References` for exported bibliographies.
-Existing notes retain the older section forms accepted by the validator; no
-other notes are converted or reindexed. These rules apply only when selected.
+The maintainer's format keeps filename stem equal to YAML id, YAML title as
+ID plus human title, a unique H1, SEE ALSO and Research, and a title-appropriate
+index link. Preserve reference-section-title: References for exported
+bibliographies. MRW does not create or fill that template.
 
-An annotation with its own H1 or reserved heading offers an explicit quotation
-wrapper. It remains **reader commentary**, with its attribution in Research.
-The original text stays exact in MRW. Relative links, WikiLinks and TeX macros
-may depend on the original context; MRW identifies these for review, without
-rewriting them. Raw TikZ fences survive transfer, but Obsidian's ability to
-render them depends on its plugins. No transfer, open or Save runs TeX, a kernel
-or AI.
-
-After completion, **Open continuation** opens the ordinary note. Continue editing
-there. **Inspect retained original annotation** shows its earlier text and
-attribution; it is no longer offered as another current editor. That attribution
-does not describe later writing in the external note. Its return link opens the
-exact retained passage, including its qualified identifier and source revision.
-Opening the whole external note is supported; heading/block routing is not.
+Prior transfer records and snapshots remain readable. After linking, edit the
+source annotation or open the external note according to the work being done.
+Neither silently overwrites the other. Removing an association does not delete
+its external note. Missing targets, dirty buffers and uncertain publication
+retain their explicit recovery paths; no retry creates another note.
 
 ### Pending transfers and missing notes
 
 The pending record survives MRW restart in the existing private source store.
 Resume it beside the annotation. Repeated invocation neither creates another
-file nor inserts text. An already saved chunk is not copied again. If saving
+file nor inserts text. A duplicate optional copy is reported; linking does not require copying. If saving
 failed, the annotation remains current. If note text was saved but link
 publication failed, keep that text and recover/reload the private store as
 instructed; verify the same pending destination without pasting again.
 
-Verification rejects other changes made to the destination during transfer.
-Keep both texts and reconcile them before explicitly cancelling and preparing
-a new transfer. Cancellation never removes already pasted text. MRW never
-writes around an application's unsaved buffer; the authoring application owns
-editing and Save. The two stores are not a distributed atomic transaction.
+Destination changes are rechecked by saved revision; the two works may develop
+independently. Cancellation never removes pasted text. MRW never writes around
+an application's unsaved buffer. The authoring application owns editing and Save;
+these stores are not a distributed transaction.
 
-A missing or renamed note is labelled in the reader. **Manage continuation… →
-Relink to a selected note…** selects its new location explicitly. Removing the
-link leaves the external file and retained original intact; it does not make
-the original current again. Deleting the MRW annotation also leaves vault files
-alone. No background synchronization or search for a similarly named file runs.
+A missing or renamed note is labelled in the reader. Manage association offers
+explicit relinking to a selected file. Removing a link preserves the external
+file and captured source snapshot. Deleting the source annotation leaves vault
+files alone. No background title search or recreation runs.
 
 ## Put an MRW link in the Obsidian note
 

@@ -333,8 +333,7 @@ creation. MRW retains working material, exact source references and return
 locations. This separation preserves the reader's own format and authoring
 practice. Source notes and developed Zettels may have many-to-many associations;
 they need not have identical text or a single editing location. Linking a Zettel
-must not retire its source material. The current exact-copy continuation requires
-correction to meet this rule; see [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
+must not retire its source material. Current associations preserve both works independently; see [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
 Keep the effort of selection and linking while removing repeated entry and
 navigation obstacles. Do not turn that effort into a registration form or

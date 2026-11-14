@@ -164,6 +164,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === 'vscode') return api;
     if (name === './navigation') return navigation;
     if (name === './assistance') return require('../src/assistance');
+    if (['./companionTools','./inspection','./featureInspection'].includes(name)) return require('../src/'+name.slice(2));
     if (name === './notebookResults') return require('../src/notebookResults');
     if (name === './zotero') return require('../src/zotero');
     if (name === './workspaceSetup') return require('../src/workspaceSetup');
@@ -1814,8 +1815,9 @@ test('MRW Activity Bar entry exposes existing views and a registered reading men
   assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.commands']);
   assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
   const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
-  for(const command of ['mrw.chooseReadingOverview','mrw.refreshReadingOutline','mrw.insertOutlineReference','mrw.importStacksSection','mrw.artifactLocation']){
-    assert.ok(overflow.some(v=>v.command===command));assert.ok(h.commands.has(command));
+  assert.ok(overflow.some(v=>v.command==='mrw.refreshReadingOutline'));
+  for(const command of ['mrw.readingTools','mrw.sourceTools','mrw.calculationTools','mrw.proofTools','mrw.companionTools','mrw.earlierWork']){
+    assert.ok(c.menus['view/title'].some(v=>v.command===command&&v.when.includes('mrw.readingOutline')));assert.ok(h.commands.has(command));
   }
   for(const command of ['mrw.openOutline','mrw.revealReadingDocument']){
     assert.ok(c.menus['view/title'].some(item=>item.command===command&&item.when==='view == mrw.readingOutline'&&item.group?.startsWith('navigation')));

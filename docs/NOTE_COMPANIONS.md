@@ -73,11 +73,11 @@ For a saved reader annotation, **Continue this note in Obsidian…** reuses that
 creation command or selects an existing note. Native editing and Save are
 followed by explicit verification before the external note becomes current.
 [Continue an annotation](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation)
-describes the two insertions, optional Zettel validation and failure recovery.
-This implemented transfer must not be confused with developing a Zettel from
-source material: the latter permits selection, reformulation and combining
-sources while those source notes remain independently editable. The exact-copy
-gate and retirement of the original remain pending corrections.
+describes optional copying, association, selected-format validation and recovery.
+Source annotations and Zettels remain independently editable. One source note
+can link several notes, and one note can combine several sources. Linking
+preserves an attributed source snapshot; it requires no matching prose or
+retirement of the source annotation.
 
 ## Obsidian now
 

@@ -81,39 +81,52 @@ item and may show later metadata.
 
 ## Citation rendering in existing notes
 
-The current connector's formatted Markdown citations are distinct from
-Obsidian/Pandoc citation syntax such as `[@key]`, `@key`, citation locators and
-a bibliography supplied through note metadata or an Obsidian plugin. MRW
-0.23.31 does not run a citation processor for these forms. Connecting Zotero
-does not make them resolve in the MRW Markdown viewer or generate a bibliography.
-This is a reader capability gap, not evidence that the Zotero library is empty.
+Native Markdown preview uses the existing Pandoc/CSL processor for bracketed
+citations such as `[@key]` and `[@first, p. 4; @second]`. Note text, YAML,
+positions, dirty buffers and Return remain native. The generated bibliography
+belongs to the view and is never appended to the note.
 
-The required follow-up is optional read-only citation rendering through an
-existing compatible processor. [Pandoc's citation documentation](https://pandoc.org/MANUAL.html#citations)
-describes supported syntax and bibliographic data. Evaluate the existing host
-renderer/extension and Pandoc/CSL interfaces before implementing a parser or
-formatter. Reuse supported note metadata (`bibliography`, `csl`, or inline
-`references` where supported) or an explicitly configured local bibliography
-export and style, without a second mandatory setup form. Resolve relative paths
-against the note under the existing scope checks. The export may be managed by
-Zotero or its existing plugins. MRW must not write
-the library, invent citekeys or require conversion to its own citation format.
+Set **MRW: Citation Executable** to a trusted Pandoc executable on the workspace
+host; empty uses pandoc on PATH. From WSL, Windows Pandoc can be selected by its
+/mnt/c/.../pandoc.exe path. Executables never come from note or vault metadata.
+Pandoc reads bibliography, local independent csl, and inline references metadata.
+**MRW: Citation Bibliography** and **Citation Style** supply explicit fallbacks.
+Relative resources resolve beside the note inside its selected notes/workspace
+root. CSL-JSON and BibTeX/BibLaTeX are processor inputs, not a new MRW format.
 
-Preserve note bytes, YAML, citation syntax, source offsets, Return and unsaved
-editor contents. Generated citations/bibliography are a view, not appended
-edits. Respect supported bibliography/style declarations and report missing,
-ambiguous or demonstrably stale data explicitly; freshness is unknown without
-reliable revision information. Keep unresolved citations visible. Do not
-scan an entire vault or issue a live Zotero/model request merely on opening;
-honor workspace trust and scoped file access. Run only the selected citation
-processor, with no arbitrary filters, template code or automatic downloads.
+If no bibliography is declared, the selected vault's existing Pandoc Reference
+List data.json bibliography can be reused. Its live Zotero lookup, executable
+and remote style URL are not followed. Empty style uses Pandoc's default;
+styles are not hard-coded in MRW. A local independent CSL style may be selected.
+Freshness relative to Zotero is unknown. Missing and duplicate keys remain
+visible, labelled unresolved or ambiguous. Opening queries no Zotero API,
+downloads no styles, invokes no filters and scans no vault.
 
-Verify an isolated note and bibliography with single/multiple citations,
-locators, missing keys, duplicate keys, changed bibliography, escaped citations,
-literal code examples, offline use and dirty buffers. Native Markdown preview and the retained-source annotation
-renderer are separate surfaces: the latter currently displays Markdown links
-literally. Do not claim that verifying one renderer fixes the other. The
-separate Contents custom-URI navigation gap is also not a citation-rendering fix.
+The current preview replaces bracketed citation groups. Standalone narrative
+@key and dependent/remote CSL styles remain unsupported. Markdown links,
+escaped examples, inline code and fenced examples retain their behavior.
+Processing is serialized, bounded to 4 MiB notes/resources/output and 128
+citation groups, with a 15-second subprocess timeout. Stale results cannot
+replace a newer document version. Citation-file notifications, configuration
+changes and **MRW: Refresh Citation Preview** update derived rendering. External selected
+notes folders are watched separately from the workspace.
+
+Reader annotations are checked separately: the same processor uses the explicit
+notes-folder bibliography, while saved text and attribution remain exact. Safe
+Markdown links become links; unsupported content remains visible. No automatic
+source-to-Zettel association is created.
+
+Evaluation: the native extendMarkdownIt hook preserves VS Code's editor and
+navigation. Existing academic-preview and Pandoc cite extensions were considered;
+some fetch dependent styles or add export machinery. The chosen small adapter
+reuses Pandoc parsing and CSL formatting in the existing preview. See
+[Pandoc citations](https://pandoc.org/MANUAL.html#citations) and
+[VS Code Markdown extensions](https://code.visualstudio.com/api/extension-guides/markdown-extension).
+
+Read-only inspection of the maintainer's Number Fields note found its key
+marcusNumberFields2018 absent from the configured local export. It remains
+unresolved; MRW does not fabricate a reference from newer live Obsidian data.
+Current evidence is in the [register](DESIGN_RECONCILIATION.md).
 
 ## Resume and inspect
 

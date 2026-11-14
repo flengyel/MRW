@@ -62,7 +62,7 @@ function activate(nativeContext) {
     vscode.commands.registerCommand(name, async (...args) => {
       try {
         if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
-        if(['mrw.moveWorkspace','mrw.recoverWorkspaceMove'].includes(name))return await action(...args);
+        if(['mrw.moveWorkspace','mrw.recoverWorkspaceMove'].includes(name)){void recorder.init();return await recorder.operations.run(name,()=>action(...args));}
         return await moveSession.run(async()=>{void recorder.init();return await recorder.operations.run(name,()=>action(...args));});
       } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
     }));};
@@ -311,6 +311,7 @@ function activate(nativeContext) {
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
     compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
+  require('./companionTools').registerCompanionTools({vscode,context,register});
   const notebooks = require('./notebookResults').registerNotebookResults({vscode,context,register,bridge:rawBridge,show,recorder});
   const zotero = require('./zotero').registerZotero({vscode,context,register,reading:readingController,show,onCancel:()=>recorder.operations.cancel()});
   registerLeanStudy({vscode,context,register,trackLocation:require('./readingOutline').trackLocation,
@@ -332,15 +333,20 @@ function activate(nativeContext) {
       return null;
     }});
   moveHost.registerWorkspaceMove({vscode,context,register,session:moveSession,clients:artifactClients,study:studyController,recorder,bridge:request=>runBridge(context.extensionPath,vscode.workspace.getConfiguration('mrw').get('pythonExecutable','python3'),request,{timeout:300000})});
-  recorder.coverage=[...registered.map(id=>({id,status:vscode.workspace.isTrusted?'available':'unavailable'})),
-    {id:'reader.webview.directActions',status:'uninstrumented'},
-    {id:'proofGraph.webview.directActions',status:'uninstrumented'},
-    {id:'study.typing',status:'uninstrumented'}];
+  const refreshCoverage=()=>{
+    recorder.coverage=[...registered.map(id=>({id,status:vscode.workspace.isTrusted?'available':'unavailable',prerequisites:/Zotero|Lean|Obsidian|Notebook/.test(id)?'configuration/companion readiness unchecked':'entry point registered'})),
+      ...['ask_ai','copy_companion','edit','continue_annotation','delete_annotation','link_note','reading_return','render_diagram','stacks_citation'].map(action=>({id:'reader.'+action,status:'available',prerequisites:'reader must be open; action guards apply'})),
+      ...['inspect','delete','restore','restore_all','update_summary','proposal','edit','ask','stacks_page','stacks_citation','source','published','upstream'].map(action=>({id:'proofGraph.'+action,status:'available',prerequisites:'graph must be open; action guards apply'})),
+      {id:'study.typing',status:'uninstrumented'}];
+    if(recorder.started)recorder.record('usage.coverage',{features:recorder.coverage},'observed_action',{});
+  };refreshCoverage();
+  for(const hook of [vscode.workspace.onDidChangeConfiguration,vscode.workspace.onDidGrantWorkspaceTrust])if(hook)context.subscriptions.push(hook.call(vscode.workspace,refreshCoverage));
   deactivateAction=async()=>{if(!moveSession.frozen){await studyController.flush();await recorder.close();}};
   context.subscriptions.push(changed);
   void moveSession.restoreTabs().catch(e=>vscode.window.showErrorMessage('MRW: '+e.message));
   // Activation registers UI and checks local relocation authority. No source acquisition or network access.
-  return { extendMarkdownIt: readingController.extendMarkdownIt };
+  const inspection=require('./inspection').createInspection({version:software.version,scope:vscode.workspace.workspaceFile?.toString()||vscode.workspace.workspaceFolders?.map(f=>f.uri.toString()).join('|')||'no-workspace',storageRoots:artifactStorage.inspectionRoots,usage:options=>require('./featureInspection').featureUse(recorder,options)});
+  return { extendMarkdownIt: readingController.extendMarkdownIt, mrwInspection:inspection };
 }
 
 module.exports = { activate, deactivate:()=>deactivateAction() };

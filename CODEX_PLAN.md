@@ -34,10 +34,10 @@ owner's template, evaluator, kernel manager, queue or managed database writer.
 Preserve subsystem identities separately from MRW captures. Missing companions
 must not block unrelated MRW work; isolate native mutation tests before dispatch.
 
-The source-to-Zettel correction remains pending: exact-copy continuation and
-freezing an annotation are not requirements for developing a Zettel. Preserve
-existing records while repairing that distinction. The current runtime and its
-verification limits remain documented separately.
+Source notes and Zettels develop independently. Preserve prior association
+records, original snapshots and links; do not restore exact-copy or annotation
+retirement gates. Current implementation and verification status belongs in the
+design reconciliation register above.
 
 ## Source notes and the Zettelkasten
 

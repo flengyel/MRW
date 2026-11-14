@@ -105,3 +105,7 @@ for present commands and installation.
 
 - [Study lifecycle](STUDY_LIFECYCLE.md): Archive/Restore, Trash/Undo,
   permanent deletion and interrupted-operation recovery.
+
+- [Current implementation evidence](MAINTENANCE_20261114.md): citations, note associations, grouped tools, diagnostics and contract pilot.
+- [Optional diagnostics companion](../diagnostics/README.md): install separately; core remains usable without it.
+- [Contract pilot mapping](CONTRACT_PILOT.md): proved abstract safety and sampled runtime traces, with explicit assumptions.

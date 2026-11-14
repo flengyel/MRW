@@ -9,6 +9,8 @@ const { registerDocumentMath } = require('./documentMath');
 // scan. A click rechecks the exact occurrence and uses ordinary scoped navigation.
 function registerWikiLinks({ vscode, context, register, documents, compile }) {
   const session = randomUUID(), cache = new WeakMap();
+  const citations = require('./citations').registerCitations({vscode,context,documents});
+  register('mrw.refreshCitations',async()=>{for(const doc of (vscode.workspace.textDocuments||[]).slice(0,16))await citations.update(doc);});
   const math = registerDocumentMath({ vscode, context, documents, compile, session });
   const scheme = vscode.env.uriScheme || 'vscode';
   function linksFor(doc) {
@@ -91,7 +93,7 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
       const href = `${scheme}://flengyel.mrw/document-link?target=${target}`;
       return `<a href="${escape(href)}" title="${escape('Follow ' + zettelLinkParts(node.target).target)}">${escape(zettelLinkParts(node.target).label)}</a>`;
     };
-    return math.extendMarkdownIt(md);
+    return citations.extendMarkdownIt(math.extendMarkdownIt(md));
   }
   async function handleUri(uri) {
     if (await documents.handleUri(uri)) return true;

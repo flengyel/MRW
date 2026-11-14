@@ -227,7 +227,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
       { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] });
     const c = { panel, root, file, busy: false }; panels.set(file, c);
     panel.onDidDispose(() => panels.delete(file));
-    panel.webview.onDidReceiveMessage(m => message(c, m));
+    panel.webview.onDidReceiveMessage(m => {const action=()=>message(c,m);return recorder?.operations&&['inspect','delete','restore','restore_all','update_summary','proposal','edit','ask','stacks_page','stacks_citation','source','published','upstream'].includes(m?.type)?recorder.operations.run('proofGraph.'+m.type,action):action();});
     if (panel.onDidChangeViewState) context.subscriptions.push(panel.onDidChangeViewState(event => {
       if (event.webviewPanel.visible && !c.busy) void panel.webview.postMessage({ type: 'idle' });
     }));

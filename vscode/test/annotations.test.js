@@ -142,3 +142,7 @@ test('Theme falls back to a readable paper image when a dark rendering is unavai
   assert.doesNotMatch(figure.className,/mrw-diagram-theme/);
   assert.equal(figure.all().filter(n=>n.nodeName==='img').length,1);
 });
+
+test('bundled Markdown links and citation display preserve exact mathematical annotation text',()=>{const h=view();h.globals.markdownit=require('../media/markdown-it/markdown-it');const text='Let \\(X\\times_Y X\\). [Source](https://example.test) and [@a].';h.render(text,{citationView:{citations:{'[@a]':{text:'(Author 2020)'}},status:'Local bibliography snapshot'}});assert.equal(h.raw().textContent,text);assert.equal(h.math().length,1);const a=h.root.all().find(n=>n.nodeName==='a');assert.equal(a.href,'https://example.test');assert.equal(a.textContent,'Source');assert.match(h.root.childNodes[0].textContent,/Author 2020/);});
+
+test('annotation citation examples stay exact beside a live resolved citation',()=>{const h=view();h.globals.markdownit=require('../media/markdown-it/markdown-it');h.render('Live [@a]. Code `[@a]`. Escaped \\[@a].',{citationView:{citations:{'[@a]':{text:'(Author 2020)'}}}});const visible=h.root.childNodes[0].textContent;assert.match(visible,/Live \(Author 2020\)/);assert.match(visible,/Code `\[@a\]`/);assert.ok(visible.includes('Escaped \\[@a].'));});

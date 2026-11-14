@@ -28,9 +28,10 @@ inspector. No report establishes complete store health or mathematical truth.
 Enable **MRW Diagnostics: Weekly Enabled** to run one report while the workspace
 is active. Missed weeks coalesce into one run at the next active session. No
 service runs while VS Code is closed. Notification progress offers cancellation.
-A host-local scope lock coordinates windows. An interrupted run is recorded at
-restart; a lock whose process has exited can be recovered. Unknown/corrupt lock
-ownership needs review and is never guessed from age. Reporting and Codex
+A Python 3 / Linux kernel file lock coordinates windows on the host. Its inode
+is retained and its kernel ownership releases automatically on process exit.
+Interrupted runs are recorded on restart; no stale-lock unlink/reclaim race is
+used. The companion reports an unavailable lock helper instead of bypassing it. Reporting and Codex
 maintenance have separate cadences: this companion does not schedule Codex.
 
 Reports and schedule state live in the companion's own extension storage,
@@ -57,3 +58,9 @@ npm run package --prefix diagnostics
 Packaging reuses the core's pinned VSCE installation; it does not publish or
 install either extension. Native-window observations and package verification
 are recorded in the parent MRW delivery report.
+
+The core release includes the optional mrw-diagnostics-0.1.0.vsix asset. Install
+it separately through Extensions: Install from VSIX on the same workspace host.
+This requires core 0.23.32 or a later compatible inspection API 1 implementation.
+Manual Feature Use offers two periods and a comparison; scheduled reports retain
+their separate weekly cadence. The companion does not install or launch Codex.

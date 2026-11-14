@@ -63,11 +63,10 @@ notes may be edited in MRW using native Save and Undo. Integration code must not
 create a parallel route that writes new vault notes directly, reproduces the
 template or bypasses its interactive steps.
 
-The 0.23.30–31 exact-copy continuation remains an implemented transfer workflow.
-It currently checks two exact insertions and makes the original read-only after
-completion. That is not the source-to-Zettel relationship required here. Correct
-it without discarding prior transfer records, original snapshots or links; do
-not describe this design requirement as already delivered.
+Earlier exact-copy transfer records remain preserved. Current associations
+capture a source snapshot without requiring identical destination prose or
+retiring the source annotation. See the [workflow](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation)
+and current [verification status](DESIGN_RECONCILIATION.md).
 
 ## Synchronization and referential integrity
 

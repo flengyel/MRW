@@ -9,7 +9,30 @@
     parent.append(value); return value;
   }
   function prose(parent, text, options = {}) {
-    const display = node('div', parent, text, 'reader-note-text');
+    const display = node('div', parent, undefined, 'reader-note-text');
+    const md=window.markdownit?.({html:false,linkify:false});
+    const spans=[];
+    if(md){
+      md.inline.ruler.before('link','mrw_annotation_citation',(state,silent)=>{
+        for(const[key,cite]of Object.entries(options.citationView?.citations||{}))if(state.src.startsWith(key,state.pos)&&!['(','['].includes(state.src[state.pos+key.length])){
+          if(!silent){spans.push({start:state.pos,end:state.pos+key.length,label:cite.text,problem:cite.problem});const token=state.push('text','',0);token.content=cite.text;}
+          state.pos+=key.length;return true;
+        }return false;
+      });
+      const original=md.inline.ruler.__rules__.find(r=>r.name==='link').fn;
+      md.inline.ruler.at('link',(state,silent)=>{
+        const start=state.pos,before=state.tokens.length,ok=original(state,silent);
+        if(ok&&!silent){const tokens=state.tokens.slice(before),open=tokens.find(t=>t.type==='link_open');
+          if(open){const href=open.attrGet('href')||'';if(/^(?:https?:|vscode(?:-insiders)?:)/i.test(href))spans.push({start,end:state.pos,href,label:tokens.slice(tokens.indexOf(open)+1,tokens.findLastIndex(t=>t.type==='link_close')).filter(t=>t.type==='text'||t.type==='code_inline').map(t=>t.content).join('')});}}
+        return ok;
+      });md.parseInline(text,{});
+    }
+    function append(parent,value){node('span',parent,value);}
+    let offset=0;
+    for(const span of spans){if(span.start<offset)continue;append(display,text.slice(offset,span.start));const a=node(span.href?'a':'span',display,span.label);if(span.href)a.href=span.href;if(span.problem)a.title=span.problem;offset=span.end;}
+    append(display,text.slice(offset));
+    if(options.citationView?.status)node('p',parent,options.citationView.status,'muted');
+    const problems=Object.values(options.citationView?.citations||{}).map(c=>c.problem).filter(Boolean);if(problems.length)node('p',parent,[...new Set(problems)].join('; '),'warning');
     if (!/\\[([]|\$\$/.test(text) && !(options.inlineDollars && /\$[^\n$]+\$/.test(text))) return false;
     let errors = 0;
     // Auto-render normally shares global definitions between expressions.

@@ -265,7 +265,7 @@ test('passage note actions precede AI on one row, including the first note; open
     h.send(value);
     const card = () => h.root.children.find(n => n.dataset.region === region.id);
     const row = card().children.find(n => n.className === 'proof-navigation passage-actions');
-    assert.deepEqual(row.children.map(n => n.dataset.action), ['add-reader-note', 'delete-reader-note', 'link-reader-note', 'ask-ai-passage']);
+    assert.deepEqual(row.children.map(n => n.dataset.action), ['add-reader-note', 'delete-reader-note', 'link-reader-note', 'ask-ai-passage', 'copy-companion']);
     assert.equal(h.button(card(), 'delete-reader-note').disabled, true);
     const key = `note:${region.id}:new`, find = () => h.root.all().find(n => n.dataset.draft === key);
     let form = find(); const text = form.all().find(n => n.tag === 'textarea');

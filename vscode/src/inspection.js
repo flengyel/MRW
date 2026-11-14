@@ -69,6 +69,10 @@ function createInspection({storageRoots=[],usage,version='unknown',scope='worksp
       const candidates=typeof storageRoots==='function'?await storageRoots():storageRoots;const selected=[...new Map(candidates.map(r=>[typeof r==='string'?r:r.path,r])).values()];
       for(const root of selected.slice(0,8)){if(stop)break;await inspectRoot(root);}
       if(selected.length>8)finding('coverage','unchecked',scope,'More than eight roots supplied; extra roots were not inspected');
+      if(typeof storageRoots==='function'){
+        try{const after=await storageRoots();if(JSON.stringify(after)!==JSON.stringify(candidates)){stop='changed-during-inspection';verified.length=0;for(const f of findings)if(f.state==='failure')f.state='changed-during-inspection';finding('authority','changed-during-inspection',scope,'Bound store selection changed during inspection');}}
+        catch(e){stop='changed-during-inspection';verified.length=0;finding('authority','changed-during-inspection',scope,e.message);}
+      }
       const status=stop||(!roots.length||roots.some(r=>r.status!=='complete')||omitted?'partial':findings.some(f=>f.state==='failure')?'failures':'completed-supported-checks');
       return {schema:'mrw.inspection',version:1,run:crypto.randomUUID(),scope,coreVersion:version,started:new Date(started).toISOString(),ended:new Date().toISOString(),status,limits:budget,resources:{files,bytes,milliseconds:Date.now()-started,omittedFindings:omitted},roots,classes,findings,verified:stop?[]:verified,coverage:'Only explicitly supplied core-owned storage roots. Completed supported checks do not establish complete store health; external/remote targets and full schema checks remain unchecked.'};
     }

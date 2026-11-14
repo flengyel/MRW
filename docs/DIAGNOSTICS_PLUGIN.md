@@ -5,7 +5,9 @@ data-hygiene reports. MRW core retains lightweight usage recording and the
 integrity checks required to read, write, move and recover its own data safely.
 Disabling the plugin must not disable those checks or block mathematical work.
 
-This is a design requirement, not a shipped plugin or schedule. Existing
+An initial optional companion is implemented in diagnostics/. Its separate
+VSIX and supported checks are described in [its guide](../diagnostics/README.md).
+The requirements below include checks beyond that bounded implementation. Existing
 source-plugin API 1 and Lean lesson-pack interfaces do not supply a general
 maintenance API. Start with a companion VS Code extension and the minimum
 versioned, read-only MRW inspection interface needed for these reports. Do not

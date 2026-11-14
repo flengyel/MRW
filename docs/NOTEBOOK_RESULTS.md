@@ -83,3 +83,17 @@ It preserves ordinary files, other captures and separately exported archives.
 An opaque marker prevents deleted IDs from reappearing. A restart completes a
 pending deletion. Already open read-only views can retain their displayed text
 until closed. Study deletion does not own these explicitly retained results.
+
+## Native retained-result viewing
+
+With Jupyter installed, retained notebooks open through the native notebook
+editor on a read-only mrw-notebook-result filesystem. Exact retained bytes and
+digests are checked. Comparison uses native notebook diff with saved rich
+outputs; without Jupyter the transcript remains available. Capture/execution
+evidence is a separate action. Reading and comparison submit no execution or
+merge and restore no live kernel.
+
+[nbdime](https://nbdime.readthedocs.io/en/latest/cli.html) was evaluated: web
+comparison adds a server/browser and its CLI supplies text. Native notebook diff
+is the smaller reuse route for this host. Source/method revisions and companion
+files remain in the existing provenance export.
