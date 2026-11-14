@@ -1,0 +1,70 @@
+{
+  "name": "mrw-diagnostics",
+  "displayName": "MRW Diagnostics",
+  "description": "Optional read-only feature-use and integrity reports for MRW.",
+  "publisher": "flengyel",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "main": "./src/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "extensionDependencies": [
+    "flengyel.mrw"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "mrwDiagnostics.featureUse",
+        "title": "MRW Diagnostics: Feature Use"
+      },
+      {
+        "command": "mrwDiagnostics.integrity",
+        "title": "MRW Diagnostics: Integrity and Data Hygiene"
+      },
+      {
+        "command": "mrwDiagnostics.export",
+        "title": "MRW Diagnostics: Export Last Report\u2026"
+      },
+      {
+        "command": "mrwDiagnostics.maintenance",
+        "title": "MRW Diagnostics: Copy Codex Maintenance Handoff"
+      }
+    ],
+    "configuration": {
+      "title": "MRW Diagnostics",
+      "properties": {
+        "mrwDiagnostics.weeklyEnabled": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine-overridable",
+          "description": "Run one bounded read-only report weekly while this workspace is active. A missed run is coalesced at the next active session. Does not call Codex or repair data."
+        },
+        "mrwDiagnostics.historyLimit": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 20,
+          "scope": "machine-overridable",
+          "description": "Maximum number of plugin-owned report files retained. Research and usage records are never deleted by this setting."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/extension.js && node --check src/reports.js",
+    "package": "../vscode/node_modules/.bin/vsce package --no-dependencies"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flengyel/MRW.git",
+    "directory": "diagnostics"
+  }
+}
