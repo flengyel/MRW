@@ -18,7 +18,9 @@ when consolidating history. Verify source, release and installation separately.
 ## Justification engine and architecture
 
 Preserve the integral engine in the [architecture overview](ARCHITECTURE.md)
-and figure. Use [D15 and D21](DESIGN_RECONCILIATION.md) for its current scope and
+and figure. Explain its mathematical purpose using the [worked example and
+current tools](JUSTIFICATION_WORKFLOW.md); lead with grounds and assumptions,
+then describe the logic. Use [D15 and D21](DESIGN_RECONCILIATION.md) for its current scope and
 the separation from the contract pilot, and
 [the justification specification](JUSTIFICATION_LOGIC_EXPERIMENT.md) for the
 existing calculus, records and explicit invocation boundaries.
@@ -30,6 +32,14 @@ save/reopen with source navigation and Return. General search belongs in Lean;
 Python binds and persists artifacts, and the extension presents the interaction.
 A diagram or documentation change does not complete that implementation.
 Carry this objective forward with the remaining D01–D22 repairs.
+
+## CoCalc adapter proposal
+
+The [CoCalc design](COCALC_ADAPTER.md) records project/file handoff and selected
+export capture, with ownership and acceptance criteria. It is not delivered.
+Keep it visible alongside the existing repairs; authenticated reads, execution
+and broader synchronization need a verified contract for the selected
+deployment before implementation.
 
 ## Operational usage and periodic diagnostics — design requirements
 

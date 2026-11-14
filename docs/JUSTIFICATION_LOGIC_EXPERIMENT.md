@@ -12,11 +12,15 @@ experiment in [UX_SPEC.md §9.3](../UX_SPEC.md#93-independent-formal-corresponde
 They do not gate readable study, a useful model exchange, or the current
 [Codex implementation handoff](CODEX_CONTINUATION.md).
 
+For the mathematical purpose, a worked example and current inspection tools,
+start with [Justification: grounds for a mathematical claim](JUSTIFICATION_WORKFLOW.md).
+This document specifies the logic and implementation boundaries.
+
 ## Purpose
 
-The current model records where a claim came from and what checks were run, but
-it does not express how admitted reasons compose. The experiment adds an
-explicit warrant layer for that purpose. Justification logic is therefore an
+Provenance records where material came from and what checks were run. The
+justification layer expresses how explicitly admitted reasons combine to support
+a claim under a recorded context. Justification logic is therefore an
 integral warrant subsystem, not a sidecar attached to AI output. Its invocation
 is nevertheless task-dependent: not every mathematical object, response, or
 work artifact needs an explicit derivation. Its first question is concrete: can
@@ -347,7 +351,8 @@ split:
    time separately from the earlier admission and context time. The bundle
    contains no expected digest of itself.
 
-The complete public command sequence is documented in `README.md`. The
+The public command sequence is documented in the
+[documentary workflow](JUSTIFICATION_WORKFLOW.md#documentary-response-commands). The
 unstamped output of `admit-documentary` is intentionally not direct Lean input.
 Direct maintainer inspection of the internal Lean transport uses the stamped
 `package/request.json` retained by a successful public check:
