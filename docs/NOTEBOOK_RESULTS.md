@@ -47,6 +47,28 @@ optional explicit execution helper. The helper starts a fresh kernel and records
 its report; it is not called by MRW. See the [profile](NOTEBOOK_PROVENANCE_PROFILE.md)
 for the exact receipt and export format.
 
+## Required display and comparison follow-up
+
+Current capture/export is delivered; the complete comparison route remains
+partial. Expose retained-result actions with notebook opening/setup, and keep
+links to input/method revisions and relevant source notes or proof work visible.
+Evaluate the native notebook view/diff first and
+[nbdime](https://nbdime.readthedocs.io/en/stable/cli.html) as a notebook-aware
+alternative before implementing a custom comparison engine. Adoption is not
+decided by naming the library; verify host compatibility, resource use and
+safe rendering of retained output. Preserve the present transcript fallback.
+
+Comparison distinguishes cell source, outputs, metadata and execution receipts;
+a changed image/error must not disappear into raw JSON. Opening a retained
+notebook does not grant trust to execute cells, widgets or arbitrary output
+scripts. Keep exact retained bytes immutable; writable copies are separate.
+No automatic merge, kernel start or replay follows from comparison/export.
+
+Accept the route with two retained results, including text/error and plot output,
+follow their source/method and note/proof links, compare them, export the selected
+records, and return after restart. Record unavailable renderers or unsupported
+output rather than inventing equivalence. See [D12](DESIGN_RECONCILIATION.md).
+
 ## Limits and preservation
 
 Retain at most one 16 MiB notebook and sixteen companion files, each at most

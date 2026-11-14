@@ -1,21 +1,28 @@
 # Codex instructions
 
+## Current authority and maintenance
+
+Use the [design reconciliation register](docs/DESIGN_RECONCILIATION.md) for
+current decisions, pending work and acceptance evidence, and
+[Codex maintenance](docs/CODEX_MAINTENANCE.md) to compare reports with design
+before making changes. Record new status there once rather than duplicating it
+across instruction files. Intervening questions refine the active task unless
+they explicitly cancel it. Carry unresolved work forward.
+
+Dated accounts below preserve version-specific evidence and enduring invariants.
+Their old priorities and task-specific stopping clauses do not override current
+user instructions or the register. Preserve work, exact identities, subsystem
+ownership, explicit execution and isolated testing; do not drop those constraints
+when consolidating history. Verify source, release and installation separately.
+
 ## Operational usage and periodic diagnostics — design requirements
 
-Follow [Operational feature use](docs/OPERATIONAL_USAGE.md) and the
-[optional diagnostics plugin design](docs/DIAGNOSTICS_PLUGIN.md). Feature use
-has been a requirement from the start: retain core recording, make coverage
-explicit, and report used/unused features over a stated period. Current
-command/history counts are partial; direct reports and fuller instrumentation
-remain pending. Do not interpret missing observations as zero use.
-
-The optional plugin owns report analysis, periodic scheduling and presentation.
-Core retains necessary storage checks and bounded read-only inspection
-interfaces. Reporting must not mutate inspected data, run computations or
-bypass a subsystem's repair/creation workflow. Source plugin API 1 is not a
-maintenance API. Keep routine reporting bounded in memory and I/O, separate
-test/automated activity, and never remove features or retained work merely for
-low use. These are design updates, not claims of a shipped plugin or schedule.
+Follow [feature-use measurement](docs/OPERATIONAL_USAGE.md) and the optional
+[diagnostics plugin design](docs/DIAGNOSTICS_PLUGIN.md). Core retains recording
+and essential checks; the plugin owns bounded reports. Reports feed
+[design-guided Codex maintenance](docs/CODEX_MAINTENANCE.md), not automatic
+retirement, deletion or mutation. Fuller instrumentation and scheduling remain
+pending; missing observations are not zero use.
 
 ## Governing integration boundary
 
@@ -276,7 +283,7 @@ Complete the authorized build, verification, release and remote integration step
 before ending the task. Report remote main, package/release and installation
 status separately; identify any unfinished stage explicitly. Preserve the working
 window: publication does not authorize installation or a forced reload.
-[0.23.28 delivery](docs/RELEASE_0_23_28.md) records the latest package.
+[0.23.31 delivery](docs/RELEASE_0_23_31.md) records the latest package at this reconciliation; recheck release and installation before making a current-state claim.
 
 ## Delivered — reader-note controls, 0.23.12
 
@@ -584,8 +591,10 @@ infer a project from filenames. Prepare nested study workspaces separately befor
 a parent rename. The user's real checkout and genuine Stacks study remain in
 place; implementing/testing this feature does not authorize moving them.
 
-Prioritize simplicity and interoperability: retain one VS Code extension and
-the existing Python core in the workspace environment. Use standard local Linux,
+Prioritize simplicity and interoperability: retain one MRW core VS Code
+extension and the existing Python core in the workspace environment. Optional
+companion extensions, including diagnostics, have the scoped responsibilities
+in the integration contract; they do not duplicate the core frontend. Use standard local Linux,
 WSL2 and Remote SSH to Linux extension hosts. Windows VS Code connected to Linux
 is an intended arrangement; native Windows backend portability remains deferred.
 Scoped installed-VSIX checks pass on Windows VS Code with WSL Debian and with
@@ -834,9 +843,12 @@ workstation processes for the same project are unsupported because no
 interprocess lifetime lock exists. Add such a lock only in a separately
 authorized concurrency change.
 
-Startup, opening, restoration and viewing invoke no compiler, checker, external
-editor, notebook kernel, model or network. LaTeX build, external-editor and
-Jupyter handoffs require explicit actions and argument vectors without a shell.
+MRW startup, opening, restoration and viewing do not independently submit
+compilation, proof checking, kernel execution or model requests. Opening through
+a native editor preserves that owner's normal behavior, including Lean language
+service diagnostics. Scoped read-only metadata/status checks follow the
+integration contract. Explicit LaTeX builds, external-editor and Jupyter
+handoffs use supported interfaces and argument vectors without a shell.
 Editor templates supply the saved file and current line/column; compare disk
 revisions on return without replacing dirty text. TeX root selection is an action
 on an existing file. Out-of-tree staged builds execute trusted project TeX with
@@ -910,9 +922,10 @@ slots may apply completion results to controllers or widgets.
 
 Read `README.md`, `VISION.md`, `VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`,
 `CODEX_PLAN.md`, and `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` before changing
-behavior. Then read `docs/CODEX_CONTINUATION.md` for the current bounded
-implementation task. `CODEX_PLAN.md` controls priority; the continuation file
-turns that priority into a handoff, not a competing roadmap.
+behavior. Use `docs/DESIGN_RECONCILIATION.md` for current decisions and pending
+work, and `docs/CODEX_MAINTENANCE.md` for report-driven corrections. The plan
+and continuation retain earlier tasks and evidence; they do not create a
+competing priority order.
 
 The active delivery order was R1 readable source plus durable note, R2 a
 task-local assistance exchange, then R3 continued investigation and resumption,

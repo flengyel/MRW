@@ -104,8 +104,10 @@ identities matter when used; an unavailable value must not be fabricated.
 Notebook bytes and displayed outputs do not establish the kernel state that
 produced them. Distinguish a saved/imported output, an observed run and a
 successful independent reproduction. Reproduction requires an explicit action
-and records a new activity. Opening, inspecting or restoring work executes
-nothing. Credentials do not belong in retained requests or provenance exports.
+and records a new activity. Opening, inspecting or restoring work makes MRW
+submit no new execution or replay; native editor diagnostics retain their
+normal owner-defined behavior. Credentials do not belong in retained requests
+or provenance exports.
 
 Keep retained snapshots readable without the producer plugin. Meaningful changes
 may be recorded alongside them, but reading an old result must not require

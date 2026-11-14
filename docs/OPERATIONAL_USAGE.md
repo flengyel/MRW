@@ -95,6 +95,12 @@ decision. Low use alone does not justify removing recovery, accessibility or
 specialist features. High use does not establish benefit, correctness or learning.
 Do not hide, retire or rearrange features automatically from counts.
 
+Periodic use reports are also inputs to [Codex maintenance](CODEX_MAINTENANCE.md).
+For each proposed change, compare the finding with the current design and
+[reconciliation register](DESIGN_RECONCILIATION.md), check coverage and present
+state, and record the decision plus actual validation. Keep unexplained low use
+as a question rather than a mandate to remove the feature.
+
 ## Recording and resource boundaries
 
 Keep lightweight recording in MRW core, independent of the reporting plugin.

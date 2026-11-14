@@ -26,6 +26,11 @@ The document Problems interface was removed in 0.23.3. Its creation commands are
 absent, while earlier saved work and pending drafts remain readable. Opening or
 following notes stays ordinary reading; see [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md).
 
+The [design reconciliation register](DESIGN_RECONCILIATION.md) maps the complete
+evaluation to governing decisions, pending corrections and acceptance evidence.
+[Codex maintenance](CODEX_MAINTENANCE.md) compares reports with this design before
+selecting changes; a later narrow task does not erase the remaining requirements.
+
 ## Rules for ordinary mathematical work
 
 These rules govern current and future implementation:
@@ -45,7 +50,8 @@ VS Code owns unsaved buffers and their recovery. Preserve saved MRW records for
 access to earlier work, without requiring their use for ordinary reading.
 These rules supersede earlier prompts and roadmap requirements that conflict
 with them. A proposed interaction needs an observed obstacle from mathematical
-use; no further feature increment is selected by this correction.
+use. This ordinary-work rule does not cancel the accepted repairs recorded in
+the [reconciliation register](DESIGN_RECONCILIATION.md).
 
 ## Purpose
 
@@ -130,6 +136,22 @@ uses in MRW are separate; this is not a hands-on evaluation of these systems.
 | [ALeA](https://www.voll-ki.fau.de/ssfc/) | Adaptive learning from annotated course material; [published work](https://kwarc.info/people/dmueller/pubs/ws_alea_voll-ki.pdf) describes flashcards, quizzes and guided tours. | Examine its learning objects and prerequisite navigation before designing new study machinery. |
 | [Eigenius](https://eigenius.io/docs/platform/justification-logic/) | An application of Artemov's justification logic to scientific records, with source-linked evidence, justification composition and Lean proof checking. | Compare its evidence representation and the distinction between checking a justification and proving its conclusion; see the [related implementation](JUSTIFICATION_LOGIC_EXPERIMENT.md#related-implementation). |
 | [VisTrails](https://www.vistrails.org/index.php/Main_Page) | Workflow versions, execution provenance, annotations and comparison of alternative results. | Use its [provenance design](https://aosabook.org/en/v1/vistrails.html) as a reference for retaining how an investigation developed. The original project reports no maintenance since 2018. |
+
+The following additional sources were checked on 2026-11-14. These comparisons
+guide reuse; they do not establish an installed or working MRW integration.
+
+| System | Documented overlap | MRW decision and boundary |
+| --- | --- | --- |
+| [Jupyter AI](https://jupyter-ai.readthedocs.io/en/latest/users/chat/guide.html) | Attach selected notebook material to a conversation; act on suggested code through explicit controls. Its [agent workflow](https://jupyter-ai.readthedocs.io/en/latest/users/terminal-agents/workflows.html) describes reviewing notebook changes. | Make context and proposed edits inspectable beside the work, using existing companions. Do not duplicate its chat interface or assume JupyterLab facilities are a VS Code API. |
+| [nbdime](https://nbdime.readthedocs.io/en/stable/cli.html) | Notebook-aware comparison of sources, outputs, metadata and attachments, including a rich diff viewer. | Evaluate native notebook diff and nbdime before building a comparison engine. No integration is selected yet; assess host compatibility, read-only output handling, resource use and any server exposure before adoption. |
+| [Org/Babel](https://orgmode.org/guide/Working-with-Source-Code.html) | Source blocks, code editing/evaluation and results kept with surrounding prose, with export options. | Keep explanation, code, result and reference near enough to follow through existing documents and links. No required Org format, duplicated prose or second evaluator follows from this lesson. |
+
+The adopted directions and exclusions are recorded in the
+[reconciliation register](DESIGN_RECONCILIATION.md#reuse-decisions-and-exclusions).
+Preserve alternatives and failed approaches, inspectable input/method revisions,
+and explicit source/note/proof links. Neither a mandatory visual pipeline nor
+formal evidence for every ordinary note is required. Reuse ideas from other
+systems without inferring that MRW needs their whole runtime or user interface.
 
 MathHub's ecosystem includes learning support, particularly through active
 course materials and the related ALeA work. The reviewed sources do not
@@ -258,15 +280,17 @@ external-change handling and recovery. MRW's retained records remain separate.
 | PDF | Hand off to an available reader. MRW does not extract text or Contents, or restore a PDF page. |
 | Zettel | Open the same Markdown file; recognize its ID and title; resolve supported links within a selected notes folder. Obsidian embeds remain unsupported in MRW. |
 | Notebook / SageMath | Use VS Code/Jupyter with SagePod. Notebook editing and execution belong to that integration; MRW does not restore live kernel state. |
-| Lean / LaTeX / code | Use the relevant host extension or tool. Opening a file does not check a proof, compile a manuscript or run code. |
+| Lean / LaTeX / code | Use the relevant host extension or tool. MRW does not independently submit a check, build or run on opening; normal owner-extension diagnostics remain available. |
 | Handwritten work | Keep a link to the scan, image or PDF in a note and open it with an available viewer. MRW supplies no handwriting recognition. |
 
 Opening, reading, extracting selected text, restoring an exact position, and
 running a computation are different capabilities. Detect what the host exposes
 and describe missing operations locally. A filename supplies neither PDF text
 nor notebook kernel state. Prefer host integrations over new readers,
-editors, kernel managers or tool runtimes. Ordinary opening/resuming starts no
-container, executes no cells, invokes no checker, and sends no model request.
+editors, kernel managers or tool runtimes. MRW opening/resuming starts no
+container, executes no cells and independently submits no checker or model
+request. Native Lean diagnostics and other normal editor behavior remain owned
+by their extensions; see the integration contract.
 A separately requested execution or lifecycle action may delegate through its
 owner's supported interface; this does not authorize a competing implementation.
 
@@ -419,9 +443,10 @@ Choose future changes from obstacles encountered in ordinary mathematical use;
 the table is not a queue of required features. Increments 1, 2 and 4 are
 delivered. Increment 3 is withdrawn and is not a prerequisite for research.
 General resumption and integrated reconstruction remain possible future work under the
-rules above. A demonstrated data-loss defect takes priority. This correction
-authorizes no new question registry, storage rewrite, outline format, scheduler
-or dashboard.
+rules above. A demonstrated data-loss defect takes priority. Research resumption
+does not justify a question registry, storage rewrite, outline format or
+mandatory research dashboard. The separately requested optional diagnostics
+schedule/reporting has the bounded scope in [its design](DIAGNOSTICS_PLUGIN.md).
 
 Evaluate practical continuity, explanatory help and learning separately. Extend
 the local history for explicit research open/resume, document-link
@@ -464,8 +489,9 @@ Microsoft. Consistent terminology applies the notation and reader-orientation
 principles in Knuth, Larrabee and Roberts, *Mathematical Writing*, sections 1 and
 13 ([Stanford text](https://www-cs-faculty.stanford.edu/~knuth/papers/cs1193.pdf)).
 
-Keep one VS Code extension and the Python services on the workspace
-host. This sequence adds no frontend rewrite, universal knowledge graph,
+Keep one MRW core VS Code extension and the Python services on the workspace
+host. Optional companion extensions, including diagnostics, use scoped interfaces
+and do not become competing frontends. This sequence adds no frontend rewrite, universal knowledge graph,
 autonomous research agent, new cognitive simulator or project-management suite.
 Preserve the delivered 0.19.1 reliability repairs. Repository publication,
 private-store migration and Windows storage qualification are separate from

@@ -114,6 +114,12 @@ mathematical truth or the authenticity of a producer's account.
 
 ## Integration review and testing
 
+Periodic report findings are reviewed through
+[Codex maintenance](CODEX_MAINTENANCE.md), with every proposed correction compared
+against this contract and the [reconciliation register](DESIGN_RECONCILIATION.md).
+Reports supply evidence; they neither override the design nor authorize a new
+creation, repair or execution route.
+
 MRW is an integration workbench. Use ports and adapters: core expresses the
 needed capability; each adapter translates it into its subsystem's supported
 operations. Keep the common model limited to references, captures, provenance

@@ -11,6 +11,11 @@ evidence needed to assess them. The [README](README.md) describes current
 capabilities; the [research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md)
 connects those capabilities to proposed work.
 
+The [reconciliation register](docs/DESIGN_RECONCILIATION.md) retains the complete
+design evaluation and pending work. Periodic reports are inputs to
+[Codex maintenance](docs/CODEX_MAINTENANCE.md); proposed changes are compared
+with this vision and the governing design before implementation.
+
 ## Current product direction — 2026-11-10
 
 MRW is an experiment in continuing mathematical study and research. Its intended
@@ -95,8 +100,10 @@ editing and document lifecycle; the extension contributes research continuity
 and explicit record operations. This vision states intended benefits, not
 feature parity between frontends or observed mathematical usefulness.
 
-Simplicity and interoperability guide deployment: keep one VS Code extension
-and the Python core, running the backend in the workspace environment.
+Simplicity and interoperability guide deployment: keep one MRW core VS Code
+extension and the Python core, running the backend in the workspace environment.
+Optional companion extensions retain scoped responsibilities, including the
+requested diagnostics plugin; they do not duplicate the MRW frontend.
 Use the host's standard local Linux, WSL2 and Remote SSH mechanisms. Windows
 VS Code connected to Linux is an intended arrangement. Python 3.11+ is required
 on the workspace host; ordinary reading and outlining need no Lean, SageMath,
