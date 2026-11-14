@@ -5,8 +5,8 @@
 The focused increment lets one saved annotation continue in a selected ordinary
 note through native editing and verified Save. Obsidian owns creation; original
 text, attribution and exact retained references remain recoverable. See the
-[workflow](docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation). Complete the
-serial regression, native fixture and release checks before reporting delivery.
+[workflow](docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation). Published and pushed; [delivery checks](docs/RELEASE_0_23_30.md) record the
+regression results, native trial and verified public assets.
 Do not install into or reload the working window.
 
 This does not complete the [interface audit](docs/INTERFACE_AUDIT_20261113.md).

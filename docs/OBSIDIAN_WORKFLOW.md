@@ -257,7 +257,8 @@ all notes on the passage. Save reader drafts first.
 2. Select this destination's format: ordinary Markdown, or **Zettel —
    flengyel/Zettel**. The Zettel choice runs the existing validator on that one
    saved note. Set **MRW: Zettel Validator** (`mrw.zettelValidator`) to its
-   `python/zettel_validate.py`, or select it when prompted. The configured
+   `python/zettel_validate.py` in User or Remote settings, or select it when
+   prompted. Executable settings are not read from Workspace settings. The configured
    `mrw.pythonExecutable` must have PyYAML. The wrapper calls that tool's
    validator and index helpers; MRW contains no replacement Zettel template.
 3. Use **Copy annotation for the note body**. Paste at the chosen body location

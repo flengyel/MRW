@@ -99,7 +99,11 @@ editor.replaceRange(${JSON.stringify(text)},editor.offsetToPos(offset));await vi
   finally{
     if(!reload){
       await vscode.env.clipboard.writeText(originalClipboard);vscode.window.showErrorMessage=originalError;
-      try{await obsidian('(()=>{const t=window.__mrwContinuationTrial;if(t?.oldLeaf)app.workspace.setActiveLeaf(t.oldLeaf,{focus:true});return true;})()');}catch(error){report.restoreFailure=error.message;}
+      try{
+        const origin=JSON.parse(await fs.readFile(path.join(config.artifacts,'obsidian.json'),'utf8'));
+        await obsidian(`(async()=>{const file=app.vault.getAbstractFileByPath(${JSON.stringify(origin.active)});if(!file)throw Error('Original note missing');const leaf=app.workspace.getLeavesOfType('markdown').find(l=>l.view.file?.path===file.path)||app.workspace.getLeaf('tab');await leaf.openFile(file);app.workspace.setActiveLeaf(leaf,{focus:true});return true;})()`);
+        if(report.complete){const state=JSON.parse(await fs.readFile(stageFile,'utf8'));delete state.originalClipboard;await fs.writeFile(stageFile,JSON.stringify(state));}
+      }catch(error){report.restoreFailure=error.message;}
       await save();if(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath===config.project)await vscode.commands.executeCommand('workbench.action.closeWindow');
     }
   }
