@@ -36,13 +36,14 @@ optional outside operations that actually require it.
 | Zettelkasten or other notes application | Create externally maintained notes using its configured workflow; assign identities, filenames and templates; maintain its indexes. | Open existing notes, support native editing, copy selected source material and maintain explicit source associations. Optional creation shortcuts delegate to that same workflow. |
 | Jupyter and the selected notebook editor | Create, edit, save and render native notebooks; select kernels and dispatch explicit cell execution. | Open notebooks through the host, retain selected saved results, associate notes and provide supported comparison/export. |
 | SagePod | Supply the configured container, Jupyter server, SageMath environment and their lifecycle interfaces. | Use documented interfaces for authorized connection or lifecycle actions; record the environment actually used. No second SageMath runtime or container service. |
+| CoCalc | Own remote project identities, collaborative documents, notebook execution, kernels and project lifecycle. | A [proposed adapter](COCALC_ADAPTER.md) opens selected projects/files and associates deliberately exported results with notes. Evaluate deployment-specific supported interfaces before adding authenticated CLI/API operations. |
 | SageQueue | Assign task identities; submit jobs; manage partitions, workers, resources, status, logs, cancellation and retries. | A future adapter may delegate queue operations and retain task references/results. It must not edit queue internals, invent status or maintain a competing scheduler. |
 | Wolfram Alpha | Interpret and execute queries through its service. | A future adapter may submit an explicit query and retain its request, response and attribution. This is not notebook editing or formal proof checking. |
 | Wolfram notebooks and engine | Maintain native documents, evaluate code and own execution state. | Delegate supported document/execution actions and retain selected results; do not substitute a new evaluator or notebook format. |
 | Zotero | Maintain reference and attachment identities, bibliographic metadata and managed-library operations. | Use supported lookup, citation and attachment interfaces; retain separately identified copies. No direct writes to the live database or managed files. |
 | Lean and its host extension | Elaborate and check proofs, report diagnostics and maintain native proof interaction. | Navigate to exact files/declarations, open the native InfoView and retain scoped checking evidence. No competing language client or assertion that a successful check proves an unstated informal correspondence. |
 
-SageQueue and Wolfram adapters are not currently implemented in MRW. SagePod
+CoCalc, SageQueue and Wolfram adapters are not currently implemented in MRW. SagePod
 connection uses the Jupyter extension; MRW does not currently start its container
 or submit queue jobs. These are current capability limits, not a permanent ban
 on explicit delegation through a future supported adapter.
