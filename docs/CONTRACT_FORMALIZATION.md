@@ -1,8 +1,8 @@
 # Selective formalization of MRW contracts
 
-MRW is a candidate for a small executable specification of its stable storage
-and integration rules. The first target is identity preservation during
-relocation, followed by operation-state and report-classification invariants.
+MRW has a first [executable contract pilot](CONTRACT_PILOT.md) for identity
+preservation during relocation and immutable citation targets. Operation-state
+and report-classification invariants remain subsequent targets.
 Formalizing the complete interface, external applications or mathematical
 usefulness is outside this proposal. This document authorizes no toolchain
 upgrade or claim that MRW's runtime is verified.
@@ -84,5 +84,8 @@ A completed pilot includes the prose-to-model mapping, executable transitions,
 checked invariant proofs, nontrivial success and rejected/fault cases, explicit
 assumptions, and links to corresponding runtime tests. State separately whether
 the result is a proved specification, tested implementation conformance or a
-proved implementation refinement. At present this is a proposal; no new
-contract model or proof has been delivered.
+proved implementation refinement. The first
+[relocation pilot](CONTRACT_PILOT.md) supplies an executable core/Std model,
+checked preservation/reachability proofs and success/rejection/recovery vectors. Its concrete trace test is separate implementation evidence;
+no implementation-refinement proof is claimed. Delegated-operation and report-
+classification models remain proposed.
