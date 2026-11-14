@@ -37,6 +37,8 @@ that version and the saved records it produced.
 
 ## Design and development
 
+- [Architecture in brief](ARCHITECTURE.md): hexagonal design, facade, adapters,
+  workflow coordination and the canonical research model, with SVG/PNG diagrams.
 - [Design reconciliation register](DESIGN_RECONCILIATION.md): complete evaluation,
   adopted decisions, unresolved repairs and their completion evidence.
 - [Codex maintenance from reports](CODEX_MAINTENANCE.md): compare periodic findings
