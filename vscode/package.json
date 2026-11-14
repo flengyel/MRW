@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.30",
+  "version": "0.23.31",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -1033,9 +1033,9 @@
         },
         "mrw.obsidianNewNoteCommand": {
           "type": "string",
-          "default": "file-explorer:new-file",
+          "default": "",
           "scope": "machine-overridable",
-          "description": "Obsidian command ID run by New Note when Notes Folder is a vault. Set this to your template creation command (for example templater-obsidian:create-Templates/NewFileTemplate.md). Requires Obsidian CLI; Obsidian owns naming and template execution."
+          "description": "Obsidian command ID that creates a note using your vault\u2019s template (for example templater-obsidian:create-Templates/NewFileTemplate.md). Required for New Note in a vault; there is no plain-file fallback. Do not use an insert-template command. Requires Obsidian CLI; Obsidian owns prompts, naming and template execution."
         },
         "mrw.obsidianExecutable": {
           "type": "string",
@@ -1065,7 +1065,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.30",
+          "title": "MRW 0.23.31",
           "icon": "media/mrw.svg"
         }
       ]

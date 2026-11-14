@@ -498,6 +498,8 @@ and runs your configured new-note command. Complete its prompts in Obsidian;
 Obsidian supplies the template and filename.
 Enable Obsidian's **Settings → General → Command line interface** and set
 **MRW: Obsidian New Note Command** to your template's creation command.
+This setting has no default: MRW stops if it is unset. It never substitutes
+Obsidian's plain new-file command or writes its own note into the vault.
 See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
 Your current MRW document stays open. The existing
 **Open in MRW** Obsidian command brings that same file back to MRW. Obsidian

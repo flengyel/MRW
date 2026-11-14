@@ -1,5 +1,13 @@
 # User experience specification
 
+## Obsidian creation command — 0.23.31
+
+For a vault, New Note and reader-note continuation require an explicitly
+configured template creation command. Missing configuration or a known plain
+new-file/insert-template command stops before opening Obsidian or invoking its
+CLI. No preliminary file or fallback note is written. Obsidian owns interactive
+prompts and Save; dispatch does not establish template completion.
+
 ## Sidebar — 0.23.28
 
 The Studies sidebar, its tree provider and row menus are removed. MRW's sidebar

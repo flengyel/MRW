@@ -28,6 +28,12 @@ reproduction. Attach only relevant logs or screenshots and use minimal example
 documents that can be shared publicly. Keep credentials and private research
 out of reports and test fixtures.
 
+For native Obsidian creation checks, use an isolated test vault and its
+configured creation template. Do not create fixture notes directly in a user's
+vault or fill and submit prompts in their working Obsidian window. A unit test's
+synthetic Markdown files do not establish that the template ran. Preserve the
+user's notes, templates, settings and open drafts.
+
 ## Preparing a pull request
 
 Work on a branch from current main and keep each pull request focused. The

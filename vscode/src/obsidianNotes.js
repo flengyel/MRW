@@ -34,8 +34,15 @@ async function createObsidianNote({vscode, root, validate = async () => {}, exec
   if (vscode.workspace.isTrusted === false) throw Error('Trust this workspace before running its configured Obsidian command.');
   const config = vscode.workspace.getConfiguration('mrw');
   const vault = config.get('obsidianVault', '').trim() || path.basename(root);
-  const command = config.get('obsidianNewNoteCommand', 'file-explorer:new-file').trim();
-  if (!vault || !command || /[\r\n\x00]/.test(vault + command)) throw Error('Set MRW: Obsidian New Note Command and a valid Obsidian vault.');
+  const configuredCommand = config.get('obsidianNewNoteCommand', '');
+  const command = typeof configuredCommand === 'string' ? configuredCommand.trim() : '';
+  // No implicit plain-file creation. The chosen companion command must run the
+  // vault's creation template; MRW cannot inspect arbitrary plugin execution.
+  if (!command || command === 'file-explorer:new-file' ||
+      command.startsWith('templater-obsidian:insert-') || command === 'templates:insert-template') {
+    throw Error('Set MRW: Obsidian New Note Command to your template’s creation command, for example templater-obsidian:create-Templates/NewFileTemplate.md. Plain new-file and insert-template commands cannot be used here. No command was sent.');
+  }
+  if (!vault || /[\r\n\x00]/.test(vault + command)) throw Error('Set MRW: Obsidian New Note Command and a valid Obsidian vault.');
   let cli;
   try {
     cli = await executable(config, vscode.env.remoteName, execute);

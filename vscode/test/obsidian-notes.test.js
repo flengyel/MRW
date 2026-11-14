@@ -21,6 +21,24 @@ test('New Note sends the configured Obsidian creation command exactly once, with
   assert.equal(f.calls.filter(c=>c.args.includes('command')).length,1);
   assert.deepEqual(f.opened,['obsidian://open?vault=Notes']);
 });
+test('missing or non-creation commands stop before CLI discovery, focus or dispatch', async () => {
+  for (const command of [undefined, null, '', '  ', 7, {}, 'file-explorer:new-file',
+    ' file-explorer:new-file ', 'templater-obsidian:insert-Templates/NewFileTemplate.md',
+    'templates:insert-template']) {
+    const f = fixture({obsidianNewNoteCommand:command, obsidianExecutable:''});
+    await assert.rejects(createObsidianNote(f), /template’s creation command.*No command was sent/);
+    assert.deepEqual(f.calls, []);
+    assert.deepEqual(f.opened, []);
+  }
+  const manifest = require('../package.json');
+  assert.equal(manifest.contributes.configuration.properties['mrw.obsidianNewNoteCommand'].default, '');
+});
+test('another explicitly configured template creation command remains supported', async () => {
+  const f = fixture({obsidianNewNoteCommand:'my-notes:create-from-template'});
+  await createObsidianNote(f);
+  assert.equal(f.calls.filter(c => c.args.includes('command')).length, 1);
+  assert.equal(f.calls.at(-1).args.at(-1), 'id=my-notes:create-from-template');
+});
 test('vault mismatch and unavailable template command stop before dispatch',async()=>{
   for (const failure of ['vault','commands']) {
     const f=fixture(),run=f.execute;f.execute=async(file,args)=>args.includes(failure)?'Wrong':run(file,args);

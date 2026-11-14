@@ -10,7 +10,8 @@ Choose **New Note…** in MRW's **Commands** view or **MRW Document** menu, or r
 **MRW: New Note…** from the Command Palette.
 
 - For a configured Obsidian vault, MRW brings Obsidian forward and runs your
-  selected creation command. Complete its prompts in Obsidian; it supplies the
+  explicitly selected template creation command. An unset command stops with
+  configuration instructions; there is no plain-file fallback. Complete its prompts in Obsidian; it supplies the
   template and filename. See [configuration](OBSIDIAN_WORKFLOW.md#new-note).
 - For another notes folder, MRW opens a blank VS Code Markdown editor beside
   the current document. Use Save to choose its filename and location.

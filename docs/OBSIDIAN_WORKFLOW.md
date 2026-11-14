@@ -69,9 +69,9 @@ editor buffers. The current document stays open in MRW.
 1. Enable **Settings → General → Command line interface** in Obsidian. Use an
    installer that supports the CLI; see [Obsidian's CLI setup](https://help.obsidian.md/cli).
 2. In VS Code's workspace settings, set **MRW: Obsidian New Note Command**
-   (`mrw.obsidianNewNoteCommand`) to the command ID used to create notes.
-   The default is Obsidian's `file-explorer:new-file`. For a Templater template
-   called `Templates/NewFileTemplate.md`, use
+   (`mrw.obsidianNewNoteCommand`) to the command that creates a note through
+   your vault's template. There is no default command or plain-file fallback.
+   For a Templater template called `Templates/NewFileTemplate.md`, use
    `templater-obsidian:create-Templates/NewFileTemplate.md`. Enable the template
    in Templater's template hotkeys so that this command is registered.
 3. In MRW, choose **New Note…** or run **MRW: New Note…** from the Command Palette.
@@ -81,7 +81,12 @@ editor buffers. The current document stays open in MRW.
    MRW opens it; that list does not read Obsidian's recent-file history.
 
 Use the creation command, not Templater's `insert-…` command, which edits the
-active note. To inspect the registered IDs, run
+active note. MRW rejects the plain `file-explorer:new-file` command and the
+known insert-template commands. Other explicitly configured plugin commands
+remain supported; configure one that runs your creation template. MRW can check
+that the command is registered, but cannot certify what an arbitrary plugin
+command does or that its interactive template has finished.
+To inspect the registered IDs, run
 `obsidian vault="Your vault" commands` in a terminal where the CLI is available.
 
 MRW checks the vault's actual path and registered commands before dispatch.

@@ -1,5 +1,22 @@
 # Codex instructions
 
+## Obsidian note creation — required
+
+Creating a note in the user's Zettelkasten must go through Obsidian and its
+configured note-creation template. This includes development and validation
+work: do not write a placeholder or fixture Markdown file into the vault,
+copy a reduced template, or automate the user's interactive keyword/title
+prompts. Use isolated test vaults for native creation checks; run the actual
+configured template there. Ordinary unit fixtures outside real vaults are test
+data, not evidence that Obsidian creation works.
+
+New Note and reader-note continuation share the configured Obsidian handoff.
+No implicit plain-file command, direct-file fallback or automatic retry is
+allowed. An explicit command is required; MRW checks its registration, not its
+internal behavior or completion of template prompts. Preserve existing notes,
+drafts, templates and the working window. Do not apply one user's Zettel format
+to every vault. Non-vault folders keep their ordinary VS Code editor route.
+
 ## Saved-source access — 0.23.29
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_29.md). Not installed into the working window.
