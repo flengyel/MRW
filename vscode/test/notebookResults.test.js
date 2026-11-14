@@ -57,6 +57,7 @@ test('native Jupyter renders immutable notebook bytes and compares cells/outputs
  const commands=new Map(),calls=[],result=id=>({id,title:id,artifacts:[{name:'retained.ipynb'}],body:'capture evidence',notebook:{name:'retained.ipynb',sha256:crypto.createHash('sha256').update(raw).digest('hex'),data:raw.toString('base64')}});
  registerNotebookResults({vscode:h.vscode,context:{storageUri:{fsPath:'/private'},subscriptions:[]},register:(id,f)=>commands.set(id,f),bridge:async r=>{calls.push(r);if(r.method==='notebook_list')return {results:[result(a),result(b)]};return result(r.id);},show:async()=>assert.fail('Jupyter path must not replace notebooks with transcripts')});
  h.picks.push(items=>items[0],'compare',items=>items[0]);await commands.get('mrw.openNotebookResult')();
+ assert.ok(require('../package.json').activationEvents.includes('onFileSystem:mrw-notebook-result'));
  assert.equal(registration.options.isReadonly,true);const open=h.calls.find(x=>Array.isArray(x)&&x[0]==='vscode.openWith');assert.equal(open[2],'jupyter-notebook');assert.deepEqual(await provider.readFile(open[1]),raw);
  const diff=h.calls.find(x=>Array.isArray(x)&&x[0]==='vscode.diff');assert.equal(diff[1].scheme,'mrw-notebook-result');assert.equal(diff[2].scheme,'mrw-notebook-result');assert.ok(diff[1].path.endsWith('.ipynb'));
  assert.throws(()=>provider.writeFile(),/read-only/);await assert.rejects(provider.readFile({path:'/../bad.ipynb'}),/Invalid/);

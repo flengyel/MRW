@@ -1074,6 +1074,7 @@
   },
   "activationEvents": [
     "onUri",
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onFileSystem:mrw-notebook-result"
   ]
 }
