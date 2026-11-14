@@ -3,8 +3,7 @@
 MRW is an integration workbench for mathematical research. It connects reading,
 notes, calculations, proof work and the reasons supporting claims while
 preserving the context needed to continue. The design uses ports and adapters:
-MRW's research services express
-the capabilities they need, and adapters connect those capabilities to the
+MRW's research services express the capabilities they need, and adapters connect those capabilities to the
 systems responsible for documents, sources and execution.
 
 ![MRW architecture: the VS Code facade leads to workflow coordination, a canonical data model, the integral justification logic engine and core services. Ports and adapters connect documents, sources, computation, external proof checking, AI and planned diagnostics.](assets/mrw-architecture.png)
@@ -24,52 +23,57 @@ remaining acceptance work.
 | **Anti-corruption layer** | Translation preserves identity, revision, attribution and meaning across unlike systems; external formats and status conventions do not silently redefine MRW records. This is a software boundary, not a correctness guarantee. |
 | **Workflow coordination** | Connect reading, comparison, annotation, linking and resumption. Keep operations explicit and distinguish dispatch, acceptance and completion. |
 | **Canonical data model** | A narrow shared vocabulary for logical identities, current locations, immutable revisions/captures, associations, provenance, observed outcomes, claim versions, admissions, contexts and derivations. Ordinary documents remain in their native formats; no duplicate representation of every mathematical idea is required. |
-| **Justification logic engine** | MRW's integral Lean subsystem checks certificates for the non-factive J₀/J(CS) calculus relative to explicit admissions and a recorded context. Python binds and retains artifacts and bundles; JavaScript presents the workflow. |
+| **Justification logic engine** | Make the grounds for using a claim inspectable: its supporting passages, calculations or proof artifacts, admitted assumptions and inference steps. Check specified inferences under those assumptions; retain distinct grounds and their dependencies. The broader comparison workflow is pending. |
 | **Core services** | Maintain storage invariants, retained references and lightweight operational usage records. Optional companions must not disable these protections. |
 
-The [justification subsystem](JUSTIFICATION_LOGIC_EXPERIMENT.md) is implemented
-under `lean/MRW/Justification/`. Its separate Lake project is a build boundary
-within MRW. The Appendix A warrant slice and offline documentary-response bridge
-are executable; broader goal-directed inference and interaction remain pending.
-The existing executable does not provide a general route-search protocol.
+The engine answers: **what grounds support this claim, and which assumptions
+does the argument use?** For example, a manuscript lemma may rely on a formal
+proof, a recorded Lean check, and a reviewed explanation of why that formal
+statement matches the prose. The engine keeps these grounds and bridges
+explicit and checks their stated composition. Provenance identifies origins;
+a justification records the admitted reasons for a conclusion.
 
-The engine records why a claim follows from specified admissions. Provenance
-records where artifacts came from; an external proof check records what was
-checked in a pinned environment. Connecting an informal claim to a formal
-statement requires an explicit reviewed bridge. These relations have separate
-records and meanings. Successful certificate checking establishes contextual
-derivability; source reputation, citations and successful execution supply no
-automatic premise admission. Challenges and withdrawals preserve prior contexts
-and certificates; a successor context records revised admissions. Ordinary
-reading does not require creating claims or admissions.
-
-The figure's solid justification block represents the existing bounded engine.
-It does not claim that general inference, multiple-route search or the complete
-interactive workflow has been delivered.
+The existing bounded checker handles the Appendix A manuscript example and an
+offline documentary-response case. Comparing several arguments, finding new
+routes and showing surviving support after withdrawal belong to the pending
+interactive workflow. [The user guide](JUSTIFICATION_WORKFLOW.md) explains the
+example, current commands and limits; [the technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)
+defines the non-factive J₀/J(CS) calculus and records. Ordinary reading requires
+no claim or premise-entry form.
 
 External systems retain ownership. The Zettelkasten application creates its
 notes using its configured workflow; existing notes can be edited natively.
 Jupyter and SagePod supply notebook execution and its environment; the Lean
 extension supplies native proof-checking interaction; Zotero owns its reference
-library. MRW retains selected sources,
-results and links without introducing competing template engines, evaluators,
+library. MRW retains selected sources, results and links without introducing competing template engines, evaluators,
 queues or managed databases. Source notes and developed Zettels remain distinct,
 potentially many-to-many works.
 
-The proposed diagnostics companion reads bounded inspection interfaces and
-produces feature-use, integrity and data-hygiene reports. Those reports feed
-Codex maintenance: compare a finding with the current design, revalidate it,
-make a justified correction and verify the result. Low usage alone does not
-justify deleting a feature or research material. Reporting does not authorize
-automatic repairs or model calls.
+The [proposed CoCalc adapter](COCALC_ADAPTER.md) uses the computation and
+document-handoff capabilities: open a selected remote project or notebook and
+retain deliberately exported results with links to local notes. CoCalc retains
+its collaborative editors, kernels and project lifecycle. Its first proposed
+increment uses browser handoff and the existing notebook-result workflow;
+authenticated CLI/API operations require a deployment-specific contract.
+
+The [optional diagnostics companion](../diagnostics/README.md) produces bounded
+local feature-use, integrity and data-hygiene reports. It supports manual
+reports, opt-in weekly reporting while the workspace is active, export and an
+explicit clipboard handoff for Codex maintenance. Core retains essential
+integrity checks and lightweight recording. Reports do not call a model or
+repair data. Automatic Codex maintenance scheduling remains pending.
+External targets, full schemas/dependencies and passage anchors remain outside
+the initial inspector's checked coverage.
 
 The design is governed by [integration boundaries](INTEGRATION_BOUNDARIES.md),
 [operational usage](OPERATIONAL_USAGE.md), [diagnostics](DIAGNOSTICS_PLUGIN.md)
-and [Codex maintenance](CODEX_MAINTENANCE.md). A proposed
-[Lean contract model](CONTRACT_FORMALIZATION.md) would check selected invariants;
-it would not by itself verify the Python/JavaScript implementation. The proposed
-`MRW.Contracts` project remains separate from the existing `MRW.Justification`
-subsystem.
+and [Codex maintenance](CODEX_MAINTENANCE.md). The first
+[`MRW.Contracts` pilot](CONTRACT_PILOT.md) provides an executable Lean
+specification of relocation and immutable-citation safety, with proved invariants
+and three concrete runtime trace comparisons. It remains separate from
+`MRW.Justification`. This is not a verified Python/JavaScript implementation or
+a liveness proof. Delegated-operation and report-classification models remain
+[subsequent bounded work](CONTRACT_FORMALIZATION.md).
 
 ## Updating the figure
 

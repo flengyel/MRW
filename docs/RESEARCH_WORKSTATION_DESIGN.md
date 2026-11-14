@@ -128,7 +128,7 @@ uses in MRW are separate; this is not a hands-on evaluation of these systems.
 | System | Documented overlap | What MRW should investigate or reuse |
 | --- | --- | --- |
 | [Zotero](https://www.zotero.org/support/quick_start_guide) | Bibliographic references, attachments, notes and citation formatting. | Connect the existing library to MRW source reading, notes and citations; reuse its reference-management functions. |
-| [CoCalc](https://doc.cocalc.com/) | Projects combining SageMath, Jupyter, Markdown, LaTeX, AI assistance and course tools. | Interoperate with existing projects, notebooks and computation rather than build another hosted computing environment. |
+| [CoCalc](https://doc.cocalc.com/) | Projects combining SageMath, Jupyter, Markdown, LaTeX, AI assistance and course tools. | A [proposed adapter](COCALC_ADAPTER.md) would open selected projects/files and retain exported notebook results. CoCalc owns collaborative editing and execution; no second hosted environment. |
 | [Wolfram Notebooks](https://www.wolfram.com/notebooks/) | Documents combining text, executable code, results and interactive content. | Link calculations and notebooks to research notes, preserving available inputs, outputs and execution context. |
 | [Proofscape / PISE](https://docs.proofscape.org/en/stable/ref/library/dc.html) | A mathematical study environment connecting proof charts, annotations and source documents. | Study its [bidirectional linking](https://www.proofscape.org/en/stable/tutorials/users/linking.html), proof expansion and comparison before adding equivalent navigation. |
 | [GNU TeXmacs](https://www.texmacs.org/tmweb/home/welcome.en.html) | Mathematical writing, graphics and interfaces to computational systems. | Learn from its document-and-computation interaction; use existing editors and computational tools where they fit. |
@@ -185,6 +185,16 @@ W3C PROV is the common model for the proposed lab notebook; see
 [the provenance design](PROVENANCE_DESIGN.md). VisTrails supplies ideas for
 workflow evolution and result comparison. Existing libraries, formats and
 interfaces should be assessed before implementing equivalent mechanisms.
+
+### CoCalc adapter
+
+The [CoCalc adapter proposal](COCALC_ADAPTER.md) defines a bounded first
+increment: select the deployment/project/file, open it through CoCalc, and
+retain an explicitly saved/exported notebook with selected companion files.
+Reuse MRW's existing notebook capture, comparison and provenance records.
+Authenticated CLI/API access and remote execution need a later verified
+contract for the selected deployment. This is a proposal, not a delivered
+adapter or replacement for the current SagePod/Jupyter workflow.
 
 ### Zotero integration
 

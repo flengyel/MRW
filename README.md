@@ -30,16 +30,21 @@ ownership across the anti-corruption boundary.
 
 ![MRW architecture: facade, workflow coordination, canonical data model, integral justification logic engine, core services, ports and adapters, and planned diagnostics.](docs/assets/mrw-architecture.png)
 
-The integral **justification logic engine** checks how claims follow from
-explicit admissions in a recorded context. Its Lean implementation checks
-certificates for the non-factive J₀/J(CS) calculus. The Appendix A warrant slice
-and offline documentary-response bridge are executable; general inference
-search and the complete interactive workflow remain pending. Provenance,
-external proof checking and contextual justification have distinct roles.
+The **justification logic engine** makes the grounds for using a mathematical
+claim inspectable: which passages, calculations or proof artifacts support it,
+which assumptions are admitted, and which steps connect those grounds to the
+claim. Its existing Lean checker checks specified inferences under recorded
+assumptions. A planned interactive workflow will compare alternative arguments
+and show which remain available after a ground is withdrawn.
 
+The current executable cases concern one manuscript lemma and an attributed
+model-response passage. General inference search and the complete interactive
+workflow remain pending. See [what the engine does, with an example](docs/JUSTIFICATION_WORKFLOW.md).
+A [proposed CoCalc adapter](docs/COCALC_ADAPTER.md) would connect selected remote
+projects and notebooks while CoCalc retains collaboration and execution.
 Native applications retain document creation and execution. MRW connects the
-work, preserves references and supports resumption. The proposed diagnostics
-companion supplies reports for Codex maintenance checked against the design;
+work, preserves references and supports resumption. The optional diagnostics
+companion supplies bounded local reports and an explicit Codex handoff;
 core integrity checks and usage recording remain in MRW. Dashed elements are
 planned capabilities.
 
@@ -229,7 +234,10 @@ durations and last use without requiring a new Study. Coverage is incomplete;
 see [usage history](docs/USAGE_HISTORY.md) and the
 [feature-use requirements](docs/OPERATIONAL_USAGE.md). A separate
 [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) for direct usage analysis and
-periodic integrity/data-hygiene reports is proposed, not yet implemented.
+periodic integrity/data-hygiene reports is available as an optional companion.
+Its supported checks and coverage limits are described in
+[the companion guide](diagnostics/README.md). Automatic Codex maintenance
+scheduling remains pending.
 
 Companion handoffs require copying and pasting the selected material.
 The separate API workflow sends only after its request preview and Send action.
