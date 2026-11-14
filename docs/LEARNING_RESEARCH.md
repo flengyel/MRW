@@ -59,6 +59,12 @@ These conventions guide placement and interaction. They do not by themselves est
 
 ## Observations for immediate adaptation and later versions
 
+The separate [operational feature-use requirement](OPERATIONAL_USAGE.md) asks
+which features are used, unused or unobserved, independently of their learning
+effect. Core records lightweight events; an optional
+[diagnostics plugin](DIAGNOSTICS_PLUGIN.md) analyzes use and reports data health.
+Neither adoption statistics nor integrity checks measure understanding.
+
 The user explicitly requests detailed tracking of what works and what does not. Record relevant MRW actions and results with software/policy versions, including navigation and failures, alongside sparse self-reports. Retain evidence for both successful and unsuccessful interventions.
 
 Immediate decisions should use the current task, explicit outcomes and preferences. Later review should examine delayed retrieval, assistance burden, source-navigation effort, interruptions, errors and resumption. Compare comparable tasks and expose missing observations. A newer version receiving easier tasks cannot be credited with improved learning merely from its aggregate success rate.

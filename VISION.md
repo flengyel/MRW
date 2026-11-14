@@ -64,6 +64,16 @@ records to adapt the present session and evaluate later MRW versions. Preserve
 the distinction between what was observed, reported, assessed or inferred.
 No single score establishes understanding.
 
+Track operational feature use independently of learning: identify features used,
+available but unused, unavailable or uninstrumented, with explicit observation
+periods and coverage. Use the evidence in release planning without equating
+popularity with value. [Feature-use statistics](docs/OPERATIONAL_USAGE.md) are a
+standing requirement; current command/history counts provide partial coverage.
+An [optional diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) should provide
+feature-use analysis and periodic integrity/data-hygiene reports. Core recording
+and storage checks remain available without it. Reports must respect subsystem
+ownership and must not turn infrequent use into automatic deletion or retirement.
+
 The optional source-study tools record attempts, reported effort, review and
 local history; see their [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
 [design](docs/ACTIVE_STUDY_DESIGN.md). Their implementation does not establish a

@@ -1,5 +1,22 @@
 # Codex continuation: reading and research
 
+## Operational usage and periodic diagnostics — design requirements
+
+Follow [Operational feature use](OPERATIONAL_USAGE.md) and the
+[optional diagnostics plugin design](DIAGNOSTICS_PLUGIN.md). Feature use
+has been a requirement from the start: retain core recording, make coverage
+explicit, and report used/unused features over a stated period. Current
+command/history counts are partial; direct reports and fuller instrumentation
+remain pending. Do not interpret missing observations as zero use.
+
+The optional plugin owns report analysis, periodic scheduling and presentation.
+Core retains necessary storage checks and bounded read-only inspection
+interfaces. Reporting must not mutate inspected data, run computations or
+bypass a subsystem's repair/creation workflow. Source plugin API 1 is not a
+maintenance API. Keep routine reporting bounded in memory and I/O, separate
+test/automated activity, and never remove features or retained work merely for
+low use. These are design updates, not claims of a shipped plugin or schedule.
+
 ## Governing integration boundary
 
 Follow [Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md) for all current

@@ -5,6 +5,10 @@ An adapter retains separately identified source snapshots; it does not obtain
 authority to edit an external library or execute computations. Source, lesson
 and execution capabilities remain separate.
 
+The proposed [diagnostics and maintenance plugin](DIAGNOSTICS_PLUGIN.md) has a
+different responsibility and needs a separate bounded inspection interface.
+API 1 below does not grant access to maintenance, scheduling or storage repair.
+
 **Import Source…** lists enabled sources. Stacks Project and Kerodon retain their
 direct Commands buttons. nLab is a built-in named-page adapter. **Add Source
 Plugin…** registers either a local JSON profile or an explicitly selected

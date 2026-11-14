@@ -73,6 +73,23 @@ implementation usable with ordinary files and folders, without Obsidian,
 Zettel conventions, a model account, Lean, or SageMath as entry requirements.
 No multi-user product framework is needed for this sequence.
 
+## Operational feedback and maintenance
+
+[Feature-use statistics](OPERATIONAL_USAGE.md) are a standing design requirement,
+independent of study assessment. Review use, persistent non-use, errors and
+coverage when choosing later improvements. The existing recorder and Study
+History report supply partial evidence; they do not yet supply complete feature
+coverage or a direct adoption report.
+
+An [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md) should provide feature-use
+analysis and periodic integrity/data-hygiene reports. Core retains its event
+recording and the checks needed for safe storage operations. The plugin consumes
+bounded, versioned inspection interfaces, owns report scheduling and presents
+findings. It delegates repairs to the owner and never treats unvisited notes or
+retained revisions as disposable. This extends the
+[integration contract](INTEGRATION_BOUNDARIES.md#integration-review-and-testing);
+it does not expand source-import API 1 into a general maintenance interface.
+
 ## Continuing study and a research lab notebook
 
 The intended workflow connects ordinary notes and source passages to

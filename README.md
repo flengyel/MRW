@@ -196,6 +196,13 @@ sessions. MRW does not record unrelated application activity or infer
 comprehension from it. Scheduling and effort reports do not establish a
 learning benefit.
 
+**Inspect Study History** also reports recorded feature invocations, outcomes,
+durations and last use without requiring a new Study. Coverage is incomplete;
+see [usage history](docs/USAGE_HISTORY.md) and the
+[feature-use requirements](docs/OPERATIONAL_USAGE.md). A separate
+[diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) for direct usage analysis and
+periodic integrity/data-hygiene reports is proposed, not yet implemented.
+
 Companion handoffs require copying and pasting the selected material.
 The separate API workflow sends only after its request preview and Send action.
 Pasted attribution does not authenticate a reply or verify its mathematics.
