@@ -1,15 +1,23 @@
 # Install Mathematical Research Workstation
 
-MRW 0.23.32 is installed from a VSIX.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.32/mrw-0.23.32.vsix)
-and its [release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.32),
-or [build from source](../vscode/README.md#package-and-install-a-vsix).
-There is no Marketplace listing. The extension identifier is `flengyel.mrw`.
+The recommended installation is **MRW plus MRW Diagnostics** on the same
+workspace host. Download both packages from the current release:
+
+- [MRW 0.23.32](https://github.com/flengyel/MRW/releases/download/v0.23.32/mrw-0.23.32.vsix): reading, notes, sources and research tools.
+- [MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.32/mrw-diagnostics-0.1.0.vsix): feature-use and integrity reports.
+
+[Release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.32)
+cover both downloads. Diagnostics can be omitted; MRW's essential storage checks
+and recording stay in core. Weekly reports are opt-in even when both are installed.
+
+There is no Marketplace listing. The extension identifiers are `flengyel.mrw`
+and `flengyel.mrw-diagnostics`. You can also
+[build from source](../vscode/README.md#package-and-install-a-vsix).
 
 ## A. MRW for reading
 
 The Windows setup uses **VS Code connected to WSL2**, with MRW and
-**Python 3.11+ on the Linux workspace host**. VS Code 1.95 or later is required.
+**Python 3.11+ on the Linux workspace host**. Use VS Code 1.96 or later for the recommended pair; core alone supports 1.95.
 The [host table](../vscode/README.md#workspace-hosts-and-dependencies) distinguishes
 observed configurations from other intended Linux arrangements.
 
@@ -46,23 +54,32 @@ storage has not been qualified.
 For a Linux SSH host, connect with Microsoft's Remote - SSH extension, open the
 workspace there and perform the same Python and extension-host checks.
 
-### 2. Install the VSIX in that workspace host
+### 2. Install both VSIX packages in that workspace host
 
-Run **Extensions: Install from VSIX…** and select `mrw-0.23.32.vsix`.
-Alternatively, use that window's Linux terminal and substitute the package path:
+Run **Extensions: Install from VSIX…** and install `mrw-0.23.32.vsix` first,
+then `mrw-diagnostics-0.1.0.vsix`. Install both in the same WSL/SSH workspace host.
+Alternatively, use that window's Linux terminal and substitute the package paths:
 
 ```sh
 code --install-extension /absolute/path/to/mrw-0.23.32.vsix
+code --install-extension /absolute/path/to/mrw-diagnostics-0.1.0.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.32` under the WSL/SSH host's installed extensions.
+Confirm `flengyel.mrw@0.23.32` and `flengyel.mrw-diagnostics@0.1.0` under the
+WSL/SSH host's installed extensions. After installing both, save unfinished work
+and reload once if VS Code requests it. Keep workspace storage when upgrading.
 After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.32**;
 the sidebar heading shows the same version. **MRW: Open Tutorial** reports the
 active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
 extension. Save unfinished work before a requested reload. Keep workspace
 storage when upgrading `flengyel.mrw`.
+
+Diagnostics reports are available from **Tools and Setup** and the Command
+Palette. To enable scheduled reports, turn on **MRW Diagnostics: Weekly Enabled**.
+They run while VS Code is active; missed weekly runs coalesce into one run.
+Reporting does not repair data or invoke Codex. See [the companion guide](../diagnostics/README.md).
 
 For upgrades from before the extension identity change, see
 [the conversion record](EXTENSION_IDENTITY.md). The upgrade from 0.23.12 to
@@ -91,7 +108,7 @@ for the layout, optional tools and existing-work recovery.
    a link, then use **Return to Document** to return to its originating location.
 
 **Commands** keeps navigation actions available. **Contents** identifies the
-selected document, and **Studies** holds separately saved work. Opening or
+selected document; **Earlier Saved Work** provides access to saved studies and history. Opening or
 following a note creates no exercise record. Questions and solutions
 can remain in their notes.
 

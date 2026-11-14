@@ -44,6 +44,18 @@ Source links and Obsidian notes** and use **Whole source**. A passage's
 [Obsidian guide](OBSIDIAN_WORKFLOW.md) for copying MRW links and setting return
 notes. Copying a Markdown link alone does not transfer its retained target.
 
+## Reopen saved material
+
+Use **Open Saved Source…** beside **Open Document…** in Commands. Search for a
+section title, author or passage tag: for example, **Hausdorff**, **08ZH** or
+**Kerodon**. The entry shows its reader-note count and retained revision.
+Opening it uses the retained bytes and annotations, without downloading again.
+
+The list belongs to the current workspace and project. A source saved in another
+workspace does not become part of this list merely because a vault note is open.
+Keep using the same saved workspace for that material. Changing the notes folder
+only changes note-link and backlink lookup; it does not move retained sources.
+
 ## Kerodon
 
 Run **MRW: Import Kerodon Section…** with `kerodon:0004` or

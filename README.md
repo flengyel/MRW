@@ -128,8 +128,12 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 | Local Linux and other Linux SSH hosts | Intended hosts; separate desktop validation remains |
 | Native Windows or macOS backend | Not qualified |
 
-In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** and
-select `mrw-0.23.32.vsix`. Confirm installation on the workspace host. Save work
+The recommended setup installs **MRW and MRW Diagnostics** together. In the
+Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
+`mrw-0.23.32.vsix`, then
+[mrw-diagnostics-0.1.0.vsix](https://github.com/flengyel/MRW/releases/download/v0.23.32/mrw-diagnostics-0.1.0.vsix).
+Confirm both on the same workspace host. Diagnostics remains optional, and
+weekly reporting is opt-in. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
 the [installation guide](docs/INSTALLATION.md) for details.
 
