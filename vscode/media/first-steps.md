@@ -19,6 +19,20 @@ Hover over the MRW Activity Bar icon to see its version. The sidebar heading
 shows it too. This tutorial reports the active extension build above. If an
 installed update is waiting for a reload, the active build can still be older.
 
+
+## Find an imported section and its reader notes
+
+Choose **Open Saved Source…** in MRW's **Commands** view, next to Open Document.
+Search by source title, author or passage title/tag. For example, `Stacks` or
+`08ZH` finds a saved Hausdorff-spaces section containing that lemma. The result
+shows its reader-note count and retained revision. Open it, then expand
+**Reader notes** at the relevant passage.
+
+This list belongs to the current workspace. A Markdown document that links to
+those passages is a separate file: use **Open Document…** for that file. Changing
+the notes folder does not relocate saved sources. Opening a saved source does
+not import it again, replace its revision or move its annotations.
+
 ## First-time workspace setup
 
 Use **MRW: Set Up MRW Workspace…** to create or reuse

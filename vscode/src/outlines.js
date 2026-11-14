@@ -9,6 +9,21 @@ const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require(
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
 
+// Only retained metadata is needed to find a source; no original-file or
+// network lookup, and no changes to its stored revision or annotations.
+function savedSourceChoice(source) {
+  const titles = source.passage_titles || [];
+  const count = source.annotation_count || 0;
+  return {
+    id: source.id,
+    label: source.title || path.basename(source.path),
+    description: [source.authors, source.locator].filter(Boolean).join(' · ') || source.path,
+    detail: [`${count} reader note${count === 1 ? '' : 's'}`,
+      titles.length ? 'Passages: ' + titles.join(' · ') : '',
+      'Revision ' + (source.upstream_revision || source.revision)].filter(Boolean).join(' · '),
+  };
+}
+
 function framePolicy(options) {
   const origins = options.frameOrigins || (options.stacksFrame ? ['https://stacks.math.columbia.edu'] : []);
   if (!Array.isArray(origins) || origins.some(o => typeof o !== 'string' || !/^https:\/\/[a-z0-9.-]+(?::[0-9]+)?$/.test(o) || new URL(o).origin !== o)) throw new Error('Invalid source frame origin');
@@ -727,8 +742,11 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const { store, root } = await storage(vscode.window.activeTextEditor);
     const result = await bridge({ method: 'outline_list', store, project_root: root });
     if (!result.outlines.length) throw new Error('No saved sources exist for this project.');
-    const picked = await vscode.window.showQuickPick(result.outlines.map(o => ({ label: o.title || path.basename(o.path),
-      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a saved source' });
+    const picked = await vscode.window.showQuickPick(result.outlines.map(savedSourceChoice), {
+      title: 'Saved sources — ' + path.basename(root),
+      placeHolder: 'Find a title, author or passage tag (for example, Stacks or 08ZH)',
+      matchOnDescription: true, matchOnDetail: true,
+    });
     if (!picked) return;
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: picked.id });
     return (await display(loaded, store, root)).result;
@@ -879,8 +897,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       const root=await fs.realpath(folder.uri.fsPath),store=path.join(context.storageUri.fsPath,`outlines-${digest(root)}`);
       if(token?.isCancellationRequested)throw new Error('Saved-copy listing cancelled.');
       const result=await bridge({method:'outline_list',store,project_root:root},{signal:controller.signal});
-      return result.outlines.map(o=>({id:o.id,label:o.title||path.basename(o.path),description:o.locator||o.path,
-        detail:'Saved copy · revision '+(o.upstream_revision||o.revision),store,root}));
+      return result.outlines.map(o => ({ ...savedSourceChoice(o), store, root }));
       } finally { subscription?.dispose(); }
     },
     open: choice => locked(async()=>{

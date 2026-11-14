@@ -51,6 +51,34 @@ class SourceOutlineTests(unittest.TestCase):
         self.edit(kind='context', context_kind='hypothesis', label=label, start=[0, 0], end=[0, 7])
         return self.saved['outline']['contexts'][-1]
 
+    def test_listing_finds_nested_passages_and_counts_notes_without_the_original(self):
+        region = self.add()['id']
+        self.edit(kind='region', region=region, title='Lemma stacks-project:08ZH — Proof',
+                  level='argument', collapsed=False)
+        bibliography = dict(self.saved['outline']['source']['bibliography'],
+                            title='Hausdorff spaces', authors='The Stacks Project Authors',
+                            locator='stacks-project:08ZD', revision='Pinned upstream revision')
+        self.edit(kind='metadata', bibliography=bibliography, authorship='unknown')
+        self.note(region, 'Preserve the pullback explanation')
+        self.note(None, 'Preserve the whole-source note')
+        self.source.unlink()
+        before = {p.relative_to(self.private): p.read_bytes() for p in self.private.rglob('*') if p.is_file()}
+        with patch('mrw.source_outlines.OutlineStore.source', side_effect=AssertionError('No source read for listing')):
+            listed = self.call('outline_list')['outlines']
+        self.assertEqual(len(listed), 1)
+        row = listed[0]
+        self.assertEqual(row['title'], 'Hausdorff spaces')
+        self.assertEqual(row['authors'], 'The Stacks Project Authors')
+        self.assertEqual(row['locator'], 'stacks-project:08ZD')
+        self.assertEqual(row['passage_titles'], ['Lemma stacks-project:08ZH — Proof'])
+        self.assertEqual(row['annotation_count'], 2)
+        self.assertEqual(row['upstream_revision'], 'Pinned upstream revision')
+        self.assertEqual(before, {p.relative_to(self.private): p.read_bytes() for p in self.private.rglob('*') if p.is_file()})
+        reopened = self.call('outline_load', id=row['id'])
+        self.assertEqual(reopened['revision'], self.saved['revision'])
+        self.assertEqual(reopened['outline']['regions'], self.saved['outline']['regions'])
+        self.assertEqual(reopened['outline']['annotations'], self.saved['outline']['annotations'])
+
     def test_obsidian_note_import_retains_external_markdown_and_reopens_without_the_vault(self):
         vault = self.home / 'vault'; vault.mkdir()
         path = vault / 'Note α😀.md'

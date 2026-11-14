@@ -5,6 +5,20 @@ VS Code's preview, and **Contents** lists its headings and links. The original
 file stays in place. Reading, following links and returning require no import
 or problem record.
 
+
+## Find an imported section and its reader notes
+
+Choose **Open Saved Source…** in MRW's **Commands** view, next to Open Document.
+Search by source title, author or passage title/tag. For example, `Stacks` or
+`08ZH` finds a saved Hausdorff-spaces section containing that lemma. The result
+shows its reader-note count and retained revision. Open it, then expand
+**Reader notes** at the relevant passage.
+
+This list belongs to the current workspace. A Markdown document that links to
+those passages is a separate file: use **Open Document…** for that file. Changing
+the notes folder does not relocate saved sources. Opening a saved source does
+not import it again, replace its revision or move its annotations.
+
 ## Open a document and find Contents
 
 1. Choose **Open Document…** in MRW's **Commands** section or the Command Palette.

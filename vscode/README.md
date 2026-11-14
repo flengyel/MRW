@@ -6,12 +6,11 @@ runs your selected creation command; other notes folders use a blank VS Code
 Markdown editor. Your current document stays open. See
 [note creation and setup](../docs/NOTE_COMPANIONS.md).
 
-0.23.28 removes the Studies sidebar. Contents and Commands remain; saved study
-work is accessible through Resume Study and history/export commands in the
-Command Palette. Study Lean 4 and ordinary files are unchanged. No data migration
-is required.
+0.23.29 restores **Open Saved Source…** beside Open Document in Commands.
+Search by title, author or passage tag, including a lemma inside a saved section.
+Results show reader-note counts and retained revisions. No data migration is required.
 
-MRW 0.23.28 opens mathematical notes and papers in place, follows references,
+MRW 0.23.29 opens mathematical notes and papers in place, follows references,
 and keeps a route back to the passage being read. It adds Contents, backlinks,
 retained source passages, reader annotations and explicit TikZ rendering to a
 VS Code workspace. The extension is experimental.
@@ -59,7 +58,9 @@ Partial searches are identified; cancellation preserves the current document.
 To read a retained revision, choose a **Saved copy** in the same picker. Its row
 identifies the source and revision. Opening an original does not import it;
 opening a saved copy does not refresh its source or replace its annotations.
-**Open Saved Source…** remains available in the Command Palette.
+**Open Saved Source…** is also directly available in **Commands** and the
+Command Palette. Search for `Stacks` or a passage tag such as `08ZH` to find a
+retained section even when its title is different.
 
 WikiLinks support note IDs, headings, paragraph/list block IDs and scoped paths.
 Ambiguous or missing targets are reported rather than guessed. Contents and
@@ -136,8 +137,8 @@ one private store are unsupported.
 
 ## Package and install a VSIX
 
-[Download MRW 0.23.28](https://github.com/flengyel/MRW/releases/download/v0.23.28/mrw-0.23.28.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.28).
+[Download MRW 0.23.29](https://github.com/flengyel/MRW/releases/download/v0.23.29/mrw-0.23.29.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.29).
 Updates from GitHub require installing the newer VSIX. For publication and build
 identity, follow [the release procedure](../docs/RELEASING.md).
 
@@ -146,12 +147,12 @@ From the repository root, with Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.28.vsix
-sha256sum vscode/mrw-0.23.28.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.29.vsix
+sha256sum vscode/mrw-0.23.29.vsix
 ```
 
 Packaging bundles the Python core and uses pinned `@vscode/vsce` 4.0.0 to create
-`vscode/mrw-0.23.28.vsix`. It publishes nothing. The fixed epoch and UTC make
+`vscode/mrw-0.23.29.vsix`. It publishes nothing. The fixed epoch and UTC make
 archive timestamps reproducible. Use Linux npm in WSL and record the resulting
 archive's hash rather than reusing an earlier package's hash.
 
@@ -162,11 +163,11 @@ caches and generated archives are excluded from the package.
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…**, or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.28.vsix
+code --install-extension /absolute/path/to/mrw-0.23.29.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.28` is installed on the workspace host. Save unfinished
+Confirm `flengyel.mrw@0.23.29` is installed on the workspace host. Save unfinished
 work before a requested reload and retain workspace storage when upgrading.
 The bridge runs the bundled core through `python3 -I`; no editable Python
 installation is needed. See [installation](../docs/INSTALLATION.md).
@@ -328,7 +329,7 @@ Fleeting notes and notes for later review can remain ordinary linked documents.
 
 ## Zotero references
 
-MRW 0.23.28 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.29 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Windows Zotero is accessed from WSL through
 Windows loopback, without forwarding its API port. See the [workflow and limits](../docs/ZOTERO_WORKFLOW.md).
 

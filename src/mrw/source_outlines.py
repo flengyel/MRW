@@ -576,7 +576,11 @@ def outline_action(request):
             result.append(dict(id=entry.name, title=saved.state['source']['bibliography']['title'],
                                path=saved.state['source']['path'], revision=saved.state['source']['revision'],
                                locator=saved.state['source']['bibliography']['locator'],
-                               upstream_revision=saved.state['source']['bibliography']['revision']))
+                               upstream_revision=saved.state['source']['bibliography']['revision'],
+                               authors=saved.state['source']['bibliography']['authors'],
+                               passage_titles=[r['title'] for r in saved.state['regions']],
+                               annotation_count=len(saved.state['annotations']) + sum(
+                                   len(r['annotations']) for r in saved.state['regions'])))
         return {'outlines': result}
     if method == 'outline_import_note':
         return import_note(store, ordinary_source(request['path'], request['source_revision']))

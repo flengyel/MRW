@@ -1384,7 +1384,7 @@ test('the MRW starting view offers note handoff, Open, saved sources and tutoria
     assert.ok(welcome.includes('(command:' + command + ' ')); assert.ok(h.commands.has(command));
   }
   assert.ok(h.commands.has('mrw.openOutline'));
-  assert.ok(!welcome.includes('(command:mrw.openOutline '));
+  assert.ok(welcome.includes('(command:mrw.openOutline '));
   assert.ok(!h.commands.has('mrw.newReadingOverview'));
   assert.ok(!manifest.contributes.commands.some(item => item.command === 'mrw.newReadingOverview'));
   assert.ok(!welcome.includes('(command:mrw.newReadingOverview '));
@@ -1772,7 +1772,7 @@ test('saved-source opening is discoverable and independent of an earlier citatio
   assert.equal(independent.path, file);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('[Open Document…](command:mrw.openDocument '));
-  assert.ok(!manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('(command:mrw.openOutline '));
+  assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('(command:mrw.openOutline '));
   assert.ok(manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.openOutline' && item.group.startsWith('navigation')));
   assert.equal(doc.isDirty, true); assert.equal(h.saves.length, 0); assert.deepEqual(h.errors, []);
 });
@@ -2445,4 +2445,43 @@ test('document menu targets its Markdown tab, preserves drafts and refuses PDF a
   assert.equal(h.state.get('mrw.readingOutline.v1').uri, chosen.uri.toString());
   assert.equal(h.saves.length, before); assert.equal(h.requests.length, 0);
   assert.equal(unrelated.isDirty, true); assert.equal(unrelated.getText(), '# Other\nUnsent draft.');
+});
+
+
+test('saved sources are searchable by author and nested passage after restart, without changing retained work', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const {file, panel, region} = await sourceReader(h, root);
+  const model = () => panel.webview.messages.findLast(m => m.type === 'outline').model;
+  await panel.receive({type:'edit', change:{kind:'metadata', authorship:'unknown',
+    bibliography:{...model().outline.source.bibliography, title:'Hausdorff spaces',
+      authors:'The Stacks Project Authors', locator:'stacks-project:08ZD', revision:'Pinned revision'}}});
+  await panel.receive({type:'edit', change:{kind:'region', region, title:'Lemma stacks-project:08ZH — Proof', level:'argument', collapsed:false}});
+  await panel.receive({type:'edit', change:{kind:'annotation', region, id:null, purpose:'question',
+    text:'Preserve the pullback explanation', origin:'human_work', author:'Reader'}});
+  const saved = model(); assert.equal(saved.outline.regions[0].annotations.length, 1);
+  await fs.unlink(file);
+  const reopened = await harness(root);
+  let choice;
+  reopened.api.window.showQuickPick = async (items, options) => {
+    assert.equal(options.matchOnDescription, true); assert.equal(options.matchOnDetail, true);
+    choice = items.find(i => i.description.includes('Stacks') && i.detail.includes('stacks-project:08ZH'));
+    assert.ok(choice); assert.equal(choice.label, 'Hausdorff spaces');
+    assert.match(choice.detail, /1 reader note/); assert.match(choice.detail, /Pinned revision/);
+    return undefined; // Cancellation must not open a reader or mutate data.
+  };
+  await reopened.commands.get('mrw.openOutline')();
+  assert.equal(reopened.panels.length, 0);
+  reopened.api.window.showQuickPick = async () => choice;
+  const result = await reopened.commands.get('mrw.openOutline')();
+  assert.equal(result.revision, saved.revision);
+  assert.deepEqual(result.outline.regions, saved.outline.regions);
+  assert.deepEqual(result.outline.annotations, saved.outline.annotations);
+  assert.equal(reopened.requests.some(r => /create|mutate|import/.test(r.method)), false);
+  // Open Document's retained results use the same searchable metadata.
+  const opening = reopened.commands.get('mrw.openDocument')();
+  for (let i=0; i<200 && !reopened.api.lastDocumentPicker?.items.some(r => r.id===choice.id); i++) await new Promise(r=>setTimeout(r,10));
+  const row = reopened.api.lastDocumentPicker.items.find(r=>r.id===choice.id);
+  assert.ok(row); assert.equal(row.description, choice.description); assert.equal(row.detail, choice.detail);
+  reopened.api.lastDocumentPicker.hide(); await opening;
+  assert.deepEqual(reopened.errors, []);
 });
