@@ -19,6 +19,26 @@ There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
 
+## Architecture
+
+MRW is an integration workbench built around **ports and adapters**. Its VS Code
+facade exposes contextual actions; the core coordinates research workflows and
+keeps a narrow model of identities, revisions, retained sources/results,
+associations and provenance. Adapters translate external interfaces while
+preserving their meaning and ownership—the anti-corruption boundary.
+
+![MRW hexagonal architecture: facade, workflow coordination, canonical data model, ports and adapters, and optional diagnostics.](docs/assets/mrw-architecture.png)
+
+Native applications retain document creation and execution. MRW connects the
+work, preserves references and supports resumption. The proposed diagnostics
+companion supplies reports for Codex maintenance checked against the design;
+core integrity checks and usage recording remain in MRW. Dashed elements are
+planned, not delivered.
+
+[Architecture summary](docs/ARCHITECTURE.md) ·
+[Scalable diagram](docs/assets/mrw-architecture.svg) ·
+[Design and implementation status](docs/DESIGN_RECONCILIATION.md)
+
 ## What works
 
 - Open Markdown notes in place, including notes in an Obsidian vault. Obsidian
