@@ -1,5 +1,10 @@
 # Vision
 
+[Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md)
+governs optional integrations: creation and execution stay with the responsible
+system; MRW supports explicit delegation, native editing, retained references and
+coordinated synchronization. Current implementation limits remain explicit.
+
 MRW is being developed to help read, investigate and return to mathematics across
 notes, sources, calculations and proofs. This document explains its goals and the
 evidence needed to assess them. The [README](README.md) describes current

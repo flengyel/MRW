@@ -1,5 +1,10 @@
 # Companion software and recommended extensions for MRW
 
+[Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md)
+governs these optional companions. Existing native editors remain available;
+creation and execution shortcuts delegate to the responsible system rather
+than supplying a second implementation.
+
 Use VS Code's editing and preview tools alongside MRW. Install a
 companion for a specific task: writing LaTeX, running a SageMath notebook,
 checking Lean proofs or using another PDF reader. Ordinary Markdown navigation

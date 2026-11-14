@@ -53,6 +53,13 @@ packaging is part of the change.
 
 ## Design expectations
 
+Follow [the integration contract](docs/INTEGRATION_BOUNDARIES.md) when connecting
+another subsystem. State its owner, supported creation/execution route, external
+identities, synchronization behavior and evidence limits. Do not bypass the
+maintaining system through a plugin. Native mutation tests may inspect identity
+read-only, then must verify isolated vaults, kernels, runtimes or queues before
+changing focus, dispatching work or writing data.
+
 Preserve ordinary notes, unsaved work, Return destinations and the user's chosen
 editor layout. Keep source revisions and attribution distinct from editable
 explanations and corrections. Propose incompatible record changes explicitly.

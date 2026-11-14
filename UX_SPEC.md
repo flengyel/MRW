@@ -1,5 +1,10 @@
 # User experience specification
 
+[Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md)
+governs optional integrations: creation and execution stay with the responsible
+system; MRW supports explicit delegation, native editing, retained references and
+coordinated synchronization. Current implementation limits remain explicit.
+
 ## Obsidian creation command — 0.23.31
 
 For a vault, New Note and reader-note continuation require an explicitly

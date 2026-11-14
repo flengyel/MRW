@@ -1,5 +1,9 @@
 # Notes applications and the MRW handoff
 
+[The integration contract](INTEGRATION_BOUNDARIES.md) governs external note
+creation, native editing and synchronization. Obsidian is one optional
+maintaining application; its rules are not imposed on other notes systems.
+
 A note is a document used for working thoughts, arguments or references. It is
 not a separate MRW file type. A Markdown note can have Contents, links and
 backlinks just like another Markdown document.
@@ -22,8 +26,12 @@ not require the maintainer's format or invent a replacement for another editor's
 creation workflow.
 
 This is separation of concerns: MRW retains working material and its provenance;
-the Zettelkasten editor owns authoring and templates; the reader chooses what to
-retain, how to express it and where it belongs. Machine proposals may assist
+the maintaining application owns creation, identity and templates; the reader
+chooses what to retain, how to express it and where it belongs. Existing notes
+may be edited in MRW through native Save and Undo. Synchronization and scoped
+reference maintenance should preserve verified identities and locations without
+overwriting unsaved work or creating another note-creation route. Machine
+proposals may assist
 those choices, but copying a passage or passing a format validator does not make
 them. A source-return link records provenance; it does not replace a considered
 connection between ideas.
@@ -66,6 +74,10 @@ creation command or selects an existing note. Native editing and Save are
 followed by explicit verification before the external note becomes current.
 [Continue an annotation](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation)
 describes the two insertions, optional Zettel validation and failure recovery.
+This implemented transfer must not be confused with developing a Zettel from
+source material: the latter permits selection, reformulation and combining
+sources while those source notes remain independently editable. The exact-copy
+gate and retirement of the original remain pending corrections.
 
 ## Obsidian now
 
@@ -90,8 +102,10 @@ open a known note, and return a known document location to MRW. These capabiliti
 need not all be present. Selection should be explicit for a notes folder; a
 folder's name or Markdown extension cannot determine its editor.
 
-The application should continue to own editing, templates and naming. MRW should
-own source Return locations and its retained research records. Preserve a target
+The application should continue to own creation, templates and naming. Native
+editing of existing notes in MRW remains available. MRW should own source Return
+locations and its retained research records, and reconcile verified external
+identity/location changes through the supported integration. Preserve a target
 as supplied by the companion, including a heading or entry locator where supported;
 a captured note need not be a new file. A dispatched request, a cancelled capture
 and a confirmed saved target are different outcomes. An uncertain result must

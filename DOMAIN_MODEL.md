@@ -1,5 +1,10 @@
 # Domain model — v9
 
+[Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md)
+governs optional integrations: creation and execution stay with the responsible
+system; MRW supports explicit delegation, native editing, retained references and
+coordinated synchronization. Current implementation limits remain explicit.
+
 This design defines entities and invariants, independently of storage technology,
 schema syntax or GUI framework. It accompanies the [vision](VISION.md),
 [UX specification](UX_SPEC.md) and [implementation plan](CODEX_PLAN.md).
