@@ -114,71 +114,39 @@ def body_text(original, presentation):
     return '\n\n' + value + '\n\n'
 
 
-def section_offsets(content):
-    """Locate insertion sections without treating a fenced example as a section.
-
-    The external validator owns Zettel conformance; this only bounds insertion.
-    """
-    fence = None
-    offset = 0
-    for line in content.splitlines(keepends=True):
-        marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
-        if fence:
-            if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence) and not line[marker.end():].strip():
-                fence = None
-        elif marker:
-            fence = marker[1]
-        else:
-            heading = re.match(r"^## ([^\n]+?)\s*$", line)
-            if heading:
-                yield heading[1], offset
-        offset += len(line)
-
-
-def verify_text(record, content, validation=None):
-    # Native editors can change line endings. Original annotation bytes remain in
-    # the private record. No mathematical text, whitespace within lines or links
-    # are normalized.
-    normalize = lambda s: s.replace('\r\n', '\n')
-    content = normalize(content)
-    body, research = normalize(record['body']), normalize(record['research'])
-    if content.count(body) != 1 or content.count(research) != 1:
-        raise ValueError('Save exactly one copy of the prepared body and attribution before verifying; do not paste them again')
-    if record['policy'] == 'zettel':
-        headings = list(section_offsets(content))
-        section = (validation or {}).get('section', 'Research')
-        see = next((at for title, at in headings if title == 'SEE ALSO'), None)
-        manual = next((at for title, at in headings if title == section), None)
-        end = next((at for _, at in headings if manual is not None and at > manual), len(content))
-        if see is None or manual is None or not content.index(body) < see < manual < content.index(research) or content.index(research) + len(research) > end:
-            raise ValueError('Place the annotation in the body before SEE ALSO, and its attribution in Research (or the accepted older manual section)')
-    # Both chunks are inserted without replacing prior text. This is a compact
-    # baseline check, not a second copy of the ordinary note in private storage.
-    stripped = content.replace(body, '', 1).replace(research, '', 1)
-    if sha256(stripped.encode()).hexdigest() != record['baseline']:
-        raise ValueError('The destination changed beyond the two selected insertions. Keep both versions; inspect the changes before preparing a new transfer')
-
-
 def change_continuation(store, value, request):
     """Mutate the in-memory association record; caller publishes it once."""
-    fields(request, {'operation', 'annotation', 'outline_revision', 'data'}, 'continuation operation')
+    fields(request, {'operation', 'annotation', 'outline_revision', 'data'} | ({'association'} if 'association' in request else set()), 'continuation operation')
     operation, data = request['operation'], request['data']
     store.expect(request['outline_revision'])
     region, original = find_annotation(store, request['annotation'])
     records = value.setdefault('continuations', [])
-    record = next((r for r in records if r['annotation'] == original['id']), None)
+    matches = [r for r in records if r['annotation'] == original['id']]
+    selected = request.get('association')
+    if selected is not None:
+        identity(selected)
+        record = next((r for r in matches if r['association'] == selected), None)
+        if record is None: raise ValueError('The selected annotation association is missing; refresh the reader')
+    elif len(matches) == 1:
+        record = matches[0]
+    elif operation != 'prepare' and matches:
+        raise ValueError('Choose which annotation association to manage')
+    else:
+        record = None
     if operation == 'prepare':
-        if record: raise ValueError('This annotation already has a pending or completed continuation; resume it without copying again')
         fields(data, {'destination', 'policy', 'presentation', 'return_link', 'destination_revision'}, 'continuation preparation')
         raw, content = destination(data['destination'], read=True)
+        if any(r['phase'] != 'unlinked' and r['destination']['root'] == data['destination']['root']
+               and r['destination']['file'] == data['destination']['file'] for r in matches):
+            raise ValueError('This annotation already has an association with this note; manage that association')
         if sha256(raw).hexdigest() != revision(data['destination_revision']): raise ValueError('Destination changed while preparing the transfer')
         reference = reference_action(dict(method='outline_reference', store=str(store.base), project_root=str(store.root), id=store.id, revision=store.revision, region=region))['reference']
         return_link(data['return_link'], reference)
         p = original['provenance']; b = store.state['source']['bibliography']
         attribution = f"{p['author'] or 'Unknown author'}; {p['origin']}; recorded {p['at']}"
         bibliography = ' · '.join(str(b[k]) for k in ('authors', 'title', 'locator', 'revision') if b[k]) or 'Retained source'
-        research = ('\n\nTransferred reader annotation: ' + attribution + '.\n'
-            + 'This attribution applies only to the transferred annotation, not to later writing in this note.\n'
+        research = ('\n\nSource reader annotation: ' + attribution + '.\n'
+            + 'This attribution identifies the source annotation; the linked note may develop it independently.\n'
             + 'Source: ' + bibliography + '.\n'
             + f'Retained source SHA-256: `{store.state["source"]["revision"]}`.\n'
             + f'[Return to the exact retained passage]({data["return_link"]})\n\n')
@@ -191,17 +159,17 @@ def change_continuation(store, value, request):
     elif record is None:
         raise ValueError('No continuation is pending for this annotation')
     elif operation == 'cancel':
-        if record['phase'] != 'pending': raise ValueError('A completed continuation cannot revert to a second current editor')
+        if record['phase'] != 'pending': raise ValueError('Only a pending association can be cancelled')
         fields(data, set(), 'cancel continuation')
         records.remove(record)  # External text is deliberately untouched.
     elif operation == 'complete':
         fields(data, {'destination_revision', 'validation'}, 'continuation verification')
         if record['phase'] != 'pending': raise ValueError('This note is already continued; open its destination')
-        if original != record['original']: raise ValueError('The annotation changed during transfer; keep both texts and resolve it before continuing')
         reference_action(dict(method='outline_follow_reference',store=str(store.base),project_root=str(store.root),reference=record['reference']))
         raw, content = destination(record['destination'], read=True)
         if sha256(raw).hexdigest() != revision(data['destination_revision']): raise ValueError('Destination changed during verification; verify again')
-        verify_text(record, content, data['validation'])
+        # The saved destination is an independent work. Its text may paraphrase
+        # or combine sources; source snapshots and provenance remain in this record.
         if record['policy'] == 'zettel' and data['validation'] is None: raise ValueError('Validate the completed Zettel with its configured validator first')
         record.update(phase='complete', destination_revision=data['destination_revision'], validation=data['validation'])
         if record['destination']['url'] is not None:
@@ -213,6 +181,7 @@ def change_continuation(store, value, request):
         if record['phase'] not in ('complete', 'unlinked'): raise ValueError('Finish or cancel the pending transfer before relinking')
         value['links'] = [i for i in value['links'] if i['id'] != record['association']]
         record['destination'] = data['destination']
+        record['destination_revision'] = data['destination_revision']
         record['phase'] = 'complete'
         if data['destination']['url'] is not None:
             value['links'].append(dict(id=record['association'],reference=record['reference'],url=data['destination']['url'],label=data['destination']['label']))
@@ -220,8 +189,8 @@ def change_continuation(store, value, request):
         fields(data, set(), 'unlink continuation')
         if record['phase'] != 'complete': raise ValueError('Cancel a pending transfer instead')
         value['links'] = [i for i in value['links'] if i['id'] != record['association']]
-        # Keep destination and completed status for explicit recovery, never make
-        # the original current just because its association was removed.
+        # Keep the destination and source snapshot for explicit recovery. Neither
+        # removing this association nor linking it owns the external file.
         record['phase'] = 'unlinked'
     else:
         raise ValueError('Unknown continuation operation')

@@ -126,7 +126,7 @@ function field(f, name, title, options) {
   node.value = f.current[name] ?? ''; return node;
 }
 function noteForm(parent, region, note) {
-  if (note && (noteError || continuations.some(c=>c.annotation===note.id && c.phase!=='pending'))) return;
+  if (note && noteError) return;
   const key = `note:${region || 'overview'}:${note?.id || 'new'}`;
   const box = el('details', undefined, parent, 'note'); keepOpen(box, key);
   el('summary', note ? `Edit reader note: ${label(note.kind)}` : 'Add reader explanation / question / repair', box);
@@ -160,21 +160,25 @@ function renderNotes(parent, annotations, scope, title = 'Reader notes') {
   for (const note of annotations) {
     el('h3', label(note.kind), notes);
     el('p', `${label(note.provenance.origin)} · author: ${note.provenance.author || 'unknown'} · recorded ${note.provenance.at}`, notes, 'muted');
-    const continuation = continuations.find(c=>c.annotation===note.id);
-    let content = notes;
-    if (continuation) {
-      el('p', (continuation.phase==='pending'?'Transfer pending — inline annotation is still current.':'Continue editing in: '+continuation.destination.label)+ ' · '+continuation.destination.file, notes, 'muted');
-      if (continuationErrors[note.id]) el('p',continuationErrors[note.id],notes,'warning');
-      if (continuation.phase!=='pending') {
-        button(notes,'Open continuation',{type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope,action:'open'},'open-continuation');
-        content=el('details',undefined,notes);
-        el('summary','Inspect retained original annotation',content);
-        el('p','Original attribution applies to this retained text, not to later writing in the external note.',content,'muted');
+    const linked = continuations.filter(c=>c.annotation===note.id);
+    const content = notes;
+    for (const continuation of linked) {
+      const association=continuation.association;
+      el('p',(continuation.phase==='pending'?'Association pending: ':continuation.phase==='unlinked'?'Association removed: ':'Linked note: ')+continuation.destination.label+' · '+continuation.destination.file,notes,'muted');
+      if (continuationErrors[association || note.id]) el('p',continuationErrors[association || note.id],notes,'warning');
+      if (continuation.phase==='complete') button(notes,'Open linked note',{type:'continue_annotation',annotation:note.id,association,region:scope==='overview'?null:scope,action:'open'},'open-continuation');
+      button(notes,continuation.phase==='pending'?'Resume pending association…':'Manage note association…',
+        {type:'continue_annotation',annotation:note.id,association,region:scope==='overview'?null:scope},'manage-continuation',true);
+      if(continuation.original){
+        const retained=el('details',undefined,notes);el('summary','Inspect source snapshot at linking',retained);
+        el('p',continuation.original.text,retained,'reader-note-text');
+        const p=continuation.original.provenance;
+        el('p',`${p.origin} · author: ${p.author || 'unknown'} · recorded ${p.at}`,retained,'muted');
       }
     }
-    const action = button(notes, continuation ? (continuation.phase==='pending'?'Resume pending transfer…':'Manage continuation…') : 'Continue this note in Obsidian…',
-      {type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope},'continue-annotation',true);
-    action.title='Continue this saved annotation in a selected ordinary note. Save and verify before making that note the editable continuation.';
+    const action = button(notes,'Link another note…',
+      {type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope,action:'new'},'continue-annotation',true);
+    action.title='Link this source annotation to an independently maintained note. Select, paraphrase or combine its material; exact copying is optional.';
     if (window.MRWAnnotations) window.MRWAnnotations.render(content, note.text, { fragments: note.fragments,
       appearance: diagramAppearance,
       onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),

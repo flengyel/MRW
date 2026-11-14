@@ -510,20 +510,23 @@ test('failed or uncertain annotation saving keeps text and announces no confirme
 });
 
 
-test('continuation hides the second current editor and preserves a labelled original with attribution', () => {
+test('associations keep source editing and immutable linking snapshots visible', () => {
   const h=reader();const value=readingModel();
   const note={id:'annotation',kind:'explanation',text:'Exact original α',provenance:{origin:'human_work',author:'Reader',at:'retained time'}};
   value.model.outline.regions[0].annotations=[note];
-  value.continuations=[{annotation:note.id,phase:'complete',destination:{label:'Ordinary note',file:'N.md'}}];
-  value.continuationErrors={annotation:'Note missing or renamed — relink explicitly'};
+  value.continuations=[{annotation:note.id,association:'association-1',phase:'complete',original:{...note,text:'Earlier source snapshot'},destination:{label:'Ordinary note',file:'N.md'}},{annotation:note.id,association:'association-2',phase:'complete',destination:{label:'Another note',file:'M.md'}}];
+  value.continuationErrors={'association-1':'Note missing or renamed — relink explicitly'};
   h.send(value);
-  assert.ok(h.root.text().includes('Inspect retained original annotation'));
+  assert.ok(h.root.text().includes('Inspect source snapshot at linking'));
+  assert.ok(h.root.text().includes('Earlier source snapshot'));
+  assert.ok(h.root.text().includes('Another note'));
+  assert.ok(h.root.text().includes('Link another note'));
   assert.ok(h.root.text().includes('Exact original α'));
   assert.ok(h.root.text().includes('Reader'));
   assert.ok(h.root.text().includes('Note missing or renamed'));
-  assert.ok(!h.root.text().includes('Edit reader note:'));
-  assert.ok(h.root.text().includes('Manage continuation'));
+  assert.ok(h.root.text().includes('Edit reader note:'));
+  assert.ok(h.root.text().includes('Manage note association'));
   value.continuations[0].phase='pending';h.send(value);
   assert.ok(h.root.text().includes('Edit reader note:'));
-  assert.ok(h.root.text().includes('Resume pending transfer'));
+  assert.ok(h.root.text().includes('Resume pending association'));
 });

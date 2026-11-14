@@ -452,7 +452,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     }
     const continued=c.notes?.continuations?.find(n=>n.association===existing?.id);
     const present=continued && [...c.result.outline.annotations,...c.result.outline.regions.flatMap(r=>r.annotations)].some(n=>n.id===continued.annotation);
-    if(present) return continuation.manage(c,{annotation:continued.annotation});
+    if(present) return continuation.manage(c,{annotation:continued.annotation,association:continued.association});
     writable(c);
     let choice = 'Replace linked note';
     if (existing) choice = await vscode.window.showQuickPick(['Replace linked note', 'Remove note link'], { placeHolder: existing.label });

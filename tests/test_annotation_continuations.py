@@ -39,9 +39,9 @@ class AnnotationContinuationTests(unittest.TestCase):
     def mutate(self, change):
         return self.call('outline_mutate',id=self.oid,revision=self.model['revision'],change=change)
     def notes(self): return self.call('outline_notes',id=self.oid)
-    def change(self,operation,data=None,revision=None):
+    def change(self,operation,data=None,revision=None,association=None):
         result=self.call('outline_continue_note',id=self.oid,revision=self.notes()['revision'] if revision is None else revision,
-            change=dict(operation=operation,annotation=self.note['id'],outline_revision=self.model['revision'],data=data or {}))
+            change=dict(operation=operation,annotation=self.note['id'],outline_revision=self.model['revision'],data=data or {},**({'association':association} if association else {})))
         return result
     def prepare(self,policy='zettel',presentation='verbatim'):
         return self.change('prepare',dict(destination=self.dest,policy=policy,presentation=presentation,return_link=self.link,destination_revision=sha256(self.file.read_bytes()).hexdigest()))['continuations'][0]
@@ -66,18 +66,17 @@ class AnnotationContinuationTests(unittest.TestCase):
         self.file.write_text(self.file.read_text()+'\nLater independent writing.\n')
         # Restart/read neither recopies original nor applies its attribution to new writing.
         self.assertEqual(self.notes(),self.notes());self.assertIn('Later independent',self.file.read_text())
-        with self.assertRaisesRegex(ValueError,'external continuation'):
-            self.mutate(dict(kind='annotation',region=self.rid,id=self.note['id'],purpose='explanation',text='second editor',origin='human_work',author=None))
+        edited=self.mutate(dict(kind='annotation',region=self.rid,id=self.note['id'],purpose='explanation',text='Independent later source work',origin='human_work',author=None))
+        self.assertEqual(edited['outline']['regions'][0]['annotations'][0]['text'],'Independent later source work')
+        self.assertEqual(self.notes()['continuations'][0]['original'],self.note)
         self.assertEqual(self.neighbor.read_text(),'untouched')
 
-    def test_repeat_prepare_complete_and_duplicate_insertion_refused(self):
+    def test_repeat_same_destination_prepare_and_complete_refused_without_rewriting(self):
         r=self.prepare(); before=self.file.read_bytes()
         with self.assertRaisesRegex(ValueError,'already'): self.prepare()
         self.assertEqual(self.file.read_bytes(),before)
-        self.paste(r);self.file.write_text(self.file.read_text()+r['body'])
-        with self.assertRaisesRegex(ValueError,'exactly one'): self.finish()
-        self.assertEqual(self.notes()['continuations'][0]['phase'],'pending')
-        self.paste(r); self.finish()
+        self.file.write_text(self.before+'\nAn independently formulated argument.\n')
+        self.finish()
         with self.assertRaisesRegex(ValueError,'already'): self.finish()
 
     def test_cancel_and_failed_link_preserve_saved_text_and_pending_recovers(self):
@@ -89,16 +88,32 @@ class AnnotationContinuationTests(unittest.TestCase):
         self.finish();self.assertEqual(self.file.read_bytes(),saved)
         self.assertEqual(len(self.notes()['links']),1)
 
-    def test_unsaved_missing_text_and_concurrent_source_or_destination_edits_stop_completion(self):
+    def test_paraphrase_combination_and_source_changes_preserve_link_snapshot(self):
         r=self.prepare()
-        with self.assertRaisesRegex(ValueError,'Save exactly'): self.finish()
-        self.paste(r);self.file.write_text(self.file.read_text().replace('Earlier prose','Changed prose'))
-        with self.assertRaisesRegex(ValueError,'beyond'): self.finish()
-        self.paste(r)
-        self.model=self.mutate(dict(kind='annotation',region=self.rid,id=self.note['id'],purpose='explanation',text='New original',origin='human_work',author=None))
-        with self.assertRaisesRegex(ValueError,'annotation changed'): self.finish()
-        self.change('cancel');self.assertEqual(self.notes()['continuations'],[])
-        self.assertIn(self.original,self.file.read_text())
+        self.file.write_text(self.before.replace('Earlier prose','Combined discussion from several sources'))
+        self.model=self.mutate(dict(kind='annotation',region=self.rid,id=self.note['id'],purpose='explanation',text='New source work',origin='human_work',author=None))
+        saved=self.file.read_bytes();self.finish()
+        self.assertEqual(self.notes()['continuations'][0]['original'],self.note)
+        self.assertEqual(self.file.read_bytes(),saved)
+        self.assertNotIn(self.original,self.file.read_text())
+
+    def test_multiple_notes_per_source_and_multiple_sources_per_note(self):
+        first=self.prepare();self.finish()
+        second_file=self.vault/'second.md';second_file.write_text('Independent discussion.\n')
+        second_dest={**self.dest,'file':second_file.name,'url':'obsidian://open?vault=Notes%20%CE%B1&file=second.md'}
+        second=self.change('prepare',dict(destination=second_dest,policy='markdown',presentation='verbatim',return_link=self.link,destination_revision=sha256(second_file.read_bytes()).hexdigest()))['continuations'][-1]
+        with self.assertRaisesRegex(ValueError,'Choose which'): self.finish()
+        self.change('complete',dict(destination_revision=sha256(second_file.read_bytes()).hexdigest(),validation=None),association=second['association'])
+        self.model=self.mutate(dict(kind='annotation',region=self.rid,id=None,purpose='question',text='An independent source question',origin='human_work',author=None))
+        old=self.note;self.note={k:v for k,v in self.model['outline']['regions'][0]['annotations'][-1].items() if k!='fragments'}
+        third=self.prepare();self.finish();self.note=old
+        records=self.notes()['continuations']
+        self.assertEqual(len(records),3)
+        self.assertEqual(len({r['association'] for r in records}),3)
+        self.assertEqual([r['destination']['file'] for r in records].count(self.file.name),2)
+        self.change('unlink',association=first['association'])
+        self.assertEqual(len(self.notes()['links']),2)
+        self.assertEqual(second_file.read_text(),'Independent discussion.\n')
 
     def test_stale_revisions_and_redirected_paths_are_rejected(self):
         with self.assertRaisesRegex(ValueError,'changed'):
@@ -144,14 +159,11 @@ class AnnotationContinuationTests(unittest.TestCase):
         self.file.write_text(self.before.replace('Earlier prose', r['body']+'Earlier prose').replace('Earlier reference.', r['research']+'Earlier reference.'))
         self.finish()
 
-    def test_attribution_must_stay_inside_the_selected_manual_section(self):
-        self.before += '\n## Unrelated section\nKeep this too.\n'
-        self.file.write_text(self.before)
-        r = self.prepare()
-        self.file.write_text(self.before.replace('Earlier prose', r['body']+'Earlier prose')+r['research'])
-        with self.assertRaisesRegex(ValueError, 'Place the annotation'):
-            self.finish()
-        self.assertEqual(self.notes()['continuations'][0]['phase'], 'pending')
+    def test_no_insertions_or_placement_constraint_is_required_for_association(self):
+        before=self.file.read_bytes();self.prepare();self.finish()
+        self.assertEqual(self.file.read_bytes(),before)
+        self.assertEqual(self.notes()['continuations'][0]['destination_revision'],sha256(before).hexdigest())
+        self.assertEqual(self.notes()['continuations'][0]['phase'],'complete')
 
     def test_generic_link_management_cannot_redirect_continuation(self):
         r=self.prepare();self.paste(r);self.finish()

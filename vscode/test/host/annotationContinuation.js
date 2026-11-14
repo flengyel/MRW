@@ -77,11 +77,11 @@ editor.replaceRange(${JSON.stringify(text)},editor.offsetToPos(offset));await vi
       }});
       await insert('body','Earlier fixture prose [@existingCitation].\n\n');
       await insert('research','\nEarlier fixture reference.\n');
-      queue.push('Choose an existing note…','Zettel — flengyel/Zettel','Copy annotation for the note body');
+      queue.push('Choose an existing note…','Zettel — flengyel/Zettel','Copy source annotation (optional)');
       await continuation.manage(c,{annotation});const body=await vscode.env.clipboard.readText();assert.equal(c.notes.continuations[0].phase,'pending');
       await insert('body',body);
-      queue.push('Copy source attribution and return link');await continuation.manage(c,{annotation});const research=await vscode.env.clipboard.readText();await insert('research',research);
-      queue.push('Verify saved note and finish continuation');await continuation.manage(c,{annotation});
+      queue.push('Copy source attribution and return link (optional)');await continuation.manage(c,{annotation});const research=await vscode.env.clipboard.readText();await insert('research',research);
+      queue.push('Confirm selected saved note and link');await continuation.manage(c,{annotation});
       const record=c.notes.continuations[0];assert.equal(record.phase,'complete');assert.equal(record.original.text,original);assert.ok(record.validation.tool.endsWith('zettel_validate.py'));
       assert.equal(parseExternal(record.return_link).reference,record.reference);assert.equal(c.notes.links[0].reference,record.reference);
       report.checks.push('native Quick Picks run production continuation controller; explicit fixture file selection; real Zettel validation; native clipboard → Obsidian editor → Save → one completed association');

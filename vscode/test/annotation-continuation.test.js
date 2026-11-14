@@ -76,3 +76,14 @@ test('missing/unlinked destinations are visible and never guessed or opened; unl
   f.picks.push({action:'unlink'});await controller.manage(c,{annotation:'note'});
   assert.equal(f.actions[0].operation,'unlink');assert.equal(await fs.readFile(path.join(f.root,'Renamed.md'),'utf8'),'Earlier prose.\n');
 });
+
+test('independent-note association confirms a saved paraphrase without copying and selects among multiple targets',async t=>{
+  const f=await fixture(t);await fs.writeFile(f.target,'A synthesis of several sources.\n');
+  const records=['first','second'].map(association=>({annotation:'note',association,phase:'pending',destination:f.destination,policy:'markdown',body:'Uncopied source text',research:'Optional attribution'}));
+  const c={root:f.root,result:{revision:'current',outline:{id:'outline',annotations:[{id:'note',text:'Changed source text'}],regions:[]}},notes:{continuations:records}};
+  const controller=createContinuation({vscode:f.vscode,publish:async(_,change)=>f.actions.push(change)});
+  f.picks.push({record:records[1]},{action:'verify'});await controller.manage(c,{annotation:'note'});
+  assert.equal(f.actions[0].operation,'complete');assert.equal(f.actions[0].association,'second');
+  assert.equal(f.actions[0].data.destination_revision,digest('A synthesis of several sources.\n'));
+  assert.deepEqual(f.clipboard,[]);assert.equal(await fs.readFile(f.target,'utf8'),'A synthesis of several sources.\n');
+});

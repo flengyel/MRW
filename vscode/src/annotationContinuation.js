@@ -1,7 +1,7 @@
 'use strict';
-// The authoring application performs every note edit and Save. This controller
-// prepares two clipboard insertions and verifies the saved result; it never
-// writes a vault file or infers a new filename from a directory scan.
+// The maintaining application owns new-note creation; existing notes may be
+// edited in a native editor. This controller records explicit associations and
+// optional source copies; it never writes a vault file or guesses a filename.
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const {execFile} = require('node:child_process');
@@ -72,20 +72,20 @@ async function validateZettel(vscode, selected, execute = exec) {
 async function availability(vscode, records) {
   const result = {};
   for (const item of records) {
-    if (item.phase === 'unlinked') { result[item.annotation] = 'Link removed — relink explicitly'; continue; }
+    if (item.phase === 'unlinked') { result[item.association || item.annotation] = 'Link removed — relink explicitly'; continue; }
     try {
       const d=item.destination, file=path.join(d.root,d.file);
       validateTarget({notes:d.root,file:d.file,workspace:'file:///validation'});
       if(await fs.realpath(d.root)!==d.root || await fs.realpath(file)!==file) throw Error('Note path redirected — relink explicitly');
       if(!(await fs.lstat(file)).isFile()) throw Error('The continuation is not a file — relink explicitly');
     }
-    catch (error) { result[item.annotation] = error.code === 'ENOENT' ? 'Note missing or renamed — relink explicitly' : error.message; }
+    catch (error) { result[item.association || item.annotation] = error.code === 'ENOENT' ? 'Note missing or renamed — relink explicitly' : error.message; }
   }
   return result;
 }
 function createContinuation({vscode, bridge, show, publish, refresh, createNote=createObsidianNote, validate=validateZettel}) {
   const call = (c,method,extra={}) => bridge({method,store:c.store,project_root:c.root,id:c.result.outline.id,...extra});
-  const change = (c, annotation, operation, data) => publish(c,{operation,annotation,outline_revision:c.result.revision,data});
+  const change = (c, annotation, operation, data, association) => publish(c,{operation,annotation,outline_revision:c.result.revision,data,...(association?{association}:{})});
   async function open(record) {
     if (record.phase === 'unlinked') throw Error('The continuation is unlinked. Use Relink to select its note.');
     const selected = await snapshot(vscode,record.destination);
@@ -110,7 +110,7 @@ function createContinuation({vscode, bridge, show, publish, refresh, createNote=
     const configured = vscode.workspace.getConfiguration('mrw').get('notesFolder','');
     if (!configured) throw Error('Choose the destination notes folder first.');
     const root = await fs.realpath(configured);
-    const start = await vscode.window.showQuickPick(['Choose an existing note…','Create a note in Obsidian…'],{title:'Continue this note in Obsidian',placeHolder:'The selected note receives this annotation; its other text stays in place.'});
+    const start = await vscode.window.showQuickPick(['Choose an existing note…','Create a note in Obsidian…'],{title:'Link this source note to a note',placeHolder:'Choose an independently maintained note; copying the source text is optional.'});
     if (!start) return;
     if (start === 'Create a note in Obsidian…') {
       if (!(await fs.stat(path.join(root,'.obsidian')).catch(()=>undefined))?.isDirectory()) throw Error('This folder is not an Obsidian vault. Create a note in its authoring application, then choose the saved file.');
@@ -123,64 +123,69 @@ function createContinuation({vscode, bridge, show, publish, refresh, createNote=
     const picked = await choose(root); if (!picked) return;
     const policy = await vscode.window.showQuickPick([{label:'Zettel — flengyel/Zettel',value:'zettel',description:'Validate ID/title, sections and title index link'},{label:'Ordinary Markdown',value:'markdown',description:'Keep this destination’s own format'}],{title:'Format of this destination',placeHolder:picked.selected.file});
     if (!policy) return;
-    let presentation = 'verbatim';
-    if (conflicts(original.text).length) {
-      const answer = await vscode.window.showWarningMessage('This annotation contains an H1 or a reserved section heading. Quote it as reader commentary in the destination to keep those headings from changing the note’s structure? The exact original stays in MRW.',{modal:true},'Quote reader annotation');
-      if (!answer) return; presentation = 'quote';
-    }
-    const issues = dependencies(original.text);
-    if (issues.length && !await vscode.window.showInformationMessage('Dependencies to check in the destination:\n'+issues.join('\n')+'\nNo links or mathematics will be rewritten.',{modal:true},'Continue')) return;
+    const presentation = 'verbatim';
     if (policy.value === 'zettel') await validate(vscode,picked.selected);
     const latest = await snapshot(vscode,picked.destination);
     if (latest.revision !== picked.selected.revision) throw Error('The selected note changed during preparation. Choose it again.');
     const target = await call(c,'outline_reference',{revision:c.result.revision,region:original.region});
     const link = makeExternal({workspace:workspaceRoute(vscode,c.root),project:c.root,reference:target.reference},vscode.env.uriScheme);
     await change(c,annotation,'prepare',{destination:picked.destination,policy:policy.value,presentation,return_link:link,destination_revision:latest.revision});
-    return c.notes.continuations.find(n=>n.annotation===annotation);
+    return c.notes.continuations.find(n=>n.annotation===annotation && n.destination.root===picked.destination.root && n.destination.file===picked.destination.file && n.phase==='pending');
   }
   async function manage(c, value) {
     if (value.unsaved) throw Error('Save or discard this annotation’s unsaved edits before continuing it.');
     if (c.noteError) throw Error('Note associations are unavailable. Refresh the saved source before continuing.');
     const original = [...c.result.outline.annotations.map(n=>({...n,region:null})),...c.result.outline.regions.flatMap(r=>r.annotations.map(n=>({...n,region:r.id})))].find(n=>n.id===value.annotation);
     if (!original) throw Error('The selected reader annotation no longer exists.');
-    let record = c.notes?.continuations?.find(n=>n.annotation===value.annotation);
+    const records = c.notes?.continuations?.filter(n=>n.annotation===value.annotation) || [];
+    let record;
+    if (value.association) {
+      record=records.find(n=>n.association===value.association);
+      if (!record) throw Error('The selected note association changed. Refresh the reader.');
+    } else if (value.action !== 'new' && records.length) {
+      if(records.length===1) record=records[0];
+      else {
+        const selected=await vscode.window.showQuickPick(records.map(n=>({label:n.destination.label,description:n.destination.file,record:n})),{title:'Choose a linked note'});
+        if(!selected)return;record=selected.record;
+      }
+    }
     if (!record) record = await begin(c,value.annotation,original);
     if (!record) return;
     if (value.action === 'open' && record.phase === 'complete') return open(record);
     const choices = record.phase === 'pending' ? [
       {label:'Open destination for editing',action:'open'},
-      {label:'Copy annotation for the note body',action:'body'},
-      {label:'Copy source attribution and return link',action:'research'},
-      {label:'Verify saved note and finish continuation',action:'verify'},
-      {label:'Cancel pending transfer…',action:'cancel'}
-    ] : [{label:'Open continuation',action:'open'},{label:'Relink to a selected note…',action:'relink'},{label:'Remove continuation link…',action:'unlink'}];
-    const choice = await vscode.window.showQuickPick(choices,{title:record.phase==='pending'?'Pending continuation — '+record.destination.label:'Continuation — '+record.destination.label,
-      placeHolder:record.phase==='pending'?(record.policy==='zettel'?'Paste the body before SEE ALSO and attribution in Research.':'Choose body and attribution locations in your note.')+' Preserve the surrounding text, then save and verify.':'The retained original is read-only. Edit the external note.'});
+      {label:'Copy source annotation (optional)',action:'body'},
+      {label:'Copy source attribution and return link (optional)',action:'research'},
+      {label:'Confirm selected saved note and link',action:'verify'},
+      {label:'Cancel pending association…',action:'cancel'}
+    ] : [{label:'Open linked note',action:'open'},{label:'Relink to a selected note…',action:'relink'},{label:'Remove note association…',action:'unlink'}];
+    const choice = await vscode.window.showQuickPick(choices,{title:(record.phase==='pending'?'Pending association — ':'Linked note — ')+record.destination.label,
+      placeHolder:'Source and external note remain independently editable. Copying is optional; confirm the selected saved file.'});
     if (!choice) return;
     if (choice.action === 'open') return open(record);
     if (['body','research'].includes(choice.action)) {
       const selected = await snapshot(vscode,record.destination);
       const content = record[choice.action];
       if (selected.text.replaceAll('\r\n','\n').includes(content.replaceAll('\r\n','\n'))) {
-        throw Error('This text is already saved in the destination. Do not paste it again; verify the saved note instead.');
+        throw Error('This source text is already saved in the destination. Choose or edit material deliberately before copying again.');
       }
       await vscode.env.clipboard.writeText(content);
-      void vscode.window.showInformationMessage((choice.action === 'body'?(record.policy==='zettel'?'Paste at a body location before SEE ALSO.':'Paste at your chosen body location.'):(record.policy==='zettel'?'Paste inside Research (or the accepted older manual section).':'Paste at your chosen attribution location.'))+' Paste without replacing existing text, preserving the copied blank lines. Save in the authoring application, then use Verify saved note. This transfer is still pending.');
+      void vscode.window.showInformationMessage((choice.action === 'body'?(record.policy==='zettel'?'Paste at a body location before SEE ALSO.':'Paste at your chosen body location.'):(record.policy==='zettel'?'Paste inside Research (or the accepted older manual section).':'Paste at your chosen attribution location.'))+' Select, paraphrase or combine material as appropriate. Save in your native editor. Exact copying is not required to link the note.');
       return;
     }
     if (choice.action === 'verify') {
       const selected = await snapshot(vscode,record.destination);
       const validation = record.policy === 'zettel' ? await validate(vscode,selected) : null;
       if ((await snapshot(vscode,record.destination)).revision !== selected.revision) throw Error('The note changed during validation. Verify it again.');
-      await change(c,value.annotation,'complete',{destination_revision:selected.revision,validation});
-      vscode.window.setStatusBarMessage('Continuation saved. Edit the external note; MRW keeps the attributed original.',8000);
+      await change(c,value.annotation,'complete',{destination_revision:selected.revision,validation},record.association);
+      vscode.window.setStatusBarMessage('Note association saved. The source note and linked note remain independently editable.',8000);
     } else if (choice.action === 'relink') {
       const picked = await choose(record.destination.root); if (!picked) return;
       if (!await vscode.window.showWarningMessage('Use '+picked.selected.file+' as this continuation? Its existing text will not be changed.',{modal:true},'Relink')) return;
-      await change(c,value.annotation,'relink',{destination:picked.destination,destination_revision:picked.selected.revision});
+      await change(c,value.annotation,'relink',{destination:picked.destination,destination_revision:picked.selected.revision},record.association);
     } else {
-      if (!await vscode.window.showWarningMessage(choice.action==='cancel'?'Cancel this pending transfer? Any text already pasted in the external note remains there. Remove or reconcile it before starting another transfer.':'Remove only this continuation link? The external file and read-only original remain.',{modal:true},choice.action==='cancel'?'Cancel transfer':'Remove link')) return;
-      await change(c,value.annotation,choice.action,{});
+      if (!await vscode.window.showWarningMessage(choice.action==='cancel'?'Cancel this pending association? Any text in the external note remains there.':'Remove only this association? The external note and source note remain.',{modal:true},choice.action==='cancel'?'Cancel association':'Remove link')) return;
+      await change(c,value.annotation,choice.action,{},record.association);
     }
   }
   return {manage,open};

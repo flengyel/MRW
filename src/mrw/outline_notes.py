@@ -74,8 +74,8 @@ def note_action(request):
         records = value['continuations']
         if not isinstance(records, list) or len(records) > 256:
             raise ValueError('Invalid annotation continuations')
-        if len({r.get('annotation') for r in records}) != len(records):
-            raise ValueError('Duplicate annotation continuation')
+        if len({r.get('association') for r in records}) != len(records):
+            raise ValueError('Duplicate annotation association identity')
         for record in records: validate_record(record, store)
     result = dict(links=value['links'], revision=sha256(raw).hexdigest() if raw is not None else None)
     if 'continuations' in value: result['continuations'] = value['continuations']
