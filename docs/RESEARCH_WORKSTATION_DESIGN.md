@@ -195,7 +195,8 @@ Zotero's library and attachments intact.
 | Source | A document or other material used as a reference for a particular question or claim. This is a role, not a file format. |
 | Saved source | An explicitly retained source revision, with reader selections and annotations where present. The Open Document picker labels this choice **Saved copy**. |
 | Passage | A selected part of a document or saved source; retained references identify the exact revision and range. |
-| Note / Zettel | A note is a document. The example [Zettel convention](https://github.com/flengyel/Zettel) uses a stable ID and editable title; that convention is optional. |
+| Note | A document used for working thoughts, arguments or references. Workspace working notes serve as fleeting notes. |
+| Zettel | A note the reader selects, develops and links within their Zettelkasten, using their editor and format. The [Zettel convention](https://github.com/flengyel/Zettel) is one optional format. |
 | Research question | The mathematical question under investigation; it may already be written in an ordinary note. This term does not require an MRW registration object or recall item. |
 | Study question | A task used to test or develop comprehension of particular material. Keeping it for scheduled review remains explicit. |
 | Proof outline | A condensed account of an argument. A proof graph is one representation of its claims and inferences. Neither term names a document's contents list. |
@@ -269,14 +270,31 @@ the separate reading-starter command was removed in 0.23.26.
 
 ### Zettelkasten
 
-Use Florian's vault as the working note collection. The public
-`flengyel/Zettel` repository contains its specification and tools; it is not the
-private vault. Notes can be used without the Obsidian application.
+Workspace working notes serve as fleeting notes. They preserve material from
+which the reader may develop Zettels, without requiring every observation or
+calculation to enter a Zettelkasten. The reader selects material, formulates it
+and chooses its links; the Zettelkasten editor and configured template own note
+creation. MRW retains working material, exact source references and return
+locations. This separation preserves the reader's own format and authoring
+practice. See [fleeting notes and Zettels](NOTE_COMPANIONS.md#fleeting-notes-and-zettels).
 
-Preserve the [Zettel specification](https://github.com/flengyel/Zettel/blob/fdce8d73b7d6c947b58d7028e4e4e4e03138f186/README.md):
+Keep the effort of selection and linking while removing repeated entry and
+navigation obstacles. Do not turn that effort into a registration form or
+automatically declare a copied or format-valid note a completed Zettel. Machine
+suggestions remain proposals for the reader to consider.
+
+The maintainer's vault is one instance of this workflow. The public
+`flengyel/Zettel` repository describes its format and tools, not a dependency
+that every MRW reader must adopt. Reading a note in place remains possible
+without Obsidian; creation in this vault goes through Obsidian and its template.
+
+When this format is selected, preserve the
+[Zettel specification](https://github.com/flengyel/Zettel#self-documenting-note-specification):
 the immutable ID equals the filename stem; YAML `id` contains that ID; YAML
 `title` contains ID plus title; the H1 contains the title; links target `[[ID]]`.
-Keep existing YAML, `SEE ALSO`, `References`, citations, embeds and formatting.
+Keep existing YAML, `SEE ALSO`, `Research`, older section headings, citations,
+embeds and formatting. `reference-section-title: References` names the exported
+bibliography; it is separate from the manually maintained Research section.
 Older ID forms remain valid. Merely opening a note never runs a template,
 renames a file, normalizes prose, or requires successful note validation.
 Not every Markdown document in the vault is a Zettel.

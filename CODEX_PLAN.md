@@ -1,5 +1,16 @@
 # CODEX_PLAN.md
 
+## Fleeting notes and the Zettelkasten
+
+Treat MRW workspace working notes as fleeting notes: preserve them as material
+for the reader's later selection, formulation and linking. Do not automatically
+promote them to Zettels or equate copying/format validation with that work.
+Creation in a Zettelkasten goes through its editor and configured template.
+Respect each reader's format; the maintainer's Zettel specification is one
+choice. Machine-suggested content and links remain proposals. Preserve useful
+human deliberation without adding classifications, forms or completion gates.
+See [the division of responsibilities](docs/NOTE_COMPANIONS.md#fleeting-notes-and-zettels).
+
 ## Obsidian note creation — required
 
 Published in [0.23.31](docs/RELEASE_0_23_31.md). Not installed into the working window.

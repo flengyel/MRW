@@ -4,6 +4,36 @@ A note is a document used for working thoughts, arguments or references. It is
 not a separate MRW file type. A Markdown note can have Contents, links and
 backlinks just like another Markdown document.
 
+## Fleeting notes and Zettels
+
+Following Sönke Ahrens’s terminology, working notes in the MRW workspace serve
+as **fleeting notes**: observations, questions, calculations and tentative
+arguments kept while reading or working.
+They can remain useful in the workspace without becoming Zettels. This describes
+their role; it introduces no record type, required classification or automatic
+deletion. Retained sources and their citations keep their separate meanings.
+
+The reader decides which material to develop into a Zettel, formulates the note
+and chooses its connections to other notes. MRW's notes, annotations, sources and
+calculation results can supply the material. Creation proceeds through the
+Zettelkasten editor and its configured template. In the maintainer's setup this
+is Obsidian with the [Zettel specification](https://github.com/flengyel/Zettel#self-documenting-note-specification).
+Other readers keep their own editor, formats and linking conventions. MRW does
+not require the maintainer's format or invent a replacement for another editor's
+creation workflow.
+
+This is separation of concerns: MRW retains working material and its provenance;
+the Zettelkasten editor owns authoring and templates; the reader chooses what to
+retain, how to express it and where it belongs. Machine proposals may assist
+those choices, but copying a passage or passing a format validator does not make
+them. A source-return link records provenance; it does not replace a considered
+connection between ideas.
+
+The reader's deliberate selection, formulation and linking are useful friction
+(**human eufriction**). Preserve those acts while removing repeated typing,
+lost locations and redundant forms. No required reflection form or completion
+checklist follows from this principle.
+
 ## Start a note from MRW
 
 Choose **New Note…** in MRW's **Commands** view or **MRW Document** menu, or run

@@ -38,10 +38,18 @@ revision.
 reference identifies its source revision and range, independently of a mutable
 display title or later selection.
 
-**Note / Zettel:** a note is a document. The example
-[Zettel convention](https://github.com/flengyel/Zettel) uses a stable ID and
-editable title. This convention is optional, as is Obsidian; not every Markdown
-file in an Obsidian vault follows it.
+**Note:** a document used for working thoughts, arguments or references.
+
+**Fleeting note:** a workspace working note that retains an observation,
+question, calculation or tentative argument. In MRW this is a role, not a file
+type, status field or deletion policy. It need not become a Zettel.
+
+**Zettel:** a note the reader selects, develops and connects within their
+Zettelkasten. The reader's editor and template govern its creation and format.
+The example [Zettel convention](https://github.com/flengyel/Zettel) uses a stable
+ID and editable title; other readers may use other conventions. Neither a copied
+passage nor successful format validation establishes the note's value or its
+conceptual connections. See [the handoff](docs/NOTE_COMPANIONS.md#fleeting-notes-and-zettels).
 
 **Research question:** the mathematical question under investigation. It may
 already be written in a note, with ordinary links to related work. The term
