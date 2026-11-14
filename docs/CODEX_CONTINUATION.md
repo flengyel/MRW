@@ -15,6 +15,22 @@ user instructions or the register. Preserve work, exact identities, subsystem
 ownership, explicit execution and isolated testing; do not drop those constraints
 when consolidating history. Verify source, release and installation separately.
 
+## Justification engine and architecture
+
+Preserve the integral engine in the [architecture overview](ARCHITECTURE.md)
+and figure. Use [D15 and D21](DESIGN_RECONCILIATION.md) for its current scope and
+the separation from the contract pilot, and
+[the justification specification](JUSTIFICATION_LOGIC_EXPERIMENT.md) for the
+existing calculus, records and explicit invocation boundaries.
+
+The requested inference workflow must eventually demonstrate a retained claim,
+explicit scoped admissions, multiple checked composed routes, inspection of
+their exact sources and assumptions, a challenge and successor context, and
+save/reopen with source navigation and Return. General search belongs in Lean;
+Python binds and persists artifacts, and the extension presents the interaction.
+A diagram or documentation change does not complete that implementation.
+Carry this objective forward with the remaining D01–D22 repairs.
+
 ## Operational usage and periodic diagnostics — design requirements
 
 Follow [feature-use measurement](OPERATIONAL_USAGE.md) and the optional

@@ -21,19 +21,26 @@ There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 
 ## Architecture
 
-MRW is an integration workbench built around **ports and adapters**. Its VS Code
-facade exposes contextual actions; the core coordinates research workflows and
-keeps a narrow model of identities, revisions, retained sources/results,
-associations and provenance. Adapters translate external interfaces while
-preserving their meaning and ownership—the anti-corruption boundary.
+MRW connects mathematical research through **ports and adapters**. Its VS Code
+facade exposes contextual actions; the core coordinates workflows and maintains
+a narrow model of identities, revisions, retained sources/results, associations,
+provenance and justification records. Adapters preserve external meaning and
+ownership across the anti-corruption boundary.
 
-![MRW hexagonal architecture: facade, workflow coordination, canonical data model, ports and adapters, and optional diagnostics.](docs/assets/mrw-architecture.png)
+![MRW architecture: facade, workflow coordination, canonical data model, integral justification logic engine, core services, ports and adapters, and planned diagnostics.](docs/assets/mrw-architecture.png)
+
+The integral **justification logic engine** checks how claims follow from
+explicit admissions in a recorded context. Its Lean implementation checks
+certificates for the non-factive J₀/J(CS) calculus. The Appendix A warrant slice
+and offline documentary-response bridge are executable; general inference
+search and the complete interactive workflow remain pending. Provenance,
+external proof checking and contextual justification have distinct roles.
 
 Native applications retain document creation and execution. MRW connects the
 work, preserves references and supports resumption. The proposed diagnostics
 companion supplies reports for Codex maintenance checked against the design;
 core integrity checks and usage recording remain in MRW. Dashed elements are
-planned, not delivered.
+planned capabilities.
 
 [Architecture summary](docs/ARCHITECTURE.md) ·
 [Scalable diagram](docs/assets/mrw-architecture.svg) ·
