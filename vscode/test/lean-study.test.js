@@ -30,8 +30,8 @@ function harness(root,{state=new Map(),global=new Map(),lean=true,extensionPath=
 }
 test('native Study button preserves source entries and ordinary activation neither reads packs nor starts Lean',()=>{
  const m=require('../package.json'),w=m.contributes.viewsWelcome.find(v=>v.view==='mrw.commands');
- for(const id of ['mrw.studyLean4','mrw.importStacksSection','mrw.importKerodonSection'])assert.ok(w.contents.includes('command:'+id));assert.equal(w.when,undefined);assert.ok(!m.extensionDependencies?.includes('leanprover.lean4'));
- const h=harness('/nonexistent',{extensionPath:'/missing'});assert.equal(h.calls.length,0);assert.equal(h.activation(),0);
+ for(const id of ['mrw.proofTools','mrw.sourceTools'])assert.ok(w.contents.includes('command:'+id));assert.equal(w.when,undefined);assert.ok(!m.extensionDependencies?.includes('leanprover.lean4'));
+ const h=harness('/nonexistent',{extensionPath:'/missing'});assert.ok(h.calls.every(c=>c.name==='setContext'));assert.equal(h.activation(),0);
 });
 test('first lesson creates a dedicated copy, opens prose/code and supported InfoView, then resumes edited code and notes',async t=>{
  const root=await temporary(t),h=harness(root),prior=path.join(root,'prior.md');await fs.writeFile(prior,'# Prior\nAn unfinished argument.\n');const doc=await h.api.workspace.openTextDocument(h.api.Uri.file(prior));const ed=await h.api.window.showTextDocument(doc);ed.selection=new h.api.Selection(doc.positionAt(8),doc.positionAt(15));h.folders.push([root]);
@@ -43,9 +43,9 @@ test('first lesson creates a dedicated copy, opens prose/code and supported Info
 });
 test('reset uses explicit confirmation and native undo without saving; concurrent edits cancel replacement',async t=>{
  const root=await temporary(t),h=harness(root,{notesFolder:root});const opened=await h.commands.get('mrw.studyLean4')();const ed=h.api.window.activeTextEditor;await h.change(ed.document,ed.document.text+'\n-- Unsaved edit\n');const onDisk=await fs.readFile(ed.document.uri.fsPath,'utf8');
- h.picks.push(items=>items.find(x=>x.kind==='reset'));await h.commands.get('mrw.leanStudyActions')();assert.match(ed.document.text,/Unsaved edit/);
- h.picks.push(items=>items.find(x=>x.kind==='reset'));h.answers.push('Replace in editor');await h.commands.get('mrw.leanStudyActions')();assert.ok(ed.undos.at(-1).includes('Unsaved edit'));assert.equal(ed.document.text.includes('Unsaved edit'),false);assert.equal(await fs.readFile(ed.document.uri.fsPath,'utf8'),onDisk);assert.equal(opened.root,path.join(root,'Lean Study','lean-foundations'));
- h.picks.push(items=>items.find(x=>x.kind==='reset'));h.api.window.showWarningMessage=async()=>{ed.document.text+='\n-- Concurrent change';ed.document.version++;return 'Replace in editor';};await assert.rejects(h.commands.get('mrw.leanStudyActions')(),/changed during confirmation/);assert.match(ed.document.text,/Concurrent change/);
+ h.picks.push(items=>items.find(x=>x.kind==='reset'));await h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'lessons/01-functions-and-proofs.md')));assert.match(ed.document.text,/Unsaved edit/);
+ h.picks.push(items=>items.find(x=>x.kind==='reset'));h.answers.push('Replace in editor');await h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'lessons/01-functions-and-proofs.md')));assert.ok(ed.undos.at(-1).includes('Unsaved edit'));assert.equal(ed.document.text.includes('Unsaved edit'),false);assert.equal(await fs.readFile(ed.document.uri.fsPath,'utf8'),onDisk);assert.equal(opened.root,path.join(root,'Lean Study','lean-foundations'));
+ h.picks.push(items=>items.find(x=>x.kind==='reset'));h.api.window.showWarningMessage=async()=>{ed.document.text+='\n-- Concurrent change';ed.document.version++;return 'Replace in editor';};await assert.rejects(h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'lessons/01-functions-and-proofs.md'))),/changed during confirmation/);assert.match(ed.document.text,/Concurrent change/);
 });
 test('external declarative pack registers, loads and survives removal without a rebuild',async t=>{
  const root=await temporary(t),h=harness(root,{notesFolder:root}),external=path.resolve(__dirname,'../../examples/lean-lesson-pack');h.folders.push([external]);await h.commands.get('mrw.addLeanLessonPack')();h.picks.push(items=>items.find(x=>x.pack.manifest.packId==='external.identity-proof'));const opened=await h.commands.get('mrw.studyLean4')();assert.equal(opened.packId,'external.identity-proof');assert.match(h.api.window.activeTextEditor.document.text,/identity_proof/);
@@ -79,7 +79,7 @@ test('three introductory lessons reopen their own prose and actions while preser
   h.picks.push(items=>items.find(i=>i.lesson?.id===id));opened=await h.commands.get('mrw.studyLean4')();
   assert.equal(opened.lessonId,id);assert.ok(h.docs.has(path.join(opened.root,'lessons',prose)));
   h.picks.push(items=>{assert.equal(items.filter(i=>i.label.startsWith('Try: ')).length,1);assert.equal(items.find(i=>i.label.startsWith('Try: ')).file,'Practice/'+exercise);assert.equal(items.find(i=>i.label.startsWith('Deliberate error: ')).file,'Practice/'+mistake);return undefined;});
-  await h.commands.get('mrw.leanStudyActions')();
+  await h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'lessons',prose)));
   if(id==='functions-and-proofs'){
    const doc=h.api.window.activeTextEditor.document;await h.change(doc,doc.text+'\n-- My ongoing Lean work\n');await fs.writeFile(doc.uri.fsPath,doc.text);
    await fs.writeFile(path.join(opened.root,'Notes.md'),'# My observation\nKeep this note.\n');
@@ -96,4 +96,26 @@ test('new Lean projects use the configured Linux parent; resume retains prior wo
  const h=harness(root,{notesFolder:notes,leanStudyParent:linux});const opened=await h.commands.get('mrw.studyLean4')();assert.ok(opened.root.startsWith(linux+path.sep));assert.deepEqual(await fs.readdir(notes),[]);
  const edited=path.join(opened.root,'Notes.md');await fs.writeFile(edited,'My retained working note');
  const next=harness(root,{state:h.state,notesFolder:notes,leanStudyParent:notes});const resumed=await next.commands.get('mrw.studyLean4')();assert.equal(resumed.root,opened.root);assert.equal(await fs.readFile(edited,'utf8'),'My retained working note');assert.deepEqual(await fs.readdir(notes),[]);
+});
+
+
+test('lesson actions resolve two selected Markdown files and reject unrelated Lean; shared code asks explicitly',async t=>{
+ const root=await temporary(t),h=harness(root,{notesFolder:root});const opened=await h.commands.get('mrw.studyLean4')();
+ for(const [file,id] of [['01-functions-and-proofs.md','functions-and-proofs'],['02-implication.md','implication']]){
+  h.picks.push(rows=>rows.find(x=>x.kind==='notes'));
+  await h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'lessons',file)));
+  assert.equal(h.state.get('mrw.leanStudy.v1').lessonId,id);
+  assert.equal(h.api.window.activeTextEditor.document.uri.fsPath,path.join(opened.root,'Notes.md'));
+ }
+ const count=h.calls.filter(x=>x.name==='lean4.displayGoal').length;
+ await assert.rejects(h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'Unrelated.lean'))),/not associated/);
+ await assert.rejects(h.commands.get('mrw.leanStudyInfo')(h.api.Uri.file(path.join(root,'Other.lean'))),/Select a Lean lesson/);
+ assert.equal(h.calls.filter(x=>x.name==='lean4.displayGoal').length,count,'context lookup does not check or start Lean');
+ h.picks.push(()=>undefined);await h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'Study/Examples.lean')));
+ assert.equal(h.state.get('mrw.leanStudy.v1').lessonId,'implication','cancelled ambiguous code selection preserves current lesson');
+ h.picks.push(rows=>rows.find(x=>x.lesson.id==='dependent-application'),()=>undefined);
+ await h.commands.get('mrw.leanStudyActions')(h.api.Uri.file(path.join(opened.root,'Study/Examples.lean')));
+ assert.equal(h.state.get('mrw.leanStudy.v1').lessonId,'dependent-application');
+ const paths=h.calls.filter(x=>x.name==='setContext').at(-1).args[1];assert.ok(paths.includes(path.join(opened.root,'lessons/02-implication.md')));assert.ok(!paths.includes(path.join(opened.root,'Unrelated.lean')));
+ const m=require('../package.json');assert.ok(m.contributes.menus['editor/title'].find(x=>x.command==='mrw.leanStudyActions').when.includes('mrw.leanLessonPaths'));
 });

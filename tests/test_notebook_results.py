@@ -45,6 +45,8 @@ class NotebookResultsTest(unittest.TestCase):
         self.assertNotEqual(first['id'], second['id'])
         self.file.write_text('changed'); self.note.unlink()
         result = self.call('read', id=first['id'])
+        self.assertEqual(n.b64decode(result['notebook']['data']), original)
+        self.assertEqual(result['notebook']['sha256'], n.digest(original))
         self.assertIn(n.UNKNOWN, result['body']); self.assertIn('5\n', result['body'])
         self.assertIn('Exact mathematical explanation', self.call('companion', id=first['id'], index=1)['body'])
         record = n.load(self.store, first['id']); self.assertEqual(n.unpack(record['artifacts'][0]), original)

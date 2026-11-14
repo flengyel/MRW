@@ -297,7 +297,8 @@ def action(request):
         key = identifier(request['id'])
         record = load(store, key)
         if method == 'notebook_read':
-            return {**summary(record), 'body': transcript(record)}
+            return {**summary(record), 'body': transcript(record),
+                    'notebook': {k: record['artifacts'][0][k] for k in ('name', 'sha256', 'data')}}
         if method == 'notebook_companion':
             index = request['index']
             if type(index) is not int or not 1 <= index < len(record['artifacts']):

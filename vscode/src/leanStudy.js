@@ -11,6 +11,29 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
  const builtin=path.join(context.extensionPath,'media/lean-study');
  const persist=()=>{const copy=structuredClone(state);queue=queue.catch(()=>{}).then(()=>context.workspaceState.update(STATE,copy));return queue;};
  const saveRegistry=()=>context.globalState.update(PACKS,registrations);
+ const lessonFiles=lesson=>[lesson.explanation,lesson.examples,...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>item.file))];
+ async function advertise(){
+  let paths=[];
+  if(state?.root)try{const pack=await loadPack(state.root);if(pack.manifest.packId===state.packId)paths=[...new Set(pack.manifest.lessons.flatMap(lessonFiles))].map(file=>path.join(pack.root,file));}catch{/* Missing copies have no contextual controls. */}
+  await vscode.commands.executeCommand('setContext','mrw.leanLessonPaths',paths);
+ }
+ function selectedUri(resource){
+  if(resource?.scheme&&resource.fsPath)return resource;
+  const tab=vscode.window.tabGroups?.activeTabGroup?.activeTab?.input;
+  return tab?.uri||vscode.window.activeTextEditor?.document.uri;
+ }
+ async function selectedLesson(resource){
+  const uri=selectedUri(resource);
+  if(!state?.root||uri?.scheme!=='file'||!uri.fsPath.startsWith(state.root+path.sep))throw Error('Select a Lean lesson Markdown file or its associated code.');
+  const pack=await loadPack(state.root);if(pack.manifest.packId!==state.packId)throw Error('The study folder belongs to another pack.');
+  const file=path.relative(pack.root,uri.fsPath).split(path.sep).join('/');
+  const matches=pack.manifest.lessons.filter(lesson=>lessonFiles(lesson).includes(file));
+  if(!matches.length)throw Error('This file is not associated with a Lean lesson. Use its native Lean controls.');
+  const lesson=matches.length===1?matches[0]:(await vscode.window.showQuickPick(matches.map(lesson=>({label:lesson.title,description:'This code is shared by several lessons',lesson})),{title:'Choose the lesson for this shared code file'}))?.lesson;
+  if(!lesson)return;
+  state={...state,lessonId:lesson.id,code:state.lessonId===lesson.id?state.code:undefined};await persist();return {pack,lesson,file};
+ }
+ void advertise().catch(()=>{});
  async function locked(fn){if(busy)throw Error('A Lean lesson is opening. Wait for that action to finish.');busy=true;try{return await fn();}finally{busy=false;}}
  const installHelp=()=>{void vscode.window.showInformationMessage('Lean editing and live goals are supplied by the optional official Lean 4 extension. Lesson files remain readable.','Official Lean setup').then(x=>x==='Official Lean setup'&&vscode.env.openExternal(vscode.Uri.parse(SETUP)));};
  async function catalogue(){
@@ -40,9 +63,10 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
   if(selection&&selection.revision===digest(doc.getText())){const r=new vscode.Range(doc.positionAt(selection.start),doc.positionAt(selection.end));ed.selection=new vscode.Selection(r.start,r.end);ed.revealRange(r,vscode.TextEditorRevealType.InCenterIfOutsideViewport);}
   if(preview)await showMarkdownPreview(vscode,doc,ed.viewColumn);return ed;
  }
- async function info(){
-  const {lesson}=await current();let ed=vscode.window.activeTextEditor;
-  if(!owned(ed?.document)||!ed.document.uri.fsPath.endsWith('.lean'))ed=await openFile(lesson.examples);
+ async function info(selected){
+  const {lesson}=selected||await current();let ed=vscode.window.activeTextEditor;
+  if(selected)ed=await openFile(selected.file.endsWith('.lean')?selected.file:lesson.examples);
+  else if(!owned(ed?.document)||!ed.document.uri.fsPath.endsWith('.lean'))ed=await openFile(lesson.examples);
   const extension=vscode.extensions?.getExtension('leanprover.lean4');if(!extension){installHelp();return false;}
   try{await extension.activate();await vscode.commands.executeCommand('lean4.displayGoal');return true;}
   catch(e){void vscode.window.showInformationMessage('Lean could not open its InfoView: '+e.message+'. Use Lean 4: InfoView: Display Goal after its setup finishes.','Official Lean setup').then(x=>x==='Official Lean setup'&&vscode.env.openExternal(vscode.Uri.parse(SETUP)));return false;}
@@ -55,23 +79,23 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
   const origin=captureOrigin(),packs=await catalogue();const items=packs.flatMap(pack=>[...pack.manifest.lessons].sort((a,b)=>a.order-b.order).map(lesson=>({label:lesson.title,description:pack.manifest.title+' · '+pack.manifest.contentVersion,pack,lesson})));
   if(!items.length)throw Error('No valid enabled Lean lesson pack is available.');
   const picked=await vscode.window.showQuickPick(items,{placeHolder:'Study Lean 4: choose a completed lesson'});if(!picked)return;
-  if(state?.packId===picked.pack.manifest.packId){const retained=await loadPack(state.root);if(!retained.manifest.lessons.some(l=>l.id===picked.lesson.id))throw Error('That lesson is not in the retained working copy. Resume the existing lesson; its files and notes are unchanged.');state={...state,code:state.lessonId===picked.lesson.id?state.code:undefined,lessonId:picked.lesson.id,origin:origin||state.origin};await persist();return openLesson();}
+  if(state?.packId===picked.pack.manifest.packId){const retained=await loadPack(state.root);if(!retained.manifest.lessons.some(l=>l.id===picked.lesson.id))throw Error('That lesson is not in the retained working copy. Resume the existing lesson; its files and notes are unchanged.');state={...state,code:state.lessonId===picked.lesson.id?state.code:undefined,lessonId:picked.lesson.id,origin:origin||state.origin};await persist();await advertise();return openLesson();}
   const config=vscode.workspace.getConfiguration('mrw');
   let parent=config.get('leanStudyParent','')||config.get('notesFolder','')||state?.parent||'';
   if(!parent){const chosen=await vscode.window.showOpenDialog({title:'Choose a parent folder for your editable Lean study project',canSelectFiles:false,canSelectFolders:true,canSelectMany:false});if(!chosen?.length)return;if(chosen[0].scheme!=='file')throw Error('Choose a local folder on the workspace host.');parent=chosen[0].fsPath;}
   const copy=await workingCopy(picked.pack,parent);
   if(!copy.manifest.lessons.some(l=>l.id===picked.lesson.id))throw Error('That lesson is not in this earlier working copy. Its files and notes were preserved.');
-  state={apiVersion:1,parent,root:copy.root,packId:copy.manifest.packId,contentVersion:copy.manifest.contentVersion,lessonId:picked.lesson.id,origin,code:undefined};await persist();return openLesson();
+  state={apiVersion:1,parent,root:copy.root,packId:copy.manifest.packId,contentVersion:copy.manifest.contentVersion,lessonId:picked.lesson.id,origin,code:undefined};await persist();await advertise();return openLesson();
  }));
  register('mrw.resumeLeanStudy',()=>locked(openLesson));
- register('mrw.leanStudyInfo',info);
+ register('mrw.leanStudyInfo',resource=>locked(async()=>{const selected=await selectedLesson(resource);if(selected)return info(selected);}));
  register('mrw.returnFromLeanStudy',async()=>{if(!state?.origin)throw Error('No prior MRW document location was captured. Your lesson remains open.');await returnToDocument(state.origin);});
- register('mrw.leanStudyActions',async()=>{
-  const {pack,lesson}=await current();const actions=[{label:'Read lesson',kind:'lesson'},{label:'Open working examples',kind:'examples'},{label:'Show native Lean InfoView',kind:'info'},{label:'Open associated note',kind:'notes'},{label:'Return to prior MRW document',kind:'return'},...lesson.bookSections.map(section=>({label:'Book: '+section.title,kind:'book',section})),...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>({label:(kind==='exercises'?'Try: ':kind==='solutions'?'Solution: ':'Deliberate error: ')+item.title,kind:'file',file:item.file}))),{label:'Reset working examples in editor…',kind:'reset'}];
+ register('mrw.leanStudyActions',resource=>locked(async()=>{
+  const selected=await selectedLesson(resource);if(!selected)return;const {pack,lesson}=selected;const actions=[{label:'Read lesson',kind:'lesson'},{label:'Open working examples',kind:'examples'},{label:'Show native Lean InfoView',kind:'info'},{label:'Open associated note',kind:'notes'},{label:'Return to prior MRW document',kind:'return'},...lesson.bookSections.map(section=>({label:'Book: '+section.title,kind:'book',section})),...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>({label:(kind==='exercises'?'Try: ':kind==='solutions'?'Solution: ':'Deliberate error: ')+item.title,kind:'file',file:item.file}))),{label:'Reset working examples in editor…',kind:'reset'}];
   const action=await vscode.window.showQuickPick(actions,{placeHolder:lesson.title+' — lesson actions'});if(!action)return;
   if(action.kind==='lesson')return openFile(lesson.explanation,{preview:true});
   if(action.kind==='examples')return openFile(lesson.examples);
-  if(action.kind==='info')return info();
+  if(action.kind==='info')return info(selected);
   if(action.kind==='notes')return openFile(pack.manifest.notesTemplate);
   if(action.kind==='return')return vscode.commands.executeCommand('mrw.returnFromLeanStudy');
   if(action.kind==='book')return vscode.env.openExternal(vscode.Uri.parse(action.section.url));
@@ -84,7 +108,7 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
    if(doc.isClosed||doc.version!==version)throw Error('The working example changed during confirmation; reset was cancelled.');
    if(!await ed.edit(edit=>edit.replace(new vscode.Range(doc.positionAt(0),doc.positionAt(doc.getText().length)),raw.toString('utf8')),{undoStopBefore:true,undoStopAfter:true}))throw Error('The editor declined the reset.');
   }
- });
+ }));
  register('mrw.addLeanLessonPack',async()=>{
   const chosen=await vscode.window.showOpenDialog({title:'Register a local Lean lesson pack (data only)',canSelectFiles:false,canSelectFolders:true,canSelectMany:false});if(!chosen?.length)return;
   if(chosen[0].scheme!=='file')throw Error('Choose a local lesson-pack folder.');const pack=await loadPack(chosen[0].fsPath);
@@ -106,6 +130,6 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
   if(owned(doc)&&state.code?.file===path.relative(state.root,doc.uri.fsPath).split(path.sep).join('/')){state.code=trackLocation(state.code,event.contentChanges,digest(doc.getText()));touched=true;}
   if(touched)void persist().catch(()=>{});
  }));
- return {current,openLesson};
+ return {current,openLesson,selectedLesson,advertise};
 }
 module.exports={registerLeanStudy};

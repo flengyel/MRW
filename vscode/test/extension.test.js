@@ -1380,8 +1380,14 @@ test('the MRW starting view offers note handoff, Open, saved sources and tutoria
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents;
-  for (const command of ['mrw.openDocument', 'mrw.chooseNotesFolder', 'mrw.reopenDocument', 'mrw.newZettel', 'mrw.openReadingOutline', 'mrw.openTutorial']) {
+  for (const command of ['mrw.openDocument', 'mrw.openTutorial']) {
     assert.ok(welcome.includes('(command:' + command + ' ')); assert.ok(h.commands.has(command));
+  }
+  const groups = require('../src/companionTools').GROUPS;
+  assert.ok(welcome.includes('(command:mrw.readingTools)'));
+  for (const command of ['chooseNotesFolder', 'reopenDocument', 'newZettel', 'openReadingOutline']) {
+    assert.ok(Object.values(groups).some(rows => rows.some(row => row[1] === command)));
+    assert.ok(h.commands.has('mrw.' + command));
   }
   assert.ok(h.commands.has('mrw.openOutline'));
   assert.ok(welcome.includes('(command:mrw.openOutline '));
@@ -1389,9 +1395,7 @@ test('the MRW starting view offers note handoff, Open, saved sources and tutoria
   assert.ok(!manifest.contributes.commands.some(item => item.command === 'mrw.newReadingOverview'));
   assert.ok(!welcome.includes('(command:mrw.newReadingOverview '));
   assert.ok(!manifest.contributes.menus['view/title'].some(item => item.command === 'mrw.newReadingOverview'));
-  for (const command of ['mrw.openTutorial']) {
-    assert.ok(manifest.contributes.menus['view/title'].some(item => item.when === 'view == mrw.readingOutline' && item.command === command));
-  }
+  assert.ok(manifest.contributes.menus['view/title'].some(item => item.when.includes('view == mrw.readingOutline') && item.command === 'mrw.companionTools'));
   assert.equal(h.requests.length, 0); assert.equal(h.reads.length, 0);
   const buttons = h.api.treeProviders['mrw.commands'];
   assert.deepEqual(await buttons.getChildren(), []);

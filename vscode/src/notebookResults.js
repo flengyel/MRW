@@ -35,9 +35,29 @@ function registerNotebookResults({vscode,context,register,bridge,show,recorder})
     const selected=await vscode.window.showQuickPick(choices,{title:many?'Export notebook provenance':'Open retained notebook result',canPickMany:many,matchOnDescription:true,matchOnDetail:true});
     return many?selected?.map(x=>x.result):selected?.result;
   }
+  const rich=!!(vscode.workspace.registerFileSystemProvider&&vscode.extensions?.getExtension('ms-toolsai.jupyter'));
+  const scheme='mrw-notebook-result';
+  const notebookUri=id=>vscode.Uri.from({scheme,path:`/${id}/retained.ipynb`});
+  function snapshotId(uri){const match=/^\/([a-f0-9-]{36})\/retained\.ipynb$/.exec(uri.path);if(!match||!validId(match[1]))throw Error('Invalid retained notebook address.');return match[1];}
+  if(rich){
+    const readonly=()=>{throw vscode.FileSystemError?.NoPermissions?.('Retained notebooks are read-only. Export to work on a separate copy.')||Error('Retained notebooks are read-only.');};
+    const provider={
+      onDidChangeFile:()=>({dispose(){}}),watch:()=>({dispose(){}}),readDirectory:async()=>[],
+      async readFile(uri){const result=await call('read',{id:snapshotId(uri)}),item=result.notebook;
+        if(!item||typeof item.data!=='string')throw Error('This core cannot provide retained notebook bytes.');
+        const raw=Buffer.from(item.data,'base64');
+        if(raw.length>16*1024*1024||require('node:crypto').createHash('sha256').update(raw).digest('hex')!==item.sha256)throw Error('Retained notebook digest mismatch.');
+        return raw;
+      },
+      async stat(uri){if(uri.path==='/'||/^\/[a-f0-9-]{36}\/?$/.test(uri.path))return {type:vscode.FileType?.Directory||2,ctime:0,mtime:0,size:0,permissions:vscode.FilePermission?.Readonly||1};const raw=await provider.readFile(uri);return {type:vscode.FileType?.File||1,ctime:0,mtime:0,size:raw.length,permissions:vscode.FilePermission?.Readonly||1};},
+      createDirectory:readonly,writeFile:readonly,delete:readonly,rename:readonly
+    };
+    context.subscriptions?.push(vscode.workspace.registerFileSystemProvider(scheme,provider,{isCaseSensitive:true,isReadonly:true}));
+  }
   async function open(id,presentation) {
-    const result=await call('read',{id});
-    const uri=await show(result.body,'Notebook-result',undefined,presentation);
+    const result=await call('read',{id});let uri;
+    if(rich&&result.notebook){uri=notebookUri(id);if(presentation?.show!==false)await vscode.commands.executeCommand('vscode.openWith',uri,'jupyter-notebook',{preview:false});}
+    else uri=await show(result.body,'Notebook-result',undefined,presentation);
     event('open',[id]);return {result,uri};
   }
   async function exportSelected(ids) {
@@ -50,7 +70,7 @@ function registerNotebookResults({vscode,context,register,bridge,show,recorder})
   }
   async function actions(id) {
     const {result}=await open(id);
-    const options=[{label:'Compare with another retained result',action:'compare'},
+    const options=[{label:'Read capture and execution evidence',action:'evidence'},{label:'Compare with another retained result',action:'compare'},
       {label:'Read a retained companion file',action:'companion'},
       {label:'Copy link to this result',action:'link'},
       {label:'Export provenance and exact files…',action:'export'},
@@ -62,6 +82,7 @@ function registerNotebookResults({vscode,context,register,bridge,show,recorder})
       const left=await open(id,{show:false}),right=await open(other.id,{show:false});
       await vscode.commands.executeCommand('vscode.diff',left.uri,right.uri,`${result.title} ↔ ${other.title}`,{preview:false});
       event('compare',[id,other.id]);
+    } else if(choice.action==='evidence') {await show(result.body,'Notebook-result-evidence');
     } else if(choice.action==='companion') {
       const item=await vscode.window.showQuickPick(result.artifacts.slice(1).map((a,i)=>({label:a.name,description:a.sha256,index:i+1})),{title:'Retained companion files'});
       if(item){const saved=await call('companion',{id,index:item.index});await show(saved.body,saved.title);}

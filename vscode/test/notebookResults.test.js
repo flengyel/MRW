@@ -47,3 +47,18 @@ test('registration in an empty window is harmless; retention requires workspace 
  const commands=new Map();registerNotebookResults({vscode:{workspace:{},window:{}},context:{},register:(id,f)=>commands.set(id,f),bridge:()=>assert.fail('no bridge without workspace'),show:()=>{}});
  await assert.rejects(commands.get('mrw.openNotebookResult')(),/workspace/);
 });
+
+
+test('native Jupyter renders immutable notebook bytes and compares cells/outputs without execution',async()=>{
+ const h=harness(),crypto=require('node:crypto'),raw=Buffer.from(JSON.stringify({nbformat:4,metadata:{},cells:[{cell_type:'code',source:'print(5)',outputs:[{output_type:'display_data',data:{'image/png':'cGxvdA=='}},{output_type:'error',ename:'Error',evalue:'failed',traceback:[]}]}]}));
+ let provider,registration;
+ h.vscode.workspace.registerFileSystemProvider=(scheme,p,options)=>{provider=p;registration={scheme,options};return {dispose(){}};};
+ h.vscode.extensions={getExtension:id=>id==='ms-toolsai.jupyter'?{}:undefined};h.vscode.Uri={from:fields=>({...fields,toString:()=>fields.scheme+':'+fields.path})};
+ const commands=new Map(),calls=[],result=id=>({id,title:id,artifacts:[{name:'retained.ipynb'}],body:'capture evidence',notebook:{name:'retained.ipynb',sha256:crypto.createHash('sha256').update(raw).digest('hex'),data:raw.toString('base64')}});
+ registerNotebookResults({vscode:h.vscode,context:{storageUri:{fsPath:'/private'},subscriptions:[]},register:(id,f)=>commands.set(id,f),bridge:async r=>{calls.push(r);if(r.method==='notebook_list')return {results:[result(a),result(b)]};return result(r.id);},show:async()=>assert.fail('Jupyter path must not replace notebooks with transcripts')});
+ h.picks.push(items=>items[0],'compare',items=>items[0]);await commands.get('mrw.openNotebookResult')();
+ assert.equal(registration.options.isReadonly,true);const open=h.calls.find(x=>Array.isArray(x)&&x[0]==='vscode.openWith');assert.equal(open[2],'jupyter-notebook');assert.deepEqual(await provider.readFile(open[1]),raw);
+ const diff=h.calls.find(x=>Array.isArray(x)&&x[0]==='vscode.diff');assert.equal(diff[1].scheme,'mrw-notebook-result');assert.equal(diff[2].scheme,'mrw-notebook-result');assert.ok(diff[1].path.endsWith('.ipynb'));
+ assert.throws(()=>provider.writeFile(),/read-only/);await assert.rejects(provider.readFile({path:'/../bad.ipynb'}),/Invalid/);
+ assert.ok(calls.every(x=>['notebook_read','notebook_list'].includes(x.method)));assert.ok(!h.calls.some(x=>Array.isArray(x)&&/kernel|execute|runAll/i.test(x[0])));
+});

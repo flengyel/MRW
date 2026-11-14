@@ -22,9 +22,9 @@ test('blocked sources show a capability limit and malformed origins cannot becom
  for(const url of ['javascript:alert(1)','https://evil.example/page','https://user:secret@wiki.example/page'])assert.equal(h.validate({name:'Wiki',url,origins:['https://wiki.example'],supported:true}),undefined);
  assert.equal(h.validate({name:'Wiki',url:'https://wiki.example/page',origins:['https://wiki.example; frame-src *'],supported:true}),undefined);
 });
-test('direct import command buttons remain native welcome content with an empty Commands provider',()=>{
+test('named source imports remain in the native Sources and References route',()=>{
  const m=require('../package.json'),welcome=m.contributes.viewsWelcome.find(v=>v.view==='mrw.commands').contents;
- for(const command of ['mrw.importStacksSection','mrw.importKerodonSection'])assert.match(welcome,new RegExp('command:'+command.replaceAll('.','\\.')));
+ assert.match(welcome,/command:mrw.sourceTools/);const {GROUPS}=require('../src/companionTools');for(const id of ['importStacksSection','importKerodonSection'])assert.ok(GROUPS.sourceTools.some(row=>row[1]===id));
  assert.equal(m.contributes.viewsWelcome.find(v=>v.view==='mrw.commands').when,undefined);
  for(const id of ['mrw.importStacksSection','mrw.importKerodonSection'])assert.ok(m.contributes.commands.some(c=>c.command===id));
 });
