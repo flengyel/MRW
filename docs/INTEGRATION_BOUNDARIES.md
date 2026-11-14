@@ -120,6 +120,12 @@ against this contract and the [reconciliation register](DESIGN_RECONCILIATION.md
 Reports supply evidence; they neither override the design nor authorize a new
 creation, repair or execution route.
 
+[Selective Lean formalization](CONTRACT_FORMALIZATION.md) may check stable
+invariants of these contracts. A proved abstract model is not a proof of the
+Python/JavaScript implementation; state its assumptions and demonstrate the
+correspondence. Formal verification remains separate from native integration
+tests and mathematical usefulness.
+
 MRW is an integration workbench. Use ports and adapters: core expresses the
 needed capability; each adapter translates it into its subsystem's supported
 operations. Keep the common model limited to references, captures, provenance

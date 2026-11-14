@@ -188,6 +188,12 @@ interfaces should be assessed before implementing equivalent mechanisms.
 
 ### Zotero integration
 
+Existing-note citation rendering is separate from lookup, Markdown insertion
+and retained attachments. Obsidian/Pandoc `[@key]` syntax does not currently
+resolve in MRW. The [reader requirement](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes)
+calls for an optional existing processor and scoped bibliography without note
+rewrites, duplicate library management or an automatic live Zotero query.
+
 First local API increment implemented after 0.23.12; see [workflow and limits](ZOTERO_WORKFLOW.md). The following scope governs the integration. Connect the existing Zotero
 library to mathematical study and the research lab notebook. Zotero continues
 to manage references; MRW links them to the passages, notes, calculations and
