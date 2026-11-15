@@ -51,6 +51,11 @@ family `S` specifies a proposition at each input. The proof `h` supplies a
 proof at every input, and `a` chooses the required one. The application `h a`
 therefore has exactly the result type `S a`.
 
+In `Examples.lean`, find `specialize` and hover over `h` and `a` to inspect their types.
+Click the later `#check specialize` line to see the theorem's full type in the
+InfoView. This proof supplies its term directly; it has no sequence of tactic
+goals to step through.
+
 The family `S` specifies propositions; it does not itself supply their proofs.
 For example, a family may assign to a natural number the proposition that it
 equals zero. At input one this proposition has no proof, so this family admits

@@ -107,9 +107,12 @@ hQ : Q
 ⊢ R
 ```
 
-Place the cursor before `exact` in the working file and run
-**MRW: Show Lean Study InfoView** to inspect the live state. Its formatting may
-differ from this illustration.
+In `Examples.lean`, find `implication_comp_tactic` and open
+**Lean 4: InfoView: Display Goal** from the Command Palette. Move the cursor
+through its three tactic lines: after `intro hP`, the goal is `R`; before
+`exact hQR hQ`, the assumptions include `hQ : Q`; after `exact hQR hQ`, the
+proof is complete. Moving the cursor inspects these states; Lean has already
+checked the whole proof. The display's formatting may differ from the illustration.
 
 The intermediate proof can also be used without naming it:
 

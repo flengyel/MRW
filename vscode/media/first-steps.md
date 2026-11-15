@@ -314,8 +314,14 @@ construction and has a variation, a solution and a deliberate error. The three
 lessons share the editable examples and associated note.
 
 The lesson preview and code use ordinary tabs; the official Lean InfoView opens
-beside the code. In the implication lesson, put the cursor before `exact hQR hQ`
-to inspect the live context and remaining goal.
+beside the code. Edit `Study/Examples.lean`; Markdown code blocks illustrate it.
+Lean checks the file as you edit. Click `#eval compose ... 2` and run **Lean 4:
+InfoView: Display Goal** from the Command Palette: its message is `14`. Change
+the final `2` to `3`, observe `16`, then undo. No Run button is needed. The
+`#check` lines display types. In `implication_comp_tactic`, put the cursor before
+`exact hQR hQ` to inspect the live context and remaining goal `R`; after that
+tactic the proof is complete. The separate Practice files contain the holes
+and deliberate errors.
 
 Install the optional official **Lean 4** extension (`leanprover.lean4`) and
 Lean/elan on the workspace host. In WSL2, choose **Install in WSL: Debian**.

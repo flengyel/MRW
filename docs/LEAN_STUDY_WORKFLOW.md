@@ -22,11 +22,29 @@ prepared with Codex for MRW and are separate from the book.
 
 ## Files and live goals
 
+Open `Study/Examples.lean` in the code editor. Lean checks it as you edit;
+the lesson's Markdown code blocks are illustrations, not editable code cells.
+With `Examples.lean` focused, press **Ctrl+Shift+P** and choose **Lean 4:
+InfoView: Display Goal**. The panel shows messages and proof goals at the cursor.
+
+For the first computation, click `#eval compose ... 2`. Its message is `14`.
+Change the final input `2` to `3`, observe `16`, then undo. No Run command or
+terminal build is required. The adjacent `#check` lines display types. An
+already completed function definition has no unfinished proof goal.
+
+For the second lesson, inspect `implication_comp_tactic` before and after each
+tactic. Before `exact hQR hQ`, the goal is `R` and `hQ : Q` is available;
+after that tactic the proof is complete. For the third, hover over `h` and `a` in
+`specialize` to inspect their types, then its later `#check` message.
+
+Use the separate `Practice` links when you want to construct a term yourself.
+Replace `_` with your proposed expression. An unfinished variation reports a missing
+term; a deliberate error reports a type mismatch. Undo is available in the
+native editor, and `Study/Solutions.lean` contains completed variations.
+
 MRW opens the lesson preview and editable Lean examples as ordinary tabs.
 The official Lean extension opens its InfoView beside the code. Switch between
 the lesson and code tabs; resize the native groups to suit the display.
-Place the cursor before `exact hQR hQ` to inspect the context containing
-`hP : P`, `hQ : Q` and remaining goal `R`.
 
 The optional **Lean 4** extension, `leanprover.lean4`, supplies elaboration,
 diagnostics, hovers, Go to Definition and live goals. Install it on the workspace
@@ -68,9 +86,10 @@ the installed extension remain untouched.
 Save, undo and recover drafts through the native editors. The project and notes
 remain usable without MRW or the original lesson pack. An occupied unrelated
 folder is rejected. Reopening reuses the working copy, including its lesson
-version. A pack update never silently replaces these files. Pack 1.1.2 supplies
+version. A pack update never silently replaces these files. Pack 1.1.3 supplies
 the introduction, contents and three lessons for new copies. Earlier copies keep
-their lesson files; updating the extension alone does not rewrite them.
+their lesson files; updating the extension alone does not rewrite them. These
+interaction instructions also apply to their unchanged examples.
 
 ## Actions and resumption
 

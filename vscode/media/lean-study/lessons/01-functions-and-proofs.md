@@ -28,20 +28,37 @@ in order; the completed examples can be inspected before attempting a variation.
 
 ## Working with the examples
 
-Keep the [working examples](../Study/Examples.lean) beside the text. The examples
-are complete. The surrounding `namespace` and `end` lines group the names
-declared between them. Each lesson ends with an optional
-variation and a deliberate error, with links to their files and a solution.
+Open the [working examples](../Study/Examples.lean) in the code editor and
+keep this lesson in Markdown preview. Edit the `.lean` file; the code blocks
+in this lesson illustrate its contents. The examples are already complete.
+The surrounding `namespace` and `end` lines group their declared names.
+
+Lean's **InfoView** is the panel displaying proof goals and messages for the
+cursor position. A goal states what remains to be proved. With the official
+Lean 4 extension installed on the workspace host, Lean checks the file as you
+edit it. No Run button or terminal command is needed for these examples.
+
+1. In `Examples.lean`, click the line beginning `#eval compose`.
+2. Press **Ctrl+Shift+P** and choose **Lean 4: InfoView: Display Goal**.
+   Read its message: the computed value is `14`.
+3. Predict the value at input `3`, then change the final `2` on that line to
+   `3`. The message should become `16`. Press **Ctrl+Z** to undo the change.
+
+The commands beginning `#check` display types; `#eval` displays a computed
+value. A complete function definition has no unfinished proof goal. For a proof
+written as a sequence of steps, the InfoView shows the assumptions and remaining
+goal at each step; the second lesson gives an example.
+
+Each lesson ends with an optional variation and a deliberate error, with
+links to their separate files and a solution. In a variation, replace `_`
+with your proposed expression; Lean reports a missing expression until it is filled.
+Edit those files directly and use Undo to recover an experiment.
 [Your notes](../Notes.md) is an ordinary Markdown file for questions and calculations.
 
-Lean's **InfoView** is the panel showing the available assumptions and what
-remains to be proved at the cursor. The second lesson explains its display.
-Live feedback requires the official **Lean 4** VS Code extension on the workspace
-host: in a WSL: Debian window, install it in WSL: Debian.
-The project uses Lean 4.33.0 and its core library. **MRW: Lean Study Actions…**
-opens the files for the selected lesson; **MRW: Resume Lean Study** returns
-to the saved lesson and code location. **MRW: Return from Lean Study** returns
-to the document from which the study was opened.
+In a WSL: Debian window, install the official Lean 4 extension in WSL: Debian.
+This project uses Lean 4.33.0 and its core library. **MRW: Lean Study Actions…**
+opens each lesson's files; **MRW: Resume Lean Study** restores the saved lesson
+and code location. **MRW: Return from Lean Study** returns to the prior document.
 
 ## Functions and composition
 
