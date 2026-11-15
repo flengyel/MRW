@@ -402,12 +402,12 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     });
   }
   async function inspect(){await load();const events=await recorder.events();
-    const latest=events.slice(-100);await show(recorder.report(events)+'\n\n## Event sample (up to 100, in session/sequence order)\n\n'+latest.map(e=>`${e.at} #${e.sequence} ${e.action} [${e.evidence}]\n${JSON.stringify(e.data)}`).join('\n\n'),'Study-history');}
+    await show(recorder.activity(events),'Study-history');}
   async function exportHistory(){await load();const all=await recorder.events(),sessions=[...new Set(all.map(e=>e.session))];
     const picked=await vscode.window.showQuickPick(sessions.map(id=>({label:all.find(e=>e.session===id).at+' · '+id.slice(0,8),description:all.find(e=>e.session===id).software.version,id,picked:id===recorder.session})),{canPickMany:true,placeHolder:'Export available sessions (other devices may be offline)'});
     if(!picked?.length){recorder.record('operation.cancel',{operation:'history.export'});return;}
     const selection=selectHistoryContext(all,picked.map(p=>p.id)),selected=selection.events;
-    const kind=await vscode.window.showQuickPick([{label:'Readable comparison',kind:'md'},{label:'Events and submitted snapshots',kind:'json'}],{placeHolder:'Export format'});if(!kind)return;
+    const kind=await vscode.window.showQuickPick([{label:'Detailed comparison and coverage',kind:'md'},{label:'Events and submitted snapshots',kind:'json'}],{placeHolder:'Export format'});if(!kind)return;
     const uri=await vscode.window.showSaveDialog({title:'Export selected study history',defaultUri:vscode.Uri.file(path.join(recorder.shared?.binding?.directory||recorder.directory,'MRW-history-'+new Date().toISOString().replace(/[:.]/g,'-')+'-'+require('node:crypto').randomUUID().slice(0,8)+'.'+kind.kind)),filters:{'Study history':[kind.kind]}});if(!uri)return;
     let text=recorder.report(selected);if(selection.missing.length)text+='\n\nMissing linked context (unsupported derived values excluded):\n'+selection.missing.map(x=>JSON.stringify(x)).join('\n');
     if(kind.kind==='json'){

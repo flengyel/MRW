@@ -262,6 +262,7 @@ class StudyHistory {
     const job=this.tail.then(async()=>{await this.refreshExcluded();return this.shared.importFrom(directory,await this.readEvents(),id=>this.snapshotText(id),this.excluded);});
     this.tail=job.catch(()=>{});return job;
   }
+  activity(events){return require('./historyActivity').activityReport(events,{...(this.historyStatus||this.shared?.status),recording:this.usageRecording,localGap:this.gap});}
   report(events){return usageReport(events,this.historyStatus||this.shared?.status)+'\n\n'+summarize(events);}
   async pauseForMove(){await this.ready;await this.flush();if(this.gap)throw Error(this.gap);this.movePaused=true;clearTimeout(this.timer);this.timer=undefined;clearInterval(this.sharedTimer);await this.tail;await this.sharedSync;}
   resumeAfterMove(){this.movePaused=false;clearInterval(this.sharedTimer);if(this.shared){this.sharedTimer=setInterval(()=>void this.syncShared(),30000);this.sharedTimer.unref?.();}}

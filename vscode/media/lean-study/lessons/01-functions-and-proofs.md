@@ -60,6 +60,15 @@ This project uses Lean 4.33.0 and its core library. **MRW: Lean Study Actions…
 opens each lesson's files; **MRW: Resume Lean Study** restores the saved lesson
 and code location. **MRW: Return from Lean Study** returns to the prior document.
 
+### Icons in the Lean window
+
+Hover over an icon for its command name. The editor's `∀` icon opens Lean's
+command menu. In the InfoView, **Pin** keeps a view at one code location;
+**Pause / Play** freezes the displayed state / resumes updates; **Refresh**
+updates a paused display once. The **cog** changes which goal details are shown.
+The **book** icon opens MRW's document menu. **Lean Study Actions…** opens the
+lesson, example and notes choices.
+
 ## Functions and composition
 
 Given functions $f:A\to B$ and $g:B\to C$, their composite sends $x$ to

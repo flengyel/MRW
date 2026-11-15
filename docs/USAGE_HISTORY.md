@@ -3,12 +3,19 @@
 Included in MRW 0.23.13; implemented through [PR #10](https://github.com/flengyel/MRW/pull/10). See
 [delivery and checks](SHARED_HISTORY_DELIVERY.md).
 
-Operational counts are already available through **MRW: Inspect Study History**,
-even without creating a Study. This report is partial coverage, not a complete
-feature-adoption review. The standing [feature-use requirements](OPERATIONAL_USAGE.md)
-specify direct access, stable feature IDs, coverage over time and bounded period
-analysis. The [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md) is proposed;
-its periodic reports are not implemented by the existing history sync timer.
+**MRW: Inspect Study History** now opens a compact activity view, available
+without creating a Study. It lists recorded commands and substantive saved-study
+events, and collapses repeated startup/availability records. Full coverage and
+comparison reports remain available through **Export Study History… → Detailed
+comparison and coverage**; the JSON option retains events and submitted snapshots.
+See [the activity view](HISTORY_ACTIVITY_VIEW.md).
+
+The optional [diagnostics plugin](DIAGNOSTICS_PLUGIN.md) separately provides
+bounded Feature Use and integrity reports. Its opt-in report schedule is distinct
+from the existing history synchronization timer. The standing
+[feature-use requirements](OPERATIONAL_USAGE.md) and
+[current reconciliation](DESIGN_RECONCILIATION.md) retain the remaining coverage
+limits.
 
 ## Connect a directory
 
@@ -110,13 +117,13 @@ only the active study. **Export Study History…** selects sessions and includes
 linked supporting context. Readable Markdown reports and inspectable JSON use
 ordinary Save and a unique suggested filename; existing files are not replaced.
 
-The usage table groups observations by feature, original writer/import origin,
+The detailed export's usage table groups observations by feature, original writer/import origin,
 UTC calendar date, software version and commit. It reports invocations,
 completion, cancellation, failure, duration and last reported use. Dates and last
 use are writer-reported, not assertions that clocks agree. Earlier unlinked
 outcomes are shown separately rather than matched by timestamps.
 
-Coverage in this increment:
+Coverage and interpretation:
 
 - MRW commands registered through the command wrapper; the inventory distinguishes
   registered/available commands from unavailable commands in an untrusted workspace.
@@ -125,8 +132,9 @@ Coverage in this increment:
 - Bridge invocations and validated Study action handlers have invocation/outcome
   links. Cancelled native MRW dialogs and explicit Study cancellation are recorded.
   Completion means the handler returned, not that its mathematical task succeeded.
-- Direct reader and proof-graph webview actions are listed as uninstrumented;
-  their bridge requests, where made, are counted separately. Typing is not counted.
+- Validated reader and proof-graph actions use the existing operation recorder.
+  Nested bridge calls remain diagnostic observations, not additional feature uses.
+  Typing is not counted; incomplete coverage remains explicit.
 - Unused means no invocation in the represented period for an inventoried available
   feature. Missing inventory is not zero use. Other devices may still be offline.
 

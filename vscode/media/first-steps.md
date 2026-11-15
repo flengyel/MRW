@@ -323,6 +323,13 @@ the final `2` to `3`, observe `16`, then undo. No Run button is needed. The
 tactic the proof is complete. The separate Practice files contain the holes
 and deliberate errors.
 
+Hover over an icon for its command name. **∀** opens Lean's menu; **Pin**
+keeps a view at one location; **Pause / Play** freezes / resumes its display;
+**Refresh** updates a paused display once; the **cog** changes goal display
+settings. The **book** opens MRW's document menu. **Lean Study Actions…**
+opens the lesson, examples and notes. See the
+[icon guide](https://github.com/flengyel/MRW/blob/main/docs/LEAN_STUDY_WORKFLOW.md#icons-and-controls).
+
 Install the optional official **Lean 4** extension (`leanprover.lean4`) and
 Lean/elan on the workspace host. In WSL2, choose **Install in WSL: Debian**.
 The dedicated project pins Lean 4.33.0 and needs no Mathlib download. Ordinary

@@ -68,7 +68,7 @@ test('current-material interaction preserves draft on source switch, resumes off
  const resumed=h.panels.at(-1).messages.findLast(m=>m.type==='active_study').study;assert.deepEqual(resumed.passages,first.passages);assert.equal(resumed.questions[0].revision,first.questions[0].revision);
  await next.receive({type:'submit',text:'Exact submitted work',paper:false});await next.receive({type:'outcome',report:{outcome:'unresolved',assessor:'reader',consulted:false}});
  await next.receive({type:'effort_offer'});await next.receive({type:'effort_response',rating:null});assert.equal(next.active.current.effortOffer.disposition,'declined');
- await next.receive({type:'history'});assert.match(h.shown.at(-1),/attempt.submit/);
+ await next.receive({type:'history'});assert.match(h.shown.at(-1),/non-production record/);assert.match(h.recorder.report(await h.recorder.events()),/Attempts: 1/);
 });
 test('strict bounded clipboard imports reject duplicate keys, unknown fields and changed source pins',async t=>{
  const h=await host(t);await h.commands.get('mrw.studyCurrent')();const object={version:1,sources:model.signature([passage]),questions:[value]};
@@ -152,4 +152,18 @@ test('Resume recovers saved work from a stale index; cancelling its picker prese
  h.api.window.showQuickPick=async rows=>rows.find(x=>x.id===s.id);
  await h.commands.get('mrw.resumeStudy')();assert.equal(h.c.active.id,s.id);assert.equal(h.c.active.unresolved,'Revised unfinished question');
  assert.equal(h.commands.has('mrw.openStudyItem'),false);
+});
+
+test('History opens a compact activity view while preserving coverage and exact submitted snapshots',async t=>{
+ const h=await host(t);h.recorder.origin='production';await h.recorder.init();
+ for(let i=0;i<40;i++)h.recorder.record('usage.coverage',{features:[{id:'fixture-coverage-'+i,status:'available'}]});
+ const start=h.recorder.record('operation.start',{operation:'mrw.openDocument',actor:'human'});
+ h.recorder.record('operation.complete',{operation:'mrw.openDocument',invocation:start.id,duration_ms:3});
+ const snapshot=h.recorder.snapshot({answer:'Exact retained answer λ'});h.recorder.record('attempt.submit',{snapshot});await h.recorder.flush();
+ const before=await h.recorder.events(),text=await fs.readFile(path.join(h.recorder.directory,'snapshots',snapshot+'.json'),'utf8');
+ await h.commands.get('mrw.inspectStudyHistory')();const shown=h.shown.at(-1);
+ assert.match(shown,/Open Document.*handler completed/);assert.match(shown,/Attempt submitted/);assert.doesNotMatch(shown,/fixture-coverage-|Attempts:|Effort:|Event sample|Exact retained answer/);
+ const after=await h.recorder.events();for(const e of before)assert.deepEqual(after.find(x=>x.id===e.id),e);
+ assert.equal(await fs.readFile(path.join(h.recorder.directory,'snapshots',snapshot+'.json'),'utf8'),text);
+ assert.match(h.recorder.report(after),/fixture-coverage-39/);assert.ok((await h.recorder.exportSnapshots(after))[snapshot]);
 });

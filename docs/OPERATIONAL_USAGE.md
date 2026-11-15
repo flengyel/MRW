@@ -9,14 +9,18 @@ question registration form or a change to ordinary mathematical work.
 ## Current implementation and gaps
 
 The 0.23.31 code records command, bridge and validated Study-action invocations,
-outcomes and durations. **MRW: Inspect Study History** displays the existing usage
-table; **Export Study History…** exports selected history. Recording is local by
+outcomes and durations. **MRW: Inspect Study History** opens a compact activity
+view; **Export Study History… → Detailed comparison and coverage** retains the
+full usage table and study measures. **Events and submitted snapshots** retains
+the JSON export. Recording is local by
 default, with optional explicitly connected shared history. See
 [the current workflow](USAGE_HISTORY.md).
 
 This is partial implementation of the requirement, not evidence of actual
 feature adoption. A repository checkout contains no observations of the
-maintainer's ordinary use. The current limitations are:
+maintainer's ordinary use. The following table records the earlier gaps that motivated the 0.23.32
+measurement increment. Consult the [current reconciliation](DESIGN_RECONCILIATION.md)
+for delivered repairs and remaining limits:
 
 | Area | Current limitation | Required correction |
 | --- | --- | --- |
@@ -27,8 +31,8 @@ maintainer's ordinary use. The current limitations are:
 | Analysis | Rows are grouped by writer, version and day, without a selected-period adoption summary. | Period totals, use on distinct recorded days, last use and comparable period/version views. |
 | Scale | Reporting loads and merges the available history in memory. | Bounded reads and incremental aggregation; no whole-history load for routine reports. |
 
-These corrections and the [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md)
-are not delivered by this design update. Preserve current history and its
+The measurement corrections and initial [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md)
+were subsequently delivered in 0.23.32, with the limits recorded above. Preserve current history and its
 inspection/export while extending it; do not start a second event store.
 
 ## Measurement contract

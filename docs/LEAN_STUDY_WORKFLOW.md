@@ -62,6 +62,25 @@ through that extension. No global elan default or research-project configuration
 is changed. Without the extension, MRW still opens the explanation and code,
 and offers the official setup link.
 
+## Icons and controls
+
+Hover over an icon to see its command name.
+
+| Icon or label | What it does |
+| --- | --- |
+| `∀` in the editor toolbar | Opens the official Lean command menu, including InfoView and setup. |
+| Pin in the InfoView | Keeps an additional view at this code location while you inspect another location. Unpin removes it. |
+| Pause / Play | Freezes the displayed state / resumes updates. |
+| Refresh, shown while paused | Updates the paused display once. |
+| Cog beside the goal | Changes which assumptions and goal details are displayed. |
+| Book, labelled MRW Document | Opens MRW's document navigation menu. |
+
+**Lean Study Actions…** is MRW's menu for the lesson, examples, notes and
+variations. Lean's `∀` menu and InfoView controls belong to the official Lean
+extension. Its [manual](https://github.com/leanprover/vscode-lean4/blob/master/vscode-lean4/manual/manual.md#status-bar)
+describes the other controls. Use Pin to compare two locations; use Pause when
+you want the display to stay still.
+
 ## Your working copy
 
 **MRW: Lean Study Parent** selects the parent for new projects. The default
@@ -86,7 +105,7 @@ the installed extension remain untouched.
 Save, undo and recover drafts through the native editors. The project and notes
 remain usable without MRW or the original lesson pack. An occupied unrelated
 folder is rejected. Reopening reuses the working copy, including its lesson
-version. A pack update never silently replaces these files. Pack 1.1.3 supplies
+version. A pack update never silently replaces these files. Pack 1.1.4 supplies
 the introduction, contents and three lessons for new copies. Earlier copies keep
 their lesson files; updating the extension alone does not rewrite them. These
 interaction instructions also apply to their unchanged examples.
