@@ -126,7 +126,8 @@ mathematical-checking, live-vault or new-release result follows from this guard.
 `--case sourceReturn` uses the bundled sums-of-odd-integers example in a fresh
 fixture. It chooses an ordinary notes folder outside its project, saves a reader
 annotation, follows ordinary and retained links, checks native dirty buffers and
-reloads only its own fixture window before reopening. Dialog choices and reader
-messages are scripted; editors, preview, bridge writes and native Memento restart
+reloads only its own fixture window before reopening. Keep the fixture window in the foreground; bring it forward again after reload
+if VS Code restores it behind the working window. The focus wait is bounded.
+Dialog choices and reader messages are scripted; editors, preview, bridge writes and native Memento restart
 are real. No Obsidian vault or authoring command is involved. See the
 [repair report](RELEASE_0_23_41.md) for actual outcomes and limits.
