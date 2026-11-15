@@ -94,6 +94,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Release 0.23.38](RELEASE_0_23_38.md) records the Lean example instructions,
+compiler/rendering checks and verified publication.
+
 [Release 0.23.37](RELEASE_0_23_37.md) records citation source identification,
 live-owner verification, package checks and the native observation limit.
 
