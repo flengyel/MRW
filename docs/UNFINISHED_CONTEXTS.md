@@ -1,6 +1,6 @@
 # Resume an unfinished justification context
 
-The next D14/D15 repair keeps an exact pending search available after the reader
+This D14/D15 repair keeps an exact pending search available after the reader
 closes or the host restarts. It uses the existing Justification picker and
 private artifact coordinator. It introduces no question form or study record.
 

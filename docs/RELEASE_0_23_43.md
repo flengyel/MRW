@@ -48,6 +48,60 @@ The pinned npm audit reports two moderate and three high findings.
 
 ## Build and publication
 
-Release identifiers, package checksum and actual regression/publication results
-are recorded after verification. Publication does not install or reload the
-working extension.
+Published as the [latest normal release, 0.23.43](https://github.com/flengyel/MRW/releases/tag/v0.23.43).
+[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-0.23.43.vsix)
+· [SHA256SUMS](https://github.com/flengyel/MRW/releases/download/v0.23.43/SHA256SUMS).
+
+- Source A: `70edb7bc16ecdd4adad6583037baa6307a03fd98`.
+- Clean release B/tag `v0.23.43`: `06c9212fe48ebd00e919fc995e1dfc17d736b297`.
+- B changes only `vscode/media/build-info.json`, embedding A and
+  `localChanges: false`. This later delivery record changes documentation only.
+- Core SHA-256: `f688b00572521829ba921d975e3ba2faa1eee3c6551cc2494a1755fd7313a2d2`.
+- Unchanged Diagnostics 0.1.0 SHA-256:
+  `4b4c5a3844273a24f635edea2de232bc2460c7599b91ca28f287d31f713d91f6`.
+
+The clean-B package verifier confirms its manifest, marker, runtime source bytes,
+current README/tutorial and dependency notices. The packaged README agrees with
+the source after VSCE's relative-link rewriting. The guide pass checked 234 local
+links/anchors in ten changed Markdown files with no failure. The full wheel
+installs without runtime dependencies and imports the new pending module and CLI.
+
+The extracted VSIX was exercised through fresh isolated Python bridge processes,
+using a correctly named standalone justification store. It saved an exact
+request and relative Return pin, refused a missing checker, reopened the exact
+unfinished request, built its own pinned checker from packaged sources, checked
+two routes, suppressed the completed intent, saved/reopened a successor and
+checked its surviving route. With the checker directory moved aside and elan
+removed from PATH, both results reopened and completed work stayed absent from
+the unfinished list. The original note and every saved JSON byte stayed unchanged
+on readback. This tests real persistence and the nested publication guard without
+another MRW installation; it is not a native GUI observation.
+
+All 650 tracked paths/text files and 184 extracted archive entries have zero
+superseded-identity matches. No compatibility alias, storage migration, package,
+private record or log was committed. Diagnostics, the 16 original checker pins,
+Lean sources/toolchain/engine registry and dependency pins are unchanged.
+The separately gated relocation-model/runtime comparison passed its three
+success/fault vectors with the previously verified unchanged model executable.
+
+The first broad Python attempt lacked three required compiled Lean modules;
+its verifier correctly refused the incomplete environment. All 16 original
+identities were then supplied and verified unchanged, and the full 494-test
+pass succeeded. Earlier logs remain alongside the final results; no failed run
+was relabeled successful. Formal tests use verified reused artifacts; the
+extracted package separately performs its own fresh route-checker build.
+
+A GitHub draft was uploaded and checked before publication. Both public VSIX
+assets and `SHA256SUMS` were downloaded via their versioned URLs and match the
+local verified bytes; both checksum checks pass. The public release is neither
+draft nor prerelease, the latest-release link resolves to 0.23.43 and its tag
+remains B. Earlier published tags and assets were unchanged.
+
+Evidence, actual commands, logs and exit statuses are retained under
+`~/.cache/mrw-unfinished-contexts-20261115/evidence/`, including the unavailable
+WSL observation. The dedicated fixture never ran its trial body. The working
+window was preserved and the new extension was not installed or reloaded.
+
+The next D15 work is reviewed source-driven context assembly without manual JSON
+preparation. This repair does not claim to deliver that interaction or the
+separately deferred paper–Lean comparison.
