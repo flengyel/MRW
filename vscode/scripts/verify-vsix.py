@@ -23,6 +23,15 @@ def verify(archive):
     for path in (extension / 'media').rglob('*'):
         if path.is_file():
             exact['extension/' + str(path.relative_to(extension))] = path
+    registry = json.loads((repository/'src/mrw/data/route_runtime.json').read_text())
+    engine = registry['engines'][registry['current']]
+    for name, entry in engine['sources'].items():
+        source = repository/entry['source']
+        staged = extension/'media/route-engine'/name
+        if sha256(source.read_bytes()).hexdigest() != entry['sha256'] or staged.read_bytes()!=source.read_bytes():
+            raise ValueError('Packaged route runtime differs from authoritative source: '+name)
+    if (extension/'media/euclid-grounds.md').read_bytes() != (repository/'docs/JUSTIFICATION_EUCLID_EXAMPLE.md').read_bytes():
+        raise ValueError('Packaged Euclid walkthrough differs from current guide')
     notice = json.loads((extension / 'media/katex/NOTICE.json').read_text())
     if notice['version'] != manifest['devDependencies']['katex']:
         raise ValueError('Bundled math renderer differs from its pinned build dependency')

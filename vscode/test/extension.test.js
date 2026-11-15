@@ -178,6 +178,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === './sharedHistory') return require('../src/sharedHistory');
     if (name === './historyCommands') return require('../src/historyCommands');
     if (name === './proofStudy') return require('../src/proofStudy');
+    if (name === './justification') return require('../src/justification');
     if (name === './proofGraph') return require('../src/proofGraph');
     if (name === './artifactStorage') return require('../src/artifactStorage');
     if (name === './bridge') return { runBridge: async (...args) => { requests.push(args[2]); return service(...args); } };

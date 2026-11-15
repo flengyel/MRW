@@ -17,3 +17,10 @@ name = "MRWRouteSearch"
 [[lean_exe]]
 name = "route_tests"
 root = "RouteTests"
+
+[[lean_lib]]
+name = "MRWRouteIO"
+
+[[lean_exe]]
+name = "route_search"
+root = "RouteMain"

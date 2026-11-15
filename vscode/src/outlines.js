@@ -31,7 +31,7 @@ function framePolicy(options) {
   return origins.length ? 'frame-src ' + [...new Set(origins)].join(' ') + '; ' : '';
 }
 function outlineHtml(script, support = [], diagramStyle = '', options = {}) {
-  const caption = ({ proof: 'Proof outline', proofStudy: 'Proof work', study: 'Study' })[options.kind] || 'Saved source';
+  const caption = ({ justification: 'Justification', proof: 'Proof outline', proofStudy: 'Proof work', study: 'Study' })[options.kind] || 'Saved source';
   script = [...support, script].join('\n;\n');
   const nonce = crypto.randomBytes(24).toString('base64');
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">

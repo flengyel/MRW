@@ -1,0 +1,23 @@
+# Packaged, explicit-build runtime; no downloads or third-party dependencies.
+name = "MRWRouteRuntime"
+version = "0.1.0"
+buildDir = ".lake/routes-build"
+defaultTargets = ["route_search"]
+
+[leanOptions]
+warningAsError = true
+
+[[lean_lib]]
+name = "MRW"
+roots = ["MRW.Justification.Certificate"]
+globs = ["MRW.Justification.+"]
+
+[[lean_lib]]
+name = "MRWRouteSearch"
+
+[[lean_lib]]
+name = "MRWRouteIO"
+
+[[lean_exe]]
+name = "route_search"
+root = "RouteMain"

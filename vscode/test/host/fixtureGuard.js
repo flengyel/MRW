@@ -27,21 +27,43 @@ async function receipt(extension){
   ||marker.device!==String(stat.dev)||marker.inode!==String(stat.ino)||marker.profile!=='MRW-Fixture-'+pointer.id
   ||marker.extension!==extension||!inside(root,extension)||extension===root)fail('fixture ownership differs');
  if(typeof process.getuid==='function'&&(stat.uid!==process.getuid()||(stat.mode&0o077)!==0))fail('fixture root must be private and owned by this user');
- if(!['isolation','sourceTrash','activation','sourceReturn','warrantInspection'].includes(marker.case))fail('this older native case needs explicit fixture/UI migration');
+ if(!['isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification'].includes(marker.case))fail('this older native case needs explicit fixture/UI migration');
  if(!Array.isArray(marker.projects)||!marker.projects.length||marker.projects.length>4)fail('invalid fixture projects');
  for(const project of marker.projects)if(!inside(root,await canonical(project))||project===root)fail('project leaves disposable root');
  return marker;
 }
-async function tree(root){
- let count=0,bytes=0;
+function stable(value){if(Array.isArray(value))return value.map(stable);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([k,v])=>[k,stable(v)]));return value;}
+async function tree(root,marker){
+ let runtime,expected,count=0,bytes=0,seenRuntime=false;
+ if(marker?.runtimeFile){
+  if(marker.case!=='justification')fail('checker runtime grant belongs only to the justification case');
+  const registry=await json(path.join(marker.extension,'python/mrw/data/route_runtime.json'));
+  const engine=registry.engines[registry.current],crypto=require('node:crypto');
+  const key=crypto.createHash('sha256').update(JSON.stringify(stable(engine))).digest('hex');
+  expected=path.join(root,'global-storage','justification-checkers','route-'+key,'.lake/routes-build/bin/route_search');
+  runtime=path.join(root,marker.runtimeFile);
+  if(runtime!==expected||!inside(root,runtime))fail('runtime grant differs from the pinned private checker');
+ }
  async function walk(dir){for(const name of await fs.readdir(dir)){
   if(name==='.git'||name==='.aws'||name==='.codex')fail('working repository or private account directory in fixture');
   const p=path.join(dir,name),st=await fs.lstat(p);
-  if(++count>5000||(bytes+=st.size)>80*1024*1024)fail('fixture exceeds its inspection budget');
+  if(++count>5000)fail('fixture exceeds its inspection budget');
   if(st.isSymbolicLink()||(!st.isDirectory()&&(!st.isFile()||st.nlink!==1)))fail('redirected or shared fixture file');
+  if(p===runtime){
+   if(!st.isFile()||st.size>256*1024*1024)fail('invalid pinned checker size');
+   const registry=await json(path.join(marker.extension,'python/mrw/data/route_runtime.json'));
+   const handle=await fs.open(p,'r'),hash=require('node:crypto').createHash('sha256');
+   try{const block=Buffer.alloc(65536);for(;;){const {bytesRead}=await handle.read(block,0,block.length,null);if(!bytesRead)break;hash.update(block.subarray(0,bytesRead));}
+    const after=await handle.stat();if(after.ino!==st.ino||after.dev!==st.dev||after.size!==st.size||after.mtimeMs!==st.mtimeMs)fail('runtime changed during preflight');
+   }finally{await handle.close();}
+   if(hash.digest('hex')!==registry.engines[registry.current].executable_sha256)fail('checker runtime hash differs');
+   seenRuntime=true;
+  }else if((bytes+=st.size)>80*1024*1024)fail('fixture exceeds its inspection budget');
   if(st.isDirectory())await walk(p);
  }}await walk(root);
+ if(runtime&&!seenRuntime)fail('declared checker is missing');
 }
+
 function configPaths(config,owned,marker){
  function visit(value,key=''){
   if(Array.isArray(value)){for(const item of value)visit(item,key);return;}
@@ -119,7 +141,7 @@ async function assertFixture(vscode,context,extension){
  const config=await json(path.join(extension,'host-test.json'));
  if(config.vault||config.obsidianExecutable)fail('native companion mutation needs a separately verified owner fixture; this harness is disabled until supplied');
  if(config.project!==project||!inside(marker.root,await canonical(config.artifacts)))fail('configuration does not match the disposable project/artifacts');
- await tree(marker.root);
+ await tree(marker.root,marker);
  const global=await canonical(context.globalStorageUri.fsPath);
  if(global!==path.join(marker.root,'global-storage')||context.storageUri.fsPath!==path.join(marker.root,'workspace-storage'))fail('native store facade leaves disposable scope');
  if(context.storageUri?.scheme!=='file')fail('local native workspace storage required');

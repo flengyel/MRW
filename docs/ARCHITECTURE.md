@@ -36,7 +36,9 @@ a justification records the admitted reasons for a conclusion.
 The existing checker handles a range-lifting warrant and an offline
 documentary-response case. The [bounded search API](JUSTIFICATION_ROUTE_SEARCH.md)
 now discovers Application routes and surviving support after withdrawal;
-its durable-record and reader integration remain pending. The
+the reader retains exact source snapshots and checked routes, supports explicit
+withdrawal into a successor context, and reopens saved results without rerunning
+Lean. The
 [Euclid example](JUSTIFICATION_EUCLID_EXAMPLE.md) supplies a public introduction.
 [The user guide](JUSTIFICATION_WORKFLOW.md) explains current commands and limits;
 [the technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)

@@ -51,7 +51,7 @@ import re
 
 def legacy_home(path):
     for ancestor in (Path(path), *Path(path).parents):
-        if re.fullmatch(r'(?:outlines|investigation)-[a-f0-9]{64}', ancestor.name):
+        if re.fullmatch(r'(?:outlines|investigation|justification)-[a-f0-9]{64}', ancestor.name):
             return ancestor.parent
         if ancestor.name == 'model-calls' and (ancestor.parent/'artifact-runtime').is_dir():
             return ancestor.parent

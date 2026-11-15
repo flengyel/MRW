@@ -66,6 +66,13 @@ def _dispatch(request):
         raise ValueError('Unsupported editor bridge protocol')
     method = request.get('method')
     fields = {
+        'route_example': ({'path'}, set()),
+        'route_prepare': ({'path'}, {'revision'}),
+        'route_setup': ({'assets','cache'}, set()),
+        'route_list': ({'store','project_root'}, set()),
+        'route_read': ({'store','project_root','revision'}, set()),
+        'route_run': ({'store','project_root','request','cache'}, set()),
+        'route_successor': ({'store','project_root','revision','removed','request_id'}, set()),
         'notebook_retain': ({'store', 'paths'}, {'software'}),
         'notebook_list': ({'store'}, set()),
         'notebook_read': ({'store', 'id'}, set()),
@@ -133,6 +140,9 @@ def _dispatch(request):
     required = required | {'protocol', 'method'}
     if not required <= request.keys() or request.keys() - required - optional:
         raise ValueError('Invalid editor action fields')
+    if method.startswith('route_'):
+        from .route_records import action
+        return action(request)
     if method.startswith('notebook_'):
         from .notebook_results import action
         return action(request)

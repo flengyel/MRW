@@ -2,9 +2,10 @@
 
 The Lean engine can now discover composed reasons from explicit admissions,
 retain their separate dependencies and search a successor context after a
-withdrawal. This is a developer API, not an MRW sidebar command. Retained
-inspection, source navigation and Return for these new search results still
-need integration. Existing warrant inspection remains available.
+withdrawal. **Proofs → Justification…** now presents explicit contexts,
+checks and retains routes, shows exact source snapshots, and reopens successors
+and predecessors. See the [reader workflow](JUSTIFICATION_WORKFLOW.md#read-search-and-resume-grounds).
+The API below also remains available to Lean clients.
 
 For a mathematical introduction, read [Euclid's lemma and its two proof
 routes](JUSTIFICATION_EUCLID_EXAMPLE.md).
@@ -103,9 +104,45 @@ and context. `without_subset` and `without_excludes` prove that removing
 admissions adds none and leaves no withdrawn admission. The audit prints their
 transitive axioms; no admitted proof or new axiom is used.
 
-The API retains typed certificates and immutable predecessor values in memory.
-It does not yet publish a durable search-result package, bind new route records
-to citations, or present a challenge/withdrawal interaction in VS Code. The
-next D15 increment must add those bindings and reopening without changing old
-warrants or silently admitting premises. This implementation does not establish
-an informal paper–Lean correspondence.
+The reader uses a stricter bounded transport: J₀ only, at most four rounds,
+16 retained routes, 4,096 attempted pairs and 64 certificate nodes. The generic
+Lean API above retains its wider bounds. The transport never introduces a
+premise from a citation or a source title.
+
+## Retained format and setup
+
+A `mrw.route-request`, version 1, carries the profile, exact goal, existing
+claim/admission/context records, source snapshots, resource limits and optional
+withdrawal. Claim assertions bind to SHA-256 content hashes; formulas select
+those complete atom versions. Every claim and admission names its exact source
+passage through `basis_refs` or `representation_refs`. Snapshots retain the
+qualified `reference`, reported whole-source revision, selected passage hash
+and exact text separately. A stable identifier does not freeze its contents.
+
+The Lean JSON adapter decodes the mathematical input, calls the existing
+search/checker and emits checked certificates and an exact request echo. Python
+checks the metadata bindings and publishes one immutable content-addressed
+`mrw.route-result`, version 1. It implements no second inference checker.
+Results use the existing artifact coordinator's copy-on-write generations,
+writer exclusion and recovery. Relocation includes the complete records;
+retained citations are not rewritten. Earlier context records remain required
+by successor records. Qualified source identifiers keep their prefixes.
+
+Checker setup is an explicit local build of packaged, pinned sources. Elan's
+non-installing run mode and the empty dependency manifest prevent a download.
+The current runtime accepts only its verified Linux x86-64/WSL executable
+identity. Setup failure changes no study data. Saved results can be read
+without that executable or toolchain. Future engine versions must retain
+known prior identities in `src/mrw/data/route_runtime.json`; new builds must
+not invalidate earlier saved runs.
+
+Operational limits: one input is at most 1 MiB; one retained record at most
+8 MiB; source text totals at most 256 KiB. Listing streams at most 128 records
+and 64 MiB; a lineage has at most 16 contexts. Reaching a limit preserves
+existing work and reports it. No record is discarded or an admission restored.
+These bounds do not establish completeness or a worst-case performance proof.
+
+The remaining central work is direct, reviewed assembly from existing notes
+and retained grounds, broader inference rules and comparison beyond the
+bounded Application search. General Hilbert/CS search, arbitrary sum
+construction and the deferred paper–Lean correspondence review remain open.

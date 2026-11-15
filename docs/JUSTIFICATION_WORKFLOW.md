@@ -9,8 +9,43 @@ The current Lean checker verifies specified inference steps under a recorded
 set of admissions. It does not search for arbitrary mathematical proofs.
 The [bounded route-search API](JUSTIFICATION_ROUTE_SEARCH.md) now finds
 alternative composed reasons from explicit admissions and rechecks a successor
-context after withdrawal. Its integration with retained records and the reader
-remains pending; it is not a complete proof search.
+context after withdrawal. The reader retains these results and their exact
+source snapshots for later inspection. This is not a complete proof search.
+
+## Read, search and resume grounds
+
+Choose **Proofs → Justification…**, then **Explore Euclid’s lemma**. Read the
+claim and the supplied admissions; the source buttons show their exact retained
+text. Opening the view creates no admission or saved result.
+
+Choose **Search under these admissions** to run the bounded Lean search and
+retain its certificates. If its local checker is unavailable, expand **Local
+checker setup** and choose **Build local checker**. This explicit build uses an
+already installed Lean 4.32.2 toolchain and downloads nothing. It currently
+requires the verified Linux x86-64/WSL build environment. Different compiler
+output is rejected; ordinary reading and saved-result inspection remain usable.
+The official Lean editor extension is optional for this headless checker.
+
+Each route lists its admitted grounds. A source button opens the retained
+passage in the same reader; **Back to routes** restores the comparison.
+**Withdraw a ground…** creates and checks a successor context. The confirmation
+states its scope: the earlier context, source notes and old certificates remain.
+**Open earlier context** reads that predecessor without rerunning a check.
+**Return to document** returns to the originating document location and preserves
+its open buffer. An edited exact destination is reported rather than replaced.
+
+Close/reopen MRW, choose **Justification…** and select the saved result. Reopening
+reads the immutable result, exact sources and recorded checker identity; it
+requires no Lean build, process or network connection. Search failures retain
+the pending request for an explicit retry with the same ID. A retry first
+looks for an already saved result, including after an uncertain save.
+
+**Open an explicit context file…** accepts the existing formula/admission
+vocabulary with exact source snapshots and scoped attribution. This is a
+reviewed-input/developer route; ordinary reading never requests this file.
+The current GUI does not yet assemble arbitrary contexts from a reader's
+notes or check their arithmetic assertions. See the
+[bounded API and format](JUSTIFICATION_ROUTE_SEARCH.md).
 
 ## Example: two proofs of Euclid's lemma
 

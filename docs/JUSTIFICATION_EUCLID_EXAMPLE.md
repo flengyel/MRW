@@ -67,8 +67,10 @@ statements are opaque atoms in this test. The engine checks their admitted
 composition; these tests do **not** constitute Lean formalizations of the two
 number-theoretic proofs.
 
-Durable source-bound search results, reader comparison, withdrawal controls
-and reopening remain the next central integration. A future paper–Lean
+The reader now retains source-bound search results, shows the separate routes,
+checks an explicit withdrawal and reopens the predecessor or successor. Choose
+**Proofs → Justification… → Explore Euclid’s lemma**. Direct assembly from
+ordinary notes and broader inference search remain central follow-up work. A future paper–Lean
 correspondence demonstration is separately deferred in the
 [roadmap](DESIGN_RECONCILIATION.md#current-implementation-order--15-november-2026).
 The older range-lifting warrant remains an internal regression; it is not the

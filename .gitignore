@@ -22,3 +22,5 @@ __pycache__/
 /.codex-work/folder-rename-*/
 
 /diagnostics/*.vsix
+/vscode/media/route-engine/
+/vscode/media/euclid-grounds.md

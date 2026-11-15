@@ -142,3 +142,21 @@ and preservation of the package and an unrelated draft, then clears its owned
 state and closes its window. It needs foreground focus but no authoring
 companion. See the [checker audit](LEAN_CHECKER_DRIFT_20261115.md) for actual
 commands, outcomes and remaining limits.
+
+## Justification runtime fixture
+
+The `justification` case may stage one additional pinned checker executable
+through `prepare-native-host.py --route-cache`. The receipt names its exact
+private relative path. Preflight recomputes the expected cache path from the
+packaged engine manifest, streams the binary hash and requires its exact pinned
+identity, regular single-link ownership and size below 256 MiB. All other files
+retain the 5,000-entry/80-MiB budget. Other cases cannot claim this allowance.
+No compiled cache, olean tree or external execution path is admitted.
+
+The native case uses real source/reader/editor/bridge behavior, a real local
+Lean run and native persistence, with scripted picker/confirmation choices and
+button clicks. A test-only DOM observer exposes rendered text/math; it is
+injected only into the owned development fixture. The production HTML and code
+contain no fixture hook. The case preserves an unsent synthetic buffer, checks
+withdrawal and exact source navigation, returns to the document, performs a
+real window reload and reopens a saved successor without another Lean run.

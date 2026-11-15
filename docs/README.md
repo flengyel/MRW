@@ -149,5 +149,7 @@ for present commands and installation.
 - [Native test isolation and instruction drift](NATIVE_TEST_ISOLATION.md).
 - [15 November drift review and verification](MAINTENANCE_20261115_DRIFT.md)
 
+- [0.23.42 retained justification routes and README review](RELEASE_0_23_42.md).
+- [README writing review](README_REVIEW_20261115.md).
 - [0.23.41 notes-folder repair and native Return checks](RELEASE_0_23_41.md).
 - [Skipped-check review and Lean checker repair](LEAN_CHECKER_DRIFT_20261115.md).

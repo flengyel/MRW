@@ -24,9 +24,9 @@ from .workspace import strict_json
 LIMIT = 512 * 1024 * 1024
 MAX_FILES = 20000
 JSON_LIMIT = 32 * 1024 * 1024
-FAMILY = re.compile(r'(outlines|investigation)-[a-f0-9]{64}')
+FAMILY = re.compile(r'(outlines|investigation|justification)-[a-f0-9]{64}')
 HEX = re.compile(r'[a-f0-9]{64}')
-WRITE = {'outline_trash', 'outline_restore', 'outline_continue_note', 'outline_source_import', 'outline_create', 'outline_import_note', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import', 'outline_kerodon_import', 'outline_render_diagram',
+WRITE = {'route_run', 'outline_trash', 'outline_restore', 'outline_continue_note', 'outline_source_import', 'outline_create', 'outline_import_note', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import', 'outline_kerodon_import', 'outline_render_diagram',
          'update_investigation', 'end_investigation', 'resume_investigation', 'send_assistance'}
 
 
@@ -77,6 +77,7 @@ def inventory(root, *, legacy=False):
                     parts=name.split('/')
                     owned=(len(parts)==2 and parts[0]=='model-calls' and parts[1].endswith('.json'))
                     owned=owned or (len(parts)==2 and parts[0].startswith('investigation-') and parts[1]=='active.json')
+                    owned=owned or (len(parts)==2 and parts[0].startswith('justification-') and re.fullmatch(r'[a-f0-9]{64}\.json',parts[1]))
                     owned=owned or (len(parts)==3 and parts[0].startswith('outlines-') and re.fullmatch(r'[a-f0-9-]{36}',parts[1]) and (parts[2] in ('outline.json','obsidian-links.json','diagram-renders.json','source-status.json') or re.fullmatch(r'(?:source|artifact)-[a-f0-9]{64}\.bin',parts[2])))
                     if not owned: continue
                 st = regular(p)
@@ -363,6 +364,8 @@ class ArtifactStorage:
                     note_action(dict(method='outline_notes',store=str(base),project_root=root,id=folder.name))
                     from .reader_diagrams import validate_retained
                     validate_retained(store)
+            from .route_records import list_records
+            for _retained in list_records(payload/('justification-'+key), root): pass
             inv = InvestigationStore(str(payload/('investigation-'+key)), root)
             if inv.active:
                 checked_parent(inv.active)
@@ -380,7 +383,7 @@ class ArtifactStorage:
         if self.home.exists():
             for folder in self.home.iterdir():
                 if not FAMILY.fullmatch(folder.name): continue
-                paths = folder.glob('*/outline.json') if folder.name.startswith('outlines-') else [folder/'active.json']
+                paths = folder.glob('*/outline.json') if folder.name.startswith('outlines-') else folder.glob('*.json') if folder.name.startswith('justification-') else [folder/'active.json']
                 for path in paths:
                     if path.exists(): projects[read_json(path)['project_root']] = True
         return dict(schema='mrw-artifact-store',version=2,id=str(uuid4()),original_home=str(self.home),
@@ -774,7 +777,7 @@ class ArtifactStorage:
                 if root not in b['projects']: raise ValueError('Wrong workspace project; explicitly open the synchronized store for this local folder first')
                 original=b['projects'][root];value['project_root']=original
                 if 'store' in value:
-                    family='outlines' if method.startswith('outline_') else 'investigation'
+                    family='outlines' if method.startswith('outline_') else 'justification' if method.startswith('route_') else 'investigation'
                     expected=self.home/(family+'-'+digest(root.encode()))
                     if Path(value['store']) != expected:
                         raise ValueError('Unexpected or stale private-store locator')

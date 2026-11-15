@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.41",
+  "version": "0.23.42",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -60,7 +60,7 @@
       },
       {
         "command": "mrw.askReader",
-        "title": "Ask OpenAI API About Reader Passage\u2026",
+        "title": "Ask OpenAI API About Reader Passage…",
         "category": "MRW"
       },
       {
@@ -127,7 +127,7 @@
       },
       {
         "command": "mrw.ask",
-        "title": "Ask OpenAI API about Selection\u2026",
+        "title": "Ask OpenAI API about Selection…",
         "category": "MRW"
       },
       {
@@ -222,7 +222,7 @@
       },
       {
         "command": "mrw.endInvestigation",
-        "title": "End Investigation\u2026",
+        "title": "End Investigation…",
         "category": "MRW",
         "enablement": "!mrw.assistanceBusy"
       },
@@ -234,13 +234,13 @@
       },
       {
         "command": "mrw.importObsidianNote",
-        "title": "Import Markdown Text\u2026",
+        "title": "Import Markdown Text…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.importStacksSection",
-        "title": "Import Stacks Project Section\u2026",
+        "title": "Import Stacks Project Section…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -252,7 +252,7 @@
       },
       {
         "command": "mrw.openOutline",
-        "title": "Open Saved Source\u2026",
+        "title": "Open Saved Source…",
         "category": "MRW",
         "icon": "$(book)",
         "enablement": "!mrw.outlineBusy"
@@ -289,19 +289,19 @@
       },
       {
         "command": "mrw.replaceOutlineContext",
-        "title": "Replace Shared Context with Selection\u2026",
+        "title": "Replace Shared Context with Selection…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.attachOutlineEvidence",
-        "title": "Attach Recorded Evidence\u2026",
+        "title": "Attach Recorded Evidence…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.insertOutlineReference",
-        "title": "Insert Source or Passage Link\u2026",
+        "title": "Insert Source or Passage Link…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -313,7 +313,7 @@
       },
       {
         "command": "mrw.copyOutlineLink",
-        "title": "Copy Source or Passage Link\u2026",
+        "title": "Copy Source or Passage Link…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -325,19 +325,19 @@
       },
       {
         "command": "mrw.associateObsidianNote",
-        "title": "Link an Obsidian Note\u2026",
+        "title": "Link an Obsidian Note…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.openObsidianNote",
-        "title": "Open Linked Note in Obsidian\u2026",
+        "title": "Open Linked Note in Obsidian…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.manageObsidianNotes",
-        "title": "Manage Linked Notes\u2026",
+        "title": "Manage Linked Notes…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
@@ -348,22 +348,22 @@
       },
       {
         "command": "mrw.moveArtifactDirectory",
-        "title": "Move Saved Work Directory\u2026",
+        "title": "Move Saved Work Directory…",
         "category": "MRW"
       },
       {
         "command": "mrw.openArtifactDirectory",
-        "title": "Open Saved Work Directory\u2026",
+        "title": "Open Saved Work Directory…",
         "category": "MRW"
       },
       {
         "command": "mrw.prepareFolderRename",
-        "title": "Prepare Folder Rename\u2026",
+        "title": "Prepare Folder Rename…",
         "category": "MRW"
       },
       {
         "command": "mrw.reconnectRenamedFolder",
-        "title": "Reconnect Saved Work After Folder Rename\u2026",
+        "title": "Reconnect Saved Work After Folder Rename…",
         "category": "MRW"
       },
       {
@@ -390,7 +390,7 @@
       },
       {
         "command": "mrw.chooseReadingOverview",
-        "title": "Choose Document\u2026",
+        "title": "Choose Document…",
         "category": "MRW"
       },
       {
@@ -418,13 +418,13 @@
       },
       {
         "command": "mrw.openProofOutline",
-        "title": "Open Proof Outline\u2026",
+        "title": "Open Proof Outline…",
         "category": "MRW",
         "icon": "$(type-hierarchy)"
       },
       {
         "command": "mrw.prepareProofStudy",
-        "title": "Work through a proof\u2026",
+        "title": "Work through a proof…",
         "category": "MRW"
       },
       {
@@ -452,7 +452,7 @@
       },
       {
         "command": "mrw.exportStudyHistory",
-        "title": "Export Study History\u2026",
+        "title": "Export Study History…",
         "category": "MRW"
       },
       {
@@ -462,25 +462,25 @@
       },
       {
         "command": "mrw.openDocument",
-        "title": "Open Document\u2026",
+        "title": "Open Document…",
         "category": "MRW",
         "icon": "$(go-to-file)"
       },
       {
         "command": "mrw.newZettel",
-        "title": "New Note\u2026",
+        "title": "New Note…",
         "category": "MRW",
         "icon": "$(new-file)"
       },
       {
         "command": "mrw.recentNotes",
-        "title": "Recent Documents\u2026",
+        "title": "Recent Documents…",
         "category": "MRW",
         "icon": "$(history)"
       },
       {
         "command": "mrw.chooseNotesFolder",
-        "title": "Choose Notes Folder\u2026",
+        "title": "Choose Notes Folder…",
         "category": "MRW",
         "icon": "$(folder)"
       },
@@ -492,7 +492,7 @@
       },
       {
         "command": "mrw.showBacklinks",
-        "title": "Show Backlinks\u2026",
+        "title": "Show Backlinks…",
         "category": "MRW",
         "icon": "$(references)"
       },
@@ -504,33 +504,33 @@
       },
       {
         "command": "mrw.importKerodonSection",
-        "title": "Import Kerodon Section\u2026",
+        "title": "Import Kerodon Section…",
         "category": "MRW",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.importSource",
-        "title": "Import Source\u2026",
+        "title": "Import Source…",
         "category": "MRW"
       },
       {
         "command": "mrw.addSourcePlugin",
-        "title": "Add Source Plugin\u2026",
+        "title": "Add Source Plugin…",
         "category": "MRW"
       },
       {
         "command": "mrw.manageSourcePlugins",
-        "title": "Manage Source Plugins\u2026",
+        "title": "Manage Source Plugins…",
         "category": "MRW"
       },
       {
         "command": "mrw.reparseSource",
-        "title": "Reparse Saved Source\u2026",
+        "title": "Reparse Saved Source…",
         "category": "MRW"
       },
       {
         "command": "mrw.studyLean4",
-        "title": "Study Lean 4\u2026",
+        "title": "Study Lean 4…",
         "category": "MRW"
       },
       {
@@ -540,7 +540,7 @@
       },
       {
         "command": "mrw.leanStudyActions",
-        "title": "Lean Study Actions\u2026",
+        "title": "Lean Study Actions…",
         "category": "MRW"
       },
       {
@@ -555,12 +555,12 @@
       },
       {
         "command": "mrw.addLeanLessonPack",
-        "title": "Add Lean Lesson Pack\u2026",
+        "title": "Add Lean Lesson Pack…",
         "category": "MRW"
       },
       {
         "command": "mrw.manageLeanLessonPacks",
-        "title": "Manage Lean Lesson Packs\u2026",
+        "title": "Manage Lean Lesson Packs…",
         "category": "MRW"
       },
       {
@@ -577,13 +577,13 @@
       },
       {
         "command": "mrw.deleteStudy",
-        "title": "Delete Study\u2026",
+        "title": "Delete Study…",
         "category": "MRW",
         "icon": "$(trash)"
       },
       {
         "command": "mrw.permanentlyDeleteStudy",
-        "title": "Permanently Delete Study\u2026",
+        "title": "Permanently Delete Study…",
         "category": "MRW",
         "icon": "$(trash)"
       },
@@ -601,33 +601,33 @@
       },
       {
         "command": "mrw.configureHistory",
-        "title": "Configure History\u2026",
+        "title": "Configure History…",
         "category": "MRW"
       },
       {
         "command": "mrw.connectZotero",
-        "title": "Connect Zotero\u2026",
+        "title": "Connect Zotero…",
         "category": "MRW"
       },
       {
         "command": "mrw.findZoteroReference",
-        "title": "Find Zotero Reference\u2026",
+        "title": "Find Zotero Reference…",
         "category": "MRW"
       },
       {
         "command": "mrw.resumeZoteroReference",
-        "title": "Resume Zotero Reference\u2026",
+        "title": "Resume Zotero Reference…",
         "category": "MRW"
       },
       {
         "command": "mrw.setupWorkspace",
-        "title": "Set Up MRW Workspace\u2026",
+        "title": "Set Up MRW Workspace…",
         "category": "MRW",
         "icon": "$(home)"
       },
       {
         "command": "mrw.moveWorkspace",
-        "title": "Move Workspace\u2026",
+        "title": "Move Workspace…",
         "category": "MRW"
       },
       {
@@ -637,52 +637,52 @@
       },
       {
         "command": "mrw.retainNotebookResult",
-        "title": "Retain Notebook Result\u2026",
+        "title": "Retain Notebook Result…",
         "category": "MRW"
       },
       {
         "command": "mrw.openNotebookResult",
-        "title": "Open Retained Notebook Result\u2026",
+        "title": "Open Retained Notebook Result…",
         "category": "MRW"
       },
       {
         "command": "mrw.exportNotebookProvenance",
-        "title": "Export Notebook Provenance\u2026",
+        "title": "Export Notebook Provenance…",
         "category": "MRW"
       },
       {
         "command": "mrw.readingTools",
-        "title": "Reading and Notes\u2026",
+        "title": "Reading and Notes…",
         "category": "MRW"
       },
       {
         "command": "mrw.sourceTools",
-        "title": "Sources and References\u2026",
+        "title": "Sources and References…",
         "category": "MRW"
       },
       {
         "command": "mrw.calculationTools",
-        "title": "Calculation\u2026",
+        "title": "Calculation…",
         "category": "MRW"
       },
       {
         "command": "mrw.proofTools",
-        "title": "Proofs\u2026",
+        "title": "Proofs…",
         "category": "MRW"
       },
       {
         "command": "mrw.companionTools",
-        "title": "Tools and Setup\u2026",
+        "title": "Tools and Setup…",
         "category": "MRW"
       },
       {
         "command": "mrw.earlierWork",
-        "title": "Earlier Saved Work\u2026",
+        "title": "Earlier Saved Work…",
         "category": "MRW"
       },
       {
         "command": "mrw.openNotebook",
-        "title": "Open Notebook\u2026",
+        "title": "Open Notebook…",
         "category": "MRW"
       },
       {
@@ -692,12 +692,22 @@
       },
       {
         "command": "mrw.deleteSavedSource",
-        "title": "Delete Saved Source\u2026",
+        "title": "Delete Saved Source…",
         "category": "MRW"
       },
       {
         "command": "mrw.restoreSavedSource",
-        "title": "Restore Saved Source\u2026",
+        "title": "Restore Saved Source…",
+        "category": "MRW"
+      },
+      {
+        "command": "mrw.openJustification",
+        "title": "Justification…",
+        "category": "MRW"
+      },
+      {
+        "command": "mrw.setupJustificationChecker",
+        "title": "Build Local Justification Checker",
         "category": "MRW"
       }
     ],
@@ -965,7 +975,7 @@
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Notes folder for WikiLinks and backlinks. Use an absolute path on the extension host; in WSL use /mnt/c/Users/\u2026 for a Windows folder. Obsidian is optional. Choose Notes Folder updates this workspace setting."
+          "description": "Notes folder for WikiLinks and backlinks. Use an absolute path on the extension host; in WSL use /mnt/c/Users/… for a Windows folder. Obsidian is optional. Choose Notes Folder updates this workspace setting."
         },
         "mrw.pythonExecutable": {
           "type": "string",
@@ -1040,19 +1050,19 @@
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Obsidian command ID that creates a note using your vault\u2019s template (for example templater-obsidian:create-Templates/NewFileTemplate.md). Required for New Note in a vault; there is no plain-file fallback. Do not use an insert-template command. Requires Obsidian CLI; Obsidian owns prompts, naming and template execution."
+          "description": "Obsidian command ID that creates a note using your vault’s template (for example templater-obsidian:create-Templates/NewFileTemplate.md). Required for New Note in a vault; there is no plain-file fallback. Do not use an insert-template command. Requires Obsidian CLI; Obsidian owns prompts, naming and template execution."
         },
         "mrw.obsidianExecutable": {
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Obsidian CLI executable, without arguments. Empty uses obsidian on PATH, Obsidian.com on Windows, or the standard Windows user installation from WSL. Enable Obsidian Settings \u2192 General \u2192 Command line interface."
+          "description": "Obsidian CLI executable, without arguments. Empty uses obsidian on PATH, Obsidian.com on Windows, or the standard Windows user installation from WSL. Enable Obsidian Settings → General → Command line interface."
         },
         "mrw.zettelValidator": {
           "type": "string",
           "default": "",
           "scope": "machine",
-          "markdownDescription": "Path to the existing `flengyel/Zettel` `python/zettel_validate.py` on this host. Used only when Zettel format is explicitly selected for an annotation continuation. Requires PyYAML in MRW\u2019s Python environment; does not modify notes."
+          "markdownDescription": "Path to the existing `flengyel/Zettel` `python/zettel_validate.py` on this host. Used only when Zettel format is explicitly selected for an annotation continuation. Requires PyYAML in MRW’s Python environment; does not modify notes."
         },
         "mrw.citationExecutable": {
           "type": "string",
@@ -1064,13 +1074,13 @@
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Local bibliography fallback when the note has no bibliography metadata. Relative paths resolve beside the note within the selected notes/workspace root. Empty can reuse the selected vault\u2019s Pandoc Reference List bibliography."
+          "description": "Local bibliography fallback when the note has no bibliography metadata. Relative paths resolve beside the note within the selected notes/workspace root. Empty can reuse the selected vault’s Pandoc Reference List bibliography."
         },
         "mrw.citationStyle": {
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Local independent CSL style fallback. Empty uses note csl metadata or Pandoc\u2019s default; no remote styles are fetched."
+          "description": "Local independent CSL style fallback. Empty uses note csl metadata or Pandoc’s default; no remote styles are fetched."
         },
         "mrw.citationSource": {
           "type": "string",
@@ -1081,7 +1091,7 @@
           ],
           "default": "auto",
           "scope": "machine-overridable",
-          "description": "Citation metadata source. Auto respects note/explicit bibliographies, then the selected vault\u2019s live-Zotero option or a connected personal Zotero library, otherwise its local bibliography. Zotero uses Better BibTeX exact-key read-only lookup."
+          "description": "Citation metadata source. Auto respects note/explicit bibliographies, then the selected vault’s live-Zotero option or a connected personal Zotero library, otherwise its local bibliography. Zotero uses Better BibTeX exact-key read-only lookup."
         },
         "mrw.citationZoteroLibraries": {
           "type": "array",
@@ -1094,14 +1104,14 @@
           "uniqueItems": true,
           "default": [],
           "scope": "machine-overridable",
-          "description": "Optional Better BibTeX library IDs for live citations. These are not Zotero Web API group IDs. Empty uses the selected vault\u2019s Zotero libraries or My Library. No wildcard lookup is performed."
+          "description": "Optional Better BibTeX library IDs for live citations. These are not Zotero Web API group IDs. Empty uses the selected vault’s Zotero libraries or My Library. No wildcard lookup is performed."
         }
       }
     },
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Open Document\u2026](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source\u2026](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents\u2026](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) \u00b7 [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) \u00b7 [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) \u00b7 [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
+        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
       },
       {
         "view": "mrw.readingOutline",
@@ -1112,7 +1122,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.41",
+          "title": "MRW 0.23.42",
           "icon": "media/mrw.svg"
         }
       ]
@@ -1129,7 +1139,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js && node --check src/historyRecords.js && node --check src/sharedHistory.js && node --check src/historyUsage.js && node --check src/historyCommands.js && node --check src/zotero.js && node --check src/zoteroApi.js && node --check src/zoteroRecords.js && node --check src/workspaceSetup.js && node --check src/workspaceMove.js && node --check src/workspaceMoveHost.js && node --check src/workspacePaths.js && node --check src/notebookResults.js && node --check src/recentNotes.js && node --check src/obsidianNotes.js && node --check src/annotationContinuation.js && node --check src/citations.js && node --check src/featureInspection.js && node --check src/inspection.js && node --check src/companionTools.js && node --check src/citationZotero.js && node --check src/historyActivity.js && node --check src/sourceLifecycle.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js && node --check src/historyRecords.js && node --check src/sharedHistory.js && node --check src/historyUsage.js && node --check src/historyCommands.js && node --check src/zotero.js && node --check src/zoteroApi.js && node --check src/zoteroRecords.js && node --check src/workspaceSetup.js && node --check src/workspaceMove.js && node --check src/workspaceMoveHost.js && node --check src/workspacePaths.js && node --check src/notebookResults.js && node --check src/recentNotes.js && node --check src/obsidianNotes.js && node --check src/annotationContinuation.js && node --check src/citations.js && node --check src/featureInspection.js && node --check src/inspection.js && node --check src/companionTools.js && node --check src/citationZotero.js && node --check src/historyActivity.js && node --check src/sourceLifecycle.js && node --check src/justification.js && node --check src/justificationView.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },

@@ -1,340 +1,247 @@
 # Mathematical Research Workstation
 
-MRW is an experimental VS Code extension for mathematical study and research.
-It opens documents in place, connects them through Contents, links and
-backlinks, and preserves a Return destination while following references.
-Questions, solutions and commentary can stay in their notes.
+MRW brings mathematical reading, source notes, calculations and proof work into
+a VS Code workspace. Read a paper or note, follow its references, record an
+observation and return to the argument. MRW retains exact source passages and
+results; companion applications keep their editing and execution workflows.
 
-The extension provides reading, navigation, source retention and annotation
-tools. Resuming work across notes, calculations and proofs, and reconstructing
-compressed AI-generated arguments remain design goals.
+The justification engine helps examine the grounds for a claim. It checks how
+explicitly admitted reasons compose, preserves alternative routes and shows
+what remains after an admission is withdrawn. Its scope is described below;
+mathematical judgment remains with the reader.
 
-**MRW 0.23.41 — Responsive notes-folder selection.**
-Choose Notes Folder completes after saving the selection; its path notification
-no longer holds the command or a subsequent selection open.
-[Repair and checks](docs/RELEASE_0_23_41.md).
-
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.41/mrw-0.23.41.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.41).
-There is no Marketplace listing. The extension ID is `flengyel.mrw`.
-[Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
-[Latest repair report](docs/RELEASE_0_23_41.md) · [Contributing](CONTRIBUTING.md)
-
-## Architecture
-
-MRW connects mathematical research through **ports and adapters**. Its VS Code
-facade exposes contextual actions; the core coordinates workflows and maintains
-a narrow model of identities, revisions, retained sources/results, associations,
-provenance and justification records. Adapters preserve external meaning and
-ownership across the anti-corruption boundary.
-
-![MRW architecture: facade, workflow coordination, canonical data model, integral justification logic engine, core services, ports and adapters, and planned diagnostics.](docs/assets/mrw-architecture.png)
-
-The **justification logic engine** makes the grounds for using a mathematical
-claim inspectable: which passages, calculations or proof artifacts support it,
-which assumptions are admitted, and which steps connect those grounds to the
-claim. Its existing Lean checker checks specified inferences under recorded
-assumptions. A planned interactive workflow will compare alternative arguments
-and show which remain available after a ground is withdrawn.
-
-A [bounded Lean search API](docs/JUSTIFICATION_ROUTE_SEARCH.md) now discovers
-composed reasons from explicit admissions and checks surviving routes after
-withdrawal. [Euclid's lemma](docs/JUSTIFICATION_EUCLID_EXAMPLE.md), with proofs
-using Bézout and unique prime factorization, introduces the workflow. Its tests
-check the admitted composition, not the arithmetic proofs. General Hilbert/CS
-search and the complete reader interaction remain pending. See the
-[justification guide](docs/JUSTIFICATION_WORKFLOW.md) for current tools and limits.
-A [proposed CoCalc adapter](docs/COCALC_ADAPTER.md) would connect selected remote
-projects and notebooks while CoCalc retains collaboration and execution.
-Native applications retain document creation and execution. MRW connects the
-work, preserves references and supports resumption. The optional diagnostics
-companion supplies bounded local reports and an explicit Codex handoff;
-core integrity checks and usage recording remain in MRW. Dashed elements are
-planned capabilities.
-
-[Architecture summary](docs/ARCHITECTURE.md) ·
-[Scalable diagram](docs/assets/mrw-architecture.svg) ·
-[Design and implementation status](docs/DESIGN_RECONCILIATION.md)
-
-## What works
-
-- Open Markdown notes in place, including notes in an Obsidian vault. Obsidian
-  and the maintainer's Zettel conventions are optional.
-- Navigate headings, ordinary links, WikiLinks and backlinks. WikiLinks support
-  scoped paths, headings and supported block IDs.
-- Render mathematical notation and supported note-local macros. Render TikZ
-  diagrams on request in Markdown notes or saved reader annotations.
-- Open PDFs through an available reader and return to the referring document.
-- Import a Stacks Project or Kerodon section, retain its source revision and
-  exact passages, and add separately attributed annotations.
-- Use SageMath/Jupyter, Lean, LaTeX tools and Codex alongside MRW through their
-  VS Code interfaces.
-- Study functions, proofs and dependent application through **Study Lean 4…**:
-  a companion lesson, editable core-only examples and the native Lean InfoView.
-
-Rendering, retained citations and navigation checks do not establish
-mathematical correctness. Calculations, formal proof checking and review of an
-argument remain distinct activities.
+**MRW 0.23.42 — Retained justification routes.**
+[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.42/mrw-0.23.42.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.42)
+· [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md).
+The extension ID is `flengyel.mrw`. Distribution is through GitHub VSIX files;
+there is no Marketplace listing. MRW remains experimental.
 
 <a id="open-existing-work"></a>
 
 ## Open a document
 
-For first use, [set up the MRW workspace](docs/WORKSPACE_SETUP.md) at
-`~/mrw-work/MRW.code-workspace` on the Linux host. A notes folder, including an
-Obsidian vault, can remain elsewhere. Existing sessions keep their saved work.
+Start with [MRW workspace setup](docs/WORKSPACE_SETUP.md). The default is
+`~/mrw-work/MRW.code-workspace` on the Linux host. Your notes folder can remain
+elsewhere, including in a Windows Obsidian vault accessed from WSL.
 
-1. Choose **MRW: Open Document…**. **Original file** opens the current file in
-   place; **Saved copy** opens a retained revision with MRW annotations.
-   **Browse for another document…** is available while other entries load.
-2. With a Markdown document active, choose **MRW: Show Contents**. The MRW
-   sidebar identifies the selected document and lists its headings and links,
-   including unsaved edits.
-3. Select a heading to move within the document. Follow a link through Contents
-   or **MRW: Follow Document Link**, or click a WikiLink in preview. These routes
-   retain the originating location for **MRW: Return to Document**.
-   **MRW: Reopen Document** opens the last opened or followed file and restores
-   a saved Markdown selection when it still matches.
-4. For note-ID lookup and backlinks, choose **MRW: Choose Notes Folder…** for
-   the intended folder. Use **MRW: Show Backlinks…** to inspect incoming
-   references. Choosing a folder leaves its notes in place.
-   The chooser shows the current folder and recent choices with full paths,
-   remembered for this workspace after restart.
+1. Choose **Open Document… → Original file**. Markdown opens in preview;
+   PDFs and other files use a registered reader or editor.
+2. Choose **Show Contents** for a Markdown document. Contents lists its headings
+   and links, including unsaved edits. The Commands view remains available.
+3. Follow a link through Contents or **Follow Document Link**, or click a
+   WikiLink in preview. **Return to Document** returns to the originating
+   occurrence. Missing or ambiguous targets are reported.
+4. Choose **Recent Documents…** to reopen notes, PDFs and other files after a
+   restart. **Reopen Document** restores a Markdown selection when it still
+   matches. PDF pages and preview scroll positions are not restored.
 
-The document picker lists the current folder before reading titles. Enter a
-subfolder to browse it, or choose **Search subfolders…** to search below it.
-The picker reports when search limits leave results incomplete.
-Browsing does not change the notes folder's lookup scope. Opening an
-original does not import it; opening a saved copy does not refresh or overwrite
-its retained source.
-
-PDFs open in a registered reader or, on request, the system reader.
-MRW does not extract PDF text, build PDF Contents or restore PDF pages.
-To start a note from MRW, choose **New Note…** in **Commands** or the
-**MRW Document** menu. For a configured Obsidian vault, MRW brings Obsidian
-forward and runs your selected creation command. Other notes folders use a blank
-VS Code Markdown editor. Your current document stays open.
-See [note creation and setup](docs/NOTE_COMPANIONS.md).
-For other document types, use their authoring application and **Open Document**.
-Ordinary reading requires no problem record or exercise form.
-
-Start with **MRW: Open Tutorial**, or read the
-[document workflow](docs/READING_OUTLINE_WORKFLOW.md). The
-[Obsidian guide](docs/OBSIDIAN_WORKFLOW.md#configure-obsidian-with-mrw) covers
-opening the same notes in both applications and the Windows/WSL arrangement.
-
-## Host and installation
-
-MRW and Python run on a **Linux workspace host**, including WSL2 or Remote SSH.
-Windows VS Code can provide the interface. Required: VS Code 1.95+ and Python
-3.11+ on that host. Reading with an installed VSIX needs no npm, Qt, Lean or AI
-account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
-
-| Arrangement | Recorded checks |
-| --- | --- |
-| Windows VS Code + WSL2 Debian | Current reading repairs and earlier reader/persistence checks |
-| Windows VS Code + Remote SSH to Raspberry Pi 5, Debian 12 ARM64 | Earlier scoped installed-reader checks |
-| Local Linux and other Linux SSH hosts | Intended hosts; separate desktop validation remains |
-| Native Windows or macOS backend | Not qualified |
-
-The recommended setup installs **MRW and MRW Diagnostics** together. In the
-Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
-`mrw-0.23.41.vsix`, then
-[mrw-diagnostics-0.1.0.vsix](https://github.com/flengyel/MRW/releases/download/v0.23.41/mrw-diagnostics-0.1.0.vsix).
-Confirm both on the same workspace host. Diagnostics remains optional, and
-weekly reporting is opt-in. Save work
-before a requested reload and retain workspace storage when upgrading. Follow
-the [installation guide](docs/INSTALLATION.md) for details.
-
-To build from source, install Linux Node.js 22+ and npm, then run from the
-repository root:
-
-```sh
-npm ci --prefix vscode --ignore-scripts
-TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.41.vsix
-sha256sum vscode/mrw-0.23.41.vsix
-```
-
-Packaging copies the shared Python core into the VSIX; it does not publish it.
-See [development and checks](vscode/README.md#run-from-this-checkout) for F5
-launching, tests and package verification.
-[Release preparation](docs/RELEASING.md) records the source-marker and publication
-procedure. GitHub updates require downloading and installing the newer VSIX.
-
-## Recommended extensions
-
-Start with VS Code's built-in Markdown preview, which renders mathematics.
-Install companions for the tasks that need them:
-
-| Task | Extension | Identifier |
-| --- | --- | --- |
-| Write LaTeX, build and view PDFs | [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) | `James-Yu.latex-workshop` |
-| Richer Markdown previews, diagrams and export | [Markdown Preview Enhanced](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced) | `shd101wyy.markdown-preview-enhanced` |
-| Work in SagePod notebooks | [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) | `ms-toolsai.jupyter` |
-| SageMath language support | [SageMath Enhanced](https://marketplace.visualstudio.com/items?itemName=Lov3.sagemath-enhanced) | `Lov3.sagemath-enhanced` |
-| Edit and check Lean proofs | [Lean 4](https://marketplace.visualstudio.com/items?itemName=leanprover.lean4) | `leanprover.lean4` |
-| Read PDFs when no suitable viewer is installed | [vscode-pdf](https://marketplace.visualstudio.com/items?itemName=tomoki1207.pdf) | `tomoki1207.pdf` |
-
-LaTeX Workshop needs a TeX distribution; Jupyter connects to a separate kernel.
-These extensions handle editing, calculation and checking.
-Keep a previewer or PDF reader that works. The
-[companion guide](docs/RECOMMENDED_EXTENSIONS.md) explains host placement and
-preview choices; the PDF extension's cross-host MRW handoff remains unobserved.
-
-## Other reading tools
-
-- [Lean study](docs/LEAN_STUDY_WORKFLOW.md): open three introductory companion lessons for
-  *Theorem Proving in Lean 4*, keep notes and resume edited code. The optional
-  official Lean extension runs on the workspace host, including WSL Debian.
-  [Local lesson packs](docs/LEAN_LESSON_PACKS.md) add content without rebuilding MRW.
-- [Stacks Project and Kerodon](docs/STACKS_WORKFLOW.md): import a section with
-  source-qualified identifiers such as `stacks-project:08ZE` and `kerodon:0004`;
-  reopen its retained revision offline.
-- [TikZ diagrams](docs/TIKZ_WORKFLOW.md): render on request using an isolated
-  compiler, while preserving the note or annotation source.
-- [Proof outlines](docs/PROOF_GRAPH_WORKFLOW.md): inspect claims and linked
-  sources, edit attributed summaries and collapse displayed intermediate steps.
-- [AI assistance](docs/READER_AI_WORKFLOW.md): exchange selected material with
-  Codex manually, or use MRW's separate API request preview and Send controls.
-- [SagePod notebooks](docs/GETTING_STARTED_WSL_SAGEPOD.md): work with a SageMath
-  kernel through Jupyter. Opening MRW starts no container and runs no cells.
-
-[flengyel/Zettel](https://github.com/flengyel/Zettel) and its
-[wiki](https://github.com/flengyel/Zettel/wiki) describe the maintainer's optional
-Zettelkasten conventions.
-
-## Optional source study
-
-For deliberate practice on a selected passage, **Study Current Material** offers
-questions, saved attempts, attributed companion replies and opt-in review using
-FSRS. **Work through a proof…** supports a separate passage-and-outline handoff.
-Opening or following notes does not create a study. Earlier document-linked
-work remains readable after removal of the
-document Problems interface.
-
-To reopen saved study work, run **MRW: Resume Study** from the Command Palette.
-**Inspect Study History** and **Export Study History…** retain access to its history.
-**Archive Study**, **Delete Study…**, **Show Archived Studies** and **Show Deleted
-Studies** are also available there; see [lifecycle controls](docs/STUDY_LIFECYCLE.md).
-Fleeting notes and notes for later review can remain ordinary linked documents.
-
-[Source-study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
-[Proof-study workflow](docs/PROOF_STUDY_WORKFLOW.md) ·
-[Removal and preservation checks](docs/DOCUMENT_PROBLEMS_REMOVAL.md)
-
-## Data and transfers
-
-Ordinary notes, notebooks, proof graphs and file-based studies remain files.
-Their editors own saving, undo and recovery. MRW keeps retained source revisions
-and attributed annotations in a source store associated with the workspace.
-
-Source-study checkpoints and interaction history live separately in private
-VS Code workspace storage on the host. They can include drafts, submissions,
-replies, exact source snapshots and reported outcomes or effort. **Inspect Study
-History** shows a local report; **Export Study History…** exports selected
-sessions. MRW does not record unrelated application activity or infer
-comprehension from it. Scheduling and effort reports do not establish a
-learning benefit.
-
-**Inspect Study History** also reports recorded feature invocations, outcomes,
-durations and last use without requiring a new Study. Coverage is incomplete;
-see [usage history](docs/USAGE_HISTORY.md) and the
-[feature-use requirements](docs/OPERATIONAL_USAGE.md). A separate
-[diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) for direct usage analysis and
-periodic integrity/data-hygiene reports is available as an optional companion.
-Its supported checks and coverage limits are described in
-[the companion guide](diagnostics/README.md). Automatic Codex maintenance
-scheduling remains pending.
-
-Companion handoffs require copying and pasting the selected material.
-The separate API workflow sends only after its request preview and Send action.
-Pasted attribution does not authenticate a reply or verify its mathematics.
-
-Saved-work move/reconnect commands transfer supported source records and
-annotations. They do **not** transfer current source-study checkpoints or
-interaction history. Copying Markdown links alone transfers neither private
-source targets nor study state. See [storage and moves](docs/ARTIFACT_STORAGE.md)
-before changing the workspace or store location.
-
-## Limits and contributions
-
-MRW is under active development. Native preview scroll positions, PDF pages,
-Obsidian embeds and arbitrary LaTeX preambles/packages are not supported.
-Automatic prerequisite discovery, whole-corpus ingestion, general proof checking
-and recovery of calculation sessions are not implemented. Multiple hosts writing
-one private store and Windows-backed artifact storage are not qualified.
-Source-study state has no cross-machine migration interface.
-[Study lifecycle controls](docs/STUDY_LIFECYCLE.md) provide Archive/Restore,
-Trash/Undo and confirmed permanent deletion without deleting ordinary files or
-shared sources.
-
-Contributions can improve navigation, accessibility, documentation or another
-specific obstacle encountered during mathematical work. See
-[CONTRIBUTING.md](CONTRIBUTING.md) for bug reports, focused pull requests and
-discussion of larger proposals. Preserve notes, source attribution and
-unfinished work; follow the native VS Code interface conventions.
-
-## Project documents and license
-
-[Documentation index](docs/README.md) ·
-[Research-workstation design](docs/RESEARCH_WORKSTATION_DESIGN.md) ·
-[W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) ·
-[Related systems](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse) ·
-[Vision](VISION.md) · [Domain model](DOMAIN_MODEL.md) ·
-[Vocabulary](VOCABULARY.md) · [UX specification](UX_SPEC.md)
-
-[AGENTS.md](AGENTS.md), the [current plan](CODEX_PLAN.md) and
-[continuation](docs/CODEX_CONTINUATION.md) guide development. The
-[changelog](CHANGELOG.md) and [earlier extension details](docs/VS_CODE_DEVELOPMENT_HISTORY.md)
-describe earlier versions, including the separate Qt/CLI prototype.
-
-MRW code is Copyright 2026 F. Lengyel, [Apache-2.0](LICENSE). Bundled dependencies
-retain their own licenses and notices. Stacks fixtures retain
-[upstream attribution and GFDL](tests/fixtures/stacks/README.md). The project
-license does not relicense retained source material.
-[PUBLIC_READINESS.md](PUBLIC_READINESS.md) records the publication review and
-its unresolved disclosure and attribution decisions.
-
-Source readers provide **Original page / Saved text** controls and persistent
-Stacks Project/Kerodon import buttons. **Import Source…** also supports nLab and
-explicitly registered source plugins. Retained snapshots remain readable without
-the plugin. See [source plugins](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_PLUGINS.md)
-and [nLab](https://github.com/flengyel/MRW/blob/main/docs/NLAB_WORKFLOW.md) for
-installation, supported mathematics, revision evidence and limits.
-
-## Zotero references
-
-MRW 0.23.41 includes read-only local Zotero lookup, citation insertion and
-retained attachment reopening. Existing `[@key]` citations can also render through
-Better BibTeX's read-only exact-key lookup; see the citation setup in the guide.
-Windows Zotero is accessed from WSL through
-Windows loopback, without forwarding its API port. See the [workflow and limits](docs/ZOTERO_WORKFLOW.md).
-
-Before connecting, open Zotero → **Settings → Advanced** and enable
-**Allow other applications on this computer to communicate with Zotero**.
-Keep Zotero running for searches and new attachment reads. With Windows Zotero
-and Debian WSL, select **Windows Zotero from WSL** in **MRW: Connect Zotero…**.
-
-### Notebook results
-
-Retain a saved Jupyter notebook with optional companion notes, reopen its exact
-results, compare alternatives and export their provenance. Saved outputs and
-producer-reported execution remain distinct. See the
-[notebook workflow](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md).
+The document picker shows filenames immediately and adds YAML or heading titles
+as they are read. Browse subfolders or choose **Search subfolders…**; incomplete
+searches are identified. Browsing leaves the configured notes folder unchanged.
+**Saved copy** and **Open Saved Source…** open a retained source revision and its
+annotations. They do not replace the original file or refresh that revision.
 
 ### Notes while reading
 
-Choose your notes folder with **MRW: Choose Notes Folder**. Then choose
-**New Note…** in MRW's **Commands** view or **MRW Document** menu. For an
-Obsidian vault, MRW brings Obsidian forward and runs your configured creation
-command; this must run your creation template. No plain-file command is
-substituted when the setting is empty. Obsidian handles the template and filename. See [setup](docs/OBSIDIAN_WORKFLOW.md#new-note).
-For other folders it opens a blank Markdown editor beside the document.
-Use VS Code's Save to choose its filename and location.
+Choose **Choose Notes Folder…** for note-ID lookup and backlinks. It remembers
+recent folders with their full paths. The folder need not be an Obsidian vault.
 
-**Recent Documents** reopens notes, PDFs and other files MRW has seen. Markdown
-entries show their title and filename; other files show their filename and path.
-The list keeps thirty entries in this workspace and survives restart. The
-**VS Code file history…** entry opens the native file picker for earlier files.
-A separate note about a scanned PDF needs no OCR.
+**New Note…** delegates creation to the configured authoring application. For
+Obsidian, it runs your selected creation command and template in Obsidian. For
+an ordinary notes folder, it opens a blank Markdown editor. Your current
+document stays open. See [note companions](docs/NOTE_COMPANIONS.md).
+
+Reader notes belong beside their retained passages. Add or edit the text,
+delete a note, link an Obsidian note, or continue it through the configured
+note-creation handoff. MRW source notes and Zettelkasten notes can develop
+independently. [Reader notes](docs/READER_NOTE_WRITING.md) ·
+[Obsidian handoff](docs/OBSIDIAN_WORKFLOW.md).
+
+## What works
+
+| Task | MRW route |
+| --- | --- |
+| Read linked notes | Markdown preview, Contents, ordinary links, WikiLinks, backlinks and Return. |
+| Keep a source passage | Import a Stacks Project, Kerodon or supported nLab page; retain its revision, exact text and reader annotations. |
+| Read a PDF | Open it in a registered viewer and keep the referring document available. A separate source note needs no OCR. |
+| Write mathematics | Render notation and supported note-local macros; compile fenced TikZ diagrams explicitly. |
+| Work with a proof | Open Lean source with the official Lean extension, or inspect a Proof Outline and its cited passages. |
+| Compare grounds | Search under displayed admissions, retain checked routes, inspect their sources and open a successor or predecessor context. |
+| Retain a calculation | Capture a saved notebook, reopen its outputs, compare alternatives and export provenance. |
+| Consult AI | Copy selected material to Codex, or use the separate API request preview and explicit Send action. |
+
+## Justification
+
+A **ground** is a source, result or argument used to support a claim. An
+**admission** records which assertion is being accepted, by whom and within
+what scope. A **context** selects the admissions available to a derivation.
+
+Choose **Proofs → Justification… → Explore Euclid’s lemma**. Its two arguments
+use Bézout’s identity and unique prime factorization. Read their source text
+and admissions, then choose **Search under these admissions**. Each retained
+route identifies the grounds it uses. Source buttons show the exact captured
+passage; **Back to routes** restores the comparison.
+
+**Withdraw a ground…** checks a successor context. The earlier context,
+certificates and sources remain saved. Reopen either context through
+**Justification…** after a restart; reopening performs no new Lean run.
+
+This bounded checker verifies the admitted composition, not the arithmetic
+proofs or an informal paper–Lean correspondence. General proof search and
+assembly of arbitrary contexts from ordinary notes remain open work. The
+[walkthrough](docs/JUSTIFICATION_EUCLID_EXAMPLE.md) gives both mathematical
+arguments; the [guide](docs/JUSTIFICATION_WORKFLOW.md) describes the supported
+interaction and limits.
+
+Checking requires an explicit build of MRW’s packaged runtime with an already
+installed Lean 4.32.2 toolchain. Setup downloads nothing. The current executable
+identity is verified on Linux x86-64/WSL; another compiler output is rejected.
+Saved results and ordinary reading remain available without that runtime.
+
+## Zotero references
+
+Use **Sources and References → Find Zotero Reference…** to find a reference,
+insert a citation or follow an attachment. In Zotero, enable **Settings →
+Advanced → Allow other applications on this computer to communicate with
+Zotero** and keep it running for new lookups.
+
+Pandoc-style citations such as `[@key]` render through the selected citation
+processor and a bibliography or Better BibTeX lookup. Snapshot notices identify
+the library or bibliography actually read. Windows Zotero can be reached from
+WSL through Windows loopback, without forwarding its API port.
+[Setup and limits](docs/ZOTERO_WORKFLOW.md).
+
+### Notebook results
+
+Use Jupyter with a SagePod SageMath kernel or another configured kernel. Retain
+a saved notebook and optional companion notes, reopen its outputs, compare
+alternatives and export their provenance. A retained output and a reported
+execution are distinct records; reopening restores neither a kernel nor a
+running calculation. SageQueue queues SageMath jobs through SagePod; an MRW
+SageQueue adapter is not implemented. [Notebook workflow](docs/NOTEBOOK_RESULTS.md).
+
+## Other reading tools
+
+- [Lean study](docs/LEAN_STUDY_WORKFLOW.md) provides introductory companion
+  lessons, editable core-only examples, solutions and notes. The lesson project
+  pins Lean 4.33.0; the justification runtime separately pins 4.32.2.
+- [Stacks Project and Kerodon](docs/STACKS_WORKFLOW.md) use qualified identifiers
+  such as `stacks-project:08ZE` and `kerodon:0004`. A stable identifier names a
+  source; retained citations also preserve its revision and exact passage.
+- [Source plugins](docs/SOURCE_PLUGINS.md) support registered readers, including
+  [nLab](docs/NLAB_WORKFLOW.md). Retained text remains readable without its plugin.
+- [TikZ](docs/TIKZ_WORKFLOW.md) rendering preserves the note or annotation source
+  and compiles only on request, using separately installed tools.
+- [Proof Outlines](docs/PROOF_GRAPH_WORKFLOW.md) show claims and citations, allow
+  summary corrections and simplify the display. Graph validation is distinct
+  from checking the mathematical argument.
+- [AI assistance](docs/READER_AI_WORKFLOW.md) separates companion clipboard
+  handoffs from API requests, exact previews and Send.
+
+The maintainer’s optional Zettelkasten conventions are documented independently
+in [flengyel/Zettel](https://github.com/flengyel/Zettel) and its
+[wiki](https://github.com/flengyel/Zettel/wiki). MRW imposes no Zettel format.
+
+## Host and installation
+
+MRW and Python run on a Linux workspace host, including WSL2 or Remote SSH;
+Windows VS Code may provide the interface. Ordinary reading requires VS Code
+1.95+ and Python 3.11+. It needs no Qt, Lean, SageMath or AI account.
+
+Windows VS Code with Debian WSL is the current checked arrangement. Earlier
+reader checks also cover Debian ARM64 over SSH; that does not qualify the
+separate x86-64 justification runtime. Native Windows/macOS backends and
+Windows-backed private artifact storage are unqualified.
+
+In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
+`mrw-0.23.42.vsix`. The recommended companion is
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.42/mrw-diagnostics-0.1.0.vsix);
+it is optional, and weekly reporting is opt-in. Save work before a requested
+reload and retain workspace storage when upgrading. GitHub updates require
+installing the newer VSIX. [Installation guide](docs/INSTALLATION.md).
+
+## Recommended extensions
+
+Install companions for the tasks you use, on the appropriate workspace host:
+
+| Task | Companion |
+| --- | --- |
+| LaTeX editing and PDF viewing | `James-Yu.latex-workshop`, plus a TeX distribution. |
+| Lean editing and live goals | `leanprover.lean4`, plus Lean/elan. |
+| Notebook work | `ms-toolsai.jupyter`, connected to a separate kernel such as SagePod. |
+| SageMath language support | `Lov3.sagemath-enhanced`. |
+| Additional Markdown preview/export | `shd101wyy.markdown-preview-enhanced`. |
+| PDF viewing without another suitable reader | `tomoki1207.pdf`; its cross-host MRW handoff remains unobserved. |
+
+The [companion guide](docs/RECOMMENDED_EXTENSIONS.md) explains placement,
+prerequisites and compatibility. Keep a previewer or PDF reader that works.
+
+## Data and transfers
+
+Notes, Lean files, notebooks and proof graphs remain ordinary files. Their
+editors own saving, undo and buffer recovery. MRW stores source captures,
+annotations, API investigation records and immutable justification results
+separately from those files. Copying a Markdown link does not copy its private
+target. [Storage and moves](docs/ARTIFACT_STORAGE.md).
+
+**Move Saved Work Directory…** transfers the supported source, annotation,
+API investigation and justification records. It does not transfer every
+notebook result, study checkpoint or history record. **Move Workspace…** has
+its own verified workspace scope and recovery. Keep exports and backups.
+
+Core history records MRW operations, not unrelated application activity.
+Diagnostics provides bounded local usage/integrity reports and an explicit
+Codex handoff. Shared history and weekly reporting are optional; missing
+observations are not zero use. [Diagnostics](diagnostics/README.md) ·
+[Shared history](docs/USAGE_HISTORY.md).
+
+## Optional source study
+
+Saved studies, attempts, proof-work questions and opt-in spaced review remain
+separately accessible through the Command Palette. **Resume Study**, history
+inspection/export and Archive/Restore or Trash controls preserve earlier work.
+They are not part of opening a note or following a link.
+[Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
+[Lifecycle and recovery](docs/STUDY_LIFECYCLE.md).
+
+## Architecture
+
+MRW coordinates references and retained evidence while each companion owns its
+editor, kernel or execution service. Its core includes the justification engine,
+source stores and recording/recovery services. Capability-specific adapters
+connect documents, calculations, proof tools and AI.
+
+![MRW architecture](docs/assets/mrw-architecture.png)
+
+[Architecture](docs/ARCHITECTURE.md) · [Scalable diagram](docs/assets/mrw-architecture.svg) ·
+[Design and current status](docs/DESIGN_RECONCILIATION.md).
+The proposed [CoCalc adapter](docs/COCALC_ADAPTER.md), general context assembly
+and broader inference search remain unimplemented.
+
+## Limits and contributions
+
+MRW does not extract PDF text, restore PDF pages or preview scroll positions,
+render every Obsidian embed or interpret arbitrary LaTeX preambles. General
+proof checking, automatic prerequisite discovery and live calculation-session
+recovery are not delivered. Concurrent hosts writing one private store are
+unsupported. Feature-specific limits and observations are recorded in the guides.
+
+Contributions should address a concrete obstacle in mathematical work while
+preserving source attribution, notes and unfinished work.
+[Contributing](CONTRIBUTING.md) · [Release procedure](docs/RELEASING.md).
+
+## Project documents and license
+
+[Documentation](docs/README.md) · [Research design](docs/RESEARCH_WORKSTATION_DESIGN.md) ·
+[Provenance](docs/PROVENANCE_DESIGN.md) · [Domain model](DOMAIN_MODEL.md) ·
+[Vocabulary](VOCABULARY.md) · [UX specification](UX_SPEC.md) · [Changelog](CHANGELOG.md).
+[AGENTS.md](AGENTS.md), [CODEX_PLAN.md](CODEX_PLAN.md) and the
+[continuation](docs/CODEX_CONTINUATION.md) guide development.
+[Earlier extension details](docs/VS_CODE_DEVELOPMENT_HISTORY.md) include the
+separate Qt/CLI prototype.
+
+Copyright 2026 F. Lengyel. MRW code is [Apache-2.0](LICENSE); bundled dependencies
+retain their notices. Stacks fixtures retain [upstream attribution and
+GFDL terms](tests/fixtures/stacks/README.md). The project license does not
+relicense source material. See [publication notes](PUBLIC_READINESS.md).

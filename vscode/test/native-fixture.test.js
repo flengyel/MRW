@@ -97,7 +97,7 @@ test('every native entry reaches the preflight barrier before activation, comman
   }
   assert.equal(mutations,0,file);assert.ok(gates>0,file);
  }
- assert.equal(count,32);
+ assert.equal(count,33);
 });
 test('both direct Python test bridges refuse unscoped and outside writes',async t=>{
  const base=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-bridge-guard-'));t.after(()=>fs.rm(base,{recursive:true,force:true}));
@@ -151,4 +151,18 @@ test('source Return preparation stages a fresh scoped case without granting exte
  const marker=await guard.receipt(launch.extension);assert.equal(marker.case,'sourceReturn');
  assert.ok(launch.arguments.includes('--new-window'));assert.ok(launch.arguments.includes('--profile'));
  assert.equal(JSON.parse(await fs.readFile(path.join(launch.extension,'package.json'))).main,'./test/host/sourceReturn.js');
+});
+
+test('native checker allowance is case-specific, path-pinned and content-verified',async t=>{
+ for(const kind of ['correct','case','path','hash']){
+  const f=await fixture(t),bytes=Buffer.from('owned checker fixture');
+  const engine={executable_sha256:crypto.createHash('sha256').update(bytes).digest('hex'),sources:{}};
+  const key=crypto.createHash('sha256').update(JSON.stringify(engine)).digest('hex');
+  const relative=path.join('global-storage','justification-checkers','route-'+key,'.lake/routes-build/bin/route_search');
+  const binary=path.join(f.root,relative);await fs.mkdir(path.dirname(binary),{recursive:true});await fs.writeFile(binary,kind==='hash'?'changed':bytes);
+  const registry=path.join(f.extension,'python/mrw/data/route_runtime.json');await fs.mkdir(path.dirname(registry),{recursive:true});await f.put(registry,{current:'fixture',engines:{fixture:engine}});
+  f.marker.case=kind==='case'?'isolation':'justification';f.marker.runtimeFile=kind==='path'?'outside-checker':relative;
+  await f.put(path.join(f.root,'.mrw-native-fixture.json'),f.marker);
+  if(kind==='correct')await f.check();else await assert.rejects(f.check(),/grant|hash/);
+ }
 });

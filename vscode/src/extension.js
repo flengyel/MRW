@@ -312,6 +312,7 @@ function activate(nativeContext) {
     compile: rawBridge, sourcePlugins,
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
   require('./companionTools').registerCompanionTools({vscode,context,register});
+  require('./justification').registerJustification({vscode,context,register,bridge,rawBridge,projectRoot,reading:readingController,show,artifactClients,recorder});
   const notebooks = require('./notebookResults').registerNotebookResults({vscode,context,register,bridge:rawBridge,show,recorder});
   const zotero = require('./zotero').registerZotero({vscode,context,register,reading:readingController,show,onCancel:()=>recorder.operations.cancel()});
   registerLeanStudy({vscode,context,register,trackLocation:require('./readingOutline').trackLocation,

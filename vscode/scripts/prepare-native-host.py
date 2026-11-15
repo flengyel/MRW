@@ -8,10 +8,10 @@ import stat
 import tempfile
 from uuid import uuid4
 
-def prepare(case, parent=None, seed=None, config=None):
+def prepare(case, parent=None, seed=None, config=None, route_cache=None):
     repo=Path(__file__).resolve().parents[2]
-    allowed={'isolation','sourceTrash','activation','sourceReturn','warrantInspection'}
-    if case not in allowed:raise ValueError('This older case needs fixture/UI migration; supported cases are isolation, sourceTrash, activation, sourceReturn and warrantInspection')
+    allowed={'isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification'}
+    if case not in allowed:raise ValueError('This older case needs fixture/UI migration; supported cases are isolation, sourceTrash, activation, sourceReturn warrantInspection and justification')
     parent=Path(parent) if parent else Path.home()/'.cache/mrw-native-tests'
     cache=Path.home()/'.cache'
     if not parent.is_absolute() or parent.resolve()!=parent or not parent.is_relative_to(cache):
@@ -22,7 +22,7 @@ def prepare(case, parent=None, seed=None, config=None):
     root=Path(tempfile.mkdtemp(prefix='mrw-fixture-',dir=parent));os.chmod(root,0o700)
     (root/'workspace-storage').mkdir();(root/'global-storage').mkdir()
     identifier=str(uuid4());profile='MRW-Fixture-'+identifier
-    names={'sourceTrash':'mrw-source-trash-fixture','activation':'mrw-activation-fixture','isolation':'mrw-isolation-fixture','sourceReturn':'mrw-source-return-fixture','warrantInspection':'mrw-warrant-inspection-fixture'}
+    names={'sourceTrash':'mrw-source-trash-fixture','activation':'mrw-activation-fixture','isolation':'mrw-isolation-fixture','sourceReturn':'mrw-source-return-fixture','warrantInspection':'mrw-warrant-inspection-fixture','justification':'mrw-justification-fixture'}
     project=root/names.get(case,'project');project.mkdir()
     extension=root/'extension';extension.mkdir()
     for name in ['src','media','python']:
@@ -57,6 +57,20 @@ def prepare(case, parent=None, seed=None, config=None):
     (extension/'package.json').write_text(json.dumps(manifest,indent=2)+'\n')
     st=root.stat();marker=dict(schema='mrw.native-fixture',version=1,case=case,id=identifier,root=str(root),profile=profile,
         extension=str(extension),projects=[str(project)],device=str(st.st_dev),inode=str(st.st_ino))
+    if route_cache:
+        if case!='justification':raise ValueError('A route runtime may be staged only for the justification case')
+        import sys
+        sys.path.insert(0,str(repo/'src'))
+        from mrw.route_checker import verify, current_engine, root as runtime_root, file_hash
+        from hashlib import sha256
+        engine=current_engine();source=runtime_root(route_cache);binary=verify(route_cache)
+        target=runtime_root(root/'global-storage/justification-checkers')
+        for name, entry in engine['sources'].items():
+            dest=target/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source/name,dest)
+        executable=target/'.lake/routes-build/bin/route_search';executable.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(binary,executable);executable.chmod(0o700)
+        if file_hash(executable)!=engine['executable_sha256']:raise ValueError('Staged native checker differs')
+        marker['runtimeFile']=str(executable.relative_to(root))
     (root/'.mrw-native-fixture.json').write_text(json.dumps(marker,indent=2)+'\n')
     (extension/'host-fixture.json').write_text(json.dumps(dict(root=str(root),id=identifier))+'\n')
     args=['--new-window','--disable-workspace-trust','--disable-extension','flengyel.mrw-diagnostics','--profile',profile,
@@ -70,11 +84,12 @@ def prepare(case, parent=None, seed=None, config=None):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--case',default='isolation')
+    parser.add_argument('--route-cache',type=Path,help='verified disposable route cache; stage only its pinned runtime for the justification case')
     parser.add_argument('--parent',type=Path)
     parser.add_argument('--seed',type=Path,help='copy ordinary fixture files into the new project')
     parser.add_argument('--config',type=Path,help='case options, with ${ROOT}, ${PROJECT}, ${PROFILE} placeholders')
     a=parser.parse_args()
-    try:result=prepare(a.case,a.parent,a.seed,json.loads(a.config.read_text()) if a.config else None)
+    try:result=prepare(a.case,a.parent,a.seed,json.loads(a.config.read_text()) if a.config else None,a.route_cache)
     except ValueError as error:raise SystemExit(str(error))
     print(json.dumps(result,indent=2))
 

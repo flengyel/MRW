@@ -307,6 +307,30 @@ from MRW's private saved-work directory: copying Markdown does not copy linked
 saved sources, annotations, studies or history. Consult the
 [storage guide](https://github.com/flengyel/MRW/blob/main/docs/ARTIFACT_STORAGE.md) before moving saved work.
 
+## Inspect the grounds of an argument
+
+Choose **Proofs → Justification… → Explore Euclid’s lemma**. The view supplies
+two arguments, using Bézout’s identity and unique prime factorization. Read
+the displayed assumptions and exact source text before choosing **Search under
+these admissions**. Opening the example saves nothing and admits no premise.
+
+If needed, expand **Local checker setup → Build local checker**. It uses an
+already installed Lean 4.32.2 toolchain on the workspace host and downloads
+nothing; the current verified build supports Linux x86-64/WSL. Reopening a saved
+result needs no checker. Ordinary MRW reading remains independent of Lean.
+
+The result retains the routes and their source snapshots. Source buttons show
+the captured passage; **Back to routes** restores the comparison. **Withdraw a
+ground…** checks a successor while preserving the earlier context and its
+certificates. Reopen saved results through **Justification…** after a restart;
+**Open earlier context** reads the predecessor without another Lean run.
+
+This checks the admitted composition, not the two arithmetic proofs. An empty
+bounded search is not a disproof. The
+[justification guide](https://github.com/flengyel/MRW/blob/main/docs/JUSTIFICATION_WORKFLOW.md)
+explains the limits and the explicit context-file route. No registration form
+is required for reading or writing notes.
+
 ## Study Lean 4
 
 Choose **Study Lean 4…** in **Commands** and begin with **Introduction and
@@ -569,7 +593,7 @@ unchecked companions and opens their existing guides.
 
 Calculation opens native notebooks, retained results, comparison and provenance
 export. Retained notebooks are read-only; comparison submits no cell execution.
-Proofs contains Lean lessons and Proof Outline. Lesson actions apply to the
+Proofs contains Justification, Lean lessons and Proof Outline. Lesson actions apply to the
 selected lesson or associated code; shared code offers a choice. Unrelated Lean
 files keep native Lean controls.
 
