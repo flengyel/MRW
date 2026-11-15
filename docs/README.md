@@ -94,6 +94,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Release 0.23.37](RELEASE_0_23_37.md) records citation source identification,
+live-owner verification, package checks and the native observation limit.
+
 [Release 0.23.36](RELEASE_0_23_36.md) records Recent Documents, the citation
 observation, exact package checks, publication and native acceptance limits.
 
