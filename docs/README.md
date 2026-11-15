@@ -94,6 +94,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Release 0.23.39](RELEASE_0_23_39.md) records the icon guide, compact History
+view, evidence preservation and verified publication.
+
 [Release 0.23.38](RELEASE_0_23_38.md) records the Lean example instructions,
 compiler/rendering checks and verified publication.
 
