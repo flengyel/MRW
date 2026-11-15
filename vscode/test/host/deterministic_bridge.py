@@ -50,4 +50,13 @@ def action(request):
     return original(request, transport=transport)
 
 editor_bridge.assistance_action = action
+# -I removes the script directory; load only this adjacent test helper.
+import importlib.util
+spec=importlib.util.spec_from_file_location('mrw_test_fixture',Path(__file__).with_name('bridge_fixture.py'))
+fixture=importlib.util.module_from_spec(spec);spec.loader.exec_module(fixture)
+dispatch=editor_bridge.dispatch
+def scoped(request):
+    fixture.validate(request, artifacts)
+    return dispatch(request)
+editor_bridge.dispatch=scoped
 raise SystemExit(editor_bridge.main())

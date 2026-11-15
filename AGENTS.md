@@ -88,17 +88,17 @@ this access, qualified identifiers, retained revisions and annotations. No stora
 migration was needed. The broader interface audit below remains outstanding.
 
 
-## Interface audit — next repair
+<a id="interface-audit--next-repair"></a>
 
-The [13 November audit](docs/INTERFACE_AUDIT_20261113.md) distinguishes implemented tools hidden in the
-interface from proposed integrations. It is an audit, not a delivered UI repair.
-Prioritize access to notebook results and companion setup, context-bound Lean
-lesson actions, and coherent command grouping. Review the remaining study-creation
-entry points separately from preserving saved work. Keep reader notes before AI
-actions and identify the API versus Codex handoff route. Do not create another
-registration system or claim a proposed adapter is installed. Preserve existing
-IDs, notes, drafts, saved sources and the working window.
+## Interface audit — findings from 0.23.28
 
+The [13 November audit](docs/INTERFACE_AUDIT_20261113.md) records that version's observations.
+Grouping, companion/setup access, contextual Lean actions and removal of study
+creation from ordinary reading were subsequently repaired. It is not the current
+backlog. Use D06–D15 in the [register](docs/DESIGN_RECONCILIATION.md) for remaining workflow and
+native-acceptance gaps. Preserve reader notes before AI actions, explicit API
+versus companion destinations, existing IDs, drafts and saved work. Do not
+reintroduce a registration system from an older audit or test fixture.
 
 ## Sidebar — 0.23.28
 

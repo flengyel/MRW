@@ -42,3 +42,6 @@ async function run() {
   finally { await fs.writeFile(path.join(root, 'activation-report.json'), JSON.stringify(report, null, 2)); }
 }
 module.exports = {run};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

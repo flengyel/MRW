@@ -7,7 +7,6 @@ async function run(context){
  assert.equal(path.basename(fixture),'mrw-source-trash-fixture');
  assert.equal(vscode.workspace.workspaceFolders?.length,1);
  assert.equal(vscode.workspace.workspaceFolders[0].uri.fsPath,fixture);
- assert.ok(fixture.startsWith('/home/flengyel/.cache/mrw-source-trash-20261115/native/'));
  assert.equal(await fs.realpath(config.artifacts),path.dirname(fixture));
  const report={vscode:vscode.version,remote:vscode.env.remoteName,checks:[],errors:[],complete:false};
  const save=()=>fs.writeFile(path.join(config.artifacts,'native-result.json'),JSON.stringify(report,null,2));
@@ -53,3 +52,6 @@ async function run(context){
   if(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath===fixture&&!vscode.workspace.textDocuments.some(d=>d.isDirty))await vscode.commands.executeCommand('workbench.action.closeWindow');}
 }
 module.exports={activate:context=>{void run(context).catch(console.error);}};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

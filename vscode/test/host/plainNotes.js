@@ -68,3 +68,6 @@ async function run(context){
  finally{vscode.window.createWebviewPanel=original.panel;vscode.window.showErrorMessage=original.error;vscode.window.showWarningMessage=original.warning;bridge.runBridge=original.bridge;await fs.writeFile(path.join(cfg.artifacts,'native-result.json'),JSON.stringify(report,null,2));await vscode.commands.executeCommand('workbench.action.closeWindow');}
 }
 module.exports={activate:context=>{void run(context).catch(console.error);}};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

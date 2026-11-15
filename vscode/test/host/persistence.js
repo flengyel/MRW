@@ -104,3 +104,6 @@ async function activate(context) {
   }
 }
 module.exports = { activate };
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

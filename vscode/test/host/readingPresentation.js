@@ -99,3 +99,6 @@ async function run(context) {
  finally{vscode.window.createTreeView=native.tree;vscode.window.createWebviewPanel=native.panel;vscode.window.showErrorMessage=native.error;bridge.runBridge=native.bridge}
 }
 module.exports={activate:context=>{void run(context).catch(console.error)}};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

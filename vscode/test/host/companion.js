@@ -74,3 +74,6 @@ async function run(context) {
   finally { vscode.window.showQuickPick = originals.pick; vscode.window.showInputBox = originals.input; await save(); }
 }
 module.exports = { activate: context => { void run(context).catch(console.error); } };
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

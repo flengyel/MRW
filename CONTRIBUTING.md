@@ -66,7 +66,7 @@ operations and exclude test activity from ordinary-use reports. Missing
 observations must not become zero use. Keep recording lightweight and reporting
 bounded; low counts alone do not justify removal.
 
-The proposed [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) owns periodic
+The optional [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) owns periodic
 integrity/hygiene reporting, while core keeps required storage checks. Inspection
 must not mutate inspected data or silently repair findings. Source plugin API 1
 does not authorize maintenance operations.
@@ -112,3 +112,11 @@ or a particular review date.
 The project uses the [Apache-2.0 license](LICENSE). Preserve notices
 and include source, license and attribution information for third-party
 material added by a contribution.
+
+## Native tests
+
+Use the [owned-fixture procedure](docs/NATIVE_TEST_ISOLATION.md). The shared
+guard must pass before a native test activates MRW, patches a host API or writes
+test data. A new window, a familiar fixture filename or a supplied directory
+does not prove isolation. Never use genuine notes, saved stores or working
+profiles as mutation-test fixtures.

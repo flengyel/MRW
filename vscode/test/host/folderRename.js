@@ -97,3 +97,6 @@ async function activate(context) {
   if (reopen) await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(reopen), { forceReuseWindow: true });
 }
 module.exports = { activate };
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

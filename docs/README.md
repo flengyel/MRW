@@ -145,3 +145,6 @@ for present commands and installation.
 - [Saved Source Trash and restoration](SAVED_SOURCE_TRASH.md).
 
 - [0.23.40 saved-source Trash delivery and checks](RELEASE_0_23_40.md).
+
+- [Native test isolation and instruction drift](NATIVE_TEST_ISOLATION.md).
+- [15 November drift review and verification](MAINTENANCE_20261115_DRIFT.md)

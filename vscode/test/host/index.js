@@ -11,7 +11,7 @@ const { digest } = require('../../src/navigation');
 const bridgeModule = require('../../src/bridge');
 
 const repo = path.resolve(__dirname, '../../..');
-const configPath = path.join(repo, '.codex-work/vscode-host/config.json');
+const configPath = path.join(__dirname, '../../host-test.json');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function run() {
@@ -247,3 +247,6 @@ async function run() {
   }
 }
 module.exports = { run };
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

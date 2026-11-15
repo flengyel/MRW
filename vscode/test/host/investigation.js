@@ -210,3 +210,6 @@ async function activate(context) {
 // Keep the workbench interactive while the test driver waits for screenshots.
 // Production activation still registers the unchanged commands and providers.
 module.exports = { activate: context => { void activate(context).catch(error => console.error(error)); } };
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

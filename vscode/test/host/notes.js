@@ -22,3 +22,6 @@ async function check(root,extension){
  }finally{for(const d of subscriptions)d.dispose();}
 }
 module.exports={check};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

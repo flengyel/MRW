@@ -109,3 +109,6 @@ editor.replaceRange(${JSON.stringify(text)},editor.offsetToPos(offset));await vi
   }
 }
 module.exports={activate:context=>{void run(context).catch(console.error);}};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

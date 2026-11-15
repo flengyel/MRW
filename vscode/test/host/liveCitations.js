@@ -27,3 +27,6 @@ async function run(context,api){
  finally{await fs.writeFile(path.join(cfg.artifacts,'native-result.json'),JSON.stringify(report,null,2));if(!dirty?.isDirty)await vscode.commands.executeCommand('workbench.action.closeWindow');}
 }
 module.exports={activate:context=>{const api=require('../../src/extension').activate(context);void run(context,api).catch(console.error);return api;}};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

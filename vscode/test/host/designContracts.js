@@ -10,3 +10,5 @@ async function run(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath;
  report.complete=true;
  }catch(e){report.failure=e.stack;throw e;}finally{await fs.writeFile(path.join(root,'native-result.json'),JSON.stringify(report,null,2));}}
 module.exports={run};
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

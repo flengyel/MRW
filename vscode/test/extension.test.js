@@ -701,8 +701,10 @@ async function deterministicSend(h, draft, status = 'completed') {
   const cp = require('node:child_process');
   const artifacts = path.dirname(draft.output);
   await fs.mkdir(artifacts, { recursive: true });
+  const root=path.dirname(path.dirname(artifacts)),st=await fs.stat(root),marker=path.join(root,'.mrw-bridge-fixture.json');
+  await fs.writeFile(marker,JSON.stringify({schema:'mrw.bridge-fixture',version:1,id:require('node:crypto').randomUUID(),root,device:String(st.dev),inode:String(st.ino)}));
   h.setService((extension, executable, request, options = {}) => runBridge(extension, executable, request, { ...options,
-    spawn: (exe, args, settings) => cp.spawn(exe, ['-I', path.join(extension, 'test/host/deterministic_bridge.py'), artifacts, status], settings) }));
+    spawn: (exe, args, settings) => cp.spawn(exe, ['-I', path.join(extension, 'test/host/deterministic_bridge.py'), artifacts, status], {...settings,env:{...process.env,MRW_TEST_FIXTURE:marker}}) }));
   await h.commands.get('mrw.sendRequest')();
   assert.deepEqual(h.errors, []);
 }

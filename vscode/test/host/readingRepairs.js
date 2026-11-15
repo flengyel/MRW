@@ -51,3 +51,6 @@ async function run(context){
  finally{vscode.window.createTreeView=native.tree;vscode.window.createQuickPick=native.quick;vscode.window.showOpenDialog=native.dialog;vscode.window.showErrorMessage=native.error;vscode.window.registerUriHandler=native.uri;}
 }
 module.exports={activate:context=>{void run(context);return {extendMarkdownIt:md=>previewAPI?previewAPI.extendMarkdownIt(md):md};},deactivate:()=>production?.deactivate()};
+
+// Refuse before any test activation, settings change, write or UI patch.
+module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});
