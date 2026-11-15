@@ -85,7 +85,7 @@ editor buffers. The current document stays open in MRW.
 3. In MRW, choose **New Note…** or run **MRW: New Note…** from the Command Palette.
    MRW brings Obsidian forward and runs the chosen command. Complete its prompts
    in Obsidian. Use your **Open in MRW**
-   command to bring the completed note back. It enters MRW's Recent Notes when
+   command to bring the completed note back. It enters MRW's Recent Documents when
    MRW opens it; that list does not read Obsidian's recent-file history.
 
 Use the creation command, not Templater's `insert-…` command, which edits the

@@ -527,11 +527,16 @@ or repeat the command.
 For papers, notebooks, Lean files and other documents, use the corresponding
 application or VS Code extension, then **Open Document** in MRW.
 
-Use **Recent Notes** to reopen a note by title and ID. It lists up to thirty
-notes opened or saved in this workspace, scoped to the selected notes folder,
-and survives restart. It does not list every note recently edited in Obsidian.
-**Return to Document** returns to the document from which you opened or created
-the note. For a PDF it reopens the file; MRW does not preserve the PDF page.
+Choose **Recent Documents…** beside Open Document to reopen a note, PDF or
+text file. The list keeps thirty files and survives restart. Markdown entries
+show their title and filename; PDFs show their filename and path. Existing
+recent notes remain. MRW does not scan your notes folder or copy document text.
+
+For older PDFs missing from this list, choose **VS Code file history…** in the
+picker, or press **Ctrl+P**. The old Recent Notes list did not record PDFs.
+Opening a permitted PDF from native history adds it for later MRW use.
+**Return to Document** keeps the source location when known; a PDF return is
+file-level, without restoring its page. Saved notes and dirty buffers are preserved.
 
 A separate note needs no OCR. Selecting or searching text in a scanned PDF does.
 Existing inline reader annotations remain in their saved sources; this command

@@ -1,7 +1,7 @@
 # Document navigation
 
 The editor toolbar has one book icon, **MRW Document**, for Markdown, PDF and
-text files. Its menu contains Return to Document, Show Backlinks, New Note and Recent Notes. Markdown
+text files. Its menu contains Return to Document, Show Backlinks, New Note and Recent Documents. Markdown
 also offers Show Contents, Edit Document Source, Open Note in Obsidian and Copy
 Note Link for Obsidian. Existing command IDs and Command Palette entries remain. Menu conditions cover
 local files and VS Code’s remote-file URIs used by WSL and SSH windows.
@@ -61,13 +61,30 @@ folder, MRW opens a blank native Markdown editor beside the document. VS Code
 owns Save, filename selection, Undo and draft recovery. No title prompt, generated
 ID, default text or source link is added by MRW.
 
-**Recent Notes** lists the thirty most recently opened or saved Markdown notes
-seen by MRW in this workspace. It shows the YAML title, or H1 fallback, beside
-the filename ID. The list survives restart, belongs to its recorded notes root,
-and never redirects entries when another folder is selected. Missing or
-redirected notes must be selected again through Open Document. Failed history
-saves are reported; reopening retries them. Recent Notes does not scan the
-vault, copy note content or read Obsidian's recent-file history.
+**Recent Documents…** is directly available beside Open Document, in Reading
+and notes, and in the MRW Document menu. It keeps thirty recently opened files
+for this workspace and survives restart. Existing Recent Notes entries remain.
+Markdown entries show the YAML title or H1 fallback with the filename; PDFs and
+other files show their filename and path. PDF bodies are not read for titles.
+
+Files opened through MRW are recorded. Native Markdown, PDF, text, TeX, Org,
+Lean and notebook tabs in the permitted scope are also recorded when active or
+saved. A configured notes folder is not required for workspace files or files
+already selected explicitly through Open Document. The list does not scan or
+import documents, copy their contents, or read Obsidian's recent-file history.
+
+Each row keeps its original path and is checked against current file
+authorization before reopening. A recent entry never grants access. Missing,
+redirected or out-of-scope files must be selected through Open Document again.
+An unrelated current pane does not block the list or acquire a Return pin.
+Failed history saves are reported and reopening retries them.
+
+PDFs opened before this increment were not recorded by the old note-only list.
+Choose **VS Code file history…** in the same picker, or press **Ctrl+P**, to use
+VS Code's native history and search. That picker follows VS Code's settings;
+MRW neither reconstructs nor clears it. Reopening a permitted PDF there records
+it for later MRW use. The native-history route does not claim a new MRW Return
+pin. See [the workflow and checks](RECENT_DOCUMENTS.md).
 
 Returning from a new or recent note preserves the source location where it is
 known. A PDF return is file-level. Existing reader annotations and retained

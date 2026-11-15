@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.35",
+  "version": "0.23.36",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -474,7 +474,7 @@
       },
       {
         "command": "mrw.recentNotes",
-        "title": "Recent Notes\u2026",
+        "title": "Recent Documents\u2026",
         "category": "MRW",
         "icon": "$(history)"
       },
@@ -1091,7 +1091,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Open Document\u2026](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source\u2026](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n\n[Reading and notes](command:mrw.readingTools) \u00b7 [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) \u00b7 [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) \u00b7 [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
+        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
       },
       {
         "view": "mrw.readingOutline",
@@ -1102,7 +1102,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.35",
+          "title": "MRW 0.23.36",
           "icon": "media/mrw.svg"
         }
       ]

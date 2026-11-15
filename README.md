@@ -9,14 +9,14 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.35 — Reopen changed documents.**
-Reopen Document opens the current file even when its saved position is stale.
-Matching positions are restored; unsaved text stays unsaved. Exact-passage Return
-keeps its checks. Live Zotero / Better BibTeX citation preview and plain reader
-notes remain available.
+**MRW 0.23.36 — Recent notes and documents.**
+**Recent Documents…**, beside Open Document, reopens notes, PDFs and text files.
+The list survives restart, shows note titles with their filenames, and keeps
+Return where its origin is known. VS Code file history is available from the
+same picker. The document-reopen and live Zotero citation repairs are included.
 The separate optional Diagnostics companion supplies bounded read-only reports.
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.35/mrw-0.23.35.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.35).
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.36/mrw-0.23.36.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.36).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -136,8 +136,8 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 
 The recommended setup installs **MRW and MRW Diagnostics** together. In the
 Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
-`mrw-0.23.35.vsix`, then
-[mrw-diagnostics-0.1.0.vsix](https://github.com/flengyel/MRW/releases/download/v0.23.35/mrw-diagnostics-0.1.0.vsix).
+`mrw-0.23.36.vsix`, then
+[mrw-diagnostics-0.1.0.vsix](https://github.com/flengyel/MRW/releases/download/v0.23.36/mrw-diagnostics-0.1.0.vsix).
 Confirm both on the same workspace host. Diagnostics remains optional, and
 weekly reporting is opt-in. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
@@ -149,8 +149,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.35.vsix
-sha256sum vscode/mrw-0.23.35.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.36.vsix
+sha256sum vscode/mrw-0.23.36.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -302,7 +302,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.35 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.36 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Existing `[@key]` citations can also render through
 Better BibTeX's read-only exact-key lookup; see the citation setup in the guide.
 Windows Zotero is accessed from WSL through
@@ -330,6 +330,8 @@ substituted when the setting is empty. Obsidian handles the template and filenam
 For other folders it opens a blank Markdown editor beside the document.
 Use VS Code's Save to choose its filename and location.
 
-**Recent Notes** reopens notes MRW has seen by title and filename. The current
-document and saved notes are preserved. A separate note about a scanned PDF
-needs no OCR.
+**Recent Documents** reopens notes, PDFs and other files MRW has seen. Markdown
+entries show their title and filename; other files show their filename and path.
+The list keeps thirty entries in this workspace and survives restart. The
+**VS Code file history…** entry opens the native file picker for earlier files.
+A separate note about a scanned PDF needs no OCR.

@@ -6,12 +6,12 @@ runs your selected creation command; other notes folders use a blank VS Code
 Markdown editor. Your current document stays open. See
 [note creation and setup](../docs/NOTE_COMPANIONS.md).
 
-0.23.35 repairs **Reopen Document** after edits. A stale saved position no
-longer blocks opening the current file. Matching positions are restored and
-dirty text remains unsaved. Exact-passage Return retains its checks. Live
-Zotero / Better BibTeX citation preview and plain reader notes are preserved.
+0.23.36 adds **Recent Documents…** beside Open Document. The existing recent
+list now includes PDFs and text files, keeps note titles with their filenames,
+and survives restart. Its VS Code file-history entry provides access to older
+files MRW did not record. Dirty buffers and known Return locations are preserved.
 
-MRW 0.23.35 opens mathematical notes and papers in place, follows references,
+MRW 0.23.36 opens mathematical notes and papers in place, follows references,
 and keeps a route back to the passage being read. It adds Contents, backlinks,
 retained source passages, reader annotations and explicit TikZ rendering to a
 VS Code workspace. The extension is experimental.
@@ -138,8 +138,8 @@ one private store are unsupported.
 
 ## Package and install a VSIX
 
-[Download MRW 0.23.35](https://github.com/flengyel/MRW/releases/download/v0.23.35/mrw-0.23.35.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.35).
+[Download MRW 0.23.36](https://github.com/flengyel/MRW/releases/download/v0.23.36/mrw-0.23.36.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.36).
 Updates from GitHub require installing the newer VSIX. For publication and build
 identity, follow [the release procedure](../docs/RELEASING.md).
 
@@ -148,12 +148,12 @@ From the repository root, with Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.35.vsix
-sha256sum vscode/mrw-0.23.35.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.36.vsix
+sha256sum vscode/mrw-0.23.36.vsix
 ```
 
 Packaging bundles the Python core and uses pinned `@vscode/vsce` 4.0.0 to create
-`vscode/mrw-0.23.35.vsix`. It publishes nothing. The fixed epoch and UTC make
+`vscode/mrw-0.23.36.vsix`. It publishes nothing. The fixed epoch and UTC make
 archive timestamps reproducible. Use Linux npm in WSL and record the resulting
 archive's hash rather than reusing an earlier package's hash.
 
@@ -164,11 +164,11 @@ caches and generated archives are excluded from the package.
 In the intended Linux/WSL/SSH window, use **Extensions: Install from VSIX…**, or:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.35.vsix
+code --install-extension /absolute/path/to/mrw-0.23.36.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.35` is installed on the workspace host. Save unfinished
+Confirm `flengyel.mrw@0.23.36` is installed on the workspace host. Save unfinished
 work before a requested reload and retain workspace storage when upgrading.
 The bridge runs the bundled core through `python3 -I`; no editable Python
 installation is needed. See [installation](../docs/INSTALLATION.md).
@@ -330,7 +330,7 @@ Fleeting notes and notes for later review can remain ordinary linked documents.
 
 ## Zotero references
 
-MRW 0.23.35 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.36 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Existing `[@key]` citations can also render through
 Better BibTeX's read-only exact-key lookup; see the citation setup in the guide.
 Windows Zotero is accessed from WSL through
@@ -367,6 +367,8 @@ substituted when the setting is empty. Obsidian handles the template and filenam
 For other folders it opens a blank Markdown editor beside the document.
 Use VS Code's Save to choose its filename and location.
 
-**Recent Notes** reopens notes MRW has seen by title and filename. The current
-document and saved notes are preserved. A separate note about a scanned PDF
-needs no OCR.
+**Recent Documents** reopens notes, PDFs and other files MRW has seen. Markdown
+entries show their title and filename; other files show their filename and path.
+The list keeps thirty entries in this workspace and survives restart. The
+**VS Code file history…** entry opens the native file picker for earlier files.
+A separate note about a scanned PDF needs no OCR.

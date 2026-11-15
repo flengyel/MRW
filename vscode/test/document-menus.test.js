@@ -37,3 +37,9 @@ test('document menu conditions admit local, WSL and SSH files without admitting 
   }
   for (const scheme of ['mrw-record', 'untitled', 'git', 'vscode-userdata']) assert.equal(visible(entry.when, scheme, '.md'), false);
 });
+
+
+test('Recent Documents is directly available and keeps its existing command identity',()=>{
+ assert.equal(c.commands.find(x=>x.command==='mrw.recentNotes').title,'Recent Documents…');
+ assert.ok(c.viewsWelcome.find(x=>x.view==='mrw.commands').contents.includes('(command:mrw.recentNotes '));
+});

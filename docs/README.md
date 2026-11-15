@@ -10,6 +10,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | --- | --- |
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
+| Reopen recent notes, PDFs and text files | [Recent Documents](RECENT_DOCUMENTS.md) |
 | Use Markdown notes, WikiLinks and an optional Obsidian vault | [Notes and Obsidian](OBSIDIAN_WORKFLOW.md) |
 | Understand note handoff and companion boundaries | [Notes applications](NOTE_COMPANIONS.md) |
 | Configure Obsidian note creation | [Obsidian New Note command](OBSIDIAN_WORKFLOW.md#new-note) |

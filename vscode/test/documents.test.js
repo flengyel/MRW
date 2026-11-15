@@ -145,14 +145,15 @@ test('New Note in an ordinary folder opens blank native Markdown and restores th
   assert.deepEqual(await fs.readFile(f.file('paper.pdf')),before);
 });
 
-test('recent notes use dirty text and preserve the originating PDF without opening it as text',async t=>{
+test('recent documents include PDFs and preserve the originating PDF when opening a dirty note',async t=>{
   const f=await fixture(t),state=new Map(),h=harness(f,state,{preview:true,notesFolder:f.notes});
   await h.open('2b.md');const note=await h.doc('2b.md');h.change(note,note.text.length,0,'unsaved calculation');
-  await h.open('paper.pdf');await h.commands.get('mrw.recentNotes')();
+  await h.open('paper.pdf');h.setPickHook(choices=>choices.find(c=>c.entry?.uri.endsWith('/2b.md')));await h.commands.get('mrw.recentNotes')();
   assert.equal(h.shown.at(-1).doc,note);assert.equal(note.isDirty,true);
-  assert.match(h.picks.at(-1).choices[0].label,/Second.*2b.md/);
+  assert.match(h.picks.at(-1).choices.find(c=>c.entry?.uri.endsWith('/2b.md')).label,/Second.*2b.md/);
+  assert.ok(h.picks.at(-1).choices.some(c=>c.label==='paper.pdf'));
   assert.equal(await h.documents.returnToDocument(),true);assert.equal(h.hostCalls.at(-1).args[0].fsPath,f.file('paper.pdf'));
-  const restarted=harness(f,state,{preview:true,notesFolder:f.notes});await restarted.commands.get('mrw.recentNotes')();
+  const restarted=harness(f,state,{preview:true,notesFolder:f.notes});restarted.setPickHook(choices=>choices.find(c=>c.entry?.uri.endsWith('/2b.md')));await restarted.commands.get('mrw.recentNotes')();
   assert.equal(restarted.shown.at(-1).doc.uri.fsPath,f.file('2b.md'));
   assert.equal(await fs.readFile(f.file('2b.md'),'utf8'),f.contents['2b.md']);
 });
@@ -967,4 +968,47 @@ test('Reopen Document still rejects a missing file or a changed file grant', asy
     await assert.rejects(()=>harness(f,h.state).commands.get('mrw.reopenDocument')(),redirected?/different file/:/ENOENT/);
     assert.deepEqual(h.state.get('mrw.documents.v1'),before);
   }
+});
+
+
+test('Recent Documents reopens two PDFs after restart without a notes-folder requirement or text extraction',async t=>{
+ const f=await fixture(t),state=new Map(),h=harness(f,state,{preview:true});
+ const other=f.file('second.pdf');await fs.writeFile(other,Buffer.from('%PDF-1.4\nsecond binary \xff\0','latin1'));
+ await h.open('paper.pdf');await h.open('second.pdf');
+ const recent=state.get('mrw.recentNotes.v1');assert.equal(recent.length,2);assert.ok(recent.every(e=>e.uri.endsWith('.pdf')));
+ const restarted=harness(f,state,{preview:true});await restarted.commands.get('mrw.reopenDocument')();restarted.setPickHook(choices=>choices.find(c=>c.entry?.uri.endsWith('/paper.pdf')));
+ await restarted.commands.get('mrw.recentNotes')();
+ assert.equal(restarted.hostCalls.at(-1).name,'vscode.openWith');assert.equal(restarted.hostCalls.at(-1).args[0].fsPath,f.file('paper.pdf'));
+ assert.equal(restarted.reads.some(p=>p.endsWith('.pdf')),false);
+ await restarted.documents.returnToDocument();assert.equal(restarted.hostCalls.at(-1).args[0].fsPath,other);
+ assert.deepEqual(await fs.readFile(f.file('paper.pdf')),Buffer.from(f.contents['paper.pdf']));
+});
+
+test('a saved recent-file row cannot grant access after its original authorization is removed',async t=>{
+ const f=await fixture(t),state=new Map(),h=harness(f,state),paper=path.join(f.outside,'external.pdf');await fs.writeFile(paper,'%PDF-1.4\n');
+ h.openChoices.push([uri(paper)]);await h.commands.get('mrw.openDocument')();assert.equal(state.get('mrw.recentNotes.v1').length,1);
+ const saved=structuredClone(state.get('mrw.documents.v1'));saved.grants=[];state.set('mrw.documents.v1',saved);
+ const restarted=harness(f,state);restarted.setPickHook(choices=>choices.find(c=>c.entry));
+ await assert.rejects(()=>restarted.commands.get('mrw.recentNotes')(),/outside the selected scope/);
+ assert.deepEqual(state.get('mrw.documents.v1').grants,[]);assert.equal(restarted.hostCalls.some(c=>c.name==='vscode.openWith'),false);
+});
+
+
+test('Recent Documents rejects a redirect introduced while the editor is opening',async t=>{
+ const f=await fixture(t),state=new Map(),h=harness(f,state,{notesFolder:f.notes});await h.open('2b.md');
+ const before=structuredClone(state.get('mrw.documents.v1')),restarted=harness(f,state,{notesFolder:f.notes});
+ restarted.setPickHook(choices=>choices.find(c=>c.entry?.uri.endsWith('/2b.md')));let redirected=false;
+ restarted.setOpenHook(async location=>{if(!redirected&&location.fsPath===f.file('2b.md')){redirected=true;await fs.unlink(f.file('2b.md'));await fs.symlink(f.file('3c.md'),f.file('2b.md'));}});
+ await assert.rejects(()=>restarted.commands.get('mrw.recentNotes')(),/moved or now points elsewhere/);
+ assert.equal(restarted.shown.length,0);assert.deepEqual(state.get('mrw.documents.v1'),before);
+});
+
+test('Recent Documents works from an unapproved native file without granting or pinning that file',async t=>{
+ const f=await fixture(t),state=new Map(),h=harness(f,state,{notesFolder:f.notes});await h.open('2b.md');
+ const outside=path.join(f.outside,'native.md');await fs.writeFile(outside,'# Native file\n');
+ const restarted=harness(f,state,{notesFolder:f.notes}),doc=await restarted.api.workspace.openTextDocument(uri(outside));await restarted.focus(doc);
+ restarted.setPickHook(choices=>choices.find(c=>c.entry?.uri.endsWith('/2b.md')));
+ await restarted.commands.get('mrw.recentNotes')();assert.equal(restarted.api.window.activeTextEditor.document.uri.fsPath,f.file('2b.md'));
+ assert.equal(state.get('mrw.documents.v1').grants.some(g=>g.uri===uri(outside).toString()),false);
+ assert.equal(state.get('mrw.documents.v1').origin,undefined);assert.equal(await fs.readFile(outside,'utf8'),'# Native file\n');
 });

@@ -41,7 +41,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   const candidates = new Set();
   context.subscriptions.push({dispose:()=>chooser?.cancel()});
   const noteRefresh = createNoteRefresh({ vscode, context, check, isNote });
-  const notes = createRecentNotes({ vscode, context, folderRoot, eligible: isNote });
+  const notes = createRecentNotes({ vscode, context, folderRoot, authorize: check, eligible: uri => uri?.scheme === 'file' && /\.(md|markdown|pdf|txt|tex|org|rst|lean|ipynb)$/i.test(uri.fsPath) });
   function persist() {
     const value = { workspace, grants: [...grants], folder, recentFolders: [...recentFolders], last, origin, location: lastLocation };
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
@@ -143,15 +143,17 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (latest) await display(latest.uri, latest.location, generation);
     return false;
   }
-  async function display(uri, location, attempt, validate, { exactLocation = true } = {}) {
+  async function display(uri, location, attempt, validate, { exactLocation = true, expectedPath } = {}) {
     let shownLocation, positionUnavailable = false;
-    await check(uri);
+    const actual = await check(uri);
     if (attempt !== generation) return false;
+    if (expectedPath && actual !== expectedPath) throw Error('This recent document moved or now points elsewhere. Use Open Document to choose it again.');
     validate?.();
     if (markdown(uri.fsPath)) {
       const doc = await vscode.workspace.openTextDocument(uri);
       if (attempt !== generation) return false;
       validate?.();
+      if (expectedPath && await canonical(uri) !== expectedPath) throw Error('This recent document moved or now points elsewhere. Use Open Document to choose it again.');
       if (location && (location.invalid || digest(doc.getText()) !== location.revision || location.end > doc.getText().length)) {
         if (exactLocation) throw new Error('The exact document location changed. Open the current document and select the intended location again.');
         // Reopen chooses a file. Its saved cursor is optional; it must not
@@ -190,13 +192,14 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       } else await vscode.commands.executeCommand('vscode.openWith', uri, reader.viewType, { preview: false });
     } else await vscode.commands.executeCommand('vscode.open', uri, { preview: false });
     if (attempt !== generation) return repairSupersededDisplay();
+    if (expectedPath && await canonical(uri) !== expectedPath) throw Error('This recent document moved or now points elsewhere. Use Open Document to choose it again.');
     // Opening yields to editor work: validate the tracked origin again before
     // publishing either this display or the new Return destination.
     validate?.();
     latestDisplay = { uri, location: shownLocation };
     lastLocation = shownLocation;
     onDisplayed(uri);
-    await notes.remember(uri).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+    await notes.remember(uri, {opened: true}).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
     if (positionUnavailable) vscode.window.setStatusBarMessage?.('MRW: Opened the current document; the previous position no longer matches.', 8000);
     return true;
   }
@@ -526,9 +529,11 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (await display(destination, undefined, attempt)) { last = destination.toString(); await persist(); await onNavigated(); }
     return true;
   }
-  async function withNoteOrigin(value, action) {
+  async function withNoteOrigin(value, action, {optionalOrigin = false} = {}) {
     const attempt = supersede(), selected = value?.scheme ? value : ordinaryUri();
-    const uri = selected?.scheme === 'file' ? selected : undefined;
+    let uri = selected?.scheme === 'file' ? selected : undefined;
+    // Opening a recent file does not require authorizing the pane it replaces.
+    if (optionalOrigin && uri) try { await check(uri); } catch (_) { uri = undefined; }
     const editor = vscode.window.activeTextEditor;
     const doc = uri && editor?.document.uri.toString() === uri.toString() ? editor.document : undefined;
     const pending = uri ? {location: doc ? snapshot(doc, doc.offsetAt(editor.selection.start), doc.offsetAt(editor.selection.end)) : {uri:uri.toString(), fileOnly:true}} : undefined;
@@ -571,12 +576,13 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       return doc;
     }); } finally { creatingNote = false; }
   });
-  register('mrw.recentNotes', value => withNoteOrigin(value, async ({attempt, pending, validate}) => notes.recent({validate, openSelected:async uri => {
-    await grant(uri); validate();
-    if (!await display(uri, undefined, attempt, validate)) return;
+  register('mrw.recentNotes', value => withNoteOrigin(value, async ({attempt, pending, validate}) => notes.recent({validate, openSelected:async (uri, expectedPath) => {
+    // Recent entries record a location; they never grant access or redirect it.
+    await check(uri); validate();
+    if (!await display(uri, undefined, attempt, validate, {expectedPath})) return;
     if (pending) origin = pending.location;
     last = uri.toString(); await persist(); await onNavigated();
-  }})));
+  }}), {optionalOrigin: true}));
   register('mrw.copyDocumentLink', copyLink);
   register('mrw.openDocumentInObsidian', openInObsidian);
   register('mrw.openDocument', open);

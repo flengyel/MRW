@@ -2,7 +2,7 @@
 // Purpose menus over existing commands; configuration inspection never probes a service.
 const GUIDES='https://github.com/flengyel/MRW/blob/main/docs/';
 const GROUPS={
- readingTools:[['Open document…','openDocument'],['New note in your authoring application…','newZettel'],['Recent notes…','recentNotes'],['Reopen document','reopenDocument'],['Show Contents','openReadingOutline'],['Show backlinks…','showBacklinks'],['Return to document','returnToReadingOutline']],
+ readingTools:[['Open document…','openDocument'],['New note in your authoring application…','newZettel'],['Recent documents…','recentNotes'],['Reopen document','reopenDocument'],['Show Contents','openReadingOutline'],['Show backlinks…','showBacklinks'],['Return to document','returnToReadingOutline']],
  sourceTools:[['Open saved source…','openOutline'],['Import Stacks Project section…','importStacksSection'],['Import Kerodon section…','importKerodonSection'],['Import source (including nLab)…','importSource'],['Find Zotero reference…','findZoteroReference'],['Resume retained Zotero reference…','resumeZoteroReference']],
  calculationTools:[['Open notebook…','openNotebook'],['Retain saved notebook result…','retainNotebookResult'],['Open / compare retained results…','openNotebookResult'],['Export notebook provenance…','exportNotebookProvenance'],['SagePod and Jupyter setup',null,'GETTING_STARTED_WSL_SAGEPOD.md']],
  proofTools:[['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Study Lean 4…','studyLean4'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],

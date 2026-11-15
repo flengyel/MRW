@@ -7,9 +7,9 @@ const KEY='mrw.recentNotes.v1';
 const fileUri=file=>({scheme:'file',fsPath:file,toString:()=>pathToFileURL(file).href});
 async function fixture(t){const root=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-recent-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));return root;}
 function host(root,state=new Map()){
- const docs=[],events={},picks=[],errors=[],opened=[];
- const h={root,state,docs,events,picks,errors,opened};
- const vscode={Uri:{parse:value=>fileUri(fileURLToPath(value))},
+ const docs=[],events={},picks=[],errors=[],opened=[],commands=[];
+ const h={root,state,docs,events,picks,errors,opened,commands};
+ const vscode={commands:{async executeCommand(name){commands.push(name);}},Uri:{parse:value=>fileUri(fileURLToPath(value))},
   workspace:{textDocuments:docs,onDidSaveTextDocument(fn){events.save=fn;return {dispose(){}};}},
   window:{async showQuickPick(items,options){picks.push({items,options});return h.pickHook?h.pickHook(items):items[0];},
    async showInformationMessage(message){h.info=message;},async showErrorMessage(message){errors.push(message);}}};
@@ -46,4 +46,22 @@ test('recent list stays bounded and excludes files outside the selected folder',
   h.pickHook=()=>undefined;await h.notes.recent();assert.equal(h.opened.length,0);
 });
 
+
+
+
+test('PDF and text entries survive restart without decoding binary content',async t=>{
+ const root=await fixture(t),h=host(root),pdf=path.join(root,'paper.pdf'),text=path.join(root,'remarks.txt');
+ const raw=Buffer.from('%PDF-1.4\n\xff\0binary','latin1');await fs.writeFile(pdf,raw);await fs.writeFile(text,'Ordinary text.');
+ const originalOpen=fs.open;t.mock.method(fs,'open',async(...args)=>{assert.notEqual(args[0],pdf,'Do not decode a PDF for its title');return originalOpen(...args);});
+ await h.notes.remember(fileUri(pdf));await h.notes.remember(fileUri(text));const restarted=host(root,h.state);await restarted.notes.recent();
+ assert.deepEqual(restarted.picks[0].items.filter(c=>c.entry).map(c=>c.label),['remarks.txt','paper.pdf']);
+ assert.equal(restarted.picks[0].options.title,'Recent Documents');assert.ok(restarted.picks[0].items.every(c=>!c.entry||c.detail.startsWith(root)));
+ assert.deepEqual(await fs.readFile(pdf),raw);
+});
+
+test('native file history is an explicit fallback without imports or recent-store changes',async t=>{
+ const root=await fixture(t),h=host(root);h.pickHook=items=>items.find(c=>c.action==='native');
+ await h.notes.recent();assert.deepEqual(h.commands,['workbench.action.quickOpen']);assert.equal(h.state.has(KEY),false);assert.equal(h.opened.length,0);
+ const file=path.join(root,'A.md');await fs.writeFile(file,'# A');await h.notes.remember(fileUri(file));const before=structuredClone(h.state.get(KEY));await h.notes.recent();assert.deepEqual(h.state.get(KEY),before);
+});
 
