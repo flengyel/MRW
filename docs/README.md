@@ -150,3 +150,4 @@ for present commands and installation.
 - [15 November drift review and verification](MAINTENANCE_20261115_DRIFT.md)
 
 - [0.23.41 notes-folder repair and native Return checks](RELEASE_0_23_41.md).
+- [Skipped-check review and Lean checker repair](LEAN_CHECKER_DRIFT_20261115.md).

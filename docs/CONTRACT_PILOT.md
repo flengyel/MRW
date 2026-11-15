@@ -83,6 +83,9 @@ test is not evidence for every range parser case. Existing `workspace-move.test.
 `test_outline_references.py` cover further occupied-target, corruption,
 changed-source, abrupt termination, Unicode/range and recovery cases.
 
+The [checker pin repair](LEAN_CHECKER_DRIFT_20261115.md) records the drift found
+when that optional profile was originally added to the pinned configuration.
+
 The conformance test is optional in ordinary extension testing: without the
 explicit executable path it reports a skip. It never builds or invokes Lean
 when MRW opens. Run from the repository root after bundling the Python core:
@@ -90,16 +93,20 @@ when MRW opens. Run from the repository root after bundling the Python core:
 ```sh
 npm run bundle-core --prefix vscode
 cd lean
-lake build contracts_tests
-lake env lean ContractsTests.lean
+lake -f lakefile-contracts.toml build
+lake -f lakefile-contracts.toml env lean ContractsTests.lean
 cd ..
-MRW_CONTRACT_EXECUTABLE="$PWD/lean/.lake/build/bin/contracts_tests" \
+MRW_CONTRACT_EXECUTABLE="$PWD/lean/.lake/contracts-build/bin/contracts_tests" \
   node --test vscode/test/contracts-relocation.test.js
 ```
 
 The build uses the existing `lean/lean-toolchain` (4.32.2), no new dependencies,
-and the independent `contracts_tests` target. The original main library,
-justification executables, test driver, pins and default targets remain intact.
+and the optional `lakefile-contracts.toml` profile. It uses the same package
+identity, pinned toolchain and dependency manifest, but writes only its own
+`.lake/contracts-build` artifacts. The original `lakefile.toml` remains byte-for-byte
+pinned by the documentary bridge. The main library, justification executables,
+test driver and default targets remain intact. Do not add contract targets to
+that pinned configuration or silently update its trusted identity.
 The six principal theorem dependencies were inspected: only `propext`, plus
 `Quot.sound` for the generic success theorem; the unlink theorem uses no axioms.
 No additional axioms or admitted proofs discharge the obligations.

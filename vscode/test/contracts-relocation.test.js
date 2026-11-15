@@ -9,7 +9,7 @@ const {runBridge}=require('../src/bridge');
 
 test('concrete relocation/fault traces agree with executable Lean identity/citation vectors',async t=>{
   const executable=process.env.MRW_CONTRACT_EXECUTABLE;
-  if(!executable)return t.skip('Build lean/contracts_tests and set MRW_CONTRACT_EXECUTABLE for model/implementation comparison');
+  if(!executable)return t.skip('Build with lean/lakefile-contracts.toml and set MRW_CONTRACT_EXECUTABLE for model/implementation comparison');
   const {stdout}=await exec(executable,[],{timeout:15000,maxBuffer:1024*1024});
   const model=JSON.parse(stdout),observed={};
   for(const scenario of ['success','recoveredBefore','recoveredAfter']){

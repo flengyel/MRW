@@ -36,6 +36,17 @@ CHECKER = LEAN_ROOT / ".lake" / "build" / "bin" / "justification_bundle"
 
 
 class DocumentaryWarrantTests(unittest.TestCase):
+    def test_committed_checker_inputs_match_pins_without_a_lean_build(self) -> None:
+        # Source/configuration drift must fail ordinary CI even when compiled
+        # checker integrations are unavailable and correctly report a skip.
+        from mrw.documentary_warrant import _PINNED_CHECKER_FILES
+
+        for relative, _role, expected in _PINNED_CHECKER_FILES:
+            if relative.startswith(".lake/"):
+                continue
+            with self.subTest(path=relative):
+                self.assertEqual(sha256((LEAN_ROOT / relative).read_bytes()).hexdigest(), expected)
+
     def make_artifacts(self) -> tuple[bytes, bytes]:
         call = parse_finalized_model_call(MODEL_CALL_FIXTURE.read_bytes())
         representation = extract_lossless_representation(

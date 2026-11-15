@@ -97,7 +97,7 @@ test('every native entry reaches the preflight barrier before activation, comman
   }
   assert.equal(mutations,0,file);assert.ok(gates>0,file);
  }
- assert.equal(count,31);
+ assert.equal(count,32);
 });
 test('both direct Python test bridges refuse unscoped and outside writes',async t=>{
  const base=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-bridge-guard-'));t.after(()=>fs.rm(base,{recursive:true,force:true}));

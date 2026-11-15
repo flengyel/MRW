@@ -45,7 +45,7 @@ Do not disable every extension: doing so can disable remote resolution. Keep
 the working profile and windows open. The isolated profile does not need GitHub
 sign-in or Settings Sync. Do not substitute the working profile when setup fails.
 
-Supported cases are `isolation`, `sourceTrash`, `activation` and `sourceReturn`. The activation
+Supported cases are `isolation`, `sourceTrash`, `activation`, `sourceReturn` and `warrantInspection`. The activation
 case uses a guarded bootstrap before its run-style test entry. Other older
 cases require explicit fixture/UI migration before they are added to this list.
 `--seed` copies at most 4,000 entries/64 MiB into the new project; symlinks and private
@@ -111,7 +111,7 @@ VS Code's profile management when no longer needed, not by editing its registry.
 
 Focused guard checks cover wrong/missing ownership, working scopes/raw contexts,
 orphaned fixture-owned state, source bindings, inherited settings, symlinks/hardlinks,
-external paths/tabs, dirty buffers and changed restart scopes. All 31 exported activation/run/check entry points are checked with a
+external paths/tabs, dirty buffers and changed restart scopes. All 32 exported activation/run/check entry points are checked with a
 preflight barrier and forbidden-body spies; the guard refusal cases exercise the
 real preflight separately. Both direct Python bridges refuse unscoped/external writes and still
 accept an owned fixture. Retired preparers leave supplied directories unchanged.
@@ -131,3 +131,14 @@ if VS Code restores it behind the working window. The focus wait is bounded.
 Dialog choices and reader messages are scripted; editors, preview, bridge writes and native Memento restart
 are real. No Obsidian vault or authoring command is involved. See the
 [repair report](RELEASE_0_23_41.md) for actual outcomes and limits.
+
+## Documentary inspection case
+
+`--case warrantInspection` reads an already checked synthetic package at
+`<project>/documentary-package`. Generate it with the repository-owned pinned
+checker before launch; do not copy the checker executable into the bounded
+fixture. The native test invokes only Inspect, checks the documentary boundary
+and preservation of the package and an unrelated draft, then clears its owned
+state and closes its window. It needs foreground focus but no authoring
+companion. See the [checker audit](LEAN_CHECKER_DRIFT_20261115.md) for actual
+commands, outcomes and remaining limits.

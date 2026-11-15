@@ -13,8 +13,3 @@ root = "Main"
 [[lean_exe]]
 name = "justification_tests"
 root = "Tests"
-
-# Independent contract pilot: imports core/Std and MRW.Contracts only.
-[[lean_exe]]
-name = "contracts_tests"
-root = "ContractsTests"

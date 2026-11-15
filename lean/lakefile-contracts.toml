@@ -1,0 +1,14 @@
+# Optional contract profile. Keep the documentary checker's lakefile.toml pinned.
+name = "MRWJustification"
+version = "0.1.0"
+buildDir = ".lake/contracts-build"
+defaultTargets = ["contracts_tests"]
+testDriver = "contracts_tests"
+
+[[lean_lib]]
+name = "MRWContracts"
+roots = ["MRW.Contracts.Relocation"]
+
+[[lean_exe]]
+name = "contracts_tests"
+root = "ContractsTests"
