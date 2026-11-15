@@ -143,3 +143,5 @@ for present commands and installation.
 - [Contract pilot mapping](CONTRACT_PILOT.md): proved abstract safety and sampled runtime traces, with explicit assumptions.
 
 - [Saved Source Trash and restoration](SAVED_SOURCE_TRASH.md).
+
+- [0.23.40 saved-source Trash delivery and checks](RELEASE_0_23_40.md).
