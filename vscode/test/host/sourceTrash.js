@@ -22,7 +22,7 @@ async function run(context){
   const {runBridge}=require('../../src/bridge'),{createArtifactStorage}=require('../../src/artifactStorage'),{digest}=require('../../src/navigation');
   const {bridge}=createArtifactStorage({vscode,context,rawBridge:req=>runBridge(context.extensionPath,'python3',req)});
   const req={store:path.join(context.storageUri.fsPath,'outlines-'+digest(fixture)),project_root:fixture};
-  const file=path.join(fixture,'source.txt'),text='Exact disposable source.\n';await fs.writeFile(file,text);
+  const file=path.join(fixture,'source.md'),text='Exact disposable source.\n';await fs.writeFile(file,text);
   const revision=require('node:crypto').createHash('sha256').update(text).digest('hex');
   let saved=await bridge({method:'outline_import_note',...req,path:file,source_revision:revision});
   const id=saved.outline.id;

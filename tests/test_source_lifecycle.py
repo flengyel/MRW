@@ -139,10 +139,12 @@ class SourceLifecycleTests(unittest.TestCase):
 
     def test_managed_blocked_status_write_never_becomes_active_head(self):
         self.move(); head=(self.destination/'HEAD.json').read_bytes()
+        generations=set((self.destination/'versions').iterdir())
         with patch('mrw.source_lifecycle.save_mutable',side_effect=OSError('failed replace')):
             self.assertTrue(self.transition('outline_trash')['blocked'])
         self.assertEqual((self.destination/'HEAD.json').read_bytes(),head)
         self.assertEqual(self.call('outline_trash_list')['outlines'],[])
+        self.assertEqual(set((self.destination/'versions').iterdir()),generations)
         self.assert_retained()
 
     def test_fresh_host_adopts_trash_without_resurrecting_it(self):

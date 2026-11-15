@@ -791,7 +791,9 @@ class ArtifactStorage:
             if method=='send_assistance' and result.get('status')=='not_sent':
                 return stable_paths(result)
             if result.get('blocked') or result.get('investigation',{}).get('blocked'):
-                preserve_candidate = True
+                # Status-only operations reserve no external work. Discard their
+                # own candidate if HEAD and the journal prove it unpublished.
+                preserve_candidate = method not in ('outline_trash', 'outline_restore')
                 return result
             if copying:
                 self.publish_generation(access)
