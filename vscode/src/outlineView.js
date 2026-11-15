@@ -88,8 +88,8 @@ function post(value) {
   api.postMessage(value);
 }
 function controls() {
-  for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || !!deletingDraft || button.dataset.empty === 'true' || (blocked && button.dataset.write === 'true');
-  for (const input of root.querySelectorAll('input,textarea,select')) input.disabled = storageFrozen;
+  for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || !!deletingDraft || button.dataset.empty === 'true' || ((blocked || model?.lifecycle?.state === 'trash') && button.dataset.write === 'true');
+  for (const input of root.querySelectorAll('input,textarea,select')) input.disabled = storageFrozen || model?.lifecycle?.state === 'trash';
   if (deletingDraft) for (const form of root.querySelectorAll('form')) {
     if (form.dataset.draft === deletingDraft || deletingDraft.endsWith(':*') && form.dataset.draft?.startsWith(deletingDraft.slice(0, -1))) {
       for (const input of form.querySelectorAll('input,textarea,select')) input.disabled = true;
@@ -396,6 +396,10 @@ function render() {
       control.addEventListener('click', () => proofViews(hidden));
     }
   }
+  if (model.lifecycle?.state === 'trash') {
+    el('p','This saved source is in Trash. Its retained text, notes and links are kept. Restore it before editing.',root,'warning');
+    button(readingBar,'Restore saved source',{type:'restore_source'},'restore-source');
+  }
   el('p', '', root, 'return-context');
   updateReturnDestination();
   if (reference?.status === 'changed or removed') {
@@ -414,6 +418,7 @@ function render() {
     ['unchanged', 'retained upstream import'].includes(o.source_status) ? 'muted' : 'warning');
   if (reference) el('p', reference.notice, tools, 'muted');
   const toolbar = el('div', undefined, tools, 'toolbar');
+  if (model.lifecycle?.state !== 'trash') button(toolbar,'Delete saved source…',{type:'trash_source'},'trash-source',true).title='Move this MRW saved copy to Trash. Restore keeps its reader notes and retained links. Original files are unchanged.';
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
   if (o.published?.error) el('p', o.published.error, root, 'warning');
   else if (o.published && window.MRWStacks) window.MRWStacks.header(tools, o.published, publishedAction);

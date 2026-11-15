@@ -69,6 +69,15 @@ internal behavior or completion of template prompts. Preserve existing notes,
 drafts, templates and the working window. Do not apply one user's Zettel format
 to every vault. Non-vault folders keep their ordinary VS Code editor route.
 
+## Saved-source Trash
+
+Delete and Restore use the existing artifact coordinator and a separate status
+record. Preserve original bytes, annotations, diagrams and note associations;
+retained links open Trash read-only. Never implicitly restore on import or
+discard a reader draft. See [scope and recovery](docs/SAVED_SOURCE_TRASH.md).
+Do not test deletion on genuine saved research. Publication does not authorize
+installation into or reloading the working window.
+
 ## Saved-source access — 0.23.29
 
 Published and pushed; [delivery checks](docs/RELEASE_0_23_29.md). Not installed into the working window.

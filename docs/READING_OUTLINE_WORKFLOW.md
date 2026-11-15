@@ -253,3 +253,15 @@ the active extension build. [Reading repairs](READING_REPAIRS.md),
 [navigation validation](READING_OUTLINE_VALIDATION.md) and
 [terminology validation](DOCUMENT_TERMINOLOGY_VALIDATION.md) record the checks
 and their original scope.
+
+## Remove a saved copy from the active list
+
+Choose **Sources and references → Delete saved source…**, or expand **Source
+details and tools** in the reader. Save or cancel unsaved reader changes first.
+The confirmation moves only that MRW saved copy to Trash. Its text, reader notes,
+diagrams and links are kept. Original files and vault notes are unchanged.
+
+**Undo** restores it immediately. **Restore saved source…** in Sources and
+references or Open Saved Source restores it after restart. Exact links still
+open a copy in Trash read-only, with a Restore button.
+See [scope and recovery](SAVED_SOURCE_TRASH.md).

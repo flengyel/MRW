@@ -93,6 +93,7 @@ def note_action(request):
             result['selected_links']=[item for item in value['links']
                 if targets[item['reference']]==dict(region=selected['region'],span=selected['span'])]
         return result
+    store.require_active()
     expected = request['revision']
     if expected is not None:
         revision(expected)

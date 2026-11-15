@@ -379,6 +379,7 @@ def commit_import(request):
         raise ValueError('Redirected Kerodon import directory')
     if (store.directory / 'outline.json').exists():
         existing = OutlineStore(str(store.base), str(store.root), store.id)
+        existing.require_active()
         _manifest(existing)
         result = existing.view(); result['reused'] = True
         return result

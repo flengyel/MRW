@@ -583,3 +583,18 @@ test('an explicitly edited author survives refresh with the text draft',()=>{
  let f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');const author=f.all().find(n=>n.name==='author');author.value='Explicit correction';author.listeners.input();f.listeners.input();h.send(v);
  f=h.root.all().find(n=>n.tag==='form'&&n.dataset.draft==='note:other:old');h.button(f,'save-note').listeners.click();assert.equal(h.messages.at(-1).change.author,'Explicit correction');
 });
+
+test('Trash reader retains its passage and offers Restore with editing disabled',()=>{
+ const h=reader(),value=readingModel();value.model.lifecycle={state:'trash',revision:'status'};h.send(value);
+ assert.match(h.root.text(),/in Trash/);
+ const button=action=>h.root.all().find(n=>n.dataset.action===action);
+ assert.equal(button('trash-source'),undefined);assert.ok(button('restore-source'));
+ assert.ok(h.root.querySelectorAll('input,textarea,select').every(n=>n.disabled));
+ assert.ok(h.root.querySelectorAll('button').filter(n=>n.dataset.write==='true').every(n=>n.disabled));
+ button('restore-source').listeners.click();assert.equal(h.messages.at(-1).type,'restore_source');
+});
+
+test('active reader exposes Delete inside source details and keeps notes editable',()=>{
+ const h=reader();h.send(readingModel());const control=h.root.all().find(n=>n.dataset.action==='trash-source');
+ assert.ok(control);assert.equal(control.disabled,false);assert.match(control.title,/Original files are unchanged/);
+});

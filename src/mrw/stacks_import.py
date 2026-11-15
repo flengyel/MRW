@@ -357,6 +357,7 @@ def commit_import(request):
         raise ValueError('Redirected Stacks import directory; no source was published')
     if (store.directory / 'outline.json').exists():
         existing = OutlineStore(str(store.base), str(store.root), store.id)
+        existing.require_active()
         manifest, _ = _manifest(existing)
         if (manifest['commit'] != packet['commit'] or manifest['tag'] != packet['tag']
                 or manifest['files'] != {name: dict(sha256=digest(raw), artifact=manifest['files'][name]['artifact'])

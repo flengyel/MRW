@@ -28,7 +28,9 @@ NLAB='''<html><body><div id="revision"><html><head><script>bad()</script></head>
 
 class SourcePluginTests(unittest.TestCase):
     def setUp(self):
-        temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup);self.base=Path(temp.name)
+        test_root=Path(__file__).resolve().parents[1]/'.codex-work/source-plugin-tests'
+        test_root.mkdir(parents=True,exist_ok=True)
+        temp=tempfile.TemporaryDirectory(dir=test_root);self.addCleanup(temp.cleanup);self.base=Path(temp.name)
         self.root=self.base/'project';self.root.mkdir();self.home=self.base/'private';self.home.mkdir()
         self.store=self.home/('outlines-'+sha256(str(self.root).encode()).hexdigest())
         env=patch.dict(os.environ,MRW_SOURCE_PLUGIN_REGISTRY=str(self.base/'config/registry.json'));env.start();self.addCleanup(env.stop)

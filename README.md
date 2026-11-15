@@ -9,14 +9,13 @@ The extension provides reading, navigation, source retention and annotation
 tools. Resuming work across notes, calculations and proofs, and reconstructing
 compressed AI-generated arguments remain design goals.
 
-**MRW 0.23.39 — Icon help and readable History.**
-+The Lean tutorial explains its icons. History now opens with recorded activity,
-+collapsing repeated startup inventories and empty study measures. Detailed
-+comparisons and original records remain available through export.
-+[History guide](docs/HISTORY_ACTIVITY_VIEW.md).
-+
-+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.39/mrw-0.23.39.vsix)
-· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.39).
+**MRW 0.23.40 — Delete and restore saved sources.**
+Move unwanted saved copies to Trash and restore them with their notes and
+retained links intact. Original documents and vault notes are unchanged.
+[Saved Source Trash](docs/SAVED_SOURCE_TRASH.md).
+
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.40/mrw-0.23.40.vsix)
+· [Release notes and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.40).
 There is no Marketplace listing. The extension ID is `flengyel.mrw`.
 [Installation](docs/INSTALLATION.md) · [User guides](docs/README.md) ·
 [Latest repair report](docs/READING_REPAIRS.md) · [Contributing](CONTRIBUTING.md)
@@ -136,8 +135,8 @@ account. TikZ rendering has separate [tool requirements](docs/TIKZ_WORKFLOW.md).
 
 The recommended setup installs **MRW and MRW Diagnostics** together. In the
 Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
-`mrw-0.23.39.vsix`, then
-[mrw-diagnostics-0.1.0.vsix](https://github.com/flengyel/MRW/releases/download/v0.23.39/mrw-diagnostics-0.1.0.vsix).
+`mrw-0.23.40.vsix`, then
+[mrw-diagnostics-0.1.0.vsix](https://github.com/flengyel/MRW/releases/download/v0.23.40/mrw-diagnostics-0.1.0.vsix).
 Confirm both on the same workspace host. Diagnostics remains optional, and
 weekly reporting is opt-in. Save work
 before a requested reload and retain workspace storage when upgrading. Follow
@@ -149,8 +148,8 @@ repository root:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.39.vsix
-sha256sum vscode/mrw-0.23.39.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.40.vsix
+sha256sum vscode/mrw-0.23.40.vsix
 ```
 
 Packaging copies the shared Python core into the VSIX; it does not publish it.
@@ -302,7 +301,7 @@ installation, supported mathematics, revision evidence and limits.
 
 ## Zotero references
 
-MRW 0.23.39 includes read-only local Zotero lookup, citation insertion and
+MRW 0.23.40 includes read-only local Zotero lookup, citation insertion and
 retained attachment reopening. Existing `[@key]` citations can also render through
 Better BibTeX's read-only exact-key lookup; see the citation setup in the guide.
 Windows Zotero is accessed from WSL through

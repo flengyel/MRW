@@ -223,3 +223,11 @@ backend portability and power-loss certification remain outside this release.
 The capability probe exercises private modes, file/directory synchronization,
 immutable hard-link publication and atomic replacement; it cannot prove hardware,
 driver or synchronization-service behavior under power loss.
+
+## Saved-source Trash
+
+`source-status.json` is a bounded, revision-checked status record inside each
+saved-source directory. It is included in legacy inventory, generation hashes,
+validation, moves and adoption. The file is optional for active earlier sources;
+once created its transition identity is retained through Restore. Trash never
+erases the source payload or annotations. See [controls and recovery](SAVED_SOURCE_TRASH.md).

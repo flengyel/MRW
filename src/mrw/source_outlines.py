@@ -304,6 +304,10 @@ class OutlineStore:
     def revision(self):
         return sha256(self.raw).hexdigest() if self.raw is not None else None
 
+    def require_active(self):
+        from .source_lifecycle import require_active
+        require_active(self)
+
     def expect(self, expected):
         if revision(expected) != self.revision:
             raise ValueError('Saved source changed; reopen it before editing')
@@ -312,6 +316,7 @@ class OutlineStore:
         return self.directory / (('source-' if source else 'artifact-') + revision(digest) + '.bin')
 
     def retain(self, raw, *, source=False):
+        self.require_active()
         destination = self.blob(sha256(raw).hexdigest(), source=source)
         if destination.exists():
             if read_bounded(destination, MAX_SOURCE, 'retained artifact') != raw:
@@ -337,6 +342,7 @@ class OutlineStore:
         return raw
 
     def publish(self, value):
+        self.require_active()
         validate_state(value, self.root, self.id)
         raw = encoded(value)
         if len(raw) > MAX_STATE:
@@ -402,7 +408,8 @@ class OutlineStore:
         reader_configuration(value)
         from .reader_diagrams import enrich as diagram_view
         diagram_view(self, value)
-        return {'outline': value, 'revision': self.revision, 'blocked': False}
+        from .source_lifecycle import status
+        return {'outline': value, 'revision': self.revision, 'blocked': False, 'lifecycle': status(self)[0]}
 
 
 def item_by_id(items, key):
@@ -511,6 +518,7 @@ def import_note(store, source):
         saved = OutlineStore(str(store.base), str(store.root), store.id)
         if saved.state['source']['path'] != str(source.path) or saved.state['source']['revision'] != source.revision:
             raise ValueError('Saved document identity differs; no saved source was replaced')
+        saved.require_active()
         return dict(**saved.view(), reused=True)
     regions = []
     offset = 0
@@ -558,22 +566,26 @@ def outline_action(request):
         return {'path': str(path.resolve()), 'revision': sha256(raw).hexdigest(),
                 'entries': [{k: e[k] for k in ('index', 'label')} for e in goal_entries(raw)]}
     store = OutlineStore(request['store'], request['project_root'], request.get('id'))
-    if method == 'outline_list':
+    if method in ('outline_list', 'outline_trash_list'):
         if not store.base.exists():
             return {'outlines': []}
         result = []
         for entry in sorted(store.base.iterdir()):
             if re.fullmatch(r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}', entry.name) is None:
                 continue
-            if len(result) >= 100:
-                raise ValueError('Saved source list exceeds its 100-source limit')
             try:
                 saved = OutlineStore(str(store.base), str(store.root), entry.name)
             except FileNotFoundError:
                 # An interrupted create may retain a source without publishing
                 # its view pointer. It is not an existing editable outline.
                 continue
-            result.append(dict(id=entry.name, title=saved.state['source']['bibliography']['title'],
+            from .source_lifecycle import status
+            lifecycle = status(saved)[0]
+            if (lifecycle['state'] == 'trash') != (method == 'outline_trash_list'):
+                continue
+            if len(result) >= 100:
+                raise ValueError('Saved source list exceeds its 100-source limit')
+            result.append(dict(id=entry.name, lifecycle=lifecycle, outline_revision=saved.revision, title=saved.state['source']['bibliography']['title'],
                                path=saved.state['source']['path'], revision=saved.state['source']['revision'],
                                locator=saved.state['source']['bibliography']['locator'],
                                upstream_revision=saved.state['source']['bibliography']['revision'],

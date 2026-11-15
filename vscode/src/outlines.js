@@ -87,6 +87,15 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       }
     },
   });
+  async function freezeReader(c) {
+    return new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>{c.storageCheck=undefined;reject(new Error('Reader did not confirm its draft state. Keep its text and try again.'));},5000);
+      c.storageCheck=value=>{clearTimeout(timer);c.storageCheck=undefined;resolve(value);};
+      c.panel.webview.postMessage({type:'storageCheck'});
+    });
+  }
+  const lifecycle=require('./sourceLifecycle').sourceLifecycle({vscode,bridge,panels,refresh,freeze:freezeReader,storage,register,locked,choice:savedSourceChoice,
+    block:location=>blockedStores.add(location.store),writable:location=>writable({store:location.store})});
   const current = () => {
     const controller = panels.get(active);
     if (!controller) throw new Error('Retain a document as a source or open a saved source first.');
@@ -95,6 +104,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   const request = (c, method, extra = {}) => ({ method, store: c.store, project_root: c.root,
     id: c.result.outline.id, revision: c.result.revision, ...extra });
   const writable = c => {
+    if (c.result?.lifecycle?.state === 'trash') throw new Error('Saved source is in Trash; restore it before editing.');
     if (blockedStores.has(c.store)) throw new Error('Saved source writes are blocked after a failed or uncertain publication. '
       + 'Keep unsaved annotation text and reload the extension host before further private writes.');
   };
@@ -245,7 +255,10 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     try {
       await locked(async () => {
         active = c.result.outline.id;
-        if (value.type === 'ask_ai') await askPassage(c, value);
+        if (c.result.lifecycle?.state === 'trash' && ['edit','link_note','continue_annotation','delete_annotation','associate_note','manage_notes','render_diagram'].includes(value.type)) writable(c);
+        if (value.type === 'trash_source') await lifecycle.trash(c);
+        else if(value.type === 'restore_source') await lifecycle.restore(c);
+        else if (value.type === 'ask_ai') await askPassage(c, value);
         else if(value.type==='copy_companion')await askPassage(c,{...value,companion:true});
         else if (value.type === 'cancel_note') {
           if (typeof value.draft !== 'string' || !value.draft.startsWith('note:') || value.draft.length > 256 || !Number.isSafeInteger(value.request) || value.request < 1) throw Error('Invalid note draft.');
@@ -781,13 +794,13 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   register('mrw.openOutline', () => locked(async () => {
     const { store, root } = await storage(vscode.window.activeTextEditor);
     const result = await bridge({ method: 'outline_list', store, project_root: root });
-    if (!result.outlines.length) throw new Error('No saved sources exist for this project.');
-    const picked = await vscode.window.showQuickPick(result.outlines.map(savedSourceChoice), {
+    const picked = await vscode.window.showQuickPick([...result.outlines.map(savedSourceChoice),{label:'Restore saved source…',description:'Open Saved Source Trash',restore:true}], {
       title: 'Saved sources — ' + path.basename(root),
       placeHolder: 'Find a title, author or passage tag (for example, Stacks or 08ZH)',
       matchOnDescription: true, matchOnDetail: true,
     });
     if (!picked) return;
+    if (picked.restore) return lifecycle.pickRestore({store,root});
     const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: picked.id });
     return (await display(loaded, store, root)).result;
   }));

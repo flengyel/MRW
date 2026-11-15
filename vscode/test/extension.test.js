@@ -360,6 +360,7 @@ test('mark survives activation and return rejects source changes without moving 
   h.api.window.activeTextEditor.selection = new Selection(new Position(0, 0), new Position(0, 6));
   await h.commands.get('mrw.mark')();
   assert.equal(h.state.size, 1); assert.equal(h.errors.length, 0);
+  const returnMarker = structuredClone([...h.state][0]);
   const resumed = await harness(root, h.state);
   await resumed.commands.get('mrw.return')();
   assert.equal(resumed.shown[0].uri.fsPath, source);
@@ -369,7 +370,7 @@ test('mark survives activation and return rejects source changes without moving 
   await resumed.commands.get('mrw.return')();
   assert.equal(resumed.shown.length, 1);
   assert.match(resumed.errors[0], /changed or moved/);
-  assert.equal(resumed.state.size, 1);
+  assert.deepEqual([...resumed.state].find(([key])=>key.startsWith('mrw.return.v1.')),returnMarker);
 });
 
 test('dirty source cannot replace an existing return marker', async t => {
@@ -1601,13 +1602,15 @@ test('reading navigator derives live Markdown, follows two sources, pins returns
   model = await restored.commands.get('mrw.openReadingOutline')();
   assert.equal(model.all.length, 7);
   assert.equal(restoredDoc.getText(restored.api.window.activeTextEditor.selection), references[2].markdown);
+  assert.deepEqual(restored.errors, [], 'ordinary navigation completes without a scope error');
   const beforeWrong = restored.requests.length;
   restored.api.workspace.getWorkspaceFolder = () => undefined;
   restored.api.workspace.workspaceFolders = []; // No workspace or explicitly selected external scope remains.
   await restored.commands.get('mrw.returnToReadingOutline')(); assert.match(restored.errors.pop(), /scope/);
   assert.equal(restored.requests.length, beforeWrong);
   assert.equal(await fs.readFile(file, 'utf8'), original);
-  assert.deepEqual(h.errors, []); assert.deepEqual(restored.errors, []);
+  assert.deepEqual(h.errors, []);
+  assert.ok(restored.errors.every(message=>/outside the selected scope/.test(message)), 'any queued refresh must also reject the deliberately removed scope');
 });
 
 test('failed source navigation during unsaved edits keeps the previous successful return occurrence', async t => {
@@ -2502,4 +2505,20 @@ test('reader Cancel uses native discard confirmation and never publishes a saved
   h.endings.push('Discard');await panel.receive({type:'cancel_note',draft:'note:overview:new',request:2});
   assert.equal(panel.webview.messages.findLast(m=>m.type==='noteCancel').discard,true);
   assert.equal(h.requests.length,before);
+});
+
+test('Open Saved Source reaches Trash when no active copies remain',async t=>{
+ const root=await temporary(t),h=await harness(root),file=path.join(root,'trash-fixture.md');
+ await fs.writeFile(file,'Retained fixture.\n');
+ h.focus(h.editor(h.document(file,await fs.readFile(file,'utf8'))));
+ await h.commands.get('mrw.createOutline')();
+ const panel=h.panels[0],model=panel.webview.messages.filter(m=>m.type==='outline').at(-1).model;
+ const req=h.requests.find(r=>r.method==='outline_create');
+ await runBridge(path.resolve(__dirname,'..'),'python3',{method:'outline_trash',store:req.store,project_root:req.project_root,id:model.outline.id,revision:model.revision,status_revision:null});
+ const originalPick=h.api.window.showQuickPick;let count=0;
+ h.api.window.showQuickPick=async rows=>{rows=await rows;if(count++===0){assert.equal(rows.length,1);assert.equal(rows[0].restore,true);}return rows[0];};
+ await h.commands.get('mrw.openOutline')();
+ const loaded=await runBridge(path.resolve(__dirname,'..'),'python3',{method:'outline_load',store:req.store,project_root:req.project_root,id:model.outline.id});
+ h.api.window.showQuickPick=originalPick;
+ assert.equal(loaded.lifecycle.state,'active');assert.equal(loaded.revision,model.revision);assert.equal(h.errors.length,0);
 });

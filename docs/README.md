@@ -141,3 +141,5 @@ for present commands and installation.
 - [Current implementation evidence](MAINTENANCE_20261114.md): citations, note associations, grouped tools, diagnostics and contract pilot.
 - [Optional diagnostics companion](../diagnostics/README.md): install separately; core remains usable without it.
 - [Contract pilot mapping](CONTRACT_PILOT.md): proved abstract safety and sampled runtime traces, with explicit assumptions.
+
+- [Saved Source Trash and restoration](SAVED_SOURCE_TRASH.md).

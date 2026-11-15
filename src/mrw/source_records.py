@@ -165,6 +165,7 @@ def commit_import(request):
     store.id=str(uuid5(NAMESPACE_URL,str(store.root)+'\0'+key));store.directory=store.base/store.id
     if (store.directory/'outline.json').exists():
         existing=OutlineStore(str(store.base),str(store.root),store.id)
+        existing.require_active()
         from .outline_references import published_identity
         if existing.source().revision!=source.revision or published_identity(existing)!=identifier:raise ValueError('Existing source identity conflicts; no saved work was overwritten')
         result=existing.view();result['reused']=True;return result

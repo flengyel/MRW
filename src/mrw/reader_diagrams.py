@@ -318,6 +318,7 @@ def enrich(store, view):
 def diagram_action(request):
     store = OutlineStore(request['store'], request['project_root'], request['id'])
     store.expect(request['revision'])
+    store.require_active()
     annotation = identity(request['annotation']); expected = revision(request['code'])
     notes = store.state['annotations'] + [n for r in store.state['regions'] for n in r['annotations']]
     note = next((n for n in notes if n['id'] == annotation), None)

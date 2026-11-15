@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.39",
+  "version": "0.23.40",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -689,6 +689,16 @@
         "command": "mrw.refreshCitations",
         "title": "Refresh Citation Preview",
         "category": "MRW"
+      },
+      {
+        "command": "mrw.deleteSavedSource",
+        "title": "Delete Saved Source\u2026",
+        "category": "MRW"
+      },
+      {
+        "command": "mrw.restoreSavedSource",
+        "title": "Restore Saved Source\u2026",
+        "category": "MRW"
       }
     ],
     "views": {
@@ -1091,7 +1101,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
+        "contents": "[Open Document\u2026](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source\u2026](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents\u2026](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) \u00b7 [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) \u00b7 [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) \u00b7 [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
       },
       {
         "view": "mrw.readingOutline",
@@ -1102,7 +1112,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.39",
+          "title": "MRW 0.23.40",
           "icon": "media/mrw.svg"
         }
       ]
@@ -1119,7 +1129,7 @@
     "bundle-core": "python3 scripts/bundle-core.py",
     "vscode:prepublish": "npm run bundle-core",
     "test": "node --test test/*.test.js",
-    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js && node --check src/historyRecords.js && node --check src/sharedHistory.js && node --check src/historyUsage.js && node --check src/historyCommands.js && node --check src/zotero.js && node --check src/zoteroApi.js && node --check src/zoteroRecords.js && node --check src/workspaceSetup.js && node --check src/workspaceMove.js && node --check src/workspaceMoveHost.js && node --check src/workspacePaths.js && node --check src/notebookResults.js && node --check src/recentNotes.js && node --check src/obsidianNotes.js && node --check src/annotationContinuation.js && node --check src/citations.js && node --check src/featureInspection.js && node --check src/inspection.js && node --check src/companionTools.js && node --check src/citationZotero.js && node --check src/historyActivity.js",
+    "check": "node --check src/extension.js && node --check src/bridge.js && node --check src/navigation.js && node --check src/assistance.js && node --check src/investigation.js && node --check src/outlines.js && node --check src/outlineView.js && node --check src/outlineReferences.js && node --check src/companionLinks.js && node --check src/artifactStorage.js && node --check src/stacksView.js && node --check src/annotationView.js && node --check src/readingMarkdown.js && node --check src/readingOutline.js && node --check src/proofGraph.js && node --check src/proofGraphView.js && node --check src/proofGraphMap.js && node --check src/proofStudy.js && node --check src/proofStudyView.js && node --check src/studyHistory.js && node --check src/studyScheduler.js && node --check src/studyModel.js && node --check src/activeStudy.js && node --check src/activeStudyView.js && node --check src/studyHelp.js && node --check src/studyExample.js && node --check src/studyEvidence.js && node --check src/documentPresentation.js && node --check src/wikiLinks.js && node --check src/noteRefresh.js && node --check src/noteFiles.js && node --check src/noteIdentity.js && node --check src/documents.js && node --check src/documentLinks.js && node --check src/tutorial.js && node --check src/sourceIdentifiers.js && node --check src/noteLinks.js && node --check src/documentPicker.js && node --check src/studyDocument.js && node --check src/chooserFiles.js && node --check src/documentMath.js && node --check src/sourceReader.js && node --check src/sourcePlugins.js && node --check src/sourceRendering.js && node --check src/lessonPacks.js && node --check src/leanStudy.js && node --check src/studyFiles.js && node --check src/studyLifecycle.js && node --check src/historyRecords.js && node --check src/sharedHistory.js && node --check src/historyUsage.js && node --check src/historyCommands.js && node --check src/zotero.js && node --check src/zoteroApi.js && node --check src/zoteroRecords.js && node --check src/workspaceSetup.js && node --check src/workspaceMove.js && node --check src/workspaceMoveHost.js && node --check src/workspacePaths.js && node --check src/notebookResults.js && node --check src/recentNotes.js && node --check src/obsidianNotes.js && node --check src/annotationContinuation.js && node --check src/citations.js && node --check src/featureInspection.js && node --check src/inspection.js && node --check src/companionTools.js && node --check src/citationZotero.js && node --check src/historyActivity.js && node --check src/sourceLifecycle.js",
     "package": "vsce package --no-dependencies --baseContentUrl https://github.com/flengyel/MRW/blob/main/vscode",
     "verify-vsix": "python3 scripts/verify-vsix.py"
   },

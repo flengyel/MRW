@@ -100,6 +100,9 @@ def _dispatch(request):
         'outline_list': ({'store', 'project_root'}, set()),
         'outline_create': ({'store', 'project_root', 'path', 'source_revision'}, set()),
         'outline_import_note': ({'store', 'project_root', 'path', 'source_revision'}, set()),
+        'outline_trash_list': ({'store', 'project_root'}, set()),
+        'outline_trash': ({'store', 'project_root', 'id', 'revision', 'status_revision'}, set()),
+        'outline_restore': ({'store', 'project_root', 'id', 'revision', 'status_revision'}, set()),
         'outline_load': ({'store', 'project_root', 'id'}, set()),
         'outline_reference': ({'store', 'project_root', 'id', 'revision', 'region'}, set()),
         'outline_reference_identities': ({'store', 'project_root', 'references'}, set()),
@@ -159,6 +162,9 @@ def _dispatch(request):
         return reference_action(request)
     if method == 'outline_assistance_context':
         return assistance_context_action(request)
+    if method in ('outline_trash', 'outline_restore'):
+        from .source_lifecycle import lifecycle_action
+        return lifecycle_action(request)
     if method in ('outline_notes', 'outline_update_note', 'outline_continue_note'):
         return note_action(request)
     if method.startswith(('source_plugins_', 'outline_source_')):
