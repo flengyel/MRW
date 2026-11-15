@@ -36,9 +36,16 @@ its open buffer. An edited exact destination is reported rather than replaced.
 
 Close/reopen MRW, choose **Justification…** and select the saved result. Reopening
 reads the immutable result, exact sources and recorded checker identity; it
-requires no Lean build, process or network connection. Search failures retain
-the pending request for an explicit retry with the same ID. A retry first
-looks for an already saved result, including after an uncertain save.
+requires no Lean build, process or network connection. Before a search starts,
+MRW saves its exact request, source snapshots and originating document location.
+If the search fails or the reader closes, choose **Unfinished: …** in the same
+picker. It reopens that saved context without building or checking; retry is
+explicit and keeps the request ID. A completed result replaces the unfinished
+picker entry, including after an uncertain save. Earlier context bytes remain.
+If the initial context save fails, Lean is not started; keep the reader open
+and retry the save. Saved workspace locations are relative; notes-folder
+locations keep their original root. An unavailable or edited exact destination
+is reported rather than guessed.
 
 **Open an explicit context file…** accepts the existing formula/admission
 vocabulary with exact source snapshots and scoped attribution. This is a

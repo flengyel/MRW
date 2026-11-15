@@ -4,6 +4,7 @@ from pathlib import Path
 
 CURRENT = ContextVar('mrw_artifact_context', default=None)
 COORDINATED = ContextVar('mrw_artifact_coordination', default=False)
+PUBLICATION_HOMES = ContextVar('mrw_publication_homes', default=frozenset())
 
 
 def read_location(path):
@@ -81,11 +82,17 @@ def publication_guard(path):
                 raise ValueError('Open this artifact directory through MRW before modifying its saved records')
     home = legacy_home(path)
     if home is not None:
+        key=str(home.resolve())
+        if key in PUBLICATION_HOMES.get():
+            yield
+            return
         from .mutable_files import file_lock
         runtime = home/'artifact-runtime'
         with file_lock(runtime/'workspace-store', runtime/'coordination'):
             if (runtime/'active-store.json').exists() or (runtime/'transaction.json').exists():
                 raise ValueError('Saved artifact location moved or is moving; use the current MRW artifact binding, not this retired locator')
-            yield
+            token=PUBLICATION_HOMES.set(PUBLICATION_HOMES.get() | {key})
+            try:yield
+            finally:PUBLICATION_HOMES.reset(token)
         return
     yield

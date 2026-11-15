@@ -1,6 +1,7 @@
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {digest}=require('./navigation'),{outlineHtml}=require('./outlines');
+const locations=require('./workspacePaths');
 const HEX=/^[a-f0-9]{64}$/;
 function goalLabel(request){const goal=request.goal;return goal?.[0]==='atom'?request.claims.find(c=>c.id===goal[1].id)?.display_name||'Selected claim':'Selected claim';}
 function registerJustification({vscode,context,register,bridge,rawBridge,projectRoot,reading,show,artifactClients,recorder}){
@@ -19,7 +20,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
  function send(c){if(c.disposed)return;void c.panel.webview.postMessage({type:'grounds',generation:++c.generation,
   request:requestOf(c),result:c.value?.record.response||null,revision:c.value?.revision||null,
   verification:c.value?.record.verification||null,origin:!!c.origin,busy:c.busy,error:c.error||'',
-  pending:!!c.request,title:goalLabel(requestOf(c))});}
+  pending:!!c.request,pendingSaved:!!c.intent,title:goalLabel(requestOf(c))});}
  async function progress(title,action){
   const controller=new AbortController();
   return vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title,cancellable:true},async(_p,token)=>{
@@ -32,6 +33,9 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
  async function run(c){
   if(!c.request)throw Error('Choose an explicit context before searching.');
   const request=c.request;
+  const notes=vscode.workspace.getConfiguration?.('mrw').get('notesFolder','')||'';
+  const staged=await call(c,'stage',{request,origin:locations.encode(c.origin||null,c.root,notes)});
+  c.intent=staged.intent;c.origin=locations.decode(staged.origin,c.root);send(c);
   const result=await progress('MRW: checking routes under the displayed admissions',options=>call(c,'run',{request,cache:cache()},options));
   if(!c.disposed){c.value=result;c.request=null;c.error='';c.panel.title='Grounds: '+goalLabel(result.effective);}
  }
@@ -63,19 +67,19 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
     const confirm=await vscode.window.showWarningMessage('Withdraw “'+choice.label+'” and search a successor context? Earlier routes and all source text remain saved.',{modal:true},'Search successor');
     if(confirm!=='Search successor'||c.value!==observed||c.disposed)return;
     const prepared=await call(c,'successor',{revision:observed.revision,removed:[choice.admission],request_id:crypto.randomUUID()});
-    c.request=prepared.request;c.value=null;send(c);await run(c);
+    c.request=prepared.request;c.value=null;c.intent=null;send(c);await run(c);
    }else if(value.type==='cancel_successor'){
     const ref=c.request?.withdrawal?.predecessor;
     if(!ref)throw Error('No successor is pending.');
     c.value=await call(c,'read',{revision:ref});c.request=null;
    }
   }catch(e){c.error=e.message;reportError(e);}
-  finally{c.busy=false;send(c);}
+  finally{c.busy=false;if(c.disposed)views.delete(c);send(c);}
  }
- async function display(scope,request,result,origin){
+ async function display(scope,request,result,origin,intent=null){
   const panel=vscode.window.createWebviewPanel('mrw.justification','Grounds: '+goalLabel(result?.effective||request),vscode.ViewColumn.Active||vscode.ViewColumn.One,{enableScripts:true,retainContextWhenHidden:true,localResourceRoots:[]});
-  const c={...scope,panel,request,value:result,origin,busy:false,generation:0,disposed:false};current=c;views.add(c);
-  context.subscriptions.push(panel,panel.onDidDispose(()=>{c.disposed=true;views.delete(c);if(current===c)current=undefined;}),
+  const c={...scope,panel,request,value:result,origin,intent,busy:false,generation:0,disposed:false};current=c;views.add(c);
+  context.subscriptions.push(panel,panel.onDidDispose(()=>{c.disposed=true;if(!c.busy)views.delete(c);if(current===c)current=undefined;}),
    panel.webview.onDidReceiveMessage(value=>{const action=()=>message(c,value);const known=['search','build','return','record','predecessor','withdraw','cancel_successor'];void (recorder?.operations&&known.includes(value?.type)?recorder.operations.run('justification.'+value.type,action):action());}),panel.onDidChangeViewState(event=>{if(event.webviewPanel.visible)send(c);}));
   try{
    const support=[];
@@ -90,14 +94,20 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
   const generation=++opening,editor=vscode.window.activeTextEditor;
   const origin=editor?.document.uri.scheme==='file'&&editor.document.languageId==='markdown'?{uri:editor.document.uri.toString(),revision:digest(editor.document.getText()),start:editor.document.offsetAt(editor.selection.start),end:editor.document.offsetAt(editor.selection.end)}:reading.currentLocation();
   const scope=await project();
-  const listed=await call(scope,'list');
+  const [listed,unfinished]=await Promise.all([call(scope,'list'),call(scope,'pending')]);
   const choice=await vscode.window.showQuickPick([
+    ...unfinished.pending.map(r=>({label:'Unfinished: '+r.goal,description:'Saved context · search requires an explicit action',intent:r.intent,requestId:r.request_id})),
     ...listed.records.slice().reverse().map(r=>({label:r.goal,description:r.checked+' · '+r.routes+' route(s)',detail:r.predecessor?'Successor context':'Initial context',revision:r.revision})),
     {label:'Explore Euclid’s lemma',kind:'example',description:'Two supplied arguments; arithmetic checking remains separate'},
     {label:'Open an explicit context file…',kind:'file',description:'Reviewed source snapshots and scoped admissions; no registration form'}],
     {title:'Justification',placeHolder:'Open saved grounds or inspect the Euclid example',matchOnDescription:true});
   if(!choice||generation!==opening)return;
-  if(choice.revision){const result=await call(scope,'read',{revision:choice.revision});if(generation===opening)return display(scope,null,result,origin);return;}
+  if(choice.intent){
+   const saved=await call(scope,'resume',{intent:choice.intent});if(generation!==opening)return;
+   const destination=locations.decode(saved.origin,scope.root);
+   return display(scope,saved.request||null,saved.result||null,destination,saved.intent||null);
+  }
+  if(choice.revision){const result=await call(scope,'read',{revision:choice.revision});if(generation===opening)return display(scope,null,result,Object.hasOwn(result,'origin')?locations.decode(result.origin,scope.root):origin);return;}
   let prepared;
   if(choice.kind==='example')prepared=await bridge({method:'route_example',path:path.join(context.extensionPath,'media/euclid-grounds.md')});
   else{

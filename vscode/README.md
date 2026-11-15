@@ -5,9 +5,9 @@ Open a document in place, follow its references, write while reading and return
 to the argument. It retains exact source passages and results while companion
 applications keep their editing and execution workflows.
 
-**MRW 0.23.42 — Retained justification routes.**
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.42/mrw-0.23.42.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.42)
+**MRW 0.23.43 — Resume unfinished justification.**
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-0.23.43.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.43)
 · [Installation](../docs/INSTALLATION.md).
 The extension ID is `flengyel.mrw`. GitHub updates require installing a newer
 VSIX; there is no Marketplace listing. MRW remains experimental.
@@ -69,7 +69,9 @@ the comparison.
 **Withdraw a ground…** checks a successor context while preserving the earlier
 context and certificates. Reopen either result through **Justification…** after
 a restart; reopening performs no new check. Failed searches retain their exact
-pending request for an explicit retry.
+pending request for an explicit retry. **Unfinished: …** entries recover it
+after closure or restart, including its original Return location. A failed
+initial context save starts no Lean process.
 
 For checking, expand **Local checker setup → Build local checker**. It uses an
 already installed Lean 4.32.2 toolchain and downloads nothing. The current
@@ -111,9 +113,9 @@ store and a trusted file workspace.
 
 ## Package and install a VSIX
 
-Install `mrw-0.23.42.vsix` with **Extensions: Install from VSIX…** in the intended
+Install `mrw-0.23.43.vsix` with **Extensions: Install from VSIX…** in the intended
 workspace host. The recommended optional companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.42/mrw-diagnostics-0.1.0.vsix).
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-diagnostics-0.1.0.vsix).
 Its weekly reports are opt-in. Save work before a requested reload and retain
 workspace storage when upgrading.
 
@@ -122,8 +124,8 @@ To build from the repository root, use Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.42.vsix
-sha256sum vscode/mrw-0.23.42.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.43.vsix
+sha256sum vscode/mrw-0.23.43.vsix
 ```
 
 Packaging bundles the Python core and pinned Lean source assets, not a compiled

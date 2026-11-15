@@ -325,6 +325,12 @@ ground…** checks a successor while preserving the earlier context and its
 certificates. Reopen saved results through **Justification…** after a restart;
 **Open earlier context** reads the predecessor without another Lean run.
 
+Search saves its exact context before Lean starts. After a failure or closure,
+choose **Unfinished: …** in **Justification…** to reopen it. Reopening performs
+no check; choose Search to retry. A completed result replaces the unfinished
+entry. If saving the context fails, keep the view open and retry; Lean has not
+started.
+
 This checks the admitted composition, not the two arithmetic proofs. An empty
 bounded search is not a disproof. The
 [justification guide](https://github.com/flengyel/MRW/blob/main/docs/JUSTIFICATION_WORKFLOW.md)

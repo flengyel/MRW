@@ -222,6 +222,9 @@ def list_records(store, project_root):
     if len(files)>256: raise ValueError('Retained route listing exceeds its entry limit')
     total=0;count=0
     for p in sorted(files):
+        if p.name=='pending':
+            if p.is_symlink() or not p.is_dir():raise ValueError('Invalid unfinished context directory')
+            continue
         # A stopped private publisher may leave an unpublished staging file.
         # Preserve it, but never present partial bytes as a checked result.
         metadata=p.lstat()
@@ -273,7 +276,8 @@ def run(store, project_root, request, checker):
                         request=request,response=response,verification=verification)
             raw=encode(record)
             if len(raw)>MAX_RECORD: raise ValueError('Retained route result exceeds 8 MiB')
-            if sum(p.stat().st_size for p in folder.glob('*.json'))+len(raw)>64*1024*1024:
+            from .route_pending import storage_size
+            if storage_size(folder)+len(raw)>64*1024*1024:
                 raise ValueError('Retained route store reached its 64-MiB limit; existing work is preserved')
             revision=digest(raw);target=folder/(revision+'.json')
             persist_private_new(target,raw,error_type=ValueError)
@@ -342,12 +346,25 @@ def action(request):
     store=request['store'];project=Path(request['project_root'])
     if not project.is_absolute() or project.resolve()!=project: raise ValueError('Use a canonical workspace project')
     project=str(project)
-    if method=='route_run':return run(store,project,request['request'],request['cache'])
+    if method=='route_stage':
+        from .route_pending import stage
+        return stage(store,project,request['request'],request['origin'])
+    if method=='route_pending':
+        from .route_pending import catalog
+        return dict(pending=[dict(intent=revision,goal=goal_label(item['request']),request_id=item['request']['id'])
+            for revision,item,result in catalog(store,project) if result is None])
+    if method=='route_resume':
+        from .route_pending import resume
+        return resume(store,project,request['intent'])
+    if method=='route_run':
+        from .route_pending import with_origin
+        return with_origin(store,project,run(store,project,request['request'],request['cache']))
     if method=='route_successor':return dict(request=successor(store,project,request['revision'],request['removed'],request['request_id']))
     if method=='route_read':
         record=read_record(store,request['revision'])
         if record['project_root']!=project: raise ValueError('Retained result belongs to another workspace project')
-        return view(request['revision'],record)
+        from .route_pending import with_origin
+        return with_origin(store,project,view(request['revision'],record))
     if method=='route_list':
         return dict(records=[dict(revision=revision,goal=goal_label(record['request']),
             checked=record['verification']['checked_at'],context=record['response']['context']['id'],

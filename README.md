@@ -10,9 +10,9 @@ explicitly admitted reasons compose, preserves alternative routes and shows
 what remains after an admission is withdrawn. Its scope is described below;
 mathematical judgment remains with the reader.
 
-**MRW 0.23.42 — Retained justification routes.**
-[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.42/mrw-0.23.42.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.42)
+**MRW 0.23.43 — Resume unfinished justification.**
+[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-0.23.43.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.43)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md).
 The extension ID is `flengyel.mrw`. Distribution is through GitHub VSIX files;
 there is no Marketplace listing. MRW remains experimental.
@@ -86,6 +86,8 @@ passage; **Back to routes** restores the comparison.
 **Withdraw a ground…** checks a successor context. The earlier context,
 certificates and sources remain saved. Reopen either context through
 **Justification…** after a restart; reopening performs no new Lean run.
+Unfinished searches reopen from the same picker with their exact saved context
+and Return location; retry remains explicit.
 
 This bounded checker verifies the admitted composition, not the arithmetic
 proofs or an informal paper–Lean correspondence. General proof search and
@@ -155,8 +157,8 @@ separate x86-64 justification runtime. Native Windows/macOS backends and
 Windows-backed private artifact storage are unqualified.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
-`mrw-0.23.42.vsix`. The recommended companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.42/mrw-diagnostics-0.1.0.vsix);
+`mrw-0.23.43.vsix`. The recommended companion is
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-diagnostics-0.1.0.vsix);
 it is optional, and weekly reporting is opt-in. Save work before a requested
 reload and retain workspace storage when upgrading. GitHub updates require
 installing the newer VSIX. [Installation guide](docs/INSTALLATION.md).

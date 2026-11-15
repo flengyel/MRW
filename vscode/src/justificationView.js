@@ -20,7 +20,9 @@
   const goal=current.request.goal,claim=goal[0]==='atom'?current.request.claims.find(c=>c.id===goal[1].id):null;
   if(claim)el('p',claim.assertion);
   el('p','This engine checks the stated composition of grounds; it does not check the arithmetic proofs or a paper–Lean correspondence.').className='muted';
-  if(current.pending){button(current.request.withdrawal?'Search / retry successor':'Search under these admissions','search');
+  if(current.pending){
+   el('p',current.pendingSaved?'Unfinished context saved. Reopen it through Justification; search runs only when requested.':current.error?'Saving has not been confirmed. Keep this view open and retry.':'Search saves this context before starting Lean.').className='muted';
+   button(current.request.withdrawal?'Search / retry successor':'Search under these admissions','search');
    if(current.request.withdrawal)button('Keep earlier context','cancel_successor');}
   else{
    if(current.request.context.admissions.length)button('Withdraw a ground…','withdraw');
@@ -48,7 +50,7 @@
    el('h3',a.id.replaceAll('-',' '),row);el('p',a.rationale,row);el('p','Scope: '+a.scope,row);el('p','Supplied by '+a.admitted_by.id+' · '+a.at,row);a.basis_refs.forEach(ref=>showSource(ref.id,row));});
   if(current.pending)assumptions.open=true;
   const setup=el('details');el('summary','Local checker setup',setup);el('p','Build MRW’s checker using an already installed Lean 4.32.2 toolchain on Linux/WSL. No download or build occurs when opening this view.',setup);button('Build local checker','build',setup);
-  if(current.busy)el('p','Working… Your context and source text are retained.').setAttribute('role','status');
+  if(current.busy)el('p',current.pendingSaved?'Working… The exact unfinished context is saved.':'Saving the exact context before checking… Keep this view open until confirmed.').setAttribute('role','status');
   if(current.error)el('p',current.error).className='warning';
  }
  window.addEventListener('message',event=>{if(event.data?.type!=='grounds')return;
