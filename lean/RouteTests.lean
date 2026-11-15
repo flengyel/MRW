@@ -130,6 +130,26 @@ def main : IO Unit := do
     | .ok value => pure value
   checks := checks ++ [← check "existing range-lifting warrant discovered from its admissions" (
     (forGoal appendix AppendixA.FM).any (fun r => r.term == AppendixA.conclusionTerm))]
+  -- Opaque mathematical assertions: this checks admitted composition, not arithmetic.
+  let euclid := atom "euclid-prime-divisor-lemma"
+  let bezout := atom "bezout-coprime-integers"
+  let factorization := atom "unique-prime-factorization-positive-integers"
+  let euclidContext ← makeContext [
+    ⟨"bezout-theorem", reason "b" bezout⟩,
+    ⟨"bezout-proof-bridge", reason "c" (.implication bezout euclid)⟩,
+    ⟨"factorization-theorem", reason "u" factorization⟩,
+    ⟨"factorization-proof-bridge", reason "d" (.implication factorization euclid)⟩]
+  let euclidRoutes ← runSearch euclidContext euclid
+  checks := checks ++ [← check "Euclid example has two checked conditional routes" (
+    (forGoal euclidRoutes euclid).length == 2)]
+  let euclidSuccessor ← match withdraw euclidContext "euclid-successor" ["bezout-proof-bridge"] with
+    | .error message => throw (IO.userError message)
+    | .ok value => pure value
+  let euclidAfter ← runSearch euclidSuccessor euclid
+  checks := checks ++ [← check "factorization route survives Bezout bridge withdrawal" (
+    (forGoal euclidAfter euclid).length == 1 &&
+    (forGoal euclidAfter euclid).all (fun r => admissionIds r.certificate ==
+      ["factorization-proof-bridge", "factorization-theorem"]))]
   IO.println ((Lean.Json.mkObj [("fixture", .str "synthetic alternative grounds"),
     ("checks", .arr checks.toArray), ("original_routes", .num routes.length),
     ("successor_routes", .num (forGoal after C).length)]).pretty)

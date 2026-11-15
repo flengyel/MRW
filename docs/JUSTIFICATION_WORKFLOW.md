@@ -12,7 +12,18 @@ alternative composed reasons from explicit admissions and rechecks a successor
 context after withdrawal. Its integration with retained records and the reader
 remains pending; it is not a complete proof search.
 
-## Example: using a formal proof in a manuscript
+## Example: two proofs of Euclid's lemma
+
+If a prime divides a product, it divides one of the factors. One proof uses
+Bézout's identity; another uses unique prime factorization. The
+[walkthrough](JUSTIFICATION_EUCLID_EXAMPLE.md) gives both proofs and shows their
+distinct grounds. Withdrawing one bridge leaves the other recorded route
+available, while preserving the earlier context. The present Lean tests check
+the conditional composition of those grounds, not the arithmetic proofs.
+
+<a id="example-using-a-formal-proof-in-a-manuscript"></a>
+
+## Existing regression: a range-lifting warrant
 
 Suppose a manuscript lemma is supported by a theorem checked in Lean. Three
 grounds need to remain visible:
@@ -25,8 +36,8 @@ grounds need to remain visible:
 
 The engine checks how these grounds combine to support the manuscript claim
 under those admissions. Its retained account shows the claim, the route,
-the assumptions and the source revisions. This is the existing Appendix A
-example: the range-lifting lemma `lem:range-lifting-pullback-section`, linked to
+the assumptions and the source revisions. This is the existing regression from the Categorical Rice–Shapiro
+manuscript (`rs_Appendix_A.tex`): the range-lifting lemma `lem:range-lifting-pullback-section`, linked to
 Lean's `CategoryTheory.Dom.exists_total_lift_iff_rangeLiftPullback_section`.
 Its logical details are in the [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#appendix-a-slice).
 

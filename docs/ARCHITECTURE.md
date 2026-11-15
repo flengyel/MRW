@@ -33,11 +33,13 @@ statement matches the prose. The engine keeps these grounds and bridges
 explicit and checks their stated composition. Provenance identifies origins;
 a justification records the admitted reasons for a conclusion.
 
-The existing bounded checker handles the Appendix A manuscript example and an
-offline documentary-response case. Comparing several arguments, finding new
-routes and showing surviving support after withdrawal belong to the pending
-interactive workflow. [The user guide](JUSTIFICATION_WORKFLOW.md) explains the
-example, current commands and limits; [the technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)
+The existing checker handles a range-lifting warrant and an offline
+documentary-response case. The [bounded search API](JUSTIFICATION_ROUTE_SEARCH.md)
+now discovers Application routes and surviving support after withdrawal;
+its durable-record and reader integration remain pending. The
+[Euclid example](JUSTIFICATION_EUCLID_EXAMPLE.md) supplies a public introduction.
+[The user guide](JUSTIFICATION_WORKFLOW.md) explains current commands and limits;
+[the technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)
 defines the non-factive J₀/J(CS) calculus and records. Ordinary reading requires
 no claim or premise-entry form.
 

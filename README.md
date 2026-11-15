@@ -37,9 +37,13 @@ claim. Its existing Lean checker checks specified inferences under recorded
 assumptions. A planned interactive workflow will compare alternative arguments
 and show which remain available after a ground is withdrawn.
 
-The current executable cases concern one manuscript lemma and an attributed
-model-response passage. General inference search and the complete interactive
-workflow remain pending. See [what the engine does, with an example](docs/JUSTIFICATION_WORKFLOW.md).
+A [bounded Lean search API](docs/JUSTIFICATION_ROUTE_SEARCH.md) now discovers
+composed reasons from explicit admissions and checks surviving routes after
+withdrawal. [Euclid's lemma](docs/JUSTIFICATION_EUCLID_EXAMPLE.md), with proofs
+using Bézout and unique prime factorization, introduces the workflow. Its tests
+check the admitted composition, not the arithmetic proofs. General Hilbert/CS
+search and the complete reader interaction remain pending. See the
+[justification guide](docs/JUSTIFICATION_WORKFLOW.md) for current tools and limits.
 A [proposed CoCalc adapter](docs/COCALC_ADAPTER.md) would connect selected remote
 projects and notebooks while CoCalc retains collaboration and execution.
 Native applications retain document creation and execution. MRW connects the

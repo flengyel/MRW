@@ -6,6 +6,9 @@ withdrawal. This is a developer API, not an MRW sidebar command. Retained
 inspection, source navigation and Return for these new search results still
 need integration. Existing warrant inspection remains available.
 
+For a mathematical introduction, read [Euclid's lemma and its two proof
+routes](JUSTIFICATION_EUCLID_EXAMPLE.md).
+
 ## What is searched
 
 Fix a checked profile and context. A reason assertion `t:A` says that `t` is

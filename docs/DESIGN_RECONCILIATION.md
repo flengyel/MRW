@@ -75,6 +75,11 @@ Search runs in Lean; Python binds and retains artifacts; the extension presents
 the interaction. Keep these stages separate from mathematical truth or
 confidence scores. Do not replace ordinary notes with a claim-registration form.
 
+Use [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md), with its Bézout and
+unique-factorization proofs, as the public walkthrough. The range-lifting
+warrant remains an internal regression; its changing manuscript is not the
+public example.
+
 **Deferred: paper–Lean correspondence review.** Use
 [`flengyel/Dosen-Petric-Maximality`](https://github.com/flengyel/Dosen-Petric-Maximality)
 as the author-selected case. At implementation time resolve its current
