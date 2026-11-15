@@ -45,7 +45,7 @@ Do not disable every extension: doing so can disable remote resolution. Keep
 the working profile and windows open. The isolated profile does not need GitHub
 sign-in or Settings Sync. Do not substitute the working profile when setup fails.
 
-Supported cases are `isolation`, `sourceTrash` and `activation`. The activation
+Supported cases are `isolation`, `sourceTrash`, `activation` and `sourceReturn`. The activation
 case uses a guarded bootstrap before its run-style test entry. Other older
 cases require explicit fixture/UI migration before they are added to this list.
 `--seed` copies at most 4,000 entries/64 MiB into the new project; symlinks and private
@@ -111,7 +111,7 @@ VS Code's profile management when no longer needed, not by editing its registry.
 
 Focused guard checks cover wrong/missing ownership, working scopes/raw contexts,
 orphaned fixture-owned state, source bindings, inherited settings, symlinks/hardlinks,
-external paths/tabs, dirty buffers and changed restart scopes. All 30 exported activation/run/check entry points are checked with a
+external paths/tabs, dirty buffers and changed restart scopes. All 31 exported activation/run/check entry points are checked with a
 preflight barrier and forbidden-body spies; the guard refusal cases exercise the
 real preflight separately. Both direct Python bridges refuse unscoped/external writes and still
 accept an owned fixture. Retired preparers leave supplied directories unchanged.
@@ -120,3 +120,13 @@ The [maintenance report](MAINTENANCE_20261115_DRIFT.md) records actual native
 observation, focused command checks, package/install comparison, logs and exit
 statuses. No whole-suite,
 mathematical-checking, live-vault or new-release result follows from this guard.
+
+## Note/source/Return case
+
+`--case sourceReturn` uses the bundled sums-of-odd-integers example in a fresh
+fixture. It chooses an ordinary notes folder outside its project, saves a reader
+annotation, follows ordinary and retained links, checks native dirty buffers and
+reloads only its own fixture window before reopening. Dialog choices and reader
+messages are scripted; editors, preview, bridge writes and native Memento restart
+are real. No Obsidian vault or authoring command is involved. See the
+[repair report](RELEASE_0_23_41.md) for actual outcomes and limits.

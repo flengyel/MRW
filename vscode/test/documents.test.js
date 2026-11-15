@@ -1012,3 +1012,20 @@ test('Recent Documents works from an unapproved native file without granting or 
  assert.equal(state.get('mrw.documents.v1').grants.some(g=>g.uri===uri(outside).toString()),false);
  assert.equal(state.get('mrw.documents.v1').origin,undefined);assert.equal(await fs.readFile(outside,'utf8'),'# Native file\n');
 });
+
+test('notes folder notifications do not hold completion or serialize a later selection behind dismissal',async t=>{
+ const f=await fixture(t),h=harness(f),pending=deferred();
+ const notices=[];h.api.window.showInformationMessage=message=>{notices.push(message);return pending.promise;};
+ t.after(()=>pending.resolve());
+ h.openChoices.push([uri(f.notes)]);let firstDone=false;
+ const first=h.commands.get('mrw.chooseNotesFolder')().then(()=>{firstDone=true;});
+ for(let i=0;i<30&&!notices.length;i++)await new Promise(r=>setTimeout(r,5));
+ assert.equal(notices.length,1);await new Promise(r=>setTimeout(r,10));
+ assert.equal(firstDone,true,'A saved folder choice must complete while its informational toast remains open');
+ h.openChoices.push([uri(f.outside)]);let secondDone=false;
+ const second=h.commands.get('mrw.chooseNotesFolder')().then(()=>{secondDone=true;});
+ for(let i=0;i<30&&!secondDone;i++)await new Promise(r=>setTimeout(r,5));
+ assert.equal(secondDone,true,'The next choice must not wait for dismissal of an earlier toast');
+ assert.equal(h.configuration.notesFolder,f.outside);assert.equal(notices.length,2);
+ pending.resolve();await Promise.all([first,second]);
+});

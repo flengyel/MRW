@@ -320,7 +320,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       }).slice(0, 10);
       try { await persist(); }
       catch (error) { throw Error(`Notes folder selected: ${uri.fsPath}. Folder history could not be saved: ${error.message}. Choose this folder again to retry.`); }
-      if (attempt === generation) await vscode.window.showInformationMessage(`Notes folder: ${uri.fsPath}`);
+      if (attempt === generation) void vscode.window.showInformationMessage(`Notes folder: ${uri.fsPath}`);
     });
     return folderPublication;
   }

@@ -148,3 +148,5 @@ for present commands and installation.
 
 - [Native test isolation and instruction drift](NATIVE_TEST_ISOLATION.md).
 - [15 November drift review and verification](MAINTENANCE_20261115_DRIFT.md)
+
+- [0.23.41 notes-folder repair and native Return checks](RELEASE_0_23_41.md).

@@ -216,10 +216,14 @@ Ordinary note opening does not require this step.
 2. Select the passage and run **MRW: Retain Document as Source**. MRW keeps that
    revision and opens its reader. Later original-file edits do not replace it.
 3. In a working Markdown document, use **MRW: Insert Source or Passage Link…**.
-   Follow the inserted link to read the saved text; **Return to Document**
+   Select the inserted link in **Contents** to read the saved text; **Return to Document**
    restores that citation's originating occurrence.
 
-**MRW: Open Saved Source…** reopens retained material. Each visible passage has
+**MRW: Open Saved Source…** reopens retained material. When opened directly,
+its **Open <document>** control opens the selected Contents document. Following
+a citation from Contents gives **Return to <document>** for that exact occurrence.
+
+Each visible passage has
 **Add a note**, **Delete reader note…**, **Link Obsidian note…** and **Ask AI about this passage…**
 on one line, in that order. **Add a note** opens that passage's annotation
 editor. Enter your text and attribution, then **Save**.
