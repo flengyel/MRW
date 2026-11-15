@@ -7,8 +7,10 @@ question when returning to an argument: **why was this claim used here?**
 
 The current Lean checker verifies specified inference steps under a recorded
 set of admissions. It does not search for arbitrary mathematical proofs.
-The broader workflow for finding and comparing several arguments and inspecting
-what survives a withdrawal remains pending.
+The [bounded route-search API](JUSTIFICATION_ROUTE_SEARCH.md) now finds
+alternative composed reasons from explicit admissions and rechecks a successor
+context after withdrawal. Its integration with retained records and the reader
+remains pending; it is not a complete proof search.
 
 ## Example: using a formal proof in a manuscript
 

@@ -1,0 +1,19 @@
+# Optional search profile: do not change the pinned documentary checker inputs.
+name = "MRWJustification"
+version = "0.1.0"
+buildDir = ".lake/routes-build"
+defaultTargets = ["route_tests"]
+testDriver = "route_tests"
+
+[leanOptions]
+warningAsError = true
+
+[[lean_lib]]
+name = "MRW"
+
+[[lean_lib]]
+name = "MRWRouteSearch"
+
+[[lean_exe]]
+name = "route_tests"
+root = "RouteTests"

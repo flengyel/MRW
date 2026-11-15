@@ -5,12 +5,12 @@ bridge are executable. The provider-backed Stage 1 mathematical-assistance
 trial remains pending. This document does not claim that every mathematical
 reason should be encoded in justification logic.
 
-Development priority is controlled by the active R1–R3 roadmap in
-[CODEX_PLAN.md](../CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first).
-The acceptance conditions here govern the separately requested warrant
-experiment in [UX_SPEC.md §9.3](../UX_SPEC.md#93-independent-formal-correspondence-and-warrant-experiment).
-They do not gate readable study, a useful model exchange, or the current
-[Codex implementation handoff](CODEX_CONTINUATION.md).
+Current development order is recorded in the
+[reconciliation register](DESIGN_RECONCILIATION.md#current-implementation-order--15-november-2026).
+The earlier R1–R3 sections retain their named evidence and invariants; they do
+not reset the present backlog. The acceptance conditions here govern the
+warrant experiment in [UX_SPEC.md §9.3](../UX_SPEC.md#93-independent-formal-correspondence-and-warrant-experiment).
+They do not require a warrant form for ordinary reading or note-taking.
 
 For the mathematical purpose, a worked example and current inspection tools,
 start with [Justification: grounds for a mathematical claim](JUSTIFICATION_WORKFLOW.md).
