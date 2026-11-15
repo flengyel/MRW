@@ -569,6 +569,10 @@ BibTeX must be running. Missing or ambiguous keys stay visible. Formatting
 changes only the preview. Returning to MRW refreshes the metadata snapshot;
 **MRW: Refresh Citation Preview** also retries. Remote styles are not downloaded. See [citation setup](https://github.com/flengyel/MRW/blob/main/docs/ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes).
 
+Citation snapshot notices identify the selected live library and Zotero host.
+Local bibliography exports show their filenames; live Zotero provides no
+database filename through this interface.
+
 The optional MRW Diagnostics companion adds Feature Use and Integrity and Data
 Hygiene reports, export and a reviewable Codex handoff. Weekly reporting is opt-in;
 missed runs coalesce while VS Code is active. Reports do not repair or delete

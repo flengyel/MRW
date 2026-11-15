@@ -59,21 +59,25 @@ async function prepare({text,file,root,configuration={},execute=run,resolveZoter
 
  if(metadata.csl)style=metaString(metadata.csl);
  if(paths.length>4)throw Error('At most four bibliography files are supported per note');
- let references=[],resourceBytes=0;
+ let references=[],resourceBytes=0;const bibliographyFiles=[];
  if(metadata.references){const wrapped={...ast,meta:{references:metadata.references},blocks:[]};references=JSON.parse(await processCitation(['--sandbox','--from=json','--to=csljson'],JSON.stringify(wrapped)));}
  async function readBibliographies(paths){for(const p of paths){const target=await scoped(p),input=await bounded(target),ext=path.extname(target).toLowerCase();
   resourceBytes+=Buffer.byteLength(input);if(resourceBytes>LIMIT)throw Error('Combined bibliography resources exceed 4 MiB');
   if(ext==='.json')references.push(...JSON.parse(input));
   else {const format={'.bib':'biblatex','.bibtex':'bibtex','.yaml':'markdown','.yml':'markdown'}[ext];if(!format)throw Error('Unsupported bibliography format');references.push(...JSON.parse(await processCitation(['--sandbox','--from='+format,'--to=csljson'],format==='markdown'?'---\nreferences:\n'+input+'\n---':input)));}
+  bibliographyFiles.push(path.relative(scope,target));
  }}
+ const bibliographyNotice=()=> 'Local bibliography snapshot: '+bibliographyFiles.map(p=>JSON.stringify(p)).join(', ')+'; freshness relative to Zotero is unknown.';
  await readBibliographies(paths);
+ if(bibliographyFiles.length)sourceStatus=bibliographyNotice();
+ else if(metadata.references)sourceStatus='Inline references in '+JSON.stringify(path.basename(file))+'.';
  if(live){
   const keys=[];function collect(v){if(Array.isArray(v))v.forEach(collect);else if(v&&typeof v==='object'){if(v.t==='Cite')for(const c of v.c[0])if(!keys.includes(c.citationId))keys.push(c.citationId);Object.values(v).forEach(collect);}}collect(ast.blocks);
   if(companion.pullFromZotero===true&&!configuration.zoteroLibraries?.length&&(!Array.isArray(companion.zoteroGroups)||!companion.zoteroGroups.length))throw Error('No Zotero libraries are selected in the companion configuration.');
   const libraries=configuration.zoteroLibraries?.length?configuration.zoteroLibraries:(companion.pullFromZotero===true?companion.zoteroGroups.map(g=>g.id):[]);
   const transport=configuration.zoteroConnection?.transport||(wsl?'windows':'local');
   if(keys.length)try{const resolved=await resolveZotero(keys,{libraries,transport,signal});references=resolved.references;sourceErrors=resolved.errors;sourceStatus=resolved.status;}
-  catch(e){if(mode!=='auto'||!bib)throw e;await readBibliographies([bib]);sourceStatus='Zotero lookup unavailable; using the local bibliography snapshot. Freshness is unknown.';}
+  catch(e){if(mode!=='auto'||!bib)throw e;await readBibliographies([bib]);sourceStatus='Zotero lookup unavailable; using '+bibliographyNotice().replace(/^Local/,'local');}
 
  }
  if(references.length>20000||Buffer.byteLength(JSON.stringify(references))>LIMIT)throw Error('Combined reference data exceeds citation budget');

@@ -9,10 +9,10 @@ test('real local citeproc handles clusters, missing/duplicate keys, changes, off
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-cite-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));const file=path.join(root,'note.md'),bib=path.join(root,'refs.json');
  const refs=[{id:'a',type:'book',title:'First Book',author:[{family:'Author',given:'Alice'}],issued:{'date-parts':[[2020]]}},{id:'b',type:'book',title:'Second Book',author:[{family:'Reader',given:'Bob'}],issued:{'date-parts':[[2021]]}}];await fs.writeFile(bib,JSON.stringify(refs));
  const text='---\nbibliography: refs.json\n---\n\n[@a] and [@a, p. 4; @b]. [@missing]\n';await fs.writeFile(file,text);const configuration={executable:process.env.MRW_TEST_PANDOC};
- const result=await prepare({text,file,root,configuration});assert.match(result.citations['[@a]'].text,/Author 2020/);assert.match(result.citations['[@a, p. 4; @b]'].text,/2020, 4.*2021/);assert.match(result.citations['[@missing]'].problem,/Unresolved/);assert.match(result.bibliography,/First Book/);assert.equal(await fs.readFile(file,'utf8'),text);
+ const result=await prepare({text,file,root,configuration});assert.match(result.citations['[@a]'].text,/Author 2020/);assert.match(result.citations['[@a, p. 4; @b]'].text,/2020, 4.*2021/);assert.match(result.citations['[@missing]'].problem,/Unresolved/);assert.match(result.bibliography,/First Book/);assert.match(result.status,/snapshot: "refs.json"/);assert.equal(await fs.readFile(file,'utf8'),text);
  await fs.writeFile(bib,JSON.stringify([...refs,refs[0]]));const duplicate=await prepare({text,file,root,configuration});assert.match(duplicate.citations['[@a]'].problem,/Ambiguous/);
  await fs.writeFile(bib,JSON.stringify([{...refs[0],title:'Changed Book'},refs[1]]));const changed=await prepare({text,file,root,configuration});assert.match(changed.bibliography,/Changed Book/);
- const inline=await prepare({text:'---\nreferences:\n- id: a\n  type: book\n  title: Inline Book\n---\n\n[@a]\n',file,root,configuration});assert.match(inline.bibliography,/Inline Book/);
+ const inline=await prepare({text:'---\nreferences:\n- id: a\n  type: book\n  title: Inline Book\n---\n\n[@a]\n',file,root,configuration});assert.match(inline.bibliography,/Inline Book/);assert.match(inline.status,/Inline references in "note.md"/);
  await assert.rejects(prepare({text:'---\nbibliography: https://invalid.example/refs.json\n---\n\n[@a]',file,root,configuration}),/Only local/);
 });
 test('preview preserves dirty source and renders only a matching document version',async()=>{
@@ -39,11 +39,11 @@ test('companion live source is respected and an explicit note bibliography keeps
  const f=await citationFixture(t),folder=path.join(f.root,'.obsidian/plugins/obsidian-pandoc-reference-list');await fs.mkdir(folder,{recursive:true});await fs.writeFile(path.join(folder,'data.json'),JSON.stringify({pullFromZotero:true,zoteroGroups:[{id:1}],pathToBibliography:'old.json',pathToPandoc:'/untrusted/ignored'}));await fs.writeFile(path.join(f.root,'old.json'),'[]');let calls=0;
  const options={...f,resolveZotero:async()=>{calls++;return {references:[ref],errors:{},status:'Live fixture'};}};
  const live=await prepare({...options,text:'[@a]'});assert.match(live.citations['[@a]'].text,/Author 2020/);assert.equal(calls,1);
- await fs.writeFile(path.join(f.root,'local.json'),JSON.stringify([{...ref,title:'Explicit local book'}]));const local=await prepare({...options,text:'---\nbibliography: local.json\n---\n[@a]',configuration:{...f.configuration,source:'zotero'}});assert.match(local.bibliography,/Explicit local book/i);assert.equal(calls,1);
+ await fs.writeFile(path.join(f.root,'local.json'),JSON.stringify([{...ref,title:'Explicit local book'}]));const local=await prepare({...options,text:'---\nbibliography: local.json\n---\n[@a]',configuration:{...f.configuration,source:'zotero'}});assert.match(local.bibliography,/Explicit local book/i);assert.match(local.status,/snapshot: "local.json"/);assert.doesNotMatch(local.status,/old.json/);assert.equal(calls,1);
 });
 test('offline auto mode uses a labeled local snapshot; a live missing key is never revived from it',{skip:!process.env.MRW_TEST_PANDOC},async t=>{
  const f=await citationFixture(t),folder=path.join(f.root,'.obsidian/plugins/obsidian-pandoc-reference-list');await fs.mkdir(folder,{recursive:true});await fs.writeFile(path.join(folder,'data.json'),JSON.stringify({pullFromZotero:true,zoteroGroups:[{id:1}],pathToBibliography:'refs.json'}));await fs.writeFile(path.join(f.root,'refs.json'),JSON.stringify([ref]));
- const offline=await prepare({...f,text:'[@a]',resolveZotero:async()=>{throw Error('Offline');}});assert.match(offline.citations['[@a]'].text,/Author 2020/);assert.match(offline.status,/unavailable.*local bibliography/);
+ const offline=await prepare({...f,text:'[@a]',resolveZotero:async()=>{throw Error('Offline');}});assert.match(offline.citations['[@a]'].text,/Author 2020/);assert.match(offline.status,/unavailable.*local bibliography snapshot: "refs.json"/);
  const missing=await prepare({...f,text:'[@a]',resolveZotero:async()=>({references:[],errors:{a:0},status:'Live missing'})});assert.equal(missing.citations['[@a]'].text,'[@a]');assert.match(missing.citations['[@a]'].problem,/Unresolved/);
 });
 test('WSL finds pandoc.exe only after a missing host command, never from companion configuration',{skip:!process.env.MRW_TEST_PANDOC},async t=>{
@@ -67,4 +67,10 @@ test('late citation responses cannot restore closed-document or disposed caches'
   const job=c.update(doc);await waiting;if(close){doc.isClosed=true;onClose(doc);}else {for(const sub of context.subscriptions)sub.dispose();assert.equal(signal.aborted,true);}
   finish();await job;assert.equal(c.cache.size,0);
  }
+});
+
+test('bibliography notice lists every file actually read by its scoped relative name',{skip:!process.env.MRW_TEST_PANDOC},async t=>{
+ const f=await citationFixture(t);await fs.mkdir(path.join(f.root,'media'));await fs.writeFile(path.join(f.root,'media/first.json'),JSON.stringify([ref]));await fs.writeFile(path.join(f.root,'second.json'),JSON.stringify([{...ref,id:'b'}]));
+ const r=await prepare({...f,text:'---\nbibliography: [media/first.json, second.json]\n---\n[@a] [@b]'});
+ assert.match(r.status,/"media[/\\]first.json", "second.json"/);assert.match(r.status,/freshness relative to Zotero is unknown/);assert.doesNotMatch(r.status,new RegExp(f.root));
 });

@@ -1,24 +1,30 @@
-# Read-only exact-key citation lookup. No library write or arbitrary RPC method.
+# Read-only exact-key citation lookup and library names. No arbitrary RPC method.
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $raw = [Console]::In.ReadToEnd()
 if ([System.Text.Encoding]::UTF8.GetByteCount($raw) -gt 131072) { throw 'Citation request too large' }
 $p = $raw | ConvertFrom-Json
-if ($p.jsonrpc -ne '2.0' -or $p.method -cne 'item.pandoc_filter' -or $p.id -notmatch '^[a-f0-9-]{36}$') { throw 'Unsupported citation request' }
-if (@($p.PSObject.Properties.Name).Count -ne 4 -or $p.params.Count -lt 2 -or $p.params.Count -gt 3 -or $p.params[1] -isnot [bool] -or -not $p.params[1]) { throw 'Invalid citation parameters' }
-$keys = @($p.params[0])
-if ($keys.Count -lt 1 -or $keys.Count -gt 128) { throw 'Invalid citation keys' }
-foreach ($key in $keys) {
-  if ($key -isnot [string] -or $key.Length -lt 1 -or [System.Text.Encoding]::UTF8.GetByteCount($key) -gt 512 -or $key -match '[\x00-\x1f\x7f]') { throw 'Invalid citation key' }
-}
-if ($p.params.Count -eq 3) {
-  $libraries = @($p.params[2])
-  if ($libraries.Count -lt 1 -or $libraries.Count -gt 8) { throw 'Invalid library scope' }
-  foreach ($library in $libraries) { if ([string]$library -notmatch '^[1-9][0-9]{0,9}$' -or [long]$library -gt 2147483647) { throw 'Invalid library identity' } }
+if ($p.jsonrpc -ne '2.0' -or $p.method -cnotin @('item.pandoc_filter','user.groups') -or $p.id -notmatch '^[a-f0-9-]{36}$') { throw 'Unsupported citation request' }
+if (@($p.PSObject.Properties.Name).Count -ne 4 -or $null -eq $p.params) { throw 'Invalid citation parameters' }
+if ($p.method -ceq 'user.groups') {
+  if ($p.params.Count -ne 1 -or $p.params[0] -isnot [bool] -or $p.params[0]) { throw 'Invalid library-name parameters' }
+} else {
+  if ($p.params.Count -lt 2 -or $p.params.Count -gt 3 -or $p.params[1] -isnot [bool] -or -not $p.params[1]) { throw 'Invalid citation parameters' }
+  $keys = @($p.params[0])
+  if ($keys.Count -lt 1 -or $keys.Count -gt 128) { throw 'Invalid citation keys' }
+  foreach ($key in $keys) {
+    if ($key -isnot [string] -or $key.Length -lt 1 -or [System.Text.Encoding]::UTF8.GetByteCount($key) -gt 512 -or $key -match '[\x00-\x1f\x7f]') { throw 'Invalid citation key' }
+  }
+  if ($p.params.Count -eq 3) {
+    $libraries = @($p.params[2])
+    if ($libraries.Count -lt 1 -or $libraries.Count -gt 8) { throw 'Invalid library scope' }
+    foreach ($library in $libraries) { if ([string]$library -notmatch '^[1-9][0-9]{0,9}$' -or [long]$library -gt 2147483647) { throw 'Invalid library identity' } }
+  }
 }
 $r = [System.Net.HttpWebRequest]::Create('http://127.0.0.1:23119/better-bibtex/json-rpc')
 $r.Method = 'POST'; $r.Proxy = $null; $r.AllowAutoRedirect = $false
-$r.Timeout = 8000; $r.ReadWriteTimeout = 8000; $r.ContentType = 'application/json'
+$timeout = if ($p.method -ceq 'user.groups') { 1500 } else { 8000 }
+$r.Timeout = $timeout; $r.ReadWriteTimeout = $timeout; $r.ContentType = 'application/json'
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($raw); $r.ContentLength = $bytes.Length
 $stream = $r.GetRequestStream()
 try { $stream.Write($bytes, 0, $bytes.Length) } finally { $stream.Dispose() }

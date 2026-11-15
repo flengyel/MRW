@@ -113,6 +113,19 @@ its documented read-only `item.pandoc_filter` method for only the keys in the
 note, within the selected libraries. It neither searches by title nor exports
 the whole library. Under WSL the Windows transport uses fixed Windows loopback;
 it does not forward the Zotero port. The lookup records when metadata was read.
+The snapshot notice includes the read time, selected library names and Better
+BibTeX IDs, and whether lookup used Windows or local Zotero. Library names come
+from the read-only `user.groups(false)` metadata method; it requests no
+collections or item text. Only selected libraries appear. Name lookup has a
+shorter timeout; if unavailable, resolved citations still display with their
+selected IDs. The default personal-library scope remains labelled My Library.
+
+The supported live API does not expose a library database filename or path.
+When a bibliography export is actually read, the notice lists its filename,
+relative to the selected notes/workspace folder, including on an offline
+fallback. An export configured but unused by live lookup is not labelled as its
+source. Inline references identify the note containing them.
+
 A citekey or library ID is not an immutable revision: this preview is a current
 metadata snapshot, separate from MRW's retained reference records.
 
