@@ -94,6 +94,9 @@ that version and the saved records it produced.
 
 ## Reports and earlier implementations
 
+[Release 0.23.36](RELEASE_0_23_36.md) records Recent Documents, the citation
+observation, exact package checks, publication and native acceptance limits.
+
 [Release 0.23.35](RELEASE_0_23_35.md) records the document-reopen repair,
 exact source, native checks, package and publication.
 
