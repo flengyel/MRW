@@ -123,7 +123,7 @@ async function sourceWorkflow(context,marker,config){
     const js=`window.addEventListener('message',e=>{if(e.data.type==='fixture_click'){[...document.querySelectorAll('button')].filter(b=>b.textContent===e.data.label)[e.data.index||0]?.click();}if(e.data.type==='fixture_select'){document.querySelectorAll('input[type=checkbox]').forEach(b=>{b.checked=true;b.dispatchEvent(new Event('change'));});}setTimeout(()=>window.__fixture_api.postMessage({type:'fixture_dom',text:document.getElementById('reader').innerText}),30);});`;
     value=value.replace('</body>',`<script nonce="${nonce}">${js}</script></body>`);
    }Reflect.set(target,key,value,target);return true;}});
-   panel=new Proxy(native,{get(target,key){if(key==='webview')return webview;const v=Reflect.get(target,key,target);return typeof v==='function'?v.bind(target):v;}});return panel;
+   panel=new Proxy(native,{get(target,key){if(key==='webview')return webview;const v=Reflect.get(target,key,target);return typeof v==='function'?v.bind(target):v;},set(target,key,value){Reflect.set(target,key,value,target);return true;}});return panel;
   };
   await require('../../src/extension').activate(context);
   const file=vscode.Uri.file(path.join(config.project,'reading.md'));
