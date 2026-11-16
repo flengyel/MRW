@@ -11,9 +11,9 @@ and shows which routes survive the withdrawal of a ground. The
 [introduction below](#justification-logic) explains the logic and its current
 implementation.
 
-**MRW 0.23.43 — Resume unfinished justification.**
-[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-0.23.43.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.43)
+**MRW 0.23.44 — Grounds from existing notes.**
+[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-0.23.44.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.44)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md).
 The extension ID is `flengyel.mrw`. Distribution is through GitHub VSIX files;
 there is no Marketplace listing. MRW remains experimental.
@@ -99,6 +99,12 @@ rules. Sum represents alternative reasons, not accumulated confidence.
 The reader currently uses J₀ and searches bounded Application routes from
 explicit admissions.
 
+Select Markdown text and choose **Justification… → Use selected Markdown text**,
+or choose saved passages. Copy their exact text and schema to Codex, import its
+proposal and correct claim summaries in the reader. Select the grounds to admit;
+Lean search remains a separate action. Sources, supplied attribution and corrections
+are retained. See the [workflow](docs/SOURCE_GROUNDS_WORKFLOW.md).
+
 Choose **Proofs → Justification… → Explore Euclid’s lemma**. Its two arguments
 use Bézout’s identity and unique prime factorization. Read their source text
 and admissions, then choose **Search under these admissions**. Each retained
@@ -114,8 +120,7 @@ and Return location; retry remains explicit.
 The checked routes are conditional on the displayed admissions. The Euclid
 example does not independently formalize its arithmetic arguments, and a
 checked formal statement does not establish its correspondence with a paper.
-General proof search and assembly of arbitrary contexts from ordinary notes
-remain open work. The
+General proof search remains open work. The
 [walkthrough](docs/JUSTIFICATION_EUCLID_EXAMPLE.md) gives both mathematical
 arguments; the [guide](docs/JUSTIFICATION_WORKFLOW.md) describes the supported
 interaction and limits.
@@ -181,8 +186,8 @@ separate x86-64 justification runtime. Native Windows/macOS backends and
 Windows-backed private artifact storage are unqualified.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
-`mrw-0.23.43.vsix`. The recommended companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-diagnostics-0.1.0.vsix);
+`mrw-0.23.44.vsix`. The recommended companion is
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-diagnostics-0.1.0.vsix);
 it is optional, and weekly reporting is opt-in. Save work before a requested
 reload and retain workspace storage when upgrading. GitHub updates require
 installing the newer VSIX. [Installation guide](docs/INSTALLATION.md).

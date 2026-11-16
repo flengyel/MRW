@@ -100,8 +100,8 @@ is reported rather than guessed.
 **Open an explicit context file…** accepts the existing formula/admission
 vocabulary with exact source snapshots and scoped attribution. This is a
 reviewed-input/developer route; ordinary reading never requests this file.
-The current GUI does not yet assemble arbitrary contexts from a reader's
-notes or check their arithmetic assertions. See the
+For ordinary notes, use the [source-selection and proposal-review workflow](SOURCE_GROUNDS_WORKFLOW.md).
+Mathematical checking of the assertions remains separate. See the
 [bounded API and format](JUSTIFICATION_ROUTE_SEARCH.md).
 
 ## Example: two proofs of Euclid's lemma
@@ -136,9 +136,8 @@ Its logical details are in the [technical specification](JUSTIFICATION_LOGIC_EXP
 A changed or disputed correspondence raises a concrete question: which routes
 use it, and is there another argument? The bounded reader workflow can compare
 the routes in an explicit context, withdraw an admission and check a successor.
-Its earlier context and certificates remain inspectable. Direct reviewed
-assembly from arbitrary notes and paper–Lean correspondence review remain
-separate pending work; the range-lifting example supplies no automatic bridge.
+Its earlier context and certificates remain inspectable. Source-driven assembly is available through the reader; paper–Lean correspondence
+review remains separate pending work; the range-lifting example supplies no automatic bridge.
 
 ## What the records establish
 
@@ -164,7 +163,7 @@ questions available for examination; mathematical judgment remains necessary.
 
 | Task | Existing route and limit |
 | --- | --- |
-| Search and compare admitted grounds | Choose **Proofs → Justification…**. The bounded reader retains checked routes and exact source snapshots, supports withdrawal and reopens completed or unfinished contexts. Arbitrary context assembly from ordinary notes still uses reviewed developer input. |
+| Search and compare admitted grounds | Choose **Proofs → Justification…**. The bounded reader retains checked routes and exact source snapshots, supports withdrawal and reopens completed or unfinished contexts. Selected Markdown text or saved passages can supply a companion proposal for review and explicit admission. |
 | Inspect retained evidence in VS Code | Run **MRW: Inspect Retained Record**. Choose **Documentary warrant package** and its directory, or **Verification and matching bundle** and select both files. Inspection validates and displays existing records; it creates no admission and does not rerun Lean. |
 | Read the manuscript example | Run `mrw why PATH/TO/rs_Appendix_A.tex`. This requires the exact supported manuscript revision and reads the packaged, previously checked bundle. It neither checks a new proof nor supports arbitrary manuscripts. |
 | Reopen a documentary package | Run `mrw show-documentary PACKAGE_DIRECTORY`. This displays the retained package without another model request or Lean run. |
@@ -175,9 +174,9 @@ written in the passage. An independently supported mathematical argument can
 cite its own grounds even if a model suggested the question.
 
 Ordinary reading and note-taking require no claim-entry or admission form.
-Direct reviewed assembly of arbitrary contexts from existing notes and retained
-grounds remains pending. The current bounded comparison and resumption tools
-are described above.
+Use [selected text or retained passages](SOURCE_GROUNDS_WORKFLOW.md) to prepare a
+companion proposal, correct summaries and explicitly admit grounds. The supplied
+response and exact source captures remain saved separately from admission.
 
 ## Documentary response commands
 

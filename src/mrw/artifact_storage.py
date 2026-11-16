@@ -26,7 +26,7 @@ MAX_FILES = 20000
 JSON_LIMIT = 32 * 1024 * 1024
 FAMILY = re.compile(r'(outlines|investigation|justification)-[a-f0-9]{64}')
 HEX = re.compile(r'[a-f0-9]{64}')
-WRITE = {'route_stage', 'route_run', 'outline_trash', 'outline_restore', 'outline_continue_note', 'outline_source_import', 'outline_create', 'outline_import_note', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import', 'outline_kerodon_import', 'outline_render_diagram',
+WRITE = {'route_material_create', 'route_material_import', 'route_material_edit', 'route_material_accept', 'route_stage', 'route_run', 'outline_trash', 'outline_restore', 'outline_continue_note', 'outline_source_import', 'outline_create', 'outline_import_note', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import', 'outline_kerodon_import', 'outline_render_diagram',
          'update_investigation', 'end_investigation', 'resume_investigation', 'send_assistance'}
 
 
@@ -78,7 +78,7 @@ def inventory(root, *, legacy=False):
                     owned=(len(parts)==2 and parts[0]=='model-calls' and parts[1].endswith('.json'))
                     owned=owned or (len(parts)==2 and parts[0].startswith('investigation-') and parts[1]=='active.json')
                     owned=owned or (len(parts)==2 and parts[0].startswith('justification-') and re.fullmatch(r'[a-f0-9]{64}\.json',parts[1]))
-                    owned=owned or (len(parts)==3 and parts[0].startswith('justification-') and parts[1]=='pending' and re.fullmatch(r'[a-f0-9]{64}\.json',parts[2]))
+                    owned=owned or (len(parts)==3 and parts[0].startswith('justification-') and parts[1] in ('pending','preparations') and re.fullmatch(r'[a-f0-9]{64}\.json',parts[2]))
                     owned=owned or (len(parts)==3 and parts[0].startswith('outlines-') and re.fullmatch(r'[a-f0-9-]{36}',parts[1]) and (parts[2] in ('outline.json','obsidian-links.json','diagram-renders.json','source-status.json') or re.fullmatch(r'(?:source|artifact)-[a-f0-9]{64}\.bin',parts[2])))
                     if not owned: continue
                 st = regular(p)
@@ -369,6 +369,8 @@ class ArtifactStorage:
             for _retained in list_records(payload/('justification-'+key), root): pass
             from .route_pending import catalog
             for _intent in catalog(payload/('justification-'+key), root):pass
+            from .route_materials import listing as materials_listing
+            for _material in materials_listing(payload/('justification-'+key),root):pass
             inv = InvestigationStore(str(payload/('investigation-'+key)), root)
             if inv.active:
                 checked_parent(inv.active)
@@ -386,7 +388,7 @@ class ArtifactStorage:
         if self.home.exists():
             for folder in self.home.iterdir():
                 if not FAMILY.fullmatch(folder.name): continue
-                paths = folder.glob('*/outline.json') if folder.name.startswith('outlines-') else [*folder.glob('*.json'),*folder.glob('pending/*.json')] if folder.name.startswith('justification-') else [folder/'active.json']
+                paths = folder.glob('*/outline.json') if folder.name.startswith('outlines-') else [*folder.glob('*.json'),*folder.glob('pending/*.json'),*folder.glob('preparations/*.json')] if folder.name.startswith('justification-') else [folder/'active.json']
                 for path in paths:
                     if path.exists(): projects[read_json(path)['project_root']] = True
         return dict(schema='mrw-artifact-store',version=2,id=str(uuid4()),original_home=str(self.home),

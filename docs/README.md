@@ -155,3 +155,7 @@ for present commands and installation.
 - [README writing review](README_REVIEW_20261115.md).
 - [0.23.41 notes-folder repair and native Return checks](RELEASE_0_23_41.md).
 - [Skipped-check review and Lean checker repair](LEAN_CHECKER_DRIFT_20261115.md).
+
+[Grounds from existing notes](SOURCE_GROUNDS_WORKFLOW.md) explains source
+selection, the Codex handoff, proposal corrections, explicit admission and
+resumption in the Justification reader.

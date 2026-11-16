@@ -70,10 +70,15 @@ def intents(store, project):
     for p in entries(base(store)/'pending'):
         raw=read_bounded(p,2*1024*1024,'unfinished context')
         if digest(raw)!=p.stem:raise ValueError('Unfinished context bytes changed')
-        item=strict_json(raw);exact_keys(item,{'schema','version','project_root','request','origin'},'unfinished context')
+        item=strict_json(raw)
+        keys={'schema','version','project_root','request','origin'}
+        exact_keys(item,keys | ({'material'} if 'material' in item else set()),'unfinished context')
         if item['schema']!='mrw.route-intent' or type(item['version']) is not int or item['version']!=1:raise ValueError('Unsupported unfinished context')
         if item['project_root']!=project:raise ValueError('Unfinished context belongs to another workspace')
         parse_request(encode(item['request']));origin(item['origin'])
+        if 'material' in item:
+            from .route_materials import bind_intent
+            bind_intent(store,project,item['material'],item['request'],item['origin'])
         yield p.stem,item
 
 
@@ -108,7 +113,7 @@ def storage_size(store):
     if not folder.exists():return 0
     files=[]
     for p in folder.iterdir():
-        if p.name=='pending':
+        if p.name in ('pending','preparations'):
             if p.is_symlink() or not p.is_dir():raise ValueError('Invalid unfinished context directory')
             files.extend(p.iterdir())
         else:files.append(p)
@@ -121,8 +126,11 @@ def storage_size(store):
     return total
 
 
-def stage(store, project, request, location):
+def stage(store, project, request, location, material=None):
     request=parse_request(encode(request));location=origin(location);folder=base(store)
+    if material is not None:
+        from .route_materials import bind_intent
+        bind_intent(store,project,material,request,location)
     with publication_guard(folder/'pending/context.json'):
         private_directory(folder)
         with file_lock(folder,folder.parent/'route-locks'):
@@ -133,26 +141,28 @@ def stage(store, project, request, location):
                 if item['request']['id']==request['id']:
                     if item['request']!=request:raise ValueError('Request identity was reused for different unfinished work')
                     sync_directory(folder/'pending')
-                    return dict(intent=revision,origin=item['origin'])
+                    return dict(intent=revision,origin=item['origin'],**({'material':item['material']} if 'material' in item else {}))
             validate_parent(folder,project,request)
             for _revision,record in list_records(folder,project):
                 if record['request']['id']==request['id'] and record['request']!=request:raise ValueError('Request identity was reused for different completed work')
             if count>=128:raise ValueError('Unfinished context store reached its 128-record limit; existing work is preserved')
             item=dict(schema='mrw.route-intent',version=1,project_root=project,request=request,origin=location)
+            if material is not None:item['material']=material
             raw=encode(item);size=storage_size(folder)
             if len(raw)>2*1024*1024:raise ValueError('Unfinished context exceeds its size limit')
             if size+len(raw)>MAX_BYTES:raise ValueError('Justification storage reached its 64-MiB limit; existing work is preserved')
             private_directory(folder/'pending');revision=digest(raw)
             persist_private_new(folder/'pending'/(revision+'.json'),raw,error_type=ValueError)
-            return dict(intent=revision,origin=location)
+            return dict(intent=revision,origin=location,**({'material':material} if material else {}))
 
 
 def resume(store, project, revision):
     if not isinstance(revision,str) or not HEX.fullmatch(revision):raise ValueError('Invalid unfinished context revision')
     for key,item,result in catalog(store,project):
         if key!=revision:continue
-        if result:return dict(result=view(result,read_record(store,result)),origin=item['origin'])
-        return dict(request=item['request'],origin=item['origin'],intent=revision)
+        if result:return dict(result=with_origin(store,project,view(result,read_record(store,result))),origin=item['origin'],**({'material':item['material']} if 'material' in item else {}))
+        material=source_material(store,project,item['request'])
+        return dict(request=item['request'],origin=item['origin'],intent=revision,**({'material':material} if material else {}))
     raise ValueError('The saved unfinished context is unavailable; no replacement was guessed')
 
 
@@ -162,4 +172,17 @@ def with_origin(store, project, result):
         if item['request']['id']!=result['record']['request']['id']:continue
         if found or item['request']!=result['record']['request']:raise ValueError('Result differs from its unfinished context')
         result['origin']=item['origin'];found=True
+        if 'material' in item:result['material']=item['material']
+    material=source_material(store,project,result['record']['request'])
+    if material:result['material']=material
     return result
+
+
+def source_material(store, project, request):
+    indexed={item['request']['id']:item.get('material') for _,item in intents(store,project)}
+    for _ in range(16):
+        if indexed.get(request['id']):return indexed[request['id']]
+        w=request['withdrawal']
+        if not w:return None
+        request=read_record(store,w['predecessor'])['request']
+    raise ValueError('Source proposal lineage limit')

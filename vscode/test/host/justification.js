@@ -5,6 +5,7 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function wait(fn,label,ms=30000){const end=Date.now()+ms;while(!fn()){if(Date.now()>end)throw Error('Timed out: '+label);await pause(50);}}
 async function run(context){
  const {marker,config}=await guard.assertFixture(vscode,context,context.extensionPath),root=marker.root;
+ if(config.sourceWorkflow)return sourceWorkflow(context,marker,config);
  const reportPath=path.join(root,'native-result.json'),cfgPath=path.join(context.extensionPath,'host-test.json');
  const report=config.phase?JSON.parse(await fs.readFile(reportPath,'utf8')):{host:vscode.version,remote:vscode.env.remoteName,checks:[],requests:[],errors:[]};
  let realBridge,bridgeModule,last,panel,observed='',note,baseline,draft,draftBaseline,reloading=false;
@@ -99,5 +100,65 @@ async function run(context){
   if(!reloading)await save();if(report.complete&&!vscode.workspace.textDocuments.some(d=>d.isDirty))await vscode.commands.executeCommand('workbench.action.closeWindow');
  }
 }
+async function sourceWorkflow(context,marker,config){
+ const root=marker.root,reportPath=path.join(root,'source-result.json'),cfgPath=path.join(context.extensionPath,'host-test.json');
+ const report=config.sourcePhase?JSON.parse(await fs.readFile(reportPath,'utf8')):{requests:[],errors:[],checks:[],host:vscode.version,remote:vscode.env.remoteName};
+ const save=async()=>{const temp=reportPath+'.next';await fs.writeFile(temp,JSON.stringify(report,null,2));await fs.rename(temp,reportPath);};
+ const original={pick:vscode.window.showQuickPick,input:vscode.window.showInputBox,create:vscode.window.createWebviewPanel,error:vscode.window.showErrorMessage};
+ let bridge,raw,last,panel,dom='',reloading=false,clipboard=await vscode.env.clipboard.readText();const ownedClipboard=new Set();
+ try{
+  bridge=require('../../src/bridge');raw=bridge.runBridge;bridge.runBridge=(...args)=>{report.requests.push(args[2].method);return raw(...args);};
+  vscode.window.showErrorMessage=async value=>{report.errors.push(value);await save();};
+  vscode.window.showInputBox=async()=> 'For injective f:A→B and g:B→C, the composite g ∘ f:A→C is injective.';
+  vscode.window.showQuickPick=async items=>{items=await items;return config.sourcePhase?items.find(v=>v.revision===config.sourceResult):items.find(v=>v.kind==='selection');};
+  vscode.window.createWebviewPanel=(...args)=>{
+   const native=original.create.apply(vscode.window,args);if(args[0]!=='mrw.justification')return native;
+   const webview=new Proxy(native.webview,{get(target,key){
+    if(key==='postMessage')return async value=>{if(value.type==='grounds')last=value;return target.postMessage(value);};
+    if(key==='onDidReceiveMessage')return (fn,...rest)=>target.onDidReceiveMessage(value=>{if(value.type==='fixture_dom'){dom=value.text;return;}return fn(value);},...rest);
+    const v=Reflect.get(target,key,target);return typeof v==='function'?v.bind(target):v;
+   },set(target,key,value){if(key==='html'){
+    value=value.replace('const api=acquireVsCodeApi(),root=', 'const api=acquireVsCodeApi();window.__fixture_api=api;const root=');
+    const nonce=/script nonce="([^"]+)"/.exec(value)[1];
+    const js=`window.addEventListener('message',e=>{if(e.data.type==='fixture_click'){[...document.querySelectorAll('button')].filter(b=>b.textContent===e.data.label)[e.data.index||0]?.click();}if(e.data.type==='fixture_select'){document.querySelectorAll('input[type=checkbox]').forEach(b=>{b.checked=true;b.dispatchEvent(new Event('change'));});}setTimeout(()=>window.__fixture_api.postMessage({type:'fixture_dom',text:document.getElementById('reader').innerText}),30);});`;
+    value=value.replace('</body>',`<script nonce="${nonce}">${js}</script></body>`);
+   }Reflect.set(target,key,value,target);return true;}});
+   panel=new Proxy(native,{get(target,key){if(key==='webview')return webview;const v=Reflect.get(target,key,target);return typeof v==='function'?v.bind(target):v;}});return panel;
+  };
+  await require('../../src/extension').activate(context);
+  const file=vscode.Uri.file(path.join(config.project,'reading.md'));
+  if(!config.sourcePhase){
+   await fs.writeFile(file.fsPath,'# Composition of injections\n\nLet f:A→B and g:B→C be injective functions. If g(f(x))=g(f(y)), injectivity of g and then f gives x=y. Thus g ∘ f is injective.\n');
+   const doc=await vscode.workspace.openTextDocument(file),editor=await vscode.window.showTextDocument(doc,{preview:false});
+   editor.selection=new vscode.Selection(doc.positionAt(0),doc.positionAt(doc.getText().length));
+  }
+  const opened=report.requests.length;await vscode.commands.executeCommand('mrw.openJustification');
+  await wait(()=>last&&(config.sourcePhase?last.revision===config.sourceResult:!!last.material),'source workflow reader',45000);
+  if(config.sourcePhase){
+   assert.equal(last.result.routes.length,1);assert.ok(last.proposalRevision);assert.ok(!report.requests.slice(opened).some(m=>['route_run','route_stage','route_material_accept','route_setup'].includes(m)));
+   report.checks.push('real host restart reopens checked grounds with proposal provenance, without search or admission');report.complete=true;
+   await guard.clearOwnedState(context);await save();await fs.writeFile(path.join(root,'ready'),'complete');return;
+  }
+  const click=async(label,index=0)=>{await wait(()=>!last.busy&&dom.includes(label),label,45000);const generation=last.generation;await panel.webview.postMessage({type:'fixture_click',label,index});await wait(()=>last.generation>generation&&!last.busy,label+' completes',45000);};
+  await click('Copy passages for Codex');const copied=await vscode.env.clipboard.readText();ownedClipboard.add(copied);assert.ok(copied.includes('If g(f(x))=g(f(y))'));assert.ok(copied.includes('mrw.grounds-proposal'));
+  const m=last.material,source=m.sources[0].id,proposal={schema:'mrw.grounds-proposal',version:1,source_set:m.id,attribution:'Synthetic native acceptance fixture; no provider call',claims:[{id:'I',title:'Injectivity hypotheses',text:'f:A→B and g:B→C are injective.',sources:[source]},{id:'G',title:'Composite injectivity',text:'g composed with f is injective.',sources:[source]}],grounds:[{id:'h',reason:'h',premises:[],conclusion:'I',sources:[source],scope:'The displayed functions.',rationale:'Selected hypotheses.'},{id:'a',reason:'a',premises:['I'],conclusion:'G',sources:[source],scope:'This composition.',rationale:'Injectivity applied twice.'}],goal:'G'};
+  const supplied=JSON.stringify(proposal);ownedClipboard.add(supplied);await vscode.env.clipboard.writeText(supplied);await click('Import proposal from clipboard');
+  assert.equal(report.requests.filter(m=>m==='route_material_accept'||m==='route_run').length,0);
+  await click('Edit summary',1);assert.match(last.material.review.claims[1].text,/For injective/);assert.equal(last.material.proposal,supplied);
+  await panel.webview.postMessage({type:'fixture_select'});await pause(100);await click('Admit selected grounds');assert.ok(last.pendingSaved);assert.equal(report.requests.filter(m=>m==='route_run').length,0);
+  await click('Search under these admissions');assert.equal(last.result.routes.length,1);assert.ok(last.proposalRevision);
+  report.checks.push('native source capture, exact clipboard handoff, attributed import, summary correction, explicit admission and Lean search');
+  config.sourcePhase='restart';config.sourceResult=last.revision;await fs.writeFile(cfgPath,JSON.stringify(config,null,2));await save();
+  if(ownedClipboard.has(await vscode.env.clipboard.readText()))await vscode.env.clipboard.writeText(clipboard);
+  reloading=true;void vscode.commands.executeCommand('workbench.action.reloadWindow');
+ }catch(error){report.failure=error.stack;await save();}
+ finally{
+  if(bridge&&raw)bridge.runBridge=raw;
+  vscode.window.showQuickPick=original.pick;vscode.window.showInputBox=original.input;vscode.window.createWebviewPanel=original.create;vscode.window.showErrorMessage=original.error;
+  if(ownedClipboard.has(await vscode.env.clipboard.readText()))await vscode.env.clipboard.writeText(clipboard);
+  if(!reloading){await save();if(report.complete)await vscode.commands.executeCommand('workbench.action.closeWindow');}
+ }
+}
+
 module.exports={activate:context=>{void run(context).catch(console.error);}};
 module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

@@ -8,6 +8,7 @@ function harness(store={intents:new Map(),results:new Map()}){
  const q=request();let location={uri:'file:///tmp/source.md',revision:'a'.repeat(64),start:0,end:0};
  const defaultService=async p=>{
   if(p.method==='route_list')return {records:[...store.results.values()].map(r=>({goal:'Euclid lemma',revision:r.revision,routes:1,checked:'now'}))};
+  if(p.method==='route_material_list')return {materials:[]};
   if(p.method==='route_pending')return {pending:[...store.intents.entries()].filter(([id])=>!store.results.has(id)).map(([id,v])=>({goal:'Euclid lemma',intent:v.intent,request_id:id}))};
   if(p.method==='route_example')return {request:structuredClone(q)};
   if(p.method==='route_stage'){
@@ -32,11 +33,11 @@ function harness(store={intents:new Map(),results:new Map()}){
  const raw=async p=>{requests.push(p);return service(p);};
  const controller=registerJustification({vscode,context,register:(id,fn)=>commands.set(id,fn),bridge:raw,rawBridge:raw,projectRoot:async()=>'/tmp/mrw-unit-project',reading:{currentLocation:()=>structuredClone(location),returnToStudy:async loc=>origins.push(loc)},show:async()=>{},artifactClients:clients});
  const open=async()=>{await commands.get('mrw.openJustification')();return panels.at(-1);};
- const send=async(type,panel=panels.at(-1))=>{await panel.receive({type,generation:panel.messages.at(-1).generation});await new Promise(r=>setTimeout(r,15));};
+ const send=async(type,panel=panels.at(-1),fields={})=>{await panel.receive({type,generation:panel.messages.at(-1).generation,...fields});await new Promise(r=>setTimeout(r,15));};
  return {store,defaultService,setLocation(v){location=v;},commands,requests,panels,errors,clients,picks,warnings,origins,controller,vscode,open,send,setService(fn){service=fn;}};
 }
 test('opening an example performs no build, search, admission or persistence',async()=>{
- const h=harness(),p=await h.open();assert.deepEqual(h.requests.map(r=>r.method),['route_list','route_pending','route_example']);
+ const h=harness(),p=await h.open();assert.deepEqual(h.requests.map(r=>r.method),['route_list','route_pending','route_material_list','route_example']);
  assert.ok(p.webview.html.includes('Opening justification'));assert.ok(p.messages.at(-1).pending);assert.equal(p.messages.at(-1).result,null);
 });
 test('failed search preserves exact pending request and reenables controls for explicit retry',async()=>{
@@ -61,8 +62,8 @@ test('closed reader keeps its move guard until the in-flight action settles',asy
  assert.equal(h.controller.current,undefined);
 });
 test('reopening a retained result uses no live checker',async()=>{
- const h=harness(),rev='b'.repeat(64);h.setService(async p=>p.method==='route_list'?{records:[{goal:'Euclid lemma',revision:rev,routes:1,checked:'now'}]}:p.method==='route_pending'?{pending:[]}:result(request(),rev));
- h.picks.push(items=>items.find(i=>i.revision===rev));await h.open();assert.deepEqual(h.requests.map(r=>r.method),['route_list','route_pending','route_read']);
+ const h=harness(),rev='b'.repeat(64);h.setService(async p=>p.method==='route_list'?{records:[{goal:'Euclid lemma',revision:rev,routes:1,checked:'now'}]}:p.method==='route_material_list'?{materials:[]}:p.method==='route_pending'?{pending:[]}:result(request(),rev));
+ h.picks.push(items=>items.find(i=>i.revision===rev));await h.open();assert.deepEqual(h.requests.map(r=>r.method),['route_list','route_pending','route_material_list','route_read']);
  assert.equal(h.controller.current.value.revision,rev);await h.send('return');assert.equal(h.origins.length,1);
 });
 
@@ -73,7 +74,7 @@ test('fresh activation reopens the exact failed context without checking or chan
  const next=harness(h.store);next.setLocation({uri:'file:///tmp/different.md',revision:'b'.repeat(64),start:3,end:3});
  next.picks.push(items=>items.find(i=>i.intent));await next.open();
  assert.deepEqual(next.controller.current.request,q);assert.deepEqual(next.controller.current.origin,origin);
- assert.deepEqual(next.requests.map(p=>p.method),['route_list','route_pending','route_resume']);
+ assert.deepEqual(next.requests.map(p=>p.method),['route_list','route_pending','route_material_list','route_resume']);
  await next.send('search');assert.equal(next.controller.current.value.revision,'a'.repeat(64));
  next.panels[0].dispose();next.picks.push(items=>{assert.ok(!items.some(i=>i.intent));return undefined;});await next.commands.get('mrw.openJustification')();
 });
@@ -82,4 +83,23 @@ test('failed durable staging never starts Lean and preserves the in-memory reque
  h.setService(p=>p.method==='route_stage'?Promise.reject(Error('save failed')):h.defaultService(p));await h.send('search');
  assert.equal(h.controller.current.request,q);assert.equal(h.requests.some(p=>p.method==='route_run'),false);
  assert.equal(h.panels[0].messages.at(-1).pendingSaved,false);
+});
+
+test('selected dirty Markdown is captured before the picker without saving or sending',async()=>{
+ const h=harness(),doc={uri:{scheme:'file',fsPath:'/tmp/note.md',toString:()=> 'file:///tmp/note.md'},languageId:'markdown',isDirty:true,getText:()=> '# Original\nExact buffer text',offsetAt:p=>p};
+ h.vscode.window.activeTextEditor={document:doc,selection:{isEmpty:false,start:11,end:28}};
+ h.picks.push(items=>{doc.getText=()=> 'later edit';return items.find(i=>i.kind==='selection');});
+ h.setService(async p=>p.method==='route_material_create'?{material:{id:'capture',sources:p.sources,origin:p.origin,review:null},material_revision:'b'.repeat(64)}:h.defaultService(p));
+ await h.open();const created=h.requests.find(p=>p.method==='route_material_create');
+ assert.equal(created.sources[0].text,'Exact buffer text');assert.equal(h.controller.current.material.sources[0].text,'Exact buffer text');
+ assert.equal(h.requests.some(p=>p.method==='route_stage'||p.method==='route_run'),false);
+});
+test('proposal corrections replace the view only after confirmed persistence; acceptance never searches',async()=>{
+ const h=harness(),m={id:'capture',sources:[{id:'s',title:'Chosen source',text:'exact'}],origin:null,proposal:'supplied',review:{goal:'g',attribution:'Supplied companion',claims:[{id:'g',title:'Goal',text:'Earlier'}],grounds:[]}};
+ h.setService(async p=>p.method==='route_material_list'?{materials:[{material_revision:'b'.repeat(64),title:'Goal',proposed:true}]}:p.method==='route_material_read'?{material:structuredClone(m),material_revision:'b'.repeat(64)}:p.method==='route_material_edit'?Promise.reject(Error('write failed')):p.method==='route_material_accept'?{request:request(),intent:'c'.repeat(64),origin:null,material:'b'.repeat(64)}:h.defaultService(p));
+ h.picks.push(items=>items.find(i=>i.materialRevision));await h.open();h.vscode.window.showInputBox=async()=> 'Corrected';
+ await h.send('edit_material',undefined,{claim:'g',field:'text'});assert.equal(h.controller.current.material.review.claims[0].text,'Earlier');
+ assert.match(h.errors[0],/write failed/);
+ await h.send('accept_material',undefined,{selected:['a']});assert.equal(h.controller.current.material,null);assert.ok(h.controller.current.intent);
+ assert.equal(h.requests.some(p=>p.method==='route_run'),false);
 });

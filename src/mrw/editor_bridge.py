@@ -66,6 +66,12 @@ def _dispatch(request):
         raise ValueError('Unsupported editor bridge protocol')
     method = request.get('method')
     fields = {
+        'route_material_create': ({'store','project_root','sources','origin'}, set()),
+        'route_material_list': ({'store','project_root'}, set()),
+        'route_material_read': ({'store','project_root','revision'}, set()),
+        'route_material_import': ({'store','project_root','revision','proposal'}, set()),
+        'route_material_edit': ({'store','project_root','revision','claim','field','value'}, set()),
+        'route_material_accept': ({'store','project_root','revision','selected'}, set()),
         'route_example': ({'path'}, set()),
         'route_prepare': ({'path'}, {'revision'}),
         'route_setup': ({'assets','cache'}, set()),

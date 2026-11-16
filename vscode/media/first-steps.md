@@ -331,6 +331,14 @@ no check; choose Search to retry. A completed result replaces the unfinished
 entry. If saving the context fails, keep the view open and retry; Lean has not
 started.
 
+To use your own note, select Markdown text and choose **Justification… → Use
+selected Markdown text**, or choose saved passages. **Copy passages for Codex**
+includes their exact text and a response schema. Import the companion response
+from the clipboard, correct its summaries, then select and **Admit selected
+grounds**. Search is a separate action. Source selections, responses and
+corrections reopen after restart. No note save or study registration is required.
+See the [existing-note workflow](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_GROUNDS_WORKFLOW.md).
+
 This checks the admitted composition, not the two arithmetic proofs. An empty
 bounded search is not a disproof. The
 [justification guide](https://github.com/flengyel/MRW/blob/main/docs/JUSTIFICATION_WORKFLOW.md)

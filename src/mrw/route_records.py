@@ -62,6 +62,22 @@ def bounded_tree(value):
         elif isinstance(item,list): pending.extend((v,depth+1) for v in item)
 
 
+def validate_sources(sources):
+    if not isinstance(sources,list) or not sources or len(sources)>32: raise ValueError('Choose at most 32 retained sources')
+    seen={};total=0
+    for s in sources:
+        exact_keys(s,{'id','title','reference','source_revision','sha256','text'},'source snapshot')
+        for key in ('id','title','reference'):text(s[key])
+        if s['id'] in seen: raise ValueError('Duplicate source ID')
+        if not isinstance(s['text'],str) or not s['text'].strip(): raise ValueError('Empty retained source')
+        source_bytes=s['text'].encode('utf-8');total+=len(source_bytes)
+        if len(source_bytes)>128*1024 or total>256*1024: raise ValueError('Retained source text limit')
+        if not isinstance(s['source_revision'],str) or not HEX.fullmatch(s['source_revision']) or s['sha256']!=digest(source_bytes):
+            raise ValueError('Retained source text or revision hash changed')
+        seen[s['id']]=s
+    return seen
+
+
 def parse_request(raw):
     if len(raw)>MAX_INPUT: raise ValueError('Route request exceeds 1 MiB')
     value=strict_json(raw);bounded_tree(value)
@@ -84,19 +100,7 @@ def parse_request(raw):
     for c in claims:
         if c['content_hash']!={'algorithm':'sha256','value':digest(c['assertion'].encode('utf-8'))}:
             raise ValueError('Claim assertion differs from its content hash')
-    sources=value['sources']
-    if not isinstance(sources,list) or not sources or len(sources)>32: raise ValueError('Choose at most 32 retained sources')
-    seen={};total=0
-    for s in sources:
-        exact_keys(s,{'id','title','reference','source_revision','sha256','text'},'source snapshot')
-        for key in ('id','title','reference'):text(s[key])
-        if s['id'] in seen: raise ValueError('Duplicate source ID')
-        if not isinstance(s['text'],str) or not s['text'].strip(): raise ValueError('Empty retained source')
-        source_bytes=s['text'].encode('utf-8');total+=len(source_bytes)
-        if len(source_bytes)>128*1024 or total>256*1024: raise ValueError('Retained source text limit')
-        if not isinstance(s['source_revision'],str) or not HEX.fullmatch(s['source_revision']) or s['sha256']!=digest(source_bytes):
-            raise ValueError('Retained source text or revision hash changed')
-        seen[s['id']]=s
+    sources=value['sources'];seen=validate_sources(sources)
     for item in [*claims,*admissions]:
         refs=item.get('basis_refs',item.get('representation_refs'))
         if not refs: raise ValueError('Every claim and admission needs an exact source reference')
@@ -222,7 +226,7 @@ def list_records(store, project_root):
     if len(files)>256: raise ValueError('Retained route listing exceeds its entry limit')
     total=0;count=0
     for p in sorted(files):
-        if p.name=='pending':
+        if p.name in ('pending','preparations'):
             if p.is_symlink() or not p.is_dir():raise ValueError('Invalid unfinished context directory')
             continue
         # A stopped private publisher may leave an unpublished staging file.
@@ -346,6 +350,9 @@ def action(request):
     store=request['store'];project=Path(request['project_root'])
     if not project.is_absolute() or project.resolve()!=project: raise ValueError('Use a canonical workspace project')
     project=str(project)
+    if method.startswith('route_material_'):
+        from .route_materials import action as material_action
+        return material_action(store,project,request)
     if method=='route_stage':
         from .route_pending import stage
         return stage(store,project,request['request'],request['origin'])

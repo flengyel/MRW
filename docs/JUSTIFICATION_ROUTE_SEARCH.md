@@ -146,3 +146,12 @@ The remaining central work is direct, reviewed assembly from existing notes
 and retained grounds, broader inference rules and comparison beyond the
 bounded Application search. General Hilbert/CS search, arbitrary sum
 construction and the deferred paper–Lean correspondence review remain open.
+
+## Prepare grounds from notes
+
+The [source-selection workflow](SOURCE_GROUNDS_WORKFLOW.md) prepares an exact
+clipboard handoff and imports an attributed proposal. Claims and arrows remain
+proposals until the reader explicitly admits selected grounds. Accepted claims
+are hashed again after summary corrections; all formula atoms bind those exact
+versions. Source captures and the original supplied response remain immutable.
+The route request and Lean inference profile are unchanged.

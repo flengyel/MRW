@@ -5,9 +5,9 @@ Open a document in place, follow its references, write while reading and return
 to the argument. It retains exact source passages and results while companion
 applications keep their editing and execution workflows.
 
-**MRW 0.23.43 — Resume unfinished justification.**
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-0.23.43.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.43)
+**MRW 0.23.44 — Grounds from existing notes.**
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-0.23.44.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.44)
 · [Installation](../docs/INSTALLATION.md).
 The extension ID is `flengyel.mrw`. GitHub updates require installing a newer
 VSIX; there is no Marketplace listing. MRW remains experimental.
@@ -60,6 +60,12 @@ A **ground** supports a claim. An **admission** records which assertion is
 accepted, by whom and within what scope. A **context** selects the admissions
 available to a derivation.
 
+Select Markdown text and choose **Justification… → Use selected Markdown text**,
+or choose saved passages. Copy their exact text and schema to Codex, import its
+proposal and correct claim summaries in the reader. Select the grounds to admit;
+Lean search remains a separate action. Sources, supplied attribution and corrections
+are retained. See the [workflow](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_GROUNDS_WORKFLOW.md).
+
 Choose **Proofs → Justification… → Explore Euclid’s lemma**. Read the supplied
 Bézout and unique-factorization arguments and their admissions, then choose
 **Search under these admissions**. MRW retains the checked routes and exact
@@ -80,9 +86,8 @@ is rejected. Saved results remain readable without this checker.
 
 The engine checks conditional composition under explicit admissions. It does
 not establish the two arithmetic proofs or an informal paper–Lean correspondence.
-An empty bounded search is not a disproof. Direct assembly of arbitrary contexts
-from notes remains pending; **Open an explicit context file…** is the current
-reviewed-input/developer route. [Guide and limits](../docs/JUSTIFICATION_WORKFLOW.md).
+An empty bounded search is not a disproof. **Open an explicit context file…**
+remains available for reviewed developer input. [Guide and limits](../docs/JUSTIFICATION_WORKFLOW.md).
 
 ## Mathematics and diagrams
 
@@ -113,9 +118,9 @@ store and a trusted file workspace.
 
 ## Package and install a VSIX
 
-Install `mrw-0.23.43.vsix` with **Extensions: Install from VSIX…** in the intended
+Install `mrw-0.23.44.vsix` with **Extensions: Install from VSIX…** in the intended
 workspace host. The recommended optional companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-diagnostics-0.1.0.vsix).
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-diagnostics-0.1.0.vsix).
 Its weekly reports are opt-in. Save work before a requested reload and retain
 workspace storage when upgrading.
 
@@ -124,8 +129,8 @@ To build from the repository root, use Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.43.vsix
-sha256sum vscode/mrw-0.23.43.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.44.vsix
+sha256sum vscode/mrw-0.23.44.vsix
 ```
 
 Packaging bundles the Python core and pinned Lean source assets, not a compiled
