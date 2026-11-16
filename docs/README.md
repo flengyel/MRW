@@ -20,7 +20,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Retain a Stacks Project or Kerodon section | [Published sources](STACKS_WORKFLOW.md) |
 | Distinguish a source item, its revision and a quoted passage | [Source identifiers](SOURCE_IDENTIFIERS.md) |
 | Ask about a passage using Codex or MRW's separate API connector | [AI assistance](READER_AI_WORKFLOW.md) |
-| Understand a claim's grounds, assumptions and checked inference steps | [Justification: purpose, example and current tools](JUSTIFICATION_WORKFLOW.md) |
+| Understand a claim's grounds, assumptions and checked inference steps | [Justification Logic: purpose, example and current tools](JUSTIFICATION_WORKFLOW.md) |
 | Inspect and edit a proof outline | [Proof outlines](PROOF_GRAPH_WORKFLOW.md) |
 | Use SageMath through Jupyter and SagePod | [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md) |
 | Retain, compare and export notebook results | [Notebook results](NOTEBOOK_RESULTS.md) |
@@ -43,7 +43,7 @@ that version and the saved records it produced.
   the canonical research model and justification engine, with SVG/PNG diagrams.
 - [CoCalc adapter proposal](COCALC_ADAPTER.md): remote project/notebook handoff,
   exported results, ownership and acceptance criteria; not yet implemented.
-- [Justification technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md):
+- [Justification Logic technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md):
   calculus, records, checked certificates and the two bounded executable cases.
 - [Design reconciliation register](DESIGN_RECONCILIATION.md): complete evaluation,
   adopted decisions, unresolved repairs and their completion evidence.
