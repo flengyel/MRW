@@ -103,3 +103,13 @@ test('proposal corrections replace the view only after confirmed persistence; ac
  await h.send('accept_material',undefined,{selected:['a']});assert.equal(h.controller.current.material,null);assert.ok(h.controller.current.intent);
  assert.equal(h.requests.some(p=>p.method==='route_run'),false);
 });
+
+test('opening catalogs never overlaps calls sharing the artifact coordinator lock',async()=>{
+ const h=harness();let active=false;
+ h.setService(async p=>{
+  if(!['route_list','route_pending','route_material_list'].includes(p.method))return h.defaultService(p);
+  assert.equal(active,false,'catalog requests overlap');active=true;
+  try{await new Promise(resolve=>setTimeout(resolve,5));return await h.defaultService(p);}finally{active=false;}
+ });
+ await h.open();assert.equal(h.errors.length,0);assert.ok(h.controller.current);
+});

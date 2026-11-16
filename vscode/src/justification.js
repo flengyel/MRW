@@ -126,7 +126,8 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
   const generation=++opening,editor=vscode.window.activeTextEditor,selected=materialTools.capture(editor);
   const origin=editor?.document.uri.scheme==='file'&&editor.document.languageId==='markdown'?{uri:editor.document.uri.toString(),revision:digest(editor.document.getText()),start:editor.document.offsetAt(editor.selection.start),end:editor.document.offsetAt(editor.selection.end)}:reading.currentLocation();
   const scope=await project();
-  const [listed,unfinished,materials]=await Promise.all([call(scope,'list'),call(scope,'pending'),call(scope,'material_list')]);
+  // These calls share the artifact coordinator's nonblocking process lock.
+  const listed=await call(scope,'list'),unfinished=await call(scope,'pending'),materials=await call(scope,'material_list');
   const choice=await vscode.window.showQuickPick([
     ...(selected?[{label:'Use selected Markdown text',kind:'selection',description:'Retain this exact buffer selection; no file save or model call'}]:[]),
     ...(selectPassages?[{label:'Choose saved passages…',kind:'passages',description:'Use explicitly selected retained passages'}]:[]),
