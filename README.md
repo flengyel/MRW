@@ -5,10 +5,11 @@ a VS Code workspace. Read a paper or note, follow its references, record an
 observation and return to the argument. MRW retains exact source passages and
 results; companion applications keep their editing and execution workflows.
 
-The justification engine helps examine the grounds for a claim. It checks how
-explicitly admitted reasons compose, preserves alternative routes and shows
-what remains after an admission is withdrawn. Its scope is described below;
-mathematical judgment remains with the reader.
+The Justification Logic engine makes reasons for mathematical assertions
+explicit. It checks how admitted reasons compose, retains alternative routes
+and shows which routes survive the withdrawal of a ground. The
+[introduction below](#justification-logic) explains the logic and its current
+implementation.
 
 **MRW 0.23.43 — Resume unfinished justification.**
 [Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.43/mrw-0.23.43.vsix)
@@ -71,11 +72,32 @@ independently. [Reader notes](docs/READER_NOTE_WRITING.md) ·
 | Retain a calculation | Capture a saved notebook, reopen its outputs, compare alternatives and export provenance. |
 | Consult AI | Copy selected material to Codex, or use the separate API request preview and explicit Send action. |
 
-## Justification
+<a id="justification"></a>
 
-A **ground** is a source, result or argument used to support a claim. An
-**admission** records which assertion is being accepted, by whom and within
-what scope. A **context** selects the admissions available to a derivation.
+## Justification Logic
+
+**Justification Logic** studies assertions together with explicit reasons for
+them. MRW follows the framework presented by Sergei Artemov and Melvin Fitting
+in *[Justification Logic: Reasoning with Reasons](https://doi.org/10.1017/9781108348034)*,
+Cambridge Tracts in Mathematics **216**, Cambridge University Press, **2019**.
+
+The expression `t:A` says that `t` is a reason for the assertion `A`.
+Application composes reasons: from `s:(A → B)` and `t:A`, it derives
+`s·t:B`. This gives an argument an inspectable dependency on its reasons.
+In MRW, those reasons can refer to exact source passages, retained calculation
+results or formal proof artifacts. Provenance identifies where an artifact
+came from; the logic checks the stated inference from admitted reasons.
+
+A **ground** is a source, result or argument offered in support of a claim.
+An **admission** records the assertion accepted for a particular argument,
+its scope and who admitted it. A **context** selects the admissions available
+to a derivation. Selecting or saving a passage does not admit its assertions.
+
+MRW implements non-factive J₀/J(CS) profiles: it does not infer bare `A` from
+`t:A`. The checker supports Application, Sum and its specified propositional
+rules. Sum represents alternative reasons, not accumulated confidence.
+The reader currently uses J₀ and searches bounded Application routes from
+explicit admissions.
 
 Choose **Proofs → Justification… → Explore Euclid’s lemma**. Its two arguments
 use Bézout’s identity and unique prime factorization. Read their source text
@@ -89,9 +111,11 @@ certificates and sources remain saved. Reopen either context through
 Unfinished searches reopen from the same picker with their exact saved context
 and Return location; retry remains explicit.
 
-This bounded checker verifies the admitted composition, not the arithmetic
-proofs or an informal paper–Lean correspondence. General proof search and
-assembly of arbitrary contexts from ordinary notes remain open work. The
+The checked routes are conditional on the displayed admissions. The Euclid
+example does not independently formalize its arithmetic arguments, and a
+checked formal statement does not establish its correspondence with a paper.
+General proof search and assembly of arbitrary contexts from ordinary notes
+remain open work. The
 [walkthrough](docs/JUSTIFICATION_EUCLID_EXAMPLE.md) gives both mathematical
 arguments; the [guide](docs/JUSTIFICATION_WORKFLOW.md) describes the supported
 interaction and limits.
@@ -210,7 +234,7 @@ They are not part of opening a note or following a link.
 ## Architecture
 
 MRW coordinates references and retained evidence while each companion owns its
-editor, kernel or execution service. Its core includes the justification engine,
+editor, kernel or execution service. Its core includes the Justification Logic engine,
 source stores and recording/recovery services. Capability-specific adapters
 connect documents, calculations, proof tools and AI.
 

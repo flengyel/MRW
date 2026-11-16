@@ -6,7 +6,7 @@ preserving the context needed to continue. The design uses ports and adapters:
 MRW's research services express the capabilities they need, and adapters connect those capabilities to the
 systems responsible for documents, sources and execution.
 
-![MRW architecture: the VS Code facade leads to workflow coordination, a canonical data model, the integral justification logic engine and core services. Ports and adapters connect documents, sources, computation, external proof checking, AI and planned diagnostics.](assets/mrw-architecture.png)
+![MRW architecture: the VS Code facade leads to workflow coordination, a canonical data model, the integral justification logic engine and core services. Ports and adapters connect documents, sources, computation, external proof checking, AI and optional diagnostics.](assets/mrw-architecture.png)
 
 [Scalable SVG](assets/mrw-architecture.svg) · [PNG](assets/mrw-architecture.png)
 
@@ -23,15 +23,23 @@ remaining acceptance work.
 | **Anti-corruption layer** | Translation preserves identity, revision, attribution and meaning across unlike systems; external formats and status conventions do not silently redefine MRW records. This is a software boundary, not a correctness guarantee. |
 | **Workflow coordination** | Connect reading, comparison, annotation, linking and resumption. Keep operations explicit and distinguish dispatch, acceptance and completion. |
 | **Canonical data model** | A narrow shared vocabulary for logical identities, current locations, immutable revisions/captures, associations, provenance, observed outcomes, claim versions, admissions, contexts and derivations. Ordinary documents remain in their native formats; no duplicate representation of every mathematical idea is required. |
-| **Justification logic engine** | Make the grounds for using a claim inspectable: its supporting passages, calculations or proof artifacts, admitted assumptions and inference steps. Check specified inferences under those assumptions; retain distinct grounds and their dependencies. The broader comparison workflow is pending. |
+| **Justification logic engine** | Represent and compose explicit reason assertions under selected premises; search bounded Application routes, retain separate dependencies and recheck successor contexts. Direct assembly from ordinary notes and broader inference remain open. |
 | **Core services** | Maintain storage invariants, retained references and lightweight operational usage records. Optional companions must not disable these protections. |
 
-The engine answers: **what grounds support this claim, and which assumptions
-does the argument use?** For example, a manuscript lemma may rely on a formal
-proof, a recorded Lean check, and a reviewed explanation of why that formal
-statement matches the prose. The engine keeps these grounds and bridges
-explicit and checks their stated composition. Provenance identifies origins;
-a justification records the admitted reasons for a conclusion.
+The engine uses **Justification Logic** to represent reasons within the logical
+language and check how they compose. Its logical basis follows Sergei Artemov
+and Melvin Fitting, [*Justification Logic: Reasoning with Reasons*](https://doi.org/10.1017/9781108348034),
+Cambridge Tracts in Mathematics 216 (Cambridge University Press, 2019), chapters
+2–3. A reason assertion `t:A` records `t` as a justification for the formula `A`.
+The non-factive calculus checks derivations of such assertions under explicit
+premises; it does not infer `A` from `t:A` alone.
+
+For example, two arguments for Euclid's lemma use different named theorems.
+The engine composes the admitted reasons, retains the separate routes and
+identifies which routes depend on a withdrawn premise. Exact source passages,
+provenance and checking records remain available alongside those derivations.
+The logical calculus and the records binding its premises to source material
+have distinct roles.
 
 The existing checker handles a range-lifting warrant and an offline
 documentary-response case. The [bounded search API](JUSTIFICATION_ROUTE_SEARCH.md)
@@ -42,7 +50,9 @@ Lean. The
 [Euclid example](JUSTIFICATION_EUCLID_EXAMPLE.md) supplies a public introduction.
 [The user guide](JUSTIFICATION_WORKFLOW.md) explains current commands and limits;
 [the technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)
-defines the non-factive J₀/J(CS) calculus and records. Ordinary reading requires
+defines the non-factive J₀/J(CS) checker profiles and records. The current reader
+transport uses J₀ only; bounded search introduces no constant-specification
+members. Ordinary reading requires
 no claim or premise-entry form.
 
 External systems retain ownership. The Zettelkasten application creates its

@@ -1,9 +1,13 @@
 # Justification-logic experiment
 
-Status: the Appendix A warrant slice and the offline documentary AI-response
-bridge are executable. The provider-backed Stage 1 mathematical-assistance
-trial remains pending. This document does not claim that every mathematical
+Status of this initial experiment: the Appendix A warrant slice and the offline
+documentary AI-response bridge are executable. The provider-backed Stage 1
+mathematical-assistance trial remains pending. This document does not claim that every mathematical
 reason should be encoded in justification logic.
+
+The later [bounded route search](JUSTIFICATION_ROUTE_SEARCH.md) and its reader
+workflow are implemented separately; this document retains the initial
+experiment's logical specification and acceptance boundaries.
 
 Current development order is recorded in the
 [reconciliation register](DESIGN_RECONCILIATION.md#current-implementation-order--15-november-2026).
@@ -18,11 +22,19 @@ This document specifies the logic and implementation boundaries.
 
 ## Purpose
 
-Provenance records where material came from and what checks were run. The
-justification layer expresses how explicitly admitted reasons combine to support
-a claim under a recorded context. Justification logic is therefore an
-integral warrant subsystem, not a sidecar attached to AI output. Its invocation
-is nevertheless task-dependent: not every mathematical object, response, or
+Justification Logic represents explicit reasons within the logical language.
+For a formula \(F\) and a justification term \(t\), the reason assertion \(t:F\)
+expresses that \(t\) is a justification for \(F\). Its inference rules describe
+how reasons compose. The implemented logical basis follows Artemov and Fitting's
+[*Justification Logic: Reasoning with Reasons*](https://doi.org/10.1017/9781108348034),
+specified below.
+
+MRW supplies the calculus with explicit premise admissions and a selected
+context. Separate artifact bindings identify the source passages, calculations
+or proof artifacts on which those admissions are based. Provenance records
+their origins; checking records identify particular checks. Neither relation
+automatically admits a premise. Justification Logic is integral to MRW; its
+invocation is task-dependent: not every mathematical object, response, or
 work artifact needs an explicit derivation. Its first question is concrete: can
 a later reader reconstruct why the selected Appendix A claim was admitted,
 which bridges were required, and which revisions those bridges depended on?
@@ -52,8 +64,9 @@ its only application.
 The initial family is the non-factive Artemov--Fitting system \(J_0\),
 parameterized as \(J(CS)\) when a proof may introduce members of a named constant
 specification as axioms. Both profiles admit justification constants as terms.
-The authoritative reference is Artemov and Fitting,
-*Justification Logic: Reasoning with Reasons*
+The authoritative reference is Sergei Artemov and Melvin Fitting,
+*Justification Logic: Reasoning with Reasons*, Cambridge Tracts in Mathematics
+216 (Cambridge University Press, 2019)
 ([book](https://doi.org/10.1017/9781108348034),
 [Chapter 2](https://doi.org/10.1017/9781108348034.003),
 [Chapter 3](https://doi.org/10.1017/9781108348034.004)).
@@ -75,6 +88,12 @@ not attempt to formalize all mathematical language.
 The checker represents the classical propositional basis, the Application and
 Sum axiom schemes, modus ponens, contextual premises, and, for \(J(CS)\), exactly
 the formulas belonging to the selected constant specification.
+
+The generic certificate checker supports both profiles. The current reader
+transport uses \(J_0\) only, and the
+[bounded Application search](JUSTIFICATION_ROUTE_SEARCH.md) introduces no
+constant-specification members. These implementation limits do not change the
+calculus specified here.
 
 Application composes a reason for \(F\to G\) with a reason for \(F\). Sum means
 that either summand is available as a reason for the same formula. Sum is not
@@ -236,8 +255,9 @@ purported member that does not terminate in an axiom instance and a membership
 representation that is not closed under suffixes. The same formula may occur
 in \(J_0\) as a contextual premise.
 
-The output says only that \(F_M\) is derivable relative to the displayed
-admissions, context, profile, and checker. It does not label \(F_M\) true,
+The output says that the reason assertion \(a\cdot(p\cdot k):F_M\) is derivable
+relative to the displayed admissions, context, profile, and checker. It does
+not derive the bare formula \(F_M\) from that assertion or label \(F_M\) true,
 known, understood, or accepted without qualification. Neither the converse
 bridge nor identity of \(F_L\) and \(F_M\) is inferred.
 

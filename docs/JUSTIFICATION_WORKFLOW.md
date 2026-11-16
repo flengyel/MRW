@@ -1,16 +1,66 @@
-# Justification: grounds for a mathematical claim
+# Justification Logic in MRW
 
-The engine makes the reasons for using a claim inspectable: the supporting
-passages, calculations or proof artifacts, the assumptions admitted, and the
-steps connecting those grounds to the conclusion. It helps answer a practical
-question when returning to an argument: **why was this claim used here?**
+<a id="justification-grounds-for-a-mathematical-claim"></a>
 
-The current Lean checker verifies specified inference steps under a recorded
-set of admissions. It does not search for arbitrary mathematical proofs.
-The [bounded route-search API](JUSTIFICATION_ROUTE_SEARCH.md) now finds
-alternative composed reasons from explicit admissions and rechecks a successor
-context after withdrawal. The reader retains these results and their exact
-source snapshots for later inspection. This is not a complete proof search.
+MRW uses Justification Logic to represent and check explicit reasons for a
+mathematical claim. A retained argument shows its supporting passages,
+calculations or proof artifacts, the assumptions admitted, and the steps
+connecting those grounds to the conclusion. It answers a practical question
+when returning to an argument: **why was this claim used here?**
+
+The reference is Sergei Artemov and Melvin Fitting,
+*Justification Logic: Reasoning with Reasons*, Cambridge Tracts in Mathematics
+216, Cambridge University Press, 2019
+([publisher](https://www.cambridge.org/core/books/justification-logic/8E496BD49A8141542587B78EFBFCD5A9);
+[DOI](https://doi.org/10.1017/9781108348034)).
+MRW implements a limited part of the formal framework developed in this book.
+Its records, checker and bounded search have the specific scope described below.
+
+## Justification assertions and reasons
+
+Let `A` and `B` be formulas expressing claims, and let `s` and `t` be
+justification terms. The assertion `t:A` says that `t` is a reason for `A`.
+The term makes the reason available for inspection instead of suppressing it
+in a bare assertion of the claim. In MRW, a claim's mathematical content remains
+in its versioned prose, LaTeX, Lean or other representation; an opaque atom
+identifies that exact claim version.
+
+Two operations on reasons are central:
+
+| Operation | Inference | Meaning |
+| --- | --- | --- |
+| Application | From `s:(A → B)` and `t:A`, derive `(s·t):B`. | Compose a reason for an implication with a reason for its premise. |
+| Sum | From `s:A`, derive `(s+t):A`; from `t:A`, derive `(s+t):A`. | Either summand suffices as an available reason for the same claim. |
+
+Sum does not measure confidence, independence or additional corroboration.
+Distinct arguments may share an admission; the retained dependencies show
+that overlap.
+
+MRW records a context: the exact admissions permitted in the argument, together
+with their sources, scope and attribution. The Lean checker verifies a
+certificate of derivation in the selected context and logic profile. The
+current profiles, `J₀` and `J(CS)`, are non-factive: deriving `t:A` alone
+does not license the further inference to `A`. Premise admission and the
+decision to rely on a claim remain explicit.
+
+A `J(CS)` profile also identifies a constant specification: the permitted
+constant assertions about logical axioms. It is not a list of trusted authors,
+books, model providers or software. The book treats broader logics and semantic
+conditions; MRW does not implement all of them. The present subsystem adds no
+factivity axiom, positive introspection or general semantic model checker.
+The [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#logical-basis)
+defines the implemented syntax and rules.
+
+The checker and search have different scopes. The checker supports the named
+profile's propositional axioms, Application, Sum, modus ponens, contextual
+premises and authorized constant-specification steps. The
+[bounded route search](JUSTIFICATION_ROUTE_SEARCH.md#scope-and-bounds) starts
+from admitted reason assertions and composes them through Application. It does
+not generate arbitrary sums, introduce constant-specification members or
+perform a complete Hilbert proof search. Each returned route carries a
+certificate accepted by the existing checker. Neither a limit nor an empty
+result proves that the goal is underivable. The reader uses the `J₀` transport;
+the generic Lean API also accepts valid `J(CS)` profiles within these limits.
 
 ## Read, search and resume grounds
 
@@ -84,10 +134,11 @@ Lean's `CategoryTheory.Dom.exists_total_lift_iff_rangeLiftPullback_section`.
 Its logical details are in the [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#appendix-a-slice).
 
 A changed or disputed correspondence raises a concrete question: which routes
-use it, and is there another argument? The proposed interactive workflow will
-compare those routes and create a successor context when an admission is
-withdrawn. The earlier context and its certificate remain inspectable.
-General route search and that complete interaction are not delivered.
+use it, and is there another argument? The bounded reader workflow can compare
+the routes in an explicit context, withdraw an admission and check a successor.
+Its earlier context and certificates remain inspectable. Direct reviewed
+assembly from arbitrary notes and paper–Lean correspondence review remain
+separate pending work; the range-lifting example supplies no automatic bridge.
 
 ## What the records establish
 
@@ -97,7 +148,11 @@ General route search and that complete interaction are not delivered.
 | External verification | What exact artifact was checked, by which tool and environment? |
 | Premise admission | Which assertion or bridge was explicitly allowed in this argument? |
 | Checked justification | Do the stated inference steps yield the displayed conclusion under those admissions? |
-| Human assessment, recorded separately | What grounds were accepted, challenged or qualified, and why? Judgments can remain in ordinary notes; the complete assessment/comparison interface remains pending. |
+| Human assessment, recorded separately | Why were grounds or bridges accepted, challenged, qualified or withdrawn? Judgments can remain in ordinary notes. |
+
+Provenance and source links identify origins and passages; a Justification Logic
+certificate checks inference under a specified profile and context. The source
+graph does not itself supply those logical steps.
 
 A citation does not automatically admit its source's assertion. A successful
 formal check does not supply the manuscript correspondence. Several citations
@@ -109,7 +164,8 @@ questions available for examination; mathematical judgment remains necessary.
 
 | Task | Existing route and limit |
 | --- | --- |
-| Inspect retained evidence in VS Code | Run **MRW: Inspect Retained Record**. Choose **Documentary warrant package** and its directory, or **Verification and matching bundle** and select both files. Inspection validates and displays existing records; it creates no admission and invokes no checker. |
+| Search and compare admitted grounds | Choose **Proofs → Justification…**. The bounded reader retains checked routes and exact source snapshots, supports withdrawal and reopens completed or unfinished contexts. Arbitrary context assembly from ordinary notes still uses reviewed developer input. |
+| Inspect retained evidence in VS Code | Run **MRW: Inspect Retained Record**. Choose **Documentary warrant package** and its directory, or **Verification and matching bundle** and select both files. Inspection validates and displays existing records; it creates no admission and does not rerun Lean. |
 | Read the manuscript example | Run `mrw why PATH/TO/rs_Appendix_A.tex`. This requires the exact supported manuscript revision and reads the packaged, previously checked bundle. It neither checks a new proof nor supports arbitrary manuscripts. |
 | Reopen a documentary package | Run `mrw show-documentary PACKAGE_DIRECTORY`. This displays the retained package without another model request or Lean run. |
 
@@ -118,8 +174,10 @@ Admitting that documentary fact does not admit the mathematical assertion
 written in the passage. An independently supported mathematical argument can
 cite its own grounds even if a model suggested the question.
 
-Ordinary reading and note-taking require no claims, logic terms or admission
-forms. The complete generic claim-to-alternative-arguments interface is pending.
+Ordinary reading and note-taking require no claim-entry or admission form.
+Direct reviewed assembly of arbitrary contexts from existing notes and retained
+grounds remains pending. The current bounded comparison and resumption tools
+are described above.
 
 ## Documentary response commands
 
@@ -158,6 +216,9 @@ Use `--help` on each command for the supported options. The
 [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#executable-offline-documentary-bridge)
 defines the checks, chronology and logical limits.
 
-The implementation uses the non-factive J₀/J(CS) calculus in
-`lean/MRW/Justification/`. Python binds, validates and retains its artifacts;
-it does not implement a second inference checker.
+The integral checker lives in `lean/MRW/Justification/`; the bounded search
+uses its separate route-build profile. Python binds, validates and retains the
+artifacts and source snapshots; it does not implement a second inference
+checker. The [route-search guide](JUSTIFICATION_ROUTE_SEARCH.md) records the
+bounds and setup, and the [unfinished-context guide](UNFINISHED_CONTEXTS.md)
+records the resumption contract.
