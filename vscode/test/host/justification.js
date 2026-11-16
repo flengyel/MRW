@@ -136,7 +136,7 @@ async function sourceWorkflow(context,marker,config){
   await wait(()=>last&&(config.sourcePhase?last.revision===config.sourceResult:!!last.material),'source workflow reader',45000);
   if(config.sourcePhase){
    assert.equal(last.result.routes.length,1);assert.ok(last.proposalRevision);assert.ok(!report.requests.slice(opened).some(m=>['route_run','route_stage','route_material_accept','route_setup'].includes(m)));
-   report.checks.push('real host restart reopens checked grounds with proposal provenance, without search or admission');report.complete=true;
+   assert.deepEqual(report.errors,[]);report.checks.push('real host restart reopens checked grounds with proposal provenance, without search or admission');report.complete=true;
    await guard.clearOwnedState(context);await save();await fs.writeFile(path.join(root,'ready'),'complete');return;
   }
   const click=async(label,index=0)=>{await wait(()=>!last.busy&&dom.includes(label),label,45000);const generation=last.generation;await panel.webview.postMessage({type:'fixture_click',label,index});await wait(()=>last.generation>generation&&!last.busy,label+' completes',45000);};
