@@ -45,7 +45,8 @@ Do not disable every extension: doing so can disable remote resolution. Keep
 the working profile and windows open. The isolated profile does not need GitHub
 sign-in or Settings Sync. Do not substitute the working profile when setup fails.
 
-Supported cases are `isolation`, `sourceTrash`, `activation`, `sourceReturn` and `warrantInspection`. The activation
+Supported cases are `isolation`, `sourceTrash`, `activation`, `sourceReturn`,
+`warrantInspection` and `justification`. The activation
 case uses a guarded bootstrap before its run-style test entry. Other older
 cases require explicit fixture/UI migration before they are added to this list.
 `--seed` copies at most 4,000 entries/64 MiB into the new project; symlinks and private
