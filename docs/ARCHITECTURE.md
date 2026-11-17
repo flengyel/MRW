@@ -1,8 +1,10 @@
 # Architecture in brief
 
-MRW is an integration workbench for mathematical research. It connects reading,
-notes, calculations, proof work and the reasons supporting claims while
-preserving the context needed to continue. The design uses ports and adapters:
+MRW supports mathematical understanding and research, including work on
+AI-generated papers and AI-formalized Lean developments. Its architecture
+connects reading, notes, calculations, proof work, deliberate practice and the
+reasons supporting claims while preserving the context needed to continue.
+The design uses ports and adapters:
 MRW's research services express the capabilities they need, and adapters connect those capabilities to the
 systems responsible for documents, sources and execution.
 
@@ -21,10 +23,19 @@ remaining acceptance work.
 | **Facade** | Contextual VS Code actions provide a coherent route into MRW services and native editors. The facade does not replace those editors. |
 | **Ports and adapters** | Capability-specific interfaces connect notes, sources, computation, proof tools, AI and inspection. Adapters translate each external system's API and data. |
 | **Anti-corruption layer** | Translation preserves identity, revision, attribution and meaning across unlike systems; external formats and status conventions do not silently redefine MRW records. This is a software boundary, not a correctness guarantee. |
-| **Workflow coordination** | Connect reading, comparison, annotation, linking and resumption. Keep operations explicit and distinguish dispatch, acceptance and completion. |
+| **Workflow coordination** | Connect reading, comparison, annotation, linking, attempts, feedback, correction, review and resumption. Keep operations explicit and distinguish dispatch, acceptance and completion. |
 | **Canonical data model** | A narrow shared vocabulary for logical identities, current locations, immutable revisions/captures, associations, provenance, observed outcomes, claim versions, admissions, contexts and derivations. Ordinary documents remain in their native formats; no duplicate representation of every mathematical idea is required. |
 | **Justification logic engine** | Represent and compose explicit reason assertions under selected premises; search bounded Application routes, retain separate dependencies and recheck successor contexts. [Source-driven context assembly and review](SOURCE_GROUNDS_WORKFLOW.md) are implemented for existing notes and retained passages; broader inference remains open. |
 | **Core services** | Maintain storage invariants, retained references and lightweight operational usage records. Optional companions must not disable these protections. |
+
+Learning is a purpose of these services. The [study workflow](ACTIVE_STUDY_WORKFLOW.md)
+connects source-bound questions, attempts, retained feedback, correction and
+spaced review; it is entered explicitly so ordinary reading remains independent.
+Current tools preserve attempts, revisions, retained feedback, reader-reported
+outcomes and observed answer exposure as distinct records. Navigation, saved evidence and successful
+formal checks must not be reported as evidence of understanding by themselves.
+The [vision](../VISION.md) distinguishes explanatory, practical, epistemic and
+organizational benefits.
 
 The engine uses **Justification Logic** to represent reasons within the logical
 language and check how they compose. Its logical basis follows Sergei Artemov

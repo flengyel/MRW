@@ -3,12 +3,18 @@
 Start with the [project README](../README.md) for current capabilities and the
 [installation guide](INSTALLATION.md) for a Linux, WSL2 or Remote SSH workspace.
 The installed **MRW: Open Tutorial** command describes the active extension build.
+Understanding mathematics, including AI-generated arguments and AI-formalized
+Lean developments, is a central purpose. Use the study and proof-work guides for
+attempts, feedback, correction and later reconstruction alongside reading,
+calculation and source navigation.
 
 ## User guides
 
 | Task | Guide |
 | --- | --- |
 | Read a mathematical argument, keep a failed approach and resume its notes | [Mathematics in ordinary notes](MATHEMATICS_WITH_NOTES.md) |
+| Practise a proof step or example, retain feedback and resume an attempt | [Source study and deliberate practice](ACTIVE_STUDY_WORKFLOW.md) |
+| Work through a proof with its cited passages and questions | [Proof work](PROOF_STUDY_WORKFLOW.md) |
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
 | Reopen recent notes, PDFs and text files | [Recent Documents](RECENT_DOCUMENTS.md) |
@@ -31,9 +37,11 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
 | Prepare to rename a folder containing an MRW workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
 
-Optional [source study](ACTIVE_STUDY_WORKFLOW.md) and
-[proof study](PROOF_STUDY_WORKFLOW.md) support selected passages,
-questions and saved work. They are separate from ordinary document navigation.
+Starting a recorded [source study](ACTIVE_STUDY_WORKFLOW.md) or
+[proof study](PROOF_STUDY_WORKFLOW.md) is explicit; ordinary document navigation
+remains available independently. Practice stays tied to the selected mathematics.
+The source-study guide describes the current attempt, assistance and exposure
+rules.
 The document Problems interface was removed in 0.23.3; its
 [earlier workflow](DOCUMENT_LEARNING_WORKFLOW.md) is retained only to explain
 that version and the saved records it produced.

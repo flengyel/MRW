@@ -1,5 +1,24 @@
 # Codex instructions
 
+## Mathematical purpose
+
+MRW supports understanding and working with mathematics, including AI-generated
+papers and AI-formalized Lean developments. Deliberate practice is a central
+learning purpose: attempts, feedback, correction, reconstruction, changed
+examples and later revisits. Evaluate this purpose alongside research
+continuity, source retention, provenance and justification when reviewing the
+design, comparing related systems or choosing maintenance work.
+
+Use [VISION.md](VISION.md), the [research design](docs/RESEARCH_WORKSTATION_DESIGN.md)
+and the [study workflow](docs/ACTIVE_STUDY_WORKFLOW.md). Within an explicitly
+started study, support the attempt, feedback, correction and later-revisit
+sequence and preserve the distinctions among unaided, assisted, unresolved and
+skipped work. Ordinary reading remains independent. Neither opening a source,
+viewing an answer, an AI assessment nor a successful Lean check alone establishes
+mathematical understanding. Describe current reveal and outcome rules accurately
+when assessing practice enforcement; new controls require their own implementation
+and evidence.
+
 ## Current authority and maintenance
 
 Use the [design reconciliation register](docs/DESIGN_RECONCILIATION.md) for

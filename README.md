@@ -1,9 +1,12 @@
 # Mathematical Research Workstation
 
-MRW brings mathematical reading, source notes, calculations and proof work into
-a VS Code workspace. Read a paper or note, follow its references, record an
-observation and return to the argument. MRW retains exact source passages and
-results; companion applications keep their editing and execution workflows.
+MRW helps mathematicians understand and work with mathematics, including
+AI-generated papers and AI-formalized Lean developments. It brings reading,
+source notes, calculations, proof work and deliberate practice into a VS Code
+workspace. Reconstruct an argument, attempt a proof step or example, examine
+feedback, correct the work and return to it later. MRW retains exact source
+passages, results and attempts; companion applications keep their editing and
+execution workflows.
 
 The [field-trace example](docs/examples/field-trace/trace.md) starts with a
 counterexample to a coefficient formula and proves the missing degree factor.
@@ -69,9 +72,48 @@ independently. [Reader notes](docs/READER_NOTE_WRITING.md) ·
 | Read a PDF | Open it in a registered viewer and keep the referring document available. A separate source note needs no OCR. |
 | Write mathematics | Render notation and supported note-local macros; compile fenced TikZ diagrams explicitly. |
 | Work with a proof | Open Lean source with the official Lean extension, or inspect a Proof Outline and its cited passages. |
+| Practise the current mathematics | Source-bound questions, submitted attempts, retained feedback, revisions, Resume Study and opt-in spaced review. |
 | Compare grounds | Search under displayed admissions, retain checked routes, inspect their sources and open a successor or predecessor context. |
 | Retain a calculation | Capture a saved notebook, reopen its outputs, compare alternatives and export provenance. |
 | Consult AI | Copy selected material to Codex, or use the separate API request preview and explicit Send action. |
+
+<a id="optional-source-study"></a>
+
+## Understand mathematics through deliberate practice
+
+Understanding existing literature and AI-generated mathematics is a central
+MRW purpose. Deliberate practice connects an attempt to feedback, correction,
+and later reconstruction or application. Reading and retaining a result support
+that work; they do not establish that the argument can be reconstructed or used.
+
+1. Select a saved text passage and run **MRW: Study Current Material**. Enter a
+   question or use **Request questions from Codex** to prepare source-bound
+   questions for review.
+2. Attempt a missing step, explanation, example or reconstruction in text or on
+   paper, then submit the work.
+3. Compare it with the source, a reference answer or retained companion feedback.
+   Submit revised work and record whether assistance was used.
+4. Revisit a selected question through **Keep for spaced review**, or work a
+   changed example to examine application of the method. **Resume Study**
+   restores the saved question and draft.
+
+When a paper has an associated Lean development, use the official Lean
+extension to inspect the relevant declaration, its hypotheses and its proof.
+Practice may include reconstructing a proof step in a working copy. A successful
+Lean check concerns the formal statement; it establishes neither understanding
+nor an unreviewed correspondence with the paper.
+
+The current study tools preserve attempts, revisions, reported outcomes,
+answer exposure and feedback. Hints, source text and reference answers may be
+revealed on request. Assisted completion remains distinct from unaided recall;
+revealing an answer creates no successful recall observation.
+
+Starting a recorded study is explicit. Ordinary reading stays available
+independently, and practice stays tied to the selected mathematical work. History inspection/export and
+Archive/Restore or Trash controls preserve saved studies.
+[Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
+[Proof work](docs/PROOF_STUDY_WORKFLOW.md) ·
+[Lifecycle and recovery](docs/STUDY_LIFECYCLE.md).
 
 <a id="justification"></a>
 
@@ -231,19 +273,10 @@ Codex handoff. Shared history and weekly reporting are optional; missing
 observations are not zero use. [Diagnostics](diagnostics/README.md) ·
 [Shared history](docs/USAGE_HISTORY.md).
 
-## Optional source study
-
-Saved studies, attempts, proof-work questions and opt-in spaced review remain
-separately accessible through the Command Palette. **Resume Study**, history
-inspection/export and Archive/Restore or Trash controls preserve earlier work.
-They are not part of opening a note or following a link.
-[Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) ·
-[Lifecycle and recovery](docs/STUDY_LIFECYCLE.md).
-
 ## Architecture
 
-MRW coordinates references and retained evidence while each companion owns its
-editor, kernel or execution service. Its core includes the Justification Logic engine,
+MRW coordinates reading, deliberate practice, research continuity and retained
+evidence while each companion owns its editor, kernel or execution service. Its core includes the Justification Logic engine,
 source stores and recording/recovery services. Capability-specific adapters
 connect documents, calculations, proof tools and AI.
 
@@ -251,8 +284,9 @@ connect documents, calculations, proof tools and AI.
 
 [Architecture](docs/ARCHITECTURE.md) · [Scalable diagram](docs/assets/mrw-architecture.svg) ·
 [Design and current status](docs/DESIGN_RECONCILIATION.md).
-The proposed [CoCalc adapter](docs/COCALC_ADAPTER.md), general context assembly
-and broader inference search remain unimplemented.
+The proposed [CoCalc adapter](docs/COCALC_ADAPTER.md) and broader inference
+search remain unimplemented. Source-driven context assembly and review are
+available through the [existing-note workflow](docs/SOURCE_GROUNDS_WORKFLOW.md).
 
 ## Limits and contributions
 
