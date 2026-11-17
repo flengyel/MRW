@@ -120,22 +120,10 @@ Three routes are involved:
 | Open in Obsidian | URI names the selected vault and relative note path. | The desktop accepted the address; MRW receives no confirmation that Obsidian found the note. |
 | Open in MRW from Obsidian | The optional Templater command opens an MRW URI containing the workspace, notes root and relative Markdown filename. | MRW validates scope and opens that file's current contents. This is not a retained citation. |
 
-For New Note, MRW checks `.obsidian` in the selected notes root. It asks the CLI
-for that vault's actual path and compares it with the configured root before
-listing its commands and checking the chosen command ID. In WSL, it compares
-`/mnt/c/...` with the corresponding Windows path. It then opens the vault through
-`obsidian://open` and invokes the command once. Paths and command IDs are passed
-as arguments, not interpolated into a shell command. Each CLI call has a
-15-second timeout; a timeout during invocation may leave the result uncertain.
-
-The following shows the CLI sequence with illustrative values. The last line
-**creates a note or starts its template prompts**; the first two inspect the vault.
-
-```sh
-obsidian vault="Your vault" vault info=path
-obsidian vault="Your vault" commands
-obsidian vault="Your vault" command id="templater-obsidian:create-Templates/NewFileTemplate.md"
-```
+For New Note, MRW checks the configured vault and command before invoking it
+once. A timeout can leave dispatch uncertain; check Obsidian before retrying.
+Obsidian documents its [CLI](https://help.obsidian.md/cli) and
+[URI handler](https://help.obsidian.md/uri) separately.
 
 The MRW source passage is not sent to the template. MRW neither receives the
 new filename nor waits for the user to finish writing. Complete and save the
@@ -143,13 +131,6 @@ note in Obsidian, then use Open in MRW if you want to read it there. For an
 already open Markdown note, external edits can refresh its clean MRW preview;
 unsaved VS Code text is preserved. This is shared-file access, not synchronization
 between separate copies.
-
-Implementation: [command dispatch](../vscode/src/obsidianNotes.js),
-[document routing and source Return](../vscode/src/documents.js),
-[note-link scope](../vscode/src/noteLinks.js), and
-[clean-preview refresh](../vscode/src/noteRefresh.js).
-Obsidian documents its [CLI](https://help.obsidian.md/cli) and
-[URI handler](https://help.obsidian.md/uri) separately.
 
 ## Open a notes folder without import
 
@@ -214,7 +195,7 @@ For a link delivered to the wrong VS Code window, see
 ## Import Markdown text
 
 Import only when a separate retained copy or text insertion is useful. Run
-**MRW: Import Markdown Text…** from the Studies menu or Command Palette, choose
+**MRW: Import Markdown Text…** from the Command Palette, choose
 a destination, then select a `.md` or `.markdown` file.
 
 | Destination | Result |

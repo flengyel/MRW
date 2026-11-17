@@ -162,8 +162,8 @@ subdirectory (preferably `<vault>/MRW/`) or the vault root. It imports and verif
 private history before changing the connection. Original files remain. Only
 `History/` is managed. Existing Syncthing/SyncTrayzor handles synchronization.
 Read the [shared-history workflow](USAGE_HISTORY.md) for offline recovery,
-conflicts, deletion and the recording switch. The published 0.23.12 package does
-not contain this increment. Active checkpoints and scheduling remain private.
+conflicts, deletion and the recording switch. Active checkpoints and scheduling
+remain private.
 
 A recorder failure displays a history gap and buffers events while keeping
 reading and drafts usable. A failed study checkpoint is reported separately;
@@ -192,6 +192,7 @@ test counts nor these reports establish a learning benefit.
 
 ## Manage saved studies
 
-Use the native study row menu for **Archive Study** or **Delete Study…**.
+Run **MRW: Archive Study** or **MRW: Delete Study…** from the Command Palette
+and select the saved record.
 [Archive, Restore, Trash, Undo and permanent deletion](STUDY_LIFECYCLE.md)
 manage optional saved work without deleting ordinary documents or shared sources.

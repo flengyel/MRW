@@ -76,8 +76,8 @@ the earlier selection remains available if exact undo restores that revision.
 
 ## Vertex elimination
 
-A graph operation that removes a vertex after joining each of its predecessors
-to each of its successors. In the proof-outline view, hidden vertices are
+In a directed acyclic proof graph, vertex elimination removes a vertex after
+joining each of its predecessors to each of its successors. In the proof-outline view, hidden vertices are
 omitted from the display while the original graph and derivations remain
 available for expansion. Each summarized proof region has a visible claim and explanation;
 required assumptions and joint premises are preserved. This is distinct from

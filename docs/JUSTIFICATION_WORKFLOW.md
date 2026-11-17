@@ -115,29 +115,16 @@ the conditional composition of those grounds, not the arithmetic proofs.
 
 <a id="example-using-a-formal-proof-in-a-manuscript"></a>
 
-## Existing regression: a range-lifting warrant
+## Relate a formal proof to a manuscript
 
-Suppose a manuscript lemma is supported by a theorem checked in Lean. Three
-grounds need to remain visible:
+A formal check concerns an exact declaration in a recorded environment. Using
+it to support a manuscript also requires an admitted proof policy and a reviewed
+correspondence between the formal proposition and the prose statement. MRW
+checks how those grounds compose under the selected admissions; it does not
+automatically establish the correspondence.
 
-| Ground | What must be recorded |
-| --- | --- |
-| The formal proof was checked | The exact declaration, source and environment revisions, checker command and result. |
-| The check supports the formal proposition | The explicitly admitted proof policy and its scope. |
-| The formal proposition supports the manuscript lemma | A reviewed correspondence between the exact formal statement and the exact prose statement, with the person or policy admitting that bridge. |
-
-The engine checks how these grounds combine to support the manuscript claim
-under those admissions. Its retained account shows the claim, the route,
-the assumptions and the source revisions. This is the existing regression from the Categorical Rice–Shapiro
-manuscript (`rs_Appendix_A.tex`): the range-lifting lemma `lem:range-lifting-pullback-section`, linked to
-Lean's `CategoryTheory.Dom.exists_total_lift_iff_rangeLiftPullback_section`.
-Its logical details are in the [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#appendix-a-slice).
-
-A changed or disputed correspondence raises a concrete question: which routes
-use it, and is there another argument? The bounded reader workflow can compare
-the routes in an explicit context, withdraw an admission and check a successor.
-Its earlier context and certificates remain inspectable. Source-driven assembly is available through the reader; paper–Lean correspondence
-review remains separate pending work; the range-lifting example supplies no automatic bridge.
+The [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#appendix-a-slice)
+contains the pinned regression case and its checker details.
 
 ## What the records establish
 
@@ -165,8 +152,6 @@ questions available for examination; mathematical judgment remains necessary.
 | --- | --- |
 | Search and compare admitted grounds | Choose **Proofs → Justification…**. The bounded reader retains checked routes and exact source snapshots, supports withdrawal and reopens completed or unfinished contexts. Selected Markdown text or saved passages can supply a companion proposal for review and explicit admission. |
 | Inspect retained evidence in VS Code | Run **MRW: Inspect Retained Record**. Choose **Documentary warrant package** and its directory, or **Verification and matching bundle** and select both files. Inspection validates and displays existing records; it creates no admission and does not rerun Lean. |
-| Read the manuscript example | Run `mrw why PATH/TO/rs_Appendix_A.tex`. This requires the exact supported manuscript revision and reads the packaged, previously checked bundle. It neither checks a new proof nor supports arbitrary manuscripts. |
-| Reopen a documentary package | Run `mrw show-documentary PACKAGE_DIRECTORY`. This displays the retained package without another model request or Lean run. |
 
 The documentary case records **that a model returned a particular passage**.
 Admitting that documentary fact does not admit the mathematical assertion
@@ -178,46 +163,10 @@ Use [selected text or retained passages](SOURCE_GROUNDS_WORKFLOW.md) to prepare 
 companion proposal, correct summaries and explicitly admit grounds. The supplied
 response and exact source captures remain saved separately from admission.
 
-## Documentary response commands
+<a id="documentary-response-commands"></a>
 
-This is the current developer CLI for an existing finalized `ModelCall`, not a
-required reading workflow. It makes no new provider request. The commands below
-use placeholder paths and fresh record IDs; use new output files outside genuine
-research stores. Choose a passage after inspecting the retained response.
-`UTC_ADMISSION_TIME` must be the actual admission time, at or after the call's
-finalization and no later than the subsequent check.
-
-```sh
-mrw review-response MODEL_CALL
-mrw review-response MODEL_CALL --passage PASSAGE_NUMBER
-
-mrw project-response MODEL_CALL --passage PASSAGE_NUMBER \
-  --representation-id REPRESENTATION_ID --claim-id DOCUMENTARY_CLAIM_ID \
-  --output NEW_PROJECTION_JSON
-
-mrw admit-documentary NEW_PROJECTION_JSON \
-  --fixture-id RUN_ID --context-id CONTEXT_ID --admission-id ADMISSION_ID \
-  --admitted-by-kind person --admitted-by-id ACTOR_ID \
-  --at UTC_ADMISSION_TIME --rationale RATIONALE --scope SCOPE \
-  --derivation-id DERIVATION_ID --output NEW_ADMISSION_JSON
-
-mrw check-documentary NEW_PROJECTION_JSON NEW_ADMISSION_JSON \
-  NEW_PACKAGE_DIRECTORY --lean-root PATH_TO_MRW_LEAN_PROJECT
-
-mrw show-documentary NEW_PACKAGE_DIRECTORY
-```
-
-Projection retains the selected bytes and attribution without admitting a
-premise. Admission explicitly records only the documentary assertion.
-`check-documentary` validates the bindings, invokes this repository's pinned
-Lean checker and retains a new package; its destination must not exist.
-Use `--help` on each command for the supported options. The
-[technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#executable-offline-documentary-bridge)
-defines the checks, chronology and logical limits.
-
-The integral checker lives in `lean/MRW/Justification/`; the bounded search
-uses its separate route-build profile. Python binds, validates and retains the
-artifacts and source snapshots; it does not implement a second inference
-checker. The [route-search guide](JUSTIFICATION_ROUTE_SEARCH.md) records the
-bounds and setup, and the [unfinished-context guide](UNFINISHED_CONTEXTS.md)
-records the resumption contract.
+Developer commands for projecting, admitting and checking a retained model
+response are documented in the
+[technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#executable-offline-documentary-bridge).
+The [route-search guide](JUSTIFICATION_ROUTE_SEARCH.md) gives checker setup and
+bounds; the [unfinished-context guide](UNFINISHED_CONTEXTS.md) describes resumption.

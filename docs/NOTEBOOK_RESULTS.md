@@ -13,7 +13,8 @@ note, input data or method file. Nothing is imported into your notes folder.
 Dirty selected documents must be saved first; MRW does not save them for you.
 
 **MRW: Open Retained Notebook Result…** lists captures by title, date and evidence.
-It opens a read-only transcript and offers:
+With Jupyter installed, it opens a read-only native notebook with its saved rich
+outputs. Otherwise, it opens a plain-text transcript. The action picker offers:
 
 - Compare with another retained result, in VS Code's diff view.
 - Read a retained companion file.
@@ -21,7 +22,7 @@ It opens a read-only transcript and offers:
 - Export provenance and exact files.
 - Delete this retained copy after showing its scope.
 
-Escape closes the action picker and leaves the transcript open. Reopening,
+Escape closes the action picker and leaves the result open. Reopening,
 comparison and export do not start a kernel. **MRW: Open Link from Clipboard**
 follows a copied result link in its owning workspace. Paste that URI into an
 ordinary Markdown link to keep it beside the argument. Preview, Contents and
@@ -53,27 +54,29 @@ optional explicit execution helper. The helper starts a fresh kernel and records
 its report; it is not called by MRW. See the [profile](NOTEBOOK_PROVENANCE_PROFILE.md)
 for the exact receipt and export format.
 
-## Required display and comparison follow-up
+<a id="native-retained-result-viewing"></a>
 
-Current capture/export is delivered; the complete comparison route remains
-partial. Expose retained-result actions with notebook opening/setup, and keep
-links to input/method revisions and relevant source notes or proof work visible.
-Evaluate the native notebook view/diff first and
-[nbdime](https://nbdime.readthedocs.io/en/stable/cli.html) as a notebook-aware
-alternative before implementing a custom comparison engine. Adoption is not
-decided by naming the library; verify host compatibility, resource use and
-safe rendering of retained output. Preserve the present transcript fallback.
+## Viewing and comparison
 
-Comparison distinguishes cell source, outputs, metadata and execution receipts;
-a changed image/error must not disappear into raw JSON. Opening a retained
-notebook does not grant trust to execute cells, widgets or arbitrary output
-scripts. Keep exact retained bytes immutable; writable copies are separate.
-No automatic merge, kernel start or replay follows from comparison/export.
+Retained notebooks use a read-only `mrw-notebook-result` filesystem. Exact bytes
+and digests are checked. With Jupyter installed, comparison opens native notebook
+diff; otherwise it compares the transcripts. Capture and execution evidence
+remain separate from the displayed outputs. Opening or comparing a result starts
+no kernel, executes no cells and performs no merge.
 
-Accept the route with two retained results, including text/error and plot output,
-follow their source/method and note/proof links, compare them, export the selected
-records, and return after restart. Record unavailable renderers or unsupported
-output rather than inventing equivalence. See [D12](DESIGN_RECONCILIATION.md).
+Native notebook diff was selected after evaluating nbdime: its web comparison
+adds a server/browser, while its CLI supplies text. Source/method revisions and
+companion files remain in the provenance export.
+
+<a id="required-display-and-comparison-follow-up"></a>
+
+### Remaining verification
+
+Focused capture, comparison and export tests pass. Native visual inspection of
+rich outputs remains unobserved. The remaining check is to compare two retained
+results with text, errors and plots, follow their source/method and note/proof
+links, export them, and return after restart. Unsupported rendering must be
+reported. See [D12](DESIGN_RECONCILIATION.md).
 
 ## Limits and preservation
 
@@ -89,17 +92,3 @@ It preserves ordinary files, other captures and separately exported archives.
 An opaque marker prevents deleted IDs from reappearing. A restart completes a
 pending deletion. Already open read-only views can retain their displayed text
 until closed. Study deletion does not own these explicitly retained results.
-
-## Native retained-result viewing
-
-With Jupyter installed, retained notebooks open through the native notebook
-editor on a read-only mrw-notebook-result filesystem. Exact retained bytes and
-digests are checked. Comparison uses native notebook diff with saved rich
-outputs; without Jupyter the transcript remains available. Capture/execution
-evidence is a separate action. Reading and comparison submit no execution or
-merge and restore no live kernel.
-
-[nbdime](https://nbdime.readthedocs.io/en/latest/cli.html) was evaluated: web
-comparison adds a server/browser and its CLI supplies text. Native notebook diff
-is the smaller reuse route for this host. Source/method revisions and companion
-files remain in the existing provenance export.

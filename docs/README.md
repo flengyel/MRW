@@ -101,73 +101,20 @@ that version and the saved records it produced.
   reports of earlier implementations. Their opening sections identify the
   current direction; completed or withdrawn prompts do not authorize new work.
 
-## Reports and earlier implementations
+## Releases and verification
 
-[Release 0.23.45](RELEASE_0_23_45.md) records linked calculation Return,
-the stopped/resumed discriminant investigation, producer failure recovery and
-verified publication.
+The [changelog](../CHANGELOG.md) lists releases. Each release report records its
+own source, package, checks and installation status; those observations do not
+qualify later builds. The [design register](DESIGN_RECONCILIATION.md) tracks
+current decisions and remaining work.
 
-[Release 0.23.44](RELEASE_0_23_44.md) records source-driven context preparation,
-attributed proposal review and verified delivery.
-
-
-[Release 0.23.39](RELEASE_0_23_39.md) records the icon guide, compact History
-view, evidence preservation and verified publication.
-
-[Release 0.23.38](RELEASE_0_23_38.md) records the Lean example instructions,
-compiler/rendering checks and verified publication.
-
-[Release 0.23.37](RELEASE_0_23_37.md) records citation source identification,
-live-owner verification, package checks and the native observation limit.
-
-[Release 0.23.36](RELEASE_0_23_36.md) records Recent Documents, the citation
-observation, exact package checks, publication and native acceptance limits.
-
-[Release 0.23.35](RELEASE_0_23_35.md) records the document-reopen repair,
-exact source, native checks, package and publication.
-
-[Working source cleanup](SOURCE_CLEANUP_20261114.md) records removal of the
-confirmed test/demo clutter, its recoverable backup and preserved source links.
-
-[Release 0.23.34](RELEASE_0_23_34.md) records the live Zotero citation repair,
-exact sources, native observations, package checks and publication.
-
-[Release 0.23.31](RELEASE_0_23_31.md) records that package's publication,
-checks and installation status. The [0.23.32 implementation account](MAINTENANCE_20261114.md)
-records the subsequent repairs and limits; use the [README](../README.md) for
-current package links. [Reading repairs for 0.23.5](READING_REPAIRS.md)
-records that earlier increment. Other validation and repair reports describe the versions,
-hosts and sources named in those reports; they do not establish that a later
-build passed the same checks.
-
-The [changelog](../CHANGELOG.md) and
-[earlier VS Code development account](VS_CODE_DEVELOPMENT_HISTORY.md) preserve
-preceding workflows and the separate Qt/CLI prototype. Use current user guides
-for present commands and installation.
-
-- [Source plugins: installation and API 1](SOURCE_PLUGINS.md)
-- [nLab reader and revision limits](NLAB_WORKFLOW.md)
-
-- [Study lifecycle](STUDY_LIFECYCLE.md): Archive/Restore, Trash/Undo,
-  permanent deletion and interrupted-operation recovery.
-
-- [Current implementation evidence](MAINTENANCE_20261114.md): citations, note associations, grouped tools, diagnostics and contract pilot.
-- [Optional diagnostics companion](../diagnostics/README.md): install separately; core remains usable without it.
-- [Contract pilot mapping](CONTRACT_PILOT.md): proved abstract safety and sampled runtime traces, with explicit assumptions.
-
-- [Saved Source Trash and restoration](SAVED_SOURCE_TRASH.md).
-
-- [0.23.40 saved-source Trash delivery and checks](RELEASE_0_23_40.md).
-
-- [Native test isolation and instruction drift](NATIVE_TEST_ISOLATION.md).
-- [15 November drift review and verification](MAINTENANCE_20261115_DRIFT.md)
-
-- [0.23.43 unfinished-context resumption](RELEASE_0_23_43.md).
-- [Resume an unfinished context and drift findings](UNFINISHED_CONTEXTS.md).
-- [0.23.42 retained justification routes and README review](RELEASE_0_23_42.md).
-- [README writing review](README_REVIEW_20261115.md).
-- [0.23.41 notes-folder repair and native Return checks](RELEASE_0_23_41.md).
-- [Skipped-check review and Lean checker repair](LEAN_CHECKER_DRIFT_20261115.md).
+- [Release 0.23.45](RELEASE_0_23_45.md): linked calculation Return and resumption.
+- [Release 0.23.44](RELEASE_0_23_44.md): source-driven context preparation and review.
+- [Study lifecycle](STUDY_LIFECYCLE.md): Archive, Restore, Trash and recovery.
+- [Saved Source Trash](SAVED_SOURCE_TRASH.md): source deletion and restoration.
+- [Contract pilot](CONTRACT_PILOT.md): proved abstract safety and sampled runtime traces.
+- [Native test isolation](NATIVE_TEST_ISOLATION.md): protect ordinary working data.
+- [Optional diagnostics](../diagnostics/README.md): local reports and maintenance handoff.
 
 [Grounds from existing notes](SOURCE_GROUNDS_WORKFLOW.md) explains source
 selection, the Codex handoff, proposal corrections, explicit admission and

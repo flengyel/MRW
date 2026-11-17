@@ -371,9 +371,44 @@ split:
    time separately from the earlier admission and context time. The bundle
    contains no expected digest of itself.
 
-The public command sequence is documented in the
-[documentary workflow](JUSTIFICATION_WORKFLOW.md#documentary-response-commands). The
-unstamped output of `admit-documentary` is intentionally not direct Lean input.
+### Documentary response commands
+
+This is the current developer CLI for an existing finalized `ModelCall`, not a
+required reading workflow. It makes no new provider request. The commands below
+use placeholder paths and fresh record IDs; use new output files outside genuine
+research stores. Choose a passage after inspecting the retained response.
+`UTC_ADMISSION_TIME` must be the actual admission time, at or after the call's
+finalization and no later than the subsequent check.
+
+```sh
+mrw review-response MODEL_CALL
+mrw review-response MODEL_CALL --passage PASSAGE_NUMBER
+
+mrw project-response MODEL_CALL --passage PASSAGE_NUMBER \
+  --representation-id REPRESENTATION_ID --claim-id DOCUMENTARY_CLAIM_ID \
+  --output NEW_PROJECTION_JSON
+
+mrw admit-documentary NEW_PROJECTION_JSON \
+  --fixture-id RUN_ID --context-id CONTEXT_ID --admission-id ADMISSION_ID \
+  --admitted-by-kind person --admitted-by-id ACTOR_ID \
+  --at UTC_ADMISSION_TIME --rationale RATIONALE --scope SCOPE \
+  --derivation-id DERIVATION_ID --output NEW_ADMISSION_JSON
+
+mrw check-documentary NEW_PROJECTION_JSON NEW_ADMISSION_JSON \
+  NEW_PACKAGE_DIRECTORY --lean-root PATH_TO_MRW_LEAN_PROJECT
+
+mrw show-documentary NEW_PACKAGE_DIRECTORY
+```
+
+Projection retains the selected bytes and attribution without admitting a
+premise. Admission explicitly records only the documentary assertion.
+`check-documentary` validates the bindings, invokes this repository's pinned
+Lean checker and retains a new package; its destination must not exist.
+Use `--help` on each command for the supported options. The
+[technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#executable-offline-documentary-bridge)
+defines the checks, chronology and logical limits.
+
+The unstamped output of `admit-documentary` is intentionally not direct Lean input.
 Direct maintainer inspection of the internal Lean transport uses the stamped
 `package/request.json` retained by a successful public check:
 

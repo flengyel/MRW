@@ -1,113 +1,20 @@
 # Mathematical source outlines and proof-outline vertex elimination
 
-**0.15.0, 2026-11-04:** the 08ZE/08ZH trial now has an explicit source-based
-inference graph, attributed Codex summaries, a proposed selection and reversible
-vertex deletion. Joint-premise alternatives, local scopes and original witnesses
-survive projection. The original file stays editable under VS Code; no Lean
-structure is inferred from declaration links. See [the bounded implementation](PROOF_GRAPH_WORKFLOW.md)
-and [validation](PROOF_GRAPH_VALIDATION.md). Earlier status entries below describe
-the reader before this increment; automatic extraction and formal checking remain
-separate from this proposed argument representation.
+MRW supports source-based inference graphs with attributed summaries, reversible
+vertex deletion, joint-premise alternatives, local scopes and expandable original
+steps. The graph file remains editable in VS Code. See the
+[current workflow](PROOF_GRAPH_WORKFLOW.md) and [validation](PROOF_GRAPH_VALIDATION.md).
+Automatic extraction and formal checking remain separate work.
 
-**First Codex-assisted case, 2026-11-04:** the study overview outlines the
-retained 08ZH proof in four claims with explicit premises and exact 08ZE/08ZH
-source links. Its pullback diagram and editable TikZ source accompany the
-inverse-image calculation. The final step uses the closed diagonal, continuity
-and inverse-image identification jointly. The Markdown navigator displays these
-claims as headings and links. The mathematical draft is Codex material,
-attributed in the study README. This first outline supplies the informal argument
-for the 0.15.0 trial above. See
-[the scoped checks](READING_OUTLINE_VALIDATION.md#first-08zh-proof-outline--2026-11-04).
+The scope includes textbooks, monographs, articles and AI-generated or
+AI-assisted manuscripts, with or without Lean formalizations. Orientation,
+central concepts, governing ideas and details are freely navigable. A cited
+theorem can be used while inspection of its proof is deferred.
 
-**Scope:** understanding and logical deconstruction of arguments in textbooks,
-monographs, articles, and AI-generated or AI-assisted manuscripts, including
-sources with no Lean formalization. Lean evidence is optional. Orientation,
-central concepts/results, governing ideas, argument structure and technical
-detail are freely navigable, not a compulsory sequence. A reader may use a
-cited theorem while deferring inspection of its proof.
-
-**Reading navigator recheck, 2026-11-03:** the repeated 0.8.0-era request is
-already implemented by the later Markdown navigator. Patch 0.11.1 repairs a
-return-pin race found during review: a failed follow during document edits
-preserves the last successful origin. It changes no prose/reference format,
-retained source identity, inference relation or proof-analysis capability.
-See [the workflow](READING_OUTLINE_WORKFLOW.md).
-
-**Reader assistance, 2026-11-03:** 0.11.0 connects an explicitly chosen retained
-passage to the existing exact-preview/Send workflow. A question can request an
-explanation or critique, using the exact source revision and range. The answer
-remains attributed AI material; this connector supplies no inference graph,
-vertex elimination, automatic outline generation or proof correctness. See
-[the workflow](READER_AI_WORKFLOW.md).
-
-**Reader diagrams, 2026-11-02:** 0.10.0 explicitly renders saved TikZ annotation
-blocks to retained SVGs. Code, attribution and source statements remain separate;
-drawing an arrow or square supplies no checked dependency or commutativity.
-Diagrams support a reader's explanation as they develop an outline. The graph
-representation and vertex-elimination machinery remain planned. See
-[the bounded workflow](TIKZ_WORKFLOW.md).
-
-The reader supplies an outline or works toward one. For a deductive outline,
-vertex elimination provides the organizing model: selected claims remain visible,
-joint premises and local scope are preserved, and suppressed steps can be
-expanded back to the original argument. A prose heading or navigation link alone
-does not supply an inference. The current reading controls are a presentation
-step toward that model; the explicit inference graph remains to be implemented.
-
-**Annotation display, 2026-11-01:** 0.9.3 typesets explicitly delimited annotation
-equations locally, retaining exact editable text and attribution. This is a
-derived reading view, separate from the retained source and proof evidence.
-The reader can hide/show published proofs together or individually while
-retaining visible statements; exact proof navigation reveals its destination.
-Patch 0.9.4 makes hidden proofs compact reveal rows and saved Reader notes a
-closable disclosure, preserving exact text and attribution.
-
-**Proof-visibility follow-up, 2026-11-01:** 0.9.2 keeps annotation editing out of
-the source sequence and provides direct navigation between explicitly published
-statement/proof parts in the same retained import. Links require exact current
-span matches; multiple proofs remain distinct and changed associations are
-reported. Temporary expansion changes no source or saved outline bytes. This
-uses published source structure and supplies no inference or proof status.
-
-**Presentation follow-up, 2026-11-01:** patch 0.9.1 addresses the observed narrow,
-control-heavy reading view with concise navigator labels, expanded mathematics,
-collapsed source tools and direct focus on matching published passages. Source
-and note bytes, original reference grammar and earlier-range behavior remain
-unchanged. This is reading presentation, with no graph or inference capability.
-
-**Update, 2026-11-01:** 0.9.0 adds a navigable reading outline derived from one
-ordinary Markdown overview. Its headings collapse/expand and select exact editor
-locations; existing references open the same retained reader/passages and return
-to the originating occurrence. Unsaved editing, undo and recovery remain host
-responsibilities. This extends the manual overview contract below, without a
-new reference grammar or inference graph. See [usage](READING_OUTLINE_WORKFLOW.md)
-and [validation](READING_OUTLINE_VALIDATION.md). Vertex elimination remains planned.
-
-**Update, 2026-10-21:** 0.8.0 imports one explicitly selected Stacks section
-from pinned upstream source and tag-map bytes into this reader. Published
-statement/proof regions and explicit citations are source structure, not a
-complete dependency graph or verified inference. Rendering is derived; exact
-TeX and earlier pinned spans remain authoritative. The adapter does not implement
-vertex elimination. See [the bounded workflow](STACKS_WORKFLOW.md).
-
-**Update, 2026-10-16:** the first manual overview spanning several sources is
-implemented in VS Code 0.5.0 as ordinary Markdown with scoped saved-outline and
-exact-region references. See the reference contract below and
-[focused validation](VS_CODE_OVERVIEW_VALIDATION.md). Remaining broader outline
-tooling and the graph contract remain pending.
-
-**Status, 2026-10-14:** the first offline source-region reader is implemented in
-VS Code; see [its contract](../vscode/README.md#offline-source-region-reader) and
-[validation evidence and limits](VS_CODE_OUTLINE_VALIDATION.md). This partially
-implements the accepted requirement. A faithful outline does not establish
-proof correctness. The bounded Task 4.0 reconnaissance is complete; see
-[actual outputs, source/tool revisions and the recommended first consumer](PROOF_OUTLINE_RECONNAISSANCE.md).
-Vertex elimination remains an accepted product requirement, not implemented.
-The VS Code extension supplies manual source regions, shared record actions
-and explicit Lean-source/browser handoffs; see [its README](../vscode/README.md). The
-workstation should help a reader obtain and inspect a mathematical outline of
-a selected argument. AI may eventually propose which details to hide and explain the
-retained claims. The original proof and its evidence remain available.
+The [08ZH study](READING_OUTLINE_VALIDATION.md#first-08zh-proof-outline--2026-11-04)
+provides the first Codex-assisted argument outline. Its claims, pullback diagram
+and inverse-image calculation supply the informal argument used in the graph
+trial. The mathematical draft remains attributed Codex material.
 
 ## Visible claims and explanations
 
@@ -184,7 +91,9 @@ explicit action using the existing bounded preview/Send boundary. Checking a
 newly proposed formal claim is a separate action. These actions do not admit
 premises into the warrant layer.
 
-## First bounded increment
+<a id="first-bounded-increment"></a>
+
+## Retained-source reader
 
 The delivered reader retains exact UTF-8 source and supplied artifact bytes,
 manual revision-pinned ranges, separately selected statements and context,
@@ -202,37 +111,11 @@ non-UTF-8 sources are explicitly unsupported. Exact expansion refers to retained
 text ranges; an externally transcribed source is not thereby certified faithful
 to a page image. No compiler, provider, extraction or formalization is required.
 
-Beyond the bounded published Stacks structure adapter, automatic extraction,
-AI proposals, automatic gap detection, verified joint-premise
-graphs and elimination witnesses remain pending. The graph demonstrations below
-describe the full accepted contract, not completed reader acceptance.
-
-The pinned example's existing export/server output has been inspected in the
-reconnaissance linked above. Consume it before writing another extractor. Keep
-the input kind visible and expose only claims actually
-supplied by that representation. Use the existing Lean editor/viewer ecosystem;
-the preferred frontend trial is one VS Code extension over the independent
-core. Choice of an open-source editor distribution is deferred. The initial
-extension implements those handoffs, record actions and the manual reader,
-without graph extraction or elimination; ordinary files remain the work artifacts.
-
-Demonstrate:
-
-1. A retained theorem and intermediate claims, each with a visible explanation,
-   source link, and expansion control.
-2. Manual selection and an explicit AI-proposal route; the reader can alter the
-   proposed selection and explanation.
-3. Agreement between displayed edges and paths through hidden vertices,
-   including a branching example requiring premises jointly.
-4. Expansion without losing assumptions, scope, or alternative paths; hiding
-   and expansion do not change the proof or its records.
-5. Source-change detection, honest evidence labels, and restoration of the
-   selection and explanations after reopening.
-
-Deterministic checks establish graph and retention behavior. Mathematical use
-must separately establish whether the outline helps reconstruct or continue
-the argument. R1–R3.1 and the Marcus observation retain their separate evidence;
-they are not preliminary ceremonies for this increment.
+The [graph workflow](PROOF_GRAPH_WORKFLOW.md) supplies explicit source-based
+outlines, attributed AI proposals and reversible deletion. General extraction,
+automatic gap detection and verification of mathematical implications remain
+outside this representation. The [reconnaissance](PROOF_OUTLINE_RECONNAISSANCE.md)
+records inspected exporter/server output and its limits.
 
 ## First manual overview across sources — reference contract, 2026-10-16
 
@@ -295,9 +178,9 @@ this first increment.
 Copying Markdown alone does not transfer private outlines or retained sources.
 References are scoped navigation data, not a synchronization/export format,
 authority credential or universal identity for mathematical occurrences.
-Beyond explicit Stacks section acquisition, automatic generation/source
-discovery, cross-host synchronization, general
-overview tooling, inference graphs and vertex elimination remain pending.
+Automatic source discovery and cross-host synchronization remain outside this
+reference contract. Explicit inference graphs and vertex elimination use the
+[separate graph format](PROOF_GRAPH_WORKFLOW.md#file-boundary).
 
 ## Obsidian companion navigation — 2026-10-17
 
