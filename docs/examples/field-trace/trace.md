@@ -1,7 +1,7 @@
 # Trace in a larger field
 
 Let $K/\mathbb Q$ be a finite field extension and let $\alpha\in K$.
-The field trace $\operatorname{Tr}_{K/\mathbb Q}(\alpha)$ is the trace of
+The field trace $\mathrm{Tr}_{K/\mathbb Q}(\alpha)$ is the trace of
 the $\mathbb Q$-linear map
 
 $$
@@ -29,7 +29,7 @@ $$
 Then
 
 $$
-\operatorname{Tr}_{K/\mathbb Q}(\alpha)
+\mathrm{Tr}_{K/\mathbb Q}(\alpha)
 =-[K:F]\,c_{d-1}.
 $$
 

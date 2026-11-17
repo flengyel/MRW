@@ -38,7 +38,7 @@ shows that this matrix has diagonal entries $0,\ldots,0,-c_{d-1}$.
 Its trace is therefore $-c_{d-1}$. Taking the trace of all $r$ blocks gives
 
 $$
-\operatorname{Tr}_{K/\mathbb Q}(\alpha)
+\mathrm{Tr}_{K/\mathbb Q}(\alpha)
 =-r c_{d-1}.
 $$
 
