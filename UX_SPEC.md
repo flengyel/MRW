@@ -4,8 +4,9 @@ This specification defines MRW's interaction requirements. The
 [README](README.md) and [user guides](docs/README.md) describe current behavior;
 the [design register](docs/DESIGN_RECONCILIATION.md) identifies pending work.
 Proposed behavior is not a claim that an interface exists. VS Code owns ordinary
-editing, saving, undo, layout and document recovery. Standalone Qt-specific
-controls below do not require duplicate controls in the extension.
+editing, saving, undo, layout and document recovery. The
+[standalone Qt maintenance rules](#standalone-qt-maintenance) apply only to
+that application.
 
 [Integration boundaries](docs/INTEGRATION_BOUNDARIES.md) govern optional
 companions: the responsible system owns creation and execution; MRW delegates
@@ -139,48 +140,74 @@ warrant question relevant.
 ### Ordinary files, rendered mathematics and re-entry
 
 Begin with an existing project directory and an ordinary mathematical file.
-Editing, viewing a source and comparing two documents require no preliminary
-metadata. Mathematical hypotheses belong in the text or formal declarations.
-The navigator and contextual information should leave room for the current work.
-All operations must be available through visible menus without required key chords.
-Also provide platform-standard Open, Save, Find and Find-next shortcuts, show
-them in menus, and keep keyboard focus predictable. Save acts on the clearly
-identified editable text target; it cannot overwrite a PDF. R1 Find/Find-next
-are text operations. When PDF has focus, disable them or explain that PDF search
-is unavailable; do not silently search a hidden or unrelated editor. Preserve
-inherited text editing shortcuts. A completed marker action
-must visibly identify the marked passage; an unavailable Return action must
-make the reason discoverable. Do not make successful marker creation something
-the user must infer from a later restart.
+Open and edit files in place using native editors and the reader's chosen pane
+layout. Viewing or comparing documents requires no preliminary metadata. Keep
+MRW commands available through visible menus, preserve native editing shortcuts
+and keep the active Save and Find targets clear.
 
-A reader must be able to select an existing local PDF through ordinary Open or
-the project navigator and see it beside an editable ordinary work note, without
-TeX source or a build. Keep PDF bytes outside editable text buffers, text
-recovery and text anchors. Preserve its document identity, page and zoom
-independently of generated-output provenance; restore the PDF and note after
-reopening. Missing, invalid, unreadable or changed PDF content must be reported
-without discarding the note or silently claiming the old reading location
-still identifies the same passage. Failed loads must not overwrite the last
-valid reading state. Workspace migration validates stored state without reading
-source files; actual document loading validates the selected document.
+Use an available PDF viewer beside the work note, or offer the system reader.
+Opening a PDF requires neither TeX source nor a build and does not extract a
+passage. For assistance on a PDF excerpt, use the reader's transcription and
+show the exact text before sending. Keep any supplied revision and page with
+the transcription, and distinguish corrections from the source.
 
-In the standalone Qt application, file reading includes independent opening, exact-identity
-page/zoom restoration, ordinary note editing, platform-standard Open, Save,
-Find and Find-next shortcuts, explicit PDF-versus-editor focus status and marker
-feedback. Save names the editable text target even while the PDF is focused;
-Find and Find-next are visibly unavailable until an editor has focus. PDF search,
-outline, SyncTeX and text extraction are deferred beyond this handoff. Add
-navigation capabilities later when required by actual reading; an
-internal document link must not silently launch an external action. Keep
-the reader's note and return location available during a definition lookup.
-Opening a PDF does not imply reliable text extraction or a source mapping.
-When sending a PDF excerpt, show the exact extracted or transcribed text and
-its document revision/page so that damaged notation can be corrected explicitly.
-A corrected transcription is distinct from the original source.
+Use [Reopen Document and Return to Document](docs/READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart)
+and [Recent Documents](docs/RECENT_DOCUMENTS.md) to recover files and supported
+locations. Explain why a missing, changed or ambiguous exact link cannot be
+followed, and preserve the last usable Return destination. Offer the current
+document when it can be opened without claiming to restore an earlier passage.
+VS Code handles dirty buffers and pane layout. MRW reopens PDFs at the file
+level; page and zoom belong to the viewer. MRW does not restore preview scroll
+positions or live kernel state.
 
-The standalone Qt assistance workflow begins from a nonempty visible selection in an
-ordinary text buffer. Its non-modal dock freezes the selected text, current
-in-memory revision and scalar location, accepts one question, permits context
+A standard `.ipynb` can serve as a working document alongside or in place of a
+Markdown or TeX note. VS Code and Jupyter own notebook editing, rendering,
+saving and explicit kernel actions; SagePod supplies computation. File links
+join the notebook and notes. Use the Markdown editor to follow private
+retained-source references within their owning workspace. The
+[notebook workflow](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) does not pass cell
+selections to MRW assistance or insert replies into cells. Keep the notebook's
+location available on return and distinguish saved outputs from live state.
+
+Opening, viewing and resuming do not make MRW submit a model request, import a
+remote source, build a document, compile a diagram, check a proof, start a
+container or kernel, or run a calculation. Each of those actions requires an
+explicit request. Native editor services such as Lean diagnostics run as usual.
+
+In VS Code, [Markdown citation preview](docs/ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes)
+may automatically run a trusted local Pandoc executable in a trusted workspace.
+It can use a scoped bibliography or inline references, or look up cited keys
+in the configured Zotero libraries through Better BibTeX on loopback. This
+read-only preview leaves the note and library unchanged. Keep unresolved
+citations visible and show which reference data the preview used.
+
+When retained model or warrant material becomes relevant, inspect it alongside
+the work. Show attribution and response identity before returned mathematical
+text. Retain exact passages on request. Inspection creates no new response,
+premise admission or verification. Keep provenance, verification, premise
+admission, contextual derivability and human judgment distinct.
+
+### Standalone Qt maintenance
+
+The older standalone Qt application opens a local PDF and a work note in
+independent panes. Keep PDF bytes outside text buffers, recovery and anchors.
+Preserve the document identity, page and zoom separately from generated-output
+provenance. Restore the page and zoom only for the matching document. Report
+missing, invalid or changed PDFs without discarding the note or overwriting the
+last valid reading state. Migration validates stored state without reading
+sources; loading validates the selected document.
+
+Retain platform-standard Open, Save, Find and Find-next shortcuts, explicit
+PDF-versus-editor focus status and visible marker feedback. Save names the
+editable text target even when a PDF has focus. Find and Find-next are text
+operations and are visibly unavailable while the PDF has focus. Qt does not
+provide PDF search, outline, SyncTeX or text extraction. Keep the note and
+return location available during a lookup; following an internal link must
+not silently launch an external action.
+
+Qt assistance begins from a nonempty visible selection in an ordinary text
+buffer. Its non-modal dock freezes the selected text, current in-memory
+revision and scalar location, accepts one question, permits context
 removal, shows the exact request body and requires a separate Send. It includes
 no PDF bytes or implicit extraction. A PDF-motivated question therefore uses an
 explicit ordinary-text transcription or corresponding source selection. The
@@ -188,8 +215,8 @@ answer remains inert attributed plain text with exact raw-record access. Exact
 passage retention and separately attributed editable note insertion are
 explicit; neither creates a premise, Verification, warrant or disposition.
 
-Different projects may be open in different workstation processes. This increment
-supports only one active workstation process per project, without a lifetime lock.
+Different projects may be open in different Qt processes. Use one active process
+per project; there is no lifetime lock.
 
 For LaTeX, select an existing file as the root, save the intended source revisions
 and explicitly request a build. TeX source is trusted executable input;
@@ -207,28 +234,9 @@ is separate from mathematical Verification and from justification or judgment.
 
 A deliberate external-editor action opens the saved file at the current passage.
 On return, compare changed disk content with any unsaved work before refreshing.
-Notebook execution likewise requires a deliberate tool action; merely opening a
-notebook must not execute it or expose editable raw JSON by default.
 
-The requested notebook/SageMath workflow permits a standard `.ipynb` as the
-primary study document or alongside Markdown/TeX. Narrative, mathematical
-notation, executable examples and outputs should remain together without a
-duplicate note requirement. The first VS Code companion workflow uses its
-existing Jupyter extension and SagePod's authenticated server with the actual
-`sagemath` kernel. VS Code/Jupyter owns the notebook editor, rendering, saving
-and explicit kernel actions; SagePod supplies computation. MRW keeps its core
-on the workspace host and supplies source/overview navigation. Ordinary relative
-links join these files; MRW private references are followed explicitly in a
-Markdown editor and remain scoped to that workspace/storage. Keep the
-notebook's location available on re-entry and distinguish saved outputs from
-live kernel state. Opening/restoring MRW must not start containers or run cells.
-The standalone Qt summary/handoff is unchanged. Notebook-cell selection into
-assistance and response insertion require a later explicit bridge; the companion
-workflow supplies neither. See the notebook section of `CODEX_PLAN.md` and
-`docs/SAGEPOD_NOTEBOOK_WORKFLOW.md`.
-
-Re-entry restores the open work, selected passage and rendering position. Two
-panes comparing the same file retain independent cursor, selection and scroll
+On re-entry, Qt restores the open work, selected passage and rendering position.
+Two panes comparing the same file retain independent cursor, selection and scroll
 positions while sharing one editable document, modified state, undo/redo history
 and buffer/recovery identity. Insertions and deletions adjust both views' text
 positions. Wrapping survives restart. Layout changes retain a visible cursor
@@ -271,18 +279,10 @@ a compensating rewrite. Native Windows currently lacks the directory-sync
 implementation required for crash-durable mutable publication and reports that
 limitation as a failure.
 
-In the current Qt GUI, wrapped views of one shared document keep equal editor
-viewport widths because that document has one layout width. Splitter movement
-and resizing preserve this constraint and both pane positions. Different buffers
-or unwrapped views may have unequal widths; no earlier unequal ratio is restored
-automatically. This toolkit constraint is not a mathematical or domain invariant.
-
-When retained model or warrant material becomes relevant, inspect it alongside
-the work. Model attribution and response identity precede returned mathematical
-text; retaining a passage preserves its exact digest-anchored span. Provenance,
-Verification, premise admission, contextual derivability and human judgment must
-remain distinct. Viewing or cancelling creates no record. Opening a project,
-restoring work or viewing any document makes no automatic tool or network call.
+Wrapped views of one shared document keep equal viewport widths because the
+document has one layout width. Splitter movement and resizing preserve this
+constraint and both pane positions. Different buffers or unwrapped views may
+have unequal widths; no earlier unequal ratio is restored automatically.
 
 ---
 
@@ -294,24 +294,26 @@ mandatory tabs. A session may move among them.
 ### Orientation
 
 Enter or revisit a subject. Locate its organizing concepts, central results,
-principal problem families, and the relations needed for the work at hand. The
-system preserves the source locations and relations consulted, together with
-prior work, so that a later session need not reconstruct them from nothing.
+principal problem families, and the relations needed for the work at hand. Use
+links in the working note to keep useful source locations and prior work within
+reach.
 
 Orientation serves a mathematical task. It is not a preliminary exercise in
 describing the subject or completing a domain model.
 
 ### Problem solving
 
-Work on a source problem, an omitted proof step, a calculation, an example, or
-a question arising from research. The session opens the problem and an ordinary
-working file immediately. It can then supply, on request, the exact source
-location, nearby definitions and results, related problems, prior attempts,
-computations, and graduated hints.
+Work on a source problem, omitted proof step, calculation, example or research
+question in an ordinary file or on paper. Keep questions, attempts and solutions
+where they were written, linked to useful sources. Follow a solution link to
+its note and preserve the originating location for Return. Exact passages,
+definitions, prior work and assistance are available on request.
 
-The session records the resulting `WorkArtifact`s and the assistance used as
-`TaskEvidence`. It does not interrupt the work to ask for a report about the
-mathematician's internal state.
+Record structured attempts and their assistance history within a study the
+reader [explicitly starts](docs/ACTIVE_STUDY_WORKFLOW.md#attempts-and-continuation).
+Outside a study, the reader can retain a source passage or calculation and link
+it from the work. Ordinary problem solving requires no problem record or
+separate attempt or outcome form.
 
 ### Theorem study
 
@@ -375,8 +377,8 @@ PDF/OCR and notebook-cell regions are outside the current retained-text reader.
 
 Perform mathematics selected from earlier work: reconstruct an argument,
 complete a proof, solve a related problem, vary a hypothesis, produce an example
-or counterexample, or repeat a Lean or Sage task. `ReviewState` is generated from
-`TaskEvidence`; it is not a score asserted by the mathematician. See §7.
+or counterexample, or repeat a Lean or Sage task. See §7 for evidence and
+scheduling within a chosen review.
 
 ### Formalization
 
@@ -469,10 +471,10 @@ the established correspondences between them, with kinds `same_claim`,
 
 ## 5. Work products and provenance
 
-The primary human-produced records are `WorkArtifact`s created while doing
-mathematics: attempts, proofs, calculations, diagrams, examples,
-counterexamples, code, exposition, and ordinary notes. The interface does not
-require these artifacts to be rewritten as structured reports.
+Working files hold the products of mathematics: attempts, proofs, calculations,
+diagrams, examples, counterexamples, code and exposition. A retained
+[`WorkArtifact`](DOMAIN_MODEL.md#workartifact) preserves a chosen revision without
+requiring a structured report.
 
 Source-derived records include stable locators and quotations. Machine-derived
 records include types, signatures, imports, dependencies, axiom usage,
@@ -502,11 +504,11 @@ Python interface renders rather than rechecks the justification calculus.
 judgment. The kind of relation is explicit because `formalizes`, `restates`, and
 `implies` assert different relationships.
 
-**Recording during work.** The system records only what the work produces or
-what is needed to resume it: the source locator, relevant problem or object,
-artifact, revision, assistance used, and provenance. Optional notes remain
-ordinary mathematical notes. Recording may not become a gate before the next
-mathematical step.
+**Recording during work.** Preserve exact revisions, source locations and
+provenance for work the reader retains. Record attempt and assistance evidence
+for a chosen study, and preserve evidence of explicitly requested checks or
+model calls. Keep ordinary drafts and next steps in their working files.
+Recording may not become a gate before the next mathematical step.
 
 ---
 
@@ -545,11 +547,12 @@ Proof-completion tasks may come from gaps left by an author, an earlier failed
 attempt, or a formal proof when one exists. Formal material is one possible
 source of tasks, not a prerequisite.
 
-`ReviewState` is generated from `TaskEvidence`: completion, checking result,
-hints used, later reconstruction, and performance on related problems. For work
-that no machine can decide, the artifact remains available for mathematical
-inspection; the system does not replace judgment with a score. No prompt asks
-the mathematician to declare a level of comprehension.
+For work the reader keeps for review, `ReviewState` draws on relevant
+`TaskEvidence`, such as completion, hints used and later reconstruction. Apply
+the [recall eligibility rules](docs/ACTIVE_STUDY_WORKFLOW.md#review-and-effort)
+before changing a schedule; opening a source or checking a proof does not
+qualify on its own. Keep the artifact available for mathematical inspection
+without asking for a comprehension score.
 
 ---
 
@@ -866,9 +869,9 @@ mathematical question.
 
 **Acceptance.** The reader can continue meaningful work with the source, note
 and relevant locations available. Quality of the explanation or argument and
-the burden of resuming matter together. Search counts, a restored cursor and
-a shelf quota do not independently establish mathematical usefulness.
-Formal counterparts are consulted only when useful.
+the burden of resuming matter together. A restored cursor alone does not
+establish mathematical usefulness. Formal counterparts are consulted only
+when useful.
 
 Edit-stable anchors and their bounded previews remain mutable navigation aids.
 They do not relocate immutable quotations, source occurrences, provenance,
