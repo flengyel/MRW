@@ -64,19 +64,16 @@ diff; otherwise it compares the transcripts. Capture and execution evidence
 remain separate from the displayed outputs. Opening or comparing a result starts
 no kernel, executes no cells and performs no merge.
 
-Native notebook diff was selected after evaluating nbdime: its web comparison
-adds a server/browser, while its CLI supplies text. Source/method revisions and
-companion files remain in the provenance export.
+Source/method revisions and companion files are included in the provenance
+export.
 
 <a id="required-display-and-comparison-follow-up"></a>
 
-### Remaining verification
+### Verification limit
 
-Focused capture, comparison and export tests pass. Native visual inspection of
-rich outputs remains unobserved. The remaining check is to compare two retained
-results with text, errors and plots, follow their source/method and note/proof
-links, export them, and return after restart. Unsupported rendering must be
-reported. See [D12](DESIGN_RECONCILIATION.md).
+Native viewing and comparison of rich outputs have not received a visual check
+on the tested host. See [D12](DESIGN_RECONCILIATION.md) for the remaining
+verification work.
 
 ## Limits and preservation
 

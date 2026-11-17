@@ -81,10 +81,6 @@ Palette. To enable scheduled reports, turn on **MRW Diagnostics: Weekly Enabled*
 They run while VS Code is active; missed weekly runs coalesce into one run.
 Reporting does not repair data or invoke Codex. See [the companion guide](../diagnostics/README.md).
 
-For upgrades from before the extension identity change, see
-[the conversion record](EXTENSION_IDENTITY.md). The upgrade from 0.23.12 to
-0.23.45 keeps the `flengyel.mrw` identity and existing saved work.
-
 <a id="3-open-existing-work"></a>
 
 ### 3. Set up MRW and open a document
@@ -171,7 +167,3 @@ Those remain in MRW's private VS Code workspace storage on the Linux host.
 **Inspect Study History** opens a report; **Export Study History…**
 creates a readable or JSON copy. Exports may contain private source text,
 attempts and replies. See [data and transfers](../README.md#data-and-transfers).
-
-The separate Qt/CLI setup and Lean justification experiment are described in
-[earlier development records](../CHANGELOG.md#standalone-qt-installation-and-launch).
-They are not prerequisites for the VS Code extension.

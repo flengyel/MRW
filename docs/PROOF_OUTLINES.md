@@ -3,18 +3,13 @@
 MRW supports source-based inference graphs with attributed summaries, reversible
 vertex deletion, joint-premise alternatives, local scopes and expandable original
 steps. The graph file remains editable in VS Code. See the
-[current workflow](PROOF_GRAPH_WORKFLOW.md) and [validation](PROOF_GRAPH_VALIDATION.md).
+[current workflow](PROOF_GRAPH_WORKFLOW.md).
 Automatic extraction and formal checking remain separate work.
 
 The scope includes textbooks, monographs, articles and AI-generated or
 AI-assisted manuscripts, with or without Lean formalizations. Orientation,
 central concepts, governing ideas and details are freely navigable. A cited
 theorem can be used while inspection of its proof is deferred.
-
-The [08ZH study](READING_OUTLINE_VALIDATION.md#first-08zh-proof-outline--2026-11-04)
-provides the first Codex-assisted argument outline. Its claims, pullback diagram
-and inverse-image calculation supply the informal argument used in the graph
-trial. The mathematical draft remains attributed Codex material.
 
 ## Visible claims and explanations
 
@@ -114,8 +109,7 @@ to a page image. No compiler, provider, extraction or formalization is required.
 The [graph workflow](PROOF_GRAPH_WORKFLOW.md) supplies explicit source-based
 outlines, attributed AI proposals and reversible deletion. General extraction,
 automatic gap detection and verification of mathematical implications remain
-outside this representation. The [reconnaissance](PROOF_OUTLINE_RECONNAISSANCE.md)
-records inspected exporter/server output and its limits.
+outside this representation.
 
 ## First manual overview across sources — reference contract, 2026-10-16
 
@@ -220,8 +214,7 @@ The final chain is
 \(x\diamond y=s(x)\diamond s(y)=s(y)\diamond s(x)=y\diamond x\).
 All claims use the assumed identity; `comm` additionally uses `idem`, and the
 conclusion uses `comm` and `op_idem` jointly. These are selected source boundaries;
-this illustration itself is not machine output. The subsequent pinned
-exporter/server runs are recorded in the reconnaissance report. The project's
+this illustration itself is not machine output. The project's
 [blueprint](https://github.com/teorth/equational_theories/blob/1aec8a7acf223b7c56e4830977b6e90d4ef1924b/blueprint/src/chapter/implications.tex)
 provides a corresponding prose argument. This illustration supplies no evidence
 of implementation or observed workstation use.

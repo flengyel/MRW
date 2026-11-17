@@ -15,10 +15,9 @@ upgrade or claim that MRW's runtime is verified.
 | Delegated operations | Core-generated creation/execution effects require an explicit request and a supported owner route. Uncertain dispatch cannot be retried without the required reconciliation/idempotency evidence; dispatch is not completion. | Native owner behavior, including Lean diagnostics, is distinct. Network loss, crashes and external outcomes remain nondeterministic inputs. |
 | Report classification | Missing or incomplete coverage cannot imply available-but-unused; partial inspection cannot imply healthy; reporting preserves inspected payload state. | New report/control writes are permitted in their separate stores. Observed trace coverage is not proved by a classification theorem. |
 
-Start with the relocation model because identity and retained-citation rules
-already have concrete persisted representations. Keep independently editable
-source notes and derived Zettels distinct; a formal model must not reintroduce
-the rejected exact-copy/freeze requirement.
+The relocation model uses concrete persisted identities and retained citations.
+Keep independently editable source notes and linked notes distinct; a formal
+model must not require identical or frozen prose.
 
 The first pilot proves safety and invariant preservation. Eventual completion
 or recovery requires separate liveness obligations and explicit fairness or
@@ -52,8 +51,7 @@ an authority above the intended contract. A mismatch requires investigation.
 ## Lean scope and dependencies
 
 The repository already contains a separate justification development in
-`lean/MRW/Justification`, pinned by `lean/lean-toolchain` to Lean 4.32.2 at this
-review. Design-contract models belong in a separate `MRW.Contracts` namespace
+`lean/MRW/Justification`, pinned by `lean/lean-toolchain` to Lean 4.32.2. Design-contract models belong in a separate `MRW.Contracts` namespace
 and independently buildable target. They must not alter the mathematical
 meaning or runtime role of the justification checker.
 

@@ -128,24 +128,10 @@ correctness, comprehension or a verified dependency. The clipboard proof-outline
 tool is separate from this API connector. Direct notebook-cell capture and a
 Copilot backend are not implemented here.
 
-## Validation and remaining observation
+<a id="validation-and-remaining-observation"></a>
 
-The connector's November 3 checks used MRW **0.11.0**. They are evidence for that
-connector delivery, not an installation report for the current release. The
-[validation metadata](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/docs/evidence/reader-ai-20261103/validation.json) records its
-package identity and checks. An installed isolated bridge prepared an exact
-Unicode/CRLF passage after removal of its disposable original, without a provider
-request or changes to source bytes.
+## Verification limit
 
-Automated command/bridge checks used deterministic responses. They covered exact
-quotations, missing originals, changed associations, wrong scope, unavailable
-retained text, cancellation, separate Send, response identity, draft preservation
-and refusal of a second unsent request. They made no live provider request.
-
-The November 3 native Windows/WSL development-window check did not produce a
-completed host report. In later use that day, the maintainer reported reaching
-the model prompt and request preview, then receiving **not sent** because the
-extension host lacked `OPENAI_API_KEY`. API setup was deferred. That observation
-does not establish a live response or successful return with an unsaved
-annotation intact. Those parts of the native connector workflow remain
-unobserved in this report; ordinary reading and companion use are independent.
+A complete native API exchange and return with an unsaved annotation have not
+been verified. Ordinary reading and the Codex clipboard workflow are independent
+of the API connector.

@@ -51,6 +51,24 @@ Update affected workflow instructions and the bundled tutorial when commands or
 user interactions change. A pull request does not need a release package unless
 packaging is part of the change.
 
+## Documentation
+
+Write for the intended reader. User guides explain purpose, current behavior,
+working steps, prerequisites, recovery and meaningful limits. Technical
+specifications define interfaces, invariants and clearly identified proposals.
+Keep development notes, repair narratives and check output in commits, pull
+requests or issues. Remove obsolete instructions when replacing them; do not
+append another account of the change to a guide or create a document for each
+repair or review. Release notes describe user-visible changes.
+
+Before submitting, check command names and examples against the implementation,
+verify links and anchors, and reconcile status with the design register. Keep
+delivered behavior distinct from intended work. Delete repetition, generic
+reassurance and prose that adds no instruction, explanation or necessary limit.
+Apply these requirements to AI-generated documentation before accepting it.
+Do not mark a change complete while affected documentation contradicts its
+behavior or retains the instructions it replaced.
+
 Current decisions and unresolved work are recorded in the
 [design reconciliation register](docs/DESIGN_RECONCILIATION.md). For maintenance
 driven by usage or integrity reports, include the finding, applicable design

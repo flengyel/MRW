@@ -1,770 +1,73 @@
 # User experience specification
 
-[Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md)
-governs optional integrations: creation and execution stay with the responsible
-system; MRW supports explicit delegation, native editing, retained references and
-coordinated synchronization. Current implementation limits remain explicit.
+This specification defines MRW's interaction requirements. The
+[README](README.md) and [user guides](docs/README.md) describe current behavior;
+the [design register](docs/DESIGN_RECONCILIATION.md) identifies pending work.
+Proposed behavior is not a claim that an interface exists. VS Code owns ordinary
+editing, saving, undo, layout and document recovery. Standalone Qt-specific
+controls below do not require duplicate controls in the extension.
 
-## Evaluation follow-up — interface and continuity
+[Integration boundaries](docs/INTEGRATION_BOUNDARIES.md) govern optional
+companions: the responsible system owns creation and execution; MRW delegates
+explicitly and retains scoped references and results.
 
-These accepted requirements implement the [reconciled evaluation](docs/DESIGN_RECONCILIATION.md),
-building on the [dated interface audit](docs/INTERFACE_AUDIT_20261113.md).
-They remain pending where current behavior does not satisfy them.
+<a id="evaluation-follow-up--interface-and-continuity"></a>
 
-- Keep Contents and Commands; group secondary actions by reading/notes,
+## Interface requirements
+
+- Keep Contents and Commands. Group secondary actions by reading/notes,
   sources/references, calculation, proofs, tools/setup and earlier saved work.
-  Use few primary actions, native contextual menus and keyboard access, with
-  no duplicate command wall or additional research-registration view.
-- Expose existing notebook-result actions and companion setup. State whether
-  software is installed, configured or reachable, and identify proposed
-  integrations. Opening the list must not install software or submit work.
-- Bind Lean lesson actions to the selected lesson Markdown or associated code.
-  An unrelated Lean file uses normal native controls and must not inherit the
-  last lesson's actions. Preserve lesson, example, notes and Return together.
-- Remove unsolicited study-creation prompts from ordinary reading controls.
-  Keep deliberate study available separately and preserve saved work,
-  history/export, review/lifecycle controls, Proof Outline and Lean study.
-- Name the AI destination at the action point, distinguish API preview/Send
-  from a Codex/companion handoff, and keep proposed changes inspectable before
-  application. Reader notes precede optional AI actions; copying exact context
-  must not require a Study or transmit it automatically.
-- Reuse native notebook rendering and investigate notebook-aware comparison
-  for retained cells/outputs before writing a new engine. Keep retained and
-  live notebooks distinct; reading/comparison does not execute them.
-
-Acceptance exercises four complete routes: note → saved source → Return;
-lesson → code → notes → Return; retained calculation → comparison → export;
-Zotero reference → attachment → Return. Include dirty buffers, missing or
-changed targets, two lessons, error/plot outputs, cancellation, keyboard access
-and restart. Link calculations to input/method revisions and relevant note or
-proof context. Registration tests alone do not establish these routes.
-
-Broader resumption must recover existing conclusions, gaps and next work from
-their documents and links without requesting duplicate fields. A paused route
-must not require reconstruction of its context from a chat transcript.
-
-## Proposed diagnostics and feature-use reports
-
-The optional [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) provides direct
-**Feature Use** and **Integrity and Data Hygiene** actions, independent of Study
-creation. Keep **Inspect Study History** available in core. Its present usage
-table is partial implementation of the
-[feature-use requirement](docs/OPERATIONAL_USAGE.md), not a delivered plugin UI.
-
-Show period, scope and missing observations before usage totals. Integrity
-findings distinguish failure, unavailable targets and incomplete checks, with
-links to evidence and owner-system recovery. Configure periodic runs and show
-last-completed, due and interrupted status. Scheduled reports do not interrupt
-reading with forms or automatically repair data. A low-use feature or an old
-source note is not a cleanup recommendation. Report export is explicit.
-
-## Obsidian creation command — 0.23.31
-
-For a vault, New Note and reader-note continuation require an explicitly
-configured template creation command. Missing configuration or a known plain
-new-file/insert-template command stops before opening Obsidian or invoking its
-CLI. No preliminary file or fallback note is written. Obsidian owns interactive
-prompts and Save; dispatch does not establish template completion.
-
-## Sidebar — 0.23.28
-
-The Studies sidebar, its tree provider and row menus are removed. MRW's sidebar
-contains Contents and Commands. Preserve saved records, drafts and history:
-Resume Study, Inspect/Export Study History and lifecycle commands remain in the
-Command Palette. Keep Study Lean 4 and ordinary Lean files independent.
-Fleeting notes and notes intended for later review remain ordinary documents;
-do not introduce a replacement view, registration form or new note schema.
-Preserve the working window. Publication does not authorize installation or reload.
-
-## Notes-folder chooser — 0.23.14
-
-Show the current notes folder and up to ten recent choices with full paths.
-Remember choices within the workspace across restart. A recent row switches
-directly; Browse starts at a valid explicit location. Successful selection
-reports the path. Cancellation does not change scope or settings. Missing or
-redirected recent folders require a fresh choice; never silently substitute one.
-Opening documents and temporary rendering work do not change the notes folder.
-
-## Proposed interaction — Study lifecycle and lab notebook
-
-The implemented Study lifecycle follows
-[Archive and delete Studies](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
-Use Command Palette pickers for archive/restore, Trash/Undo and explicit
-permanent deletion. The Studies row actions were removed with the sidebar in 0.23.28. Preserve drafts, Return and shared
-records; do not turn archive or deletion into a recall outcome. See the [delivered workflow](docs/STUDY_LIFECYCLE.md).
-
-The proposed [W3C PROV lab notebook](docs/PROVENANCE_DESIGN.md) links results to
-inputs, method revisions and notes. It supports comparison and resumption
-without a mandatory workflow canvas, question registration or duplicate prose.
-Expose useful actions such as inspecting a result's inputs; keep PROV syntax
-in export/developer documentation. Opening or restoring work makes MRW submit
-no execution or replay; native editor diagnostics retain their normal behavior.
-
-The current workflow below describes MRW 0.23.5. Later versioned sections record
-behavior at the named release; the numbered sections give design requirements
-and experiments, not a list of current VS Code features. The
-[README](README.md) and [reading workflow](docs/READING_OUTLINE_WORKFLOW.md)
-provide instructions for current use.
-
-## Current workflow — ordinary work, 0.23.5
-
-**Open Document…** offers **Original file** (current contents in place) and
-**Saved copy** (a retained revision with MRW annotations) in one native picker.
-**Browse for another document…** is usable immediately, before folder or saved-copy
-loading. The current folder lists filenames and subfolders without descending.
-YAML titles, or the first H1, arrive separately; unsaved titles take precedence.
-Search by title, filename or path. Select a folder or **Parent folder** to navigate;
-**Search subfolders…** explicitly requests a wider, bounded search. Its path,
-progress and incomplete results are shown. Failed title/listing work leaves
-Browse available. Folder browsing does not change **MRW: Notes Folder** or grant
-an indexing scope. Cancellation preserves the current view and drafts.
-
-Saved-copy rows show their title, source/path and retained revision. Discovery
-runs independently of ordinary browsing. **Saved copy…** also opens the
-project-scoped saved-source picker; **MRW: Open Saved Source…** remains in the
-Command Palette. Opening an original does not import it; opening a saved copy
-does not refresh its source or replace annotations. PDFs use the host
-reader handoff. Shared backlink and note-ID completeness rules are unchanged.
-
-Contents identifies the selected document and indicates when another file is
-active. Supported WikiLinks reach exact headings and blocks within the selected
-notes folder. Reopen Document restores a recorded Markdown selection when its
-text still matches. Note-local macros render in the Markdown preview, and an
-explicit **Render diagram** action compiles a TikZ fence without changing the
-note. Opening a note does not compile its diagrams. PDF-page and preview-scroll
-restoration remain unsupported. See [reading repairs](docs/READING_REPAIRS.md)
-for the tested scope and remaining limits.
-
-Opening or following a note displays the note in place. Contents navigates its
-headings and links. The document Problems commands, preview link, Contents
-question actions and sidebar/editor entry points are removed at the user’s
-request. They must not return under another name.
-
-Questions, solutions and commentary can stay in the documents where they were
-written and remain connected by ordinary links. Do not substitute a Research
-Question registration system. Resumption first recovers those documents,
-supported locations and unfinished work. Add an interaction only for a
-demonstrated obstacle, without duplicate entry or mandatory reporting fields.
-
-Earlier document-linked records remain readable in the saved-work view.
-It shows statements, attributed solutions, pending drafts and unresolved text,
-with Return and history/export. It offers no problem entry, attempts, grading,
-association or scheduling forms. No data migration or deletion is performed.
-Late checkpoints from older views are preserved; stale mutation actions are rejected.
-
-Keep native Commands buttons, title/filename choice and cancellation. VS Code
-owns ordinary documents, Save, Undo, editor groups and both sidebars. Preserve
-0.23.1 Return/scope/presentation and 0.23.2 opening repairs. Installation does not
-reload the working window. General research resumption and integrated argument
-reconstruction remain later work. Preserve these rules when reading the earlier
-release sections below.
-
-## Existing documents — 0.20.0
-
-**Open Document…** opens the original through the host, with Markdown in its
-existing editor and Contents available alongside it. **Choose Document…** selects
-Markdown for Contents. **Choose Notes Folder…** grants one explicit, remembered
-folder scope for note navigation and a bounded, cancellable backlink index.
-External files can instead be selected individually; their parents are not indexed.
-Ordinary Windows-mounted notes are files, not an MRW private store.
-
-Contents and **Follow Document Link** support relative Markdown links, exact
-heading fragments, and `[[ID]]` links within the selected notes folder. Front
-matter is excluded without shifting source locations. Ambiguous IDs, conflicting
-identity fields and unsupported selectors receive local errors. **Show Backlinks…**
-opens exact occurrences and distinguishes incomplete indexing from no backlinks.
-**Return to Document** restores an exact tracked occurrence; **Reopen Document**
-uses the remembered original file after restart. Ordinary origins remain separate
-from retained-reader origins. Missing or redirected files require a new choice.
-
-PDF files use a registered host custom reader. With no reader, an explicit
-**Open with system reader** action is offered; PDF bytes are never read as text.
-File-level opening and return are delivered, not PDF page restoration or extraction.
-The tutorial identifies its active version/build and refreshes the current
-activation's packaged text on reopen. Installing does not reload the working window.
-See [document workflow](docs/READING_OUTLINE_WORKFLOW.md) and
-[validation](docs/EXISTING_DOCUMENTS_VALIDATION.md). Research-question resumption
-and argument reconstruction remain later increments.
-
-## Delivered terminology — 0.19.2
-
-Document, Contents, Saved source and Passage are implemented across commands,
-reader controls, prompts, welcome text and the tutorial. New/Choose dialogs say
-Markdown; Show Contents focuses the existing navigator. Proof Outline and Studies
-remain unchanged. IDs, settings, serialized fields, reference links, existing
-files and note bytes retain their meanings. See
-[workflow](docs/READING_OUTLINE_WORKFLOW.md) and
-[validation](docs/DOCUMENT_TERMINOLOGY_VALIDATION.md). General document opening,
-optional Zettel/PDF integrations, independent research resumption and the complete
-reconstruction workflow remain the subsequent increments in the committed design.
-
-## Delivered study reliability — 0.19.1
-
-The [0.19 review findings](docs/MRW_019_REVIEW.md) are repaired within the existing
-study view. Drafts retain source/attempt identities and per-study checkpoints;
-Paste/Edit cannot replace pending prose. Explicit saved-editor study selection
-beats remembered reader context. Failed snapshot publication and shared-owner
-schedule writes remain retryable with visible conflicts. Corrections preserve
-retired review history and withdraw stale offers. Effort resolves before version
-partitioning. Ambiguous help shows request/purpose selection or stays unassociated.
-The [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) states checkpoint/recovery limits;
-[validation](docs/ACTIVE_STUDY_VALIDATION.md) separates automated and host evidence.
-
-## Delivered study feedback — 0.19.0
-
-An empty study shows its selected source and Enter a question / Request questions
-from Codex. Recall conceals source/reference answer within the study. Pending
-outcome choices persist by attempt ID without automatic reporting. Paste companion
-response reviews ordinary prose with attribution, preserves the original and
-separate edits, and retains it beside work through Resume. Requests, previews,
-retention and display remain distinct observations. A completed attempt’s revised
-work begins an explicit linked continuation. A later independent attempt resets
-exposure while keeping history. Open Study Example is explicit, original CC0
-material with separately marked practice history. Native Studies remains the
-navigation surface; no workspace rearrangement or background requests occur.
-See [workflow](docs/ACTIVE_STUDY_WORKFLOW.md) and
-[validation](docs/ACTIVE_STUDY_VALIDATION.md). Graph structure and mathematical
-checking remain separate; reader reports and pasted AI proposals establish no
-checked proof or learning benefit.
-
-## Earlier delivered active study — 0.18.0
-
-Study Current Material starts from a selected retained passage, cited graph
-claim or captured saved text selection, without a preliminary question popup.
-The existing study surface supports manual/attributed Codex questions, typed or
-paper attempts, ordered immutable submissions, source/help reveals, corrected
-reader outcomes and sparse optional effort. Source changes preserve earlier
-work. Studies replaces the command tree with recent study/source/question data;
-older commands remain in menus/Command Palette. Local history, explicit exports
-and source-scoped short FSRS blocks are implemented. See
-[workflow](docs/ACTIVE_STUDY_WORKFLOW.md) for exact mapping and limits.
-The following design text remains rationale where it describes intentions;
-[validation](docs/ACTIVE_STUDY_VALIDATION.md) states the observed scope.
-
-## Delivered VS Code study design — 2026-11-05
-
-The study interaction is specified in [ACTIVE_STUDY_DESIGN](docs/ACTIVE_STUDY_DESIGN.md).
-Its bounded implementation is described above. Start from current supported material;
-offer a few pertinent questions, feedback and light spaced revisits. Keep the
-source and unfinished work available. Graph creation is optional.
-
-Follow Microsoft's native view and contextual-action guidance. The sidebar
-shows studies, sources and questions rather than an alphabetized command list.
-Keep infrequent maintenance actions in menus/Command Palette. Retain host-owned
-editing, undo and movable views.
-
-Track detailed local MRW events with task/revision and software/policy versions.
-Keep sparse mental-effort reports, task outcomes, AI assessments and derived
-estimates distinct. Use the history both for immediate help and descriptive
-evaluation across releases. A pause, source opening or missed rating is not
-failed recall. Capture/expose meaningful events without a questionnaire at
-every step or a dashboard that displaces the mathematics.
-
-See the [research review](docs/LEARNING_RESEARCH.md) and
-[Codex prompt](docs/CODEX_LIGHT_STUDY_PROMPT.md).
-The release notes below describe delivered behavior at their stated versions;
-the current workflow states implementation bounds.
-
-## Delivered extension behavior
-
-**Proof study, 0.17.0 (2026-11-05).** Prepare chooses one retained proof and
-explicit prerequisite passages. A single handoff contains their exact text,
-references and the outline schema for the Codex companion. Import opens the
-existing graph. Summary forms edit ordinary documents with author/origin and
-save/undo under VS Code. A study tab saves the unresolved question and resumes
-it from an ordinary study file. No API call is implicit. Structure and source
-pins are validated separately from mathematical correctness. See
-[workflow](docs/PROOF_STUDY_WORKFLOW.md).
-
-**Proof-view startup, 0.16.1 (2026-11-05).** The proof view accepts messages
-from VS Code’s same-origin wrapper. Embedded-page messages are rejected by
-origin. If no graph arrives within 15 seconds, Retry requests it again; there
-is no automatic source navigation, compiler or provider request.
-
-**Tagged-page interaction, 0.16.0 (2026-11-04).** Vertex selection brings up its
-exact corresponding Stacks tag in an adjacent panel. The graph supports pan,
-zoom, search, keyboard selection, neighbor highlighting and animated layout
-changes, respecting reduced motion. Saved text gives the pinned statement and
-proof offline. Live navigation follows explicit selection and stays separate
-from retained source revisions and AI-proposed claims. Projection changes keep
-the selected page open. A JSON-editor title action opens the graph directly.
-
-**Proof-outline trial, 0.15.0 (2026-11-04).** **Open Proof Outline…** displays
-the ordinary inference document, attributed summaries, source pins and explicit
-joint-premise alternatives. Deletion changes only the display; expansion shows
-the original steps. Premises, goals and scope boundaries stay visible. Selection
-persists per exact document revision. VS Code owns summary editing and recovery;
-Ask AI keeps the existing separate exact preview and Send. The 08ZE/08ZH case
-compares source arguments with pinned Lean declarations, without claiming an
-elaborated proof graph or local check. See [the workflow](docs/PROOF_GRAPH_WORKFLOW.md).
-
-Extension patch **0.14.4** defaults reader diagrams to **Theme**. CSS selects
-the light or dark retained view from the VS Code theme class, including high
-contrast themes, without rebuilding notes or touching drafts. **Paper** and
-**Dark** remain explicit overrides. The new preference starts in Theme rather
-than carrying forward the earlier fixed-mode choice. The shared stylesheet passes
-VS Code’s color scheme to SVG images in the native Markdown preview. Return uses native
-Reopen as Preview for saved files when available, with the earlier preview
-command as fallback; unrelated Untitled drafts are never reopened or closed.
-
-Extension patch **0.14.3** opens VS Code's Markdown preview on Return to reading
-outline. It first restores the checked source location or selected overview,
-then opens its rendered view. Closing preview/editor tabs does not change the
-reading destination. Ordinary editing, unsaved text and source pins remain
-under their existing owners; Return never saves the overview.
-
-Extension patch **0.14.2** lets Return to reading outline reopen the selected
-overview when the reader was opened without a source-link origin. It preserves
-live drafts and remembered selections, or offers a Markdown file choice when
-no overview is available. Existing source-link origins still require exact
-revision and workspace checks; an invalid origin never falls back elsewhere.
-
-Extension patch **0.14.1** keeps local reader controls usable during Return to
-reading outline. Command and reader error notifications are nonblocking. A
-reader becoming visible receives idle state only when its own requests have
-finished; pending writes and storage freezes retain their guards. This changes
-control state only, preserving proof choices, return pins, notes and drafts.
-
-Extension **0.14.0** adds **Import Obsidian note…** to alphabetical Research
-Tools and the command palette. Each invocation offers all three destinations:
-saved source outline, reader annotation on a passage, or reading-overview text.
-The file picker selects one Markdown note. Source import retains exact bytes
-and a readable passage; repeat import of the same path/revision reopens its
-saved copy. Annotation import uses the chosen passage and unknown attribution.
-Overview insertion uses host editing and undo, pins its cursor/version, and
-leaves saving to the user. The note file remains unchanged.
-
-Extension patch **0.13.5** places **Delete note…** beside each displayed reader
-annotation, including whole-source notes. Confirmation names the passage and
-quotes the note. Only the selected annotation is removed through revision-checked
-core publication. Its editor is frozen during deletion; cancellation and failure
-keep the saved display and draft. Confirmed deletion clears that note’s draft
-and leaves other drafts intact.
-
-Extension patch **0.13.4** gives every Research Tools entry a plain-text hover
-description of its target and effect. Disabled investigation actions retain their
-description. Constructing tooltips performs no command, service call or write.
-
-Extension patch **0.13.3** sorts the full Research Tools list alphabetically.
-**Refresh saved source outline** is visible on the reader toolbar and available
-in Research Tools for an open source, with command-palette access. Refresh
-reloads saved notes and source status while preserving unsaved annotation forms.
-
-Extension patch **0.13.2** places saved Reader notes within their associated
-source card, including when its proof is folded. Whole-source notes appear near
-the source heading. Each note disclosure starts closed and keeps its own live
-state. Editors remain in Source details and tools; folding leaves drafts and
-saved bytes unchanged.
-
-Extension patch **0.13.1** releases frozen readers and the storage-operation
-guard before showing completion notifications. A notification may remain open
-while reading continues. Directory inputs and confirmation dialogs retain their
-operation guard. **Open Saved Work Directory…** connects a workspace without
-moving files; **Move Saved Work Directory…** transfers saved records. The
-tutorial explains controls and persistence rather than mathematical study advice.
-
-The mathematician's workflow the interface must support. Companion to
-`VISION.md` (why the system exists) and `DOMAIN_MODEL.md` (entities and
-invariants). Present implementation and limitations are documented in README.
-The standalone Qt GUI provides ordinary-file editing, existing local PDF reading,
-external-editor and Jupyter handoff, staged LaTeX building, generated-PDF
-rendering, checkpoint recovery, one explicit task-local OpenAI exchange, one
-bounded linked continuation with restart restoration, an explicit end-and-
-begin-again lifecycle, and retained-record
-inspection. Proof-assistant, computer-algebra, notebook-execution, repository,
-literature-service, branching/general model conversation and Kallenberg-guidance
-GUI workflows below remain unimplemented. The active R1–R3.1 roadmap in [CODEX_PLAN.md](CODEX_PLAN.md#active-roadmap-mathematical-usefulness-first)
-prioritizes readable study, task-local assistance and continued investigation.
-Kallenberg ordering guides requested orientation in unfamiliar material; a
-focused question need not repeat it. Qt/runtime and TeX prerequisites remain
-platform-dependent; they are not permanent workflow invariants.
-
-## VS Code frontend migration — 2026-10-13
-
-### Retained source display and completed-import navigation — 2026-11-06
-
-Patch **0.21.1** keeps each Kerodon text node together across parser callbacks
-before reading mathematical delimiters. Display bare equation arrays without
-executing source HTML or TeX. Validate the retained acquisition manifest first;
-derive the repaired display from the same retained bytes and exact spans without
-republishing the source, annotations or links.
-
-An import success notification is feedback, not a reader-action boundary. Release
-the source-action lock when display/publication finishes, independently of whether
-that notification is dismissed. New and repeated Stacks Project/Kerodon imports
-must allow Return and refresh while the notification remains open. Keep original
-source access visible in the reading toolbar; its browser action opens the current
-canonical page and does not replace the retained quotation.
-
-### New work and tutorial — 2026-11-04
-
-Extension **0.13.0** makes starting visible: **New Reading Overview**, **Open
-Reading Outline**, **Open Saved Source Outline…** and the tutorial appear in
-the empty MRW navigator. New is also a title-bar action and menu entry;
-**Open Tutorial** remains available in the menu and command palette. Research
-Tools exposes both commands.
-
-New opens a native Save dialog, creates a new Markdown working page through
-VS Code's file-edit and Save operations, opens its ordinary editor and selects
-it in Reading Outline. Its suggested headings can be changed or removed.
-Refuse existing paths and files outside the workspace; cancellation preserves
-the current selection. A failed first Save keeps the visible editor draft and
-reports the failure without selecting it as saved work. No automatic source
-outline or research record is created.
-
-The optional tutorial opens offline as a read-only Markdown preview. It starts
-from a question and paper notes, explains overviews, retained passages and
-annotations, and introduces computation or AI only where useful. Reproducibility,
-precise source locations and a next step make research computing approachable
-without requiring a complete toolchain or formalization. Opening help changes
-no workspace, source record or mathematical status and launches no backend.
-
-### Reading overview choice — 2026-11-04
-
-Patch **0.12.1** makes **Open Reading Outline** usable without focusing Markdown
-first. Use the active overview, reuse the chosen live overview or reopen its saved
-file. Without an available choice, including a missing saved file, show VS Code's
-native Markdown file picker. **Choose Reading Overview…** in the view menu and
-command palette always offers an explicit new selection. Cancellation leaves
-the navigator and preference unchanged. Preserve unsaved text and live untitled
-overviews; only saved-file pointers survive in MRW workspace UI state. Keep the
-latest saved choice when an untitled overview is used and closed. Check workspace
-and resolved file scope before opening a selected file. These actions do not
-change the VS Code workspace, reload extensions, save prose or move records.
-
-### Folder rename preparation and reconnection — 2026-11-04
-
-Extension **0.12.0** gives a single-folder study two explicit actions: **Prepare
-Folder Rename…**, then **Reconnect Saved Work After Folder Rename…** after a
-normal file-tool rename and reopening. Preparation verifies/moves saved artifacts
-outside the project, preserving source bytes, exact references, annotations and
-required records through the existing core. It refuses unsaved research drafts
-and incomplete operations. A completed move whose convenience shortcut cannot
-be saved reports its actual location and the existing manual opening route.
-
-Reconnection shows the previous and current folder, verifies the selected store
-and explicitly maps the project. An occupied receiving workspace cannot merge
-or replace its work. No ordinary file, source provenance or recorded source
-path is rewritten; retained access remains available when an original-file jump becomes
-unavailable. VS Code owns ordinary saving/recovery and the directory operation;
-editor/UI state and unsent drafts do not transfer. Nested study workspaces need
-their own preparation before a parent rename. [Workflow](docs/FOLDER_RENAME_WORKFLOW.md).
-
-### Previously delivered reader assistance and navigation
-
-Patch **0.11.1** preserves the prior source's originating Markdown occurrence
-when a later navigation fails during unsaved edits. Track candidate return pins
-while a source opens, commit only after successful following, and keep exact
-overlap refusal/undo restoration. Prose editing and saving remain VS Code-owned.
-
-Extension **0.11.0** adds direct questions from a retained source-reader passage.
-The reader action resolves the existing exact reference and prepares the shared
-R2 preview. It initially includes only the retained quotation and its source,
-outline, region and range identity. An earlier changed/removed linked range
-keeps its original quotation. Reader annotations, unsaved drafts and supplied
-evidence are excluded. The existing separate Send and attributed response review
-remain; returning to the source tab preserves reader drafts. Ordinary-editor
-selection remains an alternative. This uses the existing OpenAI connector;
-Copilot access, automatic annotation insertion, outline generation and checking
-are not supplied. See [the reader workflow](docs/READER_AI_WORKFLOW.md).
-
-The backend runs in the workspace environment with Python 3.11+, using standard
-local Linux, WSL2 or Remote SSH to Linux hosts. Windows may supply the editor
-while Linux runs the core. One extension and the existing Python services
-remain the architecture; native Windows backend portability is deferred.
-Reading and outlining need no Lean, SageMath, container or provider. Scoped
-installed-VSIX reader/restart checks pass with WSL Debian and Remote SSH to a
-Raspberry Pi 5 running Debian 12 ARM64. Other Linux SSH hosts, local desktop use
-and other Raspberry Pi OS/ARM configurations remain separately unvalidated.
-
-VS Code is the active frontend target. The mathematical workflow principles in
-this document apply to both frontends; implementation details concerning QtPdf,
-split panes, widgets, application-owned buffers, checkpoints, and close/quit
-apply only to Qt. Preserve their source-integrity and evidence invariants when
-designing host integrations, without duplicating VS Code's document lifecycle.
-Statements that R1–R3.1 are delivered below refer to Qt unless the extension is
-explicitly named. Other extensions' PDF, Lean, LaTeX, and notebook support is
-integration context, not a claim of MRW implementation or validation.
-
-The initial extension supplies an Explorer research view and MRW commands for
-record inspection, response review, exact retention, attributed note insertion,
-and Lean/browser handoffs. Ordinary documents, save, undo and recovery belong
-to the host. This section describes the extension; the existing R1–R3.1 Qt
-contracts below retain their implementation status.
-
-A saved UTF-8 text selection can be marked as a return location. Its canonical
-path, exact byte revision, host text revision, UTF-16 selection, and bounded
-preview live in private VS Code workspace state, with one marker per canonical
-project. The shelf displays it without reading the source. Returning checks
-both disk and editor contents before moving the editor. Dirty or changed text
-blocks return; markers do not track edits in this first increment. Host state
-persistence is not presented as the Qt recovery checkpoint protocol.
-
-Record views are read-only plain text and reuse existing validators. Showing a
-passage selects its exact reviewed record revision. Retention creates a new
-projection with no overwrite. Insertion adds an attributed editable copy at the
-active note cursor, preserving selected work and one undo boundary; it does
-not save the note. Concurrent note/selection changes cancel insertion.
-Opening an earlier review tab reselects its record and passage. This association
-survives document language changes. Each activation uses a distinct virtual
-document namespace so restored tabs cannot acquire a new record identity.
-
-Lean-source handoff opens a user-selected file and line beside the work. An
-installed Lean extension may process that file. HTTPS viewer handoff sends no
-source or appended local path. Neither action extracts a graph or supplies a
-Verification. PDF/Lean/LaTeX/notebook behavior supplied by other extensions
-remains their responsibility. R2 preview/Send is transferred: **Ask About
-Selected Work** captures exact visible ordinary text, including unsaved and
-untitled documents. Up to eight contexts can be added or removed; changing
-context or the question invalidates the previous preview. The read-only current
-preview must be active for the separate **Send Exact Preview** command. Send
-consumes that preview before launching the asynchronous Python adapter, so
-duplicate actions cannot resend it. An explicit preflight rejection reports
-**not sent** and preserves the draft for a newly displayed preview. A known
-terminal outcome remains distinct from a later display failure; automatic
-response review checks the exact retained-record digest. All four terminal
-statuses can be inspected, while passage extraction remains completed-only.
-Native Windows Send is blocked before transport because immutable publication
-is unsupported there. Terminal records live in private VS Code
-workspace storage; unsent drafts are transient. Host interruption can leave a
-request outcome uncertain and never triggers an automatic retry. R3/R3.1 is
-implemented as described below; vertex elimination remains planned.
-See [extension instructions](vscode/README.md).
-
-R3 starts from one exact reviewed initial completed ModelCall. Choose one to
-eight numbered prior passages, explicitly add/remove current ordinary-text
-selections, and keep the human correction and task summary separate. Every
-draft change invalidates its complete independent preview; Send is a separate
-one-attempt action. The child records `in_reply_to` without provider conversation
-state. An initial parent has one child in the active investigation; a linked
-child cannot be continued again, and an existing slot cannot be overwritten.
-
-The extension's versioned private state contains bounded human task fields and
-exact record pointers/spans, with a pending reservation published before Send.
-It uses the core's existing mutable-file publication service under private
-extension storage, keyed by canonical project identity. No Qt workspace,
-buffer or recovery state is imported. Explicit **Resume Saved Investigation**
-restores the parent/human/child comparison after exact validation. A pending
-destination is reconciled only against its reserved request fingerprint;
-missing or changed known records leave the human summary and pins intact.
-Opening the host starts no bridge or request. No automatic retry occurs.
-
-Human fields are edited through commands and displayed in the plain-text
-comparison. **Save Human Task Summary** persists them; accepted edits not yet
-saved remain in memory. The investigation's current-question command is
-independent of an unrelated R2 draft. Handoff insertion uses the latest matching
-human fields and immutable identities without copying model prose. Repeated
-previews and comparisons reuse an existing MRW editor group.
-
-**End Investigation…** offers insert-handoff-and-end, end-without-insertion or
-cancel. Busy/restore entry points are guarded, and the handler revalidates active
-identity and the intended ordinary note after confirmation and preparation.
-Successful ending clears only the active pointer after private publication.
-Insertion remains an ordinary unsaved host edit with undo; no automatic Save or
-Qt recovery guarantee is claimed. If ending fails, live state and any inserted
-note text remain without duplicate insertion, retry or automatic undo. Failed
-or uncertain publication blocks further private writes until reload; a complete
-post-replacement result may be visible on disk after an uncertain sync failure.
-Preserve unsaved human edits through a handoff before reload when needed.
-Another independent bounded investigation can use the released slot after
-restart. Records are retained; no archive browser or branching conversation is added.
-
-The 2026-10-13 Windows/WSL Development Host checks exercised these command,
-document, undo and record workflows with scripted dialogs and deterministic
-responses. A normal-host close/reopen separately confirmed Return persistence
-and rejection of stale virtual-tab identity; VS Code's extension-test mode uses
-in-memory workspace storage and cannot establish that result. Visible captures
-at both review sizes were inspected, using ordinary host layout controls for
-the smaller window. No production UX change or mathematical-use claim follows
-from this validation. Details and remaining limits are in the
-[host validation record](docs/VS_CODE_ASSISTANCE_REVIEW.md#actual-extension-development-host-validation).
-
-### Explicit TikZ reader diagrams — 2026-11-02
-
-A saved reader annotation can contain ordinary `tikz` fences. Save leaves the
-code inert. In Reader notes, **Render diagram** starts one isolated native job
-and retains a validated SVG for that annotation and exact code digest. Newer
-form typing survives the reply. **Exact TikZ code** and the full annotation text
-remain accessible. Changed code never adopts an older rendering. Failed renders
-keep prior valid output; uncertain publication never announces success.
-
-Reopening and refreshing display retained output without tools or networking.
-Paper/Dark display adapts monochrome ink and preserves other colors and the
-original SVG. Its workspace preference is host-local. Rendering needs supported
-Linux tools only for the explicit action; there is no unrestricted fallback.
-One block produces one diagram page; unsupported active/external SVG output
-fails visibly. This adds no graph inference or mathematical evidence. See
-[workflow](docs/TIKZ_WORKFLOW.md) and [checks](docs/TIKZ_VALIDATION.md).
-
-### MRW entry point — 2026-11-01
-
-MRW has a dedicated book icon in VS Code's Activity Bar. The sidebar contains
-Reading Outline and the collapsible Research Tools view, with existing IDs and
-state. Reading actions have a standard native **…** menu; Open and Return remain
-title icons. This replaces default placement under Explorer while respecting
-host-owned view customizations. Opening the sidebar starts no backend or source
-acquisition. All existing command-palette entry points remain available.
-
-### Annotation mathematics — 2026-11-01
-
-Reader explanations and other annotations render explicit `\( ... \)` inline
-math and `\[ ... \]` / `$$ ... $$` display math with bundled KaTeX and native
-MathML. Other prose remains literal text, including Unicode, HTML and URLs;
-single dollar signs retain their ordinary meaning. Editing uses the exact saved
-text; the reading view also offers Exact annotation text. Invalid mathematics
-keeps its TeX with a visible fallback message. Rendering changes no attribution,
-saved content, source identity or mathematical status and starts no external tool.
-
-Published proof cards offer **Show proof / Hide proof** beside the mathematics.
-The sticky reading toolbar has **Hide proofs / Show proofs** for the source;
-statements remain visible. The initial visibility preference uses host-local
-workspace UI state. Individual choices stay in the live view; following an exact
-proof reveals that proof even when others are hidden. These controls preserve
-drafts and create no source-record mutation. Readers choose their level of detail
-without a prescribed sequence. Manual regions retain their existing saved
-expansion action and gain visible Show/Hide details controls.
-
-### Compact hidden details — 2026-11-01
-
-A hidden published proof is one compact reveal row labelled with its retained
-title. It keeps no large heading, empty card, hidden-status paragraph or duplicate
-return link. Selecting it reveals the exact proof in place. Reader notes is a
-native disclosure labelled with the note count and starts closed. The reader
-can open/close it with mouse or keyboard; its live state survives refresh/save
-replies. Folding saved notes leaves their text, attribution and editing drafts
-intact, and creates no record mutation.
-
-### Proof visibility repair — 2026-11-01
-
-The user confirmed that the expanded 0.9.1 view improved reading, then found that
-opening the annotation form pushed the proof out of view. Patch 0.9.2 removes
-editing forms from the source reading sequence. Published statements and proofs
-have direct reciprocal links using existing explicit part roles, tag and exact
-retained spans. Temporary proof expansion changes only the live reader view.
-Reader notes are separately attributed beneath their associated passage; their editors
-and the remaining region controls are grouped under Source details and tools.
-Changed associations are never presented as the original proof. Source,
-Markdown, record identity, mathematical status and core request semantics stay
-unchanged. Annotation saving shows pending, confirmed and unconfirmed results inline. A confirmation covers
-only the submitted version; newer typing remains explicitly unsaved. Open note
-editors stay open across refresh and save replies, and failures preserve their
-text and the existing write block.
-
-### Reading presentation repair — 2026-11-01
-
-The first installed trial exposed a reading blocker: a selected long Markdown
-citation dominated the middle editor, while metadata and controls crowded the
-mathematics into a narrow reader. Patch 0.9.1 gives navigator references concise
-view labels without rewriting Markdown. Its former automatic layout expansion
-is superseded by the 0.22.1 layout-preservation contract. Source text precedes passage actions;
-source details and editing controls start collapsed. A sticky Return action
-brings back the originating overview and navigator. A matching published passage
-is shown as rendered retained source at its exact card. Earlier/changed ranges
-continue to open their original pinned text, with a visible warning and no
-replacement region. Exact TeX, notes and evidence remain explicitly accessible.
-The patch changes no source identity, stored range, prose ownership or warrant.
-
-### Reading-outline navigation — 2026-11-01
-
-**MRW: Open Reading Outline** derives a collapsible Explorer view from the
-selected ordinary Markdown overview, including unsaved text. CommonMark headings
-supply organization; existing MRW links supply retained-source navigation.
-Code examples are excluded. Selecting a heading visibly selects its exact line;
-selecting a passage opens its pinned retained range through the existing reader.
-Repeated headings and repeated passage links remain distinct occurrences.
-**Return to Reading Outline** is available in the palette, view and reader.
-It selects the originating occurrence and opens the rendered Markdown overview,
-including when its previous preview tab was closed, without saving or replacing
-note text. The ordinary Markdown editor remains available for editing.
-When no source-link origin exists, it opens the selected live or remembered
-overview instead, restoring a matching selection. Without an overview it offers
-a Markdown file choice; cancellation keeps the reader. An unrelated active
-Markdown editor cannot replace the selected overview during Return.
-A live return location follows nonoverlapping edits; overlap blocks return,
-with exact undo restoring the original pin. Restart checks the saved text hash
-before returning; it never guesses from matching headings or similar links.
-
-The view refreshes from host document events and reconstructs after normal
-save/close/reopen. Collapsed-section preferences, last selected document/location
-and a return pin live in existing host-local workspace UI state. No prose or
-second outline record is stored. Opening/restoring the view starts no bridge,
-network, provider, compiler, notebook or container. Following invokes only the
-existing retained resolver/reader. Existing insertion commands and ordinary
-Obsidian notes remain in use; no vault is inspected. Navigation creates no
-premise, dependency, verification or comprehension status. See
-[usage and format bounds](docs/READING_OUTLINE_WORKFLOW.md).
-
-### Obsidian companion navigation — 2026-10-17
-
-The source reader offers **Copy link to this outline** under **Whole outline**
-and **Copy link to this passage** in each **This passage** group.
-**MRW: Copy Outline or Passage Link…** also works without an active Markdown
-editor. Ordinary Markdown labels use the source title and locator; target
-identifiers and routing remain in the URI. Clicking in Obsidian opens the saved
-reader and, for a region, selects the original pinned retained passage.
-
-To associate a note, open the intended note in Obsidian and use its **Copy
-Obsidian URL for current file** command. “Current file” refers to the note open
-in Obsidian. Under **Whole outline** or a passage card's **This passage** group,
-**Link an Obsidian note…** stores that URL and a short label.
-**Open linked note in Obsidian** uses a readable chooser for multiple notes.
-Replacement/removal changes only the
-navigation record; earlier pinned passage associations remain accessible.
-A single linked note displays its stored label beside the opening action;
-multiple notes retain the chooser. An empty group explains how to link a return
-destination. Tooltips distinguish copying an MRW destination from linking an
-Obsidian return destination; copying creates no reverse association. A changed
-range exposes a separate **Earlier linked passage** group, while current
-passage actions keep their current range. The all-notes list labels those scopes.
-These 0.6.1 presentation changes preserve IDs, references, retention and storage.
-Obsidian owns notes, rendering and ordinary attachments, including handwritten
-work. Existing Zettel notes need no conversion or derivation transcription.
-
-An external link carries separate workspace routing and existing scoped
-`mrw-outline:v1` identity. A receiving window must match the routing and project
-before the Python resolver checks its private scope. A wrong window offers
-**Copy Link and Open Workspace**, followed by **MRW: Open Link from Clipboard**;
-it never interprets the reference against an unrelated project. Missing private
-state and malformed links fail without replacement guesses. Obsidian handles
-missing notes; MRW explains how to replace their association. Dispatch success
-does not confirm note existence. Existing retained access survives changed or
-missing original sources. Navigation performs no mathematical analysis or tool
-execution. Copying a note transfers no private targets. See
-[the workflow and persistence limits](docs/OBSIDIAN_WORKFLOW.md) and
-[validation](docs/OBSIDIAN_VALIDATION.md).
-
-### Saved artifact location — 2026-10-19
-
-**MRW: Show Artifact Location** reports the effective directory for this
-workspace. **MRW: Move Saved Work Directory…** names the current location,
-proposed new directory and all affected project folders before confirmation.
-It protects unsaved reader/assistance edits, verifies a complete staged copy,
-commits one host-local binding, rebinds readers and removes only exact old owned
-payloads. **MRW: Recover Artifact Move** resolves interrupted/uncertain operations
-from the persisted binding and manifests; postcommit cleanup never rolls back
-authority. **MRW: Refresh Artifact Location** retains drafts when another updated
-local window has moved the store. Editing `mrw.artifactMoveDestination` merely
-changes the suggested input.
-
-**MRW: Open Saved Work Directory…** is distinct: an empty/unbound
-workspace explicitly maps projects and verifies every required byte before using
-a complete synchronized copy. It does not merge stores or move ordinary notes,
-source documents or notebooks. Missing mounts, partial synchronization and
-conflicts produce actionable errors without empty replacements or guessed
-locations. Unsupported private permissions/publication boundaries reject before
-commit; the current `/mnt/c` mount is one observed unsupported configuration.
-The separately authorized scoped metadata trial passes a disposable move and
-save/reopen, but unresolved probe replacement denials prevent real-store
-qualification; see [the configuration results](docs/WSL_ARTIFACT_STORAGE_SETUP.md).
-One approved comparison found no denials in four paused probes and one denial
-in each four-probe active phase. The Windows folder was resumed and independently
-verified. The subsequent approved paused transaction check failed at its first
-preflight replacement before commit. No pause/write/handover procedure is
-qualified; retain the rejection and original real-store location.
-Keep bindings/journals/locks and runtime state outside the selected directory.
-The [storage guide](docs/ARTIFACT_STORAGE.md) defines scope, recovery and the
-one-writing-computer workflow. Qt storage is unchanged. Navigation initiates no
-provider, compiler, notebook or container execution.
+  Use contextual menus and keyboard access rather than another command wall.
+- Open ordinary documents in place. Contents follows the selected Markdown
+  document's headings and links, including unsaved text. Preserve exact Return
+  occurrences and report missing, ambiguous or changed targets.
+- Choose Notes Folder defines one explicit scope and remembers recent choices.
+  Browsing documents does not change that scope. Cancellation preserves settings.
+- New Note delegates to the configured Obsidian creation command for a vault,
+  or opens a blank VS Code editor for an ordinary folder. Obsidian owns prompts,
+  templates, filenames and Save. A missing command produces no fallback note.
+- Ordinary reading creates no problem or study record and offers no unsolicited
+  registration. Keep deliberately invoked study, saved attempts, history,
+  lifecycle controls, Proof Outline and Lean study separately accessible.
+- Bind lesson actions to the selected lesson or its associated code. Unrelated
+  Lean files retain native controls. Preserve lesson, code, notes and Return.
+- Name API and companion destinations where help is requested. Show exact context
+  and proposed changes before application. Copying context does not send it.
+- Keep source text and reader notes prominent. Attribution and optional tools
+  must not displace the argument. Folded proofs and notes remain available for
+  explicit expansion; annotation saves distinguish submitted and newer drafts.
+- Reuse native notebook rendering and comparison. Keep saved output, producer
+  accounts and live execution distinct; viewing or comparison executes no cells.
+- Setup distinguishes installed, configured, reachable and unsupported states.
+  Opening setup performs no installation, service probe or job submission.
+
+The complete routes are note → saved source → Return; lesson → code → notes →
+Return; retained calculation → comparison → export; and Zotero reference →
+attachment → Return. Each preserves dirty buffers and handles missing/changed
+links, cancellation and restart. Resumption recovers existing work and its
+context without duplicate question, conclusion or next-action forms.
+
+## Persistence and optional tools
+
+The [reader](docs/READING_OUTLINE_WORKFLOW.md),
+[Obsidian](docs/OBSIDIAN_WORKFLOW.md), [notebook](docs/NOTEBOOK_RESULTS.md),
+[source-study](docs/ACTIVE_STUDY_WORKFLOW.md) and
+[study-lifecycle](docs/STUDY_LIFECYCLE.md) guides define their current controls
+and recovery limits. Immutable citations retain original revisions; mutable
+navigation and current locations do not rewrite them. External notes remain
+independent works with optional associations.
+
+Use the [storage contract](docs/ARTIFACT_STORAGE.md) and
+[workspace relocation contract](docs/WORKSPACE_RELOCATION_DESIGN.md) for moves,
+adoption and interrupted operations. Synchronization is not multi-writer
+coordination. Never initialize replacement storage merely because a target or
+mount is unavailable. Windows-backed private storage remains unqualified.
+
+The [diagnostics companion](docs/DIAGNOSTICS_PLUGIN.md) derives bounded, read-only
+feature-use and integrity reports. Show period, scope, coverage and unknowns
+before totals. Export is explicit; a report does not authorize repair or
+retirement of work. The [provenance design](docs/PROVENANCE_DESIGN.md) connects
+results, inputs, method revisions and notes without a mandatory workflow canvas.
 
 ## 1. Design principle
 
@@ -861,7 +164,7 @@ still identifies the same passage. Failed loads must not overwrite the last
 valid reading state. Workspace migration validates stored state without reading
 source files; actual document loading validates the selected document.
 
-The delivered R1 increment includes independent opening, exact-identity
+In the standalone Qt application, file reading includes independent opening, exact-identity
 page/zoom restoration, ordinary note editing, platform-standard Open, Save,
 Find and Find-next shortcuts, explicit PDF-versus-editor focus status and marker
 feedback. Save names the editable text target even while the PDF is focused;
@@ -875,7 +178,7 @@ When sending a PDF excerpt, show the exact extracted or transcribed text and
 its document revision/page so that damaged notation can be corrected explicitly.
 A corrected transcription is distinct from the original source.
 
-The delivered R2 increment begins only from a nonempty visible selection in an
+The standalone Qt assistance workflow begins from a nonempty visible selection in an
 ordinary text buffer. Its non-modal dock freezes the selected text, current
 in-memory revision and scalar location, accepts one question, permits context
 removal, shows the exact request body and requires a separate Send. It includes
@@ -1036,77 +339,37 @@ is required.
 
 ### Proof outlines by vertex elimination
 
-The graph view delivered in 0.15.0 supports reversible vertex omission with
-original derivations available for expansion. See the
-[proof-graph workflow](docs/PROOF_GRAPH_WORKFLOW.md) for current behavior. The
-dated paragraphs below record the preceding reader and design work.
+The [graph workflow](docs/PROOF_GRAPH_WORKFLOW.md) supports source-based claims,
+attributed explanations and reversible vertex omission. Each summarized region
+retains its necessary assumptions, joint premises, alternative derivations and
+local scope. Expansion exposes the original steps and exact source passages.
+The reader can change the retained selection and revise explanations. The
+original graph and source revisions remain available.
 
-**Delivered partial reader, updated 2026-10-15:** VS Code offers explicit manual
-source-region selection and revision, exact retained-source hide/expand,
-separate exact statement and context selections, editable attributed reader
-explanations, optional supplied evidence and explicit source navigation. Opening
-saved outlines restores persisted selections, annotations and visibility across
-restart; changed or missing originals are reported without remapping. Retained
-sources and artifacts stay accessible. Save annotation forms explicitly;
-unsaved drafts survive live re-rendering, not host closure/reload.
+Identify the representation: declaration dependencies, source regions, tactic
+states and elaborated proof structure provide different information. A
+navigation edge or a recorded tactic context does not establish inference.
+General extraction and automatic mathematical checking are separate work.
+A faithful outline does not by itself establish correctness or understanding.
+See the [mathematical contract](docs/PROOF_OUTLINES.md).
 
-Shared context has explicitly saved reader labels and roles, an exact-source
-range-replacement command, and removal of the reading selection. Evidence cards
-allow an explicitly saved manual region/snapshot choice and removal of the
-region link. Detached evidence stays visible as an outline-level reference with
-its supplied goal/context and retained-artifact action. Original statements,
-hypotheses, checking evidence and unrelated reading work remain unchanged.
-Text typed while a save is pending survives completion and needs its own save.
-Failed or uncertain publication keeps live drafts, reports the failure and
-blocks further project-private writes until host reload; retained reading
-remains available. No association operation invokes a compiler, checker or
-provider, or establishes a correspondence or proof edge.
+The [saved-source reader](vscode/README.md#offline-source-region-reader) retains
+exact text and manual statement/context selections, attributed notes and
+optional supplied evidence. Current selections can be revised or removed;
+earlier pinned citations retain their source ranges. Detached evidence stays
+readable without acquiring a new proof association. Missing or changed originals
+do not remap retained passages.
 
-The reading-level filter exposes orientation, central concepts/results,
-governing ideas, argument structure and optional detail without imposing an
-order. A cited result may be used while its proof is deferred. General informal
-mathematics, including AI-generated/assisted articles, requires no Lean evidence.
-Source statements, reader reconstruction and supplied evidence remain labeled
-separately. Tactic goals are not declaration statements; local context is
-available assumptions and snapshot associations are manual. Gap/repair and
-dependency notes create no checked inference or source amendment. Text formats
-and limits are in [the reader contract](vscode/README.md#offline-source-region-reader);
-PDF/OCR and notebook regions are unsupported. Automatic extraction, AI proposals,
-automatic gap detection and graph elimination remain pending. A faithful
-outline does not establish proof correctness. See [validation](docs/VS_CODE_OUTLINE_VALIDATION.md).
+Saved annotation edits preserve newer typing while a save is pending. Failed
+or uncertain publication preserves drafts and reports the blocked write state;
+read-only retained material stays available. Save forms before closing or
+reloading: their live drafts are not host editor buffers.
 
-**First manual overview across sources, 2026-10-16:** write ordinary Markdown
-about a subject, book, monograph, article, section or argument. No template,
-questionnaire, hierarchy or reading sequence is required. The extension inserts
-a readable reference to an existing saved outline or exact region on explicit
-request. VS Code owns editing, save, undo, recovery and preview. Place the cursor
-in the link in the Markdown editor and explicitly follow it to the existing
-reader; region references also select the pinned retained passage in plain text.
-Changing annotations does not invalidate references. Changed/removed region
-associations are reported without redirecting earlier prose to a new passage.
-Changed or missing originals still permit exact retained navigation. Missing
-targets/storage and different workspace scope fail clearly without rewriting
-the document or guessing replacements. Overview prose is reader synthesis;
-links confer no checking status or verified dependency. Copying Markdown alone
-does not transfer private outline/source storage. Preview-click navigation and
-remaining broader outline tooling stay pending.
-
-**Requirement recorded 2026-10-12.** For a selected proof,
-retain mathematical milestones and hide intervening vertices while preserving
-dependency paths. Every summarized region shows a claim with its necessary
-assumptions and an explanation of the omitted argument and its purpose. Offer
-source navigation and expansion to the hidden steps. The reader may select
-regions manually, explicitly request an AI proposal, and revise the proposed
-selection or explanation.
-
-Preserve joint premises and local scope. Identify whether the input is a
-declaration map, source regions, tactic states, or elaborated proof structure;
-these supply different levels of detail. Keep indirect edges expandable and
-retain the exact source revision. A changed source invalidates the current
-association without deleting the earlier outline. Inspection creates no
-Verification or premise admission, and generated explanations retain separate
-attribution. See [the full requirement](docs/PROOF_OUTLINES.md), including the
-preferred VS Code frontend trial and the separate mathematical-use evaluation.
+Ordinary Markdown can connect subjects, books, sections and arguments across
+sources without a required template, hierarchy or reading order. Source
+assertions, reader synthesis, proposed connections and checking evidence remain
+separate. Copying a note does not transfer private retained-source targets.
+PDF/OCR and notebook-cell regions are outside the current retained-text reader.
 
 ### Review
 
@@ -1329,7 +592,7 @@ five-anchor setup precedes this workflow. A natural-language question is enough;
 metadata comes from the chosen work. The UI must not label an unverified model
 citation as a retrieved source, or an answer as complete when context is missing.
 
-The delivered R2 dock is non-modal so the selected source and ordinary note stay
+The standalone Qt assistance dock is non-modal so the selected source and ordinary note stay
 reachable. It shows OpenAI and the requested model, every exact selected context
 with source identity/current revision/scalar range, the question, complete
 instructions/input, configured limits, destination, retention disclosure and
@@ -1573,11 +836,6 @@ coherent algebraic number theory cluster remains a suitable candidate.
 6. Leave the next question or unfinished step in the note and continue later.
    A related problem or reconstructed argument can test later retention.
 
-R1–R3.1 have been technically verified with deterministic local responses for
-assistance. No live provider request or genuine mathematical-obstruction trial
-was performed, so the following acceptance remains unobserved rather than
-inferred from tests.
-
 **Acceptance.** Useful mathematical work is possible without a formal artifact.
 One real assistance exchange is traceable from inspected outbound context
 through raw response to a contribution used, corrected, rejected or abandoned.
@@ -1588,21 +846,10 @@ and a disposition for every sentence are not prerequisites.
 
 ### 9.2 Mathematical reading and re-entry
 
-R1's PDF-plus-note workflow is implemented and technically verified. Its
-contribution to mathematical usefulness remains pending a natural reading and
-later continuation; automated and visual checks do not establish that outcome.
-
-The supplied September 14 evidence shows useful saved notes, reopened panes and
-one retained manuscript passage. The guidance came from the surrounding
-assistant interaction; it does not establish implemented GUI guidance.
-Five-anchor restoration and confirmed marker Return were not completed, and
-the missing earlier work prevents comparison with that starting point. No
-anchor persistence defect or crash follows from these observations.
-
-Use the actual saved work in a durable project, or begin a clearly identified
-new prospective session if it is unavailable. Do not repeatedly reconstruct a
-missing note as a substitute for testing continuation. Appendix A is available
-for this experiment; another current mathematical source is also legitimate.
+Use actual saved work in a durable project. If it is unavailable, begin a
+clearly identified prospective session rather than reconstructing a missing note
+and claiming a comparison with it. Choose material relevant to the current
+mathematical question.
 
 1. Open the source and previous note at the current question. For unfamiliar
    material, establish purpose and needed definitions before unnecessary proof
@@ -1658,8 +905,7 @@ warrant experiment, not entry into mathematical study.
 
 ## 10. Later large-corpus experiment
 
-**Delivered bounded exception, 2026-10-21 (VS Code 0.8.0).** **Import Stacks
-Section…** accepts an official section URL/tag, downloads source and its tag map
+**Import Stacks Project Section…** accepts an official section URL/tag, downloads source and its tag map
 at one Git commit, and shows identity, revision and effective destination before
 publication. The source reader offers direct statement/proof navigation,
 restricted bundled MathML, exact retained TeX and explicit local citation
@@ -1669,14 +915,11 @@ the same revision reopens the saved outline; a new revision creates a separate
 one. Unsupported structural syntax offers explicit source-only retention;
 display limitations show the complete raw fragment. Retained reading, citation
 following and annotation do not download or execute anything. Existing links and
-Obsidian controls apply unchanged. No earlier study ceremony gates this
-separately authorized importer. [Usage and limits](docs/STACKS_WORKFLOW.md).
+Obsidian controls apply. [Usage and limits](docs/STACKS_WORKFLOW.md).
 
 
-The broader experiment below remains deferred. Apart from the bounded exception
-above, it may begin only after
-the two initial sessions have been evaluated and it has been authorized
-separately. Use either the Stacks Project
+Broader corpus ingestion requires a separately authorized task after evaluation
+of the relevant study workflows. Use either the Stacks Project
 [@stacksprojectauthorsStacksProject2021] or Kerodon.
 
 1. Import the selected source's published hierarchy, stable identifiers,

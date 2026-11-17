@@ -1,9 +1,8 @@
 # W3C PROV for the mathematical lab notebook
 
-Design direction, 2026-11-10, with the bounded notebook profile implemented in
-0.23.20. See the [profile](NOTEBOOK_PROVENANCE_PROFILE.md) and
-[workflow](NOTEBOOK_RESULTS.md). A general lab-notebook provenance service remains
-outside this increment.
+The bounded [notebook profile](NOTEBOOK_PROVENANCE_PROFILE.md) supports retained
+calculation results through the [notebook workflow](NOTEBOOK_RESULTS.md).
+A general lab-notebook provenance service remains outside this profile.
 
 **W3C PROV is the common provenance model for new research and study
 integrations.** Use its concepts and relations across plugins, with a documented
@@ -135,11 +134,9 @@ deleted-target marker separate from retained mathematical content.
 
 ## First bounded implementation
 
-Study archive/delete and Zotero linking are delivered. The first bounded
-[notebook workflow](NOTEBOOK_RESULTS.md) tests this profile with one SagePod/Jupyter investigation:
-retain two alternative calculations, their input and method revisions, outputs
-and an explanatory note; reopen and compare them after restart. Export the
-selected account without executing it or needing the producer plugin.
+The [notebook workflow](NOTEBOOK_RESULTS.md) retains alternative calculations,
+their input and method revisions, outputs and companion notes. It supports
+reopening, comparison and export without executing the retained work.
 
 Acceptance requires correct relation directions and identities, preserved
 revision-specific links, readable retained results, explicit missing context,

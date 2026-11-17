@@ -1,4 +1,0 @@
-{
-  "capture": "UTF-8 Windows clipboard text; CRLF preserved in JSON escapes",
-  "text": "A finite list of primes.\r\nForm N = p₁ ⋯ pₙ + 1.\r\nA divisor of N cannot divide that product.\r\n"
-}

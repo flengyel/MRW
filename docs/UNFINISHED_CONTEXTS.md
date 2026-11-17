@@ -1,8 +1,7 @@
 # Resume an unfinished justification context
 
-This D14/D15 repair keeps an exact pending search available after the reader
-closes or the host restarts. It uses the existing Justification picker and
-private artifact coordinator. It introduces no question form or study record.
+An exact pending search remains available after the reader closes or the host
+restarts. Choose **Unfinished: …** in **Proofs → Justification…** to resume it.
 
 Search first publishes an immutable `mrw.route-intent` under the justification
 store's `pending` directory. Its request, source snapshots and Return pin are
@@ -26,16 +25,6 @@ remain the existing storage system's responsibility. Pending-only stores are
 included in discovery and moves. Inputs, catalog entries and total justification
 bytes stay bounded. Unpublished staging is preserved, not presented as work.
 
-## Drift findings
-
-| Finding at main c48bfa8 | Disposition |
-| --- | --- |
-| The implementation-order paragraph still schedules the reader/search sequence delivered in 0.23.42. | Reconciled against the release and implementation; next work is exact unfinished-context resumption, then generic source-driven assembly. |
-| Failed requests are held only in a panel object removed on disposal. | Confirmed closure/restart gap; retain the request before checking and reopen through the existing picker. |
-| A test titled “pending work survives closure” only checks a disposed object, not discoverability after a fresh activation. | Replaced with a move-guard test and a separate fresh-activation/fresh-process resumption check. |
-| Nested standalone publication reacquires its own workspace-store lock. | Reuse only an already-held same-store guard; a separate process still fails to acquire it. |
-| Disposing a busy panel removes it from the set used to block saved-work moves. | Keep its operation in the guard until it settles, without reopening the panel. |
-
-The scope is resumption of an explicitly started justification search. General
-context assembly, larger inference search and paper–Lean correspondence remain
-pending. Formal checking remains relative to the supplied admissions.
+General proof search and automatic paper–Lean correspondence checking remain
+outside this workflow. Formal checking is relative to the supplied admissions.
+Use [selected sources](SOURCE_GROUNDS_WORKFLOW.md) to assemble a new context.

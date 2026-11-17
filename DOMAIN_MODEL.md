@@ -1,4 +1,4 @@
-# Domain model — v9
+# Domain model
 
 [Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md)
 governs optional integrations: creation and execution stay with the responsible
@@ -12,16 +12,17 @@ schema syntax or GUI framework. It accompanies the [vision](VISION.md),
 Ordinary documents and links are the starting point for current MRW use.
 The entities below describe mathematical content and optional retained records;
 they do not require a second representation of every question or solution.
-Opening a note creates no problem record. The document Problems interface was
-removed in 0.23.3; the [ordinary-work rules](docs/ORDINARY_WORK_RULES.md) take
-precedence over any conflicting earlier design requirement.
+Opening a note creates no problem or study record. Questions and solutions may
+remain in ordinary files; retained records are optional tools for the selected
+mathematical work.
 
 VS Code is the active frontend; the standalone Qt application is another
 client of the same independent services. Host text documents, undo stacks, and
 document recovery are editor responsibilities, not new domain records. Research
 records retain their identities and evidence boundaries across frontends.
 This model includes entities without an implemented VS Code command; consult
-README and CODEX_PLAN for delivery status by frontend.
+the [README](README.md) and [design register](docs/DESIGN_RECONCILIATION.md)
+for supported behavior and remaining work.
 
 The deployment direction retains one extension over the Python core
 in the workspace environment, through standard local Linux, WSL2 or Remote SSH
@@ -53,7 +54,7 @@ change source identity, retention, ownership or mathematical status. Derived
 aggregates and reports are separate from authoritative history and research
 artifacts; no duplicate research schema is required.
 
-## Proposed extension — W3C PROV and Study lifecycle
+## Provenance and study lifecycle
 
 [W3C PROV](docs/PROVENANCE_DESIGN.md) governs the common provenance vocabulary for
 new integrations: versioned artifacts are entities, observed operations are
@@ -69,43 +70,6 @@ separate. Follow [the lifecycle contract](docs/ACTIVE_STUDY_DESIGN.md#archive-an
 The saved-study lifecycle is implemented through additive markers beside the
 existing private records; existing study content is not migrated.
 
-## Earlier model revisions
-
-Changes from v8: the requested proof-outline view uses vertex elimination with
-visible claims and explanations. Source boundaries, local assumptions,
-reversible expansion, and explanation provenance remain separate from proof
-checking. This adds a planned behavior contract, not a deployed record schema.
-
-Changes from v7: response digestion made explicit as a human-led workflow over existing
-records, not a new AI-specific schema; task evidence extended to mathematical-
-object study; visible passage selection separated from retained digest-anchored
-byte spans; returned and pursued routes distinguished from hidden model
-reasoning; derived syntheses retain their exact sources.
-
-Changes from v6: model calls fixed as operational provenance envelopes; exact
-response spans anchored to immutable response digests; selected AI output
-projects into the existing generic claim, admission, context, and derivation
-records rather than a bespoke trust or support schema.
-
-Changes from v5: non-factive justification terms, immutable premise admissions,
-versioned contexts, and checked derivations added as a distinct, integral
-warrant class; provenance, verification, correspondence, admission, and
-derivability kept
-orthogonal; the bounded Appendix A slice excludes JAM and factive profiles.
-
-Changes from v4: source-published cross-references and the boundary of
-large-corpus ingestion made explicit; diagrams made first-class work artifacts
-and representations; a fixed representation of mathematical expertise excluded.
-
-Changes from v3: bounded task-attached model calls made first-class; exact
-application-supplied request content and raw responses recorded; generated
-mathematical content remains proposed material with AI provenance.
-
-Changes from v2: problems and mathematical work made first-class; problem-to-
-result relations added for exercise-driven sources; manually asserted
-internal-state and competence records removed; review state made a generated
-result of task evidence; formal material made explicitly optional.
-
 ## Scope
 
 The implemented Obsidian companion uses small private mutable navigation
@@ -120,7 +84,7 @@ dependency, verification or human judgment. See
 [the companion contract](docs/OBSIDIAN_WORKFLOW.md).
 
 Saved artifact placement is separate from mathematical identity. The extension's
-0.7.0 store has persistent store/project UUIDs, a complete content-hash manifest
+saved-work store has persistent store/project UUIDs, a complete content-hash manifest
 and verified compatibility mappings for earlier path-derived reference scopes.
 A host-local binding maps that identity to one local directory and project
 folders. Relocation preserves immutable record bytes, source provenance, spans
@@ -701,18 +665,17 @@ The current proof-outline view reads an ordinary `.mrw-proof.json` document.
 It can omit and restore intermediate vertices while preserving the original
 joint-premise derivations and local scopes. These are display operations, not
 proof checks; the [proof-graph workflow](docs/PROOF_GRAPH_WORKFLOW.md) documents
-the format and limits. The earlier source reader described below retains
+the format and limits. The source reader described below retains
 passages and annotations independently of this graph view.
 
-Extension 0.8.0 adds a bounded Stacks section acquisition descriptor to this
-private reader state. Its immutable supporting manifest identifies a single Git
+The Stacks section acquisition descriptor belongs to private reader state. Its immutable supporting manifest identifies a single Git
 commit, exact retained chapter/tag-map/license/preamble bytes and original
 published statement/proof spans. Mutable annotations and bibliographic labels
 remain separate. Derived MathML creates no new claim identity, checked edge,
 premise or evidence status. Explicit citations use the existing revision/range
 reference contract; stable upstream tags alone never identify immutable text.
 
-The delivered first source-region reader is private mutable navigation and
+The source-region reader is private mutable navigation and
 attributed reader work over retained immutable source/artifact bytes. It uses
 Source/SourceOccurrence/VersionedSpan semantics with separate source-statement
 selections, reader Representation provenance, and optional supplied Trace or
@@ -727,7 +690,7 @@ Added justifications and proposed repairs remain attributed reader material,
 never silent amendments to the retained argument. This source reader does not
 perform the graph view's vertex operations.
 
-The first manual overview spanning several sources is an ordinary Markdown
+An overview spanning several sources is an ordinary Markdown
 work artifact containing reader synthesis and explicit saved-outline references.
 It may concern a subject, book, monograph, article, section or argument without
 a strict hierarchy. These reader-authored references are navigation data, not
@@ -740,7 +703,7 @@ No global mathematical-occurrence identity or automatic synchronization is
 introduced. The separately versioned artifact-store envelope preserves these
 reference identities during explicit relocation/adoption. See [the reference contract](docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
 
-**Design requirement recorded 2026-10-12.** A proof outline may retain selected claims
+A proof outline may retain selected claims
 and hide intervening graph vertices, with explanations and expansion to the
 original steps. Use existing statement, explanation, outline, and diagram
 `Representation`s; bind selections and source references to the exact proof

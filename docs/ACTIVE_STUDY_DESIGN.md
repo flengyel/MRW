@@ -1,32 +1,18 @@
 # Active study, light review, and cognitive-load tracking
 
-Status: the original study interaction was implemented through 0.19.1 within
-the [workflow boundaries](ACTIVE_STUDY_WORKFLOW.md); see [validation](ACTIVE_STUDY_VALIDATION.md).
-The [lifecycle controls](STUDY_LIFECYCLE.md) are delivered. The Studies sidebar
-was removed in 0.23.28; saved-work and lifecycle commands remain in the Command
-Palette. This supersedes references below to tree rows or a study content view.
-Role clarified 2026-11-06. Original design baseline: `db656402190c255afd6a296da6ef8e549cc0b293`.
+This contract governs optional source study: attempts, feedback, correction,
+review, effort reports and resumption. The [workflow](ACTIVE_STUDY_WORKFLOW.md)
+describes current commands and limits. The
+[research-workstation design](RESEARCH_WORKSTATION_DESIGN.md) governs the wider
+mathematical workflow.
 
-## Role in the research workstation
-
-[RESEARCH_WORKSTATION_DESIGN](RESEARCH_WORKSTATION_DESIGN.md) now governs the
-overall interaction and next implementation order. This document governs the
-optional study component. Opening or following a document never starts its
-forms or creates a problem record. Questions and solutions can stay in ordinary
-notes; do not duplicate them here to make reading or resumption work. The
-ordinary-work rules in the research design supersede earlier increment prompts.
-Comprehension testing, reconstruction, light review and
-task-linked effort/history support ongoing research; research questions need
-not begin as source-bound study questions and do not automatically enter FSRS.
-Keep existing study behavior and 0.19.1 reliability repairs while connecting
-documents, research resumption and mathematical tool use. The delivery language
-below describes the original bounded study increment, not a new instruction to
-repeat it or make it the whole workstation.
+Opening or following a document creates no study record. Questions and solutions
+can remain in ordinary notes. Research questions need not begin as source-bound
+study questions and do not automatically enter spaced review.
 
 ## Archive and delete Studies
 
-Implemented after MRW 0.23.10; see the [lifecycle workflow](STUDY_LIFECYCLE.md).
-The following contract governs Archive, Restore and deletion.
+See the [lifecycle workflow](STUDY_LIFECYCLE.md) for Archive, Restore and deletion.
 Retiring a question or archiving a help response does not manage the study.
 
 The implementation uses the existing study store and recorder. It requires no
@@ -48,7 +34,7 @@ reversible and needs no routine confirmation. Deletion identifies the selected
 study and the data affected; cancellation changes nothing. Avoid a new dashboard
 or study-registration form. Preserve the current Return destination.
 
-Scope this first implementation to the saved records represented by Studies,
+Lifecycle controls apply to saved study records,
 including preserved document-linked studies. Lean lesson files and proof-study
 documents remain ordinary files; removing a saved study must not delete its
 working directory, lesson pack or repository.
@@ -88,29 +74,17 @@ a new study after permanent deletion needs a distinct identity.
 [W3C PROV](PROVENANCE_DESIGN.md) describes provenance relationships, not mandatory
 retention. Keep immutable content unchanged while retained; explicit permanent
 deletion may remove it. Earlier prohibitions on unsolicited deletion still
-apply, but do not prohibit these user-invoked lifecycle controls. This design
-update itself deletes no genuine study.
-
-### Completion evidence
-
-Use disposable studies to check archive/restart/restore, Trash/Undo/restore,
-permanent deletion, cancellation and interrupted persistence. Include a pending
-draft, a mixed-study history session, shared question owners and a shared snapshot.
-Verify that shared sources and other studies are unchanged, deleted payloads are
-not recoverable through MRW's history/export, stale messages cannot resurrect
-them, and revisiting the same source requires an explicit choice. Check review
-eligibility and preserved scheduling after each transition. Update the bundled
-tutorial when these commands are delivered.
+apply, but do not prohibit these user-invoked lifecycle controls.
 
 <a id="purpose-and-next-delivery"></a>
 
-## Original study increment — delivered
+## Purpose
 
-MRW should help absorb, investigate, generate and check mathematics while preserving the route through the literature. The next increment joins the existing reader, proof study, notes and Codex companion around the material currently open. Frequent attempts, feedback and spaced revisits belong in study mode. A proof graph is one useful representation, not the required result of every question.
-
-Deliver one usable increment: **study the current material, answer a few pertinent questions, record effort and outcomes, and resume later**. Detailed interaction history must serve two purposes: adapting the present session and deciding what to change in the next MRW version.
-
-[Research and limits](LEARNING_RESEARCH.md) distinguish established findings from the prototype choices below. CHREST can inform later experiments; no cognitive simulator is required to deliver this increment.
+Source study connects the current material to pertinent questions, attempts,
+feedback, correction and later reconstruction or application. A proof graph is
+one representation, not the required result of every question.
+[Learning research](LEARNING_RESEARCH.md) distinguishes research findings from
+MRW's scheduling and effort policies.
 
 ## Current material and session behavior
 
@@ -156,7 +130,8 @@ Separate scheduling from admission and selection:
 - Keep scheduling outcomes distinguishable from mathematical correctness and effort. Document the adapter's exact mapping (for example, reader-confirmed unaided recall to Good, failed unaided recall including answer-dependent completion to Again). Store the original observation, not only the mapped rating.
 - Opening the same material repeatedly does not repeatedly reschedule it. Use timestamps and event identities to make updates idempotent. After a gap, select a short relevant block rather than requiring catch-up first.
 
-If an existing scheduler cannot be packaged, complete the source-focused interaction and event capture, document the concrete obstacle and retain a plainly labeled manual revisit option. Do not substitute an unvalidated formula while claiming FSRS behavior. This exception must not become a reason to stop the rest of the delivery.
+A missing scheduler must not block attempts, feedback or saving. A manual revisit
+option must be labeled as such; it must not claim FSRS scheduling.
 
 ## Cognitive load: observations and responses
 
@@ -183,13 +158,10 @@ If a high-effort threshold is needed initially, 7–9 is a documented provisiona
 
 ## Instrumentation for two uses
 
-The 2026-11-10 [shared usage-history design](USAGE_HISTORY.md) extends this
-recorder to a configurable data directory and per-feature reporting. The data
-directory may be separate from, beneath, or identical to the Obsidian vault. It supersedes the
-private-workspace-only location for that future increment; current shipped
-behavior is unchanged. Preserve the single-recorder and evidence distinctions below.
-
-Record meaningful MRW interactions comprehensively; request subjective input sparingly. A shared recorder should cover existing command and webview boundaries so the next release can be evaluated against the current workflow, not only against the new review feature.
+The [history workflow](USAGE_HISTORY.md) describes configurable storage and
+exports. Use one recorder for MRW commands and study interactions. Request
+subjective input sparingly; keep observed actions, reader reports and estimates
+distinct.
 
 ### Event envelope and categories
 
@@ -232,28 +204,16 @@ Provide a compact local summary/export for selected studies, date ranges and ver
 
 Show denominators, missing observations, task/revision mix and exposure history. A before/after release difference is descriptive: task difficulty, prior practice and elapsed intervals can explain it. No automatic code changes follow from a metric. Use the report to choose the next concrete improvement; later controlled comparisons can test causal hypotheses.
 
-There is no instrumented 0.17.0 usage baseline in this design review. The first delivered recorder establishes a baseline; do not invent earlier events or treat test reports as usage data. The initial comparison export can group comparable recorded sessions by version without building an interactive analytics interface. Application to a new example is evaluated separately and never inherits a successful recall event from a memorized question.
+Do not invent missing earlier events or count automated fixtures as usage.
+Application to a new example is assessed separately from recall of a memorized
+answer.
 
 ## VS Code interface
 
-Retain one MRW Activity Bar container and respect saved placement. Rework Research Tools into content-oriented native views of studies, questions and sources while preserving command IDs and access through contextual menus/Command Palette. A source row opens that source; it is not a generic command button.
+Use the existing Contents and Commands views, contextual actions and Command
+Palette. Preserve command IDs, saved placement, keyboard access and native file
+lifecycle. No separate study sidebar is required.
 
 Keep the main source and study interaction together without forcing a new layout. Use webviews for mathematics/graphs that need them; use native menus, file lifecycle, selection and settings elsewhere. Keep one pertinent primary editor action and secondary actions in overflow. Support keyboard use, host themes and reduced motion. Load/error feedback stays near the work.
 
 A small history for current material may show “reported effort 7/9; hint used; question unresolved.” Detailed logs and release comparison belong behind Inspect/Export, not in a dashboard that displaces mathematics.
-
-Update the bundled tutorial to match delivered labels. Proposed labels in this document are not commands available in 0.17.0.
-
-## First implementation and evidence
-
-Reuse the 0.17 reader, study documents, exact references, summary editing, Codex handoff and restart behavior. Keep current saved studies backward-compatible. Do not build a curriculum engine, corpus scanner, general telemetry service, new cognitive architecture or additional frontend.
-
-Implement in this order without stopping at an intermediate demo: first complete the current-material attempt/effort/recording/resumption path on existing surfaces; then connect light scheduling; then make the native study entry and compact export discoverable. Limit the first content view to current/recent studies and their source-linked questions. A full source explorer and sophisticated release-analysis UI are not part of this increment.
-
-Meaningful checks cover context changes without draft loss; source/question revision isolation; no scheduler update on opening/skipping; assisted versus unaided outcomes; budget/admission limits; effort missingness and high-effort success; event ordering/version tags/corrections; offline save/reopen and logging failure; native contextual actions and accessible rendering.
-
-Use current real study content without modifying its authoritative source. Keep test observations separate. Report what was exercised in a native host versus command/browser tests. A missing host observation is a stated limit, not a demand for a new manual acceptance ceremony.
-
-Delivery should include the working interaction, inspected session history and one readable study summary, with concrete remaining friction. Document validation suffices for this design-only commit; implementation tests belong to the later code change.
-
-Repository publication is a separate decision. These documents describe an experimental research workstation and separate implemented behavior, proposed design and observed results; they do not authorize changing repository visibility.

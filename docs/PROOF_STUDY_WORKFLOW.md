@@ -49,13 +49,11 @@ still require the matching saved-source store. A study using local sources needs
 an HTTPS bibliographic reference in the retained source description to fit the
 current graph format.
 
-## Steps removed and remaining friction
+<a id="steps-removed-and-remaining-friction"></a>
 
-The handoff assembles quotations, references and the outline format. Import
-creates the quotation files and opens the graph; claim summaries can be edited
-without editing JSON. Saving the question permits later resumption.
+## Limits
 
-Passage selection and transfer to and from Codex remain manual. The returned
+Passage selection and transfer to and from Codex are manual. The returned
 outline must match the requested format; rejected replies need correction.
-The proof outline and study occupy separate tabs. Mathematical checking remains
-a separate task. [Validation and limits](PROOF_STUDY_VALIDATION.md).
+The proof outline and study occupy separate tabs. Mathematical checking is a
+separate task.

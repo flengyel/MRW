@@ -46,7 +46,7 @@ The steps below apply when building a new version.
    Substitute the selected version. Check changed documents and their links.
    Record dependency audit findings without silently changing pinned versions.
    Compare runtime files with the previously verified baseline; run relevant
-   regressions for uncovered runtime changes. The shared reader/plugin refactor requires
+   regressions for uncovered runtime changes. Changes to shared reader/plugin code require
    the full Python and extension suites, syntax checks, a clean wheel install,
    an extracted-VSIX bridge check and isolated interface checks. Verify no stale
    generated package is present. Search every tracked path and text file, then
@@ -81,7 +81,7 @@ The steps below apply when building a new version.
    link, tag target and README link. Download both assets through their
    versioned URLs; check the downloaded VSIX against
    `SHA256SUMS` and the verified local bytes. Record the URLs, commits, checksum
-   and actual checks in the delivery report. Publication failure remains pending,
+   and actual checks in the release notes or linked pull request. Publication failure remains pending,
    not a completed release; preserve the ready assets and release-note text.
 
 See [GitHub's release instructions](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).

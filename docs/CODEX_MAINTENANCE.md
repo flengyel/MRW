@@ -91,7 +91,10 @@ when the owning operation and recheck establish their result.
 
 Update the reconciliation register where a design item changes status. Retain
 the observation, design comparison, actual diff, validation and unresolved
-items in a concise maintenance record. Report repository commit, package and
+items in the commit, pull request or issue. Update the affected user guide to
+describe current behavior; remove superseded instructions rather than appending
+the repair account. Follow the [documentation requirements](../CONTRIBUTING.md#documentation).
+Report repository commit, package and
 installation status separately. Carry unfinished work into the next review
 without repeatedly treating it as a new feature request or deleting its history.
 

@@ -26,9 +26,7 @@ provides the existing JSON records and retained submitted work. These formats,
 record IDs, links, sharing and deletion rules are unchanged. The compact view
 does not read submitted snapshot bodies, rewrite records or remove evidence.
 
-This is a presentation repair. The recorder's existing history read/sync path
-is unchanged; the 100-entry display limit is not a new bound on loading a whole
-private/shared history. Bounded feature-use inspection remains available through
+The 100-entry display limit does not bound loading of private/shared history. Bounded feature-use inspection remains available through
 the optional Diagnostics plugin. Missing observations, usefulness, comprehension
 and mathematical checking remain separate questions.
 

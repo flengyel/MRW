@@ -19,7 +19,7 @@ checked again before opening a backlink.
 saved Markdown selection when it still matches; a stale position produces a
 brief status message and does not block opening. Unsaved text stays unsaved.
 This differs from an exact-passage Return, which checks its target before
-selecting it. See the [reopen repair](DOCUMENT_REOPEN_REPAIR.md).
+selecting it.
 
 Editor menus use the tab that supplied the action, even if another pane has
 focus. Show Contents and Edit Document Source refuse a PDF or other non-Markdown
@@ -31,23 +31,6 @@ text extraction, page bookmarks, PDF annotations or PDF Contents. When the PDF
 opens in a system application, use MRW's Command Palette in VS Code for Return
 and backlinks; there is no MRW toolbar in the system reader. Open Note in
 Obsidian still requires a Markdown note inside the selected notes folder.
-
-## Command grouping review
-
-The [VS Code editor-action guidance](https://code.visualstudio.com/api/ux-guidelines/editor-actions)
-asks extensions to keep actions contextual, use one toolbar icon and put
-secondary actions in overflow. This increment groups document actions in one
-native submenu, supported by the [menu contribution API](https://code.visualstudio.com/api/references/contribution-points#contributesmenus).
-It removes the three separate Markdown toolbar icons. New Note opens a
-separate note in Obsidian or the Markdown editor; it does not edit the PDF. Proof study and AI requests
-are not included in this document menu. The wider sidebar grouping
-remains a separate review; this patch does not change saved view placement.
-
-The regression checks use disposable files and a VS Code API facade. They cover
-PDF backlink selection, focus changes, cancellation, restart Return, scope
-rejection and dirty-buffer preservation. These are command-level checks, not an
-observation of the native desktop menu. No connected document session was
-available for this increment, and the working window was not reloaded.
 
 <a id="zettels-and-recent-notes"></a>
 
@@ -79,8 +62,7 @@ redirected or out-of-scope files must be selected through Open Document again.
 An unrelated current pane does not block the list or acquire a Return pin.
 Failed history saves are reported and reopening retries them.
 
-PDFs opened before this increment were not recorded by the old note-only list.
-Choose **VS Code file history…** in the same picker, or press **Ctrl+P**, to use
+For files absent from the MRW list, choose **VS Code file history…** in the same picker, or press **Ctrl+P**, to use
 VS Code's native history and search. That picker follows VS Code's settings;
 MRW neither reconstructs nor clears it. Reopening a permitted PDF there records
 it for later MRW use. The native-history route does not claim a new MRW Return

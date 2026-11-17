@@ -83,9 +83,6 @@ test is not evidence for every range parser case. Existing `workspace-move.test.
 `test_outline_references.py` cover further occupied-target, corruption,
 changed-source, abrupt termination, Unicode/range and recovery cases.
 
-The [checker pin repair](LEAN_CHECKER_DRIFT_20261115.md) records the drift found
-when that optional profile was originally added to the pinned configuration.
-
 The conformance test is optional in ordinary extension testing: without the
 explicit executable path it reports a skip. It never builds or invokes Lean
 when MRW opens. Run from the repository root after bundling the Python core:
@@ -111,18 +108,6 @@ The six principal theorem dependencies were inspected: only `propext`, plus
 `Quot.sound` for the generic success theorem; the unlink theorem uses no axioms.
 No additional axioms or admitted proofs discharge the obligations.
 
-## Observed pilot checks
-
-The independent `contracts_tests` build, theorem audit and executable vectors
-passed with Lean 4.32.2. A subsequent proof-audit invocation under a 30-second
-timeout exited 0 in 1.62 seconds; `/usr/bin/time -v` reported maximum resident
-set size 738,072 KiB. The isolated concrete three-trace test passed in 10.85
-seconds, including a retained exact passage/range and removal of a local
-association without editing the external original. Logs and exit statuses are
-retained outside the source tree in the implementation evidence directory.
-The test used a temporary workspace/private store and synthetic external note;
-it did not open or mutate a live vault or window.
-
 ## Assumptions and omitted behavior
 
 The abstraction assumes source/private payloads and candidate verification
@@ -131,8 +116,8 @@ durable authority boundary. Source/candidate changes during preparation are
 handled by runtime verification; arbitrary same-account interference is outside
 this proof. The model does not prove content-hash authenticity, crash durability,
 interprocess fairness, remote synchronization, storage cleanup or scheduling.
-It does not model independent edits to Zettels or source notes as text equality.
-A source may support several Zettels and each may develop separately.
+It does not model independent edits to linked notes or source notes as text
+equality. A source may support several notes and each may develop separately.
 
 Only safety is established. Eventual successful publication/recovery would need
 explicit availability and fairness assumptions. Delegated-operation and report

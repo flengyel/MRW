@@ -1,4 +1,4 @@
-# Documents, Contents and saved sources — 0.23.21
+# Documents, Contents and saved sources
 
 Open a note or paper with **MRW: Open Document…**. Markdown opens in
 VS Code's preview, and **Contents** lists its headings and links. The original
@@ -228,14 +228,15 @@ Optional source-study and proof tools have their own
 They are not required for ordinary reading. General research-session restoration
 and automatic argument reconstruction remain unimplemented.
 
-## Navigation repair — 0.23.1
+<a id="navigation-repair--0231"></a>
+
+## Editor placement
 
 A new destination uses the invoking preview group; an already-open document
 keeps its group. An unrelated text editor in another group is not
 replaced. Note and backlink origins are checked again after asynchronous
 opening, and backlink scope is checked before loading. Changed or redirected
-occurrences require a new selection. See the
-[repair checks and limits](DOCUMENT_NAVIGATION_REPAIR.md).
+occurrences require a new selection.
 
 ## Mathematical rendering in ordinary notes
 
@@ -249,10 +250,7 @@ needs a new render; compiler failures preserve source and earlier views.
 See [TikZ rendering](TIKZ_WORKFLOW.md) for requirements and limits.
 
 The [tutorial](../vscode/media/first-steps.md) introduces these actions and names
-the active extension build. [Reading repairs](READING_REPAIRS.md),
-[navigation validation](READING_OUTLINE_VALIDATION.md) and
-[terminology validation](DOCUMENT_TERMINOLOGY_VALIDATION.md) record the checks
-and their original scope.
+the active extension build.
 
 ## Remove a saved copy from the active list
 

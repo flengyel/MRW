@@ -1,178 +1,89 @@
-# Design evaluation: decisions and remaining work
+# Design decisions and implementation status
 
-This is the current reconciliation of the MRW design evaluation, including its
-interface, integration, usage and maintenance recommendations. It records
-accepted requirements and remaining work; a recorded decision does not mean
-its runtime implementation is complete. The register includes subsequent repairs
-through [0.23.45](RELEASE_0_23_45.md). The 14 November implementation batch started
-from main `ba2db577b1ab8bf512daf63300e2eedf4232d907`; its original package and
-installation evidence is in the [0.23.32 report](RELEASE_0_23_32.md).
-That batch baseline is not the current checkout or backlog.
-The [15 November checker audit](LEAN_CHECKER_DRIFT_20261115.md) records the later
-source-build correction without changing the 0.23.41 VSIX.
-Update this record as implementation and evidence change.
+The decisions below govern current work. “Partial” means the implementation
+covers only part of a requirement. Proposed work is not a delivered capability.
 
 ## Authority and continuity
 
-Current user instructions govern the task. The [research design](RESEARCH_WORKSTATION_DESIGN.md),
+User instructions govern the task. The [research design](RESEARCH_WORKSTATION_DESIGN.md),
 [integration contract](INTEGRATION_BOUNDARIES.md), [UX specification](../UX_SPEC.md),
 [feature-use contract](OPERATIONAL_USAGE.md) and [diagnostics design](DIAGNOSTICS_PLUGIN.md)
-define the requirements below. The [maintenance workflow](CODEX_MAINTENANCE.md)
-applies them to reports and proposed corrections.
+define subsystem requirements. Apply the [maintenance workflow](CODEX_MAINTENANCE.md)
+when evaluating a proposed correction. Investigate discrepancies between design
+and implementation rather than changing one merely to match a report.
 
-Versioned audits, release accounts and old task prompts remain evidence for
-their named versions. Their former priorities and task-specific stop clauses
-do not cancel later authorized work. Still-applicable invariants remain binding:
-preserve work and exact identities, respect subsystem ownership and explicit
-execution, keep tests isolated, and distinguish source, release and installation.
-When a report and the design disagree, investigate the discrepancy; do not
-silently rewrite the design to match the implementation or the report.
+Keep current status here. Preserve work, exact identities, subsystem ownership,
+explicit execution and isolated testing. Source, release and installation are
+separate states; publication does not authorize installation or forced reload.
 
-Record current status here once. AGENTS, CODEX_PLAN and continuation documents
-link here instead of accumulating another copy of the same status. Preserve
-old anchors and release evidence when reducing duplicated instructions.
-Intervening questions and clarifications refine the active objective unless
-they explicitly cancel or replace it. Carry unresolved findings forward.
+<a id="reconciliation-register"></a>
 
-## Reconciliation register
+## Decisions
 
-“Pending” means required work lacks completion evidence. “Partial” identifies
-existing support that does not yet meet the whole requirement. Design-only
-updates cannot change either status to delivered.
-
-| ID | Evaluation point and governing decision | Current status and completion evidence |
+| ID | Decision | Current capability and remaining work |
 | --- | --- | --- |
-| D01 | **Integration workbench.** Use capability-specific ports/adapters, a narrow common model and subsystem-owned creation/execution. No second editor, evaluator, kernel manager, queue, sync service or managed-database writer. [Contract](INTEGRATION_BOUNDARIES.md). | Design adopted; each adapter must demonstrate its supported route, identities and failure boundaries. Source-reader API 1 does not become a universal plugin API. The [CoCalc proposal](COCALC_ADAPTER.md) defines remote project/file handoff and exported-result capture; its adapter remains unimplemented. |
-| D02 | **Source notes and Zettels.** Independent works with many-to-many associations; human selection, formulation and linking; external editor/template owns creation. Native editing after creation remains allowed. [Notes](NOTE_COMPANIONS.md#source-notes-and-zettels). | Implemented association repair: independent destination text, editable source annotations and many-to-many links preserve earlier records and linking snapshots. Focused Python/controller checks pass; creation still delegates to the configured template. See [batch evidence](MAINTENANCE_20261114.md). |
-| D03 | **Identity and referential integrity.** Separate logical identity, current locator, content revision and capture. Verified moves may update current links; immutable citations keep their original target. [Contract](INTEGRATION_BOUNDARIES.md#synchronization-and-referential-integrity). | Existing protections must be preserved and adapter-specific gaps checked. Test missing, renamed, ambiguous, offline and deleted targets; never guess by title or recreate them silently. |
-| D04 | **Asynchronous work and partial failure.** Distinguish dispatch, acceptance, running, completion, cancellation and uncertainty. Correlate requests/results; retry only under a verified idempotency contract. | Required for current/future adapters; a returned handler or saved output is insufficient completion evidence. Test interruption before and after acceptance, late outcomes and partial cross-system success. Do not emulate a distributed transaction or compensate by deleting external work. |
-| D05 | **Concurrent editing and synchronization.** Preserve dirty buffers, revision conflicts, deletion markers and offline evidence; synchronization is not multi-writer coordination. | Keep current storage qualifications. Test concurrent edits and stale mappings without silent overwrite. Saved notebook synchronization must not imply restored kernel or queue state. |
-| D06 | **Optional companions and capability discovery.** Separate source readers, lesson packs, native extensions and external services. Show installed/configured/reachable/unsupported states separately. | Implemented grouped setup access with installed/configured/unchecked states; opening setup performs no service probe or install. Component checks and native core/optional-companion activation pass. Reachability remains action-specific. |
-| D07 | **Command grouping and context.** Group reading/notes, sources/references, calculation, proofs, tools/setup and earlier saved work; bind actions to the selected document. [UX requirements](../UX_SPEC.md#evaluation-follow-up--interface-and-continuity). | Implemented six purpose groups with native picker/menu access instead of the command wall. Core contributed commands register in native WSL host. Keyboard/theme layout observations beyond native control behavior remain unobserved. Plain reader-note entry is implemented: **Add a note**, focused text, Save/Cancel and optional attribution/help, preserving existing metadata and LaTeX/TikZ; [focused and native normal/narrow evidence](READER_NOTE_WRITING.md). |
-| D08 | **Lean lesson controls.** Resolve a selected lesson Markdown file or its associated code, not an unrelated saved lesson. Preserve native Lean behavior. | Implemented selected-resource lesson actions; two lessons, shared code choice and unrelated Lean rejection covered by focused tests. No MRW-issued checking on open. Pack 1.1.4 also explains Lean/MRW toolbar icons, Pin, Pause/Play, Refresh and goal settings; the examples are unchanged. Full native lesson/code/notes/Return acceptance remains unobserved. |
-| D09 | **Optional study.** Ordinary reading must not offer unsolicited study-registration prompts. Keep deliberate study, saved work, history, review and lifecycle access separate. | Removed study/proof-study creation controls from the ordinary source toolbar and ordinary document menus. Deliberate study, history/lifecycle, Proof Outline and Lean study remain. Component regressions retain their routes. |
-| D10 | **AI destination and review.** Label the API route versus Codex/another companion where the action is chosen; show exact context and proposed changes. Human review retains control. | API destination is named on reader actions and commands; Copy passage for Codex copies exact retained context/reference without sending. Preview/Send remains separate. Companion application behavior after paste is unobserved. |
-| D11 | **Note → source → Return.** Make explicit source/note/proof relationships navigable without moving all material into one repository or imposing one note format. | Existing native Contents/preview and dirty-buffer preservation pass in an isolated host. Retained source/Return component and relocation-trace checks preserve exact references. Current saved-source access was also repaired: both retained Hausdorff and Kerodon sources opened in the existing installed window; prior annotations and source bytes remain unchanged ([recovery evidence](SAVED_SOURCE_RECOVERY_20261114.md)). The scripted native note/source/Return route now passes with an external ordinary notes folder, reader annotation, unrelated dirty buffer, real reload and reopen ([0.23.41 evidence](RELEASE_0_23_41.md)). Actual editors, preview, bridge and native state are used; dialog choices and reader messages are scripted. Obsidian creation and broader unscripted companion acceptance remain separate. |
-| D12 | **Retained calculation → comparison → export.** Keep rich outputs and links to input/method revisions, relevant notes and proof work. Reuse native notebook views and evaluate notebook-aware comparison first. [Notebook requirements](NOTEBOOK_RESULTS.md#required-display-and-comparison-follow-up). | Implemented native read-only retained notebook viewing and notebook diff when Jupyter is installed; transcript fallback remains. nbdime evaluated. Focused capture/comparison/export tests pass; rich-output native visual acceptance remains unobserved. |
-| D13 | **Zotero → attachment → Return.** Expose the delivered reference/attachment workflow in the same coherent interface. | Grouped Sources exposes Find/Resume Zotero and setup explains readiness. Existing isolated connector/attachment/Return regressions remain required. No live Zotero attachment mutation trial or claim of native acceptance in this batch. |
-| D14 | **Research resumption and reconstruction.** Recover existing documents, supported locations, conclusions, gaps, attempts and next work through links/prose, without duplicated forms. | Partial. Basic Return/Reopen exists. Recent Documents now includes PDFs and ordinary files beside notes, with direct access, restart, known Return and current-authorization checks ([workflow/evidence](RECENT_DOCUMENTS.md)). Reopen treats a stale cursor as optional, opens current text and preserves exact Return and dirty buffers ([repair evidence](DOCUMENT_REOPEN_REPAIR.md)); a [native field-trace case](MATHEMATICAL_WORK_20261116.md) now verifies ordinary proof-heading links, exact Return and recovery of an earlier selection after both notes close and the host reloads. Native history was sufficient; no new control or store was added. The [discriminant investigation](RELEASE_0_23_45.md) now exercises a longer stopped/resumed route with actual Sage outputs, a failed construction, a supporting integral-basis proof and six separate capture/execution provenance accounts. It exposed and repairs saved-calculation links from ordinary notes; exact Return survives restart. This is scripted native evidence, not a human-comprehension claim. Wider continuity and compressed-argument reconstruction remain pending; never claim live kernel restoration. |
-| D15 | **Evidence, provenance and justification.** Distinguish retained source, producer account, observed run, independent reproduction, formal check, scoped premise admission, checked contextual derivation, informal correspondence and human judgment. Keep alternative grounds and failed approaches. The [justification engine](JUSTIFICATION_WORKFLOW.md) makes supporting grounds, admitted assumptions and checked inference steps inspectable; it is integral to MRW. | Partial. Bounded notebook provenance and the Lean J₀/J(CS) checker with Appendix A and offline documentary-response cases exist. The formerly skipped real-checker integrations exposed a build-configuration pin mismatch; its exact configuration was restored and the contract profile separated. All nine documentary checks now pass. A genuinely Lean-generated synthetic warrant opens/reopens through the native inspector without a new admission/check or package mutation ([audit](LEAN_CHECKER_DRIFT_20261115.md)). Bounded Application search over explicitly admitted reasons is now implemented in Lean, with separate checked certificates, exact admission footprints and immutable successor-context withdrawal ([scope and API](JUSTIFICATION_ROUTE_SEARCH.md), [verification](JUSTIFICATION_SEARCH_20261115.md)). The [retained-route increment](RELEASE_0_23_42.md) now retains source-bound checked results, streams saved-result discovery, displays exact captures, and supports explicit successor withdrawal, predecessor reopening and Return. It uses the existing artifact coordinator and an explicit no-download local checker setup. Exact unfinished requests and original Return pins now survive failure/closure/restart through the existing store ([resumption](UNFINISHED_CONTEXTS.md)); completed requests are suppressed from the unfinished picker. Fresh-process and component checks pass; the native trial was unavailable before activation because WSL resolution stalled. Source-driven context preparation now captures selected Markdown or saved passages, hands exact text and a schema to a companion, imports an attributed proposal, corrects summaries and explicitly admits chosen grounds ([workflow](SOURCE_GROUNDS_WORKFLOW.md)). Capture, import and correction execute neither admission nor Lean. Immutable preparations use the existing coordinator; failed-write, uncertain-acceptance, restart and relocation checks preserve work. The [0.23.44 native source-workflow trial](RELEASE_0_23_44.md) now passes capture, attributed import, correction, explicit admission, Lean search and real host restart with no new check on reopening. Its catalog-lock race is repaired. Broader Hilbert/CS search remains pending. W3C PROV records provenance; checked derivability is relative to explicit admissions and a context. A checked Lean statement does not establish an unstated informal correspondence. |
-| D16 | **Feature use over time.** Keep lightweight core recording; report used, available-but-unused, unavailable, uninstrumented and unknown periods. [Measurement contract](OPERATIONAL_USAGE.md). | Implemented bounded local-period aggregation, stable command/direct-action IDs, correlated children, trust/configuration coverage refresh and relocation invocation capture; test/development/scheduled origins excluded. Missing outcomes and unobserved/shared intervals remain explicit. Continuous availability/adoption is not inferred; broader shared aggregation remains partial. The default History view now shows up to 100 production activity entries, collapsing startup inventories and empty measure tables while preserving detailed/raw exports and gap notices ([workflow](HISTORY_ACTIVITY_VIEW.md)). The existing history read/sync resource limits remain unchanged. |
-| D17 | **Periodic integrity and hygiene.** Optional diagnostics plugin; core retains essential checks. Bounded, read-only, configurable reporting with explicit incomplete/unknown findings. [Plugin design](DIAGNOSTICS_PLUGIN.md). | Initial optional diagnostics companion implemented with inspection API 1, bounded streamed hashes/metadata/manifests, pending/deletion observations, manual reports and opt-in weekly/coalesced scheduling. Isolated inspection/scheduling tests and native activation pass. External/remote targets, full schemas/dependencies and passage-anchor checks remain explicitly unchecked. |
-| D18 | **Reports → Codex maintenance → design comparison.** Compare every proposed change with the current design, revalidate findings, make bounded corrections and verify outcomes. [Maintenance contract](CODEX_MAINTENANCE.md). | Implemented explicit report/export/Codex clipboard handoff with evidence marked untrusted; no model call or repair authorization. Weekly report cadence is separate from manual maintenance. Automatic maintenance scheduling remains pending. |
-| D19 | **Instruction consistency.** One current decision/status register and maintenance workflow, linked from entry documents; versioned evidence remains accessible. | Current authority is consolidated here. Older version sections retain their invariants and anchors. Stale interface-priority labels and continuation/diagnostics descriptions are reconciled against this register ([drift account](NATIVE_TEST_ISOLATION.md#drift-disposition)); further extraction must preserve anchors and map every surviving rule before deletion. Do not duplicate new status across four files. The [16 November drift review](MAINTENANCE_20261116_DRIFT.md) confirms runtime/release alignment, preserves deferred work and repairs escaped roadmap line breaks and the native-case list. |
-| D20 | **Resource budgets and realistic validation.** Bounded history/scan reads, streaming hashes, cancellable work and measured memory/I/O limits. Test adapters at their real boundary. | New inspectors enforce file/byte/time/finding budgets, streaming hashes, cancellation and bounded local history reads; fixtures test partial/offline/change states. Peak resources and actual logs belong in batch evidence; this does not diagnose the earlier memory exhaustion. The two confirmed test/demo sources and three workspace test files were removed from the active workspace with a verified external backup, interrupted-publication rehearsal and fresh-manager retained-link checks ([cleanup account](SOURCE_CLEANUP_20261114.md)). Saved-source Delete/Restore now uses reversible Trash in the existing store ([scope](SAVED_SOURCE_TRASH.md)); focused regressions cover restart, stale transitions, failed publication, annotations and exact links. All native entry modules now require an owned fixture, dedicated stores, namespaced native Mementos, a matching workspace and safe initial buffers before test work; direct Python helpers also check write scopes. Four unsafe preparers refuse before writes. The supported staging route is bounded to checked cases; older UI bodies are not current acceptance requirements ([scope and evidence](NATIVE_TEST_ISOLATION.md)). |
-| D21 | **Selective contract formalization.** Small executable Lean models for identity-preserving relocation, delegation/outcomes and report classification, tied explicitly to runtime behavior. Keep `MRW.Contracts` separate from the integral `MRW.Justification` subsystem. [Scope](CONTRACT_FORMALIZATION.md). | First pilot delivered: independent core/Std MRW.Contracts relocation model, executable transitions, init/preservation/reachability proofs, success/rejection/fault vectors and three concrete trace comparisons. Pinned Lean 4.32.2 checks pass without new axioms or admitted proofs. [Mapping](CONTRACT_PILOT.md). The optional contract profile now builds separately from the pinned checker configuration; all trusted checker digests and three concrete traces pass ([repair](LEAN_CHECKER_DRIFT_20261115.md)). Implementation refinement, liveness and subsequent operation/report models remain open. |
-| D22 | **Existing-note citation rendering.** Read Obsidian/Pandoc citation syntax using a selected existing processor and scoped bibliography or owner-supplied metadata, preserving note bytes and source positions. [Workflow](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes). | Implemented bracketed citation rendering via Pandoc/CSL in native preview and reader annotations. Live Better BibTeX exact-key lookup respects selected libraries and explicit local bibliography precedence; WSL discovers host-PATH pandoc.exe. Snapshot notices identify selected owner library names/IDs and host, or the scoped bibliography filenames actually read. Live library database filenames are unavailable through the supported API. The unchanged Number Fields note visibly resolves to (Marcus 2018) in native WSL preview. Missing/ambiguous/offline/scope/dirty/closed-buffer checks pass; [evidence](CITATION_ZOTERO_REPAIR.md). Narrative @key, remote/dependent styles and exact companion-style matching remain unsupported. |
+| D01 | **Integration workbench.** Use capability-specific ports/adapters and a narrow common model. External systems own creation and execution. [Integration contract](INTEGRATION_BOUNDARIES.md). | Source-reader API 1 is not a universal plugin API. The [CoCalc adapter](COCALC_ADAPTER.md) is proposed. Do not duplicate editors, evaluators, kernels, queues, synchronization services or managed-database writers. |
+| D02 | **Source notes and linked notes.** Keep independent works, many-to-many associations and externally owned creation/templates. [Notes](NOTE_COMPANIONS.md#source-notes-and-zettels). | Source annotations and destination notes remain independently editable. Associations preserve earlier records and linking snapshots. Creation delegates to the configured application; native editing afterward remains available. |
+| D03 | **Identity and referential integrity.** Distinguish logical identity, current location, revision and capture. [Contract](INTEGRATION_BOUNDARIES.md#synchronization-and-referential-integrity). | Supported moves preserve immutable citations and verified mappings. Adapter-specific checks must cover missing, renamed, ambiguous, offline and deleted targets. Never guess a replacement by title. |
+| D04 | **Asynchronous work.** Distinguish dispatch, acceptance, execution, completion, cancellation and uncertainty. | Correlate requests and outcomes. Retry only with a verified idempotency contract. A returned handler or saved output alone does not establish completion. Interruption and partial cross-system success require adapter-specific checks; never compensate by deleting external work. |
+| D05 | **Editing and synchronization.** Preserve dirty buffers, revision conflicts, deletion markers and offline records. | Current storage qualifications remain binding. Synchronization does not coordinate concurrent writers or restore a kernel or queue. Check stale mappings and conflicting edits without silent overwrite. |
+| D06 | **Optional companions.** Distinguish source readers, lesson packs, native extensions and external services. | Grouped setup shows installed, configured and unchecked states. Opening setup does not probe services or install software. Reachability is checked by the relevant action. |
+| D07 | **Command context.** Group actions by task and bind them to the selected document. [UX](../UX_SPEC.md#evaluation-follow-up--interface-and-continuity). | Six task groups use native pickers and menus. [Reader notes](READER_NOTE_WRITING.md) support focused text entry, Save/Cancel and optional attribution while retaining metadata and mathematical markup. Broader keyboard/theme observations remain incomplete. |
+| D08 | **Lean lessons.** Resolve the selected lesson or associated code and preserve native Lean behavior. [Workflow](LEAN_STUDY_WORKFLOW.md). | Lesson actions use the selected resource; opening performs no MRW-issued check. Guides explain native toolbar controls. Full lesson/code/notes/Return interaction remains unobserved. |
+| D09 | **Optional study.** Ordinary reading creates no study record and opens no registration form. [Study workflow](ACTIVE_STUDY_WORKFLOW.md). | Deliberate study, history, review, lifecycle commands, Proof Outlines and Lean study remain independently available. |
+| D10 | **AI destination and review.** Identify API requests and companion handoffs where chosen. [AI workflow](READER_AI_WORKFLOW.md). | API requests require exact preview and separate Send. Codex clipboard actions copy selected context and references without sending. Companion behavior after paste remains outside MRW's observed boundary. |
+| D11 | **Note, source and Return.** Navigate linked work without imposing one repository or note format. | Contents, preview and exact Return preserve dirty buffers and retained references. Scripted note/source/Return and restart checks have exercised the native route. Obsidian creation and broader unscripted companion interaction remain separate checks. [Navigation](READING_OUTLINE_WORKFLOW.md). |
+| D12 | **Retained calculations.** Keep rich outputs, input/method revisions, notes and proof links available through comparison and export. [Notebook workflow](NOTEBOOK_RESULTS.md). | Native read-only notebook viewing and diff use Jupyter; transcripts remain the fallback. Capture, comparison and export have focused tests. Native visual inspection of rich outputs remains unobserved. |
+| D13 | **Zotero references.** Connect references, attachments and Return through the supported owner API. [Workflow](ZOTERO_WORKFLOW.md). | Sources exposes Find/Resume Zotero and setup. Connector/attachment/Return regressions cover the supported route. A live attachment interaction remains unobserved; no mutation of Zotero is authorized. |
+| D14 | **Research resumption.** Recover documents, supported locations, conclusions, gaps and attempts through existing links and prose. | Partial. Return, Reopen, [Recent Documents](RECENT_DOCUMENTS.md) and saved-calculation links survive supported restarts. Stale cursor positions do not prevent opening current text. Wider continuity and reconstruction of compressed arguments remain open. No live kernel restoration is provided. |
+| D15 | **Evidence and justification.** Separate source capture, producer accounts, observed execution, reproduction, formal checking, scoped admission, contextual derivability, correspondence and human judgment. [Guide](JUSTIFICATION_WORKFLOW.md). | Partial. The Lean J₀/J(CS) checker and bounded Application search retain certificates, exact admission dependencies and successor contexts. The reader preserves source snapshots, withdrawal, earlier contexts, Return and unfinished requests. [Source-driven preparation](SOURCE_GROUNDS_WORKFLOW.md) supports attributed proposals, corrections and explicit admission. Capture/import/correction invoke neither admission nor Lean. Reopening performs no new check. Derivability is non-factive and relative to the admitted context. General Hilbert/CS search and paper–Lean correspondence review remain open. |
+| D16 | **Feature use.** Record used, available-but-unused, unavailable, uninstrumented and unknown periods. [Contract](OPERATIONAL_USAGE.md). | Bounded local aggregation uses stable feature IDs and correlated operations. Test/development/scheduled origins are excluded. [History](HISTORY_ACTIVITY_VIEW.md) preserves detailed exports and gap notices. Missing coverage is not zero use; shared aggregation remains partial. |
+| D17 | **Integrity and hygiene.** Optional diagnostics supplies bounded, read-only reports; core retains essential checks. [Design](DIAGNOSTICS_PLUGIN.md). | Inspection API 1 supports streamed hashes/metadata/manifests, pending/deletion observations, manual reports and opt-in weekly scheduling. External/remote targets, complete schemas/dependencies and passage anchors remain unchecked. |
+| D18 | **Maintenance.** Revalidate report findings against the design before making bounded corrections. [Contract](CODEX_MAINTENANCE.md). | Explicit export and Codex clipboard handoff retain reports as untrusted input. A report authorizes neither a model call nor a repair. Automatic maintenance scheduling is not implemented. |
+| D19 | **Instruction consistency.** Maintain one current decision/status register linked from development instructions. | Keep documentation aligned with current behavior. Remove superseded instructions instead of appending repair narratives. Put routine development notes and check output in commits, pull requests or issues. |
+| D20 | **Resource limits and verification.** Bound reads, memory, I/O and work duration; stream hashes and support cancellation. | Inspectors and history readers enforce budgets. Saved-source Trash uses reversible deletion and restart recovery. [Native tests](NATIVE_TEST_ISOLATION.md) require owned fixtures, dedicated stores, safe buffers and matching workspace identity. Resource observations do not establish a general performance bound. |
+| D21 | **Contract formalization.** Keep small Lean safety models separate from `MRW.Justification` and relate them explicitly to runtime behavior. [Scope](CONTRACT_FORMALIZATION.md). | `MRW.Contracts` has an executable relocation model and safety proofs in a separate build profile. These do not verify the Python/JavaScript implementation. Implementation refinement, liveness, delegation and report-classification models remain open. |
+| D22 | **Citation rendering.** Use an existing citation processor and scoped bibliography or owner metadata without changing note bytes. [Workflow](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes). | Bracketed citations render through Pandoc/CSL. Better BibTeX lookup respects selected libraries and explicit bibliography precedence; notices identify the source used. Live database filenames are unavailable through the API. Narrative `@key`, remote/dependent styles and exact companion-style matching remain unsupported. |
 
 <a id="current-implementation-order--15-november-2026"></a>
+<a id="current-implementation-order--16-november-2026"></a>
 
-## Current implementation order — 16 November 2026
+## Current implementation order
 
-The author requests central roadmap work before the paper–Lean comparison.
-The bounded discovery/withdrawal and retained reader sequence is delivered in
-[0.23.42](RELEASE_0_23_42.md); do not repeat it as the next task. The bounded
-[0.23.43 D14/D15 repair](RELEASE_0_23_43.md) preserves an exact unfinished search and Return location across
-reader closure/restart. Saving and resuming a context must neither admit a new
-premise nor execute Lean; checking and retry remain explicit. Use the existing
-storage coordinator and interface, without a new registration form.
+Prioritize mathematical work over engine expansion. Address confirmed data-loss
+or resource failures first, then concrete obstacles in reading, calculations,
+proof work and resumption. Preserve pending work when addressing a narrower
+repair. Wider integrations require a demonstrated mathematical need.
 
-D15 source-driven context assembly and review is implemented in the
-[existing-note workflow](SOURCE_GROUNDS_WORKFLOW.md), without hand-editing JSON,
-and published with [verified 0.23.44 delivery](RELEASE_0_23_44.md). Keep human
-acceptance of grounds and attributed proposals explicit; never invent an
-implication or treat opaque assertions as proved mathematics. Broader Hilbert/CS
-search remains distinct. Search runs in Lean; Python binds/retains artifacts;
-the extension presents the interaction.
-The user is running 0.23.44 and prioritizes mathematics over further engine
-expansion. The [field-trace case](MATHEMATICS_WITH_NOTES.md) uses ordinary linked
-notes and a SageMath calculation. Native history already recovered its earlier
-selected passage after closure/restart, so no resumption control was added.
+Bounded search, withdrawal, retained routes, unfinished-context resumption and
+source-driven proposal review are implemented. Do not repeat them as new tasks.
+Saving and reopening admit no premise and execute no Lean check; search and
+retry remain explicit. Search runs in Lean, Python validates and retains records,
+and the extension presents the interaction.
 
-The [0.23.45 discriminant investigation](RELEASE_0_23_45.md) now supplies
-one longer D14 route, including an unsuccessful approach and a native restart.
-Continue from concrete gaps in ordinary mathematical work before broadening
-search or adding display infrastructure. Wider continuity, rich-output visual
-acceptance and unscripted companion interaction remain open. The prepared injection example is a regression, not evidence of
-mathematical usefulness or a completed companion interaction.
+The next work comes from gaps in ordinary mathematical use. Wider continuity,
+rich-output visual inspection and unscripted companion interaction remain open.
+Prepared examples and scripted checks establish their stated behavior, not
+mathematical understanding. Use [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md)
+as the public justification walkthrough.
 
-Use [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md), with its Bézout and
-unique-factorization proofs, as the public walkthrough. The range-lifting
-warrant remains an internal regression; its changing manuscript is not the
-public example.
+**Deferred: paper–Lean correspondence review.** The selected case is
+[`flengyel/Dosen-Petric-Maximality`](https://github.com/flengyel/Dosen-Petric-Maximality).
+Resolve the current manuscript and Lean revisions together. Compare definitions,
+types, hypotheses, quantifiers, conclusions and dependencies; preserve exact
+passages and reviewed correspondence records. A Lean check alone does not
+establish correspondence. The source-selection prototype remains outside main
+and the release.
 
-**Deferred: paper–Lean correspondence review.** Use
-[`flengyel/Dosen-Petric-Maximality`](https://github.com/flengyel/Dosen-Petric-Maximality)
-as the author-selected case. At implementation time resolve its current
-manuscript and Lean revisions together; do not freeze an older paper version.
-Compare the printed definitions, types, hypotheses, quantifiers and conclusion
-with the elaborated declaration and its dependencies. Preserve exact passages
-and the evidence for any reviewed correspondence. A Lean check alone does not
-establish that correspondence. This is a roadmap item, not delivered behavior
-or a reason to interrupt the central sequence. The partial source-selection
-prototype remains outside main and the release.
+## Reuse and boundaries
 
-## Architecture correction — 2026-11-14
+Consult [related systems](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
+before duplicating their capabilities. Reuse supported editors, reference
+managers, notebook views and execution services. Contextual help, linked sources,
+expandable arguments and retained alternatives must work with ordinary documents;
+no required conversion, universal graph or visual pipeline is introduced.
 
-The [architecture overview](ARCHITECTURE.md), README and SVG/PNG now identify
-the justification engine inside the MRW core. D15 distinguishes its existing
-bounded checker from general inference and the full interactive workflow.
-D21 keeps the proposed contract pilot separate. This clarification was checked
-against main `0c63d714660b585498a9fe0c7731bd50148cb705`; it does not
-change runtime behavior or mark the remaining inference work complete.
-
-Validation: parsed the SVG as XML, exported and visually inspected the
-2700 × 2130 PNG, and checked changed documentation links against the repository
-tree. Lean, Python and extension suites were not rerun for this documentation
-correction.
-
-## Documentation review — 2026-11-14
-
-The overview now explains the justification engine through its mathematical
-purpose and a manuscript-lemma example; the [guide](JUSTIFICATION_WORKFLOW.md)
-separates current inspection/checking from pending search and comparison.
-It repairs the technical specification's stale README command reference.
-The [CoCalc proposal](COCALC_ADAPTER.md) adds the missing ownership boundary,
-bounded workflow and acceptance criteria. The figure describes the engine's
-function and marks CoCalc as planned.
-
-This review incorporates main `90023ba8027ebf422c306aa08b0fbe83d46949d8`:
-the bounded diagnostics companion and first relocation contract pilot are now
-described as implemented, with their recorded coverage limits. Automatic Codex
-maintenance scheduling and subsequent contract models remain pending.
-Official CoCalc sources linked in the proposal describe their named deployments.
-SVG/XML, PNG layout and changed relative links were checked. Documentation
-checks establish no new runtime capability, native acceptance or installation.
-All D01–D22 items remain tracked.
-
-## Reuse decisions and exclusions
-
-The [related-systems review](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse)
-supplies the sources. These are adopted directions, not promises to install
-each system or implement every feature:
-
-| Source of the lesson | Adopt or investigate | Boundary |
-| --- | --- | --- |
-| Proofscape | Explicit links among sources, notes and arguments; expansion and return. | No compulsory proof chart, hidden navigation rules or new universal graph. |
-| CoCalc and Jupyter AI | Contextual assistance beside ongoing work; visible context and reviewable changes. | Reuse existing companions; no new hosted platform or chat frontend, automatic execution or silent edits. |
-| Native notebook tools and nbdime | Cell/output-aware comparison and rich retained-result viewing. | Evaluate compatibility before adoption; no bespoke diff engine or automatic merge/replay. A comparison must not execute cells. |
-| Sagebrush | Evaluate exported notebooks and independent calculation comparisons; preserve actual producer identity, assumptions and conditional certification. | Reading/capture does not authorize reactive execution or agent access. One upstream file passed exact capture/read; an execution trial and adapter remain unimplemented. [Assessment](RESEARCH_WORKSTATION_DESIGN.md#sagebrush). |
-| Org/Babel | Keep explanation, code, results and references close enough to follow. | Proximity through existing documents/links, not required Org conversion, another evaluator or duplicated prose. |
-| VisTrails | Preserve alternative investigations, method/input revisions and failed approaches. | Reuse provenance ideas and W3C PROV; do not adopt a runtime or mandatory visual pipeline. |
-| Eigenius and existing evidence tools | Keep grounds, derivation and independently checked conclusions distinct. | No inference from an audit trail to reliability, or from formal checking to every informal claim. Formal evidence is optional where the task does not require it. |
-| Zotero, TeXmacs, MathHub/ALeA and native VS Code tools | Reuse reference management, mathematical presentation and source navigation where they remove a demonstrated obstacle. | No replacement editor, mandatory source schema, cognitive model or claim of uniqueness. |
-
-## Order of work
-
-Confirmed data-loss/invariant violations and resource failures come first.
-Then repair coherent existing workflows (D02 and D06–D13), close observation
-gaps and implement bounded diagnostics. Wider integrations follow demonstrated
-mathematical needs, not a feature-count target. These workstreams do not cancel
-one another: a narrower repair or follow-up question must preserve the remaining
-accepted items and their evidence requirements.
-
-The current implementation batch and its limits are recorded in
-[maintenance evidence](MAINTENANCE_20261114.md). Release and installation are
-reported separately after package verification. No plugin installation is
-implied by implementation or publication. Publication never implies installation or a forced
-reload of the working window.
+Keep provenance distinct from mathematical support. Neither an audit trail nor
+a formal check warrants every informal claim. Reading and capture authorize no
+reactive execution or agent access. Do not infer uniqueness, reliability or
+learning benefit from the presence of integrations.

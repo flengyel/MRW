@@ -110,7 +110,7 @@ If a prime divides a product, it divides one of the factors. One proof uses
 Bézout's identity; another uses unique prime factorization. The
 [walkthrough](JUSTIFICATION_EUCLID_EXAMPLE.md) gives both proofs and shows their
 distinct grounds. Withdrawing one bridge leaves the other recorded route
-available, while preserving the earlier context. The present Lean tests check
+available, while preserving the earlier context. The route checker verifies
 the conditional composition of those grounds, not the arithmetic proofs.
 
 <a id="example-using-a-formal-proof-in-a-manuscript"></a>
@@ -124,7 +124,7 @@ checks how those grounds compose under the selected admissions; it does not
 automatically establish the correspondence.
 
 The [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#appendix-a-slice)
-contains the pinned regression case and its checker details.
+describes the formal-proof example and its checker details.
 
 ## What the records establish
 

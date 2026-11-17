@@ -4,9 +4,7 @@ Use these tools when a selected passage would benefit from recorded attempts,
 companion explanations or scheduled recall. They are separate from ordinary
 [document reading](READING_OUTLINE_WORKFLOW.md): opening a note or following a
 link creates no study. Questions and solutions can remain in their existing
-notes. The document Problems interface was removed in 0.23.3; earlier saved work
-remains readable without its forms. See the
-[preservation checks](DOCUMENT_PROBLEMS_REMOVAL.md).
+notes.
 
 To start, select a saved passage and run **MRW: Study Current Material**, or choose
 **Study current material** in the retained reader. A graph claim with a retained
@@ -137,10 +135,9 @@ reported outcomes to force a review interval.
 
 ## History and export
 
-The Studies sidebar was removed in 0.23.28. Use **MRW: Resume Study**,
-**MRW: Inspect Study History** and **MRW: Export Study History…** in the Command
-Palette. Saved records, drafts, references and history remain in their existing
-stores. Ordinary notes and the Lean tutorial need no study record.
+Use **MRW: Resume Study**, **MRW: Inspect Study History** and
+**MRW: Export Study History…** in the Command Palette. Ordinary notes and the
+Lean tutorial need no study record.
 
 MRW records its navigation, submissions, question/review decisions, exposure,
 effort reports, help offers, cancellations, errors, operation times and
@@ -157,7 +154,7 @@ this state, and cross-machine or renamed-workspace migration is not implemented.
 Keep the original workspace storage when continuing work. One local writer per
 workspace is supported.
 
-**Configure History…** can now connect a separate data directory, a vault
+**Configure History…** connects a separate data directory, a vault
 subdirectory (preferably `<vault>/MRW/`) or the vault root. It imports and verifies
 private history before changing the connection. Original files remain. Only
 `History/` is managed. Existing Syncthing/SyncTrayzor handles synchronization.
@@ -168,9 +165,8 @@ remain private.
 A recorder failure displays a history gap and buffers events while keeping
 reading and drafts usable. A failed study checkpoint is reported separately;
 keep the view open or copy the draft. Recovery preserves conflicting stored
-work rather than overwriting it. The [design](ACTIVE_STUDY_DESIGN.md) and
-[validation report](ACTIVE_STUDY_VALIDATION.md) describe persistence and recovery
-in detail.
+work rather than overwriting it. The [design](ACTIVE_STUDY_DESIGN.md) describes
+persistence and recovery.
 
 **Inspect history** shows usage and study reports plus a sample of up to 100 events in session/sequence order.
 **Export history…** selects recorded sessions and creates a readable comparison
