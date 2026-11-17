@@ -8,7 +8,7 @@ question registration form or a change to ordinary mathematical work.
 
 ## Current implementation and gaps
 
-The 0.23.31 code records command, bridge and validated Study-action invocations,
+Core records command, bridge and validated Study-action invocations,
 outcomes and durations. **MRW: Inspect Study History** opens a compact activity
 view; **Export Study History… → Detailed comparison and coverage** retains the
 full usage table and study measures. **Events and submitted snapshots** retains
@@ -16,24 +16,12 @@ the JSON export. Recording is local by
 default, with optional explicitly connected shared history. See
 [the current workflow](USAGE_HISTORY.md).
 
-This is partial implementation of the requirement, not evidence of actual
-feature adoption. A repository checkout contains no observations of the
-maintainer's ordinary use. The following table records the earlier gaps that motivated the 0.23.32
-measurement increment. Consult the [current reconciliation](DESIGN_RECONCILIATION.md)
-for delivered repairs and remaining limits:
-
-| Area | Current limitation | Required correction |
-| --- | --- | --- |
-| Access | Usage is inside Study History. | Direct access to a feature-use report, independent of creating a Study. |
-| Feature coverage | Direct reader and proof-graph actions are uninstrumented; internal bridge calls are separate rows. | Stable user-facing feature IDs with declared coverage across commands, buttons and webviews. |
-| Availability | Inventory is captured at recorder initialization; command registration/trust is not external-tool readiness. | Refresh coverage when availability changes; state the interval and what availability establishes. |
-| False zeroes | Workspace move/recovery bypass the usage wrapper while appearing in its command inventory. | Record these invocations safely across relocation, or label them uninstrumented until supported. |
-| Analysis | Rows are grouped by writer, version and day, without a selected-period adoption summary. | Period totals, use on distinct recorded days, last use and comparable period/version views. |
-| Scale | Reporting loads and merges the available history in memory. | Bounded reads and incremental aggregation; no whole-history load for routine reports. |
-
-The measurement corrections and initial [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md)
-were subsequently delivered in 0.23.32, with the limits recorded above. Preserve current history and its
-inspection/export while extending it; do not start a second event store.
+The [optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md) provides direct,
+bounded feature-use reporting with stable feature IDs, selected periods and
+availability coverage. Local history remains authoritative; no second event
+store is required. These records describe observed activity, not learning or
+feature adoption outside their coverage. See the [design register](DESIGN_RECONCILIATION.md)
+for remaining availability and native-observation limits.
 
 ## Measurement contract
 

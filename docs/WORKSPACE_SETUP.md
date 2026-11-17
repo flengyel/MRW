@@ -34,7 +34,7 @@ notes can stay where Obsidian uses them. See
    on this host. If absent, install Debian's `python3` package; if its version
    is too old, upgrade the distribution or configure an installed supported
    interpreter with `mrw.pythonExecutable` in Remote settings.
-4. [Install the current MRW VSIX](INSTALLATION.md#2-install-the-vsix-in-that-workspace-host)
+4. [Install the current MRW VSIX](INSTALLATION.md#2-install-both-vsix-packages-in-that-workspace-host)
    on **WSL: Debian**, rather than only the Windows interface.
 5. Run **MRW: Set Up MRW Workspace…** from F1 or MRW's Commands view. It prepares
    `~/mrw-work/MRW.code-workspace` and reports the path and Python check. Choose

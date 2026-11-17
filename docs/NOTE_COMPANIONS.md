@@ -37,10 +37,9 @@ those choices, but copying a passage or passing a format validator does not make
 them. A source-return link records provenance; it does not replace a considered
 connection between ideas.
 
-The reader's deliberate selection, formulation and linking are useful friction
-(**human eufriction**). Preserve those acts while removing repeated typing,
-lost locations and redundant forms. No required reflection form or completion
-checklist follows from this principle.
+Preserve the reader's selection, formulation and linking while removing repeated
+typing, lost locations and redundant forms. No reflection form or completion
+checklist is required.
 
 ## Start a note from MRW
 
@@ -59,12 +58,6 @@ with the note, or select it through **Open Document**. For other kinds of
 documents, use their authoring application or VS Code extension, then open the
 file in MRW. The integrations available now are Obsidian and the VS Code editor;
 MRW does not yet invoke Emacs or The Archive.
-
-**New Reading Document** and its fixed reading headings were removed in 0.23.26.
-Previously created documents remain ordinary Markdown files and continue to open
-with Contents, links and Return. There is no data conversion. A custom keybinding
-for the removed command should be removed or changed to the chosen application's
-creation command.
 
 MRW's saved sources, annotations and research records remain part of its reading
 and research functions. Delegating document creation does not remove that saved

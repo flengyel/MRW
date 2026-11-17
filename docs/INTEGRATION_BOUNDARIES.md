@@ -5,9 +5,7 @@ mathematical work across tools while respecting the system responsible for each
 document, computation and service. Current capabilities remain those documented
 in the [README](../README.md) and the individual workflows; this contract does
 not claim that proposed adapters or synchronization features are implemented.
-Where older task instructions prescribe a different ownership boundary, this
-contract governs future work. Versioned release reports remain accounts of the
-behavior and checks at their named versions.
+This contract governs integration ownership when task instructions conflict.
 
 ## Ownership and delegation
 

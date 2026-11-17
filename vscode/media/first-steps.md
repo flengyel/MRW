@@ -72,7 +72,7 @@ Choose **Browse for another document…** to use the file dialog immediately.
 The picker lists the current folder's files and subfolders before loading their
 titles. Search by title, filename or path, enter a subfolder, or choose **Parent
 folder**. **Search subfolders…** searches nested folders within the
-[chooser limits](https://github.com/flengyel/MRW/blob/main/docs/DOCUMENT_OPENING_REPAIR.md).
+[chooser limits](https://github.com/flengyel/MRW/blob/main/docs/READING_OUTLINE_WORKFLOW.md).
 Titles arrive in batches without changing the current query or selection;
 incomplete results are identified. Cancelling preserves the current view and
 drafts.
@@ -550,11 +550,7 @@ survives restart. A notebook result opens without another action picker or cell
 execution; its evidence and comparison actions remain in **Open Retained
 Notebook Result…**.
 
-The [quadratic-discriminant example](https://github.com/flengyel/MRW/blob/main/docs/MATHEMATICS_WITH_NOTES.md#the-discriminant-investigation)
-has two Sage calculations, a failed construction and a linked integral-basis
-proof. Save an unfinished step in the note, reopen it after stopping, and follow
-the saved evidence without rerunning it. See the
-[notebook guide](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md)
+See the [notebook guide](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md)
 for retention, comparison and export limits.
 
 ## When commands do not respond

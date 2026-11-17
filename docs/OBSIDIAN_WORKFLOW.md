@@ -358,15 +358,7 @@ and interaction history are outside that transfer.
 
 Opening ordinary Windows-vault notes through `/mnt/c` does not qualify that
 location for MRW's private saved-work store. Windows-backed store placement
-remains unqualified. Neither pausing synchronization nor closing Obsidian is
-an established remedy for the recorded replacement failures. The
-[storage comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md) and
-[Obsidian-closed observation](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20)
-record those limited tests; they do not impose a requirement to close Obsidian
-for ordinary reading.
+remains unqualified. Ordinary reading does not require closing Obsidian.
 
 MRW does not discover or rewrite a vault, synchronize its contents, or start a
 background server. Navigation starts no compiler, model, notebook or container.
-The [Obsidian validation report](OBSIDIAN_VALIDATION.md) records desktop
-round-trip and routing checks. [Reading repairs](READING_REPAIRS.md) describes
-the newer note navigation and rendering checks and their remaining limits.

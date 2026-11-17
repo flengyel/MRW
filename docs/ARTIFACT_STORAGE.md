@@ -1,23 +1,17 @@
 # Choose where MRW keeps saved work
 
-Patch 0.17.0 discards a rejected write’s own unpublished generation only after
-checking its directory identity, the current HEAD and the absence of a recovery
-journal. Not-sent requests use the same cleanup. Blocked/uncertain publications
-and journaled operations preserve their bytes; older generations are not swept.
+MRW keeps retained sources, outlines, annotations and associated records
+separately from ordinary notes and notebooks. A saved-work move applies to one
+VS Code workspace. Other workspaces and Obsidian's notes remain in place.
 
-MRW 0.7.0 lets you move the saved sources, outlines, annotations and associated
-records for **this VS Code workspace**. Existing installations keep their current
-location until you explicitly move it. Other workspaces are unchanged. Obsidian
-continues to own your notes and attachments; no new vault is needed.
-
-For an ordinary study-folder rename, **0.12.0** adds **Prepare Folder Rename…**
+For an ordinary study-folder rename, use **Prepare Folder Rename…**
 and **Reconnect Saved Work After Folder Rename…** over this same core protocol.
 Preparation moves saved artifacts to stable host-local extension storage, then
 the reopened folder explicitly adopts the verified identity. See
 [the folder-rename workflow](FOLDER_RENAME_WORKFLOW.md). It does not change source
 provenance, merge stores or transfer editor recovery/UI state.
 
-## Open or move saved work (0.13.1)
+## Open or move saved work
 
 **Open Saved Work Directory…** connects this workspace to saved sources,
 outlines and annotations at the entered directory. It does not move those files.
@@ -47,36 +41,13 @@ An existing directory belongs to the separate opening operation below; MRW never
 merges stores. Symlinks, redirected paths, self-moves, ancestor/descendant moves
 and destinations overlapping host-local VS Code storage are rejected.
 
-A possible synchronized location is
-`/mnt/c/Users/fleng/Zettelkasten/MRW-artifacts`. **The current Windows-backed
-mount does not satisfy MRW's current private-mode policy:** it reports
-directories/files as `0777` despite requests for `0700`/`0600`. These displayed
-bits do not establish access by every Windows account; DrvFS derives them from
-the Windows user's access when metadata is absent. MRW still rejects before
-commit. A separately authorized [scoped metadata/ACL fixture trial](WSL_ARTIFACT_STORAGE_SETUP.md)
-has now moved a disposable fixture successfully and verified Windows-created
-receiving copies. Nested probe replacement denials remain unresolved, so this
-configuration is not yet qualified for real work. Only that new directory's ACL
-and separate mount changed. A later separately approved
-[controlled Windows-client comparison](WSL_ARTIFACT_STORAGE_COMPARISON.md)
-temporarily paused its vault folder: 3/4 probes passed before, 4/4 paused and
-3/4 resumed. The flag was restored and independently verified false. The original
-mount and existing vault ACLs remain unchanged; no lasting Syncthing setting
-change was made. This difference does not qualify paused use or identify the
-cause of the denials. The subsequent approved paused transaction check also
-failed at its first preflight atomic replacement, before commit. Pausing is not
-a qualified remedy; synchronization/configuration were restored and independently
-verified. This bounded attempt ended without retries. Another mount must pass
-its own capability checks; enabling a setting alone does not establish support.
-See [actual filesystem results](ARTIFACT_STORAGE_VALIDATION.md).
-
-The user subsequently closed Obsidian for one disposable test. With zero
-Obsidian processes and Syncthing unpaused/unchanged, that relocation/save/
-reference case passed. One success does not prove the cause of intermittent
-denials or establish a requirement to close Obsidian. It is not yet a supported
-real-store procedure. Obsidian notes themselves stay in place during a move;
-MRW moves only its separately saved material. Read
-[the test and its limits](ARTIFACT_STORAGE_VALIDATION.md#user-requested-obsidian-closed-check--2026-10-20).
+Use a filesystem that supports the required private permissions, atomic
+replacement, hard-link publication and directory synchronization. Windows-backed
+private storage remains unqualified. Do not treat pausing synchronization or
+closing Obsidian as a supported remedy for failed capability checks. Another
+mount must pass its own checks; changing a setting does not establish support.
+Ordinary Windows-vault notes can stay in place while MRW's private store remains
+on the Linux host.
 
 ## What moves
 
@@ -151,21 +122,14 @@ Relocation and network synchronization are separate. Use your existing
 synchronization arrangement only with a filesystem that preserves MRW's required
 publication and private permissions. MRW installs no synchronization service.
 
-The user identifies a Raspberry Pi 5 as the Syncthing peer and Windows machines
-as SyncTrayzor clients. The inspected Windows client includes a local Syncthing
-engine. A pause on that client does not pause or change the Pi. No remote
-filesystem access, permissions or completed network handover were established
-by local API status or copied-store tests.
-
 1. Stop writing on the first computer. Finish recovery and close MRW windows
    using the store. Wait for your synchronization tool to finish copying the
    entire selected artifact directory, including its identity, manifest and
    generation files. Verify receiving-side ownership and permissions after both
    initial creation and later replacement; do not assume permission metadata
-   travels with the bytes. The inspected Windows Syncthing 2.1.6 configuration
-   does not send/sync ownership or extended attributes, and its connected peer
-   reports 1.19.2. The [Windows-backed trial](WSL_ARTIFACT_STORAGE_SETUP.md)
-   is not yet a supported synchronized handover procedure.
+   travels with the bytes. A synchronization tool may copy content without
+   preserving ownership or permission metadata. Windows-backed private stores
+   are not qualified for this handover.
 2. On the receiving computer, open a workspace with one local folder for each
    project in the store. This workspace must have no existing MRW saved artifacts
    or store binding. There is no replace/merge operation in this release.

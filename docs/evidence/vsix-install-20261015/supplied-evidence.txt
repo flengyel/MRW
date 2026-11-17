@@ -1,2 +1,0 @@
-Supplied offline validation fixture.
-No compiler or checking attestation is claimed.

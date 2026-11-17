@@ -1,4 +1,4 @@
-# TikZ diagrams in notes and annotations — 0.23.5
+# TikZ diagrams in notes and annotations
 
 MRW renders `tikz` fenced blocks in ordinary Markdown notes and in saved-source
 annotations. Choose **Render diagram** to compile a block; opening, saving or
@@ -121,6 +121,4 @@ indexes and SVGs. Ordinary-note diagram caches are separate workspace data.
 Windows-backed private-store placement remains unqualified.
 
 Rendering does not establish commutativity, proof validity or a dependency.
-Source and annotation attribution remain unchanged. See the
-[annotation-rendering checks](TIKZ_VALIDATION.md) and
-[ordinary-note rendering checks](READING_REPAIRS.md).
+Source and annotation attribution remain unchanged.

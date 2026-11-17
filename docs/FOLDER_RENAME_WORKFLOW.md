@@ -1,7 +1,7 @@
 # Rename a study folder without losing saved MRW work
 
-Extension **0.12.0** adds a preparation and reconnection workflow for an existing
-single-folder study workspace on a Linux/WSL/SSH host. MRW preserves its retained
+Prepare and reconnect an existing single-folder study workspace on a
+Linux/WSL/SSH host before renaming its folder. MRW preserves its retained
 sources, passages, annotations and other saved research records. Your file tools
 perform the ordinary directory rename or move; VS Code owns ordinary documents.
 
@@ -74,7 +74,6 @@ this workflow. Save first and reopen the ordinary documents; no similar-text
 search, guessed pin or automatic prose rewrite is supplied.
 
 For a new general workspace, use [the MRW default](WORKSPACE_SETUP.md), not a
-subject-specific study or validation directory. Earlier
-[validation and host limits](FOLDER_RENAME_VALIDATION.md) describe that delivery.
+subject-specific study or test directory.
 The [complete workspace relocation contract](WORKSPACE_RELOCATION_DESIGN.md)
 adds obligations beyond this saved-source preparation workflow.

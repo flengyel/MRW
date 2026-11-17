@@ -1,9 +1,6 @@
 # Shared usage and interaction history
 
-Included in MRW 0.23.13; implemented through [PR #10](https://github.com/flengyel/MRW/pull/10). See
-[delivery and checks](SHARED_HISTORY_DELIVERY.md).
-
-**MRW: Inspect Study History** now opens a compact activity view, available
+**MRW: Inspect Study History** opens a compact activity view, available
 without creating a Study. It lists recorded commands and substantive saved-study
 events, and collapses repeated startup/availability records. Full coverage and
 comparison reports remain available through **Export Study History… → Detailed

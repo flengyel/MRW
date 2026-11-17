@@ -7,7 +7,9 @@ the original steps and can be reversed. This is a reading aid, not a proof check
 If the outline does not open within 15 seconds, **Retry** requests it again.
 Host errors and rendering failures appear in the view.
 
-## Graph and tagged Stacks passage (0.16.0)
+<a id="graph-and-tagged-stacks-passage-0160"></a>
+
+## Graph and tagged Stacks passage
 
 Click a vertex to select it and show its corresponding Stacks tag beside the
 graph. The complete vertex is clickable and keyboard accessible. Connected
@@ -37,7 +39,7 @@ given no referrer. It has no MRW API. Messages from child frames are ignored.
 The ordinary source reader retains its previous frame-free policy. No live page
 content is added to an AI request or written into the saved source store.
 
-An **Open Proof Outline** icon now appears in the title bar of a
+The **Open Proof Outline** icon appears in the title bar of a
 `.mrw-proof.json` editor, alongside the Command Palette and Contents view menu.
 Selecting a JSON file in Explorer still opens its ordinary editor;
 the icon opens the interactive graph without another MRW-sidebar step.
@@ -77,10 +79,11 @@ the earlier selection remains available if exact undo restores that revision.
 ## Vertex elimination
 
 In a directed acyclic proof graph, vertex elimination removes a vertex after
-joining each of its predecessors to each of its successors. In the proof-outline view, hidden vertices are
-omitted from the display while the original graph and derivations remain
-available for expansion. Each summarized proof region has a visible claim and explanation;
-required assumptions and joint premises are preserved. This is distinct from
+joining each of its predecessors to each of its successors. In the proof-outline
+view, hidden vertices are omitted from the display while the original graph and
+derivations remain available for expansion. Each summarized region has a visible
+claim and explanation, with required assumptions and joint premises preserved.
+This is distinct from
 transitive reduction, node grouping, and proof checking.
 
 In this view, **Delete vertex** performs the display operation and **Expand
@@ -89,14 +92,11 @@ original steps** restores the supporting argument. See the
 
 ## Lean and mathematical English
 
-MRW should help explain selected Lean statements and proof steps in mathematical
-English, and turn a mathematical argument in English into Lean code. An
-explanation should identify the hypotheses, types and reasoning; generated Lean
-should be checked in the selected project. The correspondence between the prose
-and code needs review.
-
-General automatic translation in either direction is a development goal, not a
-capability of the current proof-outline viewer.
+Lean-to-English explanation and English-to-Lean formalization are
+[MRW design goals](../VISION.md#mathematical-understanding). The current
+proof-outline viewer neither extracts an elaborated Lean proof graph nor
+translates arguments automatically. Generated Lean needs checking in the
+selected project, and its correspondence with the prose needs review.
 
 ## File boundary
 
@@ -145,6 +145,4 @@ with Axiom Math's equalizer application. Its proposed selection displays 10 of
 and the project's report of kernel checking remain separate from the Codex
 reconstruction. No local Lean build or check has been performed for this case.
 
-The existing Markdown overview, TikZ diagram and reader annotations remain in
-place. This is a bounded trial of summaries and reversible deletion, with
-mathematical usefulness still to be observed. See [validation](PROOF_GRAPH_VALIDATION.md).
+The study also includes a Markdown overview, TikZ diagram and reader annotations.

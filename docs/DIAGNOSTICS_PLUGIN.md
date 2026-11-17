@@ -138,4 +138,4 @@ that reporting did not mutate inspected payloads, distinguishing concurrent
 owner changes and separate report/control writes. Test a large history/store under
 explicit resource limits, restart scheduling without duplicate runs and plugin
 absence without loss of core protection. Native tests use isolated targets;
-no report trial creates, repairs or removes material in a live Zettelkasten.
+no report trial creates, repairs or removes material in live notes.

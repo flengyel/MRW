@@ -19,12 +19,7 @@ Current reading supports original files, retained source copies, Contents,
 scoped note links and backlinks, and Return. Markdown previews support note-local
 macros and explicit TikZ rendering; Reopen Document can restore an exact saved
 Markdown selection. PDF pages, preview scroll positions and notebook kernel
-state are not restored by MRW. See the [reading workflow](READING_OUTLINE_WORKFLOW.md)
-and [0.23.5 repair report](READING_REPAIRS.md).
-
-The document Problems interface was removed in 0.23.3. Its creation commands are
-absent, while earlier saved work and pending drafts remain readable. Opening or
-following notes stays ordinary reading; see [the removal report](DOCUMENT_PROBLEMS_REMOVAL.md).
+state are not restored by MRW. See the [reading workflow](READING_OUTLINE_WORKFLOW.md).
 
 The [design reconciliation register](DESIGN_RECONCILIATION.md) maps the complete
 evaluation to governing decisions, pending corrections and acceptance evidence.
@@ -55,29 +50,17 @@ the [reconciliation register](DESIGN_RECONCILIATION.md).
 
 ## Purpose
 
-MRW is a hub for doing and resuming mathematical research. It connects a
-question to documents, attempts, calculations, proofs, explanations, checking
-evidence, and the next action. Reading and learning belong within this work.
-Work can begin with an unfinished question or calculation, without a solution,
-a source passage, an AI response, or a comprehension exercise.
+MRW supports mathematical study and research, including AI-generated papers and
+Lean formalizations. It connects sources, notes, calculations and proofs;
+supports deliberate practice; and preserves unfinished work.
 
-A central use is reconstructing a compressed mathematical argument, including
-an LLM-generated solution: identify its assumptions, definitions, intermediate
-claims, cited results and gaps; develop explanations and examples; check what
-can be checked; and preserve the work so it can be continued. Reconstruction
-may discover that a step is false or remains unjustified. Fluency is not the
-criterion of success. This concerns the returned mathematical argument, not
-the model's hidden reasoning or unreturned search.
+Reconstruction identifies an argument's assumptions, definitions, intermediate
+claims and gaps. It can expose errors as well as supply missing steps.
+Explanations concern the returned mathematics, not hidden model reasoning.
 
-The original rapid-learning-console idea guides the interaction: present useful
-mathematics, let the reader work, offer pertinent tests of comprehension, and
-remember where work stopped. Speed is not a performance target. A feature is
-valuable when it contributes to that interaction or makes research resumable.
-
-Design first for Florian's mathematical work and tools. Keep the
-implementation usable with ordinary files and folders, without Obsidian,
-a particular note format, a model account, Lean, or SageMath as entry requirements.
-No multi-user product framework is needed for this sequence.
+Ordinary reading and existing files remain usable without Obsidian, a prescribed
+note format, an AI account, Lean or SageMath. Practice uses the mathematics under
+study rather than an unrelated sequence of exercises.
 
 ## Operational feedback and maintenance
 
@@ -147,7 +130,7 @@ guide reuse; they do not establish an installed or working MRW integration.
 | [Org/Babel](https://orgmode.org/guide/Working-with-Source-Code.html) | Source blocks, code editing/evaluation and results kept with surrounding prose, with export options. | Keep explanation, code, result and reference near enough to follow through existing documents and links. No required Org format, duplicated prose or second evaluator follows from this lesson. |
 
 The adopted directions and exclusions are recorded in the
-[reconciliation register](DESIGN_RECONCILIATION.md#reuse-decisions-and-exclusions).
+[reconciliation register](DESIGN_RECONCILIATION.md#reuse-and-boundaries).
 Preserve alternatives and failed approaches, inspectable input/method revisions,
 and explicit source/note/proof links. Neither a mandatory visual pipeline nor
 formal evidence for every ordinary note is required. Reuse ideas from other
@@ -241,7 +224,7 @@ resolve in MRW. The [reader requirement](ZOTERO_WORKFLOW.md#citation-rendering-i
 calls for an optional existing processor and scoped bibliography without note
 rewrites, duplicate library management or an automatic live Zotero query.
 
-First local API increment implemented after 0.23.12; see [workflow and limits](ZOTERO_WORKFLOW.md). The following scope governs the integration. Connect the existing Zotero
+See [workflow and limits](ZOTERO_WORKFLOW.md). Connect the existing Zotero
 library to mathematical study and the research lab notebook. Zotero continues
 to manage references; MRW links them to the passages, notes, calculations and
 proofs that use them.
@@ -403,10 +386,8 @@ commentary in those documents, connected by ordinary links. Reopening a note
 containing a solution displays that note, with the surrounding work preserved.
 VS Code owns recovery of unsaved buffers; MRW must not save or discard them to
 resume reading. Current Reopen Document and Return behavior is described in the
-[reading workflow](READING_OUTLINE_WORKFLOW.md). A
-[worked field-trace case](MATHEMATICS_WITH_NOTES.md) verifies an earlier
-Markdown selection through native history after closure and restart. Broader
-recovery remains planned.
+[reading workflow](READING_OUTLINE_WORKFLOW.md).
+PDF pages, preview scroll positions and live kernels are not restored.
 
 Do not introduce Research Question registration, a question-object hierarchy,
 a Research view or required title/summary/next-action fields as the default
@@ -455,46 +436,18 @@ Optional recall should concern the material currently relevant. **Keep for
 spaced review** enrolls a study question; reading a document does not.
 Preserve the FSRS, effort-report and assistance distinctions from [ACTIVE_STUDY_DESIGN](ACTIVE_STUDY_DESIGN.md).
 
-## Delivered work and possible next steps
+## Implementation status
 
-| Increment | Deliverable | Concrete completion evidence |
-| --- | --- | --- |
-| 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | The create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
-| 2. Documents and notes | Open in place, ordinary links, selected-folder note links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
-| 3. Document Problems | Withdrawn at the user’s request in 0.23.3 | Creation routes removed; earlier records and drafts remain readable. |
-| 4. Reading repairs, 0.23.5 | Delivered: exact heading/block WikiLinks, note macros, explicit TikZ rendering, progressive titles and saved Markdown selections | [Repair report and limits](READING_REPAIRS.md). |
-| 5. Broader resumption | Proposed: recover additional locations and unfinished work without question registration | Resume the same notes and drafts with their links and surrounding work preserved; add only a demonstrated missing recovery action. |
-| 6. Integrated reconstruction | Proposed: one compressed-solution session joins reading, explanation, an attempt, optional computation/checking and resumption | Trace one original passage through expansion, correction or remaining gap, recorded work and restart; use the study/history mechanisms. |
+The [design register](DESIGN_RECONCILIATION.md) records delivered capabilities
+and remaining work. Broader resumption and integrated argument reconstruction
+require further implementation. Add an interaction only for an observed
+obstacle; preserve ordinary files, links and unfinished work.
 
-Choose future changes from obstacles encountered in ordinary mathematical use;
-the table is not a queue of required features. Increments 1, 2 and 4 are
-delivered. Increment 3 is withdrawn and is not a prerequisite for research.
-General resumption and integrated reconstruction remain possible future work under the
-rules above. A demonstrated data-loss defect takes priority. Research resumption
-does not justify a question registry, storage rewrite, outline format or
-mandatory research dashboard. The separately requested optional diagnostics
-schedule/reporting has the bounded scope in [its design](DIAGNOSTICS_PLUGIN.md).
-
-Evaluate practical continuity, explanatory help and learning separately. Extend
-the local history for explicit research open/resume, document-link
-navigation, attempts, checking actions and failed operations, including software
-and input revisions. A model proposal, reader report, observed event and derived
-estimate remain distinguishable. Use the history to adapt the current session
-and choose later improvements. Time away and tab switching alone establish no
-cognitive-load or comprehension result. Do not create a second telemetry system.
-The requested [shared history and feature-use report](USAGE_HISTORY.md) extends
-that recorder with per-writer history in a configurable data directory, synchronized
-by the user's Syncthing/SyncTrayzor setup. The directory may be separate from,
-beneath, or identical to the Obsidian vault; a vault subdirectory is the preferred
-choice for this setup. Shared history is included in 0.23.13; its scope and limits
-are documented in the linked workflow. It does not synchronize live execution
-state or every MRW store.
-
-Use a supplied mathematical example and notes for read-only opening;
-new work has an explicit destination. Use disposable copies for destructive
-checks. Missing native-host access is a reported limit, not a requirement for
-a manual study procedure. Automated checks demonstrate mechanics; mathematical
-use demonstrates whether the software makes work easier to resume or understand.
+Assess practical continuity, explanation and learning separately. Observed
+actions, reader reports, AI assessments and derived estimates remain distinct.
+Time away and tab switching alone establish no cognitive-load or comprehension
+result. Use the [existing recorder](USAGE_HISTORY.md), not a second telemetry
+system.
 
 ## Interface guidance and scope
 

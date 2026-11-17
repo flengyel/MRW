@@ -1,19 +1,9 @@
 # Mathematical Research Workstation
 
-MRW helps mathematicians understand and work with mathematics, including
-AI-generated papers and AI-formalized Lean developments. It brings reading,
-source notes, calculations, proof work and deliberate practice into a VS Code
-workspace. Reconstruct an argument, attempt a proof step or example, examine
-feedback, correct the work and return to it later. MRW retains exact source
-passages, results and attempts; companion applications keep their editing and
-execution workflows.
-
-The [field-trace example](docs/examples/field-trace/trace.md) starts with a
-counterexample to a coefficient formula and proves the missing degree factor.
-[Work through an argument](docs/MATHEMATICS_WITH_NOTES.md) shows how ordinary
-linked notes, Return and saved calculations support that work.
-The [discriminant investigation](examples/notebook-provenance/README.md) connects
-two calculations, a failed construction and the missing integral-basis argument.
+MRW is a VS Code workstation for mathematical study and research, including
+AI-generated papers and Lean formalizations. It connects sources, notes,
+calculations and proofs, supports deliberate practice and preserves unfinished
+work.
 
 **MRW 0.23.45 — Resume linked calculations.**
 [Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix)
@@ -303,11 +293,9 @@ preserving source attribution, notes and unfinished work.
 
 [Documentation](docs/README.md) · [Research design](docs/RESEARCH_WORKSTATION_DESIGN.md) ·
 [Provenance](docs/PROVENANCE_DESIGN.md) · [Domain model](DOMAIN_MODEL.md) ·
-[UX specification](UX_SPEC.md) · [Changelog](CHANGELOG.md).
+[UX specification](UX_SPEC.md).
 [AGENTS.md](AGENTS.md), [CODEX_PLAN.md](CODEX_PLAN.md) and the
 [continuation](docs/CODEX_CONTINUATION.md) guide development.
-[Earlier extension details](docs/VS_CODE_DEVELOPMENT_HISTORY.md) include the
-separate Qt/CLI prototype.
 
 Copyright 2026 F. Lengyel. MRW code is [Apache-2.0](LICENSE); bundled dependencies
 retain their notices. Stacks fixtures retain [upstream attribution and

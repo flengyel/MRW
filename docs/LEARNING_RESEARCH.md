@@ -1,6 +1,7 @@
 # Learning, expertise, and cognitive-load evidence for MRW
 
-Reviewed 2026-11-05. This report informs the proposed [active study design](ACTIVE_STUDY_DESIGN.md). It does not report a learning experiment in MRW. Three parallel reviews covered learning, cognitive load/expertise, and CHREST; a fourth reviewed instrumentation.
+This research basis informs the [active study design](ACTIVE_STUDY_DESIGN.md).
+The cited studies do not establish a learning benefit for MRW itself.
 
 ## Findings that change the design
 
@@ -65,7 +66,7 @@ effect. Core records lightweight events; an optional
 [diagnostics plugin](DIAGNOSTICS_PLUGIN.md) analyzes use and reports data health.
 Neither adoption statistics nor integrity checks measure understanding.
 
-The user explicitly requests detailed tracking of what works and what does not. Record relevant MRW actions and results with software/policy versions, including navigation and failures, alongside sparse self-reports. Retain evidence for both successful and unsuccessful interventions.
+Record relevant MRW actions and results with software/policy versions, including navigation and failures, alongside sparse self-reports. Retain evidence for both successful and unsuccessful interventions.
 
 Immediate decisions should use the current task, explicit outcomes and preferences. Later review should examine delayed retrieval, assistance burden, source-navigation effort, interruptions, errors and resumption. Compare comparable tasks and expose missing observations. A newer version receiving easier tasks cannot be credited with improved learning merely from its aggregate success rate.
 

@@ -155,9 +155,5 @@ or shut down the shared SagePod container. Save the new outputs explicitly.
 Record the Sage/kernel versions and any external data or packages needed.
 Opening/restoring MRW starts no container and runs no notebook cells.
 
-The delivered example and the distinction between visible UI checks and
-authenticated API checks are recorded in
-[the validation report](SAGEPOD_NOTEBOOK_VALIDATION.md). Mathematical usefulness
-requires evidence from actual study; this arithmetic demonstration leaves it
-unassessed. Direct notebook-cell assistance, automatic response insertion,
-automatic execution and kernel-memory restoration remain outside MRW.
+Direct notebook-cell assistance, automatic response insertion, automatic
+execution and kernel-memory restoration remain outside MRW.

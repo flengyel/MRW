@@ -1,9 +1,9 @@
 # Vision
 
-MRW should help a mathematician understand, use and develop mathematics across
-papers, notes, calculations and proofs. This includes AI-generated manuscripts
-and AI-formalized Lean code. The workstation should make that material easier
-to question, explain, practise and return to.
+MRW supports mathematical study and research, including the understanding of
+AI-generated papers and Lean formalizations. Its purposes are to connect
+sources, notes, calculations and proofs, support deliberate practice and
+preserve unfinished work.
 
 ## Mathematical understanding
 

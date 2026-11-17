@@ -6,9 +6,8 @@ retained copies do not authorize direct database or attachment-store writes.
 Reference synchronization is a design responsibility; the current local API
 workflow and its limits are specified below.
 
-Included in MRW 0.23.13. [Delivery checks](ZOTERO_DELIVERY.md) distinguish live API
-observations from native desktop acceptance. Zotero manages the library; MRW reads selected references and
-retains them for use in ordinary notes. No Study or question form is required.
+MRW reads selected references and retains them for use in ordinary notes.
+No study or question form is required.
 
 ## Connect and find a reference
 
@@ -153,13 +152,7 @@ folders are watched separately from the workspace.
 
 Reader annotations use the same selected source and processor in the saved
 source reader. Their text and attribution remain exact. Safe Markdown links
-remain links; no automatic source-to-Zettel association is created.
-
-The maintainer's unchanged Number Fields note now displays **(Marcus 2018)** for
-`[@marcusNumberFields2018]` through Windows Zotero / Better BibTeX. Its local
-export lacks that key; live lookup resolves the selected item. Native WSL preview
-and dirty-buffer preservation were observed in an isolated window. See the
-[repair and verification account](CITATION_ZOTERO_REPAIR.md).
+remain links; no note association is created automatically.
 
 The adapter reuses Pandoc parsing and CSL formatting in VS Code's existing
 preview. API contracts: [Better BibTeX JSON-RPC](https://retorque.re/zotero-better-bibtex/exporting/json-rpc/),

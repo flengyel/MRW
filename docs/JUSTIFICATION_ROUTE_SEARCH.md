@@ -142,10 +142,9 @@ and 64 MiB; a lineage has at most 16 contexts. Reaching a limit preserves
 existing work and reports it. No record is discarded or an admission restored.
 These bounds do not establish completeness or a worst-case performance proof.
 
-The remaining central work is direct, reviewed assembly from existing notes
-and retained grounds, broader inference rules and comparison beyond the
-bounded Application search. General Hilbert/CS search, arbitrary sum
-construction and the deferred paper–Lean correspondence review remain open.
+General Hilbert/CS search, arbitrary sum construction and automatic paper–Lean
+correspondence review remain outside the current search. Direct assembly from
+notes and retained grounds uses the source-selection workflow below.
 
 ## Prepare grounds from notes
 

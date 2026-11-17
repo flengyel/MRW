@@ -178,7 +178,7 @@ is not implemented. [Notebook workflow](../docs/NOTEBOOK_RESULTS.md).
 Ordinary notes, notebooks and Lean files remain files owned by their editors.
 MRW stores source captures, annotations, API investigation records and immutable
 justification results separately. Copying a note link does not copy its private
-target. Source-note and Zettelkasten-note associations preserve each work's
+target. Source-note and linked-note associations preserve each work's
 text and attribution independently.
 
 History records MRW operations, versions and outcomes rather than unrelated
@@ -231,15 +231,44 @@ Original-file edits do not replace that revision or its reader notes.
 
 ### Retained-source references
 
-Exact citations bind the source, revision and passage. Changing a current
-locator or note association does not redirect an earlier citation.
-[Persistence details](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#outline-persistence-boundary).
+Retained source bytes and supplied artifacts are immutable. Reader selections,
+annotations, bibliography and visibility are mutable, revision-checked state.
+Exact citations bind the store/project scope, source revision and passage;
+changing a current locator, annotation or association does not redirect them.
+Changed or missing originals leave retained text accessible. Changed region
+associations open the original pinned range without guessing a replacement.
+
+Annotation forms require explicit Save. Newer typing survives an older save's
+completion, and failed saves preserve the draft. Live forms are not ordinary
+VS Code documents: save or copy them before closing/reloading. Failed or
+uncertain private publication blocks further private writes until recovery;
+it must not be reported as a successful save. Supported store moves preserve
+identities and exact source references under the
+[storage contract](../docs/ARTIFACT_STORAGE.md). Copying Markdown alone transfers
+neither private outlines nor their retained sources.
 
 ### Investigation persistence boundary
 
-The API investigation retains exact parent/child response bindings and an
-unfinished summary. It does not own ordinary editor buffers.
-[Investigation details](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#investigation-persistence-boundary).
+An API investigation holds one initial completed response, one bounded child
+request and separate human task text. Its private state pins exact record
+identities, response digests and selected spans; the child reservation is saved
+before Send. It imports no Qt workspace, editor buffer or recovery state.
+
+**Resume Saved Investigation** validates those bindings and restores the saved
+comparison without transmitting or retrying. An interrupted request is matched
+only against its reserved fingerprint. Missing or changed records are reported
+while retaining the human summary. Accepted task edits remain in memory until
+**Save Human Task Summary** or a requested handoff preserves them.
+
+**End Investigation…** offers insertion of a handoff and ending, ending without
+insertion, or cancellation. Successful ending clears only the active pointer;
+immutable responses and projections remain. Handoff insertion is an ordinary
+unsaved editor edit with Undo. If ending fails, the active state and any inserted
+text remain without a retry, duplicate insertion or automatic undo. Uncertain
+private publication blocks further writes until recovery; preserve unsaved
+human text in an ordinary note first. The released slot can hold another
+independent investigation. Branching, simultaneous slots, child-of-child
+continuation and automatic retry are outside this workflow.
 
 ### Obsidian companion notes
 
@@ -266,18 +295,9 @@ compiled checker, Qt, TikZ or native host report those prerequisites separately.
 The guarded native preparer is `vscode/scripts/prepare-native-host.py`.
 [Native isolation](../docs/NATIVE_TEST_ISOLATION.md).
 
-<a id="reproduce-the-bounded-outline-host-checks"></a>
+## Licensing
 
-### Reproduce the outline host checks
-
-Earlier checks retain their [source and reproduction steps](../docs/VS_CODE_DEVELOPMENT_HISTORY.md#reproduce-the-bounded-outline-host-checks).
-Use each release's report for the behavior observed in that version.
-
-## Development records and notices
-
-[Development records](../docs/VS_CODE_DEVELOPMENT_HISTORY.md) and the
-[CHANGELOG](../CHANGELOG.md) retain earlier implementation and host evidence,
-including the separate Qt/CLI prototype. [Contributing](../CONTRIBUTING.md).
+[Contributing](../CONTRIBUTING.md) describes development requirements.
 
 The package includes MRW's [Apache-2.0 license](../LICENSE) and notices for
 KaTeX, markdown-it, ts-fsrs and Quiver. Source material retains its own license.
