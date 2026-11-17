@@ -97,6 +97,8 @@ class ModelProjectionTests(unittest.TestCase):
 
     def test_finalized_call_is_strictly_validated_and_deeply_frozen(self) -> None:
         self.assertEqual(self.call.id, self.source["id"])
+        self.assertEqual(self.call.document["target"], self.source["target"])
+        self.assertEqual(self.call.document["purpose"], "strategic_hint")
         self.assertEqual(self.call.raw_response, self.source["raw_response"])
         self.assertEqual(
             self.call.raw_response_digest,
@@ -109,6 +111,25 @@ class ModelProjectionTests(unittest.TestCase):
         self.assertIsInstance(effective_input, MappingProxyType)
         with self.assertRaises(TypeError):
             effective_input["messages"] = ()
+
+    def test_passage_target_keeps_its_revision_through_response_extraction(self) -> None:
+        document = model_call_document()
+        document["target"] = {
+            "kind": "VersionedSpan", "id": "paper:fixture#scalar-3.0-3.12",
+            "revision": sha256(b"exact source revision").hexdigest(),
+        }
+        document["purpose"] = "general_question"
+        call = parse_finalized_model_call(encode(document))
+        representation = extract_lossless_representation(
+            call, representation_id="passage-explanation", version="1",
+            subject=call.document["target"], kind="informal_explanation",
+            start_byte=self.start, end_byte=self.end,
+        )
+        self.assertEqual(representation.document["subject"], document["target"])
+        self.assertEqual(representation.document["content"], self.selected)
+        document["target"].pop("revision")
+        with self.assertRaisesRegex(ModelProjectionError, "target.revision"):
+            parse_finalized_model_call(encode(document))
 
     def test_only_completed_finalized_exact_response_is_accepted(self) -> None:
         mutations = (

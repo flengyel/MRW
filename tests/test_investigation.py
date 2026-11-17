@@ -153,6 +153,9 @@ class InvestigationControllerTests(unittest.TestCase):
         )
         request = prepared.operation.request
         self.assertEqual(request["in_reply_to"], parent.call.id)
+        self.assertEqual(request["target"], parent.call.document["target"])
+        self.assertEqual(request["target"]["kind"], "VersionedSpan")
+        self.assertEqual(request["purpose"], "general_question")
         self.assertEqual(request["context_refs"][0], {
             "kind": "VersionedSpan",
             "id": (f"{parent.call.id}#response-utf8-"

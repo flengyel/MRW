@@ -13,6 +13,7 @@ METADATA_PREVIEW_SCALARS = 120
 DIAGNOSTIC_PREVIEW_SCALARS = 240
 MAX_INDEX_OUTPUT_CHARACTERS = 32 * 1024
 PURPOSE_TO_KIND = {
+    "general_question": "informal_explanation",
     "definition_explanation": "informal_explanation",
     "result_explanation": "informal_explanation",
     "source_suggestion": "informal_explanation",

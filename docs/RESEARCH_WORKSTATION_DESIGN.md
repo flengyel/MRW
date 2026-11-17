@@ -98,80 +98,36 @@ the lifecycle controls without restoring a study tree or a renamed registration
 system. Fleeting notes and notes intended for later review are ordinary documents.
 The sidebar provides Contents and Commands; the Lean tutorial remains separate.
 
-## Related systems and reuse
+<a id="related-systems-and-reuse"></a>
 
-MRW is experimenting with workflows that combine continuing mathematical
-study, a research lab notebook, linked Markdown notes, computation
-and formal proofs. The combination is a design direction, not a claim that
-comparable systems do not exist or that the complete workflow is implemented.
+## Related research
 
-The links below were checked on 2026-11-10. Documented capabilities and proposed
-uses in MRW are separate; this is not a hands-on evaluation of these systems.
+| System | Emphasis |
+| --- | --- |
+| [Eigenius](https://eigenius.io/docs/platform/justification-logic/) | Typed evidence and checkable grounds for research claims. Its [justification implementation](JUSTIFICATION_LOGIC_EXPERIMENT.md#related-implementation) is relevant to MRW's separation of provenance, admitted reasons and checked derivations. |
+| [Axiom Math](https://axiommath.ai/mission/) | Pursues mathematical discovery through conjecturing, proof search and translation between informal mathematics and Lean, including explanations of formal proofs. |
+| [Google AI co-scientist](https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/) | Generates, evaluates and refines scientific hypotheses and research proposals. |
+| [Kosmos](https://advances.edisonscientific.com/research/announcing-kosmos/) | Combines literature reading and computational analysis, tracing report conclusions to source passages and code. |
 
-| System | Documented overlap | What MRW should investigate or reuse |
-| --- | --- | --- |
-| [Zotero](https://www.zotero.org/support/quick_start_guide) | Bibliographic references, attachments, notes and citation formatting. | Connect the existing library to MRW source reading, notes and citations; reuse its reference-management functions. |
-| [CoCalc](https://doc.cocalc.com/) | Projects combining SageMath, Jupyter, Markdown, LaTeX, AI assistance and course tools. | A [proposed adapter](COCALC_ADAPTER.md) would open selected projects/files and retain exported notebook results. CoCalc owns collaborative editing and execution; no second hosted environment. |
-| [Wolfram Notebooks](https://www.wolfram.com/notebooks/) | Documents combining text, executable code, results and interactive content. | Link calculations and notebooks to research notes, preserving available inputs, outputs and execution context. |
-| [Proofscape / PISE](https://docs.proofscape.org/en/stable/ref/library/dc.html) | A mathematical study environment connecting proof charts, annotations and source documents. | Study its [bidirectional linking](https://www.proofscape.org/en/stable/tutorials/users/linking.html), proof expansion and comparison before adding equivalent navigation. |
-| [GNU TeXmacs](https://www.texmacs.org/tmweb/home/welcome.en.html) | Mathematical writing, graphics and interfaces to computational systems. | Learn from its document-and-computation interaction; use existing editors and computational tools where they fit. |
-| [MathHub](https://kwarc.info/systems/mathhub/), [sTeX and FLAMS](https://kwarc.info/systems/sTeX/) | Mathematical archives, semantic document navigation and active course materials. | Investigate reusable source representations, concept links and document services. |
-| [ALeA](https://www.voll-ki.fau.de/ssfc/) | Adaptive learning from annotated course material; [published work](https://kwarc.info/people/dmueller/pubs/ws_alea_voll-ki.pdf) describes flashcards, quizzes and guided tours. | Examine its learning objects and prerequisite navigation before designing new study machinery. |
-| [Eigenius](https://eigenius.io/docs/platform/justification-logic/) | An application of Artemov's justification logic to scientific records, with source-linked evidence, justification composition and Lean proof checking. | Compare its evidence representation and the distinction between checking a justification and proving its conclusion; see the [related implementation](JUSTIFICATION_LOGIC_EXPERIMENT.md#related-implementation). |
-| [VisTrails](https://www.vistrails.org/index.php/Main_Page) | Workflow versions, execution provenance, annotations and comparison of alternative results. | Use its [provenance design](https://aosabook.org/en/v1/vistrails.html) as a reference for retaining how an investigation developed. The original project reports no maintenance since 2018. |
+MRW emphasizes studying the mathematics, inspecting grounds for using results
+and continuing unfinished work.
 
-The following additional sources were checked on 2026-11-14. These comparisons
-guide reuse; they do not establish an installed or working MRW integration.
+## Optional plugins and integrations
 
-| System | Documented overlap | MRW decision and boundary |
-| --- | --- | --- |
-| [Jupyter AI](https://jupyter-ai.readthedocs.io/en/latest/users/chat/guide.html) | Attach selected notebook material to a conversation; act on suggested code through explicit controls. Its [agent workflow](https://jupyter-ai.readthedocs.io/en/latest/users/terminal-agents/workflows.html) describes reviewing notebook changes. | Make context and proposed edits inspectable beside the work, using existing companions. Do not duplicate its chat interface or assume JupyterLab facilities are a VS Code API. |
-| [nbdime](https://nbdime.readthedocs.io/en/stable/cli.html) | Notebook-aware comparison of sources, outputs, metadata and attachments, including a rich diff viewer. | MRW uses native notebook viewing and diff with Jupyter, with a transcript fallback. Rich-output visual verification remains incomplete; see [notebook results](NOTEBOOK_RESULTS.md#viewing-and-comparison). |
-| [Org/Babel](https://orgmode.org/guide/Working-with-Source-Code.html) | Source blocks, code editing/evaluation and results kept with surrounding prose, with export options. | Keep explanation, code, result and reference near enough to follow through existing documents and links. No required Org format, duplicated prose or second evaluator follows from this lesson. |
+| Integration | Current role |
+| --- | --- |
+| [Obsidian](OBSIDIAN_WORKFLOW.md) | Linked notes and externally owned note creation. |
+| [Zotero](ZOTERO_WORKFLOW.md) | Read-only reference and attachment access; citation rendering. |
+| [Lean](LEAN_STUDY_WORKFLOW.md) | Native proof interaction and optional [local lesson packs](LEAN_LESSON_PACKS.md). |
+| [Jupyter and SagePod](SAGEPOD_NOTEBOOK_WORKFLOW.md) | Notebook execution, with MRW capture, comparison and export of retained results. |
+| [Source plugins](SOURCE_PLUGINS.md) | Explicit imports from Stacks Project, Kerodon and nLab. |
+| [Diagnostics companion](DIAGNOSTICS_PLUGIN.md) | Optional local feature-use and integrity reports. |
 
-The adopted directions and exclusions are recorded in the
-[reconciliation register](DESIGN_RECONCILIATION.md#reuse-and-boundaries).
-Preserve alternatives and failed approaches, inspectable input/method revisions,
-and explicit source/note/proof links. Neither a mandatory visual pipeline nor
-formal evidence for every ordinary note is required. Reuse ideas from other
-systems without inferring that MRW needs their whole runtime or user interface.
-
-MathHub's ecosystem includes learning support, particularly through active
-course materials and the related ALeA work. The reviewed sources do not
-establish the complete combination sought for MRW: personal linked notes,
-continuing study, a research lab notebook, repository notes and Lean proofs,
-and external computation in one resumable workflow. This is a distinction of
-documented scope and intended use, not evidence that MathHub cannot be extended
-or that MRW is unique.
-
-For each proposed feature, first check these systems for an existing capability,
-interface or export format. Prefer interoperability or component reuse where it
-meets the task. Record the remaining gap with a concrete research or study
-example before adding another editor, kernel manager, scheduler or document
-format. A link here does not make a system a required dependency.
-
-[Sagebrush](https://sagebrush.space/) was reviewed separately on 2026-11-17;
-[the assessment below](#sagebrush) covers its notebook interchange, reactive
-execution and computational evidence.
-
-### Current support and proposed integrations
-
-The [source plugins](SOURCE_PLUGINS.md) for Stacks Project, Kerodon and nLab,
-[optional source study](ACTIVE_STUDY_WORKFLOW.md), and the first
-[Lean study unit](LEAN_STUDY_WORKFLOW.md) with
-[local lesson packs](LEAN_LESSON_PACKS.md) are implemented. Notebook computation
-currently uses the separate [SagePod/Jupyter workflow](SAGEPOD_NOTEBOOK_WORKFLOW.md).
-
-Zotero’s first local reference/attachment workflow is implemented; its scope is
-below. Repository study imports, CoCalc and Wolfram interoperability plugins, a
-data-analysis plugin and broader lab-notebook provenance remain unimplemented.
-Clowder and PreTeXt source adapters also remain proposed. These are distinct
-from the delivered source-import and local lesson-pack interfaces.
-
-W3C PROV is the common model for the proposed lab notebook; see
-[the provenance design](PROVENANCE_DESIGN.md). VisTrails supplies ideas for
-workflow evolution and result comparison. Existing libraries, formats and
-interfaces should be assessed before implementing equivalent mechanisms.
+CoCalc, Wolfram interoperability, repository study imports and broader
+lab-notebook provenance remain proposed. Clowder and PreTeXt source adapters
+also remain proposed. The [provenance design](PROVENANCE_DESIGN.md) defines the
+common W3C PROV vocabulary for new integrations. External systems retain their
+editors, execution environments and managed data.
 
 ### CoCalc adapter
 
@@ -199,22 +155,6 @@ the existing capture, comparison, linking and Return workflow.
 | Delegate execution explicitly | The [cell-execution guide](https://sagebrush.space/articles/notebook/01-how-cells-run) describes downstream reruns, an edit-and-run agent operation, and recomputation on history reversion. MRW reading, capture, comparison and resumption must stay separate from those operations. A future adapter must expose their actual execution scope and respect the owner's policy. |
 | Distinguish different kinds of evidence | The [engine README](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/README.md) distinguishes exact, conditional and heuristic results; some class-group certification is conditional on GRH. Preserve the algorithm, version, assumptions and available certificate. A producer's label or agreement with SageMath does not become a Lean check, unconditional proof or automatic premise admission. |
 | Keep authority with the owning application | File, agent and execution grants remain Sagebrush's. Importing a notebook grants no additional access. Its [security model](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/SECURITY-MODEL.md) separates intended controls from incomplete implementation; an MRW adapter would need its own tested boundary rather than inheriting a general assurance. |
-
-A useful bounded comparison is the existing
-[quadratic-discriminant investigation](../examples/notebook-provenance/README.md):
-evaluate the two trace determinants in both Sagebrush and SagePod, preserve
-their basis choices and exact outputs, compare them, and reopen without a run.
-This would test the benefit of a second implementation before adding an MCP
-or native adapter. No such execution trial or adapter is delivered by this review.
-
-The code/format review uses upstream revision
-`4bcb319294e73be1fe67c602ea7a92b6d4933eb6`, checked on 2026-11-17.
-One [upstream number-field notebook](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/examples/notebook/sage-algebraic-number-theory/main.ipynb)
-(13 cells, 12 saved outputs) passed MRW's existing capture/read path with
-byte-for-byte recovery in a disposable store. It correctly retained
-**saved outputs, execution unknown**. This checks one file, not browser export,
-native rendering, execution or general API compatibility. Its kernelspec says
-`sagemath`; that name alone cannot establish which engine produced the output.
 
 ### Zotero integration
 

@@ -1,145 +1,43 @@
 # Domain model
 
-[Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md)
-governs optional integrations: creation and execution stay with the responsible
-system; MRW supports explicit delegation, native editing, retained references and
-coordinated synchronization. Current implementation limits remain explicit.
+MRW connects exact source passages, attributed mathematical work and records of
+checking, study and justification. Ordinary documents remain in their native
+formats. Reading or asking about a passage requires no mathematical-object,
+problem or study registration.
 
-This design defines entities and invariants, independently of storage technology,
-schema syntax or GUI framework. It accompanies the [vision](VISION.md),
-[UX specification](UX_SPEC.md) and [implementation plan](CODEX_PLAN.md).
+The shared model consists of scoped identities, immutable versions and captures,
+exact references, associations, provenance and observed outcomes. Mathematical
+objects and relations form an optional interpretation layer. Study and
+justification records are created only by their respective workflows.
 
-Ordinary documents and links are the starting point for current MRW use.
-The entities below describe mathematical content and optional retained records;
-they do not require a second representation of every question or solution.
-Opening a note creates no problem or study record. Questions and solutions may
-remain in ordinary files; retained records are optional tools for the selected
-mathematical work.
+The schemas below describe semantic requirements, not a common serialized format
+or a migration of existing records. The [design register](docs/DESIGN_RECONCILIATION.md)
+identifies implemented capabilities. The [architecture](docs/ARCHITECTURE.md),
+[UX specification](UX_SPEC.md) and [integration contract](docs/INTEGRATION_BOUNDARIES.md)
+define service and editor ownership.
 
-VS Code is the active frontend; the standalone Qt application is another
-client of the same independent services. Host text documents, undo stacks, and
-document recovery are editor responsibilities, not new domain records. Research
-records retain their identities and evidence boundaries across frontends.
-This model includes entities without an implemented VS Code command; consult
-the [README](README.md) and [design register](docs/DESIGN_RECONCILIATION.md)
-for supported behavior and remaining work.
+## Identity and exact references
 
-The deployment direction retains one extension over the Python core
-in the workspace environment, through standard local Linux, WSL2 or Remote SSH
-to Linux hosts. The backend requires Python 3.11+. Windows may supply the editor
-UI while Linux owns backend execution and filesystem operations; native Windows
-backend portability is deferred. Scoped installed-VSIX validation covers WSL
-Debian and Remote SSH to a Raspberry Pi 5 running Debian 12 ARM64; it does not
-establish every Linux SSH host or Raspberry Pi OS/ARM configuration. Lean, SageMath,
-containers and providers are optional integrations, not prerequisites for
-ordinary reading or outlining. These deployment choices preserve source
-identity, provenance and publication protections; they add no remote-access
-service, TypeScript rewrite, data migration or new domain entity.
+Logical identity, content revision, capture identity and current location are
+separate. An exact reference names its scoped source or record identity and
+immutable version, with the retained content digest and passage range where
+applicable. A moving URL, path, label or branch name alone is insufficient.
+A source revision includes the exact file or captured bytes; an upstream edition
+or repository commit alone does not identify uncommitted changes.
 
-## Operational observations and diagnostic findings
+Retained source/capture versions, submitted work snapshots and attestations are
+immutable while retained. Editing creates
+a successor version; associations with current locations can change separately.
+An attestation stays bound to its original input. Availability and staleness
+relative to current work are derived, not changes to the earlier result.
+Explicit deletion follows the [study lifecycle](docs/STUDY_LIFECYCLE.md) and
+[saved-source contract](docs/SAVED_SOURCE_TRASH.md).
 
-[Maintenance dispositions](docs/CODEX_MAINTENANCE.md) relate observed findings to
-design requirements and verified outcomes. They are development records, not
-new research-question objects, grades or mathematical evidence.
-
-[Feature-use observations](docs/OPERATIONAL_USAGE.md) describe actions and their
-coverage; they are not mathematical claims or learning assessments. External
-operation state remains qualified by its observing subsystem. A feature ID,
-user invocation and child operation are distinct identities.
-
-The optional [diagnostics companion](docs/DIAGNOSTICS_PLUGIN.md) derives findings
-from scoped checks. Each finding identifies the object, check and observation;
-an unavailable target or unperformed check is not corruption. Reports do not
-change source identity, retention, ownership or mathematical status. Derived
-aggregates and reports are separate from authoritative history and research
-artifacts; no duplicate research schema is required.
-
-## Provenance and study lifecycle
-
-[W3C PROV](docs/PROVENANCE_DESIGN.md) governs the common provenance vocabulary for
-new integrations: versioned artifacts are entities, observed operations are
-activities, and responsible people/software are agents. Reuse existing exact
-source and artifact identities. Keep provenance, checking, premise admission,
-logical consequence and learning assessment separate.
-
-Study lifecycle state is distinct from mathematical content and recall state:
-active, archived, trashed, or permanently deleted. Archive suspends selection
-and review while retaining work; permanent deletion removes the selected
-study-owned data. Shared sources, other studies and ordinary files remain
-separate. Follow [the lifecycle contract](docs/ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies).
-The saved-study lifecycle is implemented through additive markers beside the
-existing private records; existing study content is not migrated.
-
-## Scope
-
-The implemented Obsidian companion uses small private mutable navigation
-associations, separate from source outlines, retained quotations, attributed
-annotations and all warrant records. Each association names an exact
-scoped outline/region reference, an Obsidian open URL and a short label.
-It stores no note prose or vault copy. Replacing/removing the association does
-not alter either endpoint. A note keeps its immutable note ID and editable
-title; no MRW conversion is required. Workspace/remote routing is separate from
-stable target identity. A navigation link establishes no
-dependency, verification or human judgment. See
-[the companion contract](docs/OBSIDIAN_WORKFLOW.md).
-
-Saved artifact placement is separate from mathematical identity. The extension's
-saved-work store has persistent store/project UUIDs, a complete content-hash manifest
-and verified compatibility mappings for earlier path-derived reference scopes.
-A host-local binding maps that identity to one local directory and project
-folders. Relocation preserves immutable record bytes, source provenance, spans
-and evidence distinctions. Mutable aliases resolve required absolute record
-locators; they do not amend earlier evidence. A copied store becomes writable
-only after complete validation and explicit local adoption. Journals, locks and
-runtime/UI state remain host-local. This protocol handles navigation and
-persistence; it does not confer mathematical status or provide distributed
-transactions or synchronization. See [the storage contract](docs/ARTIFACT_STORAGE.md).
-
-For a body of mathematics under study, the model must represent:
-
-- the structure of the subject, as sources present it;
-- problems, statements, proofs, explanations, and examples, whether human- or
-  AI-generated, and the sources in which they occur;
-- bounded model calls made from active mathematical work, including the exact
-  input sent, model identity, raw response, and extracted proposals;
-- proof attempts, calculations, diagrams, examples, counterexamples, code, and
-  other mathematical work produced during study;
-- formal statements, formal proofs, and mechanically generated facts when they
-  are available;
-- what has been checked, by what method, and at what revision;
-- how explicitly admitted reasons compose in a checked non-factive
-  justification derivation when an active task requires that account;
-- observed task events and review state generated from those events.
-
-## Non-goals
-
-- Not a Lean documentation browser. Formal artifacts are one optional
-  representation class among several.
-- Not a proof assistant. Nothing here elaborates, checks, or rewrites
-  mathematical or Lean proofs. The integral justification-logic subsystem is
-  implemented in Lean and checks only derivations in its explicit object
-  language; invoking that checker is task-dependent.
-- Not a single-source system, and not a system whose objects originate in a
-  formal development.
-- Not a questionnaire about a mathematician's internal state.
-- Not a manually maintained classification of competence.
-- Not a general chat client, prompt manager, multi-provider orchestration layer,
-  or autonomous-agent system.
-- Not a requirement to encode all mathematical reasoning in logic, and not an
-  initial implementation of factive justification, introspection,
-  Justification Awareness Models, Fitting semantics, or epistemic scores.
-
-## Orthogonal information classes
-
-Source content, mathematical work, model-call records, provenance, verification,
-premise admission, justification derivability, task evidence, and generated
-review state are distinct. The model must not infer one directly from another:
-a model response is neither source content nor verification, provenance is not
-admission, verification is not a formal--informal bridge, a checked derivation
-does not verify the truth of its conclusion, verification is not retention, and
-a recorded task event is not a claim about an internal mental state.
-
----
+[Source identifiers](docs/SOURCE_IDENTIFIERS.md) define qualified published IDs,
+private scope and retained passage references. The [storage contract](docs/ARTIFACT_STORAGE.md)
+defines placement and relocation. [W3C PROV mappings](docs/PROVENANCE_DESIGN.md)
+relate artifacts, operations and agents. These contracts preserve the distinction
+between provenance, checking, admission, contextual derivability and study outcomes.
 
 ## Subject structure
 
@@ -154,9 +52,8 @@ Source
     id
     kind            manuscript | formal_development | expository_corpus
                     | textbook | problem_collection | paper | external
-    name            e.g. rs_Appendix_A.tex, Categorical_Rice_Shapiro/Lean,
-                    Stacks Project, Kerodon, problem-centered textbook
-    revision        commit, version, or edition
+    name            descriptive title
+    revision        exact retained content revision; upstream version if known
 ```
 
 ### SourceNode
@@ -183,10 +80,10 @@ ingestion.
 
 ```
 SourceOccurrence
-    source
+    source          exact Source revision
     node
     locator         latex_label | declaration_name | problem_number
-                    | tag | url | anchor
+                    | tag | url | anchor | retained_region_uuid
     span            optional VersionedSpan
     raw             the text or declaration as it appears
 ```
@@ -214,8 +111,9 @@ relations are added only when active mathematical work requires them.
 
 ### VersionedSpan
 
-Line and column extents bound to a source revision. Spans are indispensable for
-highlighting, citation, tactic-step display, and jumping into an editor.
+A half-open range in an exact retained source revision. Lines are one-based;
+columns are zero-based Unicode scalar offsets. Host UTF-16 positions are
+converted at the editor boundary.
 
 ```
 VersionedSpan
@@ -224,29 +122,35 @@ VersionedSpan
     end_line, end_col
 ```
 
-**Invariant A — identity is not positional.** A span may locate an occurrence
-and never identifies one. Stable locators identify occurrences: `\label`
-targets, declaration names, problem numbers, and corpus tags. A correspondence
-keyed only to line numbers can become stale after edits. Bind each span to its
-source revision and use stable locators for correspondence across revisions.
+**Invariant A — identity is not positional.** A retained occurrence reference
+includes its scoped source identity, immutable revision and source-local locator.
+A stable label identifies an item across revisions, not unchanged mathematical
+content. Spans locate passages in pinned revisions; correspondence across
+revisions requires an explicit recorded relation.
 
 ---
 
-## Objects and relations
+## Optional mathematical interpretation
+
+These groupings and relations support selected mathematical work. They are not
+prerequisites for source acquisition, navigation, assistance or interoperability.
 
 ### MathematicalObject
 
-A theorem, definition, lemma, concept, construction, or worked example treated
-as one object across explicitly unified source occurrences. Ingestion does not
-establish such unification.
+A local grouping of occurrences concerning a theorem, definition, lemma, concept,
+construction or example. Membership alone asserts no equivalence. Each asserted
+identification or formalization has an explicit `Correspondence` with exact
+endpoints, attribution and basis. Revising a grouping preserves its earlier version.
 
 ```
 MathematicalObject
-    id
+    id, revision
     kind            theorem | definition | lemma | concept | example
                     | construction
     display_name
-    occurrences     [SourceOccurrence]      -- unification is a judgment
+    occurrences     [exact SourceOccurrence references]
+    correspondences [Correspondence]        -- stated relations among occurrences
+    provenance      Provenance
     representations [Representation]
     formal_facts    [FormalFact]            -- generated, read-only, possibly empty
     relations       [MathematicalRelation]
@@ -262,7 +166,7 @@ not a registration requirement for questions in ordinary notes.
 
 ```
 Problem
-    id
+    id, revision
     display_name
     occurrences     [SourceOccurrence]
     representations [Representation]
@@ -292,6 +196,8 @@ The first six relation kinds describe what the problem asks; they do not attest
 that any attempt succeeded. `prerequisite_for` relates one problem to another.
 No relation is inferred solely from source order or matching terminology.
 
+## Work and task evidence
+
 ### WorkArtifact
 
 Mathematics produced while studying, researching, reconstructing, or teaching.
@@ -300,49 +206,67 @@ state.
 
 ```
 WorkArtifact
-    id
-    subjects          [Problem | MathematicalObject]
+    id, revision
+    subjects          [exact source, problem or mathematical-object references]
     kind              proof_attempt | calculation | diagram | example
                       | counterexample | code | exposition
     content
+    content_hash      SHA-256 of the immutable content
     sources_consulted [SourceOccurrence]
     assistance_used   [Representation]
     provenance        Provenance
     supersedes        optional WorkArtifact
 ```
 
-A false start remains a work artifact. Whether an artifact is correct is a
-separate verification question.
+A retained work artifact is an immutable version. A false start remains work;
+its correctness is a separate verification question. A source passage used as
+context keeps its source identity rather than being relabelled as produced work.
 
 ### TaskEvidence
 
-An observed event arising from work on a problem, review item, or mathematical
-object.
+An immutable, attributed event from work on an exact task revision. The existing
+[study contract](docs/ACTIVE_STUDY_DESIGN.md#minimal-question-and-attempt-records)
+defines its study-specific payloads and persistence.
 
 ```
 TaskEvidence
-    task              Problem | ReviewItem | MathematicalObject
-    artifact          optional WorkArtifact
-    event             started | resumed | artifact_saved | source_consulted
-                      | assistance_requested | proposal_used
-                      | proposal_corrected | proposal_rejected
-                      | proposal_abandoned | premise_admitted
-                      | premise_withdrawn | premise_replaced
-                      | warrant_inspected | check_requested | completed
-    assistance_kind   optional definition_explanation | result_explanation
-                      | source_suggestion | strategic_hint
-                      | intermediate_lemma | proof_outline | critique
-                      | worked_solution | computation
-    related           optional SourceOccurrence | Representation | Verification
-                      | ModelCall | PremiseAdmission | JustificationContext
-                      | JustificationDerivation
-    recorded_by       person | system | tool
+    id
+    task              exact source, work, problem, object or ReviewItem reference
+    study             study identity, when applicable
+    attempt           attempt identity, when applicable
+    event             operation or study action
+    evidence_kind     observed_action | reader_report | ai_assessment
+                      | external_check | derived_estimate
+    recorded_by       identified person, system or tool
+    payload           event-specific data
     at
 ```
 
-`completed` records a workflow event, not correctness or competence. Task
-evidence is obtained from substantive activity; the interface must not require
-ratings or declarations of understanding.
+Study events retain the following data:
+
+| Event | Required content |
+| --- | --- |
+| Begin | Study, exact question revision and activity, attempt identity and timing context. |
+| Submit | Attempt, submission identity and sequence, immutable answer snapshot or explicit paper-work report, prior submission, submission-time help/source/answer exposure and available timing. |
+| Outcome | Exact submission, attributed outcome, identified assessor, author where applicable and reported consultation (`true`, `false` or unknown). |
+| Correct outcome | Exact submission and prior assessment being corrected; retain both assessments. |
+| Assistance/exposure | Exact attempt, selected help or source, and its order relative to submission. |
+| Skip or interrupt | Exact attempt and disposition; neither supplies a failed recall outcome. |
+
+The retained outcome is `unaided_success`, `help_dependent`, `unresolved` or
+`unassessed`. Reader reports, AI assessments and external checks remain distinct.
+A submission exposed to help cannot be recorded as unaided success. Exposure
+after submission does not change the earlier submission's classification.
+Correction links, rather than wall-clock order alone, identify the current
+assessment. Missing evidence remains unknown.
+
+Non-study events record saved work, consultation, proposal use or correction,
+premise changes, warrant inspection and requested checks against exact subjects.
+Completion records an operation's disposition; it does not establish correctness
+or understanding. The [usage contract](docs/OPERATIONAL_USAGE.md) supplies the
+common event envelope; it requires no duplicate research-event store.
+
+## Correspondences and mathematical relations
 
 ### Correspondence
 
@@ -351,11 +275,13 @@ with provenance, and its kind states the exact relation being asserted.
 
 ```
 Correspondence
-    from            SourceOccurrence
-    to              SourceOccurrence
+    id, revision
+    from            exact SourceOccurrence reference
+    to              exact SourceOccurrence reference
     kind            same_claim | formalizes | restates | strengthens | weakens
                     | implies | is_implied_by
-    note            optional prose
+    note            the asserted relation and its scope
+    basis           exact source, work or verification references
     provenance      Provenance
 ```
 
@@ -369,14 +295,9 @@ All directed kinds are interpreted from `from` to `to`:
 - `implies`: `from` has been shown to imply `to`;
 - `is_implied_by`: `to` has been shown to imply `from`.
 
-The Appendix A mapping supplies examples. `Erratum.coassoc` and
-`PCategory.diag_assoc` are two names for the same declaration, so their source
-occurrences have kind `same_claim`. Heller's naturalizer clause has no
-corresponding Lean declaration. `p0_nat_of_isTotal` and `p1_nat_of_isTotal`
-prove projection-naturality statements under `IsTotal`; no correspondence to
-Heller's clause is recorded unless an implication or equivalence is established.
-The `Dom` sense of "section," a right inverse of `π_Z`, is not the
-`P`-categorical `IsSection`; a shared word does not establish a correspondence.
+A grouping references these judgments rather than silently merging occurrences.
+A changed judgment creates a new correspondence version. Neither the grouping
+nor the correspondence supplies a premise admission or a checked implication.
 
 ### MathematicalRelation
 
@@ -397,8 +318,8 @@ MathematicalRelation
 ## Claims and explicit justifications
 
 This information class represents how admitted reasons compose. It is used only
-when an active mathematical task needs an inspectable warrant path. The first
-profiles are the non-factive Artemov--Fitting systems \(J_0\) and \(J(CS)\).
+when an active mathematical task needs an inspectable warrant path. The
+profiles are the non-factive Artemov–Fitting systems $J_0$ and $J(CS)$.
 
 ### ClaimAtomVersion
 
@@ -411,8 +332,8 @@ ClaimAtomVersion
     id
     display_name
     assertion       immutable canonical opaque proposition payload
-    representation_refs [SourceOccurrence | Representation | WorkArtifact
-                         | FormalFact]
+    representation_refs [exact SourceOccurrence | Representation | WorkArtifact
+                         | FormalFact references]
     content_hash
     supersedes      optional ClaimAtomVersion
 ```
@@ -471,22 +392,13 @@ JustificationProfile
     checker_version
 ```
 
-A constant specification \(CS\) is a downward-closed set of nested assertions
-\(c_n:\cdots:c_1:A\), where \(n\geq1\) and \(A\) is a logical axiom instance:
-every shorter suffix of a member also belongs to \(CS\). It is never a trust
-list for sources, people, model providers, or theorem provers. Both \(J_0\) and
-\(J(CS)\) permit constants as terms; only \(J(CS)\) admits a proof step by
-membership in its named, versioned, decidable \(CS\). An axiomatically
-appropriate \(CS\) supplies every axiom instance at every positive nesting depth
-and cannot be finite. A derivation's footprint is only the finite subset of
-\(CS\) members actually invoked as axioms. It is not thereby a constant
-specification; even if it is downward-closed and hence forms a finite constant
-specification, it is not axiomatically appropriate.
-
-The constructor or certificate for a `ConstantSpecification` must establish
-that every member terminates in a logical axiom instance and that membership is
-closed under shorter suffixes. An arbitrary decidable predicate is not a
-constant specification.
+A constant specification $CS$ is a downward-closed set of nested assertions
+$c_n:\cdots:c_1:A$, where $n\geq1$ and $A$ is a logical axiom instance.
+Every shorter suffix of a member belongs to $CS$. Membership must be decidable
+and satisfy those conditions. It is not a list of trusted providers or sources.
+A derivation's finite footprint is not thereby an axiomatically appropriate
+constant specification. The [logical specification](docs/JUSTIFICATION_LOGIC_EXPERIMENT.md#logical-basis)
+defines the profiles and the conditions for axiomatic appropriateness.
 
 ### PremiseAdmission and JustificationContext
 
@@ -494,8 +406,8 @@ constant specification.
 PremiseAdmission
     id
     premise         JustificationFormula
-    basis_refs      [SourceOccurrence | Representation | WorkArtifact
-                    | ModelCall | FormalFact | Verification | Correspondence]
+    basis_refs      [exact SourceOccurrence | Representation | WorkArtifact
+                    | ModelCall | FormalFact | Verification | Correspondence references]
     admitted_by     person | named policy
     rationale       optional prose or WorkArtifact
     scope
@@ -558,13 +470,13 @@ only that the conclusion is derivable under the recorded context and profile.
 It does not establish truth, knowledge, understanding, provenance, external
 verification of the conclusion, or unqualified human acceptance. The checker
 attestation verifies only that the certificate denotes the recorded contextual
-derivation. The first Appendix A output must say “derivable relative to these
-admitted premises and policy.”
+derivation. Display the result as derivable relative to the recorded
+admissions and profile.
 
 **Invariant K — every bridge is explicit.** Provenance, verification,
 correspondence, and model output never become premises automatically. A
 `formalizes`, `restates`, or `same_claim` correspondence does not create
-\(F_L\to F_M\); any implication used by application is a separately admitted
+$F_L\to F_M$; any implication used by application is a separately admitted
 formula with its own scope and basis.
 
 **Invariant L — syntax and history are immutable.** Artifact bindings belong to
@@ -573,20 +485,11 @@ correspondence graphs may contain legitimate cycles. A derivation remains
 check-valid in its original context when a successor context omits an admission,
 although its route is no longer active in the successor.
 
-**Invariant M — the checker boundary is not duplicated.** The integral warrant
-subsystem is implemented as a Lean deep embedding that checks the calculus and
-emits a deterministic bundle. The Python application may validate the known
-schema, profile, dependencies, and a trusted expected digest and render the
-result; it does not reimplement the derivation checker. The emitted bundle
-contains no digest of itself. For a frozen fixture shipped with the application,
-the expected SHA-256 of the complete bundle bytes is pinned in Python package or
-code metadata. For a bundle generated at runtime, the application computes
-SHA-256 over the complete bytes received at the trusted Lean-checker handoff and
-atomically retains it in the immutable `Verification`, with the artifact
-identity, checker and environment revision, profile, and context. Subsequent
-validation compares the bytes with that separate retained value. A bundle hash
-detects later substitution relative to its independently retained expected
-digest; it is not a signature and does not authenticate the producer.
+**Invariant M — the checker boundary is not duplicated.** Lean checks the
+calculus and emits the bundle. Python validates bindings and renders it.
+The separate `Verification` retains the checker identity and expected bundle
+digest. A matching digest detects later substitution; it does not authenticate
+the producer.
 
 ---
 
@@ -594,9 +497,9 @@ digest; it is not a signature and does not authenticate the producer.
 
 ### Representation
 
-A statement, explanation, problem, hint, proof, calculation, diagram, or
-example associated with a mathematical object, problem, work artifact, or
-review item.
+A statement, explanation, problem, hint, proof, calculation, diagram or example
+associated with an exact source passage, mathematical object, problem, work
+artifact or review item.
 The kinds include stages in Curry's account of increasing precision
 [@curryFoundationsMathematicalLogic1977, §1], but no stage is required.
 
@@ -604,7 +507,8 @@ The kinds include stages in Curry's account of increasing precision
 Representation
     id
     version
-    subject     MathematicalObject | Problem | WorkArtifact | ReviewItem
+    subject     exact VersionedSpan | SourceOccurrence | MathematicalObject
+                | Problem | WorkArtifact | ReviewItem reference
     kind        orientation | informal_explanation | statement
                 | problem_statement | proof_outline | proof_skeleton
                 | strategic_hint | proposed_solution | calculation | diagram
@@ -621,7 +525,7 @@ An AI-generated theorem, problem, proof, explanation, hint, solution, or worked
 example requires no additional entity or representation kind. When produced
 outside MRW and imported for study, it is recorded as a
 `SourceOccurrence` in the appropriate source and represented with provenance
-whose `Provenance.origin = ai_proposal` and whose author is the model. A
+whose `Provenance.origin = ai_proposal` and whose author is the model, if known. A
 proposal generated by MRW is represented in the same way but need
 not have an external source occurrence. Verification, later human use or
 rejection, and admission as a justification premise remain separate records.
@@ -656,63 +560,23 @@ prevents study, problem solving, review, or reconstruction.
 
 ### Proof outlines by vertex elimination
 
-The current proof-outline view reads an ordinary `.mrw-proof.json` document.
-It can omit and restore intermediate vertices while preserving the original
-joint-premise derivations and local scopes. These are display operations, not
-proof checks; the [proof-graph workflow](docs/PROOF_GRAPH_WORKFLOW.md) documents
-the format and limits. The source reader described below retains
-passages and annotations independently of this graph view.
+The [proof-outline view](docs/PROOF_GRAPH_WORKFLOW.md) reads an ordinary
+`.mrw-proof.json` document. Vertex elimination simplifies the display while
+preserving joint premises, alternatives, local scopes and expansion to original
+steps. It performs no proof check. Retained explanations have their own versions
+and provenance; they do not inherit a proof's verification.
 
-The Stacks section acquisition descriptor belongs to private reader state. Its immutable supporting manifest identifies a single Git
-commit, exact retained chapter/tag-map/license/preamble bytes and original
-published statement/proof spans. Mutable annotations and bibliographic labels
-remain separate. Derived MathML creates no new claim identity, checked edge,
-premise or evidence status. Explicit citations use the existing revision/range
-reference contract; stable upstream tags alone never identify immutable text.
+The [source reader](docs/PROOF_OUTLINES.md) separately retains immutable source
+passages and editable attributed annotations. Reader-created associations and
+dependency notes are distinct from source-published `SourceReference` records
+and checked implications. Exact references bind scope, source revision, outline
+and region identities, with scalar ranges for passages. Annotation edits do not
+retarget earlier citations.
 
-The source-region reader is private mutable navigation and
-attributed reader work over retained immutable source/artifact bytes. It uses
-Source/SourceOccurrence/VersionedSpan semantics with separate source-statement
-selections, reader Representation provenance, and optional supplied Trace or
-other artifact references. Its versioned storage envelope is not a new global
-proof schema or warrant. It requires no Lean declaration, compiler output or
-Verification. Textbook, monograph, article and AI-generated/assisted manuscript
-arguments use the same boundary. Unknown bibliography/authorship stays unknown.
-Manual source/snapshot associations and dependency notes are not checked
-Correspondences or verified inference edges. Recorded context lists available
-assumptions; it does not identify necessary or jointly required premises.
-Added justifications and proposed repairs remain attributed reader material,
-never silent amendments to the retained argument. This source reader does not
-perform the graph view's vertex operations.
-
-An overview spanning several sources is an ordinary Markdown
-work artifact containing reader synthesis and explicit saved-outline references.
-It may concern a subject, book, monograph, article, section or argument without
-a strict hierarchy. These reader-authored references are navigation data, not
-source-published `SourceReference` records or verified dependencies. Identity
-binds workspace/private-store scope, outline UUID and retained source revision;
-region references additionally bind region UUID and an exact `VersionedSpan`.
-Annotation edits leave that identity valid. A changed region association is
-reported while its originally referenced retained passage stays accessible.
-No global mathematical-occurrence identity or automatic synchronization is
-introduced. The separately versioned artifact-store envelope preserves these
-reference identities during explicit relocation/adoption. See [the reference contract](docs/PROOF_OUTLINES.md#first-manual-overview-across-sources--reference-contract-2026-10-16).
-
-A proof outline may retain selected claims
-and hide intervening graph vertices, with explanations and expansion to the
-original steps. Use existing statement, explanation, outline, and diagram
-`Representation`s; bind selections and source references to the exact proof
-revision. Use `Trace` or generated `FormalFact` references when the selected
-representation supplies them. Do not hand-edit or duplicate generated facts.
-
-The graph selection is navigation state. Any retained explanation or paraphrase
-has its own provenance and version; it does not inherit the original proof's
-Verification. Preserve required assumptions, joint premises, and binder scope,
-as well as witnesses for paths through hidden vertices. Source changes
-invalidate the current association while preserving the earlier outline for
-its pinned source. The full contract is in
-[docs/PROOF_OUTLINES.md](docs/PROOF_OUTLINES.md); the implemented serialization
-is documented in the [proof-graph workflow](docs/PROOF_GRAPH_WORKFLOW.md#file-boundary).
+An overview across sources may remain an ordinary Markdown work artifact with
+explicit retained references. A changed source or association preserves the
+previously cited passage. Generated `FormalFact` and `Trace` records are
+referenced where available rather than copied into the overview.
 
 ### ModelCall
 
@@ -725,8 +589,9 @@ automatically; the mathematician does not populate it as a form.
 ModelCall
     id
     initiated_by      person
-    target            Problem | ReviewItem | MathematicalObject | WorkArtifact
-    purpose           definition_explanation | result_explanation
+    target            exact VersionedSpan | Problem | ReviewItem
+                      | MathematicalObject | WorkArtifact reference
+    purpose           general_question | definition_explanation | result_explanation
                       | source_suggestion | strategic_hint
                       | intermediate_lemma | proof_outline | critique
                       | worked_solution | computation
@@ -752,106 +617,54 @@ ModelCall
     raw_response_digest optional SHA-256 of raw_response UTF-8 bytes
 ```
 
-`context_refs` identify the exact source revisions and artifact versions used to
-construct `effective_input`. The effective input includes every
-application-supplied instruction and message, not only the mathematician's
-question. The record permits inspection of what was sent; it does not promise
-deterministic replay.
+`context_refs` identify the exact revisions used to construct `effective_input`,
+including every application-supplied instruction and message. Source-bound
+requests use an exact passage identity and revision as their `VersionedSpan`
+target. General Ask and its follow-ups use `general_question`; they do not
+classify a free-form question as an explanation, critique or computation.
 
-Request fields are frozen when transmission begins. Response and terminal
-fields are appended as events arrive; once `finalized_at` is set, the complete
-`ModelCall` is immutable. A correction or retry creates another linked call.
-Only a finalized call with a fixed response digest may participate in a
+Request fields freeze before transmission. A separate explicit Send action
+permits at most one provider request. Finalization makes the complete call
+immutable; a retry or follow-up creates another linked call. Provider-side
+conversation state is not the project record.
+
+`raw_response` is the exact Unicode response text after transport decoding and
+before normalization or extraction. Its digest is required whenever text is
+present. A lossless extracted `Representation` identifies the finalized call,
+response digest and half-open UTF-8 byte span; its content equals those bytes.
+A paraphrase or synthesis has a separate representation and derivation link.
+Extracted representations are found through provenance, not a mutable list on
+the call. Only finalized, digest-bound returned material can support a
 documentary claim atom.
 
-Each explicit user action creates at most one provider request and one
-`ModelCall`. The request includes only the displayed selected context, obeys its
-recorded limits, invokes no provider tools, and performs no automatic retry or
-recursive request. A retry or user-requested follow-up is another `ModelCall`
-linked through `in_reply_to`. The `purpose` is derived from the invoked
-assistance operation; the mathematician does not classify it separately.
+**Invariant I — a model response is proposed material.** Retention, extraction
+or use supplies no verification, premise admission or checked implication.
+Reported citations and checks require independently obtained source or checking
+evidence. A selected response passage remains inert attributed text.
 
-For the first adapter, `raw_response` is the exact Unicode mathematical-response
-text delivered by the adapter after transport decoding and before trimming,
-normalization, parsing, or extraction. The first experiment accepts one such
-text payload; unsupported multipart or non-text output is recorded as an
-incomplete call and is not projected into a warrant.
-
-The raw response and its digest are preserved before extraction. The first
-executable step is a deterministic response-review view that may display a
-numbered passage index and exact returned
-text without creating a record. A mathematician selects a visible passage; the
-application computes and validates the half-open UTF-8 byte span internally.
-Passage numbers are transient presentation aids, not persistent identities.
-
-Only response material that enters the mathematical work, or whose correction,
-rejection, or abandonment is recorded, is extracted as a `Representation`. In
-the first experiment this extraction is lossless: its content is the exact
-half-open UTF-8 byte span `[start, end)` of `raw_response` identified by
-`raw_response_digest`. Its provenance identifies the `ModelCall` and span and
-has `Provenance.origin = ai_proposal`. Extraction establishes attribution only,
-not correctness or a relation to any source.
-
-A candidate-route view is derived only from routes stated in returned response
-spans and routes actually preserved in `WorkArtifact`s, together with their
-`TaskEvidence` dispositions; it is not a new stored entity. No record purports
-to expose or reconstruct a provider's hidden reasoning, chain of thought,
-internal search, or alternatives that were never returned.
-
-`raw_response_digest` is required whenever `raw_response` is present. A failed,
-refused, or incomplete call with no returned content has neither a response
-digest nor a response span.
-
-A suggested source does not become a `SourceOccurrence` until it is
-independently retrieved and identified. A reported computation or proof check
-does not become a `Verification` until the corresponding method is run or its
-attestation is obtained separately.
-
-Provider-side conversation state is never the canonical project record. When
-the service allows remote response storage to be disabled, the first experiment
-requests that setting and records it. The setting does not assert that the
-provider performs no other processing or retention.
-
-A narrow provider adapter translates between the canonical request record and
-one service in the first experiment. Provider-specific request and response
-types do not become domain entities. This boundary does not add service
-selection, multiple adapters, or routing.
-
-Authentication credentials belong to runtime configuration. MRW supplies them
-to the provider transport; it does not insert them into `effective_input` or
-project records. Returned text is retained unchanged and may itself contain
-sensitive information. A raw response is untrusted content: it cannot execute
-markup or commands, open a link, invoke a tool, or be submitted again without an explicit
-user action.
-
-Representations extracted from a call are obtained by reverse lookup through
-their provenance. They are not a mutable list stored on the immutable
-`ModelCall`.
-
-**Invariant I — a model response is proposed material.** Storing a raw response,
-extracting representations from it, or using one during work does not convert
-its mathematical claims into source facts, verifications, premise admissions,
-justification derivations, or human judgments.
+The [reader AI workflow](docs/READER_AI_WORKFLOW.md) defines preview, Send,
+continuation and review. The [Responses adapter](src/mrw/openai_response.py) defines transport, response
+limits, credentials and immutable publication.
 
 ### AI-to-warrant projection
 
 This projection uses the existing generic warrant records; it introduces no
 AI-specific domain entity. Let:
 
-- \(C\) be an immutable `ModelCall`;
-- \(h\) be its `raw_response_digest`;
-- \(s\) be the exact response span of a lossless `Representation` \(R\);
-- \(D=\operatorname{ModelProduced}(C,h,s,R)\) be an opaque documentary
+- $C$ be an immutable `ModelCall`;
+- $h$ be its `raw_response_digest`;
+- $s$ be the exact response span of a lossless `Representation` $R$;
+- $D=\operatorname{ModelProduced}(C,h,s,R)$ be an opaque documentary
   `ClaimAtomVersion`; and
-- \(F\) be a distinct opaque substantive mathematical claim.
+- $F$ be a distinct opaque substantive mathematical claim.
 
 `ModelProduced` is only the display convention for this application atom, not
 an added predicate language or domain type. If the documentary fact participates
-in a warrant, a `PremiseAdmission` may admit \(m:D\), with \(m\) a justification
-variable and with \(C\), \(R\), and the exact span as external basis. This says
+in a warrant, a `PremiseAdmission` may admit $m:D$, with $m$ a justification
+variable and with $C$, $R$, and the exact span as external basis. This says
 only that the finalized call returned that proposal.
 
-The canonical assertion payload for \(D\) is the compact UTF-8 JSON array
+The canonical assertion payload for $D$ is the compact UTF-8 JSON array
 
 ```text
 ["model-produced-v1", call_id, response_digest, start_byte, end_byte,
@@ -860,19 +673,19 @@ The canonical assertion payload for \(D\) is the compact UTF-8 JSON array
 
 with JSON string escaping, base-ten integer offsets, and no insignificant
 whitespace. `ClaimAtomVersion.content_hash` is the SHA-256 of those exact bytes.
-All identifiers are stable immutable identifiers; \(C\) must be finalized and
-\(R\) immutable before the atom is created.
+All identifiers are stable immutable identifiers; $C$ must be finalized and
+$R$ immutable before the atom is created.
 
 Direct reliance on the proposal additionally requires a separate, scoped
-admission \(r:(D\to F)\), with an independently inspectable review or policy
-basis. The checker may then derive \(r\cdot m:F\). No extraction, structured
+admission $r:(D\to F)$, with an independently inspectable review or policy
+basis. The checker may then derive $r\cdot m:F$. No extraction, structured
 response, provider identity, fluency, citation, or use during work creates
 either admission. No provider-wide bridge from model production to truth is
 permitted.
 
 When independent reconstruction, source retrieval, computation, or formal
-checking directly warrants \(F\), the context instead admits a separately based
-reason \(v:F\). The model call then remains causally relevant through provenance
+checking directly warrants $F$, the context instead admits a separately based
+reason $v:F$. The model call then remains causally relevant through provenance
 and `TaskEvidence` but is correctly absent from the mathematical derivation.
 Reported citations, computations, and checks remain proposals until retrieved
 or run independently.
@@ -882,7 +695,7 @@ or run independently.
 trust, reliability, support, confidence, acceptance, correctness, verification,
 authority, weight, integration, or adoption. There is no `AITrust`, `AIWarrant`,
 `ModelAuthority`, generic support edge, or provider entry in a constant
-specification. If a later experiment needs acceptance or knowledge-production
+specification. If a later extension needs acceptance or knowledge-production
 semantics, it must adopt a separately specified justification-logic extension
 rather than add application-specific status fields.
 
@@ -918,13 +731,15 @@ revision so staleness is detectable.
 
 ```
 FormalFact
-    subject         object | problem | occurrence | representation
+    subject         exact occurrence or representation reference
+    logical_subject optional object or problem, for navigation
     kind            declaration_type | source_location | imports
                     | direct_dependencies | transitive_dependencies
                     | axiom_dependencies | signature_hypotheses
                     | is_theorem | checking_status | downstream_references
     value
     generator       tool name and version
+    inputs          exact source and artifact references
     derived_from    environment revision
     derived_at
 ```
@@ -943,13 +758,14 @@ has one origin and one or more attestations.
 
 ```
 Verification
-    subject         representation | object | problem | work_artifact
-                    | justification_derivation
+    subject         logical subject, for navigation
+    checked_inputs  nonempty exact representation, source, work-artifact
+                    or justification-derivation references
     claim           what the method checked
     method          lean_kernel | computer_algebra | external_checker
                     | peer_review | independent_reproduction
                     | source_comparison | justification_checker
-    status          verified | failed | inconclusive | stale
+    status          verified | failed | inconclusive
     axioms          for kernel checks
     checker_revision optional exact checker implementation revision
     environment     revision
@@ -959,6 +775,14 @@ Verification
     artifact_digest optional SHA-256 of exact emitted artifact bytes
     at
 ```
+
+Every verification identifies the exact retained inputs checked, including their
+immutable revisions or content digests. A logical object or current path alone
+is insufficient. The checker environment identifies the method, not the input.
+An emitted-artifact digest identifies output, not the checked manuscript or
+proof. If current work differs, derive a stale association while preserving the
+original attestation and its input references. These requirements define the
+generic contract; method-specific records retain their existing serializations.
 
 For `method = justification_checker`, the claim is limited to successful
 certificate checking under the exact recorded profile and context; the
@@ -983,6 +807,7 @@ Provenance
     origin         human_work | human_judgment | ai_proposal
                    | machine_extraction | source_quotation
     author         person | model identifier | tool name and version
+                   | unknown for imported material
     model_call     required for a system-generated AI proposal
     response_span  required digest-anchored half-open UTF-8 byte offsets for a
                    lossless system-generated AI proposal
@@ -1012,7 +837,7 @@ Discrepancy
                 | manuscript_vs_formalization | source_vs_source
                 | artifact_vs_source | claim_vs_verification
                 | claim_vs_formal_fact
-    parties     the two items in conflict
+    parties     exact references to the two items in conflict
     detected_by generator or human
     at
     resolution  unresolved | claim_corrected | correspondence_updated
@@ -1036,13 +861,15 @@ compare a claim with the fact about the same subject.
 
 ### ReviewItem
 
-A mathematical task proposed for resumption, reconstruction, practice, or
-checking.
+An optional versioned task for resumption, reconstruction, practice or checking.
+A saved study question is identified by its question ID, content revision and
+activity; it can refer directly to source passages.
 
 ```
 ReviewItem
-    id
-    subject     MathematicalObject | Problem
+    id, revision
+    subject     exact source, work, MathematicalObject or Problem reference
+    activity    definition | hypotheses | missing_step | argument | application
     target      orientation | statement | dependencies | method
                 | proof_reconstruction | calculation | application
                 | technical_details | formal_proof
@@ -1064,20 +891,26 @@ Generated scheduling data. It is not a user-authored evaluation.
 
 ```
 ReviewState
-    subject         MathematicalObject | Problem
+    study           study identity
+    item            exact ReviewItem/question ID and content revision
+    activity        recorded question activity
     target
     due_at
     algorithm_state
-    derived_from    [TaskEvidence]
-    generator       scheduler name and version
+    derived_from    exact attempt/submission/outcome TaskEvidence references
+    generator       scheduler name, version and parameter identifier
     derived_at
 ```
 
-**Invariant G — review state is derived, not reported.** `ReviewState` is
-generated from task evidence and can be recomputed. It may determine which task
-is offered next, but it never asserts that a mathematician understands or has
-mastered its subject. The interface must not require a rating or questionnaire
-before work continues.
+**Invariant G — review state is derived.** Replay the retained eligible
+observations for the same question revision and activity under the recorded
+scheduler. Reader-confirmed unaided recall maps to Good; unresolved or
+help-dependent reader-reported recall maps to Again. AI assessments, missing
+assessments, skips, interruptions and reading alone do not supply recall ratings.
+The [study contract](docs/ACTIVE_STUDY_DESIGN.md#light-rescheduling) defines
+eligibility and correction replay. A changed question or source requires
+explicit rebinding; prior review does not silently transfer. Scheduling reports
+neither mathematical correctness nor understanding.
 
 **Invariant H — open-ended work has no canonical answer.** A proof attempt,
 explanation, example, or counterexample remains a `WorkArtifact` whether or not
@@ -1086,33 +919,9 @@ it has been checked. Any correctness claim is recorded separately as a
 
 ---
 
-## What the model deliberately omits
-
-- Any required account of a mathematician's internal state.
-- Any fixed representation of mathematical expertise or of a mathematician's
-  organization of knowledge.
-- Any manually asserted competence score.
-- Any authoritative explanation.
-- Any inference from verification status to retention or competence.
-- Any requirement that formal material exist before study or problem solving.
-- Any assumption that ingestion establishes identity across sources.
-- Provider-side conversation state as the canonical mathematical context.
-- Autonomous chains of model calls or a general conversation archive.
-- Global factivity, positive introspection, Fitting-world semantics, or a
-  Justification Awareness Model in the first warrant slice.
-- Any inference from checked contextual derivability to mathematical truth,
-  knowledge, understanding, or competence.
-
 ## Open questions
 
-- Granularity: whether a definition and its induced instances are one object.
-- Whether `Discrepancy` resolution may trigger regeneration or only annotation.
-- Which task events and thresholds a review-state generator should use.
-- Which parts of a raw model response, beyond representations used during the
-  work, should be extracted automatically in the first experiment.
-- How problem relations are proposed, checked, and revised.
-- How subject-level maps are produced — curated by hand, derived from
-  `SourceNode` trees, proposed by AI, or some combination — and how a curated map
-  survives a source revision.
-- Which later mathematical tasks warrant another justification profile or claim
-  route after the first Appendix A certificate is evaluated.
+- Which task requires a mathematical-object grouping rather than direct source links?
+- Which source correspondences can be proposed automatically, and what review is needed?
+- When may discrepancy resolution request regeneration rather than annotation?
+- Which subject maps remain useful when their sources acquire new revisions?

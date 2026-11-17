@@ -321,6 +321,7 @@ class ReviewCliTests(unittest.TestCase):
 
     def test_passage_projection_equals_byte_mode_and_maps_every_purpose(self) -> None:
         mapping = {
+            "general_question": "informal_explanation",
             "definition_explanation": "informal_explanation",
             "result_explanation": "informal_explanation",
             "source_suggestion": "informal_explanation",

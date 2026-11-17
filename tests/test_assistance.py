@@ -121,9 +121,11 @@ class AssistanceControllerTests(unittest.TestCase):
         self.assertIn("Exact selected text", prepared.preview)
         self.assertIn("Request-body SHA-256", prepared.preview)
         self.assertEqual(
-            prepared.operation.request["target"]["revision"],
-            context.source_revision,
+            prepared.operation.request["target"],
+            {"kind": "VersionedSpan", "id": context.reference_id,
+             "revision": context.source_revision},
         )
+        self.assertEqual(prepared.operation.request["purpose"], "general_question")
         self.assertEqual(prepared.operation.request["in_reply_to"], None)
 
     def test_context_removal_changes_frozen_body_and_cancel_creates_nothing(self):
@@ -149,6 +151,15 @@ class AssistanceControllerTests(unittest.TestCase):
         self.assertEqual(
             context.state, "explicitly opened read-only ordinary text reference"
         )
+        prepared = self.prepared(context, question="Criticize this argument.")
+        self.assertEqual(prepared.operation.request["target"], {
+            "kind": "VersionedSpan", "id": context.reference_id,
+            "revision": context.source_revision,
+        })
+        self.assertEqual(prepared.operation.request["purpose"], "general_question")
+        self.assertIn(context.reference_id, prepared.preview)
+        self.assertFalse(prepared.operation.output.exists())
+        self.assertEqual(self.calls, [])
 
         untitled = self.controller.new_buffer()
         self.controller.edit(untitled.state.id, "Unsaved 😀 work")

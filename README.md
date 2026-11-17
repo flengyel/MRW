@@ -36,18 +36,31 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 Ordinary reading requires no study record. General automatic Lean–English
 translation remains a development goal.
 
-## Related systems
+## Related research
 
 | System | Emphasis |
 | --- | --- |
-| [CoCalc](https://doc.cocalc.com/), [Jupyter AI](https://jupyter-ai.readthedocs.io/en/latest/users/chat/guide.html), [Sagebrush](https://sagebrush.space/) | Collaborative notebooks; agent chat in JupyterLab; browser-based mathematical notebooks. |
-| [Proofscape](https://docs.proofscape.org/en/stable/ref/library/dc.html) | Proof charts, annotations and linked source documents. |
-| [MathHub](https://kwarc.info/systems/mathhub/), [ALeA](https://kwarc.info/people/dmueller/pubs/ws_alea_voll-ki.pdf) | Mathematical document archives and services; adaptive study of annotated course material. |
-| [GNU TeXmacs](https://www.texmacs.org/tmweb/home/welcome.en.html) | Mathematical authoring with computational interfaces. |
-| [Obsidian](https://obsidian.md/) | Linked local Markdown notes. |
-| [Zotero](https://www.zotero.org/support/quick_start_guide) | References, attachments and citations. |
+| [Eigenius](https://eigenius.io/docs/platform/justification-logic/) | Typed evidence and checkable grounds for research claims. |
+| [Axiom Math](https://axiommath.ai/mission/) | Pursues mathematical discovery through conjecturing, proof search and translation between informal mathematics and Lean. |
+| [Google AI co-scientist](https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/) | Generates, evaluates and refines scientific hypotheses and research proposals. |
+| [Kosmos](https://advances.edisonscientific.com/research/announcing-kosmos/) | Combines literature reading and computational analysis, tracing report conclusions to sources and code. |
 
 [Further comparisons](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse).
+
+## Optional plugins and integrations
+
+| Integration | Use |
+| --- | --- |
+| [Obsidian](docs/OBSIDIAN_WORKFLOW.md) | Linked notes and the configured note-creation workflow. |
+| [Zotero](docs/ZOTERO_WORKFLOW.md) | References, attachments and citations. |
+| [Lean](docs/LEAN_STUDY_WORKFLOW.md) | Native goals, diagnostics and proof checking. |
+| [Jupyter and SagePod](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) | Notebook editing and computation. |
+
+## Architecture
+
+![MRW architecture](docs/assets/mrw-architecture.png)
+
+[Architecture](docs/ARCHITECTURE.md) · [Data model](DOMAIN_MODEL.md)
 
 ## Data and transfers
 

@@ -127,7 +127,7 @@ def render_assistance_preview(operation, target, contexts, question):
         'Task-local mathematical assistance preview',
         f'Provider: {PROVIDER}',
         f'Requested model: {operation.requested_model}',
-        f'Target ordinary work: {target.source_identity}',
+        f'Target selected passage: {target.reference_id}',
         f'Target captured text SHA-256: {target.source_revision}',
         f'Question [UTF-8 bytes={len(question.encode("utf-8"))}]:',
         question,
@@ -200,13 +200,11 @@ def prepare_assistance(project_root, *, target, contexts, question, model,
     spec = {
         'initiated_by': 'local-mathematician',
         'target': {
-            'kind': 'WorkArtifact',
-            'id': target.source_identity,
+            'kind': 'VersionedSpan',
+            'id': target.reference_id,
             'revision': target.source_revision,
         },
-        # R2 has one general ask action. This operational value does not
-        # semantically classify the natural-language question.
-        'purpose': 'result_explanation',
+        'purpose': 'general_question',
         'request_text': question,
         'context_refs': [{
             'kind': 'VersionedSpan',

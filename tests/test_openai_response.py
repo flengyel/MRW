@@ -82,6 +82,19 @@ class OpenAIResponseTests(unittest.TestCase):
     def setUp(self) -> None:
         self.spec = parse_prepared_request(encoded_spec())
 
+    def test_passage_target_requires_an_exact_revision(self) -> None:
+        spec = request_spec()
+        spec["target"] = {
+            "kind": "VersionedSpan", "id": "paper:fixture#scalar-3.0-3.12",
+            "revision": sha256(b"exact source revision").hexdigest(),
+        }
+        spec["purpose"] = "general_question"
+        parsed = parse_prepared_request(json.dumps(spec).encode())
+        self.assertEqual(parsed["target"], spec["target"])
+        spec["target"].pop("revision")
+        with self.assertRaisesRegex(OpenAIResponseError, "target.revision"):
+            parse_prepared_request(json.dumps(spec).encode())
+
     def run_success(self, destination: Path):
         seen = []
         previews = []

@@ -49,13 +49,14 @@ _MODEL_CALL_KEYS = frozenset(
 _REFERENCE_KEYS = frozenset({"kind", "id"})
 _REVISED_REFERENCE_KEYS = frozenset({"kind", "id", "revision"})
 _MODEL_CALL_TARGET_KINDS = frozenset(
-    {"Problem", "ReviewItem", "MathematicalObject", "WorkArtifact"}
+    {"Problem", "ReviewItem", "MathematicalObject", "WorkArtifact", "VersionedSpan"}
 )
 _MODEL_CALL_CONTEXT_KINDS = frozenset(
     {"VersionedSpan", "SourceOccurrence", "Representation", "WorkArtifact"}
 )
 _PURPOSES = frozenset(
     {
+        "general_question",
         "definition_explanation",
         "result_explanation",
         "source_suggestion",
@@ -344,9 +345,11 @@ def _parse_model_call_document(raw: bytes) -> Mapping[str, object]:
     purpose = _require_string(record["purpose"], "model_call.purpose")
     if purpose not in _PURPOSES:
         raise ModelProjectionError("model_call.purpose is not recognized")
-    _require_reference(
+    target = _require_reference(
         record["target"], "model_call.target", allowed_kinds=_MODEL_CALL_TARGET_KINDS
     )
+    if target["kind"] == "VersionedSpan" and "revision" not in target:
+        raise ModelProjectionError("model_call.target.revision is required for a passage")
     context_refs = record["context_refs"]
     if not isinstance(context_refs, list):
         raise ModelProjectionError("model_call.context_refs must be a JSON array")

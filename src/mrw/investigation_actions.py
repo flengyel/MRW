@@ -306,7 +306,7 @@ def prepare_continuation(project_root, *, parent, passage_numbers, contexts, que
     spec = {
         'initiated_by': 'local-mathematician',
         'target': dict(parent.call.document['target']),
-        'purpose': 'result_explanation',
+        'purpose': 'general_question',
         'request_text': question,
         'context_refs': context_refs,
         'effective_input': {

@@ -92,7 +92,11 @@ class EditorAssistanceTests(unittest.TestCase):
         self.assertNotIn('α😀', self.calls[0].decode())
         terminal = parse_terminal_model_call(Path(self.draft['output']).read_bytes())
         self.assertEqual(terminal.document['context_refs'], ())
-        self.assertEqual(terminal.document['target']['id'], 'untitled:1')
+        self.assertEqual(terminal.document['target'], {
+            'kind': 'VersionedSpan', 'id': 'untitled:1#scalar-1.0-2.0',
+            'revision': self.draft['target']['source_revision'],
+        })
+        self.assertEqual(terminal.document['purpose'], 'general_question')
 
     def test_all_terminal_statuses_remain_distinct(self):
         cases = [('failed', OSError('synthetic network failure')),

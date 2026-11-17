@@ -36,7 +36,7 @@ HARD_MAX_PROVIDER_RESPONSE_BYTES = 1024 * 1024
 HARD_MAX_OUTPUT_TOKENS = 16384
 HARD_MAX_TIMEOUT_SECONDS = 300
 _PURPOSES = {
-    "definition_explanation", "result_explanation", "source_suggestion",
+    "general_question", "definition_explanation", "result_explanation", "source_suggestion",
     "strategic_hint", "intermediate_lemma", "proof_outline", "critique",
     "worked_solution", "computation",
 }
@@ -48,7 +48,7 @@ _LIMIT_KEYS = {
     "max_request_body_bytes", "max_provider_response_bytes",
     "max_output_tokens", "timeout_seconds",
 }
-_TARGET_KINDS = {"Problem", "ReviewItem", "MathematicalObject", "WorkArtifact"}
+_TARGET_KINDS = {"Problem", "ReviewItem", "MathematicalObject", "WorkArtifact", "VersionedSpan"}
 _CONTEXT_KINDS = {
     "VersionedSpan", "SourceOccurrence", "Representation", "WorkArtifact",
 }
@@ -221,9 +221,11 @@ def parse_prepared_request(raw: bytes) -> dict[str, object]:
         _string(spec[key], f"prepared_request.{key}")
     if spec["purpose"] not in _PURPOSES:
         raise OpenAIResponseError("prepared_request.purpose is not recognized")
-    _reference(
+    target = _reference(
         spec["target"], "prepared_request.target", allowed_kinds=_TARGET_KINDS
     )
+    if target["kind"] == "VersionedSpan" and "revision" not in target:
+        raise OpenAIResponseError("prepared_request.target.revision is required for a passage")
     if spec["in_reply_to"] is not None:
         _string(spec["in_reply_to"], "prepared_request.in_reply_to")
     context_refs = spec["context_refs"]
