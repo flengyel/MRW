@@ -136,9 +136,11 @@ commands operate on ordinary Markdown editors, not notebook cells or Markdown
 preview clicks.
 
 Copying the notebook and its companion ordinary files preserves those files
-and relative links. **It does not transfer MRW's private targets.** MRW links
-remain bound to their existing canonical workspace/private-storage scope;
-moving the workspace or using another host does not relocate retained sources.
+and relative links. **It does not transfer MRW's private targets.** Manual folder
+renaming or copying files to another host does not relocate retained sources.
+Use [Move Workspace](WORKSPACE_RELOCATION_DESIGN.md) for supported relocation of
+a workspace and its private MRW stores, or the narrower
+[saved-work mover](ARTIFACT_STORAGE.md) for its listed source and research records.
 References and a successful calculation confer no proof-checking status.
 
 ## Save, reopen and reproduce deliberately

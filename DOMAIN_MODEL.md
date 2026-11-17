@@ -47,7 +47,7 @@ coverage; they are not mathematical claims or learning assessments. External
 operation state remains qualified by its observing subsystem. A feature ID,
 user invocation and child operation are distinct identities.
 
-The proposed [diagnostics plugin](docs/DIAGNOSTICS_PLUGIN.md) derives findings
+The optional [diagnostics companion](docs/DIAGNOSTICS_PLUGIN.md) derives findings
 from scoped checks. Each finding identifies the object, check and observation;
 an unavailable target or unperformed check is not corruption. Reports do not
 change source identity, retention, ownership or mathematical status. Derived
@@ -227,13 +227,8 @@ VersionedSpan
 **Invariant A — identity is not positional.** A span may locate an occurrence
 and never identifies one. Stable locators identify occurrences: `\label`
 targets, declaration names, problem numbers, and corpus tags. A correspondence
-keyed to line numbers is invalidated silently by every edit to its source, and
-`Lean/docs/AppendixA.md` illustrates the exposure — roughly fifty line
-references against fifty-seven mapping rows, with nothing to detect drift.
-The selected result already has the stable locator
-`lem:range-lifting-pullback-section`. Remaining positional manuscript
-references require `\label`s before correspondence maintenance expands to
-them; no formal exporter substitutes for those locators.
+keyed only to line numbers can become stale after edits. Bind each span to its
+source revision and use stable locators for correspondence across revisions.
 
 ---
 
@@ -822,10 +817,11 @@ one service in the first experiment. Provider-specific request and response
 types do not become domain entities. This boundary does not add service
 selection, multiple adapters, or routing.
 
-Credentials remain in the application's secret configuration and never appear
-in `effective_input`, raw responses, project records, diagnostic logs, exports,
-or error text. A raw response is untrusted content: it cannot execute markup or
-commands, open a link, invoke a tool, or be submitted again without an explicit
+Authentication credentials belong to runtime configuration. MRW supplies them
+to the provider transport; it does not insert them into `effective_input` or
+project records. Returned text is retained unchanged and may itself contain
+sensitive information. A raw response is untrusted content: it cannot execute
+markup or commands, open a link, invoke a tool, or be submitted again without an explicit
 user action.
 
 Representations extracted from a call are obtained by reverse lookup through

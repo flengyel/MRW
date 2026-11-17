@@ -51,9 +51,9 @@ on the Linux host.
 
 ## What moves
 
-One move covers all MRW-owned durable artifacts in this workspace's extension
-storage, including saved project folders no longer among its currently open
-folders. The confirmation lists the project roots. This bounded store moves:
+The saved-work mover transfers supported source, investigation, justification
+and model-call records, including records for project folders no longer open
+in this workspace. The confirmation lists the project roots. Its scope is:
 
 | Saved material | Existing layout / treatment |
 |---|---|
@@ -63,6 +63,7 @@ folders. The confirmation lists the project roots. This bounded store moves:
 | Obsidian return destinations and stored labels | `obsidian-links.json`; no note prose |
 | Reader diagram renderings | `diagram-renders.json` pins exact annotation/code keys; immutable SVG `artifact-HASH.bin` blobs accompany it |
 | Saved investigation question, correction, conclusion and pending work | `investigation-PROJECT_HASH/active.json` |
+| Justification results, unfinished requests and proposal preparations | `justification-PROJECT_HASH/`, including its `pending/` and `preparations/` records |
 | Retained terminal model records | The workspace's `model-calls/*.json` |
 | Required parent/child records outside that storage | Exact verified copies retained as dependencies; their external originals are preserved |
 | Persistent store/project identity and compatibility mappings | Added once; preserved on subsequent moves/adoption |
@@ -80,6 +81,10 @@ binding, transaction/recovery journals, writer and publication locks, output
 reservations, credentials, caches, UI/session state, VS Code return markers,
 ordinary document recovery, trusted tool settings and build/runtime outputs.
 The standalone Qt application's project storage is unchanged.
+
+Study checkpoints, study/interaction history and retained notebook results are
+outside this operation. The separate [Move Workspace workflow](WORKSPACE_RELOCATION_DESIGN.md)
+includes private workspace stores; ordinary copying or renaming does not.
 
 ## Commit, cancellation and recovery
 

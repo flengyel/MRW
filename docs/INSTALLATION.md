@@ -131,8 +131,8 @@ Basic reading and manual source study require no companion.
 
 ### Separate MRW API connector
 
-**Ask About Selected Work** and **Ask About Reader Passage…** prepare an exact
-request preview. **Send Exact Preview** sends it through MRW's separate OpenAI
+**Ask OpenAI API about Selection…** and **Ask OpenAI API About Reader Passage…**
+prepare an exact request preview. **Send Exact Preview** sends it through MRW's separate OpenAI
 connector. A Codex sign-in does not configure this connector.
 
 The connector reads `OPENAI_API_KEY` at Send from the environment inherited by

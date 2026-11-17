@@ -17,7 +17,7 @@ scope for note links and backlinks. These locations need not coincide.
 | An MRW source checkout | Extension development; unnecessary for using the VSIX |
 
 For example, `/home/alice/mrw-work/MRW.code-workspace` can read notes at
-`/mnt/c/Users/Alice/Zettelkasten`. The latter is a valid WSL path to Windows
+`/mnt/c/Users/Alice/Notes`. The latter is a valid WSL path to Windows
 files. Linux builds work more efficiently on the Linux filesystem; Windows
 notes can stay where Obsidian uses them. See
 [Microsoft's filesystem guidance](https://learn.microsoft.com/en-us/windows/wsl/filesystems).

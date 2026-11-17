@@ -31,11 +31,11 @@ For a question about a passage:
    send the question from Codex. The link alone does not transfer the text or
    grant access to MRW's private store.
 4. Save a useful reply in an ordinary note or notebook with its source reference
-   and AI attribution. To keep it as a reader annotation, choose **Add reader
-   note** beside the passage. Choose **ai proposal** under **Supplied origin**, enter
-   **Codex** under **Author / attribution**, paste the text and **Save annotation**.
-   Wait for confirmed save feedback; edits typed during a save may remain
-   unsaved. Keep later reader corrections separately attributed.
+   and AI attribution. To keep it as a reader annotation, choose **Add a note**
+   beside the passage and paste the response. Expand **Attribution**, choose
+   **ai proposal** under **Origin**, enter **Codex** under **Author**, then choose
+   **Save**. Wait for confirmed save feedback; edits typed during a save may
+   remain unsaved. Keep later reader corrections separately attributed.
 
 For repeated work with selected sources, the optional
 [source-study tool](ACTIVE_STUDY_WORKFLOW.md#retain-companion-help) assembles a
@@ -44,8 +44,8 @@ help request and retains pasted replies. For a proposed graph, use
 pasting the selected material. Neither requires MRW's API credentials.
 
 Manual companion work creates no MRW API `ModelCall` record or proof-checking
-status. The reader's **Ask AI about this passage…** button uses the separate API
-connector described below, not the Codex sidebar or Copilot.
+status. **Ask OpenAI API about this passage…** uses the separate API connector
+described below, not the Codex sidebar or Copilot.
 
 ## Setup
 
@@ -69,25 +69,27 @@ changed environment. MRW does not edit this script or store the credential.
 
 ## Ask, preview and send
 
-Each visible passage places **Add reader note**, **Delete reader note…** and **Link Obsidian note…**
-before **Ask AI about this passage…**, on the same line. Reader notes work
-without AI. Add opens the passage's editor without changing its draft; Delete
+A passage's action row offers **Add a note**, **Delete reader note…**,
+**Link Obsidian note…** and **Ask OpenAI API about this passage…**. Reader notes
+work without AI. Add opens the passage's editor without changing its draft; Delete
 selects a saved note if needed and asks for confirmation. Saving or deleting
 one note preserves other annotations and retained source text.
 Linked reader notes stay in the vault and open in Obsidian. **Change or remove
 link…** removes only an MRW association, not the note file. It retains the exact
 source revision and passage target; it does not freeze the external note's text.
 
-A saved annotation also offers **Continue this note in Obsidian…**. After its
-text and attribution are saved and verified in a selected note, edit that note;
-the source reader retains the original for inspection. This makes no AI request.
+A saved annotation offers **Link another note…**. Select an existing note or
+create one through the configured notes application, then choose **Confirm
+selected saved note and link**. The source annotation and external note remain
+independently editable; copying is optional. Linking makes no AI request.
 See [continuation and recovery](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
 
 1. Open the intended workspace and retained source with **MRW: Open Saved
    Source…**, or follow a source/passage link.
-2. Beside the passage, choose **Ask AI about this passage…**. Alternatively use
-   **Ask AI about a passage…** in the reading toolbar or **MRW: Ask About Reader
-   Passage…** in the Command Palette. Expand a hidden proof to expose its action.
+2. Beside the passage, choose **Ask OpenAI API about this passage…**. The reading
+   toolbar offers **Ask OpenAI API about a passage…**; the Command Palette offers
+   **MRW: Ask OpenAI API About Reader Passage…**. Expand a hidden proof to expose
+   its action.
 3. Enter the question, for example “Explain the governing idea and identify the
    assumptions used in this argument.” Select a model if prompted. Cancelling
    leaves the source and annotations unchanged.
@@ -116,9 +118,9 @@ or disappears. MRW resolves the exact reference within the matching workspace
 and store. It does not substitute a similarly named file, search another
 workspace or normalize quotation bytes.
 
-When a saved link points to a passage whose association has changed, **Ask AI
-about the earlier linked passage…** keeps the original range and reports the
-change in the preview. Current passage buttons use the displayed reader
+For a changed passage association, **Ask OpenAI API about the earlier linked
+passage…** keeps the saved link's original range and reports the change in the
+preview. Current passage buttons use the displayed reader
 revision. A stale reader fails explicitly; refresh it and select the intended
 passage again. Missing storage, wrong scope and oversized requests are reported
 without substituting or truncating the source.
