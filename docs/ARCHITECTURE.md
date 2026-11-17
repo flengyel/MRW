@@ -23,7 +23,7 @@ remaining acceptance work.
 | **Anti-corruption layer** | Translation preserves identity, revision, attribution and meaning across unlike systems; external formats and status conventions do not silently redefine MRW records. This is a software boundary, not a correctness guarantee. |
 | **Workflow coordination** | Connect reading, comparison, annotation, linking and resumption. Keep operations explicit and distinguish dispatch, acceptance and completion. |
 | **Canonical data model** | A narrow shared vocabulary for logical identities, current locations, immutable revisions/captures, associations, provenance, observed outcomes, claim versions, admissions, contexts and derivations. Ordinary documents remain in their native formats; no duplicate representation of every mathematical idea is required. |
-| **Justification logic engine** | Represent and compose explicit reason assertions under selected premises; search bounded Application routes, retain separate dependencies and recheck successor contexts. Direct assembly from ordinary notes and broader inference remain open. |
+| **Justification logic engine** | Represent and compose explicit reason assertions under selected premises; search bounded Application routes, retain separate dependencies and recheck successor contexts. [Source-driven context assembly and review](SOURCE_GROUNDS_WORKFLOW.md) are implemented for existing notes and retained passages; broader inference remains open. |
 | **Core services** | Maintain storage invariants, retained references and lightweight operational usage records. Optional companions must not disable these protections. |
 
 The engine uses **Justification Logic** to represent reasons within the logical
