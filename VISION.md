@@ -1,9 +1,8 @@
 # Vision
 
-MRW supports mathematical study and research, including the understanding of
-AI-generated papers and Lean formalizations. Its purposes are to connect
-sources, notes, calculations and proofs, support deliberate practice and
-preserve unfinished work.
+MRW supports mathematical understanding and research. Its aims are to recover
+forgotten knowledge, study literature and AI-generated mathematics, practise
+deliberately, inspect grounds for using results, and continue unfinished work.
 
 ## Mathematical understanding
 
