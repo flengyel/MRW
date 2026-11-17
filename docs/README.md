@@ -65,15 +65,15 @@ that version and the saved records it produced.
 - [Optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md): bounded local reports
   and opt-in weekly scheduling, with further checks specified separately.
 
-- [Interface and companion audit — 13 November](INTERFACE_AUDIT_20261113.md): current
-  tool access, missing integrations, observed limits and the next interface repairs.
+- [Interface and companion audit — 13 November](INTERFACE_AUDIT_20261113.md):
+  version-specific findings; use the reconciliation register for current work.
 
 - [Optional notes adapters](NOTE_COMPANIONS.md#proposed-optional-adapters): current
   Obsidian handoff, possible Org capture and The Archive routes, and format limits.
 - [W3C PROV lab-notebook design](PROVENANCE_DESIGN.md): shared provenance model,
   plugin responsibilities and a bounded implementation trial.
 - [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
-  proposed lifecycle, shared-data boundaries and completion checks.
+  lifecycle contract, shared-data boundaries and completion checks.
 - [Zotero integration](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration): requested
   reference, attachment and citation design; the local API workflow is included in 0.23.13.
 - [Related systems and reuse](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse):
@@ -94,6 +94,14 @@ that version and the saved records it produced.
   current direction; completed or withdrawn prompts do not authorize new work.
 
 ## Reports and earlier implementations
+
+[Release 0.23.45](RELEASE_0_23_45.md) records linked calculation Return,
+the stopped/resumed discriminant investigation, producer failure recovery and
+verified publication.
+
+[Release 0.23.44](RELEASE_0_23_44.md) records source-driven context preparation,
+attributed proposal review and verified delivery.
+
 
 [Release 0.23.39](RELEASE_0_23_39.md) records the icon guide, compact History
 view, evidence preservation and verified publication.

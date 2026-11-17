@@ -4,7 +4,7 @@ This is the current reconciliation of the MRW design evaluation, including its
 interface, integration, usage and maintenance recommendations. It records
 accepted requirements and remaining work; a recorded decision does not mean
 its runtime implementation is complete. The register includes subsequent repairs
-through [0.23.44](RELEASE_0_23_44.md). The 14 November implementation batch started
+through [0.23.45](RELEASE_0_23_45.md). The 14 November implementation batch started
 from main `ba2db577b1ab8bf512daf63300e2eedf4232d907`; its original package and
 installation evidence is in the [0.23.32 report](RELEASE_0_23_32.md).
 That batch baseline is not the current checkout or backlog.

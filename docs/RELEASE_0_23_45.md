@@ -1,8 +1,26 @@
 # MRW 0.23.45 — Resume linked calculations
 
-Publication is pending. This report records the source changes and completed
-workflow checks; release commits and final package hashes will be added after
-the clean A/B build and public-asset verification.
+Published 17 November 2026 as a normal GitHub release and Latest:
+[release](https://github.com/flengyel/MRW/releases/tag/v0.23.45) ·
+[core VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix) ·
+[checksums](https://github.com/flengyel/MRW/releases/download/v0.23.45/SHA256SUMS).
+
+## Source and package
+
+| Item | Verified value |
+| --- | --- |
+| Source A | `4a4a8e4f1096d64a7965f5f4d9ad6db07e770dbf` |
+| Release B / tag | `260270f2aed3902c21730026a17e6be4c3cca1d1` |
+| A-to-B diff | Only vscode/media/build-info.json |
+| Core VSIX SHA-256 | `fab0114e6595f4543b091c46c95951c2fc57df6b2b40ea15b708f15bccca0b6b` |
+| Archive | 187 files; exact inventory, manifest and runtime match |
+
+Build B was clean. The marker names A, version 0.23.45 and localChanges false.
+Packaging used the documented UTC epoch, Linux Node 24.22.1 and pinned
+dependencies. The core and unchanged Diagnostics 0.1.0 asset were published
+with SHA256SUMS; all three public downloads match the verified local files.
+Published tags and earlier assets were preserved. No package is tracked in Git.
+
 
 ## Changes
 
@@ -69,14 +87,19 @@ optional checks skipped, zero failures. Production JavaScript syntax checks pass
 Changed-guide checks cover 173 relative links/anchors; all 67 formulas in the
 two example notes render through bundled KaTeX. All 666 tracked/new paths and
 bytes contain zero previous-identity matches. The 11 route-checker source pins
-and dependency lockfile remain unchanged. Final package checks are pending.
+and dependency lockfile remain unchanged. The extracted VSIX passes isolated imports/CLI and three fresh packaged
+bridge captures/reads through exact links without a picker or execution.
+Packaged README, tutorial, manifest and marker were inspected; all 187 archive
+entries have zero previous-identity matches. Local and downloaded checksums pass.
 
 The complete mathematical writing scope is the example README and new
 integral-basis note. Definitions and coefficient domains precede use, displayed
 formulas use dollar delimiters and explicit multiplication, and process
-commentary stays in this report. Knuth, Larrabee and Roberts's Mathematical
-Writing, Section 1, governs the exposition. Brian Conrad's Quadratic integer
-rings, Theorem 1.1, was consulted for the integral-basis criterion. Local formula
+commentary stays in this report. Knuth, Larrabee and Roberts's
+[Mathematical Writing, Section 1](https://www-cs-faculty.stanford.edu/~knuth/papers/cs1193.pdf)
+governs the exposition. Brian Conrad's
+[Quadratic integer rings, Theorem 1.1](https://math.stanford.edu/~conrad/210BPage/handouts/quadint.pdf)
+was consulted for the integral-basis criterion. Local formula
 and link checks are separate from GitHub's client-side math rendering.
 
 The npm audit reports two moderate and three high findings; dependency pins
