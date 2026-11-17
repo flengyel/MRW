@@ -1,8 +1,8 @@
 # Vision
 
-MRW supports mathematical understanding and research. Its aims are to recover
-forgotten knowledge, study literature and AI-generated mathematics, practise
-deliberately, inspect grounds for using results, and continue unfinished work.
+MRW supports mathematical understanding and research. Its aims are to study
+literature and AI-generated mathematics, inspect grounds for using results,
+and continue unfinished work.
 
 ## Mathematical understanding
 

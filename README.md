@@ -1,8 +1,8 @@
 # Mathematical Research Workstation
 
-MRW supports mathematical understanding and research. Its aims are to recover
-forgotten knowledge, study literature and AI-generated mathematics, practise
-deliberately, inspect grounds for using results, and continue unfinished work.
+MRW supports mathematical understanding and research. Its aims are to study
+literature and AI-generated mathematics, inspect grounds for using results,
+and continue unfinished work.
 
 [Download MRW 0.23.45](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix)
 · [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.45)
