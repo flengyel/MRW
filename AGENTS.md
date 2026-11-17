@@ -24,6 +24,13 @@ and essential checks; the plugin owns bounded reports. Reports feed
 retirement, deletion or mutation. Fuller instrumentation and scheduling remain
 pending; missing observations are not zero use.
 
+## Mathematics in shared Markdown
+
+Use dollar delimiters for new or revised mathematical Markdown intended for
+GitHub or Obsidian: single dollars inline and double dollars on separate lines
+for displays. Preserve fenced code, imported source text and exact retained
+passages; this writing convention does not authorize rewriting saved material.
+
 ## Governing integration boundary
 
 Follow [Subsystem ownership and integration boundaries](docs/INTEGRATION_BOUNDARIES.md) for all current
