@@ -167,6 +167,10 @@ meets the task. Record the remaining gap with a concrete research or study
 example before adding another editor, kernel manager, scheduler or document
 format. A link here does not make a system a required dependency.
 
+[Sagebrush](https://sagebrush.space/) was reviewed separately on 2026-11-17;
+[the assessment below](#sagebrush) covers its notebook interchange, reactive
+execution and computational evidence.
+
 ### Current support and proposed integrations
 
 The [source plugins](SOURCE_PLUGINS.md) for Stacks Project, Kerodon and nLab,
@@ -195,6 +199,39 @@ Reuse MRW's existing notebook capture, comparison and provenance records.
 Authenticated CLI/API access and remote execution need a later verified
 contract for the selected deployment. This is a proposal, not a delivered
 adapter or replacement for the current SagePod/Jupyter workflow.
+
+### Sagebrush
+
+[Sagebrush](https://sagebrush.space/) fits as an optional calculation and
+document companion. Its [product description](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/PRODUCT.md)
+describes browser and desktop notebooks with its own mathematical engines and
+partial Sage, Magma, Python and MATLAB interfaces. It is a separate execution
+system from SagePod/SageMath. MRW should first use exported notebooks through
+the existing capture, comparison, linking and Return workflow.
+
+| MRW requirement | Fit and boundary |
+| --- | --- |
+| Keep mathematics, explanation and computation connected | Sagebrush supplies executable notebooks; ordinary MRW notes can link their retained outputs and supporting arguments. Its cell-dependency graph describes computation, not a proof graph. |
+| Preserve exact work through interruption | Its [exporter](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/web/notebook/ipynb.js) writes nbformat 4 with code, outputs and metadata. Retain those exact bytes and selected input files; a browser document or share URL alone is not an immutable result revision. |
+| Delegate execution explicitly | The [cell-execution guide](https://sagebrush.space/articles/notebook/01-how-cells-run) describes downstream reruns, an edit-and-run agent operation, and recomputation on history reversion. MRW reading, capture, comparison and resumption must stay separate from those operations. A future adapter must expose their actual execution scope and respect the owner's policy. |
+| Distinguish different kinds of evidence | The [engine README](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/README.md) distinguishes exact, conditional and heuristic results; some class-group certification is conditional on GRH. Preserve the algorithm, version, assumptions and available certificate. A producer's label or agreement with SageMath does not become a Lean check, unconditional proof or automatic premise admission. |
+| Keep authority with the owning application | File, agent and execution grants remain Sagebrush's. Importing a notebook grants no additional access. Its [security model](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/SECURITY-MODEL.md) separates intended controls from incomplete implementation; an MRW adapter would need its own tested boundary rather than inheriting a general assurance. |
+
+A useful bounded comparison is the existing
+[quadratic-discriminant investigation](../examples/notebook-provenance/README.md):
+evaluate the two trace determinants in both Sagebrush and SagePod, preserve
+their basis choices and exact outputs, compare them, and reopen without a run.
+This would test the benefit of a second implementation before adding an MCP
+or native adapter. No such execution trial or adapter is delivered by this review.
+
+The code/format review uses upstream revision
+`4bcb319294e73be1fe67c602ea7a92b6d4933eb6`, checked on 2026-11-17.
+One [upstream number-field notebook](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/examples/notebook/sage-algebraic-number-theory/main.ipynb)
+(13 cells, 12 saved outputs) passed MRW's existing capture/read path with
+byte-for-byte recovery in a disposable store. It correctly retained
+**saved outputs, execution unknown**. This checks one file, not browser export,
+native rendering, execution or general API compatibility. Its kernelspec says
+`sagemath`; that name alone cannot establish which engine produced the output.
 
 ### Zotero integration
 

@@ -96,6 +96,25 @@ SageQueue submission or job-monitoring controls. This documentation review did
 not run a queue job or change a container. Follow the
 [SagePod notebook guide](GETTING_STARTED_WSL_SAGEPOD.md) for interactive setup.
 
+## Sagebrush
+
+[Sagebrush](https://sagebrush.space/) offers mathematical notebooks in a browser
+and a separate desktop application. It has its own engines with partial
+Sage-compatible and other interfaces; it is not a VS Code extension or the
+SagePod kernel.
+
+The candidate MRW workflow is to export a notebook as `.ipynb`, keep its saved
+outputs, and use the existing **Retain Notebook Result…**, comparison and
+ordinary-note links. Opening retained results does not run cells. A public
+upstream notebook passed exact capture/read checks; live browser export,
+execution and agent integration have not been tested with MRW.
+
+Keep the actual producer/version separate from a `sagemath` kernelspec.
+Sagebrush's reactive reruns and reported certification conditions also need to
+remain explicit. See [the design assessment](RESEARCH_WORKSTATION_DESIGN.md#sagebrush)
+for the checked revision, evidence scope and a proposed discriminant comparison.
+Sagebrush is optional; no MRW adapter is currently implemented.
+
 ## Obsidian
 
 [Obsidian](https://obsidian.md) is a separate application for editing and reading

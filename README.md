@@ -153,6 +153,9 @@ execution are distinct records; reopening restores neither a kernel nor a
 running calculation. SageQueue queues SageMath jobs through SagePod; an MRW
 SageQueue adapter is not implemented. [Notebook workflow](docs/NOTEBOOK_RESULTS.md).
 
+[Sagebrush](https://sagebrush.space/) offers browser-based mathematical
+notebooks; see [its fit with MRW and the tested limits](docs/RESEARCH_WORKSTATION_DESIGN.md#sagebrush).
+
 ## Other reading tools
 
 - [Lean study](docs/LEAN_STUDY_WORKFLOW.md) provides introductory companion
