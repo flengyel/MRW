@@ -525,7 +525,7 @@ pending controls survive resumption, and an explicit CC0 example marks practice
 separately. Existing source stores, notes and graphs are preserved.
 
 The root/install/tutorial documents describe current behavior; older development
-accounts remain linked. [Public readiness](PUBLIC_READINESS.md) records the scope,
+accounts remain linked. [Public readiness](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/PUBLIC_READINESS.md) records the scope,
 rights/disclosure decisions and unchanged private visibility. No publication,
 history rewrite or provider integration is part of delivery. Actual checks and
 package identity belong in [validation](docs/ACTIVE_STUDY_VALIDATION.md).

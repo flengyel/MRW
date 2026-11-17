@@ -59,8 +59,7 @@ document stays open. See [note companions](docs/NOTE_COMPANIONS.md).
 
 Reader notes belong beside their retained passages. Add or edit the text,
 delete a note, link an Obsidian note, or continue it through the configured
-note-creation handoff. MRW source notes and Zettelkasten notes can develop
-independently. [Reader notes](docs/READER_NOTE_WRITING.md) ·
+note-creation handoff. MRW source notes and linked notes can develop independently. [Reader notes](docs/READER_NOTE_WRITING.md) ·
 [Obsidian handoff](docs/OBSIDIAN_WORKFLOW.md).
 
 ## What works
@@ -216,9 +215,9 @@ notebooks; see [its fit with MRW and the tested limits](docs/RESEARCH_WORKSTATIO
 - [AI assistance](docs/READER_AI_WORKFLOW.md) separates companion clipboard
   handoffs from API requests, exact previews and Send.
 
-The maintainer’s optional Zettelkasten conventions are documented independently
-in [flengyel/Zettel](https://github.com/flengyel/Zettel) and its
-[wiki](https://github.com/flengyel/Zettel/wiki). MRW imposes no Zettel format.
+Obsidian is optional. The maintainer’s [published note format](https://github.com/flengyel/Zettel)
+and [configuration examples](https://github.com/flengyel/Zettel/wiki) are optional
+resources; MRW imposes no note format.
 
 ## Host and installation
 
@@ -304,7 +303,7 @@ preserving source attribution, notes and unfinished work.
 
 [Documentation](docs/README.md) · [Research design](docs/RESEARCH_WORKSTATION_DESIGN.md) ·
 [Provenance](docs/PROVENANCE_DESIGN.md) · [Domain model](DOMAIN_MODEL.md) ·
-[Vocabulary](VOCABULARY.md) · [UX specification](UX_SPEC.md) · [Changelog](CHANGELOG.md).
+[UX specification](UX_SPEC.md) · [Changelog](CHANGELOG.md).
 [AGENTS.md](AGENTS.md), [CODEX_PLAN.md](CODEX_PLAN.md) and the
 [continuation](docs/CODEX_CONTINUATION.md) guide development.
 [Earlier extension details](docs/VS_CODE_DEVELOPMENT_HISTORY.md) include the
@@ -313,4 +312,4 @@ separate Qt/CLI prototype.
 Copyright 2026 F. Lengyel. MRW code is [Apache-2.0](LICENSE); bundled dependencies
 retain their notices. Stacks fixtures retain [upstream attribution and
 GFDL terms](tests/fixtures/stacks/README.md). The project license does not
-relicense source material. See [publication notes](PUBLIC_READINESS.md).
+relicense source material.

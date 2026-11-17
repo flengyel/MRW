@@ -1,16 +1,14 @@
 # Obsidian and notes in place
 
-This guide describes delivered commands. [The integration contract](INTEGRATION_BOUNDARIES.md)
-also specifies the pending source-to-Zettel correction: source material may be
-reformulated and remain editable, independently of the derived Zettel. The
-exact-copy continuation below still has its documented transfer restrictions.
-Obsidian owns creation through its configured template; existing notes may be
-edited in either application's native editor. Shared-file refresh is implemented;
-automatic cross-system rename/move reconciliation is not claimed.
+This guide describes the optional Obsidian integration. Source annotations and
+linked notes remain independently editable. Obsidian owns creation through its
+configured template; existing notes may be edited in either application's
+native editor. Shared-file refresh is implemented; automatic cross-system
+rename/move reconciliation is not claimed.
 
 MRW and Obsidian can open the same Markdown notes. MRW supplies Contents,
 links, backlinks and Return in VS Code; Obsidian retains its own editing and
-rendering. No conversion, import or Zettel metadata is required. Handwritten
+rendering. No conversion, import or special note metadata is required. Handwritten
 work can remain in scans, PDFs or other attachments linked from a note.
 
 MRW also supports links between Obsidian notes and separately retained sources
@@ -42,8 +40,8 @@ selected path; cancelling does not change it.
 
 | Setting | Value |
 | --- | --- |
-| `mrw.notesFolder` | Absolute vault-root path on the extension host. A Windows vault at `C:\Users\<user>\Zettelkasten` is `/mnt/c/Users/<user>/Zettelkasten` in WSL. |
-| `mrw.obsidianVault` | Optional Obsidian vault name or ID. Empty uses the selected folder's name, such as `Zettelkasten`. This is not a directory path. |
+| `mrw.notesFolder` | Absolute vault-root path on the extension host. A Windows vault at `C:\Users\<user>\Notes` is `/mnt/c/Users/<user>/Notes` in WSL. |
+| `mrw.obsidianVault` | Optional Obsidian vault name or ID. Empty uses the selected folder's name, such as `Notes`. This is not a directory path. |
 
 Open a note through **MRW: Open Document…**, then choose **Open in Obsidian**
 above its Markdown preview or run **MRW: Open Note in Obsidian**. This uses the
@@ -56,7 +54,7 @@ Unsaved VS Code changes prevent replacement; MRW does not save or merge them.
 Both applications must address the same files. A link does not synchronize a
 separate Linux or SSH copy.
 
-The maintainer's [Zettel repository](https://github.com/flengyel/Zettel) describes
+The maintainer's [published note format](https://github.com/flengyel/Zettel) describes
 a note format, templates and scripts. Its [wiki](https://github.com/flengyel/Zettel/wiki)
 describes Obsidian configuration and conventions. These are optional companion
 resources; MRW does not install their plugins or configure the vault. New Note
@@ -246,7 +244,7 @@ paths when working in WSL.
 
 1. In Obsidian, open the note and run **Copy Obsidian URL for current
    file**. The URL has the form
-   `obsidian://open?vault=Zettelkasten&file=NOTE_ID` and contains no note prose.
+   `obsidian://open?vault=Notes&file=NOTE_ID` and contains no note prose.
 2. In MRW's saved-source reader, expand **Source details and tools** and, for a
    published source, **Source links and Obsidian notes**. Choose **Link an
    Obsidian note…** under **Whole source**, or use a passage's **This passage**
@@ -279,7 +277,7 @@ saved note and link** verifies the saved destination and selected format without
 requiring an exact-text replica or special marker. If **Zettel — flengyel/Zettel**
 is selected, the existing external validator checks that note only. Other notes
 keep their own format. Format validation does not establish intellectual
-completeness or useful conceptual links. See [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
+completeness or useful conceptual links. See [source notes and linked notes](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
 The maintainer's format keeps filename stem equal to YAML id, YAML title as
 ID plus human title, a unique H1, SEE ALSO and Research, and a title-appropriate

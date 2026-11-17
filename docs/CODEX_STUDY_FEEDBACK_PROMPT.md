@@ -176,8 +176,7 @@ implementation.
   included source has been reviewed.
 - Preserve candid development history. Embarrassing mistakes, failed experiments
   and rough interface versions are not reasons to erase commits.
-- Prepare a compact PUBLIC_READINESS.md stating findings, remaining blockers and
-  proposed release contents. Fix ordinary documentation and attribution issues.
+- Fix ordinary documentation and attribution issues.
   Do not rewrite Git history, rotate credentials, change repository visibility,
   publish a release/Marketplace package, or contact testers under this task.
   A discovered exposure needs a concrete remediation proposal before those

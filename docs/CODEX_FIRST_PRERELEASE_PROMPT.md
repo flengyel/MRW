@@ -36,9 +36,8 @@ tag. Substitute the selected version consistently below.
    `https://github.com/flengyel/MRW/releases/download/v0.23.6/mrw-0.23.6.vsix`,
    with the matching release-page link. Use explicit versioned links rather
    than relying on GitHub's latest-release redirect for a prerelease.
-4. Add a current-status note to PUBLIC_READINESS.md: the repository is public,
-   and this task distributes the packaged extension. Preserve the November 5
-   review's scope, findings and unresolved decisions; public visibility does
+4. Preserve the November 5 publication review's scope, findings and unresolved
+   decisions; public visibility does
    not retrospectively clear those findings. Do not rewrite history or remove
    research material as part of this task.
 5. Add a short docs/RELEASING.md describing this repeatable procedure. Keep

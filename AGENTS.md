@@ -60,19 +60,21 @@ owner's template, evaluator, kernel manager, queue or managed database writer.
 Preserve subsystem identities separately from MRW captures. Missing companions
 must not block unrelated MRW work; isolate native mutation tests before dispatch.
 
-Source notes and Zettels develop independently. Preserve prior association
+Source notes and linked notes develop independently. Preserve prior association
 records, original snapshots and links; do not restore exact-copy or annotation
 retirement gates. Current implementation and verification status belongs in the
 design reconciliation register above.
 
-## Source notes and the Zettelkasten
+<a id="source-notes-and-the-zettelkasten"></a>
+
+## Source notes and linked notes
 
 Treat MRW workspace working notes as source notes: preserve them as material
 for the reader's later selection, formulation and linking. Do not automatically
-promote them to Zettels or equate copying/format validation with that work.
-Creation in a Zettelkasten goes through its editor and configured template.
-Respect each reader's format; the maintainer's Zettel specification is one
-choice. Machine-suggested content and links remain proposals. Preserve useful
+treat copying or format validation as a substitute for that work.
+The selected notes application owns creation and its configured template.
+Obsidian and the maintainer's published note format are optional choices.
+Machine-suggested content and links remain proposals. Preserve useful
 human deliberation without adding classifications, forms or completion gates.
 See [the division of responsibilities](docs/NOTE_COMPANIONS.md#source-notes-and-zettels).
 
@@ -80,9 +82,9 @@ See [the division of responsibilities](docs/NOTE_COMPANIONS.md#source-notes-and-
 
 Published in [0.23.31](docs/RELEASE_0_23_31.md). Not installed into the working window.
 
-Creating a note in the user's Zettelkasten must go through Obsidian and its
-configured note-creation template. This includes development and validation
-work: do not write a placeholder or fixture Markdown file into the vault,
+When the selected notes folder is an Obsidian vault, creating a note must use
+Obsidian and its configured note-creation template. This includes development
+and validation work: do not write a placeholder or fixture Markdown file into the vault,
 copy a reduced template, or automate the user's interactive keyword/title
 prompts. Use isolated test vaults for native creation checks; run the actual
 configured template there. Ordinary unit fixtures outside real vaults are test
@@ -92,7 +94,7 @@ New Note and reader-note continuation share the configured Obsidian handoff.
 No implicit plain-file command, direct-file fallback or automatic retry is
 allowed. An explicit command is required; MRW checks its registration, not its
 internal behavior or completion of template prompts. Preserve existing notes,
-drafts, templates and the working window. Do not apply one user's Zettel format
+drafts, templates and the working window. Do not apply one user's note format
 to every vault. Non-vault folders keep their ordinary VS Code editor route.
 
 ## Saved-source Trash
@@ -955,7 +957,7 @@ See UX_SPEC.md §§9.1–9.3 for the now-independent evaluations.
 Keep Qt worker results detached; only explicitly queued main-thread QObject
 slots may apply completion results to controllers or widgets.
 
-Read `README.md`, `VISION.md`, `VOCABULARY.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`,
+Read `README.md`, `VISION.md`, `DOMAIN_MODEL.md`, `UX_SPEC.md`,
 `CODEX_PLAN.md`, and `docs/JUSTIFICATION_LOGIC_EXPERIMENT.md` before changing
 behavior. Use `docs/DESIGN_RECONCILIATION.md` for current decisions and pending
 work, and `docs/CODEX_MAINTENANCE.md` for report-driven corrections. The plan

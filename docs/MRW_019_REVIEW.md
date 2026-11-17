@@ -172,7 +172,7 @@ This review did not run the full Node/Python suites, rebuild or install the VSIX
 operate the native VS Code window, or establish a learning outcome. The separate
 0.19 delivery report states its broader checks and native-launch limitation.
 The repository remains private; the rights/disclosure questions in
-[PUBLIC_READINESS](../PUBLIC_READINESS.md) are unchanged by this code review.
+[PUBLIC_READINESS](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/PUBLIC_READINESS.md) are unchanged by this code review.
 
 ## Next action
 

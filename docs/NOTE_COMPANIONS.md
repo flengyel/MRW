@@ -8,22 +8,23 @@ A note is a document used for working thoughts, arguments or references. It is
 not a separate MRW file type. A Markdown note can have Contents, links and
 backlinks just like another Markdown document.
 
-## Source notes and Zettels
+<a id="source-notes-and-zettels"></a>
+
+## Develop and link notes
 
 **Source notes** are working notes kept in MRW: observations, questions,
 calculations and tentative arguments. They provide material from which the
-reader may develop Zettels and can remain useful in their own right. Keep them
+reader may develop further notes and can remain useful in their own right. Keep them
 as ordinary documents. Retained source snapshots and exact citations have
 their separate meanings.
 
-The reader decides which material to develop into a Zettel, formulates the note
-and chooses its connections to other notes. MRW's notes, annotations, sources and
-calculation results can supply the material. Creation proceeds through the
-Zettelkasten editor and its configured template. In the maintainer's setup this
-is Obsidian with the [Zettel specification](https://github.com/flengyel/Zettel#self-documenting-note-specification).
-Other readers keep their own editor, formats and linking conventions. MRW does
-not require the maintainer's format or invent a replacement for another editor's
-creation workflow.
+The reader selects material, develops the argument and chooses connections to
+other notes. MRW's notes, annotations, sources and calculation results can supply
+the material. The selected authoring application owns creation and its templates.
+Obsidian with the maintainer's [published note format](https://github.com/flengyel/Zettel#self-documenting-note-specification)
+is one optional setup. Other readers keep their own editor, formats and linking
+conventions. MRW does not require that format or replace the editor's creation
+workflow.
 
 This is separation of concerns: MRW retains working material and its provenance;
 the maintaining application owns creation, identity and templates; the reader
@@ -74,7 +75,7 @@ creation command or selects an existing note. Native editing and Save are
 followed by explicit verification before the external note becomes current.
 [Continue an annotation](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation)
 describes optional copying, association, selected-format validation and recovery.
-Source annotations and Zettels remain independently editable. One source note
+Source annotations and linked notes remain independently editable. One source note
 can link several notes, and one note can combine several sources. Linking
 preserves an attributed source snapshot; it requires no matching prose or
 retirement of the source annotation.
