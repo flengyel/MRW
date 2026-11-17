@@ -82,18 +82,16 @@ check. OCRmyPDF does not supply MRW with PDF Contents or page-position recovery.
 | [SageQueue](https://github.com/flengyel/sagequeue) | Queue SageMath batch jobs in a running SagePod instance, with task submission, partitions, workers, resource limits and logs. |
 | MRW | Connect reading and retained sources with ordinary working files; [retain, compare and export saved notebook results](NOTEBOOK_RESULTS.md). |
 
-SageQueue has been rewritten to use SagePod's runtime. It is a job queueing
-system, not another SageMath image or a VS Code extension. Its current
-[README](https://github.com/flengyel/sagequeue/blob/main/README.md), reviewed on
-**2026-11-13**, documents Python 3.10+, rootless Podman and Linux/WSL2 ACL tools,
+SageQueue uses SagePod's runtime. Its
+[README](https://github.com/flengyel/sagequeue/blob/main/README.md) documents
+Python 3.10+, rootless Podman and Linux/WSL2 ACL tools,
 with scripts under the shared notebook directory. Queue commands do not build,
 restart or remove SagePod. Use the upstream [command reference](https://github.com/flengyel/sagequeue/blob/main/docs/commands.md)
 for submission, cancellation, retries and worker management.
 
 Choose Jupyter for interactive notebook work and SageQueue for batch jobs.
 They share SagePod's resources; set worker concurrency accordingly. MRW has no
-SageQueue submission or job-monitoring controls. This documentation review did
-not run a queue job or change a container. Follow the
+SageQueue submission or job-monitoring controls. Follow the
 [SagePod notebook guide](GETTING_STARTED_WSL_SAGEPOD.md) for interactive setup.
 
 ## Sagebrush
@@ -126,11 +124,9 @@ Set `mrw.obsidianVault` only if the vault name or ID differs from the folder nam
 See [Obsidian configuration and the shared-file workflow](OBSIDIAN_WORKFLOW.md#configure-obsidian-with-mrw)
 for settings, saved-edit refresh and rendering limits.
 
-[flengyel/Zettel](https://github.com/flengyel/Zettel) documents the maintainer's
-Zettelkasten note format, templates and supporting scripts. Its
-[wiki](https://github.com/flengyel/Zettel/wiki) documents Obsidian configuration,
-software and working conventions. These are companion references; MRW does not
-require the Zettel format, its scripts or its Obsidian plugins.
+The maintainer's [published note format](https://github.com/flengyel/Zettel)
+and [configuration examples](https://github.com/flengyel/Zettel/wiki) are optional.
+MRW requires neither that format nor its scripts or Obsidian plugins.
 
 [New Note](OBSIDIAN_WORKFLOW.md#new-note) invokes the configured Obsidian command
 and its template. Other folders use a blank VS Code Markdown editor. The Archive's

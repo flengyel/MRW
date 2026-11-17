@@ -25,10 +25,10 @@ For example, import [Topology, Hausdorff spaces (08ZD)](https://stacks.math.colu
 4. Follow a local citation, such as `stacks-project:08ZE`, to its retained
    statement. **Open original source ↗** opens the current published page.
    Chapter context and other citations are under **Source details and tools**.
-5. Use **Add reader note** beside a passage to annotate it,
-   supply its attribution and choose **Save annotation**. Annotations remain
-   separate from the authors' text. Save before closing: unsaved reader drafts
-   are not ordinary VS Code text documents.
+5. Choose **Add a note** beside a passage, write the annotation, and choose
+   **Save**. Supply origin and author under **Attribution** when known.
+   Annotations remain separate from the authors' text. Save before closing:
+   unsaved reader drafts are not ordinary VS Code text documents.
 6. Reopen with **Open Document… → Saved copy** or **MRW: Open Saved Source…**.
    Reading, annotations and citations within the saved section require no
    further download.

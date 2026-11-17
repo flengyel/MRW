@@ -224,7 +224,7 @@ its **Open <document>** control opens the selected Contents document. Following
 a citation from Contents gives **Return to <document>** for that exact occurrence.
 
 Each visible passage has
-**Add a note**, **Delete reader note…**, **Link Obsidian note…** and **Ask AI about this passage…**
+**Add a note**, **Delete reader note…**, **Link Obsidian note…** and **Ask OpenAI API about this passage…**
 on one line, in that order. **Add a note** opens that passage's annotation
 editor. Enter your text and attribution, then **Save**.
 **Reader notes** displays the saved text beside the passage. **Delete reader
@@ -236,18 +236,17 @@ Obsidian. **Change or remove link…** changes only the association; it never
 deletes or rewrites the vault file. The link pins this retained passage, while
 the external note remains editable in its vault.
 
-To develop one saved annotation in an ordinary note, choose **Continue this note
-in Obsidian…** beside it. Select a saved note, or create one through your configured
-Obsidian command and then select its saved file. Choose ordinary Markdown or the
-optional Zettel format. For Zettel, complete the title index link in SEE ALSO;
-the template alone leaves it empty.
+To develop one saved annotation in an ordinary note, choose **Link another
+note…** beside it. Select a saved note, or create one through your configured
+Obsidian command and then select its saved file. Choose the matching format
+when prompted.
 
 Copying annotation text and its attribution/return link is optional. The note
 can paraphrase the annotation or combine several sources. Save it, then choose
 **Confirm selected saved note and link**. The selected external validator checks
-the Zettel format when requested; it does not judge the note's content.
+the selected format when requested; it does not judge the note's content.
 
-**Open continuation** opens the external note. The source annotation remains
+**Open linked note** opens the external note. The source annotation remains
 editable and the snapshot captured when linking stays inspectable. **Link another
 note…** preserves existing associations. Pending links resume without creating a
 second file; missing notes offer explicit relinking. No link opens an AI request

@@ -175,7 +175,7 @@ the library or bibliography actually read. Windows Zotero can be reached from
 WSL through Windows loopback, without forwarding its API port.
 [Setup and limits](docs/ZOTERO_WORKFLOW.md).
 
-### Notebook results
+## Notebook results
 
 Use Jupyter with a SagePod SageMath kernel or another configured kernel. Retain
 a saved notebook and optional companion notes, reopen its outputs, compare

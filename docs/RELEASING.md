@@ -24,11 +24,9 @@ The steps below apply when building a new version.
    `vscode/package-lock.json`, preserving dependency pins. Set the `mrw` Activity
    Bar container title to `MRW <version>` in the manifest; VS Code uses it for
    the icon hover and sidebar heading. Package verification rejects a stale title.
-   Update current examples
-   in both READMEs and the installation guide, plus explicit versioned release
-   and VSIX links. Preserve earlier evidence unchanged; if a task requires its
-   archival, link its immutable source snapshot. Commit these changes
-   as **A**.
+   Update versioned release and VSIX links in both READMEs and the installation
+   guide. Keep release facts and check results in release notes or the pull
+   request. Commit these changes as **A**.
 3. Set `vscode/media/build-info.json` to the selected version, A's full commit SHA
    and `localChanges: false`. Commit only that marker as **B**. Verify that the
    A-to-B diff contains only this file. B is the release commit; A is the embedded

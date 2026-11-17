@@ -10,9 +10,8 @@ with [path A in the installation guide](INSTALLATION.md#a-mrw-for-reading).
 That path also points to the existing AI connector; SagePod is an optional
 computation companion with its own installation.
 
-This tutorial gets you from Windows VS Code to a mathematical reading workspace
-with an ordinary notebook running SageMath. It describes **MRW 0.23.18**. The
-SagePod helper instructions use revision `4bc1bc3`, reviewed on **2026-11-03**.
+This tutorial connects Windows VS Code to MRW and an ordinary notebook running
+SageMath. The SagePod helper instructions are scoped to revision `4bc1bc3`.
 
 MRW is the **Mathematical Research Workstation** VS Code extension. Download
 its VSIX from the [current GitHub release](https://github.com/flengyel/MRW/releases/latest)
@@ -86,17 +85,17 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`mrw-0.23.18.vsix`. Alternatively, in that window's WSL integrated
+`mrw-0.23.45.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/mrw-0.23.18.vsix
+code --install-extension /absolute/path/to/mrw-0.23.45.vsix
 code --list-extensions --show-versions
 ```
 
-Check that **Mathematical Research Workstation 0.23.18** appears under
+Check that **Mathematical Research Workstation 0.23.45** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.mrw@0.23.18`. If an extension appears
+The CLI identity is `flengyel.mrw@0.23.45`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
@@ -243,7 +242,7 @@ MRW targets. Keep the same workspace for existing references; use the documented
 ## 6. Save and return later
 
 Press **Ctrl+S** to save your notebook and Markdown. Save MRW annotation forms
-using their own **Save annotation** button. On reopening the same workspace,
+using their own **Save** button. On reopening the same workspace,
 open the notebook and working note normally. With the note's Markdown editor
 active, use **MRW: Show Contents**; **MRW: Open Saved Source…** reopens the reader.
 
@@ -275,12 +274,11 @@ Linux Node.js, npm and Git are build dependencies, not notebook-reading
 requirements. Keep the source checkout separate from your MRW workspace and
 SagePod's notebook directory.
 
-## Roadmap and further help
+## Further help
 
-[CODEX_PLAN.md](../CODEX_PLAN.md) records current implementation and remaining work.
-MRW 0.19.0 introduced retained companion help and linked study continuation. The
-[study workflow](ACTIVE_STUDY_WORKFLOW.md) covers that interaction; notebook-cell
-capture still belongs to the separate Jupyter workflow described here.
+The [study workflow](ACTIVE_STUDY_WORKFLOW.md) covers retained companion help
+and linked study continuation. Notebook-cell capture belongs to the Jupyter
+workflow described here.
 [Reader AI](READER_AI_WORKFLOW.md) documents the separate API preview/Send path.
 Current installation/build instructions are in [INSTALLATION.md](INSTALLATION.md)
 and the [extension guide](../vscode/README.md).

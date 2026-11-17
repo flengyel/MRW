@@ -240,8 +240,8 @@ range has since changed.
 
 ## Continue a reader annotation
 
-In Reader notes, choose **Continue this note in Obsidian…** or **Link another
-note…** beside a saved annotation. Select an existing note, or invoke your
+In Reader notes, choose **Link another note…** beside a saved annotation.
+Select an existing note, or invoke your
 configured Obsidian template creation command. Complete creation in Obsidian
 and explicitly select the saved file. Existing notes can also be edited and
 saved in the native VS Code editor.

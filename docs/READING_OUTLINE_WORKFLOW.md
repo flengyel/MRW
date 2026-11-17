@@ -98,8 +98,8 @@ receives the saved file, not unsent VS Code text. See the
 Choose **MRW: Choose Notes Folder…** to select the folder used for note-ID
 lookup and backlinks. It may be outside the workspace, including a Windows
 folder mounted in WSL. The selection sets `mrw.notesFolder` in workspace
-settings; it accepts an absolute extension-host path. Ordinary Markdown needs
-neither Obsidian nor Zettel metadata.
+settings; it accepts an absolute extension-host path. Ordinary Markdown requires
+neither Obsidian nor special note metadata.
 
 The chooser shows **Current** and **Recent** folders with their full paths.
 Select a recent entry to switch directly, or **Browse for notes folder…**.
@@ -217,9 +217,10 @@ available, and qualified identifier. Source and storage details stay under
 **Source details and tools**. Hover or Tab-focus reader controls for help;
 Escape dismisses it. Destination labels remain visible without hovering.
 Annotations use **Save** and remain separate from the source text.
-To continue one in an ordinary note, use **Continue this note in Obsidian…**
-beside its saved text. After verification, the external note is current and the
-original remains inspectable. See [the handoff](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
+To continue one in an ordinary note, use **Link another note…**
+beside its saved text. Confirm the selected saved note to link it. The source
+annotation and external note remain independently editable; copying is optional.
+See [the handoff](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
 Copying a Markdown link does not copy its private retained target.
 `mrw-outline:v1` references remain valid.
 

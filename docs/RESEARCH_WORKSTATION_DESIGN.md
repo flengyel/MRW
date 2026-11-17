@@ -126,7 +126,7 @@ guide reuse; they do not establish an installed or working MRW integration.
 | System | Documented overlap | MRW decision and boundary |
 | --- | --- | --- |
 | [Jupyter AI](https://jupyter-ai.readthedocs.io/en/latest/users/chat/guide.html) | Attach selected notebook material to a conversation; act on suggested code through explicit controls. Its [agent workflow](https://jupyter-ai.readthedocs.io/en/latest/users/terminal-agents/workflows.html) describes reviewing notebook changes. | Make context and proposed edits inspectable beside the work, using existing companions. Do not duplicate its chat interface or assume JupyterLab facilities are a VS Code API. |
-| [nbdime](https://nbdime.readthedocs.io/en/stable/cli.html) | Notebook-aware comparison of sources, outputs, metadata and attachments, including a rich diff viewer. | Evaluate native notebook diff and nbdime before building a comparison engine. No integration is selected yet; assess host compatibility, read-only output handling, resource use and any server exposure before adoption. |
+| [nbdime](https://nbdime.readthedocs.io/en/stable/cli.html) | Notebook-aware comparison of sources, outputs, metadata and attachments, including a rich diff viewer. | MRW uses native notebook viewing and diff with Jupyter, with a transcript fallback. Rich-output visual verification remains incomplete; see [notebook results](NOTEBOOK_RESULTS.md#viewing-and-comparison). |
 | [Org/Babel](https://orgmode.org/guide/Working-with-Source-Code.html) | Source blocks, code editing/evaluation and results kept with surrounding prose, with export options. | Keep explanation, code, result and reference near enough to follow through existing documents and links. No required Org format, duplicated prose or second evaluator follows from this lesson. |
 
 The adopted directions and exclusions are recorded in the
@@ -218,18 +218,18 @@ native rendering, execution or general API compatibility. Its kernelspec says
 
 ### Zotero integration
 
-Existing-note citation rendering is separate from lookup, Markdown insertion
-and retained attachments. Obsidian/Pandoc `[@key]` syntax does not currently
-resolve in MRW. The [reader requirement](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes)
-calls for an optional existing processor and scoped bibliography without note
-rewrites, duplicate library management or an automatic live Zotero query.
+Native Markdown preview renders bracketed Pandoc citations through Pandoc/CSL
+with a scoped bibliography or Better BibTeX lookup. Citation rendering is
+separate from reference lookup, Markdown insertion and retained attachments;
+it does not rewrite the note or manage a second library. See
+[citation setup and limits](ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes).
 
 See [workflow and limits](ZOTERO_WORKFLOW.md). Connect the existing Zotero
 library to mathematical study and the research lab notebook. Zotero continues
 to manage references; MRW links them to the passages, notes, calculations and
 proofs that use them.
 
-The initial workflow should support:
+The current workflow supports:
 
 1. Find and select an item from a chosen Zotero library, retaining its
    bibliographic metadata and a link back to the item.
@@ -240,10 +240,11 @@ The initial workflow should support:
    Zotero's metadata and citation facilities. Keep bibliographic citations
    distinct from MRW's exact retained-passage references.
 
-Use Zotero's documented [local API](https://www.zotero.org/support/dev/web_api/v3/local_api)
-or [Web API](https://www.zotero.org/support/dev/web_api/v3/basics) as appropriate to
-the selected library and host. Begin with reference lookup and linking; automatic
-two-way synchronization and library editing are outside the first increment.
+The current adapter uses Zotero's documented
+[local API](https://www.zotero.org/support/dev/web_api/v3/local_api).
+The [Web API](https://www.zotero.org/support/dev/web_api/v3/basics) is a separate
+integration option. Automatic two-way synchronization and library editing are
+not implemented.
 Do not read or modify the live SQLite database or move Zotero-managed files.
 
 Verify the Windows Zotero / WSL2 MRW connection explicitly before choosing a

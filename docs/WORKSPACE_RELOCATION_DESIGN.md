@@ -47,9 +47,8 @@ recovery. Reopen references and verify exact bytes and state at the destination.
 Check both same-filesystem and cross-filesystem cases where supported. Report
 native host observations separately from storage and API checks.
 
-This work precedes the PROV trial. Do not migrate the user's workspace merely to
-test it, and do not ship a button that moves only a subset under the name “Move
-Workspace”.
+Do not migrate the user's workspace merely to test it, and do not ship a button
+that moves only a subset under the name “Move Workspace”.
 
 ## Using the commands
 

@@ -111,17 +111,19 @@ outlines, attributed AI proposals and reversible deletion. General extraction,
 automatic gap detection and verification of mathematical implications remain
 outside this representation.
 
-## First manual overview across sources — reference contract, 2026-10-16
+<a id="first-manual-overview-across-sources--reference-contract-2026-10-16"></a>
 
-This increment activates ordinary Markdown overviews referring to existing
-saved source outlines, including informal sources. An overview may concern a
-subject, book, monograph, article, section or argument and connect sources
+## Source references
+
+Ordinary Markdown overviews refer to retained sources, including informal
+arguments. An overview may concern a subject, book, monograph, article, section
+or argument and connect sources
 without imposing a hierarchy. VS Code owns editing, undo, saving, recovery and
 preview. No template, questionnaire or reading sequence is required. Overview
 prose is reader synthesis; its references supply navigation, not checked
 dependencies, proof status or source assertions.
 
-Reference identity is defined before implementation:
+The `mrw-outline:v1` grammar is:
 
 ```text
 mrw-outline:v1/SCOPE/OUTLINE/SOURCE
@@ -130,7 +132,7 @@ mrw-outline:v1/SCOPE/OUTLINE/SOURCE/REGION/SL.SC-EL.EC
 
 For stores using path-based scopes, `SCOPE` is the lowercase SHA-256 of the canonical project
 path, NUL and canonical private outline-store path (UTF-8). For explicitly moved
-0.7.0 stores it is SHA-256 of `mrw-store-v1`, NUL, persistent store UUID, NUL and
+stores it is SHA-256 of `mrw-store-v1`, NUL, persistent store UUID, NUL and
 persistent project UUID. The immutable store identity retains a recomputed,
 verified compatibility mapping for its earlier path-based scope. Explicit local adoption
 maps each project to a local folder; matching path names alone cannot establish
@@ -151,9 +153,9 @@ locator and retained revision. Missing metadata stays unknown. The visible
 label is a citation snapshot; later metadata/annotation changes do not rewrite
 the Markdown or invalidate its target.
 
-An explicit **Follow Outline Reference at Cursor** action accepts only this
-reference grammar. It opens the existing reader; a region reference also opens
-and selects its exact retained passage. Annotation edits do not change reference
+**MRW: Follow Source or Passage Link at Cursor** accepts this reference grammar.
+It opens the existing reader; a region reference also opens and selects its
+exact retained passage. Annotation edits do not change reference
 identity. If a region is removed or its range changes, navigation reports the
 changed association and opens the originally pinned retained passage, selecting
 no replacement reader region. It does not silently follow the region's new
@@ -165,9 +167,8 @@ outlines, unavailable/corrupt retained storage, source-identity mismatch or a
 different workspace/storage scope cause a clear failure, without rewriting
 Markdown, creating storage, searching other projects or guessing a replacement.
 Following is read-only, including when a reader region is collapsed. It invokes
-no provider, compiler, external command or arbitrary URI handler. The Command
-Palette action works in the Markdown editor; preview-click handling is outside
-this first increment.
+no provider, compiler, external command or arbitrary URI handler. This contract
+covers the Command Palette action in a Markdown editor.
 
 Copying Markdown alone does not transfer private outlines or retained sources.
 References are scoped navigation data, not a synchronization/export format,
@@ -176,11 +177,13 @@ Automatic source discovery and cross-host synchronization remain outside this
 reference contract. Explicit inference graphs and vertex elimination use the
 [separate graph format](PROOF_GRAPH_WORKFLOW.md#file-boundary).
 
-## Obsidian companion navigation — 2026-10-17
+<a id="obsidian-companion-navigation--2026-10-17"></a>
 
-Version 0.6.0 wraps the existing `mrw-outline:v1` reference in a standard VS Code
-extension URI. The permanent payload contains the unchanged reference plus
-separate project/workspace routing, never a transient window ID or cached
+## Companion navigation
+
+An Obsidian link wraps the retained-source reference in a VS Code extension URI.
+The permanent payload contains the unchanged reference plus separate
+project/workspace routing, never a transient window ID or cached
 external callback. The original parser, scope validation, resolver and reader
 remain authoritative. Changed/removed region associations still open their
 original pinned range. Ordinary Markdown labels use a bounded source title and

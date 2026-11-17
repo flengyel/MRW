@@ -56,8 +56,7 @@ npm run package --prefix diagnostics
 ```
 
 Packaging reuses the core's pinned VSCE installation; it does not publish or
-install either extension. Native-window observations and package verification
-are recorded in the parent MRW delivery report.
+install either extension.
 
 The core release includes the optional mrw-diagnostics-0.1.0.vsix asset. Install
 it separately through Extensions: Install from VSIX on the same workspace host.

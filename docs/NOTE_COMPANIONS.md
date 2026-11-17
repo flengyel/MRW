@@ -63,9 +63,9 @@ MRW's saved sources, annotations and research records remain part of its reading
 and research functions. Delegating document creation does not remove that saved
 work or change its format.
 
-For a saved reader annotation, **Continue this note in Obsidian…** reuses that
-creation command or selects an existing note. Native editing and Save are
-followed by explicit verification before the external note becomes current.
+For a saved reader annotation, **Link another note…** reuses that creation
+command or selects an existing note. Save the file in its native editor, then
+choose **Confirm selected saved note and link** to publish the association.
 [Continue an annotation](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation)
 describes optional copying, association, selected-format validation and recovery.
 Source annotations and linked notes remain independently editable. One source note

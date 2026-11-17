@@ -150,9 +150,10 @@ distinct.
 Study checkpoints live in `active-studies-v1/` and events and immutable snapshots
 in `study-history-v1/`, within private VS Code workspace storage. They are not
 repository files or package resources. Managed saved-source moves do not transfer
-this state, and cross-machine or renamed-workspace migration is not implemented.
-Keep the original workspace storage when continuing work. One local writer per
-workspace is supported.
+this state. The supported [Move Workspace workflow](WORKSPACE_RELOCATION_DESIGN.md)
+includes private study state and history. Manual folder renaming and cross-machine
+study migration remain unsupported. Keep the original workspace storage when
+continuing work outside that workflow. One local writer per workspace is supported.
 
 **Configure History…** connects a separate data directory, a vault
 subdirectory (preferably `<vault>/MRW/`) or the vault root. It imports and verifies
