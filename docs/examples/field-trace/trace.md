@@ -30,7 +30,7 @@ Then
 
 $$
 \mathrm{Tr}_{K/\mathbb Q}(\alpha)
-=-[K:F]\,c_{d-1}.
+=-[K:F]\cdot c_{d-1}.
 $$
 
 When $K=F$, the factor $[K:F]$ is $1$.
