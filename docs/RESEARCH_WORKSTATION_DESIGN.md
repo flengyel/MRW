@@ -76,7 +76,7 @@ valuable when it contributes to that interaction or makes research resumable.
 
 Design first for Florian's mathematical work and tools. Keep the
 implementation usable with ordinary files and folders, without Obsidian,
-Zettel conventions, a model account, Lean, or SageMath as entry requirements.
+a particular note format, a model account, Lean, or SageMath as entry requirements.
 No multi-user product framework is needed for this sequence.
 
 ## Operational feedback and maintenance
@@ -118,7 +118,7 @@ The sidebar provides Contents and Commands; the Lean tutorial remains separate.
 ## Related systems and reuse
 
 MRW is experimenting with workflows that combine continuing mathematical
-study, a research lab notebook, linked Markdown/Zettelkasten notes, computation
+study, a research lab notebook, linked Markdown notes, computation
 and formal proofs. The combination is a design direction, not a claim that
 comparable systems do not exist or that the complete workflow is implemented.
 
@@ -282,40 +282,12 @@ missing attachment and changed metadata/content; earlier retained citations
 must keep their original targets. Archive/delete of an MRW Study must leave
 Zotero's library and attachments intact.
 
-## Vocabulary and interface labels
+## Interface labels
 
-| Term | Meaning |
-| --- | --- |
-| Document | Material opened for work, such as a Markdown note, PDF paper, manuscript, or notebook. Format determines available operations. |
-| Contents | Navigation within the selected document. It is derived from the document, not a second authored document. |
-| Source | A document or other material used as a reference for a particular question or claim. This is a role, not a file format. |
-| Saved source | An explicitly retained source revision, with reader selections and annotations where present. The Open Document picker labels this choice **Saved copy**. |
-| Passage | A selected part of a document or saved source; retained references identify the exact revision and range. |
-| Note | A document used for working thoughts, arguments or references. Workspace working notes serve as source notes. |
-| Zettel | A note the reader selects, develops and links within their Zettelkasten, using their editor and format. The [Zettel convention](https://github.com/flengyel/Zettel) is one optional format. |
-| Research question | The mathematical question under investigation; it may already be written in an ordinary note. This term does not require an MRW registration object or recall item. |
-| Study question | A task used to test or develop comprehension of particular material. Keeping it for scheduled review remains explicit. |
-| Proof outline | A condensed account of an argument. A proof graph is one representation of its claims and inferences. Neither term names a document's contents list. |
-| Reconstruction | Attributed work making an argument's reasoning explicit, including corrections and remaining gaps. It does not inherit the source's checking status. |
-
-Use Document in the interface and ordinary prose. Name the format when it
-changes a choice or explains a current limit. Show the document's title or
-filename once selected. Retire Reading overview as an application object name.
-Keep overview and outline as ordinary mathematical or expository words where
-they have their ordinary meanings.
-
-The delivered 0.19.2 GUI patch changed visible labels, help, welcome text and
-current workflow instructions. It preserved command IDs, view IDs, settings keys,
-serialized records, stored references, filenames and note bytes.
-In particular, `mrw-outline:v1` remains a compatible reference format.
-The exact first-patch label map and implementation boundaries are in
-[the Codex task](CODEX_DOCUMENT_WORKFLOW_PROMPT.md).
-
-**Open Document…** opens an original file or a saved copy. **Show Contents**
-focuses navigation for a selected Markdown document. Contents supports headings,
-ordinary links, scoped WikiLinks and retained-source references; it does not
-extract a contents tree from a PDF. The host's **File: Open File…** remains
-available alongside MRW's commands.
+Use **Document** for the current file and **Contents** for its navigation.
+Proof outlines remain separate views of mathematical claims and inferences.
+Existing command IDs, settings, stored references and note bytes retain their
+identities when visible labels change.
 
 <a id="existing-documents-and-optional-integrations"></a>
 
@@ -331,7 +303,6 @@ external-change handling and recovery. MRW's retained records remain separate.
 | --- | --- |
 | Markdown | Open in place; edit or preview; navigate headings and supported links through Contents. Note-local macros and explicitly rendered TikZ diagrams stay separate from the original text. |
 | PDF | Hand off to an available reader. MRW does not extract text or Contents, or restore a PDF page. |
-| Zettel | Open the same Markdown file; recognize its ID and title; resolve supported links within a selected notes folder. Obsidian embeds remain unsupported in MRW. |
 | Notebook / SageMath | Use VS Code/Jupyter with SagePod. Notebook editing and execution belong to that integration; MRW does not restore live kernel state. |
 | Lean / LaTeX / code | Use the relevant host extension or tool. MRW does not independently submit a check, build or run on opening; normal owner-extension diagnostics remain available. |
 | Handwritten work | Keep a link to the scan, image or PDF in a note and open it with an available viewer. MRW supplies no handwriting recognition. |
@@ -370,30 +341,31 @@ MRW invokes the configured Obsidian command or opens a blank host editor.
 The invoked application owns its prompts, templates, filename and Save;
 the separate reading-starter command was removed in 0.23.26.
 
-### Zettelkasten
+<a id="zettelkasten"></a>
+
+### Linked notes
 
 Workspace working notes serve as source notes. They preserve material from
-which the reader may develop Zettels, without requiring every observation or
-calculation to enter a Zettelkasten. The reader selects material, formulates it
-and chooses its links; the Zettelkasten editor and configured template own note
+which the reader may develop further notes, without requiring every observation or
+calculation to use a particular notes application. The reader selects material, formulates it
+and chooses its links; the selected notes application and configured template own note
 creation. MRW retains working material, exact source references and return
 locations. This separation preserves the reader's own format and authoring
-practice. Source notes and developed Zettels may have many-to-many associations;
-they need not have identical text or a single editing location. Linking a Zettel
-must not retire its source material. Current associations preserve both works independently; see [source notes and Zettels](NOTE_COMPANIONS.md#source-notes-and-zettels).
+practice. Source notes and independently developed notes may have many-to-many associations;
+they need not have identical text or a single editing location. Linking a note
+must not retire its source material. Current associations preserve both works independently; see [source notes and linked notes](NOTE_COMPANIONS.md#source-notes-and-zettels).
 
 Keep the effort of selection and linking while removing repeated entry and
 navigation obstacles. Do not turn that effort into a registration form or
-automatically declare a copied or format-valid note a completed Zettel. Machine
+automatically declare a copied or format-valid note a completed mathematical note. Machine
 suggestions remain proposals for the reader to consider.
 
-The maintainer's vault is one instance of this workflow. The public
-`flengyel/Zettel` repository describes its format and tools, not a dependency
-that every MRW reader must adopt. Reading a note in place remains possible
+The maintainer's vault is one instance of this workflow. Its
+[published note format](https://github.com/flengyel/Zettel) and tools are optional. Reading a note in place remains possible
 without Obsidian; creation in this vault goes through Obsidian and its template.
 
 When this format is selected, preserve the
-[Zettel specification](https://github.com/flengyel/Zettel#self-documenting-note-specification):
+[optional note-format specification](https://github.com/flengyel/Zettel#self-documenting-note-specification):
 the immutable ID equals the filename stem; YAML `id` contains that ID; YAML
 `title` contains ID plus title; the H1 contains the title; links target `[[ID]]`.
 Keep existing YAML, `SEE ALSO`, `Research`, older section headings, citations,
@@ -401,7 +373,7 @@ embeds and formatting. `reference-section-title: References` names the exported
 bibliography; it is separate from the manually maintained Research section.
 Older ID forms remain valid. Merely opening a note never runs a template,
 renames a file, normalizes prose, or requires successful note validation.
-Not every Markdown document in the vault is a Zettel.
+The selected format is not required for other Markdown documents in the vault.
 
 The [Alphanumeric Index](https://github.com/flengyel/Zettel/wiki/Alphanumeric-Index)
 uses links to reserved index notes and the resulting backlinks. Preserve
@@ -488,7 +460,7 @@ Preserve the FSRS, effort-report and assistance distinctions from [ACTIVE_STUDY_
 | Increment | Deliverable | Concrete completion evidence |
 | --- | --- | --- |
 | 1. GUI terminology | Document / Contents / Saved source / Passage labels with matching help and tutorial | The create/select/follow/return/edit/reopen path works; command IDs, links and saved work are preserved. |
-| 2. Documents and notes | Open in place, ordinary links, selected-folder Zettel links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
+| 2. Documents and notes | Open in place, ordinary links, selected-folder note links/backlinks, optional Obsidian opening, PDF host handoff, matching tutorial | Open a supplied note, follow another note and a PDF, inspect backlinks, return/reopen without an import or note rewrite; the ordinary-folder path works without Obsidian. |
 | 3. Document Problems | Withdrawn at the user’s request in 0.23.3 | Creation routes removed; earlier records and drafts remain readable. |
 | 4. Reading repairs, 0.23.5 | Delivered: exact heading/block WikiLinks, note macros, explicit TikZ rendering, progressive titles and saved Markdown selections | [Repair report and limits](READING_REPAIRS.md). |
 | 5. Broader resumption | Proposed: recover additional locations and unfinished work without question registration | Resume the same notes and drafts with their links and surrounding work preserved; add only a demonstrated missing recovery action. |

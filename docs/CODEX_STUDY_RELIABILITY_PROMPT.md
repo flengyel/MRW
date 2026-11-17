@@ -157,4 +157,4 @@ No new provider adapter, CHREST runtime, analytics service, corpus ingestion,
 telemetry upload or general migration belongs in this repair. The public README
 and exposure review already exist. Do not repeat that campaign, change repository
 visibility, publish packages or resolve ownership/disclosure choices by
-assumption. Continue to preserve the decisions recorded in PUBLIC_READINESS.md.
+assumption. Continue to preserve the decisions recorded in the [archived publication review](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/PUBLIC_READINESS.md).

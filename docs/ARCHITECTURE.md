@@ -66,12 +66,12 @@ transport uses J₀ only; bounded search introduces no constant-specification
 members. Ordinary reading requires
 no claim or premise-entry form.
 
-External systems retain ownership. The Zettelkasten application creates its
+External systems retain ownership. The selected notes application creates its
 notes using its configured workflow; existing notes can be edited natively.
 Jupyter and SagePod supply notebook execution and its environment; the Lean
 extension supplies native proof-checking interaction; Zotero owns its reference
 library. MRW retains selected sources, results and links without introducing competing template engines, evaluators,
-queues or managed databases. Source notes and developed Zettels remain distinct,
+queues or managed databases. Source notes and independently developed notes remain distinct,
 potentially many-to-many works.
 
 The [proposed CoCalc adapter](COCALC_ADAPTER.md) uses the computation and

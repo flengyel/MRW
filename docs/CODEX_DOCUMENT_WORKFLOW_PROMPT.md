@@ -23,7 +23,7 @@ in the present GUI, followed by the ordered integrations in that design.
 
 ## Work from the current checkout
 
-Read AGENTS.md, the current CODEX_PLAN.md priority, VOCABULARY.md and the new
+Read AGENTS.md, the current CODEX_PLAN.md priority and the new
 design before editing. Fetch/inspect current main and preserve later commits,
 local work, genuine notes, saved studies, history and installed packages.
 The baseline identifies this review, not a commit to reset to. Keep the 0.19.1

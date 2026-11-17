@@ -606,7 +606,7 @@ Browser/controller/filesystem interaction passed; isolated native launch exited
 Clipboard relay, outcome reports and review admission remain manual. Unsupported
 workspace/machine transfer and abrupt termination before checkpoint remain limits.
 Repository visibility stays private; publication/ownership decisions in
-PUBLIC_READINESS.md remain unchanged.
+the [archived publication review](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/PUBLIC_READINESS.md) remain unchanged.
 
 ## Earlier delivery — study feedback, 0.19.0
 
@@ -614,7 +614,7 @@ The fetched `origin/main` task at `923539a` is implemented after a clean
 fast-forward. Three parallel workers handled measurement, study UI and public
 preparation with separate file ownership; the root integrated retention and
 performed delivery checks. Read [workflow](ACTIVE_STUDY_WORKFLOW.md),
-[validation](ACTIVE_STUDY_VALIDATION.md) and [public readiness](../PUBLIC_READINESS.md).
+[validation](ACTIVE_STUDY_VALIDATION.md) and [public readiness](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/PUBLIC_READINESS.md).
 
 Do not repeat the measurement repairs. Immutable attempts/submissions resolve
 linked corrections before grouping; timing is fixed at submission against the
@@ -629,7 +629,7 @@ or learning benefit is claimed. Native launch exited 255 before the runner;
 browser/API evidence is distinct. Genuine source/store/study/history content
 must stay intact. The working window was not reloaded or switched. Public
 release remains separately authorized, with concrete disclosure/rights decisions
-in PUBLIC_READINESS.md; do not rewrite history or change visibility.
+in the [archived publication review](https://github.com/flengyel/MRW/blob/af623be0a9dc85cb23dbdde610484ad886ea687a/PUBLIC_READINESS.md); do not rewrite history or change visibility.
 
 Delivery is installed as **0.19.0**: manifest plus 85 runtime files verified,
 VSIX SHA-256 `18980e01c6976ebec01e6f11017d06d0fff01d8e0f5baa3e6282640f90b11942`.

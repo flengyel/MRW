@@ -280,5 +280,4 @@ Use each release's report for the behavior observed in that version.
 including the separate Qt/CLI prototype. [Contributing](../CONTRIBUTING.md).
 
 The package includes MRW's [Apache-2.0 license](../LICENSE) and notices for
-KaTeX, markdown-it, ts-fsrs and Quiver. Source material retains its own license;
-[publication notes](../PUBLIC_READINESS.md) describe attribution and disclosure.
+KaTeX, markdown-it, ts-fsrs and Quiver. Source material retains its own license.

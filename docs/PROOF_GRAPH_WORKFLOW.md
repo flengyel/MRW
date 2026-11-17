@@ -74,6 +74,30 @@ The selected vertices persist in host workspace state, keyed by canonical file
 path and exact editor-text digest. A changed outline starts with all vertices;
 the earlier selection remains available if exact undo restores that revision.
 
+## Vertex elimination
+
+A graph operation that removes a vertex after joining each of its predecessors
+to each of its successors. In the proof-outline view, hidden vertices are
+omitted from the display while the original graph and derivations remain
+available for expansion. Each summarized proof region has a visible claim and explanation;
+required assumptions and joint premises are preserved. This is distinct from
+transitive reduction, node grouping, and proof checking.
+
+In this view, **Delete vertex** performs the display operation and **Expand
+original steps** restores the supporting argument. See the
+[outline design](PROOF_OUTLINES.md) for the scope and mathematical requirements.
+
+## Lean and mathematical English
+
+MRW should help explain selected Lean statements and proof steps in mathematical
+English, and turn a mathematical argument in English into Lean code. An
+explanation should identify the hypotheses, types and reasoning; generated Lean
+should be checked in the selected project. The correspondence between the prose
+and code needs review.
+
+General automatic translation in either direction is a development goal, not a
+capability of the current proof-outline viewer.
+
 ## File boundary
 
 Version 1 is an ordinary document containing `sources`, `scopes`, `nodes`,

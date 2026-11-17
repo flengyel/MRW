@@ -93,8 +93,8 @@ that version and the saved records it produced.
   checks and packaging.
 - [Research-workstation design](RESEARCH_WORKSTATION_DESIGN.md): current scope,
   terminology and proposed work.
-- [Vision](../VISION.md), [vocabulary](../VOCABULARY.md),
-  [domain model](../DOMAIN_MODEL.md) and [UX specification](../UX_SPEC.md):
+- [Vision](../VISION.md), [domain model](../DOMAIN_MODEL.md) and
+  [UX specification](../UX_SPEC.md):
   product aims, concepts and behavior.
 - [Agent instructions](../AGENTS.md), [plan](../CODEX_PLAN.md) and
   [continuation](CODEX_CONTINUATION.md): current development constraints and
@@ -139,10 +139,6 @@ current package links. [Reading repairs for 0.23.5](READING_REPAIRS.md)
 records that earlier increment. Other validation and repair reports describe the versions,
 hosts and sources named in those reports; they do not establish that a later
 build passed the same checks.
-
-[Public readiness](../PUBLIC_READINESS.md) records a separate publication review
-and unresolved disclosure and attribution decisions. Editorial changes to the
-guides do not extend that review or clear those decisions.
 
 The [changelog](../CHANGELOG.md) and
 [earlier VS Code development account](VS_CODE_DEVELOPMENT_HISTORY.md) preserve

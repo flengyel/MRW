@@ -22,8 +22,8 @@ Ownership concerns the operation and its contract, not which process physically
 writes bytes. Opening an existing note or notebook in its appropriate VS Code
 editor and explicitly editing and saving it is allowed. Calling the external
 system's supported creation or execution command is delegation. Independently
-creating a Zettel without its configured editor/template, rewriting a managed
-database or fabricating a job's state is a bypass.
+creating an externally maintained note outside its configured creation workflow,
+rewriting a managed database or fabricating a job's state is a bypass.
 
 MRW owns its source notes, retained snapshots, annotations, associations and
 provenance records. A retained copy has its own capture identity and does not
@@ -33,7 +33,7 @@ optional outside operations that actually require it.
 
 | Subsystem | Responsibilities retained by the subsystem | MRW's integration role |
 | --- | --- | --- |
-| Zettelkasten or other notes application | Create externally maintained notes using its configured workflow; assign identities, filenames and templates; maintain its indexes. | Open existing notes, support native editing, copy selected source material and maintain explicit source associations. Optional creation shortcuts delegate to that same workflow. |
+| Notes application | Create externally maintained notes using its configured workflow; assign identities, filenames and templates; maintain its indexes. | Open existing notes, support native editing, copy selected source material and maintain explicit source associations. Optional creation shortcuts delegate to that same workflow. |
 | Jupyter and the selected notebook editor | Create, edit, save and render native notebooks; select kernels and dispatch explicit cell execution. | Open notebooks through the host, retain selected saved results, associate notes and provide supported comparison/export. |
 | SagePod | Supply the configured container, Jupyter server, SageMath environment and their lifecycle interfaces. | Use documented interfaces for authorized connection or lifecycle actions; record the environment actually used. No second SageMath runtime or container service. |
 | CoCalc | Own remote project identities, collaborative documents, notebook execution, kernels and project lifecycle. | A [proposed adapter](COCALC_ADAPTER.md) opens selected projects/files and associates deliberately exported results with notes. Evaluate deployment-specific supported interfaces before adding authenticated CLI/API operations. |
@@ -51,14 +51,15 @@ on explicit delegation through a future supported adapter.
 ## Source notes and externally maintained notes
 
 Source notes remain useful working material. The reader may develop several
-Zettels from one source note, or combine several sources in one Zettel. Linking
+notes from one source note, or combine several sources in one note. Linking
 them must not require identical text, retire the source note or certify that the
-Zettel is intellectually complete. Preserve the source revision used and allow
+note is intellectually complete. Preserve the source revision used and allow
 later work to develop independently. Human selection, formulation and links
 between ideas remain distinct from copying and format validation.
 
-For the maintainer's Zettelkasten, Obsidian and its configured template create
-Zettels according to [flengyel/Zettel](https://github.com/flengyel/Zettel).
+When Obsidian is selected, note creation uses its configured command and
+template. The maintainer's [published note format](https://github.com/flengyel/Zettel)
+is one optional convention.
 Other maintaining applications and formats retain their own rules. Existing
 notes may be edited in MRW using native Save and Undo. Integration code must not
 create a parallel route that writes new vault notes directly, reproduces the
@@ -89,8 +90,8 @@ working relink/recovery route.
 Synchronizing saved notebook files does not synchronize live kernel memory,
 reconstruct a container environment or recreate queue execution state.
 Refreshing a job uses the queue's identity and status interface; reconnecting a
-kernel does not rerun it. Source notes and derived Zettels are separate works,
-not replicas whose text must be synchronized.
+kernel does not rerun it. Source notes and independently developed notes are
+separate works, not replicas whose text must be synchronized.
 
 ## Execution and evidence
 

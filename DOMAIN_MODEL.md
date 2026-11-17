@@ -113,7 +113,7 @@ associations, separate from source outlines, retained quotations, attributed
 annotations and all warrant records. Each association names an exact
 scoped outline/region reference, an Obsidian open URL and a short label.
 It stores no note prose or vault copy. Replacing/removing the association does
-not alter either endpoint. A note keeps its immutable Zettel ID and editable
+not alter either endpoint. A note keeps its immutable note ID and editable
 title; no MRW conversion is required. Workspace/remote routing is separate from
 stable target identity. A navigation link establishes no
 dependency, verification or human judgment. See
