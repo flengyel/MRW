@@ -50,9 +50,9 @@ the [reconciliation register](DESIGN_RECONCILIATION.md).
 
 ## Purpose
 
-MRW supports mathematical study and research, including AI-generated papers and
-Lean formalizations. It connects sources, notes, calculations and proofs;
-supports deliberate practice; and preserves unfinished work.
+MRW supports mathematical understanding and research. Its aims are to recover
+forgotten knowledge, study literature and AI-generated mathematics, practise
+deliberately, inspect grounds for using results, and continue unfinished work.
 
 Reconstruction identifies an argument's assumptions, definitions, intermediate
 claims and gaps. It can expose errors as well as supply missing steps.
