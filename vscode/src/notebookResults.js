@@ -14,6 +14,9 @@ function parseLink(value,scheme='vscode') {
   if(!parsed||Object.keys(parsed).sort().join(',')!=='id,workspace'||!validId(parsed.id))throw Error('Invalid retained notebook target.');
   return {workspace:validateWorkspaceRoute(parsed.workspace),id:parsed.id};
 }
+function isNotebookResultLink(value,scheme='vscode') {
+  try { parseLink(value,scheme); return true; } catch (_) { return false; }
+}
 function registerNotebookResults({vscode,context,register,bridge,show,recorder}) {
   const version=context.extension?.packageJSON?.version||require('../package.json').version;
   const software={version,commit:recorder?.software?.version===version&&!recorder.software.localChanges?recorder.software.commit||'unknown':'unknown'};
@@ -114,13 +117,13 @@ function registerNotebookResults({vscode,context,register,bridge,show,recorder})
   });
   register('mrw.openNotebookResult',async()=>{const selected=await select();if(selected)await actions(selected.id);});
   register('mrw.exportNotebookProvenance',async()=>{const selected=await select(true);if(selected?.length)return exportSelected(selected.map(x=>x.id));});
-  async function handleUri(uri) {
+  async function handleUri(uri,{showActions=true}={}) {
     if(uri.path!=='/notebook-result')return false;
     let target=parseLink(uri.toString(true),vscode.env.uriScheme||'vscode');
     if(context.mrwRoute)target=await context.mrwRoute(target);
     if(target.workspace!==route())throw Error('Open this result’s workspace, then use Open Link from Clipboard.');
-    await actions(target.id);return true;
+    if(showActions)await actions(target.id);else await open(target.id);return true;
   }
   return {handleUri};
 }
-module.exports={registerNotebookResults,parseLink};
+module.exports={registerNotebookResults,parseLink,isNotebookResultLink};

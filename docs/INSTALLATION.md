@@ -3,10 +3,10 @@
 The recommended installation is **MRW plus MRW Diagnostics** on the same
 workspace host. Download both packages from the current release:
 
-- [MRW 0.23.44](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-0.23.44.vsix): reading, notes, sources and research tools.
-- [MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-diagnostics-0.1.0.vsix): feature-use and integrity reports.
+- [MRW 0.23.45](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix): reading, notes, sources and research tools.
+- [MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-diagnostics-0.1.0.vsix): feature-use and integrity reports.
 
-[Release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.44)
+[Release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.45)
 cover both downloads. Diagnostics can be omitted; MRW's essential storage checks
 and recording stay in core. Weekly reports are opt-in even when both are installed.
 
@@ -56,20 +56,20 @@ workspace there and perform the same Python and extension-host checks.
 
 ### 2. Install both VSIX packages in that workspace host
 
-Run **Extensions: Install from VSIX…** and install `mrw-0.23.44.vsix` first,
+Run **Extensions: Install from VSIX…** and install `mrw-0.23.45.vsix` first,
 then `mrw-diagnostics-0.1.0.vsix`. Install both in the same WSL/SSH workspace host.
 Alternatively, use that window's Linux terminal and substitute the package paths:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.44.vsix
+code --install-extension /absolute/path/to/mrw-0.23.45.vsix
 code --install-extension /absolute/path/to/mrw-diagnostics-0.1.0.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.44` and `flengyel.mrw-diagnostics@0.1.0` under the
+Confirm `flengyel.mrw@0.23.45` and `flengyel.mrw-diagnostics@0.1.0` under the
 WSL/SSH host's installed extensions. After installing both, save unfinished work
 and reload once if VS Code requests it. Keep workspace storage when upgrading.
-After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.44**;
+After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.45**;
 the sidebar heading shows the same version. **MRW: Open Tutorial** reports the
 active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
@@ -83,7 +83,7 @@ Reporting does not repair data or invoke Codex. See [the companion guide](../dia
 
 For upgrades from before the extension identity change, see
 [the conversion record](EXTENSION_IDENTITY.md). The upgrade from 0.23.12 to
-0.23.44 keeps the `flengyel.mrw` identity and existing saved work.
+0.23.45 keeps the `flengyel.mrw` identity and existing saved work.
 
 <a id="3-open-existing-work"></a>
 

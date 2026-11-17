@@ -106,7 +106,7 @@ function harness(f, state = new Map(), options = {}) {
   const context = { mrwIdentityRoot:options.identityRoot, subscriptions: [], workspaceState: {
     get: key => state.get(key), async update(key, value) { await options.updateState?.(key, value); state.set(key, structuredClone(value)); },
   } };
-  documents = createDocuments({ vscode: api, context, obsidianNote: options.obsidianNote, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences,
+  documents = createDocuments({ vscode: api, context, obsidianNote: options.obsidianNote, register: (name, callback) => commands.set(name,async(...args)=>{const result=await callback(...args);if(latestPicker?.error)throw latestPicker.error;return result;}), trackLocation, resolveReferences: options.resolveReferences, followNotebookResult: options.followNotebookResult,
     onDisplayed: uri => displayed.push(uri.fsPath),
     onMarkdown: async doc => markdownSelections.push({ uri: doc.uri.toString(), parsed: parseReadingMarkdown(doc.getText()) }) });
   const apiHarness = {
@@ -477,7 +477,7 @@ test('WikiLinks are clickable without an active source editor and preserve exact
   h.change(a, value.start + 2, 2, '3c');
   await h.documents.check(a.uri); // Allow the tracked-location checkpoint to finish.
   const previous = structuredClone(h.state.get('mrw.documents.v1').origin);
-  await assert.rejects(h.commands.get('mrw.followWikiLink')(value), /WikiLink changed/);
+  await assert.rejects(h.commands.get('mrw.followWikiLink')(value), /note link changed/);
   assert.deepEqual(h.state.get('mrw.documents.v1').origin, previous, 'stale click preserves preceding origin');
   await assert.rejects(wiki.handleUri(h.api.Uri.parse(hrefs[0] + '&extra=x')), /Invalid MRW/);
   h.api.workspace.isTrusted = false;
@@ -1028,4 +1028,63 @@ test('notes folder notifications do not hold completion or serialize a later sel
  assert.equal(secondDone,true,'The next choice must not wait for dismissal of an earlier toast');
  assert.equal(h.configuration.notesFolder,f.outside);assert.equal(notices.length,2);
  pending.resolve();await Promise.all([first,second]);
+});
+
+
+function resultLink(workspace, id='11111111-1111-4111-8111-111111111111') {
+  const params=new URLSearchParams({v:'1',target:Buffer.from(JSON.stringify({workspace,id})).toString('base64url')});
+  return 'vscode://flengyel.mrw/notebook-result?'+params;
+}
+test('a linked retained calculation preserves its exact note occurrence across restart without external dispatch', async t=>{
+  const f=await fixture(t), state=new Map(), calls=[],target=resultLink(uri(f.root).toString());
+  const body='# Calculation\n\nA failed approach remains here.\n\n[Saved calculation]('+target+')\n\nContinue the proof here.\n';
+  await fs.writeFile(f.file('1a.md'),body);
+  const h=harness(f,state,{followNotebookResult:async value=>{calls.push(value.toString());return true;}});
+  const doc=await h.open('1a.md');await h.follow(doc,target);
+  assert.deepEqual(calls,[target]);assert.equal(h.external.length,0);
+  const pin=state.get('mrw.documents.v1').origin;assert.equal(body.slice(pin.start,pin.end),'[Saved calculation]('+target+')');
+  const restarted=harness(f,state);await restarted.documents.returnToDocument();
+  assert.equal(restarted.selected(),'[Saved calculation]('+target+')');assert.equal(await fs.readFile(f.file('1a.md'),'utf8'),body);
+});
+test('rejected calculation opens preserve the previous Return and unrelated dirty work',async t=>{
+  const f=await fixture(t),state=new Map(),target=resultLink('file:///other-workspace');
+  await fs.appendFile(f.file('2b.md'),'\n[Foreign calculation]('+target+')\n');
+  const h=harness(f,state,{followNotebookResult:async()=>{throw Error('Open this result’s workspace first.');}});
+  await h.folder();const first=await h.open('1a.md');await h.follow(first,'2b.md#target');
+  const prior=structuredClone(state.get('mrw.documents.v1').origin),doc=await h.doc('2b.md');
+  const unrelated=await h.doc('3c.md');h.change(unrelated,0,0,'Unsent draft\n');
+  await assert.rejects(h.follow(doc,target),/workspace first/);
+  assert.deepEqual(state.get('mrw.documents.v1').origin,prior);assert.ok(unrelated.isDirty);assert.match(unrelated.getText(),/^Unsent draft/);
+});
+
+test('repeated calculation links in preview and source bind to the clicked occurrence, not an external opener',async t=>{
+  const f=await fixture(t),calls=[],target=resultLink(uri(f.root).toString()),link='[Calculation]('+target+')',fence=String.fromCharCode(96).repeat(3);
+  const body='# Investigation\n\n'+link+'\n\nSecond occurrence: '+link+'\n\n[Ordinary site](https://example.org/)\n\n'+fence+'text\n'+link+'\n'+fence+'\n';
+  await fs.writeFile(f.file('1a.md'),body);
+  const h=harness(f,new Map(),{preview:true,notesFolder:f.notes,followNotebookResult:async value=>{calls.push(value.toString());return true;}});
+  const doc=await h.doc('1a.md');
+  const wiki=registerWikiLinks({vscode:h.api,context:h.context,register:(id,fn)=>h.commands.set(id,fn),documents:h.documents});
+  const md=wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
+  const html=md.render(body,{currentDocument:doc.uri});
+  assert.match(html,/href="https:\/\/example.org\/"/);
+  const links=[...html.matchAll(/href="([^"]*\/document-link\?target=[^"]+)"/g)].map(m=>m[1].replaceAll('&amp;','&'));
+  assert.equal(links.length,2);assert.equal(h.linkProvider.provideDocumentLinks(doc).length,2);
+  const second=links[1];assert.equal(await wiki.handleUri(h.api.Uri.parse(second)),true);
+  assert.deepEqual(calls,[target]);await h.documents.returnToDocument();
+  assert.equal(h.state.get('mrw.documents.v1').origin.start,body.lastIndexOf(link,body.indexOf('[Ordinary site]')));
+  const returned=h.shown.at(-1);assert.equal(doc.getText().slice(doc.offsetAt(returned.editor.selection.start),doc.offsetAt(returned.editor.selection.end)),link);
+  h.change(doc,0,0,'Changed preface\n');
+  await assert.rejects(wiki.handleUri(h.api.Uri.parse(second)),/changed/);
+  assert.equal(calls.length,1);assert.ok(doc.isDirty);
+  h.api.workspace.isTrusted=false;
+  assert.equal(md.render(doc.getText(),{currentDocument:doc.uri}).includes('/document-link?target='),false);
+});
+test('an overlapping note edit during calculation opening never publishes a stale Return',async t=>{
+  const f=await fixture(t),gate=deferred(),entered=deferred(),target=resultLink(uri(f.root).toString());
+  await fs.writeFile(f.file('1a.md'),'# Work\n\n[Calculation]('+target+')\n');
+  const h=harness(f,new Map(),{followNotebookResult:async()=>{entered.resolve();await gate.promise;return true;}});
+  const doc=await h.open('1a.md'),opening=h.follow(doc,target);await entered.promise;
+  h.change(doc,doc.getText().indexOf('Calculation'),11,'Different');gate.resolve();
+  await assert.rejects(opening,/location changed/);
+  assert.equal(h.state.get('mrw.documents.v1').origin,undefined);assert.ok(doc.isDirty);
 });

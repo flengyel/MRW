@@ -309,7 +309,7 @@ function activate(nativeContext) {
     readingDestination: location => readingController.returnDestination(location),
     handleDocumentUri: async uri => await notebooks.handleUri(uri) || await zotero.handleUri(uri) || readingController.handleDocumentUri(uri), relocateRoute:moveSession.rebaseRoute });
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
-    compile: rawBridge, sourcePlugins,
+    compile: rawBridge, sourcePlugins, followNotebookResult: uri => notebooks.handleUri(uri, {showActions:false}),
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
   require('./companionTools').registerCompanionTools({vscode,context,register});
   require('./justification').registerJustification({vscode,context,register,bridge,rawBridge,projectRoot,reading:readingController,show,artifactClients,recorder,selectPassages:root=>outlineRows.selectStudyPrerequisites(root,[])});

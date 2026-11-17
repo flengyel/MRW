@@ -4,6 +4,7 @@ const { noteIdentity } = require('./noteIdentity');
 const { documentColumn } = require('./documentPresentation');
 const { parseReadingMarkdown, zettelLinkParts, frontMatterInfo } = require('./readingMarkdown');
 const { registerDocumentMath } = require('./documentMath');
+const { isNotebookResultLink } = require('./notebookResults');
 
 // Discovery/rendering only uses the host's already-open text, never a folder
 // scan. A click rechecks the exact occurrence and uses ordinary scoped navigation.
@@ -18,24 +19,24 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
     const saved = cache.get(doc);
     if (saved?.version === doc.version) return saved.links;
     const parsed = parseReadingMarkdown(doc.getText());
-    const links = parsed.all.filter(n => n.kind === 'document_link' && n.syntax === 'zettel')
+    const links = parsed.all.filter(n => n.kind === 'document_link' && (n.syntax === 'zettel' || isNotebookResultLink(n.target, scheme)))
       .map(n => ({ ...n, revision: parsed.revision }));
     cache.set(doc, { version: doc.version, links }); return links;
   }
   const payload = (doc, node) => ({ session, uri: doc.uri.toString(), revision: node.revision,
     start: node.start, end: node.end, target: node.target });
   async function follow(value) {
-    if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following a WikiLink.');
+    if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following a note link.');
     if (!value || value.session !== session || typeof value.uri !== 'string' || value.uri.length > 8192 ||
         !/^[a-f0-9]{64}$/.test(value.revision) || !Number.isSafeInteger(value.start) || !Number.isSafeInteger(value.end) ||
-        value.start < 0 || value.end <= value.start || typeof value.target !== 'string' || value.target.length > 2048) {
-      throw new Error('This WikiLink is unavailable. Reopen its preview or follow its current editor occurrence.');
+        value.start < 0 || value.end <= value.start || typeof value.target !== 'string' || value.target.length > (isNotebookResultLink(value.target, scheme) ? 16384 : 2048)) {
+      throw new Error('This note link is unavailable. Reopen its preview or follow its current editor occurrence.');
     }
     const uri = vscode.Uri.parse(value.uri);
     await documents.check(uri);
     const doc = await vscode.workspace.openTextDocument(uri);
     const node = linksFor(doc).find(n => n.revision === value.revision && n.start === value.start && n.end === value.end && n.target === value.target);
-    if (!node) throw new Error('The WikiLink changed. Follow its current occurrence again.');
+    if (!node) throw new Error('The note link changed. Follow its current occurrence again.');
     return documents.follow(doc, node);
   }
   register('mrw.followWikiLink', follow);
@@ -48,7 +49,7 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
             const range = new vscode.Range(doc.positionAt(node.start), doc.positionAt(node.end));
             const target = vscode.Uri.parse('command:mrw.followWikiLink?' + encodeURIComponent(JSON.stringify([payload(doc, node)])));
             const link = new vscode.DocumentLink(range, target);
-            link.tooltip = `Follow ${zettelLinkParts(node.target).target} in MRW’s notes folder`;
+            link.tooltip = node.syntax === 'zettel' ? `Follow ${zettelLinkParts(node.target).target} in MRW’s notes folder` : 'Open the retained calculation and keep Return to this link';
             return link;
           });
         } catch (_) { return []; } // Bounded-parser failures remain available via Show Contents.
@@ -69,9 +70,15 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
     });
     md.core.ruler.after('inline', 'mrw_wikilink_occurrences', state => {
       const counts = new Map(), frontMatter = frontMatterInfo(state.src);
-      for (const block of state.tokens) for (const token of block.children || []) if (token.type === 'mrw_wikilink' && (!frontMatter.present || block.map?.[0] >= frontMatter.lineEnd)) {
-        const occurrence = counts.get(token.content) || 0;
-        token.meta = { occurrence }; counts.set(token.content, occurrence + 1);
+      for (const block of state.tokens) for (const token of block.children || []) {
+        if (frontMatter.present && block.map?.[0] < frontMatter.lineEnd) continue;
+        if (token.type === 'mrw_wikilink') {
+          const key = 'wiki:' + token.content, occurrence = counts.get(key) || 0;
+          token.meta = { occurrence }; counts.set(key, occurrence + 1);
+        } else if (token.type === 'link_open' && isNotebookResultLink(token.attrGet('href'), scheme)) {
+          const key = 'result:' + token.attrGet('href'), occurrence = counts.get(key) || 0;
+          token.meta = { ...token.meta, mrwResultOccurrence: occurrence }; counts.set(key, occurrence + 1);
+        }
       }
     });
     md.core.ruler.push('mrw_note_heading', state => { state.tokens.unshift(new state.Token('mrw_note_heading', '', 0)); });
@@ -87,11 +94,25 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
       const source = env.currentDocument?.toString();
       const doc = vscode.workspace.textDocuments?.find(d => d.uri.toString() === source);
       let node;
-      try { node = token.meta && linksFor(doc).filter(n => n.target === token.content)[token.meta.occurrence]; } catch (_) { /* No guessed location. */ }
+      try { node = token.meta && linksFor(doc).filter(n => n.syntax === 'zettel' && n.target === token.content)[token.meta.occurrence]; } catch (_) { /* No guessed location. */ }
       if (!node || vscode.workspace.isTrusted === false) return escape(`[[${token.content}]]`);
       const target = Buffer.from(JSON.stringify(payload(doc, node)), 'utf8').toString('base64url');
       const href = `${scheme}://flengyel.mrw/document-link?target=${target}`;
       return `<a href="${escape(href)}" title="${escape('Follow ' + zettelLinkParts(node.target).target)}">${escape(zettelLinkParts(node.target).label)}</a>`;
+    };
+    const renderLink = md.renderer.rules.link_open || ((tokens, at, options, env, self) => self.renderToken(tokens, at, options));
+    md.renderer.rules.link_open = (tokens, at, options, env, self) => {
+      const token = tokens[at], href = token.attrGet('href');
+      if (token.meta?.mrwResultOccurrence !== undefined && vscode.workspace.isTrusted !== false) {
+        const doc = vscode.workspace.textDocuments?.find(d => d.uri.toString() === env.currentDocument?.toString());
+        const node = linksFor(doc).filter(n => n.syntax === 'markdown' && n.target === href)[token.meta.mrwResultOccurrence];
+        if (node) {
+          const target = Buffer.from(JSON.stringify(payload(doc, node)), 'utf8').toString('base64url');
+          token.attrSet('href', scheme + '://flengyel.mrw/document-link?target=' + target);
+        }
+      }
+      try { return renderLink(tokens, at, options, env, self); }
+      finally { token.attrSet('href', href); }
     };
     return citations.extendMarkdownIt(math.extendMarkdownIt(md));
   }
@@ -100,10 +121,10 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
     const value = uri.toString(true);
     if (!['/document-link', '/document-action', '/document-diagram'].includes(uri.path)) return false;
     if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following a note action.');
-    if (value.length > 20000) throw new Error('Invalid MRW WikiLink.');
+    if (value.length > 40000) throw new Error('Invalid MRW note link.');
     const parsed = new URL(value), pairs = [...parsed.searchParams];
     if (parsed.protocol !== `${scheme}:` || parsed.host !== 'flengyel.mrw' || parsed.hash ||
-        pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid MRW WikiLink.');
+        pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid MRW note link.');
     const data = JSON.parse(Buffer.from(pairs[0][1], 'base64url').toString('utf8'));
     if (uri.path === '/document-diagram') { await math.handle(data); return true; }
     if (uri.path === '/document-action') {

@@ -9,10 +9,12 @@ The [field-trace example](docs/examples/field-trace/trace.md) starts with a
 counterexample to a coefficient formula and proves the missing degree factor.
 [Work through an argument](docs/MATHEMATICS_WITH_NOTES.md) shows how ordinary
 linked notes, Return and saved calculations support that work.
+The [discriminant investigation](examples/notebook-provenance/README.md) connects
+two calculations, a failed construction and the missing integral-basis argument.
 
-**MRW 0.23.44 — Grounds from existing notes.**
-[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-0.23.44.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.44)
+**MRW 0.23.45 — Resume linked calculations.**
+[Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.45)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md).
 The extension ID is `flengyel.mrw`. Distribution is through GitHub VSIX files;
 there is no Marketplace listing. MRW remains experimental.
@@ -185,8 +187,8 @@ separate x86-64 justification runtime. Native Windows/macOS backends and
 Windows-backed private artifact storage are unqualified.
 
 In the intended Linux/WSL/SSH window, run **Extensions: Install from VSIX…** for
-`mrw-0.23.44.vsix`. The recommended companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-diagnostics-0.1.0.vsix);
+`mrw-0.23.45.vsix`. The recommended companion is
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-diagnostics-0.1.0.vsix);
 it is optional, and weekly reporting is opt-in. Save work before a requested
 reload and retain workspace storage when upgrading. GitHub updates require
 installing the newer VSIX. [Installation guide](docs/INSTALLATION.md).

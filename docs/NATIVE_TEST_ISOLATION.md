@@ -161,3 +161,32 @@ injected only into the owned development fixture. The production HTML and code
 contain no fixture hook. The case preserves an unsent synthetic buffer, checks
 withdrawal and exact source navigation, returns to the document, performs a
 real window reload and reopens a saved successor without another Lean run.
+
+
+## Investigation and window closure
+
+The sourceReturn case also accepts `investigation: true` with the
+quadratic-discriminant note/proof and saved trace, resultant and failed
+notebooks as its seed. Notebook execution belongs to the separate producer
+helper. The native case follows actual retained links, compares/exports,
+closes its work, reloads, resumes the exact remaining step and follows the
+supporting proof. Clipboard contents are restored immediately after each copy.
+It waits for the owned window and source-editor acknowledgement before
+requesting Contents.
+
+On the tested Windows CLI, installing a connector into a new named profile
+requires that profile to exist first. If a bootstrap window is needed, give it
+the same unique fixture title through a disposable local folder, disable MRW
+there, and close that exact window after enabling the pinned WSL connector.
+Verify its closure before launching the remote fixture. Do not leave an
+unidentified blank window behind. Keep inherited CLI IPC/Electron settings out
+of the GUI launcher process; do not alter the working shell or profile.
+
+A timed-out launcher can still open a window after an access prompt is approved.
+Recheck every owned profile used in the trial, including earlier attempts.
+
+A completed result report does not prove that a window closed. Verify closure
+of the uniquely titled fixture after saving the report; never kill a shared
+VS Code process to clean up a test. The current investigation checks and the
+repeat requested after window-access approval are recorded in
+[0.23.45 delivery](RELEASE_0_23_45.md).

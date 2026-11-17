@@ -28,7 +28,7 @@ function validPin(pin) {
     Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start;
 }
 
-function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile, sourcePlugins }) {
+function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile, sourcePlugins, followNotebookResult }) {
   const saved = context.workspaceState.get(KEY) || {};
   let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
@@ -223,7 +223,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     documents.watchNotes();
     return model;
   }
-  const documents = createDocuments({ vscode, context, register, trackLocation, resolveReferences, savedDocuments, sourcePlugins,
+  const documents = createDocuments({ vscode, context, register, trackLocation, resolveReferences, savedDocuments, sourcePlugins, followNotebookResult,
     onDisplayed: uri => { displayedUri = uri; refresh(); },
     onNavigated: async () => { route = 'ordinary'; await persist(); },
     onMarkdown: async doc => {

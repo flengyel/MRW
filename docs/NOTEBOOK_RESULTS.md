@@ -23,7 +23,13 @@ It opens a read-only transcript and offers:
 
 Escape closes the action picker and leaves the transcript open. Reopening,
 comparison and export do not start a kernel. **MRW: Open Link from Clipboard**
-follows a copied result link in its owning workspace. Workspace relocation
+follows a copied result link in its owning workspace. Paste that URI into an
+ordinary Markdown link to keep it beside the argument. Preview, Contents and
+source-editor links open that saved result directly, without another action
+picker. **Return to Document** selects the exact originating link, including
+repeated occurrences; the pin survives restart. Wrong-workspace, deleted or
+stale links preserve the previous Return destination and unsaved work.
+Workspace relocation
 carries the results and rebases links through the existing move record.
 
 **MRW: Export Notebook Provenance…** selects several captures for one ZIP. The

@@ -543,8 +543,19 @@ execution context; a producer receipt is a reported execution, not independent
 verification. Opening, comparison and export run no code. The transcript shows
 plain text and errors; rich outputs remain in the retained notebook.
 
-See the [notebook guide](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md)
-for a worked example using two Sage calculations.
+Choose **Copy link to this result** and paste it as a Markdown link beside the
+argument in your ordinary note. Open it from preview, Contents or the source
+editor; **Return to Document** selects that exact link. The Return destination
+survives restart. A notebook result opens without another action picker or cell
+execution; its evidence and comparison actions remain in **Open Retained
+Notebook Result…**.
+
+The [quadratic-discriminant example](https://github.com/flengyel/MRW/blob/main/docs/MATHEMATICS_WITH_NOTES.md#the-discriminant-investigation)
+has two Sage calculations, a failed construction and a linked integral-basis
+proof. Save an unfinished step in the note, reopen it after stopping, and follow
+the saved evidence without rerunning it. See the
+[notebook guide](https://github.com/flengyel/MRW/blob/main/docs/NOTEBOOK_RESULTS.md)
+for retention, comparison and export limits.
 
 ## When commands do not respond
 

@@ -63,3 +63,12 @@ test('native Jupyter renders immutable notebook bytes and compares cells/outputs
  assert.throws(()=>provider.writeFile(),/read-only/);await assert.rejects(provider.readFile({path:'/../bad.ipynb'}),/Invalid/);
  assert.ok(calls.every(x=>['notebook_read','notebook_list'].includes(x.method)));assert.ok(!h.calls.some(x=>Array.isArray(x)&&/kernel|execute|runAll/i.test(x[0])));
 });
+
+test('following a retained link opens it immediately without action prompts or kernel commands',async()=>{
+  const h=harness();h.picks.push(items=>items[0],'link');await h.commands.get('mrw.openNotebookResult')();
+  const link=h.calls.find(x=>x[0]==='clipboard')[1],before=h.calls.length,views=h.views.length;
+  h.vscode.window.showQuickPick=async()=>assert.fail('following an exact link must not need another picker');
+  assert.equal(await h.api.handleUri({path:'/notebook-result',toString:()=>link},{showActions:false}),true);
+  assert.equal(h.views.length,views+1);
+  assert.deepEqual(h.calls.slice(before).map(c=>c.method),['notebook_read']);
+});

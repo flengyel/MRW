@@ -34,3 +34,14 @@ reloaded the host. Recent Documents recovered the selected passage through
 native editor history, with both saved texts unchanged. That observation
 justified retaining the existing navigation for this case. It does not establish
 general recovery of every document arrangement, unsaved buffer or kernel.
+
+
+## The discriminant investigation
+
+The [quadratic-discriminant investigation](../examples/notebook-provenance/README.md)
+continues this pattern through two saved calculations and a rejected field
+construction. The question is why two rational bases have determinants 5 and
+20. Its linked proof determines the full ring of integers. Keep the remaining
+step in the working note; the saved calculation links let you inspect evidence
+and return without reconstructing filenames or entering the work in a form.
+A saved error is part of the investigation, not a successful mathematical result.

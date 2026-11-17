@@ -5,15 +5,15 @@ const {registerActiveStudy}=require('../src/activeStudy'),{runBridge}=require('.
 const passage={reference:'mrw-outline:v1/exact-selected-reference',label:'Selected proof passage',text:'For every x, f(x) = x.',source_revision:'a'.repeat(64),authors:'Source author'};
 const value={activity:'missing_step',prompt:'Explain the missing step.',answer:{text:'Apply the hypothesis.',author:'Codex companion',origin:'ai_proposal'},hints:['Check the hypothesis.'],references:[passage.reference],author:'Codex companion',origin:'ai_proposal'};
 async function host(t){
- const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));t.after(()=>fs.rm(home,{recursive:true,force:true}));const state=new Map(),commands=new Map(),panels=[],shown=[];
- const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});t.after(()=>recorder.close());
+ const home=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-active-'));const state=new Map(),commands=new Map(),panels=[],shown=[];
+ const recorder=new StudyHistory(path.join(home,'history'),{version:'0.18.0',commit:'test'},{origin:'test'});
  const api={ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
   env:{clipboard:{value:'',async readText(){return this.value;},async writeText(t){this.value=t;}}},
   workspace:{getConfiguration:()=>({get:(k,f)=>f})},commands:{executeCommand:async()=>{}},window:{registerTreeDataProvider(){return{dispose(){}};},
    createWebviewPanel(){const p={title:'',webview:{onDidReceiveMessage(f){p.receive=f;},async postMessage(m){p.messages.push(m);}},messages:[],onDidDispose(f){p.close=f;},onDidChangeViewState(){},reveal(){}};panels.push(p);return p;},showQuickPick:async a=>a[0]}};
  const context={storageUri:{fsPath:home},extensionPath:path.resolve(__dirname,'..'),subscriptions:[],workspaceState:{get:k=>state.get(k),update:async(k,v)=>state.set(k,v)}};
  const options={vscode:api,context,register:(n,f)=>commands.set(n,f),recorder,projectRoot:async()=>'/project',show:async text=>shown.push(text),bridge:r=>runBridge(context.extensionPath,'python3',r),changed:{fire(){}},getCurrent:async()=>passage,readPassage:async()=>passage,followPassage:async()=>{}};
- const c=registerActiveStudy(options);return{home,c,commands,panels,recorder,api,state,shown,options};
+ const c=registerActiveStudy(options);t.after(async()=>{await c.flush();await recorder.close();await fs.rm(home,{recursive:true,force:true});});return{home,c,commands,panels,recorder,api,state,shown,options};
 }
 function scoped(c,message){const s=c.active;if(message.type==='effort_response'&&!Object.hasOwn(message,'offer'))message={offer:s.current?.effortOffer?.id,...message};return {study:s.id,attempt:s.current?.id||null,formEpoch:s.formEpoch,
  formDraftId:s.formDraft?.draftId||null,helpDraftId:s.helpDraft?.id||null,...message};}

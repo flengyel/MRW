@@ -15,11 +15,12 @@ const { DEFAULT_LIMITS } = require('./documentLinks');
 const { workspaceRoute } = require('./companionLinks');
 const { makeNoteLink, parseNoteLink } = require('./noteLinks');
 const { noteIdentity } = require('./noteIdentity');
+const { isNotebookResultLink } = require('./notebookResults');
 const { createDocumentPicker } = require('./documentPicker');
 const { createRecentNotes } = require('./recentNotes');
 const { createObsidianNote } = require('./obsidianNotes');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins, obsidianNote = createObsidianNote }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins, followNotebookResult, obsidianNote = createObsidianNote }) {
   const identityRoot=value=>context.mrwIdentityRoot?.(value)||value;
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: identityRoot(vscode.workspace.workspaceFile?.toString()), folders: (vscode.workspace.workspaceFolders || []).map(f => identityRoot(f.uri.toString())) }));
@@ -374,6 +375,20 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!current || (node.revision && node.revision !== parsed.revision)) throw new Error('The document link changed. Follow its current occurrence again.');
     const attempt = supersede(), candidate = { location: snapshot(doc, node.start, node.end) }; candidates.add(candidate);
     try {
+      if (isNotebookResultLink(current.target, vscode.env.uriScheme || 'vscode') && current.syntax === 'markdown') {
+        await check(doc.uri);
+        validateOrigin(doc, candidate);
+        if (!followNotebookResult) throw Error('Retained notebook results are unavailable in this reader.');
+        const opened = await followNotebookResult(vscode.Uri.parse(current.target));
+        if (attempt !== generation) return repairSupersededDisplay();
+        validateOrigin(doc, candidate);
+        if (!opened) throw Error('The retained notebook result could not be opened.');
+        // Keep the ordinary note as Reopen's document; the notebook owner
+        // retains the result identity. No kernel, file grant or new record.
+        origin = candidate.location;
+        last = doc.uri.toString(); lastLocation = structuredClone(origin);
+        await persist(); await onNavigated(); return true;
+      }
       if (current.qualified_id) {
         await check(doc.uri);
         await sourcePlugins?.load();

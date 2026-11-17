@@ -5,9 +5,9 @@ Open a document in place, follow its references, write while reading and return
 to the argument. It retains exact source passages and results while companion
 applications keep their editing and execution workflows.
 
-**MRW 0.23.44 — Grounds from existing notes.**
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-0.23.44.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.44)
+**MRW 0.23.45 — Resume linked calculations.**
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.45)
 · [Installation](../docs/INSTALLATION.md).
 The extension ID is `flengyel.mrw`. GitHub updates require installing a newer
 VSIX; there is no Marketplace listing. MRW remains experimental.
@@ -118,9 +118,9 @@ store and a trusted file workspace.
 
 ## Package and install a VSIX
 
-Install `mrw-0.23.44.vsix` with **Extensions: Install from VSIX…** in the intended
+Install `mrw-0.23.45.vsix` with **Extensions: Install from VSIX…** in the intended
 workspace host. The recommended optional companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-diagnostics-0.1.0.vsix).
+[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-diagnostics-0.1.0.vsix).
 Its weekly reports are opt-in. Save work before a requested reload and retain
 workspace storage when upgrading.
 
@@ -129,8 +129,8 @@ To build from the repository root, use Python 3.11+, Linux Node.js 22+ and npm:
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.44.vsix
-sha256sum vscode/mrw-0.23.44.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.45.vsix
+sha256sum vscode/mrw-0.23.45.vsix
 ```
 
 Packaging bundles the Python core and pinned Lean source assets, not a compiled

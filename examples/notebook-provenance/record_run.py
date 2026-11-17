@@ -24,6 +24,19 @@ def now():
     return datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
 
+
+def preserve_kernel_error(*, cell, cell_index, execute_reply):
+    # The execute reply can report failure even when the kernel's traceback
+    # formatter emitted only streams. Preserve that actual reply as notebook data.
+    if any(output.get('output_type') == 'error' for output in cell['outputs']):
+        return
+    content = execute_reply['content']
+    name, value, lines = content.get('ename'), content.get('evalue'), content.get('traceback')
+    if content.get('status') != 'error' or not isinstance(name, str) or not isinstance(value, str) or not isinstance(lines, list) or not all(isinstance(line, str) for line in lines):
+        raise ValueError('Kernel error reply is incomplete; no execution receipt was created')
+    cell['outputs'].append(nbformat.v4.new_output('error', ename=name, evalue=value, traceback=lines))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path)
@@ -40,6 +53,7 @@ def main():
     started = now(); outcome = 'completed'
     try:
         nbclient.NotebookClient(nb, timeout=120, kernel_name=args.kernel,
+                               force_raise_errors=True, on_cell_error=preserve_kernel_error,
                                resources={'metadata': {'path': str(args.input.parent.resolve())}}).execute()
     except CellExecutionError:
         outcome = 'failed'
