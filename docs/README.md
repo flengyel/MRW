@@ -8,6 +8,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 
 | Task | Guide |
 | --- | --- |
+| Read a mathematical argument, keep a failed approach and resume its notes | [Mathematics in ordinary notes](MATHEMATICS_WITH_NOTES.md) |
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
 | Reopen recent notes, PDFs and text files | [Recent Documents](RECENT_DOCUMENTS.md) |

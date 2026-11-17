@@ -5,11 +5,10 @@ a VS Code workspace. Read a paper or note, follow its references, record an
 observation and return to the argument. MRW retains exact source passages and
 results; companion applications keep their editing and execution workflows.
 
-The Justification Logic engine makes reasons for mathematical assertions
-explicit. It checks how admitted reasons compose, retains alternative routes
-and shows which routes survive the withdrawal of a ground. The
-[introduction below](#justification-logic) explains the logic and its current
-implementation.
+The [field-trace example](docs/examples/field-trace/trace.md) starts with a
+counterexample to a coefficient formula and proves the missing degree factor.
+[Work through an argument](docs/MATHEMATICS_WITH_NOTES.md) shows how ordinary
+linked notes, Return and saved calculations support that work.
 
 **MRW 0.23.44 — Grounds from existing notes.**
 [Download MRW](https://github.com/flengyel/MRW/releases/download/v0.23.44/mrw-0.23.44.vsix)

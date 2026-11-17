@@ -7,6 +7,7 @@ const {assertFixture,clearOwnedState}=require('./fixtureGuard');
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function run(context){
  const scope=await assertFixture(vscode,context,context.extensionPath),root=scope.marker.root;
+ if(scope.config.continuity)return continuityTrial(context);
  const stateFile=path.join(root,'return-state.json'),reportFile=path.join(root,'native-result.json');
  let state;try{state=JSON.parse(await fs.readFile(stateFile,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const report={host:vscode.version,remote:vscode.env.remoteName,profile:scope.marker.profile,phase:state?'resume':'prepare',checks:state?.checks||[],errors:[],complete:false};
@@ -92,6 +93,56 @@ async function run(context){
   vscode.window.createWebviewPanel=original.panel;vscode.window.showQuickPick=original.pick;vscode.window.showOpenDialog=original.dialog;vscode.window.showErrorMessage=original.error;vscode.commands.executeCommand=original.execute;
   await save();if(!reloading&&!vscode.workspace.textDocuments.some(d=>d.isDirty))await original.execute('workbench.action.closeWindow');
  }
+}
+async function continuityTrial(context){
+ const guard=require("./fixtureGuard"),{createDocuments}=require("../../src/documents"),{trackLocation}=require("../../src/readingOutline"),{parseReadingMarkdown}=require("../../src/readingMarkdown");
+ async function wait(fn,label){const end=Date.now()+20000;while(!fn()){if(Date.now()>end)throw Error("Timed out: "+label);await pause(30);}}
+ const {marker,config}=await guard.assertFixture(vscode,context,context.extensionPath),root=marker.root,project=config.project;
+ const statePath=path.join(root,'continuity-state.json'),reportPath=path.join(root,'continuity-result.json');
+ const state=await fs.readFile(statePath,'utf8').then(JSON.parse).catch(e=>{if(e.code==='ENOENT')return null;throw e;});
+ const report=state?.report||{host:vscode.version,remote:vscode.env.remoteName,previews:[],errors:[],checks:[]};
+ const original={execute:vscode.commands.executeCommand,pick:vscode.window.showQuickPick,error:vscode.window.showErrorMessage};let reloading=false;
+ async function save(){const temp=reportPath+'.next';await fs.writeFile(temp,JSON.stringify(report,null,2));await fs.rename(temp,reportPath);}
+ const commands=new Map(),controller=createDocuments({vscode,context,trackLocation,register:(name,fn)=>{commands.set(name,fn);context.subscriptions.push(vscode.commands.registerCommand(name,fn));}});
+ const note=vscode.Uri.file(path.join(project,'trace.md')),related=vscode.Uri.file(path.join(project,'matrix.md')),needle='The [multiplication-matrix proof](matrix.md#the-repeated-blocks) explains';
+ try{
+  vscode.window.showErrorMessage=async message=>{report.errors.push(message);await save();};
+  vscode.window.showQuickPick=async items=>(await items).find(i=>i.entry?.uri===note.toString());
+  vscode.commands.executeCommand=async(name,...args)=>{
+   if(name==='vscode.openWith'&&args[1]==='vscode.markdown.preview.editor'){
+    const editor=vscode.window.visibleTextEditors.find(e=>e.document.uri.toString()===args[0].toString());
+    report.previews.push({uri:args[0].toString(),selection:editor?.document.getText(editor.selection),start:editor&&editor.document.offsetAt(editor.selection.start)});
+   }return original.execute(name,...args);
+  };
+  if(!state){
+   const body=await fs.readFile(note.fsPath,'utf8'),matrixBody=await fs.readFile(related.fsPath,'utf8');
+   report.originalHashes={note:digest(body),matrix:digest(matrixBody)};
+   await controller.openLinkedDocument(note);
+   const doc=await vscode.workspace.openTextDocument(note),editor=await vscode.window.showTextDocument(doc,{preview:false});
+   const link=parseReadingMarkdown(body).all.find(n=>n.kind==='document_link'&&n.target==='matrix.md#the-repeated-blocks');
+   assert.ok(link);await controller.follow(doc,link);await controller.returnToDocument();
+   assert.equal(report.previews.at(-1).selection,body.slice(link.start,link.end));
+   report.checks.push('Actual relative-heading follow and Return preserve the original link occurrence');
+   const at=doc.getText().indexOf(needle);const focused=await vscode.window.showTextDocument(doc,{preview:false});focused.selection=new vscode.Selection(doc.positionAt(at),doc.positionAt(at+needle.length));
+   await wait(()=>context.workspaceState.get('mrw.documents.v1')?.location?.start===at,'saved first-document location');
+   await controller.openLinkedDocument(related);
+   assert.ok(!vscode.workspace.textDocuments.some(d=>d.isDirty));
+   const tabs=vscode.window.tabGroups.all.flatMap(g=>g.tabs).filter(t=>t.input?.uri?.fsPath?.startsWith(project+path.sep));
+   await vscode.window.tabGroups.close(tabs,true);
+   report.checks.push('Two linked mathematical documents opened; first location selected and both clean tabs closed');
+   await fs.writeFile(statePath,JSON.stringify({at,needle,report}));await save();
+   reloading=true;void original.execute('workbench.action.reloadWindow');return;
+  }
+  await commands.get('mrw.recentNotes')();
+  const seen=report.previews.filter(p=>p.uri===note.toString()).at(-1);
+  assert.ok(seen,'native preview opened');
+  report.expectedSelection=state.needle;report.observedSelection=seen.selection;report.expectedStart=state.at;report.observedStart=seen.start;
+  report.positionRecovered=seen.selection===state.needle;
+  report.notesUnchanged=digest(await fs.readFile(note.fsPath))===report.originalHashes.note&&digest(await fs.readFile(related.fsPath))===report.originalHashes.matrix;
+  assert.ok(report.positionRecovered);assert.ok(report.notesUnchanged);assert.deepEqual(report.errors,[]);
+  report.complete=true;await save();await guard.clearOwnedState(context);
+ }catch(error){report.failure=error.stack;await save();}
+ finally{vscode.commands.executeCommand=original.execute;vscode.window.showQuickPick=original.pick;vscode.window.showErrorMessage=original.error;if(!reloading){await save();if(!vscode.workspace.textDocuments.some(d=>d.isDirty))void original.execute('workbench.action.closeWindow');}}
 }
 module.exports={activate:context=>{void run(context).catch(console.error);}};
 module.exports=require('./fixtureGuard').protect(module.exports,{vscode,filename:__filename});

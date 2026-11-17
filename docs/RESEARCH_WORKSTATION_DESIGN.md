@@ -394,7 +394,7 @@ commentary in those documents, connected by ordinary links. Reopening a note
 containing a solution displays that note, with the surrounding work preserved.
 VS Code owns recovery of unsaved buffers; MRW must not save or discard them to
 resume reading. Current Reopen Document and Return behavior is described in the
-[reading workflow](READING_OUTLINE_WORKFLOW.md). Broader recovery remains planned.
+[reading workflow](READING_OUTLINE_WORKFLOW.md). A [worked field-trace case](MATHEMATICS_WITH_NOTES.md) verifies an earlier\nMarkdown selection through native history after closure and restart. Broader\nrecovery remains planned.
 
 Do not introduce Research Question registration, a question-object hierarchy,
 a Research view or required title/summary/next-action fields as the default
