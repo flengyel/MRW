@@ -293,7 +293,7 @@
       if(a.question.answer&&(!state.document||a.answerVisible)){if(a.answerVisible){el('h3','Reference answer');el('p',label(a.question.answer.origin)+' · '+a.question.answer.author);math(root,a.question.answer.text);}else button(help,'Reveal reference answer','answer');}
       renderSource(a);renderHelp(a);
       if(a.finished){
-        const actions=el('div');actions.className='toolbar';button(actions,'Next question','next');button(actions,'Start another block','continue_block');button(actions,'Report effort','effort_offer');
+        const actions=el('div');actions.className='toolbar';button(actions,'Next question','next');button(actions,state.dueCount?'Review due questions':'Start another block','continue_block',{dueOnly:!!state.dueCount});button(actions,'Report effort','effort_offer');
       }
       if(a.effortOffer?.disposition==='no_response'){
         el('h3','How much mental effort did that last attempt require?');el('p','Attempt '+a.id.slice(0,8)+' · 1 very low, 9 very high');
@@ -302,7 +302,7 @@
       if(a.adaptation){el('p',a.adaptation.reason);for(const choice of a.adaptation.choices)button(root,choice.replaceAll('_',' '),'adaptation',{choice,offer:a.adaptation.event});}
     }else{
       renderSource(null);
-      if(questions.length&&!state.document)button(root,'Begin short block','next');
+      if(questions.length&&!state.document)button(root,state.dueCount?'Review due questions':'Begin short block',state.dueCount?'continue_block':'next',{dueOnly:!!state.dueCount});
       else if(!state.document){
         el('h2','Study this passage');const actions=el('div');actions.className='toolbar';
         localButton(actions,'Enter a question',()=>edit(),'enter_question',!!local.form);button(actions,'Request questions from Codex','handoff',{purpose:'questions'});

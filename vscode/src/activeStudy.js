@@ -22,6 +22,22 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       .map(s=>({id:s.id,title:s.title,document:s.document?.uri,sources:s.passages.length,unfinished:!!s.current&&!s.current.finished}));
     await context.workspaceState.update(recentKey,rows);
   }
+  function resumeChoices(now) {
+    const recentIDs = new Set(recent().map(row => row.id));
+    const rows = [];
+    for (const study of studies.values()) {
+      if (!activeStudy(study)) continue;
+      // A shared question is listed under its owner. Document studies are read-only.
+      const due = scheduler.scheduledReviews(study.document ? [] : study.questions, now);
+      if (!due.count && !recentIDs.has(study.id)) continue;
+      const description = [];
+      if (due.count) description.push(due.count + ' due for spaced review');
+      if (study.current && !study.current.finished) description.push('Unfinished attempt');
+      rows.push({ label: study.title, id: study.id, description: description.join(' · '),
+        earliest: due.earliest, updated: study.updated });
+    }
+    return rows.sort((a,b) => a.earliest - b.earliest || b.updated.localeCompare(a.updated) || a.id.localeCompare(b.id));
+  }
   function load(){if(loaded)return Promise.resolve();if(!loading)loading=restore().catch(e=>{loading=undefined;throw e;});return loading;}
   async function restore(){if(!home)throw new Error('Open a folder to save study continuity.');await recorder.init();
     await io.mkdir(home,{recursive:true,mode:0o700});
@@ -59,7 +75,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       return bank;
     }
     const pins=new Set(model.signature(s.passages).map(p=>JSON.stringify(p))),bank=[];
-    for(const owner of studies.values())if(inspection||activeStudy(owner))for(const q of owner.questions){
+    for(const owner of studies.values())if(inspection||(!owner.document && owner.root === s.root && activeStudy(owner)))for(const q of owner.questions){
       if(q.references.every(ref=>{const p=owner.passages.find(p=>p.reference===ref);return p&&pins.has(JSON.stringify(model.signature([p])[0]));}))bank.push(q);
     }return bank;
   }
@@ -133,7 +149,9 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
   }
   async function send(notice=''){
     if(!panel||!active)return;syncContext();
-    await panel.webview.postMessage({type:'active_study',deletedStudies:[...lifecycle.records.values()].filter(r=>['deleted','deleting'].includes(r.state)).map(r=>r.id),study:{...active,lifecycle:lifecycle.get(active.id)||null,lifecycleStatus:stateOf(active),returnOrigin:problemReturn(active),passages:passagesFor(active),questions:eligible(active,!activeStudy(active))},gap:recorder.gap,notice,scheduler:scheduler.IDENTITY});
+    const questions = eligible(active, !activeStudy(active));
+    const dueCount = active.document || !activeStudy(active) ? 0 : scheduler.scheduledReviews(questions, Date.now()).count;
+    await panel.webview.postMessage({type:'active_study',deletedStudies:[...lifecycle.records.values()].filter(r=>['deleted','deleting'].includes(r.state)).map(r=>r.id),study:{...active,lifecycle:lifecycle.get(active.id)||null,lifecycleStatus:stateOf(active),returnOrigin:problemReturn(active),passages:passagesFor(active),questions,dueCount},gap:recorder.gap,notice,scheduler:scheduler.IDENTITY});
   }
   async function open(s,reason){
     if(active&&active.id!==s.id){await persist(active);recorder.record('source.change',{from:active.id,to:s.id,unfinished:!!active.current&&!active.current.finished});}
@@ -173,7 +191,9 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     const s=active;if(s.current&&!s.current.finished)throw new Error('Finish or skip this attempt first; Pause preserves it.');
     if(!s.block)s.block=model.block(settings());
     const bank=eligible(s).filter(q=>!s.document||q.kept&&['definition','hypotheses','missing_step','argument'].includes(q.activity));
-    const decision=scheduler.select(bank,s.block);
+    const now = Date.now();
+    const candidates = s.block.dueOnly ? bank.filter(q => scheduler.scheduledDueAt(q) <= now) : bank;
+    const decision=scheduler.select(candidates,s.block,now);
     if(decision.question){beginAttempt(s,decision.question,decision.reason);await persist(s);}
     else{
       for(const q of eligible(s).filter(q=>!q.retired))recorder.record('review.defer',{question:q.id,revision:q.revision,reason:decision.reason});
@@ -359,7 +379,14 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       await persist(s);await send('Linked continuation started. Earlier work and outcome remain saved.');
     }
     else if(m.type==='next')await offerNext();
-    else if(m.type==='continue_block'){s.block=model.block(settings());recorder.record('block.start',{...s.block,reason:'reader-continued'});await offerNext();}
+    else if (m.type==='continue_block') {
+      if (s.current && !s.current.finished) throw Error('Finish or skip this attempt first; Pause preserves it.');
+      if (s.helpDraft || s.formDraft) throw Error('Finish the pending draft before starting another block.');
+      s.block = model.block(settings());
+      if (m.dueOnly === true) s.block.dueOnly = true;
+      recorder.record('block.start', {...s.block, reason:'reader-continued'});
+      await offerNext();
+    }
     else if(m.type==='choose_question'){
       const q=eligible(s).find(q=>q.revision===m.revision);if(!q||q.retired)throw new Error('Choose a current question revision.');
       if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected; budget override');await persist(s);await send();
@@ -603,8 +630,13 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     recorder.record('example.open',{attribution:'Codex companion (OpenAI)',license:'CC0-1.0'});await persist(s);await send();
   });
   registerQueued('mrw.resumeStudy',async item=>{await load();let id=item?.study;
-    if(!id&&recent().length===1)id=recent()[0].id;
-    if(!id){const picked=await vscode.window.showQuickPick(recent().map(x=>({label:x.title,id:x.id})),{placeHolder:'Resume a saved study'});id=picked?.id;}
+    if (!id) {
+      const choices = resumeChoices(Date.now());
+      const picked = choices.length === 1 ? choices[0] : await vscode.window.showQuickPick(choices, {
+        placeHolder: 'Resume a study or return to questions due for spaced review'
+      });
+      id = picked?.id;
+    }
     const s=studies.get(id);if(s&&!activeStudy(s))throw Error('This study is '+stateOf(s)+'. Use Show Archived Studies or Show Deleted Studies.');if(s)await open(s,'resume');else if(id)throw new Error('This study is unavailable; its history is preserved.');
   });
   registerQueued('mrw.inspectStudyHistory',inspect);registerQueued('mrw.exportStudyHistory',exportHistory);

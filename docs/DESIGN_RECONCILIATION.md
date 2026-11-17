@@ -61,11 +61,17 @@ Saving and reopening admit no premise and execute no Lean check; search and
 retry remain explicit. Search runs in Lean, Python validates and retains records,
 and the extension presents the interaction.
 
-The next work comes from gaps in ordinary mathematical use. Wider continuity,
-rich-output visual inspection and unscripted companion interaction remain open.
-Prepared examples and scripted checks establish their stated behavior, not
-mathematical understanding. Use [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md)
-as the public justification walkthrough.
+The next mathematical-use test follows one argument across sessions. Select a
+passage from a paper or its Lean development, identify the grounds for one step,
+attempt it, compare the attempt with the source, and keep a question for spaced
+review. On return, reconstruct the step and try a changed hypothesis or example.
+The [learning research and evaluation](LEARNING_RESEARCH.md#evaluating-mrw-on-a-manuscript)
+specifies what would count as a benefit. Assess research continuity separately
+by resuming an unfinished argument with its sources and open question intact.
+
+[Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md) illustrates justification.
+Rich-output inspection and companion tests remain open. Extend an adapter or
+the justification engine when a mathematical task calls for it.
 
 **Deferred: paper–Lean correspondence review.** The selected case is
 [`flengyel/Dosen-Petric-Maximality`](https://github.com/flengyel/Dosen-Petric-Maximality).

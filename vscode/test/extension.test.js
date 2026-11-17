@@ -456,8 +456,12 @@ test('reader passage prepares frozen retained context without editor focus, then
   assert.ok(h.requests.some(r=>r.method==='review'));
   assert.equal(h.requests.filter(r=>r.method==='send_assistance').length, 1);
   const retained=JSON.parse(await fs.readFile(draft.output,'utf8'));
-  assert.equal(retained.target.id,draft.target.source_identity);
-  assert.equal(retained.target.revision,saved.outline.source.revision);
+  assert.deepEqual(retained.target, {
+    kind:'VersionedSpan',
+    id:draft.target.source_identity + '#scalar-' + draft.target.start + '-' + draft.target.end,
+    revision:saved.outline.source.revision
+  });
+  assert.equal(retained.purpose,'general_question');
   assert.equal(retained.context_refs[0].revision,saved.outline.source.revision);
   assert.equal(panel.webview.dirty, true);
 });

@@ -42,8 +42,23 @@ function select(questions, block, now = Date.now()) {
   const fresh = ready.filter(q=>!q.reviews?.length).sort((a,b)=>a.id.localeCompare(b.id));
   return block.newCount < block.newLimit && fresh.length ? { question: fresh[0], reason: 'new' } : { question: null, reason: fresh.length?'new-budget':'none-due' };
 }
-function dueQuestions(questions, limit = 3, now = Date.now()) {
-  return questions.filter(q => q.kept && !q.retired && ['definition','hypotheses','missing_step','argument'].includes(q.activity) &&
-    (!q.card || +new Date(q.card.due) <= now)).sort((a,b) => (+new Date(a.card?.due || 0) - +new Date(b.card?.due || 0)) || a.id.localeCompare(b.id)).slice(0, Math.min(10, Math.max(1, Number(limit) || 3)));
+// Questions without a retained schedule cannot be advertised for a due review.
+function scheduledDueAt(q) {
+  if (!q.kept || q.retired || !q.reviews?.length || !q.card?.due ||
+      !['definition', 'hypotheses', 'missing_step', 'argument'].includes(q.activity)) return Infinity;
+  const due = new Date(q.card.due).getTime();
+  return Number.isFinite(due) ? due : Infinity;
 }
-module.exports = { observe, replay, select, dueQuestions, IDENTITY };
+
+function scheduledReviews(questions, now) {
+  let count = 0, earliest = Infinity;
+  for (const question of questions) {
+    const due = scheduledDueAt(question);
+    if (due <= now) {
+      count++;
+      earliest = Math.min(earliest, due);
+    }
+  }
+  return { count, earliest };
+}
+module.exports = { observe, replay, select, scheduledDueAt, scheduledReviews, IDENTITY };

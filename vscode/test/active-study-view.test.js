@@ -43,6 +43,20 @@ test('recall starts concealed and unfinished work cannot switch questions after 
   assert.match(h.root.text(),/Exact reference answer/);assert.doesNotMatch(h.root.text(),/Original mathematical source/);
 });
 
+test('the spaced review button starts a due-only block and preserves an unfinished attempt', () => {
+  const h = view(), s = study();
+  s.questions = [question()];
+  s.dueCount = 1;
+  h.send(s);
+  const review = h.button('continue_block');
+  assert.equal(review.textContent, 'Review due questions');
+  review.onclick();
+  assert.equal(h.messages.at(-1).dueOnly, true);
+  s.current = attempt();
+  h.send(s);
+  assert.equal(h.button('continue_block'), undefined);
+});
+
 test('outcome and consultation remain pending across reveal, pause, checkpoint and renderer restart',()=>{
   const h=view(),s=study();s.questions=[question()];s.current=attempt();s.current.submissions=[{hints:0,answer_visible:false}];h.send(s);
   change(h.field('Your outcome'),'unresolved');change(h.field('Did you consult the source or other help before that submission?'),'yes');h.flush();

@@ -430,9 +430,10 @@ keep a returned explanation with attribution. Pasting does not authenticate its
 author or check its mathematics.
 
 **Pause / save** keeps unfinished work. **Continue with revised work** starts a
-linked attempt after completion. **Keep for spaced review** opts a question into later
-source-scoped review; saving alone does not enroll it. Effort reports are
-optional. See [the study guide](https://github.com/flengyel/MRW/blob/main/docs/ACTIVE_STUDY_WORKFLOW.md) for recall,
+linked attempt after completion. **Keep for spaced review** enrolls a recall
+question. Submit an attempt and record its outcome. Later, **MRW: Resume Study**
+shows which studies have questions due. Open one and choose **Review due questions**
+when ready for another attempt. Effort reports are optional. See [the study guide](https://github.com/flengyel/MRW/blob/main/docs/ACTIVE_STUDY_WORKFLOW.md) for recall,
 submission and history details. Earlier document-linked work remains readable
 through **MRW: Resume Study** in the Command Palette; its removed forms do not reopen.
 

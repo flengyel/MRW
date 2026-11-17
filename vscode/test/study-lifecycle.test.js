@@ -11,7 +11,7 @@ async function fixture(t){
  const api={ViewColumn:{Active:1},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
   workspace:{getConfiguration:()=>({get:(k,f)=>f})},env:{clipboard:{readText:async()=>'',writeText:async()=>{}}},window:{
    registerTreeDataProvider(){return{dispose(){}};},
-   showQuickPick:async choices=>{const selected=h.pick.shift();return typeof selected==='string'?choices.find(c=>c.label===selected):selected;},
+   showQuickPick:async choices=>{h.lastChoices=choices;const selected=h.pick.shift();return typeof selected==='string'?choices.find(c=>c.label===selected):selected;},
    showWarningMessage:async(text,options,...buttons)=>{confirmations.push({text,options,buttons});return h.confirm.shift();},
    showInformationMessage:async(text,...buttons)=>{information.push({text,buttons});return h.info.shift();},
    createWebviewPanel(){const p={messages:[],webview:{html:'',onDidReceiveMessage(fn){p.receive=fn;},async postMessage(m){
@@ -226,4 +226,53 @@ test('workspace relocation preserves unfinished drafts, archived schedules, Tras
  await h.run('restoreStudy',archived);await h.run('resumeStudy',archived);assert.deepEqual(h.c.active.questions[0],schedule);
  assert.equal((await h.marker(trashed)).state,'trashed');
  await h.restart();await assert.rejects(h.run('resumeStudy',deleted),/unavailable|deleted/);
+});
+
+test('Resume Study finds scheduled work beyond recent studies and returns to the exact question after restart', async t => {
+  const h = await fixture(t);
+  const source = await h.c.start([passage], h.root, 'Owner study');
+  await h.send({type:'question_save', question});
+  const q = source.questions[0];
+  await h.send({type:'admit', revision:q.revision});
+  await h.send({type:'next'});
+  await h.send({type:'submit', text:'An independent answer', paper:false});
+  await h.send({type:'outcome', report:{outcome:'unaided_success', assessor:'reader', consulted:false}});
+  const firstAttempt = source.current.id;
+  const due = new Date(q.card.due).getTime();
+  assert.equal(q.reviews.length, 1);
+
+  for (let n = 0; n < 33; n++) {
+    const later = require('../src/studyModel').createStudy([extra(n), passage], h.root, 'Later study ' + n);
+    later.updated = new Date(due + n).toISOString();
+    if (n === 0) {
+      // This document can be inspected, but its old cards cannot be attempted here.
+      later.document = {uri:'file:///fixture.md'};
+      later.questions = [{...structuredClone(q), id:'read-only', revision:'read-only', card:{due:'1970-01-01'}}];
+    }
+    if (n === 1) later.questions = [{...structuredClone(q), reviews:[], card:null}];
+    await fs.writeFile(path.join(h.home, 'active-studies-v1', later.id + '.json'), JSON.stringify(later));
+  }
+  await h.restart();
+  const clock = t.mock.method(Date, 'now', () => due - 1);
+  await h.run('resumeStudy');
+  assert.ok(!h.lastChoices.some(row => row.id === source.id));
+  clock.mock.mockImplementation(() => due + 86400000);
+  await h.run('resumeStudy'); // Cancel the picker.
+  assert.equal(h.c.active, undefined);
+  assert.equal(h.lastChoices[0].id, source.id);
+  assert.equal(h.lastChoices[0].description, '1 due for spaced review');
+  assert.ok(!h.lastChoices.slice(1).some(row => row.description.includes('due')));
+  h.pick.push('Owner study');
+  await h.run('resumeStudy');
+  assert.equal(h.c.active.current.id, firstAttempt);
+  assert.equal(h.c.active.questions[0].reviews.length, 1);
+  assert.equal(h.panels.at(-1).messages.at(-1).study.dueCount, 1);
+  await h.send({type:'continue_block', dueOnly:true});
+  assert.notEqual(h.c.active.current.id, firstAttempt);
+  assert.equal(h.c.active.current.question.revision, q.revision);
+  assert.equal(h.c.active.current.answerVisible, false);
+  assert.equal(h.c.active.current.sourceVisible, false);
+  await h.run('archiveStudy', source);
+  await h.run('resumeStudy');
+  assert.ok(!h.lastChoices.some(row => row.id === source.id));
 });

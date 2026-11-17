@@ -29,7 +29,7 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 | Task | Tools |
 | --- | --- |
 | Understand an argument | [Proof outlines and source passages](docs/PROOF_STUDY_WORKFLOW.md), with native Lean goals and diagnostics for formal proofs. |
-| Practise | [Questions, attempts, feedback, corrections and later review](docs/ACTIVE_STUDY_WORKFLOW.md), tied to the current mathematics. |
+| Revisit a proof step | In **Study Current Material**, enter a question and choose **Keep for spaced review**. Return through **Resume Study**. [Attempts, feedback and scheduling](docs/ACTIVE_STUDY_WORKFLOW.md#review-and-effort). |
 | Calculate | Jupyter and SagePod; [retained notebook results](docs/NOTEBOOK_RESULTS.md) preserve saved calculations for comparison. |
 | Examine grounds | [Source-linked reasons and admitted premises](docs/JUSTIFICATION_WORKFLOW.md), using Artemov's Justification Logic. |
 

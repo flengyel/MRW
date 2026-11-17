@@ -94,12 +94,21 @@ research use and automated fixtures. Existing work is preserved.
 
 ## Review and effort
 
-**Keep for spaced review** enrolls a question. Creating or importing one does not.
-**Retire** removes it from review while preserving its records. Due questions
-from the selected sources come first. A matching exact prerequisite can reuse a
-question from another recent study; different question or source revisions do
-not inherit its review history. The current index covers up to 30 recent studies
-and 200 question revisions per study, not an entire corpus.
+**Keep for spaced review** enrolls a recall question. Attempt it and record
+the outcome to establish its schedule. **Retire** ends review and preserves
+the earlier work.
+
+On a later visit run **MRW: Resume Study**. When there is a choice, active
+studies with due questions appear first, with a count beside the owning
+study. This includes an older study with a due question outside the last
+30 recent studies. A single study opens directly. An unfinished attempt
+reopens with its draft. Choose **Review due questions** to start a short
+block drawn only from scheduled questions now due. Each attempt opens with
+the answer concealed.
+
+A block draws from the selected sources, including questions on matching
+prerequisite passages. Review history belongs to an exact question and source
+revision. A study holds up to 200 question revisions.
 
 Blocks default to three questions, about five minutes and at most one new
 question. Adjust these limits with `mrw.studyQuestions`, `mrw.studyMinutes` and
