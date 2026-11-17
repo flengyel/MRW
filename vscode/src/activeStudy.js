@@ -197,7 +197,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(decision.question){beginAttempt(s,decision.question,decision.reason);await persist(s);}
     else{
       for(const q of eligible(s).filter(q=>!q.retired))recorder.record('review.defer',{question:q.id,revision:q.revision,reason:decision.reason});
-      recorder.record('block.stop',{reason:decision.reason,completed:s.block.completed,block:s.block.id});offerEffort('block-boundary');
+      recorder.record('block.stop',{reason:decision.reason,completed:s.block.completed,block:s.block.id});
     }
     await send(decision.question?'':decision.reason==='none-due'?'No question is due here. Add one, return to the source, or start another block.':'Block complete. Continue when you choose.');
   }
@@ -208,9 +208,6 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     clearForm(s);help.archive(s);s.helpVisible=[];s.problemRevision=q.revision;s.solutionReview=null;model.begin(s,q,reason,recorder);if(s.documentContext)s.current.documentReturn=structuredClone(s.documentContext.origin);
   }
   const settings=()=>{const c=vscode.workspace.getConfiguration('mrw');return{questions:c.get('studyQuestions',3),minutes:c.get('studyMinutes',5),newQuestions:c.get('studyNewQuestions',1)};};
-  function offerEffort(point){const a=active.current;if(!a||!a.finished||a.effortOffer)return;
-    const e=recorder.record('effort.offer',{attempt:a.id,wording:'How much mental effort did that last attempt require?',wording_version:1,scale:[1,9],point});a.effortOffer={id:e.id,disposition:'no_response'};
-  }
   async function copyHelp(purpose,adaptation=null){
     const s=active,a=s.current,latest=a?.submissions.at(-1);let submitted=null;
     if(latest)try{await recorder.flush();submitted=JSON.parse(await io.readFile(path.join(recorder.directory,'snapshots',latest.snapshot+'.json'),'utf8'));}catch{ /* Missing snapshot stays explicit in the handoff. */ }
@@ -392,7 +389,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       if(!s.block)s.block=model.block(settings());beginAttempt(s,q,'reader-selected; budget override');await persist(s);await send();
     }else if(m.type==='submit'){model.submit(s,m.text,!!m.paper,recorder);await persist(s);await send('Submission saved. Compare with the source or report its outcome.');}
     else if(m.type==='outcome'){
-      model.outcome(s,m.report,recorder,eligible(s));if(m.report.correction)model.refreshAdaptation(s,await recorder.events(),recorder);if(s.block.completed>=s.block.limit||Date.now()-s.block.started>=s.block.minutes*60000)offerEffort('block-boundary');
+      model.outcome(s,m.report,recorder,eligible(s));if(m.report.correction)model.refreshAdaptation(s,await recorder.events(),recorder);
       const pending=s.current.reportDraft;s.current.reportDraft=null;try{await persistOwners(s);}catch(e){s.current.reportDraft=pending;throw e;}await send('Outcome recorded.');
     }else if(m.type==='skip'){
       if(s.current&&!s.current.finished){recorder.record('attempt.skip',{attempt:s.current.id});s.current.finished=true;s.block.completed++;await persist(s);}await send('Skipped; recall schedule unchanged.');
@@ -402,8 +399,15 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       if(m.type==='answer'){a.answerVisible=true;recorder.record('attempt.answer',{attempt:a.id,after_submission:!!a.submissions.length});}
       if(m.type==='source_visibility'){a.sourceVisible=!!m.visible;if(m.visible)a.sourceExposed=true;recorder.record('source.visibility',{attempt:a.id,visible:!!m.visible,meaning:'exposure opportunity, not evidence of reading'});}
       await persist(s);await send();
-    }else if(m.type==='effort_offer'){offerEffort('reader-request');await persist(s);await send();}
-    else if(m.type==='effort_response'){
+    }else if(m.type==='effort_offer'){
+      const a=s.current;
+      if(!a?.finished)throw new Error('Complete or skip the attempt before reporting effort.');
+      if(!a.effortOffer){
+        const e=recorder.record('effort.offer',{attempt:a.id,wording:'How much mental effort did that last attempt require?',wording_version:1,scale:[1,9],point:'reader-request'});
+        a.effortOffer={id:e.id,disposition:'no_response'};
+      }
+      await persist(s);await send();
+    }else if(m.type==='effort_response'){
       const a=s.current;if(!a?.effortOffer||a.effortOffer.disposition!=='no_response')throw new Error('No unanswered effort offer.');
       if(m.rating!==null&&(!Number.isInteger(m.rating)||m.rating<1||m.rating>9))throw new Error('Choose 1–9 or decline.');
       a.effortOffer.disposition=m.rating===null?'declined':'answered';a.effortOffer.rating=m.rating;

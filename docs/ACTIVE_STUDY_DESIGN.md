@@ -102,7 +102,7 @@ Eligible review questions belong to the current source/study or explicitly selec
 2. Present one relevant question. The activity may be definition/hypothesis recall, a missing step, argument reconstruction, or an application/example.
 3. Allow a typed or paper-based attempt. Reveal a hint, reference answer or source comparison on request. Keep the source easy to recover; record whether the relevant answer was visible.
 4. Record the outcome with its origin. For paper work, one brief reader report suffices. A skipped question is not failed recall.
-5. Occasionally offer an effort rating for that specified attempt, then continue, return to the source, or stop. Save the unfinished question and attempt without requiring a separate reporting ceremony.
+5. Continue, return to the source, or stop. Preserve unfinished work.
 
 Use the existing exact-context Codex handoff for proposed questions, explanations and hints; make the requested output appropriate to the activity instead of always demanding graph JSON. Support editing or entering a question manually and reuse saved questions offline. Generated answers retain attribution and source links. No new provider integration is required.
 
@@ -137,7 +137,7 @@ option must be labeled as such; it must not claim FSRS scheduling.
 
 Track **reported mental effort** separately from task outcomes, hints, duration and derived estimates. The first version must not display a global mastery score or a percentage of cognitive capacity.
 
-Use a nullable 1–9 item: “How much mental effort did that last attempt require?”, from very low to very high. Record its wording/version, scale, sampling point and attempt ID. Initially offer it once at a natural boundary of a light-review block, referring to the last attempt, and on reader request. It is never an entry requirement. A skipped rating remains unknown.
+Choosing **Report effort** opens the question “How much mental effort did that last attempt require?” on a scale from 1 (very low) to 9 (very high). Record the wording, scale, time of request and attempt ID. Record a rating only when the reader gives one.
 
 Capture hint/answer use, task kind, self-reported or suggested outcome, source visibility and elapsed duration automatically where available. Record pause/focus events so elapsed time is not misrepresented as active thinking. Work done on paper or away from the app remains unobserved unless reported.
 

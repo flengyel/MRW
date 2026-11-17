@@ -38,8 +38,8 @@ unfinished attempt.
 
 Report **Unaided success**, **Completed with help**, **Unresolved** or **Not
 assessed**, and whether the source was consulted before submission. These are
-reader reports, not mathematical checks. **Correct outcome** preserves the earlier
-report and records its correction. Unsubmitted report choices survive pause and
+reader reports, not mathematical checks. To revise a report, open **Correct
+recorded outcome**. **Correct outcome** saves the revision alongside the earlier report. Unsubmitted report choices survive pause and
 reopen; they are never submitted automatically.
 
 Starting recall conceals the source and reference answer inside the study.
@@ -129,9 +129,9 @@ times; it does not add a second review. Retired questions stay out of selection.
 Missing earlier timing evidence remains unknown. The resulting intervals are
 scheduling estimates, not measures of mathematical understanding or mental effort.
 
-At a block boundary, or through **Report effort**, an optional 1–9 rating asks:
-“How much mental effort did that last attempt require?” Missing, declined and
-unsampled ratings remain distinct. High reported effort (7–9) with repeated
+Choose **Report effort** after an attempt to open the optional 1–9 rating.
+Continue or leave the study at any time. Missing, declined and unsampled
+ratings remain distinct. High reported effort (7–9) with repeated
 difficulty can offer a smaller step, prerequisite, worked example or pause.
 High effort with success preserves the challenge. Offers require reader-confirmed
 recall evidence and effort linked to that attempt. Correcting the outcome

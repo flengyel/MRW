@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
   const api=acquireVsCodeApi(),root=document.getElementById('reader');
-  let state,busy=false,form=null,local={},notice='';
+  let state,busy=false,form=null,local={},notice='',effortAttempt=null;
   const formTimers=new Map();
   const saved=api.getState?.()||{studies:{}};saved.studies ||= {};
   const el=(tag,text,parent=root)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;parent.append(n);return n;};
@@ -126,7 +126,8 @@
       local.reports[a.id]=copy(a.reportDraft)||{outcome:a.outcome?.outcome||'unassessed',assessor:'reader',consulted:a.outcome?.consulted??null,correction:!!a.finished};
       local.reportVersions[a.id]=revision;
     }
-    const report=local.reports[a.id],box=el('section');box.dataset.reportFor=a.id;
+    const parent=a.finished?details(root,'Correct recorded outcome','correct-outcome:'+a.id):root;
+    const report=local.reports[a.id],box=el('section',undefined,parent);box.dataset.reportFor=a.id;
     select(box,'Your outcome',[['unassessed','Not assessed'],['unaided_success','Unaided success'],['help_dependent','Completed with help'],['unresolved','Unresolved']],report.outcome,v=>report.outcome=v,a.id+':');
     select(box,'Did you consult the source or other help before that submission?',[['unknown','Not reported'],['no','No'],['yes','Yes']],report.consulted===null?'unknown':report.consulted?'yes':'no',v=>report.consulted=v==='unknown'?null:v==='yes',a.id+':');
     button(box,a.finished?'Correct outcome':'Record outcome','outcome',()=>({report:{...report,correction:!!a.finished}}));
@@ -293,12 +294,16 @@
       if(a.question.answer&&(!state.document||a.answerVisible)){if(a.answerVisible){el('h3','Reference answer');el('p',label(a.question.answer.origin)+' · '+a.question.answer.author);math(root,a.question.answer.text);}else button(help,'Reveal reference answer','answer');}
       renderSource(a);renderHelp(a);
       if(a.finished){
-        const actions=el('div');actions.className='toolbar';button(actions,'Next question','next');button(actions,state.dueCount?'Review due questions':'Start another block','continue_block',{dueOnly:!!state.dueCount});button(actions,'Report effort','effort_offer');
+        const actions=el('div');actions.className='toolbar';button(actions,'Next question','next');button(actions,state.dueCount?'Review due questions':'Start another block','continue_block',{dueOnly:!!state.dueCount});
+        if(!a.effortOffer || (a.effortOffer.disposition==='no_response' && effortAttempt!==a.id)){
+          localButton(actions,'Report effort',()=>{effortAttempt=a.id;post('effort_offer');},'effort_offer');
+        }
       }
-      if(a.effortOffer?.disposition==='no_response'){
+      if(effortAttempt===a.id && a.effortOffer?.disposition==='no_response'){
         el('h3','How much mental effort did that last attempt require?');el('p','Attempt '+a.id.slice(0,8)+' · 1 very low, 9 very high');
         for(let rating=1;rating<=9;rating++)button(root,String(rating),'effort_response',{rating,offer:a.effortOffer.id});button(root,'Decline','effort_response',{rating:null,offer:a.effortOffer.id});
-      }else if(a.effortOffer)el('p',a.effortOffer.rating?'Reported effort: '+a.effortOffer.rating+'/9':'Effort rating declined.');
+      }else if(a.effortOffer?.disposition==='answered')el('p','Reported effort: '+a.effortOffer.rating+'/9');
+      else if(a.effortOffer?.disposition==='declined')el('p','Effort rating declined.');
       if(a.adaptation){el('p',a.adaptation.reason);for(const choice of a.adaptation.choices)button(root,choice.replaceAll('_',' '),'adaptation',{choice,offer:a.adaptation.event});}
     }else{
       renderSource(null);
@@ -355,6 +360,7 @@
         delete saved.studies[m.study.id];local={study:m.study.id};
       }
       const changed=state?.id!==m.study.id;
+      if(changed||state?.current?.id!==m.study.current?.id)effortAttempt=null;
       restoreForm(m.study,changed);
       if(m.study.document){if(!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}
       else if(changed){if(m.study.helpDraft||!local.helpDraft)local.helpDraft=copy(m.study.helpDraft||null);}

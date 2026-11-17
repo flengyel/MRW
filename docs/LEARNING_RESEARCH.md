@@ -74,8 +74,9 @@ four relations as hypotheses. Locating the separate construction of the
 arithmetic witnesses tests a different part of the proof.
 [Manuscript calculation](https://github.com/flengyel/FailureOfComposition/blob/58579d2e0a94f8a3dee1435c6e0a1908f264f33a/manuscript/failure_of_composition_2026-11-14_v38.tex#L377-L388) · [Lean deduction](https://github.com/flengyel/FailureOfComposition/blob/58579d2e0a94f8a3dee1435c6e0a1908f264f33a/Lean/FailureOfComposition/QuotientObstruction.lean#L37-L53) · [Arithmetic witnesses](https://github.com/flengyel/FailureOfComposition/blob/58579d2e0a94f8a3dee1435c6e0a1908f264f33a/Lean/FailureOfComposition/ManuscriptObstruction.lean#L318-L332)
 
-A familiar manuscript can establish that the workflow is usable. To test a
-learning benefit, select several pairs of unfamiliar arguments with comparable
+A familiar manuscript can establish that the workflow is usable. In a separate
+study, the evaluator scores the mathematical work. To test a learning benefit,
+select several pairs of unfamiliar arguments with comparable
 length, prerequisites and difficulty. Record prior familiarity and fix the scoring
 criteria before allocating one passage from each pair at random to MRW study
 and the other to ordinary study with the same time budget. Give both conditions

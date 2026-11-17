@@ -76,6 +76,36 @@ test('strict bounded clipboard imports reject duplicate keys, unknown fields and
  for(const raw of ['{"version":1,"version":1}',JSON.stringify({...object,extra:true}),JSON.stringify({...object,sources:[]}),JSON.stringify({...object,questions:Array(11).fill(value)})]){
  h.api.env.clipboard.value=raw;await assert.rejects(h.c.receive({type:'import_questions'}));assert.equal(h.c.active.questions.length,1);}
 });
+test('completing a block never requests effort; explicit offers remain attributable and reusable', async t => {
+  const h = await host(t);
+  h.api.workspace.getConfiguration = () => ({get:(key,fallback) => key === 'studyQuestions' ? 1 : fallback});
+  await h.commands.get('mrw.studyCurrent')();
+  await h.c.receive({type:'question_save', question:value});
+  await h.c.receive({type:'next'});
+  const s = h.c.active;
+  await h.c.receive({type:'submit', text:'My reconstruction.', paper:false});
+  await h.c.receive({type:'outcome', report:{outcome:'unaided_success', assessor:'reader', consulted:false}});
+  assert.equal(s.block.completed, s.block.limit);
+  assert.equal(s.current.effortOffer, null);
+  await h.c.receive({type:'next'});
+  assert.equal((await h.recorder.events()).some(e => e.action === 'effort.offer'), false);
+
+  await h.c.receive({type:'effort_offer'});
+  const offer = s.current.effortOffer.id;
+  const events = await h.recorder.events();
+  assert.equal(events.find(e => e.id === offer).data.point, 'reader-request');
+  const resumed = registerActiveStudy(h.options);
+  await h.commands.get('mrw.resumeStudy')({study:s.id});
+  await resumed.receive({type:'effort_offer'});
+  assert.equal(resumed.active.current.effortOffer.id, offer);
+  await resumed.receive({type:'effort_response', rating:4});
+  const effort = (await h.recorder.events()).filter(e => e.action.startsWith('effort.'));
+  assert.deepEqual(effort.map(e => e.action), ['effort.offer','effort.response']);
+  assert.equal(effort[1].data.offer, offer);
+  assert.equal(effort[1].data.disposition, 'answered');
+  assert.equal(effort[1].evidence, 'reader_report');
+});
+
 test('only explicitly selected prerequisite pins share review eligibility across studies',async t=>{
  const h=await host(t),owner=await h.c.start([passage],'/project');await h.c.receive({type:'question_save',question:value});const q=owner.questions[0];
  const different={...passage,reference:'other',text:'A different proof.'};await h.c.start([different],'/project');assert.equal(h.panels[0].messages.at(-1).study.questions.length,0);

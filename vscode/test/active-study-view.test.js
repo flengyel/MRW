@@ -70,6 +70,64 @@ test('outcome and consultation remain pending across reveal, pause, checkpoint a
   const next=structuredClone(s);next.current.id='attempt-2';next.current.reportDraft=null;h.send(next);assert.equal(h.field('Your outcome').value,'unassessed','draft choices belong to their attempt');
 });
 
+test('completed outcome corrections stay folded and retain pending choices', () => {
+  const h = view(), s = study();
+  s.current = attempt();
+  s.current.finished = true;
+  s.current.submissions = [{hints:0, answer_visible:false}];
+  s.current.outcome = {outcome:'unaided_success', consulted:false};
+  s.current.reportDraft = {outcome:'help_dependent', consulted:true, assessor:'reader', correction:true};
+  h.send(s);
+  const box = h.field('Your outcome').parent.parent, disclosure = box.parent;
+  assert.equal(disclosure.tag, 'details');
+  assert.equal(disclosure.children[0].textContent, 'Correct recorded outcome');
+  assert.equal(disclosure.open, false);
+  assert.ok(box.all().includes(h.field('Did you consult the source or other help before that submission?')));
+  assert.ok(box.all().includes(h.button('outcome')));
+  assert.ok(h.button('next'));
+  disclosure.open = true;
+  disclosure.ontoggle();
+  assert.equal(h.field('Your outcome').value, 'help_dependent');
+  assert.equal(h.field('Did you consult the source or other help before that submission?').value, 'yes');
+  change(h.field('Your outcome'), 'unresolved');
+  h.button('pause').onclick();
+  assert.equal(h.messages.at(-1).reportDraft.outcome, 'unresolved');
+  assert.equal(h.messages.some(m => m.type === 'outcome'), false);
+  s.current.reportDraft = h.messages.at(-1).reportDraft;
+  const reopened = view();
+  reopened.send(s);
+  const restored = reopened.field('Your outcome').parent.parent.parent;
+  assert.equal(restored.open, false);
+  restored.open = true;
+  restored.ontoggle();
+  reopened.button('outcome').onclick();
+  assert.deepEqual(reopened.messages.at(-1).report,
+    {outcome:'unresolved', consulted:true, assessor:'reader', correction:true});
+});
+
+test('an unanswered effort offer appears only on request, including after reopening', () => {
+  const h = view(), s = study();
+  s.current = attempt();
+  s.current.finished = true;
+  s.current.effortOffer = {id:'old-offer', disposition:'no_response'};
+  h.send(s);
+  assert.equal(h.button('effort_response'), undefined);
+  assert.doesNotMatch(h.root.text(), /effort rating declined/i);
+  assert.ok(h.button('next'));
+  h.button('effort_offer').onclick();
+  assert.equal(h.messages.at(-1).type, 'effort_offer');
+  h.send(s);
+  const responses = h.root.all().filter(n => n.dataset.action === 'effort_response');
+  assert.deepEqual(responses.map(n => n.textContent), ['1','2','3','4','5','6','7','8','9','Decline']);
+  responses.at(-1).onclick();
+  assert.equal(h.messages.at(-1).offer, 'old-offer');
+  assert.equal(h.messages.at(-1).rating, null);
+  const reopened = view(h.stored());
+  reopened.send(s);
+  assert.equal(reopened.button('effort_response'), undefined);
+  assert.ok(reopened.button('effort_offer'));
+});
+
 test('help review retains mathematical prose and attribution drafts after failure, without overwriting previous replies',()=>{
   const h=view(),s=study();s.current=attempt();h.send(s);h.button('help_paste').onclick();assert.equal(h.messages.at(-1).type,'help_paste');
   s.helpDraft={id:'response-draft-1',text:'Original \\(x^2\\).',author:'Codex companion',origin:'ai_proposal',request:'request-1',attempt:'attempt-1',original:{text:'Original \\(x^2\\).',author:'Codex companion',origin:'ai_proposal'}};h.send(s,'Review response.');
