@@ -6,91 +6,38 @@ and continue unfinished work.
 
 ## Mathematical understanding
 
-An AI-generated argument or a checked formal proof may be available before its
-recipient understands it. MRW should help expose its governing idea, recover
-needed definitions, examine hypotheses, fill omitted steps and develop examples
-or counterexamples. An attempted reconstruction may reveal an error or an
-unresolved gap. It concerns the returned mathematics, not hidden model reasoning.
+A paper or a checked Lean proof can leave a mathematical question open for its
+reader. Which hypothesis makes this inference valid? What is the governing idea
+of the proof? MRW connects the passage in question to definitions, cited results,
+examples and the reader’s own explanation. A reader can attempt a step on paper
+or in the editor, compare it with the proof and return to it later.
+[Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md)
 
-Lean-to-English explanation and English-to-Lean formalization are intended uses.
-Compare the mathematical statement with the formal declaration, including its
-types, hypotheses and conclusion. A successful Lean check does not establish
-that the declaration expresses the intended mathematics. Existing Lean tools
-supply checking, goals and diagnostics; MRW connects them to the argument being
-studied.
+For a paper accompanied by a Lean development, compare the types, hypotheses
+and conclusion of the declaration with the statement on the page. Lean checks the
+formal declaration. Whether it expresses the intended theorem requires a separate
+judgment. Explanation in English and formalization in Lean are intended uses.
+[Lean workflow](docs/LEAN_STUDY_WORKFLOW.md)
 
-Requested orientation should begin with the purpose and organization of the
-subject, then its central concepts and results, a selected argument, its idea
-and its details. A focused question can start at any of these points.
+## Grounds for using a result
 
-## Deliberate practice
+A mathematician may have sufficient grounds to use a theorem while still seeking
+an explanation of its proof. An exact passage identifies what was cited. An
+admission records what was accepted. MRW’s justification engine shows how a
+conclusion depends on the admissions and which routes survive withdrawal.
+[Euclid’s lemma](docs/JUSTIFICATION_EUCLID_EXAMPLE.md)
 
-Deliberate practice is central to learning with MRW. Work from the current
-mathematics: attempt a proof step, reconstruct an argument, solve a changed
-example, explain why a hypothesis is needed, or repair a Lean proof. Connect the
-attempt to targeted feedback, correction and a later reconstruction or
-application. Paper-based work remains a supported way to practise.
+## Continuing unfinished work
 
-Within a chosen study, preserve the distinction between unaided work, assistance,
-correction and unfinished attempts. Viewing a solution must not count as
-successful recall. Keep the submitted work and the help used so practice can be
-resumed rather than replaced by passive rereading. Selected questions may enter
-spaced review; ordinary reading does not automatically start exercises or create
-an overdue queue.
+Keep the attempted argument, a failed approach or a calculation where it was
+written. Returning to the work should recover the relevant passage and the open
+step. In a proof outline, vertex elimination can shorten the displayed argument
+while keeping the omitted steps available for expansion.
+[Resuming work](docs/RESEARCH_WORKSTATION_DESIGN.md#research-that-can-be-resumed) ·
+[Vertex elimination](docs/PROOF_GRAPH_WORKFLOW.md#vertex-elimination)
 
-The [study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) describes current controls
-and limits. Reported effort, observed activity, AI feedback and mathematical
-assessment remain separate; none supplies a general mastery score.
+## Manuscripts
 
-## Justification, understanding and benefit
-
-Sufficient grounds for using a result need not provide an explanation of it.
-MRW should support appropriate use and further understanding without requiring
-complete proof reconstruction first. It promises neither effortless mastery nor
-that every justified result has a human-accessible explanation.
-
-Explanatory progress, practical application, inspectable grounds and research
-continuity are distinct benefits. A saved source or successful check may support
-one without establishing the others.
-
-Retain exact source passages, revisions, original AI responses and attribution
-alongside explanations, calculations and corrections. A paraphrase is separate
-from its source. Formal checks have a recorded scope; informal-to-formal
-correspondence requires mathematical review.
-
-The integral Justification Logic engine, based on Artemov's theory as presented
-by [Artemov and Fitting](https://doi.org/10.1017/9781108348034), composes explicit
-reasons under scoped admissions. It keeps alternative routes and the effect of
-withdrawing an admission inspectable. The calculus is non-factive: deriving
-$t:A$ does not assert bare $A$. Provenance, formal verification, admitted reasons
-and understanding answer different questions.
-
-## Working environment
-
-Keep ordinary documents and the mathematician's chosen tools. VS Code owns
-editing and buffer recovery; Lean checks proofs; Jupyter and SagePod execute
-calculations; Zotero manages references. Obsidian and the maintainer's
-[published note format](https://github.com/flengyel/Zettel) are optional.
-MRW connects the work without replacing those applications.
-
-Preserve the source location, attempt, failed approach, useful result and place
-to continue. [Vertex elimination](docs/PROOF_GRAPH_WORKFLOW.md#vertex-elimination)
-should simplify a displayed proof while leaving the original steps available
-for expansion. Different views and explanations must not silently change the
-source argument or its checking status.
-
-Introduce an interaction when it helps the mathematics. Reading needs no
-registration form or account of an internal mental state. Model requests,
-calculations and checks remain explicit actions; resumption does not silently
-repeat them.
-
-## Study material
-
-The current public walkthrough uses [Euclid's lemma](docs/JUSTIFICATION_EUCLID_EXAMPLE.md).
-Euclid's algorithm can supply further elementary examples. Two manuscript cases
-are [Pointwise provable equality and the failure of composition](https://github.com/flengyel/FailureOfComposition)
-and [Došen–Petrić maximality](https://github.com/flengyel/Dosen-Petric-Maximality),
-with their associated Lean developments. Other manuscripts can be added later.
-
-Current capabilities and remaining work belong in the [README](README.md) and
-[design register](docs/DESIGN_RECONCILIATION.md).
+Two manuscripts with Lean developments are
+[*Pointwise provable equality and the failure of composition*](https://arxiv.org/abs/2609.25556)
+and [*Maximality of the Došen–Petrić Boolean Category*](https://arxiv.org/abs/2611.19496).

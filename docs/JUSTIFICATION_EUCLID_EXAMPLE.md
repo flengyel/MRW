@@ -10,13 +10,13 @@ factorization. Keeping both arguments reveals which grounds each uses.
 
 If $p\mid a$, the conclusion holds. Suppose $p\nmid a$. Since $p$ is prime,
 $\gcd(p,a)=1$. Bézout's identity gives integers $u,v$ such that
-\[
+$$
 up+va=1.
-\]
+$$
 Multiplying by $b$ gives
-\[
+$$
 upb+vab=b.
-\]
+$$
 Both terms on the left are divisible by $p$, so $p\mid b$.
 
 ## Proof using unique prime factorization
@@ -68,8 +68,4 @@ number-theoretic proofs.
 The reader now retains source-bound search results, shows the separate routes,
 checks an explicit withdrawal and reopens the predecessor or successor. Choose
 **Proofs → Justification… → Explore Euclid’s lemma**. Use [selected text or retained passages](SOURCE_GROUNDS_WORKFLOW.md) to prepare
-and review grounds from another note. Broader inference search remains pending. A future paper–Lean
-correspondence demonstration is separately deferred in the
-[roadmap](DESIGN_RECONCILIATION.md#current-implementation-order--15-november-2026).
-The older range-lifting warrant remains an internal regression; it is not the
-public introduction to this workflow.
+and review grounds from another note.

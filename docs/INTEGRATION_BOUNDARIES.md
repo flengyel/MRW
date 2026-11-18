@@ -1,11 +1,8 @@
 # Subsystem ownership and integration boundaries
 
-This contract governs MRW's existing and future integrations. MRW connects
-mathematical work across tools while respecting the system responsible for each
-document, computation and service. Current capabilities remain those documented
-in the [README](../README.md) and the individual workflows; this contract does
-not claim that proposed adapters or synchronization features are implemented.
-This contract governs integration ownership when task instructions conflict.
+MRW delegates creation and execution to the application responsible for the
+document or computation. The table below identifies the owner of each operation
+and distinguishes current integrations from proposals.
 
 ## Ownership and delegation
 
@@ -37,7 +34,7 @@ optional outside operations that actually require it.
 | CoCalc | Own remote project identities, collaborative documents, notebook execution, kernels and project lifecycle. | A [proposed adapter](COCALC_ADAPTER.md) opens selected projects/files and associates deliberately exported results with notes. Evaluate deployment-specific supported interfaces before adding authenticated CLI/API operations. |
 | SageQueue | Assign task identities; submit jobs; manage partitions, workers, resources, status, logs, cancellation and retries. | A future adapter may delegate queue operations and retain task references/results. It must not edit queue internals, invent status or maintain a competing scheduler. |
 | Wolfram Alpha | Interpret and execute queries through its service. | A future adapter may submit an explicit query and retain its request, response and attribution. This is not notebook editing or formal proof checking. |
-| Wolfram notebooks and engine | Maintain native documents, evaluate code and own execution state. | Delegate supported document/execution actions and retain selected results; do not substitute a new evaluator or notebook format. |
+| Wolfram notebooks and engine | Maintain native documents, evaluate code and own execution state. | A proposed adapter would delegate document and execution actions to Wolfram and retain selected results. |
 | Zotero | Maintain reference and attachment identities, bibliographic metadata and managed-library operations. | Use supported lookup, citation and attachment interfaces; retain separately identified copies. No direct writes to the live database or managed files. |
 | Lean and its host extension | Elaborate and check proofs, report diagnostics and maintain native proof interaction. | Navigate to exact files/declarations, open the native InfoView and retain scoped checking evidence. No competing language client or assertion that a successful check proves an unstated informal correspondence. |
 
@@ -55,13 +52,10 @@ note is intellectually complete. Preserve the source revision used and allow
 later work to develop independently. Human selection, formulation and links
 between ideas remain distinct from copying and format validation.
 
-When Obsidian is selected, note creation uses its configured command and
-template. The maintainer's [published note format](https://github.com/flengyel/Zettel)
-is one optional convention.
-Other maintaining applications and formats retain their own rules. Existing
-notes may be edited in MRW using native Save and Undo. Integration code must not
-create a parallel route that writes new vault notes directly, reproduces the
-template or bypasses its interactive steps.
+For an Obsidian vault, MRW invokes the configured creation command. Obsidian
+creates the note and applies its template. For an ordinary folder, MRW opens
+an untitled Markdown file in VS Code. Existing notes can be edited with native
+Save and Undo.
 
 Earlier exact-copy transfer records remain preserved. Current associations
 capture a source snapshot without requiring identical destination prose or

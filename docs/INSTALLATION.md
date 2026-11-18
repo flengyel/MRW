@@ -73,8 +73,7 @@ After activation, hovering over the MRW Activity Bar icon shows **MRW 0.23.45**;
 the sidebar heading shows the same version. **MRW: Open Tutorial** reports the
 active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
-extension. Save unfinished work before a requested reload. Keep workspace
-storage when upgrading `flengyel.mrw`.
+extension.
 
 Diagnostics reports are available from **Tools and Setup** and the Command
 Palette. To enable scheduled reports, turn on **MRW Diagnostics: Weekly Enabled**.
@@ -92,7 +91,6 @@ saved records. Subsequent runs preserve your settings and files. Reopen this
 saved workspace for later sessions; opening `~/mrw-work` as a folder selects a
 different VS Code workspace identity. See [workspace setup](WORKSPACE_SETUP.md)
 for the layout, optional tools and existing-work recovery.
-
 
 1. Open the MRW Activity Bar view and choose **Open Document…**, or run
    **MRW: Open Document…** from the Command Palette (**F1**).

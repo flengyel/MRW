@@ -38,10 +38,10 @@ dependencies, source regions, tactic states, and elaborated proof structure
 are different inputs. A declaration map does not supply the internal argument
 of a proof. Source inspection is not elaboration-graph extraction.
 
-For a finite directed acyclic graph \(G=(V,E)\), let \(R\subseteq V\) be the
-retained vertices and \(V\setminus R\) the hidden vertices. Between distinct
-vertices \(u,v\in R\), the displayed graph has an edge \(u\to v\) exactly when
-the original graph has a directed path from \(u\) to \(v\) whose internal
+For a finite directed acyclic graph $G=(V,E)$, let $R\subseteq V$ be the
+retained vertices and $V\setminus R$ the hidden vertices. Between distinct
+vertices $u,v\in R$, the displayed graph has an edge $u\to v$ exactly when
+the original graph has a directed path from $u$ to $v$ whose internal
 vertices are hidden. Operationally, eliminate a vertex by joining each of its
 predecessors to each of its successors and then removing it. This preserves
 reachability between retained vertices.
@@ -78,13 +78,11 @@ selection or explanation generated through a `ModelCall`. A changed source
 invalidates the current association; the earlier outline remains inspectable
 against its pinned source. Do not silently reassign it to similar-looking nodes.
 
-The outline service invokes no model or compiler merely to open, hide, expand,
-or restore an existing outline. An installed Lean extension may process a
-source file opened through navigation; that is a separate tool action, not an
-outline-service check or a new MRW Verification. Requesting an AI outline is an
-explicit action using the existing bounded preview/Send boundary. Checking a
-newly proposed formal claim is a separate action. These actions do not admit
-premises into the warrant layer.
+Opening, hiding or expanding claims in an outline invokes no model or compiler.
+The [proof-study workflow](PROOF_STUDY_WORKFLOW.md) copies selected passages and
+a question to the clipboard for Codex. The reader imports the proposed outline.
+The Lean extension may check a source file opened from the outline. Neither
+import nor navigation admits a premise to the justification engine.
 
 <a id="first-bounded-increment"></a>
 
@@ -201,20 +199,20 @@ proof status follows from a link. See [the guide](OBSIDIAN_WORKFLOW.md).
 
 The pinned proof
 [`Subgraph.Equation387_implies_Equation43`](https://github.com/teorth/equational_theories/blob/1aec8a7acf223b7c56e4830977b6e90d4ef1924b/equational_theories/Subgraph.lean)
-provides three local lemmas and a concluding rewrite block. Let \(G\) have a
-binary operation \(\diamond\), assume
-\(x\diamond y=(y\diamond y)\diamond x\) for all \(x,y\in G\), and write
-\(s(x)=x\diamond x\).
+provides three local lemmas and a concluding rewrite block. Let $G$ have a
+binary operation $\diamond$, assume
+$x\diamond y=(y\diamond y)\diamond x$ for all $x,y\in G$, and write
+$s(x)=x\diamond x$.
 
 | Selected source region | Visible claim | Explanation |
 |---|---|---|
-| `idem` | Squares are idempotent: \(s(x)\diamond s(x)=s(x)\). | Apply the assumed identity twice to reduce the product of two squares to one square. |
-| `comm` | Every square commutes with every element: \(s(x)\diamond y=y\diamond s(x)\). | Apply the assumed identity with the idempotent element \(s(x)\), whose square is itself. |
-| `op_idem` | Squaring both factors preserves their product: \(s(x)\diamond s(y)=x\diamond y\). | Rewrite first to \(s(y)\diamond x\), then to \(x\diamond y\). |
+| `idem` | Squares are idempotent: $s(x)\diamond s(x)=s(x)$. | Apply the assumed identity twice to reduce the product of two squares to one square. |
+| `comm` | Every square commutes with every element: $s(x)\diamond y=y\diamond s(x)$. | Apply the assumed identity with the idempotent element $s(x)$, whose square is itself. |
+| `op_idem` | Squaring both factors preserves their product: $s(x)\diamond s(y)=x\diamond y$. | Rewrite first to $s(y)\diamond x$, then to $x\diamond y$. |
 | Concluding rewrite block | The operation is commutative. | Replace both factors by their squares, exchange the squares, and undo the replacement. |
 
 The final chain is
-\(x\diamond y=s(x)\diamond s(y)=s(y)\diamond s(x)=y\diamond x\).
+$x\diamond y=s(x)\diamond s(y)=s(y)\diamond s(x)=y\diamond x$.
 All claims use the assumed identity; `comm` additionally uses `idem`, and the
 conclusion uses `comm` and `op_idem` jointly. These are selected source boundaries;
 this illustration itself is not machine output. The project's

@@ -1,98 +1,45 @@
 # Architecture in brief
 
-MRW supports mathematical understanding and research, including work on
-AI-generated papers and AI-formalized Lean developments. Its architecture
-connects reading, notes, calculations, proof work, deliberate practice and the
-reasons supporting claims while preserving the context needed to continue.
-The design uses ports and adapters: research services express the capabilities
-they need, and adapters connect them to the systems responsible for documents,
-sources and execution.
+The VS Code extension connects a passage in a paper or note to the sources,
+calculations and proof steps that bear on it. MRW keeps the references needed
+to return to that work. Native editors, kernels and proof checkers manage
+their own files and execution.
 
-![MRW architecture: the VS Code facade leads to workflow coordination, a canonical data model, the integral justification logic engine and core services. Ports and adapters connect documents, sources, computation, external proof checking, AI and optional diagnostics.](assets/mrw-architecture.png)
+![The VS Code facade connects to the MRW core. Six groups of adapters connect it to documents and notes, sources and references, computation, proof checking, AI assistance and optional diagnostics.](assets/mrw-architecture.png)
 
-[Scalable SVG](assets/mrw-architecture.svg) · [PNG](assets/mrw-architecture.png)
+The hexagon groups responsibilities. Dashed elements are proposed.
+[Scalable diagram](assets/mrw-architecture.svg) · [Implementation status](DESIGN_RECONCILIATION.md)
 
-The hexagon groups responsibilities; it is not a deployment map or a claim
-that exactly six interchangeable interfaces exist. It combines current and
-intended architecture. Dashed elements are proposed. The
-[design register](DESIGN_RECONCILIATION.md) gives implementation status and
-remaining acceptance work.
-
-| Design element | Role in MRW |
+| Component | Responsibility |
 | --- | --- |
-| **Facade** | Contextual VS Code actions provide a coherent route into MRW services and native editors. The facade does not replace those editors. |
-| **Ports and adapters** | Capability-specific interfaces connect notes, sources, computation, proof tools, AI and inspection. Adapters translate each external system's API and data. |
-| **Anti-corruption layer** | Translation preserves identity, revision, attribution and meaning across unlike systems; external formats and status conventions do not silently redefine MRW records. This is a software boundary, not a correctness guarantee. |
-| **Workflow coordination** | Connect reading, comparison, annotation, linking, attempts, feedback, correction, review and resumption. Keep operations explicit and distinguish dispatch, acceptance and completion. |
-| **Canonical data model** | A narrow shared vocabulary for logical identities, current locations, immutable revisions/captures, associations, provenance, observed outcomes, claim versions, admissions, contexts and derivations. Ordinary documents remain in their native formats; no duplicate representation of every mathematical idea is required. |
-| **Justification logic engine** | Represent and compose explicit reason assertions under selected premises; search bounded Application routes, retain separate dependencies and recheck successor contexts. [Source-driven context assembly and review](SOURCE_GROUNDS_WORKFLOW.md) are implemented for existing notes and retained passages; broader inference remains open. |
-| **Core services** | Maintain storage invariants, retained references and lightweight operational usage records. Optional companions must not disable these protections. |
+| Facade | Presents MRW actions in the context of the current document or selection. |
+| Ports and adapters | A port specifies an operation the core needs. An adapter implements it for a particular editor, source or service. |
+| Anti-corruption layer | Translates external records while preserving their identity, revision and attribution. A citation returned by a reference manager, for example, identifies a work. It supplies no premise until the reader admits one. |
+| Workflow coordination | Connects actions across tools and records which requests were dispatched, accepted or completed. Returning to a saved calculation opens its result without executing the notebook. |
+| Canonical data model | Distinguishes a work, its location, a retained revision and a passage in that revision. Claims, admissions, derivations and their links to sources have separate records. [Data model](../DOMAIN_MODEL.md) |
+| Justification logic engine | Checks derivations under selected admissions. Bounded search finds alternative routes and records which admissions each route uses. [Search and withdrawal](JUSTIFICATION_ROUTE_SEARCH.md) |
+| Core services | Store retained records, check their integrity and record local feature use. [Storage](ARTIFACT_STORAGE.md) · [Operational usage](OPERATIONAL_USAGE.md) |
 
-Learning is a purpose of these services. The [study workflow](ACTIVE_STUDY_WORKFLOW.md)
-connects source-bound questions, attempts, retained feedback, correction and
-spaced review; it is entered explicitly so ordinary reading remains independent.
-Current tools preserve attempts, revisions, retained feedback, reader-reported
-outcomes and observed answer exposure as distinct records. Navigation, saved evidence and successful
-formal checks must not be reported as evidence of understanding by themselves.
-The [vision](../VISION.md) distinguishes explanatory, practical, epistemic and
-organizational benefits.
+In [source study](ACTIVE_STUDY_WORKFLOW.md), a question refers to a particular
+passage. MRW keeps the submitted attempt, retained feedback and subsequent
+corrections. The reader can reopen the attempt or keep the question for spaced
+review.
 
-The engine uses **Justification Logic** to represent reasons within the logical
-language and check how they compose. Its logical basis follows Sergei Artemov
-and Melvin Fitting, [*Justification Logic: Reasoning with Reasons*](https://doi.org/10.1017/9781108348034),
-Cambridge Tracts in Mathematics 216 (Cambridge University Press, 2019), chapters
-2–3. A reason assertion `t:A` records `t` as a justification for the formula `A`.
-The non-factive calculus checks derivations of such assertions under explicit
-premises; it does not infer `A` from `t:A` alone.
+The engine implements a non-factive fragment of Sergei Artemov’s Justification
+Logic. A derivation of $t:A$ under stated admissions establishes that $t$ is a
+reason for $A$ in that context. It does not establish $A$ itself. The two proofs
+of Euclid’s lemma illustrate why dependencies matter. Withdrawing the admitted
+implication from Bézout’s identity to Euclid’s lemma leaves the route through unique prime factorization available.
+[Artemov and Fitting, chapters 2–3](https://doi.org/10.1017/9781108348034) ·
+[Euclid’s lemma](JUSTIFICATION_EUCLID_EXAMPLE.md) · [Checker specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)
 
-For example, two arguments for Euclid's lemma use different named theorems.
-The engine composes the admitted reasons, retains the separate routes and
-identifies which routes depend on a withdrawn premise. Exact source passages,
-provenance and checking records remain available alongside those derivations.
-The logical calculus and the records binding its premises to source material
-have distinct roles.
+Jupyter and SagePod run notebooks, the Lean extension checks proofs, and Zotero
+manages references. The optional diagnostics extension uses the inspection
+interface to produce local reports. A CoCalc adapter for remote projects and
+notebooks is proposed. [Integration boundaries](INTEGRATION_BOUNDARIES.md) ·
+[Diagnostics](DIAGNOSTICS_PLUGIN.md) · [CoCalc proposal](COCALC_ADAPTER.md)
 
-The [bounded search API](JUSTIFICATION_ROUTE_SEARCH.md) discovers Application
-routes and surviving support after withdrawal;
-the reader retains exact source snapshots and checked routes, supports explicit
-withdrawal into a successor context, and reopens saved results without rerunning
-Lean. The [Euclid example](JUSTIFICATION_EUCLID_EXAMPLE.md) supplies a public
-introduction.
-[The user guide](JUSTIFICATION_WORKFLOW.md) explains current commands and limits;
-[the technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md)
-defines the non-factive J₀/J(CS) checker profiles and records. The current reader
-transport uses J₀ only; bounded search introduces no constant-specification
-members. Ordinary reading requires no claim or premise-entry form.
-
-External systems retain ownership. The selected notes application creates its
-notes using its configured workflow; existing notes can be edited natively.
-Jupyter and SagePod supply notebook execution and its environment; the Lean
-extension supplies native proof-checking interaction; Zotero owns its reference
-library. MRW retains selected sources, results and links without introducing competing template engines, evaluators,
-queues or managed databases. Source notes and independently developed notes remain distinct,
-potentially many-to-many works.
-
-The [proposed CoCalc adapter](COCALC_ADAPTER.md) extends these boundaries to
-remote projects and notebooks. CoCalc retains its editors, kernels and project
-lifecycle; the proposed adapter retains explicitly exported results and links
-to local work.
-
-The [optional diagnostics companion](../diagnostics/README.md) produces bounded
-local feature-use, integrity and data-hygiene reports. It supports manual
-reports, opt-in weekly reporting while the workspace is active, export and an
-explicit clipboard handoff for Codex maintenance. Core retains essential
-integrity checks and lightweight recording. Reports do not call a model or
-repair data. Automatic Codex maintenance scheduling is not implemented.
-Diagnostics does not check external targets, complete schemas/dependencies
-or passage anchors.
-
-[Integration boundaries](INTEGRATION_BOUNDARIES.md) define ownership and handoff
-contracts. [Operational usage](OPERATIONAL_USAGE.md),
-[diagnostics](DIAGNOSTICS_PLUGIN.md) and [Codex maintenance](CODEX_MAINTENANCE.md)
-define recording and maintenance responsibilities.
-
-[`MRW.Contracts`](CONTRACT_PILOT.md) specifies relocation and immutable-citation
-safety in Lean. Its proved invariants and sampled runtime comparisons do not
-verify the Python/JavaScript implementation or establish liveness. It is separate
-from `MRW.Justification`; [further contract models](CONTRACT_FORMALIZATION.md)
-remain proposed.
+The separate Lean library `MRW.Contracts` models relocation and the preservation
+of exact citations. Its proofs concern the model. Tests compare selected
+JavaScript operations with the model’s predictions.
+[Relocation model and checks](CONTRACT_PILOT.md)

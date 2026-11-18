@@ -5,7 +5,6 @@ VS Code's preview, and **Contents** lists its headings and links. The original
 file stays in place. Reading, following links and returning require no import
 or problem record.
 
-
 ## Find an imported section and its reader notes
 
 Choose **Open Saved Source…** in MRW's **Commands** view, next to Open Document.
@@ -46,8 +45,7 @@ use **Reveal Contents Document** to return to the selected Markdown note. **Choo
 Contents. **Reveal Contents Document** returns to that document when another
 editor is active. While a different file is active, Contents hides the preceding
 tree and identifies the active file, with directions for selecting its Markdown
-or returning to the selected document. It does not display an unrelated note's
-headings beneath a PDF or text file.
+or returning to the selected document.
 
 To start a note from MRW, choose **New Note…** in **Commands** or the
 **MRW Document** menu. For a configured Obsidian vault, MRW brings Obsidian
@@ -110,12 +108,6 @@ file dialog's last location. A successful choice reports the selected path.
 Cancellation and an unavailable or redirected recent folder leave the selection
 unchanged. If the setting is saved but history cannot be saved, MRW reports both
 facts; selecting that folder again retries the history save.
-
-Temporary directories such as `/tmp/mrw-…` hold disposable development fixtures
-or intermediate TikZ rendering files. They are not a default location for notes.
-Opening a file or rendering a diagram does not change **MRW: Notes Folder**.
-Tests must use their own workspace and settings; they must not change a working
-workspace's notes folder.
 
 1. Click a WikiLink in preview, or Ctrl+click it in the source editor, subject
    to VS Code's configured link modifier. For ordinary links, select their

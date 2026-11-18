@@ -1,10 +1,5 @@
 # Companion software and recommended extensions for MRW
 
-[Subsystem ownership and integration boundaries](INTEGRATION_BOUNDARIES.md)
-governs these optional companions. Existing native editors remain available;
-creation and execution shortcuts delegate to the responsible system rather
-than supplying a second implementation.
-
 Use VS Code's editing and preview tools alongside MRW. Install a
 companion for a specific task: writing LaTeX, running a SageMath notebook,
 checking Lean proofs or using another PDF reader. Ordinary Markdown navigation
@@ -123,10 +118,6 @@ host. For Windows Obsidian with WSL, use the Windows vault's `/mnt/c/…` path.
 Set `mrw.obsidianVault` only if the vault name or ID differs from the folder name.
 See [Obsidian configuration and the shared-file workflow](OBSIDIAN_WORKFLOW.md#configure-obsidian-with-mrw)
 for settings, saved-edit refresh and rendering limits.
-
-The maintainer's [published note format](https://github.com/flengyel/Zettel)
-and [configuration examples](https://github.com/flengyel/Zettel/wiki) are optional.
-MRW requires neither that format nor its scripts or Obsidian plugins.
 
 [New Note](OBSIDIAN_WORKFLOW.md#new-note) invokes the configured Obsidian command
 and its template. Other folders use a blank VS Code Markdown editor. The Archive's

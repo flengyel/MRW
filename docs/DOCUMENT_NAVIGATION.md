@@ -72,6 +72,3 @@ Returning from a new or recent note preserves the source location where it is
 known. A PDF return is file-level. Existing reader annotations and retained
 sources are unchanged. These commands also appear in the Command Palette and
 the MRW sidebar.
-
-The independent `flengyel/Zettel` specification describes one optional set of
-conventions. MRW does not define a note schema or require those conventions.

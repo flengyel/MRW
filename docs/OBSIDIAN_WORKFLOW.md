@@ -54,11 +54,8 @@ Unsaved VS Code changes prevent replacement; MRW does not save or merge them.
 Both applications must address the same files. A link does not synchronize a
 separate Linux or SSH copy.
 
-The maintainer's [published note format](https://github.com/flengyel/Zettel) describes
-a note format, templates and scripts. Its [wiki](https://github.com/flengyel/Zettel/wiki)
-describes Obsidian configuration and conventions. These are optional companion
-resources; MRW does not install their plugins or configure the vault. New Note
-invokes only the Obsidian command selected in your MRW settings.
+The maintainer publishes an optional [note format and templates](https://github.com/flengyel/Zettel).
+**New Note…** uses the creation command configured for the selected vault.
 
 MRW's native Markdown preview supports note-local mathematical macros and
 explicit rendering of `tikz` fences. See [TikZ diagrams](TIKZ_WORKFLOW.md).
@@ -254,16 +251,9 @@ captured when linking remain available separately.
 
 Copying the annotation and its attribution/return link is optional. Use the copy
 actions when useful, then save in the authoring application. **Confirm selected
-saved note and link** verifies the saved destination and selected format without
-requiring an exact-text replica or special marker. If **Zettel — flengyel/Zettel**
-is selected, the existing external validator checks that note only. Other notes
-keep their own format. Format validation does not establish intellectual
-completeness or useful conceptual links. See [source notes and linked notes](NOTE_COMPANIONS.md#source-notes-and-zettels).
-
-The maintainer's format keeps filename stem equal to YAML id, YAML title as
-ID plus human title, a unique H1, SEE ALSO and Research, and a title-appropriate
-index link. Preserve reference-section-title: References for exported
-bibliographies. MRW does not create or fill that template.
+saved note and link** verifies the saved destination. Choose **Ordinary Markdown**
+for notes in another format. Choosing the maintainer's format runs its external
+validator on the selected note. [Source notes and linked notes](NOTE_COMPANIONS.md#develop-and-link-notes).
 
 Prior transfer records and snapshots remain readable. After linking, edit the
 source annotation or open the external note according to the work being done.
@@ -295,8 +285,7 @@ files alone. No background title search or recreation runs.
 1. In the saved-source reader, choose **Copy link to this source** under
    **Whole source**, or **Copy link to this passage** under **This passage**.
    Alternatively run **MRW: Copy Source or Passage Link…** and select a target.
-2. Paste and save the Markdown link in an Obsidian note, for example under
-   a Research heading.
+2. Paste the link into the note and save it.
 3. Click the link to open the saved reader. A passage link also selects its
    exact retained range in a read-only source view.
 

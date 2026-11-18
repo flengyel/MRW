@@ -38,10 +38,15 @@ The steps below apply when building a new version.
    npm ci --prefix vscode --ignore-scripts
    node --test vscode/test/tutorial.test.js
    TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-   npm run verify-vsix --prefix vscode -- mrw-0.23.45.vsix
+   core_version=$(node -p "require('./vscode/package.json').version")
+   diagnostics_version=$(node -p "require('./diagnostics/package.json').version")
+   npm run verify-vsix --prefix vscode -- "mrw-$core_version.vsix"
+   npm run check --prefix diagnostics
+   npm test --prefix diagnostics
+   TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix diagnostics
    ```
 
-   Substitute the selected version. Check changed documents and their links.
+   Check changed documents and their links.
    Record dependency audit findings without silently changing pinned versions.
    Compare runtime files with the previously verified baseline; run relevant
    regressions for uncovered runtime changes. Changes to shared reader/plugin code require
@@ -55,30 +60,28 @@ The steps below apply when building a new version.
 5. Inspect the final manifest, build marker, revised tutorial, guide links and
    packaged README. The verifier checks the exact inventory, runtime bytes and
    bundled licenses/notices; do not include vault files, private settings, logs
-   or test evidence. Produce and check the checksum with a portable asset name:
+   or test evidence. Generate a checksum for each package.
 
    ```sh
-   cd vscode
-   sha256sum mrw-0.23.45.vsix > SHA256SUMS
-   sha256sum -c SHA256SUMS
+   release_dir=$(mktemp -d)
+   cp "vscode/mrw-$core_version.vsix" "diagnostics/mrw-diagnostics-$diagnostics_version.vsix" "$release_dir/"
+   (cd "$release_dir" && sha256sum *.vsix > SHA256SUMS && sha256sum -c SHA256SUMS)
    ```
 
    Keep packages, checksums and build/check logs outside tracked source. Retain
    local logs and exit statuses; upload only the intended release assets.
 6. Fetch again and preserve concurrent main commits with normal integration and
-   pushes. Confirm B is included in main. Create and push tag `v0.23.45` at verified
-   B. Use an authenticated GitHub API or browser to create a **draft release**
-   with `prerelease: false`, titled **MRW 0.23.45 — Resume linked calculations** for this release.
-   Attach `mrw-0.23.45.vsix` and `SHA256SUMS` before publishing. Do not expose or
-   commit credentials. No automatic publishing workflow is needed.
+   pushes. Confirm B is included in main. Tag B with `v` followed by the new core version
+   and push that tag. Create a **draft release** for it with `prerelease: false`. Attach both VSIX files and
+   their `SHA256SUMS` from the release directory.
 7. Release notes identify B and A, actual changes, requirements, installation,
    optional companions, known limits and manual update instructions. Link the
    [installation guide](INSTALLATION.md), [reading guide](READING_OUTLINE_WORKFLOW.md)
    and [TikZ setup](TIKZ_WORKFLOW.md). Publish only the completed draft and mark
    it as **Latest**. Verify its public page, `prerelease: false`, latest-release
-   link, tag target and README link. Download both assets through their
-   versioned URLs; check the downloaded VSIX against
-   `SHA256SUMS` and the verified local bytes. Record the URLs, commits, checksum
+   link, tag target and README link. Download both VSIX files and `SHA256SUMS` through their
+   versioned URLs. Compare the manifest with the locally generated copy, then
+   verify both packages with `sha256sum -c SHA256SUMS`. Record the URLs, commits, checksum
    and actual checks in the release notes or linked pull request. Publication failure remains pending,
    not a completed release; preserve the ready assets and release-note text.
 

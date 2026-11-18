@@ -38,9 +38,9 @@ unfinished attempt.
 
 Report **Unaided success**, **Completed with help**, **Unresolved** or **Not
 assessed**, and whether the source was consulted before submission. These are
-reader reports, not mathematical checks. To revise a report, open **Correct
-recorded outcome**. **Correct outcome** saves the revision alongside the earlier report. Unsubmitted report choices survive pause and
-reopen; they are never submitted automatically.
+reader reports, not mathematical checks. Use **Correct outcome** to save a revision alongside the earlier report. On
+`main`, first expand **Correct recorded outcome**. Unsubmitted choices survive
+pause and reopen.
 
 Starting recall conceals the source and reference answer inside the study.
 Revealing either records possible exposure, without claiming that it was read.
@@ -98,13 +98,12 @@ research use and automated fixtures. Existing work is preserved.
 the outcome to establish its schedule. **Retire** ends review and preserves
 the earlier work.
 
-On a later visit run **MRW: Resume Study**. When there is a choice, active
-studies with due questions appear first, with a count beside the owning
-study. This includes an older study with a due question outside the last
-30 recent studies. A single study opens directly. An unfinished attempt
-reopens with its draft. Choose **Review due questions** to start a short
-block drawn only from scheduled questions now due. Each attempt opens with
-the answer concealed.
+On a later visit run **MRW: Resume Study**. One study opens directly. An
+unfinished attempt reopens with its draft. In the 0.23.45 release, choose
+a recent study and begin or continue its block. On `main`, the picker also
+lists older studies with due questions and puts due studies first. Choose
+**Review due questions** to start a block of scheduled questions with the
+answers concealed.
 
 A block draws from the selected sources, including questions on matching
 prerequisite passages. Review history belongs to an exact question and source
@@ -129,8 +128,9 @@ times; it does not add a second review. Retired questions stay out of selection.
 Missing earlier timing evidence remains unknown. The resulting intervals are
 scheduling estimates, not measures of mathematical understanding or mental effort.
 
-Choose **Report effort** after an attempt to open the optional 1–9 rating.
-Continue or leave the study at any time. Missing, declined and unsampled
+Choose **Report effort** after an attempt for the optional 1–9 rating. The
+0.23.45 release can also display it when a block ends. On `main`, it opens
+only on request. Missing, declined and unsampled
 ratings remain distinct. High reported effort (7–9) with repeated
 difficulty can offer a smaller step, prerequisite, worked example or pause.
 High effort with success preserves the challenge. Offers require reader-confirmed
@@ -164,8 +164,7 @@ includes private study state and history. Manual folder renaming and cross-machi
 study migration remain unsupported. Keep the original workspace storage when
 continuing work outside that workflow. One local writer per workspace is supported.
 
-**Configure History…** connects a separate data directory, a vault
-subdirectory (preferably `<vault>/MRW/`) or the vault root. It imports and verifies
+**Configure History…** connects a data directory for sharing. It imports and verifies
 private history before changing the connection. Original files remain. Only
 `History/` is managed. Existing Syncthing/SyncTrayzor handles synchronization.
 Read the [shared-history workflow](USAGE_HISTORY.md) for offline recovery,

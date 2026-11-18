@@ -3,17 +3,13 @@
 Start with the [project README](../README.md) for current capabilities and the
 [installation guide](INSTALLATION.md) for a Linux, WSL2 or Remote SSH workspace.
 The installed **MRW: Open Tutorial** command describes the active extension build.
-Understanding mathematics, including AI-generated arguments and AI-formalized
-Lean developments, is a central purpose. Use the study and proof-work guides for
-attempts, feedback, correction and later reconstruction alongside reading,
-calculation and source navigation.
 
 ## User guides
 
 | Task | Guide |
 | --- | --- |
 | Read a mathematical argument, keep a failed approach and resume its notes | [Mathematics in ordinary notes](MATHEMATICS_WITH_NOTES.md) |
-| Practise a proof step or example, retain feedback and resume an attempt | [Source study and deliberate practice](ACTIVE_STUDY_WORKFLOW.md) |
+| Revisit a proof step or example | [Questions, attempts and spaced review](ACTIVE_STUDY_WORKFLOW.md) |
 | Work through a proof with its cited passages and questions | [Proof work](PROOF_STUDY_WORKFLOW.md) |
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |
 | Open documents, navigate Contents, follow links and return | [Documents and Contents](READING_OUTLINE_WORKFLOW.md) |
@@ -38,12 +34,6 @@ calculation and source navigation.
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
 | Prepare to rename a folder containing an MRW workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
 
-Starting a recorded [source study](ACTIVE_STUDY_WORKFLOW.md) or
-[proof study](PROOF_STUDY_WORKFLOW.md) is explicit; ordinary document navigation
-remains available independently. Practice stays tied to the selected mathematics.
-The source-study guide describes the current attempt, assistance and exposure
-rules.
-
 ## Design and development
 
 - [Architecture in brief](ARCHITECTURE.md): facade, adapters, workflow coordination,
@@ -51,7 +41,7 @@ rules.
 - [CoCalc adapter proposal](COCALC_ADAPTER.md): remote project/notebook handoff,
   exported results, ownership and acceptance criteria; not yet implemented.
 - [Justification Logic technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md):
-  calculus, records, checked certificates and the two bounded executable cases.
+  calculus, admissions and checked certificates.
 - [Design reconciliation register](DESIGN_RECONCILIATION.md): adopted decisions,
   implementation status and remaining work.
 - [Codex maintenance from reports](CODEX_MAINTENANCE.md): compare periodic findings
@@ -73,13 +63,15 @@ rules.
 - [Optional notes adapters](NOTE_COMPANIONS.md#proposed-optional-adapters): current
   Obsidian handoff, possible Org capture and The Archive routes, and format limits.
 - [W3C PROV lab-notebook design](PROVENANCE_DESIGN.md): shared provenance model,
-  plugin responsibilities and a bounded implementation trial.
+  plugin responsibilities and the notebook provenance export.
 - [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):
   lifecycle contract, shared-data boundaries and completion checks.
 - [Zotero integration design](RESEARCH_WORKSTATION_DESIGN.md#zotero-integration):
   reference, attachment and citation responsibilities.
-- [Related systems and reuse](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse):
-  Zotero, CoCalc, Wolfram, Proofscape, TeXmacs, MathHub/ALeA and VisTrails.
+- [Related research](RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse) compares
+  Eigenius, Axiom Math, Google AI co-scientist and Kosmos.
+- [Optional plugins and integrations](RESEARCH_WORKSTATION_DESIGN.md#optional-plugins-and-integrations) lists
+  tools for notes, references, calculation and proof checking.
 
 - [Contributing](../CONTRIBUTING.md): focused changes, bug reports and larger proposals.
 - [Lean lesson packs](LEAN_LESSON_PACKS.md): explicit local content registration and API 1.

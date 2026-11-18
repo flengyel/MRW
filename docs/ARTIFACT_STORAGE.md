@@ -2,7 +2,7 @@
 
 MRW keeps retained sources, outlines, annotations and associated records
 separately from ordinary notes and notebooks. A saved-work move applies to one
-VS Code workspace. Other workspaces and Obsidian's notes remain in place.
+VS Code workspace. Ordinary notes and notebooks stay at their existing paths.
 
 For an ordinary study-folder rename, use **Prepare Folder Rename…**
 and **Reconnect Saved Work After Folder Rename…** over this same core protocol.
@@ -130,10 +130,8 @@ publication and private permissions. MRW installs no synchronization service.
 1. Stop writing on the first computer. Finish recovery and close MRW windows
    using the store. Wait for your synchronization tool to finish copying the
    entire selected artifact directory, including its identity, manifest and
-   generation files. Verify receiving-side ownership and permissions after both
-   initial creation and later replacement; do not assume permission metadata
-   travels with the bytes. A synchronization tool may copy content without
-   preserving ownership or permission metadata. Windows-backed private stores
+   generation files. Verify ownership and permissions on the receiving host after initial creation
+   and later replacement. Windows-backed private stores
    are not qualified for this handover.
 2. On the receiving computer, open a workspace with one local folder for each
    project in the store. This workspace must have no existing MRW saved artifacts
@@ -196,7 +194,8 @@ driver or synchronization-service behavior under power loss.
 ## Saved-source Trash
 
 `source-status.json` is a bounded, revision-checked status record inside each
-saved-source directory. It is included in legacy inventory, generation hashes,
-validation, moves and adoption. The file is optional for active earlier sources;
+saved-source directory. Earlier stores include it in the file inventory, and
+versioned stores include it in the generation hashes. Validation, moves and
+adoption cover the file. The file is optional for active earlier sources;
 once created its transition identity is retained through Restore. Trash never
 erases the source payload or annotations. See [controls and recovery](SAVED_SOURCE_TRASH.md).

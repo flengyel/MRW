@@ -8,7 +8,7 @@ revision of that item's contents. Retained references distinguish four fields:
 | Qualified item ID | `stacks-project:08ZH`, `kerodon:0004`, `nlab:adjoint%20functor` | Source namespace and source-local item |
 | Content revision | Retained SHA-256; Stacks Project also retains a Git commit | The exact acquired bytes |
 | Passage | Outline/region identity and scalar start/end range | The exact quotation within those bytes |
-| Private scope | Workspace/store identity | Authority to resolve retained material |
+| Private scope | Workspace/store identity | Where MRW resolves the retained reference |
 
 Keep the qualified identifier intact in document links, backlinks, study/research
 records, handoffs and resumption. Never collapse `kerodon:0004` and
@@ -31,8 +31,8 @@ mrw-outline:v2/kerodon:000A/<scope>/<outline>/<source-sha256>/<region>/<start>-<
 The hash and exact scalar range retain their meaning. Outline-level
 links omit the region/range. A prefix cannot excuse a hash mismatch or authorize
 another private scope. A canonical URL cannot substitute for a failed retained
-reference. Changing a published page creates a distinct retained snapshot;
-earlier citations still resolve their original bytes and passage.
+reference. Retaining a changed page creates a distinct snapshot. Earlier
+citations still resolve to the retained bytes and passage.
 
 Older v1 links remain supported. The reader derives their published identity
 from the retained manifest. Explicit published-item backlink scans can resolve

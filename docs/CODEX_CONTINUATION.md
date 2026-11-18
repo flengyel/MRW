@@ -21,8 +21,8 @@ Proposed capabilities in a design document do not authorize their implementation
 Use the existing workflow and owner application first. The
 [integration contract](INTEGRATION_BOUNDARIES.md) governs delegation and failure;
 the [native-test procedure](NATIVE_TEST_ISOLATION.md) governs mutation tests.
-Ordinary reading and note-taking require no study registration or prerequisite
-exercise. Deliberate practice and source/proof studies remain explicit choices.
+Opening a note starts no exercise. Source study and proof study begin when
+the reader selects the corresponding command.
 
 ## Verify and complete
 

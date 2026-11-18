@@ -205,10 +205,8 @@ root and relative filename. Exact citations keep their original revisions.
 
 ## Study a difficult passage
 
-Deliberate source study, saved attempts and opt-in spaced review remain
-separately accessible from the Command Palette. **Resume Study**, history
-inspection/export and Archive/Restore or Trash controls preserve earlier work.
-Opening or following a note requires none of these records.
+Choose **Study Current Material** to work on a selected passage. **Keep for
+spaced review** enrolls a question. **Resume Study** reopens the saved work.
 [Study workflow](../docs/ACTIVE_STUDY_WORKFLOW.md) ·
 [Lifecycle](../docs/STUDY_LIFECYCLE.md).
 

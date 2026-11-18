@@ -7,13 +7,11 @@ records accepted requirements and unresolved work; a report cannot replace it.
 
 ## Handoff and scope
 
-The optional [diagnostics plugin](DIAGNOSTICS_PLUGIN.md) produces reports and a
-bounded review package for the selected workspace. It does not become a code
-editor or model client. A manual or explicitly configured periodic Codex
-maintenance workflow consumes that package and the repository's current design.
-Report cadence and maintenance cadence are separately configured; producing a
-report alone neither submits it to a model nor authorizes code/data mutations.
-No such automated handoff or maintenance schedule is currently implemented.
+The optional [diagnostics plugin](DIAGNOSTICS_PLUGIN.md) can schedule reports
+for the active workspace. **Copy Codex Maintenance Handoff** copies findings
+for manual review against the current design. The reader chooses whether to
+send them to Codex. Automated handoff and a separate maintenance schedule
+are proposed.
 
 The package identifies report/check versions, observation periods and coverage,
 workspace/host scope, data revisions, finding IDs and locators for supporting

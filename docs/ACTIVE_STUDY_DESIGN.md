@@ -1,10 +1,8 @@
-# Active study, light review, and cognitive-load tracking
+# Source study and scheduled review
 
-This contract governs optional source study: attempts, feedback, correction,
-review, effort reports and resumption. The [workflow](ACTIVE_STUDY_WORKFLOW.md)
-describes current commands and limits. The
-[research-workstation design](RESEARCH_WORKSTATION_DESIGN.md) governs the wider
-mathematical workflow.
+A source study keeps questions, attempts and feedback with the passage they
+concern. The reader can enroll individual questions for scheduled review.
+[Commands](ACTIVE_STUDY_WORKFLOW.md) · [Research on scheduling and feedback](LEARNING_RESEARCH.md).
 
 Opening or following a document creates no study record. Questions and solutions
 can remain in ordinary notes. Research questions need not begin as source-bound
@@ -71,20 +69,11 @@ material must not silently restore an archived/trashed study or recreate a
 permanently deleted one. Offer explicit Restore where possible or Start New;
 a new study after permanent deletion needs a distinct identity.
 
-[W3C PROV](PROVENANCE_DESIGN.md) describes provenance relationships, not mandatory
-retention. Keep immutable content unchanged while retained; explicit permanent
-deletion may remove it. Earlier prohibitions on unsolicited deletion still
-apply, but do not prohibit these user-invoked lifecycle controls.
+[W3C PROV](PROVENANCE_DESIGN.md) describes provenance relationships. Content
+can remain immutable while retained and still be subject to permanent deletion.
 
 <a id="purpose-and-next-delivery"></a>
-
-## Purpose
-
-Source study connects the current material to pertinent questions, attempts,
-feedback, correction and later reconstruction or application. A proof graph is
-one representation, not the required result of every question.
-[Learning research](LEARNING_RESEARCH.md) distinguishes research findings from
-MRW's scheduling and effort policies.
+<a id="purpose"></a>
 
 ## Current material and session behavior
 
@@ -120,22 +109,24 @@ At submission, retain the exact answer snapshot or an existing immutable record 
 
 Separate scheduling from admission and selection:
 
-- Reuse a maintained FSRS implementation behind a small adapter if compatible with the existing runtime/package. Pin its version and parameter identifier. Use its documented default parameters initially; do not fit an individual model from a handful of attempts or invent a fresh forgetting curve.
+- The scheduler uses bundled ts-fsrs with default parameters and fuzzing disabled. Each scheduled observation records the scheduler version and parameter identifier.
 - A stable question revision and activity type are the scheduling item. A changed answer, substantially different question or changed source requires explicit rebinding/new revision; retain earlier history instead of silently transferring it.
 - Eligible due questions come first within the current material. Add new questions only while the current study's admission and time budgets permit. Stable tie-breaking makes selection explainable.
 - Initial product defaults: at most **three questions or approximately five minutes** in one light-review block, stopping at an attempt boundary; at most **one new question** in that block. These are adjustable prototype choices, not research-derived optima. Continuing is always possible.
-- Keep regular review admission explicit: saving a useful question can offer Keep for review. Do not turn every generated question or every opened theorem into permanent review work.
+- **Keep for spaced review** enrolls a selected recall question. Saving a question alone does not enroll it.
 - Questions outside the current context remain available with their history; they are not obligations displayed as a global overdue queue. Retirement/suspension preserves records. Logs distinguish relevance deferral, budget deferral and retirement.
 - Update the scheduler only from an eligible completed recall observation. Record hints and answer visibility separately. Recollection after seeing the answer is not unaided success; skip, interruption, reading and missing assessment do not update recall as failure.
 - Keep scheduling outcomes distinguishable from mathematical correctness and effort. Document the adapter's exact mapping (for example, reader-confirmed unaided recall to Good, failed unaided recall including answer-dependent completion to Again). Store the original observation, not only the mapped rating.
 - Opening the same material repeatedly does not repeatedly reschedule it. Use timestamps and event identities to make updates idempotent. After a gap, select a short relevant block rather than requiring catch-up first.
 
-A missing scheduler must not block attempts, feedback or saving. A manual revisit
-option must be labeled as such; it must not claim FSRS scheduling.
+If the scheduler is unavailable, attempts and feedback must still be savable.
+Distinguish manual revisits from FSRS-scheduled reviews.
 
-## Cognitive load: observations and responses
+<a id="cognitive-load-observations-and-responses"></a>
 
-Track **reported mental effort** separately from task outcomes, hints, duration and derived estimates. The first version must not display a global mastery score or a percentage of cognitive capacity.
+## Reported effort
+
+A rating records the reader's effort on one attempt. Keep it separate from the outcome, time spent and help used.
 
 Choosing **Report effort** opens the question “How much mental effort did that last attempt require?” on a scale from 1 (very low) to 9 (very high). Record the wording, scale, time of request and attempt ID. Record a rating only when the reader gives one.
 

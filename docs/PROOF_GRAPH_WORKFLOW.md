@@ -36,8 +36,7 @@ the displayed Stacks statement remains distinct from their AI summaries.
 
 The embedded page is restricted to the official Stacks origin, sandboxed and
 given no referrer. It has no MRW API. Messages from child frames are ignored.
-The ordinary source reader retains its previous frame-free policy. No live page
-content is added to an AI request or written into the saved source store.
+No live page content is added to an AI request or written into the saved source store.
 
 The **Open Proof Outline** icon appears in the title bar of a
 `.mrw-proof.json` editor, alongside the Command Palette and Contents view menu.

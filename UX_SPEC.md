@@ -28,8 +28,8 @@ explicitly and retains scoped references and results.
   or opens a blank VS Code editor for an ordinary folder. Obsidian owns prompts,
   templates, filenames and Save. A missing command produces no fallback note.
 - Ordinary reading creates no problem or study record and offers no unsolicited
-  registration. Keep deliberately invoked study, saved attempts, history,
-  lifecycle controls, Proof Outline and Lean study separately accessible.
+  registration. Keep saved attempts, study history, Archive and Restore, Proof Outline
+  and Lean study available on request.
 - Bind lesson actions to the selected lesson or its associated code. Unrelated
   Lean files retain native controls. Preserve lesson, code, notes and Return.
 - Name API and companion destinations where help is requested. Show exact context
@@ -72,43 +72,15 @@ results, inputs, method revisions and notes without a mandatory workflow canvas.
 
 ## 1. Design principle
 
-The interface supports doing and studying mathematics. It does not require a
-declaration name, a formal development, or a preliminary account of what the
-mathematician understands.
+Begin with a source, question or unfinished calculation in an ordinary file.
+Keep the relevant passages, prior work and calculations within reach. When the
+reader requests an outline or a prerequisite, give its source location and
+identify proposed connections. The reader can keep the next question and its
+sources in the working note or notebook.
 
-A mathematical objective describes the work, not a required data-entry field.
-A session can begin by opening an ordinary file to orient in a subject, solve a
-problem, study a theorem or proof, reconstruct earlier work, prepare to teach,
-or examine generated mathematics. The mathematician begins the mathematical
-work in the ordinary medium appropriate to it. MRW supplies source
-context, prior work, computations, and assistance when relevant.
-
-The interface supports work with mathematics whose justification exceeds the
-mathematician's present understanding, while making further understanding
-possible wherever it can. Statements, evidence, and applicable checks remain
-accessible without a complete explanatory account. Appropriate application
-requires access to the relevant hypotheses and scope, not reconstruction of
-every proof step. Missing explanation and missing justification are distinct.
-The four benefit categories in
-[VISION.md](VISION.md#justification-understanding-and-benefit) govern evaluation;
-they add no comprehension questionnaire or automatic acceptance status.
-
-The primary use is working into the existing literature from a chosen source
-or question. The intended interface should make a passage's role, relevant
-prerequisites, and connections to other sources accessible, with precise source
-locations and explicit uncertainty about proposed connections. An outline or
-local prerequisite lookup can support immediate work; no complete subject map
-or proof reconstruction is required. Preserve these study artifacts and the
-next question in an ordinary note or notebook so that progress can accumulate.
-These guidance capabilities remain design requirements, subject to the
-implementation limits stated above.
-
-Five constraints follow from `VISION.md` and apply throughout this
-specification.
-
-**Mathematical work comes first.** The interface must not require a subject map,
-questionnaire, or structured description of comprehension before a problem,
-proof, calculation, or exposition can begin.
+A result may be used before its proof is understood. Show the hypotheses, the
+grounds for using it and the scope of any check. A missing explanation and
+missing grounds raise different questions.
 
 **Formal material is optional.** When formal material exists, it appears after
 the informal mathematical context and may be consulted when useful. Its absence
@@ -388,10 +360,8 @@ a mismatch between prose and code. Such results are preserved as
 `WorkArtifact`s, relations, or discrepancies produced during the mathematical
 work.
 
-Formalization is neither required for a corpus nor required before study. The
-first problem-centered experiment therefore needs no formal development. A
-separate experiment may test informal/formal correspondence where a formal
-development already exists.
+When a formal development exists, compare its declarations with the
+corresponding manuscript statements. A reader can study a paper on its own.
 
 ---
 
@@ -416,9 +386,8 @@ Formalization — when available
 Verification — when applicable
 ```
 
-`why` is a separate, explicitly requested post-correspondence view, not an
-earlier Kallenberg level. In the first stateless CLI it assumes no prior command
-or hidden session state. It cumulatively presents the source's purpose and
+In the command-line example, `why` opens a reviewed correspondence and its
+justification on request. The command presents the source's purpose and
 organization, central concepts and results, the selected result's role and
 statement, governing idea, proof skeleton, available technical detail, and
 reviewed formal correspondence in that order before displaying the exact claim
@@ -590,10 +559,9 @@ Source/citation retrieval in step 4 is not automatic:
 6. If useful, explicitly request a linked follow-up with the correction or
    alternative assumption, then continue the mathematical work.
 
-No developer request JSON, declaration name, formal artifact, warrant or
-five-anchor setup precedes this workflow. A natural-language question is enough;
-metadata comes from the chosen work. The UI must not label an unverified model
-citation as a retrieved source, or an answer as complete when context is missing.
+The reader enters a question in ordinary language. MRW takes its references
+from the selected work. Distinguish a suggested citation from a retrieved
+source and identify any missing context.
 
 The standalone Qt assistance dock is non-modal so the selected source and ordinary note stay
 reachable. It shows OpenAI and the requested model, every exact selected context
@@ -744,15 +712,15 @@ method or attestation is obtained separately.
 When a selected proposal participates in an inspectable warrant, the interface
 uses the ordinary justification records rather than an AI-specific status. It
 keeps the documentary atom
-\(D=\operatorname{ModelProduced}(C,h,s,R)\) distinct from the substantive atom
-\(F\). Admitting \(m:D\) records only that the exact call returned the exact
-proposal. A separate, scoped admission \(r:(D\to F)\) is required before a
-checker may derive \(r\cdot m:F\). The view shows the call, response digest and
+$D=\operatorname{ModelProduced}(C,h,s,R)$ distinct from the substantive atom
+$F$. Admitting $m:D$ records only that the exact call returned the exact
+proposal. A separate, scoped admission $r:(D\to F)$ is required before a
+checker may derive $r\cdot m:F$. The view shows the call, response digest and
 span, both admissions and their bases, the derivation, and any later withdrawal.
 
 The interface does not force the model call into the mathematical warrant. If
 the proposal prompts an independent proof, source retrieval, computation, or
-formal check that supplies \(v:F\), it displays that direct warrant and retains
+formal check that supplies $v:F$, it displays that direct warrant and retains
 the model call only as attributed causal assistance and task evidence. Neither
 using a proposal during work nor marking it corrected or rejected creates a
 premise admission.
@@ -882,24 +850,23 @@ admissions, verifications or warrants.
 Run this when the active mathematical question calls for it, separately from
 acceptance of readable study and live assistance.
 
-For the Appendix fixture, inspect the relevant manuscript result, Lean
-declaration and `Lean/docs/AppendixA.md` correspondence. Then explicitly request
-`why` for `lem:range-lifting-pullback-section`. Inspect the immutable manuscript
-claim, exact proposition of
-`Dom.exists_total_lift_iff_rangeLiftPullback_section`, pinned kernel-attestation
-claim, separately admitted bridges and checked \(J_0\) certificate.
-In a test fixture, vary a source, formal environment or admission and confirm
-that only dependent current routes deactivate while old certificates remain.
+Compare the hypotheses, quantifiers and conclusion of a manuscript statement
+with those of its proposed Lean counterpart. Inspect the exact statement
+revisions, the recorded kernel check and its environment, and the separate
+admissions for the proof policy and the correspondence. The $J_0$ certificate
+checks the derivation under those admissions. In a test fixture, change a
+source, the formal environment or an admission. Only the routes depending on
+that change should cease to apply. The earlier certificates remain inspectable.
 
 For the documentary model-response experiment, trace one exact response span
-to its documentary atom. Inspect either explicitly admitted \(m:D\) and
-\(r:(D\to F)\) with checked \(r\cdot m:F\), an independently based
-\(v:F\) route with no AI-to-claim bridge, or rejection/abandonment without a
-warrant for \(F\). Never manufacture a bridge to complete the experiment.
+to its documentary atom. Inspect either explicitly admitted $m:D$ and
+$r:(D\to F)$ with checked $r\cdot m:F$, an independently based
+$v:F$ route with no AI-to-claim bridge, or rejection/abandonment without a
+warrant for $F$. Never manufacture a bridge to complete the experiment.
 
 **Acceptance.** Display only contextual derivability and keep source identity,
 external verification, premise admission and human judgment distinct.
-\(m:D\) alone cannot derive \(F\). The visible derivation exposes the actual
+$m:D$ alone cannot derive $F$. The visible derivation exposes the actual
 bridges, and withdrawing an admission preserves the old record while
 deactivating the dependent current route. These requirements govern the
 warrant experiment, not entry into mathematical study.
@@ -922,8 +889,8 @@ Obsidian controls apply. [Usage and limits](docs/STACKS_WORKFLOW.md).
 
 
 Broader corpus ingestion requires a separately authorized task after evaluation
-of the relevant study workflows. Use either the Stacks Project
-[@stacksprojectauthorsStacksProject2021] or Kerodon.
+of the relevant study workflows. Use either the [Stacks Project](https://stacks.math.columbia.edu/)
+or [Kerodon](https://kerodon.net/).
 
 1. Import the selected source's published hierarchy, stable identifiers,
    cross-references, and revision information.
@@ -947,8 +914,8 @@ corpus. A source revision identifies the stored records that require inspection.
 
 The interface has failed if it requires or encourages:
 
-- treating an incomplete prescribed evaluation ritual as a failure by the user;
-- requiring five anchors, formal correspondence or a warrant before useful study;
+- requiring a quota of retained passages, a formal correspondence or an admitted
+  reason before a reader can study the source;
 - counting tests, searches, responses or preserved records as mathematical benefit;
 - improving provenance machinery while the user still cannot read the source
   comfortably or ask a task-local mathematical question.
@@ -1002,13 +969,6 @@ It has also failed if:
 - Which of the Stacks Project and Kerodon should be used for the later
   large-corpus experiment, and which published interfaces provide its hierarchy,
   identifiers, cross-references, and revision information?
-- Which levels of assistance should be available, and which should require an
-  explicit request?
-- Which single model and service should be configured for the first experiment,
-  and what minimal response schema preserves the mathematical content without
-  forcing it into an inadequate schema?
-- How should outbound context be selected from sources and work artifacts
-  without manual classification or unnecessary disclosure?
 - How much prerequisite context can be recovered from sources and prior work
   without manual classification?
 - What orientation view serves a large problem-centered source and what view

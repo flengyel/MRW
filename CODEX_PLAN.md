@@ -11,11 +11,9 @@ feature, external-service or data-mutation authorization.
 
 ## Direction
 
-Develop MRW around actual mathematical work: understand existing literature and
-AI-generated mathematics, reconstruct arguments, practise deliberately, retain
-useful calculations and resume unfinished work. Ordinary notes and the chosen
-applications remain the work products. A new form, store or workflow requires a
-demonstrated obstacle that the existing tools cannot resolve.
+Start from a passage the reader is studying, a result whose grounds need
+inspection, or unfinished work in an existing document. Add an interaction
+when the existing tools leave a concrete obstacle.
 
 The [vision](VISION.md) defines the purposes; the
 [research design](docs/RESEARCH_WORKSTATION_DESIGN.md) and
@@ -28,7 +26,7 @@ requirements without presenting proposed capabilities as current behavior.
 | --- | --- |
 | Research continuity and argument reconstruction | D14 and the [research workflow](docs/RESEARCH_WORKSTATION_DESIGN.md#research-that-can-be-resumed). Resume documents, useful conclusions, failed approaches and unfinished steps through existing files and links. Let the mathematical task identify missing interactions. |
 | Outlines across sources and scales | [Outline contract](docs/PROOF_OUTLINES.md) and [subject navigation](UX_SPEC.md#4-subject-navigation). Support subjects, bodies of literature, books, articles, sections and individual arguments. Connections can cross sources without forming a strict hierarchy. Purpose, organization, concepts, governing ideas and details remain freely navigable; Lean is optional. Broader generation, discovery and corpus ingestion require separately scoped work. |
-| Deliberate practice and later performance | [Study design](docs/ACTIVE_STUDY_DESIGN.md) and [current workflow](docs/ACTIVE_STUDY_WORKFLOW.md). Preserve attempts, assistance, corrections and revisits. Evaluate reconstruction or application through the mathematics; a revealed answer, elapsed time or reader rating does not establish mastery. |
+| Returning to a proof step | Preserve the exact question, the reader’s attempt, retained feedback and the correction. Assess later reconstruction and application separately. [Study design](docs/ACTIVE_STUDY_DESIGN.md) · [Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md) |
 | Paper–Lean correspondence | D15 and the register's deferred review. Use the author-selected Došen–Petrić manuscript and resolve its current prose and Lean revisions together. Compare types, hypotheses, quantifiers, conclusions and dependencies. Preserve reviewed correspondences separately from formal checking. |
 | Grounds and derivations | D15 and the [justification specification](docs/JUSTIFICATION_LOGIC_EXPERIMENT.md). Keep explicit admissions, alternative routes, withdrawal and retained contexts distinct from provenance and truth. Extend the engine only for an authorized mathematical need. |
 | Native workflow verification | D08 and D11–D13. Complete the specifically unobserved lesson/code/notes, companion interaction, rich-output comparison and reference/attachment routes when the relevant host and services are available. Do not repeat completed demonstrations or infer native acceptance from mocks. |

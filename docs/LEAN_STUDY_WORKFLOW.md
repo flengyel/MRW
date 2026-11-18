@@ -143,5 +143,4 @@ files: from the repository root run
 It uses the already installed pinned toolchain, copies projects to temporary
 directories and records exact source hashes, compiler output and exit statuses.
 
-There is no quiz, timer, registration form or AI-account requirement. Additional
-local content is supported through [declarative lesson packs](LEAN_LESSON_PACKS.md).
+Add a local lesson using a [declarative lesson pack](LEAN_LESSON_PACKS.md).

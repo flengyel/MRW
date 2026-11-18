@@ -17,7 +17,7 @@ const helpText = {
   'proof-study': 'Prepare an exact proof-passage handoff for study; this does not check a proof.',
   'add-reader-note': 'Write a note about this passage.',
   'delete-reader-note': 'Choose an annotation stored in MRW and confirm its deletion. Linked vault notes are not deleted.',
-  'link-reader-note': 'Link a Zettelkasten note to this exact retained passage using its Obsidian URL. The file stays in your vault.',
+  'link-reader-note': 'Paste a note’s Obsidian URL to link it to this passage.',
   'ask-ai': 'Choose a retained passage and prepare a question with an exact preview. Send is a separate action.',
   'ask-ai-passage': 'Prepare an AI question about this exact retained passage. Review the preview before sending.',
   'ask-ai-pinned': 'Prepare a question about the earlier range pinned by the citation, even if the current passage changed.',

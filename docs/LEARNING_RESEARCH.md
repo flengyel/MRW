@@ -1,7 +1,7 @@
 # Mathematical practice, spaced review and evidence of learning
 
 MRW starts with an argument the reader has reason to understand or use. The
-reader can recover a prerequisite, inspect a cited result, attempt an inference,
+reader can look up a definition, inspect a cited result, attempt an inference,
 compare it with the proof, and return later to reconstruct or apply it.
 [Source study](ACTIVE_STUDY_WORKFLOW.md) implements attempts and scheduled recall.
 Whether this helps a mathematician understand a research paper remains open.
@@ -19,13 +19,11 @@ Frequent attempts and spaced returns are worth testing as part of ordinary mathe
 | Pan and Rickard (2018), [Transfer of test-enhanced learning](https://doi.org/10.1037/bul0000151), [author paper](https://rickardlab.ucsd.edu/pdf/PR_2018.pdf) | Transfer benefits varied with response relationships, elaborated retrieval and initial performance. | Keep definition recall, argument reconstruction and application to a changed example distinguishable. |
 | Wisniewski, Zierer and Hattie (2020), [The power of feedback revisited](https://doi.org/10.3389/fpsyg.2019.03087) | Feedback effects varied substantially with its information content and the task. AI feedback reliability was not studied. | Prefer a specific discrepancy, useful next step or source comparison to a generic score. Record feedback provenance and subsequent corrections. |
 
-## Expertise and proof reading
+## Expertise and reading proofs
 
-Deliberate practice begins with a difficulty that can be isolated. If a reader
-cannot justify a particular implication, a useful task is to supply the missing
-hypothesis, compare the attempt with the exact passage, correct it, and try the
-argument again after a delay. Repeating the entire proof can leave that
-difficulty untouched. Ericsson, Krampe and Tesch-Römer studied expert musicians.
+For a reader who cannot justify an implication, the question is which hypothesis
+licenses the inference. The reader can compare an answer with the passage and
+try the step again later. Ericsson, Krampe and Tesch-Römer studied expert musicians.
 A later violinist study found that cumulative practice time failed to distinguish
 the two more accomplished groups. Counts of hours or repetitions cannot grade
 an individual's mathematical expertise. [Ericsson et al. (1993)](https://doi.org/10.1037/0033-295X.100.3.363) · [Macnamara and Maitra (2019)](https://doi.org/10.1098/rsos.190327)

@@ -123,8 +123,8 @@ correspondence between the formal proposition and the prose statement. MRW
 checks how those grounds compose under the selected admissions; it does not
 automatically establish the correspondence.
 
-The [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#appendix-a-slice)
-describes the formal-proof example and its checker details.
+The [formal-proof example](JUSTIFICATION_LOGIC_EXPERIMENT.md#formal-proof-and-manuscript)
+gives the admissions and the resulting derivation.
 
 ## What the records establish
 

@@ -394,8 +394,8 @@ JustificationProfile
 
 A constant specification $CS$ is a downward-closed set of nested assertions
 $c_n:\cdots:c_1:A$, where $n\geq1$ and $A$ is a logical axiom instance.
-Every shorter suffix of a member belongs to $CS$. Membership must be decidable
-and satisfy those conditions. It is not a list of trusted providers or sources.
+If such an assertion belongs to $CS$, then $c_k:\cdots:c_1:A$ belongs to $CS$
+for every $1\le k<n$. The checker requires decidable membership.
 A derivation's finite footprint is not thereby an axiomatically appropriate
 constant specification. The [logical specification](docs/JUSTIFICATION_LOGIC_EXPERIMENT.md#logical-basis)
 defines the profiles and the conditions for axiomatic appropriateness.
@@ -500,8 +500,8 @@ the producer.
 A statement, explanation, problem, hint, proof, calculation, diagram or example
 associated with an exact source passage, mathematical object, problem, work
 artifact or review item.
-The kinds include stages in Curry's account of increasing precision
-[@curryFoundationsMathematicalLogic1977, §1], but no stage is required.
+For the distinction between informal and formal presentations, see Haskell B.
+Curry, [*Foundations of Mathematical Logic*](https://books.google.com/books?id=27dkTJFrLZIC), chapter 1.
 
 ```
 Representation
@@ -617,9 +617,9 @@ ModelCall
     raw_response_digest optional SHA-256 of raw_response UTF-8 bytes
 ```
 
-`context_refs` identify the exact revisions used to construct `effective_input`,
-including every application-supplied instruction and message. Source-bound
-requests use an exact passage identity and revision as their `VersionedSpan`
+`context_refs` identify the selected source and work revisions.
+`effective_input` records the instructions and messages supplied to the model.
+Source-bound requests use an exact passage identity and revision as their `VersionedSpan`
 target. General Ask and its follow-ups use `general_question`; they do not
 classify a free-form question as an explanation, critique or computation.
 
@@ -861,9 +861,8 @@ compare a claim with the fact about the same subject.
 
 ### ReviewItem
 
-An optional versioned task for resumption, reconstruction, practice or checking.
-A saved study question is identified by its question ID, content revision and
-activity; it can refer directly to source passages.
+An optional versioned task that can refer directly to source passages. Its question ID,
+content revision and activity identify a saved study question.
 
 ```
 ReviewItem

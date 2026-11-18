@@ -17,14 +17,11 @@ Use [PROV-DM](https://www.w3.org/TR/prov-dm/) for the conceptual model,
 exported provenance. The [overview](https://www.w3.org/TR/prov-overview/) and
 [primer](https://www.w3.org/TR/prov-primer/) introduce the family.
 
-Define and version a small MRW profile before implementing an exporter. Keep
-the existing source identities, exact revisions, persistence services and origin
-records. Map them to PROV; do not replace the saved store or require a graph
-database. The first interchange target is PROV-O expressed as Turtle, accompanied
-by an artifact manifest. Export each named bundle in a separate Turtle file,
-with its identity and attribution in the manifest, so distinct accounts are not
-silently merged. Ordinary notes remain Markdown; notebook and Lean files retain
-their native formats. Export creates no network publication.
+The notebook profile maps saved records to PROV-O. Each export contains an
+artifact manifest and one Turtle file per named bundle. The manifest identifies
+each bundle and its origin so that MRW's observations can be read separately from
+the producer's account. Notes, notebooks and Lean files retain their native
+formats. Export writes a local archive.
 
 The existing domain-model `Provenance` record describes origin. It remains
 valid. PROV adds relationships among artifacts, operations and responsible

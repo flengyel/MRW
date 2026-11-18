@@ -23,13 +23,9 @@ connection only after verification. Cancellation leaves the previous connection
 and files intact. Missing private snapshots or conflicting event copies stop the
 import. Original private files remain available for recovery.
 
-The data directory is independent of **MRW: Notes Folder**. Supported layouts:
-
-| Data directory | Managed history |
-| --- | --- |
-| A separate directory | `<data>/History/` |
-| A vault subdirectory, preferably `<vault>/MRW/` | `<vault>/MRW/History/` |
-| The vault root | `<vault>/History/` |
+MRW manages only `History/` under the selected directory. This directory is
+independent of **MRW: Notes Folder**. It may be inside an existing notes
+folder if that folder is already synchronized.
 
 Select an ordinary directory on the extension host. WSL paths use `/mnt/c/...`
 for Windows folders. MRW refuses an occupied `History/` directory without its

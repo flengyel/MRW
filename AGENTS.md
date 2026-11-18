@@ -2,18 +2,11 @@
 
 ## Mathematical purpose
 
-MRW supports understanding and working with mathematics, including AI-generated
-papers and AI-formalized Lean developments. Preserve deliberate practice:
-attempts, feedback, correction, reconstruction, changed examples and later
-revisits. Evaluate these purposes alongside access to literature, research
-continuity, source retention, provenance and justification.
-
-Ordinary reading remains independent of recorded study, AI and Lean. Within a
-chosen study, distinguish unaided, assisted, unresolved and skipped work. Neither
-opening a source, revealing an answer, an AI assessment nor a successful Lean
-check establishes understanding. Do not require full reconstruction or eventual
-human comprehensibility as a condition of using sufficiently supported results.
-Evaluate explanatory, practical, epistemic and organizational benefits separately.
+Use the [project purpose](README.md) when describing MRW. Document optional
+study commands where readers use them. Opening a document starts no study.
+Preserve submitted work, retained feedback, corrections and unfinished attempts.
+A formal check applies to the declaration checked. A reader may use a supported
+result without reconstructing its proof.
 
 For requested orientation, begin with purpose and organization, central concepts
 and results, a selected argument, its governing idea and then its details. A
@@ -101,7 +94,7 @@ Changes to the selected notes folder must not redirect older references.
 Neither copying Markdown nor synchronizing ordinary files transfers private
 MRW targets or restores kernel state.
 
-[Source notes and linked notes](docs/NOTE_COMPANIONS.md#source-notes-and-zettels)
+[Source notes and linked notes](docs/NOTE_COMPANIONS.md#develop-and-link-notes)
 are independent works with potentially many-to-many associations. Preserve prior
 links, attribution and snapshots. Do not require exact-copy transfers, special
 markers, format validation or annotation retirement as proof of useful work.

@@ -11,9 +11,11 @@ step in the working note. Use **Reopen Document** for the last file or
 while it still matches. PDF pages, preview scroll positions and live kernels
 are not restored.
 
-**New Note…** uses the configured notes application and template; see
-[notes applications](NOTE_COMPANIONS.md). Calculations remain in Jupyter or
-SagePod. [Retain a notebook result](NOTEBOOK_RESULTS.md) to keep its saved inputs
+In an ordinary notes folder, **New Note…** opens an untitled Markdown file in
+VS Code. In an Obsidian vault it runs the configured creation command.
+[Notes applications](NOTE_COMPANIONS.md).
+
+Run calculations in a Jupyter notebook with the selected kernel. [Retain a notebook result](NOTEBOOK_RESULTS.md) to keep its saved inputs
 and outputs beside the argument. Reopening that result does not execute it.
 
 No study record, question form or justification context is required.

@@ -11,9 +11,7 @@ folders use a blank VS Code Markdown editor. Your current document stays open.
 See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
 
 **Contents** lists headings and links in the selected Markdown document.
-**Commands** keeps opening and navigation controls available. Fleeting notes and
-notes for later review can remain ordinary linked documents. Opening or following
-a document never creates a problem record or launches an exercise form.
+**Commands** keeps opening and navigation controls available.
 
 Hover over the MRW Activity Bar icon to see its version. The sidebar heading
 shows it too. This tutorial reports the active extension build above. If an
@@ -134,7 +132,7 @@ support these forms within the chosen notes folder:
 | `[[ID]]` or `[[ID|label]]` | A note identified by its ID; the label changes display only |
 | `[[ID#Heading]]` | A heading in that note |
 | `[[ID#^block-id]]` | A supported paragraph/list block |
-| `[[folder/ID#Heading]]` | A heading in a note at a vault-relative path |
+| `[[folder/ID#Heading]]` | A heading in a note at a path relative to the selected notes folder |
 | `[[#Heading]]` | A heading in the current note |
 
 Paths beginning with `./` or `../` are relative to the source note and cannot
@@ -179,7 +177,7 @@ link reaches another workspace, use **Copy Link and Open Workspace**, then run
 stays open.
 
 The optional **Templater: Open in MRW** command described in the
-[Zettel template guide](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
+[optional Obsidian template guide](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md)
 opens the current Obsidian note in MRW without inserting text. Its setup belongs
 to that guide; it is not a built-in Obsidian command.
 
@@ -440,8 +438,7 @@ through **MRW: Resume Study** in the Command Palette; its removed forms do not r
 ## History across computers
 
 Run **MRW: Configure History… → Choose shared history directory…** and select
-an MRW data directory. A vault subfolder such as `MRW` is convenient; Obsidian is
-optional. **Import and Connect** copies recorded interactions and required
+a data directory to share between computers. **Import and Connect** copies recorded interactions and required
 submitted snapshots, verifies them, and keeps the private originals. MRW uses
 only the directory's `History/` subtree. Syncthing/SyncTrayzor supplies file sync.
 
@@ -533,7 +530,8 @@ creates a new identity.
 
 Run and save your notebook with its normal Jupyter kernel. **MRW: Retain Notebook
 Result…** keeps an exact copy, with optional companion notes or input files.
-**Open Retained Notebook Result…** reopens the transcript and offers comparison,
+**Open Retained Notebook Result…** opens the read-only notebook with Jupyter
+or a text transcript without it. It offers comparison,
 companion reading, a link, export and deletion of that copy. Your original files
 stay where they are. Escape closes the action picker while leaving the result open.
 
@@ -562,8 +560,8 @@ for the activation error. Notes and saved research do not need to be recreated.
 
 ## Notes while reading
 
-Choose your Zettelkasten with **Choose Notes Folder**. The folder stays separate
-from the MRW workspace; an Obsidian installation is optional.
+Use **Choose Notes Folder…** to select the directory containing the notes.
+It can be inside or outside the workspace.
 
 Choose **New Note…** in MRW's **Commands** view or the document's **MRW Document**
 menu. If the selected folder is an Obsidian vault, MRW brings Obsidian forward
@@ -574,9 +572,8 @@ Enable Obsidian's **Settings → General → Command line interface** and set
 This setting has no default: MRW stops if it is unset. It never substitutes
 Obsidian's plain new-file command or writes its own note into the vault.
 See [Obsidian setup](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md).
-Your current MRW document stays open. The existing
-**Open in MRW** Obsidian command brings that same file back to MRW. Obsidian
-runs as a separate application, not inside the MRW pane.
+Your current MRW document stays open. If the optional **Open in MRW** template
+command is configured in Obsidian, it opens the same file in MRW.
 
 For an ordinary notes folder, the command opens a blank Markdown editor beside
 the document. Use **Ctrl+S** to choose its filename and location. VS Code handles
@@ -619,15 +616,14 @@ selected lesson or associated code; shared code offers a choice. Unrelated Lean
 files keep native Lean controls.
 
 Source annotations stay editable after linking an external note. Copying is
-optional: the note can paraphrase or combine sources. Create new vault notes
-through the authoring application's configured template, then select the saved
-file. Linking retains a source snapshot; it does not certify a completed Zettel.
+optional. A linked note can paraphrase the annotation or combine several sources.
+Select the saved note to link it to the annotation and its source snapshot.
 See [note associations](https://github.com/flengyel/MRW/blob/main/docs/OBSIDIAN_WORKFLOW.md#continue-a-reader-annotation).
 
 Bracketed Pandoc citations render through a trusted Pandoc processor and either
 an explicit bibliography or the selected Zotero / Better BibTeX library. MRW
-reuses an Obsidian Pandoc Reference List live selection; Zotero and Better
-BibTeX must be running. Missing or ambiguous keys stay visible. Formatting
+can reuse a library selected in Obsidian’s Pandoc Reference List settings.
+Live lookup requires Zotero and Better BibTeX. Missing or ambiguous keys stay visible. Formatting
 changes only the preview. Returning to MRW refreshes the metadata snapshot;
 **MRW: Refresh Citation Preview** also retries. Remote styles are not downloaded. See [citation setup](https://github.com/flengyel/MRW/blob/main/docs/ZOTERO_WORKFLOW.md#citation-rendering-in-existing-notes).
 
@@ -645,7 +641,7 @@ research or invoke Codex. See [diagnostics](https://github.com/flengyel/MRW/blob
 Choose **Sources and references → Delete saved source…**, or expand **Source
 details and tools** in the reader. Save or cancel unsaved reader changes first.
 The confirmation moves only that MRW saved copy to Trash. Its text, reader notes,
-diagrams and links are kept. Original files and vault notes are unchanged.
+diagrams and links are kept. Original files and linked notes stay in place.
 
 **Undo** restores it immediately. **Restore saved source…** in Sources and
 references or Open Saved Source restores it after restart. Exact links still

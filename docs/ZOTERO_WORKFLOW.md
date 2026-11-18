@@ -97,8 +97,8 @@ Executable paths in notes or Obsidian configuration are never run.
   Bibliography** setting, takes precedence in every mode. It can select a fixed
   local export. Resources resolve beside the note within its selected
   notes/workspace root. CSL-JSON and BibTeX/BibLaTeX are processor inputs.
-- In `auto`, MRW reads the selected vault's Pandoc Reference List configuration.
-  If that companion selects live Zotero lookup, MRW uses its selected Better
+- In `auto`, MRW can read Pandoc Reference List settings from a selected
+  Obsidian vault. If those settings select live Zotero lookup, MRW uses the specified Better
   BibTeX library IDs. A connected personal Zotero library can also select this
   route. Otherwise MRW uses the companion's scoped local bibliography.
 - `zotero` explicitly selects live lookup. **Citation Zotero Libraries** can

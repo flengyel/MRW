@@ -7,12 +7,6 @@ configure MRW's API connector. Reading and annotating require neither connection
 
 <a id="temporary-companion-codex-in-vs-code"></a>
 
-The [design evaluation](DESIGN_RECONCILIATION.md) requires destination labels
-at the action point and inspectable context/proposed changes. The existing
-routes below remain distinct; fuller UI labeling is pending. A companion's
-suggestion does not authorize edits or execution, and source-note work remains
-usable without creating a Study or starting a model session.
-
 ## Codex in VS Code
 
 Open the workspace containing the retained source, then open the Codex sidebar.
@@ -74,7 +68,8 @@ A passage's action row offers **Add a note**, **Delete reader note…**,
 work without AI. Add opens the passage's editor without changing its draft; Delete
 selects a saved note if needed and asks for confirmation. Saving or deleting
 one note preserves other annotations and retained source text.
-Linked reader notes stay in the vault and open in Obsidian. **Change or remove
+A note linked through **Link Obsidian note…** stays in the vault and
+opens in Obsidian. MRW stores passage annotations with the saved source. **Change or remove
 link…** removes only an MRW association, not the note file. It retains the exact
 source revision and passage target; it does not freeze the external note's text.
 

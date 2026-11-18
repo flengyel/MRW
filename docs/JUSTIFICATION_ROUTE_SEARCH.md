@@ -1,8 +1,8 @@
 # Bounded search for alternative grounds
 
-The Lean engine can now discover composed reasons from explicit admissions,
-retain their separate dependencies and search a successor context after a
-withdrawal. **Proofs → Justification…** now presents explicit contexts,
+The Lean engine searches for reasons that can be composed from the admissions
+in a context. It retains each route and its dependencies. After a withdrawal,
+it can search the successor context. **Proofs → Justification…** displays contexts,
 checks and retains routes, shows exact source snapshots, and reopens successors
 and predecessors. See the [reader workflow](JUSTIFICATION_WORKFLOW.md#read-search-and-resume-grounds).
 The API below also remains available to Lean clients.
@@ -66,11 +66,10 @@ inferences and full J(CS) search remain outside its scope.
 The [implementation](../lean/MRWRouteSearch.lean) belongs to
 `MRW.Justification.RouteSearch` and calls the existing integral checker. It
 uses a separate build profile so the documentary checker's source and binary
-pins remain intact. The [tests](../lean/RouteTests.lean) include the existing range-lifting
-warrant from the Categorical Rice–Shapiro manuscript (`rs_Appendix_A.tex`),
-as well as synthetic alternatives, curried implications,
-cycles, changed claim versions, equal-formula leaves, resource limits and
-withdrawal. The synthetic grounds are not asserted about a mathematical paper.
+pins remain intact. The [tests](../lean/RouteTests.lean) check the two admitted
+routes to Euclid's lemma and the route that survives withdrawal of one premise. They also cover curried
+implications, cycles, changed claim versions, distinct admissions of the same
+formula, and resource limits.
 
 From the repository root:
 

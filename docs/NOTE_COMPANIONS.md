@@ -1,45 +1,15 @@
 # Notes applications and the MRW handoff
 
-[The integration contract](INTEGRATION_BOUNDARIES.md) governs external note
-creation, native editing and synchronization. Obsidian is one optional
-maintaining application; its rules are not imposed on other notes systems.
-
-A note is a document used for working thoughts, arguments or references. It is
-not a separate MRW file type. A Markdown note can have Contents, links and
-backlinks just like another Markdown document.
-
-<a id="source-notes-and-zettels"></a>
+MRW opens ordinary Markdown notes in VS Code. A configured notes application
+can create notes using its own templates and filenames. Obsidian is optional.
+[Integration boundaries](INTEGRATION_BOUNDARIES.md).
 
 ## Develop and link notes
 
-**Source notes** are working notes kept in MRW: observations, questions,
-calculations and tentative arguments. They provide material from which the
-reader may develop further notes and can remain useful in their own right. Keep them
-as ordinary documents. Retained source snapshots and exact citations have
-their separate meanings.
-
-The reader selects material, develops the argument and chooses connections to
-other notes. MRW's notes, annotations, sources and calculation results can supply
-the material. The selected authoring application owns creation and its templates.
-Obsidian with the maintainer's [published note format](https://github.com/flengyel/Zettel#self-documenting-note-specification)
-is one optional setup. Other readers keep their own editor, formats and linking
-conventions. MRW does not require that format or replace the editor's creation
-workflow.
-
-This is separation of concerns: MRW retains working material and its provenance;
-the maintaining application owns creation, identity and templates; the reader
-chooses what to retain, how to express it and where it belongs. Existing notes
-may be edited in MRW through native Save and Undo. Synchronization and scoped
-reference maintenance should preserve verified identities and locations without
-overwriting unsaved work or creating another note-creation route. Machine
-proposals may assist
-those choices, but copying a passage or passing a format validator does not make
-them. A source-return link records provenance; it does not replace a considered
-connection between ideas.
-
-Preserve the reader's selection, formulation and linking while removing repeated
-typing, lost locations and redundant forms. No reflection form or completion
-checklist is required.
+A source note can contain a question, a calculation or part of an argument.
+Link it to an exact passage when the source matters. An ordinary note remains
+editable after it is linked. The link identifies the retained passage and its
+revision.
 
 ## Start a note from MRW
 
@@ -59,10 +29,6 @@ documents, use their authoring application or VS Code extension, then open the
 file in MRW. The integrations available now are Obsidian and the VS Code editor;
 MRW does not yet invoke Emacs or The Archive.
 
-MRW's saved sources, annotations and research records remain part of its reading
-and research functions. Delegating document creation does not remove that saved
-work or change its format.
-
 For a saved reader annotation, **Link another note…** reuses that creation
 command or selects an existing note. Save the file in its native editor, then
 choose **Confirm selected saved note and link** to publish the association.
@@ -73,12 +39,12 @@ can link several notes, and one note can combine several sources. Linking
 preserves an attributed source snapshot; it requires no matching prose or
 retirement of the source annotation.
 
-## Obsidian now
+## Obsidian handoff
 
 [Configure the handoff](OBSIDIAN_WORKFLOW.md#new-note) with a vault root and the
 Obsidian command that already creates your notes. A Templater creation command
-can run your NewFileTemplate; MRW does not reproduce it. The companion owns the
-template, prompts, filename and save operation. MRW keeps the source open and
+uses the template already configured in Obsidian. Obsidian supplies the
+prompts, filename and save operation. MRW keeps the source open and
 records where to return.
 
 Creating a note uses the Obsidian CLI. Opening an existing note uses the desktop

@@ -1,25 +1,10 @@
 # Install MRW and use SagePod in WSL2
 
-[Subsystem ownership](INTEGRATION_BOUNDARIES.md) applies throughout: use Jupyter
-for notebook creation/editing and explicit execution, and SagePod's documented
-tools for its runtime. MRW retains selected results and links without taking
-over either system. This guide's versioned checks describe the named builds.
-
-This is **path B: MRW with SagePod**. For reading and mathematical review, start
-with [path A in the installation guide](INSTALLATION.md#a-mrw-for-reading).
-That path also points to the existing AI connector; SagePod is an optional
-computation companion with its own installation.
-
-This tutorial connects Windows VS Code to MRW and an ordinary notebook running
-SageMath. The SagePod helper instructions are scoped to revision `4bc1bc3`.
-
-MRW is the **Mathematical Research Workstation** VS Code extension. Download
-its VSIX from the [current GitHub release](https://github.com/flengyel/MRW/releases/latest)
-and follow [installation](INSTALLATION.md). There is no Marketplace listing.
-Building from source is optional.
-
-The connection to SagePod belongs to **Microsoft's Jupyter extension**. There is
-no separate SagePod connection setting in MRW.
+Use Microsoft's Jupyter extension to connect a VS Code window in WSL2 to a
+SageMath notebook running in SagePod. MRW can retain the saved notebook and link
+it to a working note. The SagePod helper commands below refer to revision
+`4bc1bc3`. For reading alone, follow [the MRW installation guide](INSTALLATION.md#a-mrw-for-reading).
+Download the MRW VSIX from the [current release](https://github.com/flengyel/MRW/releases/latest).
 
 For batch jobs, [SageQueue](https://github.com/flengyel/sagequeue) now uses the
 same SagePod runtime. It supplies queueing, workers and job logs; it is optional
@@ -277,8 +262,8 @@ SagePod's notebook directory.
 ## Further help
 
 The [study workflow](ACTIVE_STUDY_WORKFLOW.md) covers retained companion help
-and linked study continuation. Notebook-cell capture belongs to the Jupyter
-workflow described here.
+and resuming a saved attempt. To keep a snapshot of a saved notebook and its
+outputs, see [Retained notebook results](NOTEBOOK_RESULTS.md).
 [Reader AI](READER_AI_WORKFLOW.md) documents the separate API preview/Send path.
 Current installation/build instructions are in [INSTALLATION.md](INSTALLATION.md)
 and the [extension guide](../vscode/README.md).

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1420" viewBox="0 0 1800 1420" role="img" aria-labelledby="title desc">
 <title id="title">MRW architecture: ports, adapters and justification</title>
-<desc id="desc">The VS Code facade leads to MRW's core, which contains workflow coordination, a canonical data model, the integral justification logic engine, storage integrity and usage recording. The engine traces claims to grounds and admitted assumptions and checks stated inferences. Existing bounded Lean checking is distinct from pending interactive search and comparison. A CoCalc adapter is proposed for remote projects and notebooks. Ports and adapters connect documents and notes, sources and references, computation, external proof checking, AI assistance and optional diagnostics. Provenance, external checking and contextual justification remain distinct. Dashed elements are proposed. Diagnostic reports feed Codex review against the design before corrections.</desc>
+<desc id="desc">The VS Code facade leads to MRW's core, which contains workflow coordination, a canonical data model, the integral justification logic engine, storage integrity and usage recording. The engine traces claims to grounds and admitted assumptions and checks stated inferences. The reader compares routes found by bounded search and can withdraw an admission. Lean checks the returned derivations. A CoCalc adapter is proposed for remote projects and notebooks. Ports and adapters connect documents and notes, sources and references, computation, external proof checking, AI assistance and optional diagnostics. Provenance, external checking and contextual justification remain distinct. Dashed elements are proposed. Diagnostic reports feed Codex review against the design before corrections.</desc>
 <defs>
   <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8" fill="none" stroke="#638198" stroke-width="1.5"/></marker>
 </defs>
@@ -20,8 +20,6 @@ text { font-family: 'DejaVu Sans', sans-serif; fill:#18364c; }
 <rect width="1800" height="1420" rx="24" fill="#f7f9fc"/>
 <text x="60" y="73" class="title">Mathematical Research Workstation</text>
 <text x="60" y="116" class="subtitle">Ports and adapters for continuing mathematical work across tools</text>
-<rect x="1360" y="48" width="380" height="49" rx="24" fill="#e8eef6"/>
-<text x="1550" y="80" text-anchor="middle" class="small">DESIGN OVERVIEW · 14 NOV 2026</text>
 <rect x="635" y="156" width="530" height="138" rx="20" fill="#163c58"/>
 <text x="900" y="191" text-anchor="middle" style="font-size:19px;letter-spacing:2px;fill:#a8dcf0;font-weight:700">VS CODE WORKBENCH</text>
 <text x="900" y="232" text-anchor="middle" style="font-size:31px;fill:#fff;font-weight:700">MRW facade</text>
@@ -43,7 +41,7 @@ text { font-family: 'DejaVu Sans', sans-serif; fill:#18364c; }
 <rect x="625" y="764" width="550" height="124" rx="17" fill="#f3edfa" stroke="#967bb5" stroke-width="2"/>
 <text x="900" y="801" class="heading" text-anchor="middle" style="fill:#563773">Justification logic engine</text>
 <text x="900" y="835" class="body" text-anchor="middle">Trace grounds · check inference steps</text>
-<text x="900" y="864" class="small" text-anchor="middle">Bounded checks exist; wider workflow pending</text>
+<text x="900" y="864" class="small" text-anchor="middle">Bounded search · route comparison</text>
 <rect x="680" y="904" width="440" height="70" rx="17" fill="#fff" stroke="#d3deec" stroke-width="1.5"/>
 <text x="900" y="934" text-anchor="middle" style="font-size:24px;font-weight:700">Core services</text>
 <text x="900" y="962" class="small" text-anchor="middle">Storage integrity · usage recording</text>
