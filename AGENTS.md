@@ -39,10 +39,12 @@ notes in commits, pull requests or issues, not new repository reports. Use
 ordinary notes terminology; Obsidian and the maintainer's format are optional.
 Preserve exact external names, quoted source text, saved records and links.
 
-Use single-dollar inline mathematics and separate-line double-dollar displays
-in new or revised GitHub/Obsidian Markdown. Preserve fenced code, imported text
-and exact retained passages. Define mathematical terms before technical use.
-Do not alter a mathematical statement to simplify its presentation.
+In GitHub and Obsidian Markdown, use `$...$` inline and put each `$$` display
+delimiter on its own line. Use built-in commands such as `\gcd` for named
+operators. For other upright names use `\mathrm{...}`. Avoid `\operatorname`.
+Preserve fenced code, imported text and exact retained passages. Define
+mathematical terms before technical use. Do not alter a mathematical statement
+to simplify its presentation.
 
 ## Frontend and companion ownership
 

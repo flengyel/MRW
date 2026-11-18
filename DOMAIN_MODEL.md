@@ -654,7 +654,7 @@ AI-specific domain entity. Let:
 - $C$ be an immutable `ModelCall`;
 - $h$ be its `raw_response_digest`;
 - $s$ be the exact response span of a lossless `Representation` $R$;
-- $D=\operatorname{ModelProduced}(C,h,s,R)$ be an opaque documentary
+- $D=\mathrm{ModelProduced}(C,h,s,R)$ be an opaque documentary
   `ClaimAtomVersion`; and
 - $F$ be a distinct opaque substantive mathematical claim.
 

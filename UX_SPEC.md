@@ -712,7 +712,7 @@ method or attestation is obtained separately.
 When a selected proposal participates in an inspectable warrant, the interface
 uses the ordinary justification records rather than an AI-specific status. It
 keeps the documentary atom
-$D=\operatorname{ModelProduced}(C,h,s,R)$ distinct from the substantive atom
+$D=\mathrm{ModelProduced}(C,h,s,R)$ distinct from the substantive atom
 $F$. Admitting $m:D$ records only that the exact call returned the exact
 proposal. A separate, scoped admission $r:(D\to F)$ is required before a
 checker may derive $r\cdot m:F$. The view shows the call, response digest and

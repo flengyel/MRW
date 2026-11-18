@@ -265,7 +265,7 @@ raw-response UTF-8 bytes, $s$ a half-open UTF-8 byte span, and $R$ the
 lossless `Representation` extracted from that span. The ordinary opaque atom
 
 $$
-D=\operatorname{ModelProduced}(C,h,s,R)
+D=\mathrm{ModelProduced}(C,h,s,R)
 $$
 
 records only the documentary claim that the finalized call returned that exact
