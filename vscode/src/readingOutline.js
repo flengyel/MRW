@@ -3,6 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { digest } = require('./navigation');
 const { parseReadingMarkdown } = require('./readingMarkdown');
+const { referenceAt } = require('./outlineReferences');
 const { createDocuments } = require('./documents');
 const { registerWikiLinks } = require('./wikiLinks');
 const { noteIdentity } = require('./noteIdentity');
@@ -259,6 +260,34 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   register('mrw.revealReadingDocument', () => openReadingOutline(false, false, true));
   registerTutorial({ vscode, context, register });
   register('mrw.refreshReadingOutline', () => { refresh(); return model; });
+  async function followRetainedReference(reference, editor, location, attempt, reading = false) {
+    documents.supersede();
+    // Keep the previous origin until the source opens. The reader owns the
+    // successful pin and releases it when it opens another reference or closes.
+    const pending = { location, release: () => pendingOrigins.delete(pending) };
+    pendingOrigins.add(pending);
+    let committed = false;
+    try {
+      const result = await followReference(reference, editor, { reading, returnContext: pending });
+      if (attempt !== generation) return result;
+      committed = true;
+      origin = pending.location;
+      route = 'retained';
+      await persist();
+      return result;
+    } finally {
+      if (!committed) pending.release();
+    }
+  }
+  register('mrw.followOutlineReference', async () => {
+    const editor = vscode.window.activeTextEditor;
+    const source = editor?.document;
+    if (!isOverview(source)) throw new Error('Focus an ordinary Markdown document in this workspace.');
+    const caret = editor.selection.active;
+    const { reference, start, end } = referenceAt(source.lineAt(caret.line).text, caret.character);
+    const offset = source.offsetAt(caret) - caret.character;
+    return followRetainedReference(reference, editor, pin(source, offset + start, offset + end), ++generation);
+  });
   register('mrw.selectReadingOutlineItem', async node => {
     const attempt = ++generation; documents.supersede();
     const source = document;
@@ -273,23 +302,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     const editor = await showLocation(source, location);
     if (attempt !== generation || source !== document) return documents.restoreLatest();
     selected = location;
-    if (current.kind === 'reference') {
-      documents.supersede();
-      // Track a candidate during resolution without replacing the last source's
-      // return pin. Both locations follow intervening edits; commit only once
-      // the retained target has actually opened.
-      const pending = { location }; pendingOrigins.add(pending);
-      pending.release = () => pendingOrigins.delete(pending);
-      let committed = false;
-      try {
-        const result = await followReference(current.reference, editor, { reading: true, returnContext: pending });
-        if (attempt !== generation) return result;
-        committed = true;
-        origin = pending.location; route = 'retained';
-        await persist(); return result;
-      }
-      finally { if (!committed) pending.release(); }
-    }
+    if (current.kind === 'reference') return followRetainedReference(current.reference, editor, location, attempt, true);
     await showMarkdownPreview(vscode, source, editor.viewColumn);
     await persist();
   });

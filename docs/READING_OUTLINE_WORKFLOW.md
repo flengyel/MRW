@@ -197,12 +197,12 @@ revision even if the original changes or disappears. **Refresh saved source**
 reloads saved reader state and annotations; it does not acquire a new revision.
 
 Use **Insert Source or Passage Link…** in a working Markdown document to insert
-an exact retained reference. Following it opens the saved source, and **Return
-to Document** restores the citation's originating occurrence and Markdown
-preview. Each reader keeps its own return occurrence, including nonoverlapping
-unsaved edits. Independently opening a saved source instead offers **Open
-filename** for the selected Contents document, or **Choose a document…** when
-none is selected.
+an exact retained reference. Follow it from Contents or use **Follow Source or
+Passage Link at Cursor** in the Markdown editor. **Return to Document** restores
+the exact citation occurrence in the Markdown preview. Each reader keeps its
+own return occurrence, including nonoverlapping unsaved edits. An independently
+opened saved source offers **Open filename** for the selected Contents document,
+or **Choose a document…** when none is selected.
 
 The reader's location line names the source collection, chapter/section when
 available, and qualified identifier. Source and storage details stay under

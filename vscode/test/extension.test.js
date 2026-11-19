@@ -51,6 +51,7 @@ async function harness(root, state = new Map(), options = {}) {
       },
       positionAt(at) { const lines = this.text.slice(0, at).split('\n'); return new Position(lines.length - 1, lines.at(-1).length); },
       offsetAt(point) { return offset(this.text, point); },
+      lineAt(line) { return { text: this.text.split(/\r\n|\r|\n/)[line] }; },
       get lineCount() { return this.text.split('\n').length; }, validateRange: range => range };
     storedDocuments.set(doc.uri.toString(), doc);
     return doc;
@@ -853,7 +854,7 @@ test('Markdown overview references two saved sources, follows retained regions a
   const re = restarted.editor(md); re.selection = ed.selection; restarted.focus(re);
   const followed = await restarted.commands.get('mrw.followOutlineReference')();
   assert.equal(followed.status, 'changed or removed'); assert.equal(followed.region, null);
-  assert.equal(restarted.panels[0].webview.messages.at(-1).selected, null);
+  assert.equal(restarted.panels[0].webview.messages.findLast(message => message.type === 'outline').selected, null);
   assert.equal(restarted.api.window.activeTextEditor.document.getText(), 'α😀 → β\r\nClaim.\r\n');
   assert.equal(md.text, before); assert.deepEqual(restarted.errors, []); assert.deepEqual(h.errors, []);
 });
@@ -1859,6 +1860,47 @@ test('reader Return reopens the rendered overview after its editor and preview t
   }
   assert.equal(await fs.readFile(file,'utf8'),text);assert.equal(h.saves.length,0);
   assert.equal(h.state.get('mrw.readingOutline.v1').origin,undefined);assert.deepEqual(h.errors,[]);
+});
+
+test('following a retained link at the cursor returns to its exact occurrence after an outside edit', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const { saved, region, panel } = await sourceReader(h, root);
+  const { markdown: link } = await runBridge(path.resolve(__dirname, '..'), 'python3', {
+    method: 'outline_reference', store: path.join(root, '..', 'private-state', `outlines-${navigation.digest(root)}`),
+    project_root: root, id: saved.outline.id, revision: saved.revision, region,
+  });
+  const text = `# Note\r\n\r\n${link}\r\n\r\nα😀 ${link}\r\n`;
+  const file = path.join(root, 'citations.md');
+  await fs.writeFile(file, text);
+  const doc = h.document(file, text);
+  doc.languageId = 'markdown';
+  const editor = h.editor(doc), start = text.lastIndexOf(link);
+  const caret = doc.positionAt(start + 2);
+  editor.selection = new Selection(caret, caret);
+  h.focus(editor);
+
+  const result = await h.commands.get('mrw.followOutlineReference')();
+  assert.equal(result.status, 'unchanged');
+  const passage = saved.outline.regions.find(value => value.id === region);
+  assert.equal(h.api.window.activeTextEditor.document.getText(h.api.window.activeTextEditor.selection), passage.argument_text);
+  const destination = panel.webview.messages.findLast(message => message.type === 'outline').returnDestination;
+  assert.equal(destination.kind, 'citation');
+  assert.equal(destination.path, file);
+
+  const prefix = 'Unsent notes\r\n';
+  h.changeDocument(doc, 0, 0, prefix);
+  const beforeReturn = h.commandCalls.length;
+  await panel.receive({ type: 'reading_return' });
+  const returned = h.api.window.activeTextEditor;
+  assert.equal(returned.document, doc);
+  assert.equal(doc.offsetAt(returned.selection.start), start + prefix.length);
+  assert.equal(doc.getText(returned.selection), link);
+  assert.ok(h.commandCalls.slice(beforeReturn).some(({ name, args }) =>
+    name === 'markdown.showPreview' && args[0].toString() === doc.uri.toString()));
+  assert.equal(doc.isDirty, true);
+  assert.equal(await fs.readFile(file, 'utf8'), text);
+  assert.deepEqual(h.dialogs, []);
+  assert.deepEqual(h.errors, []);
 });
 
 test('reader Return renders the exact source-link occurrence and rejects changed origins before preview', async t => {

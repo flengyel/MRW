@@ -3,7 +3,6 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 const { sourceSnapshot, digest } = require('./navigation');
-const { referenceAt } = require('./outlineReferences');
 const {createContinuation, availability} = require('./annotationContinuation');
 const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require('./companionLinks');
 
@@ -624,11 +623,6 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     return result.reference;
     });
   }
-  register('mrw.followOutlineReference', async () => {
-    const { editor } = await markdown();
-    const line = editor.document.getText().split(/\r\n|\r|\n/)[editor.selection.active.line] || '';
-    return followReference(referenceAt(line, editor.selection.active.character), editor);
-  });
   async function selection(c) {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.selection.isEmpty) throw new Error('Select a nonempty passage in the original or retained text.');
