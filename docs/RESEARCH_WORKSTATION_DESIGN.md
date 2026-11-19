@@ -6,9 +6,11 @@ MRW supports mathematical understanding and research. Its aims are to study
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
 
-An explanation of a paper or a Lean formalization can identify an assumption,
-supply an omitted inference or expose a gap. Keep the explanation, the source
-passage and any correction available for comparison.
+Work can begin with an unsolved question or an unfinished calculation. Write
+it in a note or notebook. When the argument calls for a theorem, compare its
+hypotheses with those available. For an AI-generated proof, keep the proposed
+inference beside its source so that a correction can identify the precise gap.
+[Mathematics in ordinary notes](MATHEMATICS_WITH_NOTES.md)
 
 ## Rules for ordinary mathematical work
 
@@ -22,23 +24,48 @@ ordinary links. Opening a document or following a link creates no study record.
 VS Code owns editing and unsaved buffers. The [integration contract](INTEGRATION_BOUNDARIES.md)
 assigns editing, execution and storage to their respective applications.
 
-## Operational feedback and maintenance
+<a id="continuing-study-and-a-research-lab-notebook"></a>
 
-The [diagnostics companion](DIAGNOSTICS_PLUGIN.md) reads MRW's versioned
-inspection interface to produce [feature-use](OPERATIONAL_USAGE.md) and
-integrity reports. A reader can request a report or enable weekly reporting.
-Reports state their scope and coverage. Core owns the event recorder and the
-checks used to read, write and recover its stores. Repairs belong to the
-application that manages the data.
+## Research that can be resumed
 
-## Continuing study and a research lab notebook
+Leave the conclusion, failed approach or unfinished step in the working note.
+Link to the exact passage or saved calculation it depends on. A retained
+notebook result preserves the saved notebook and any selected inputs.
+[Notebook results](NOTEBOOK_RESULTS.md) · [Provenance](PROVENANCE_DESIGN.md)
 
-A note can link a source passage, an attempted proof, a calculation or the
-question left open. Retained calculations and proof artifacts have their own
-revisions and links to selected inputs. The [provenance design](PROVENANCE_DESIGN.md)
-gives the W3C PROV terms for these relations. **Resume Study** reopens a saved
-attempt. The [study controls](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
-also allow inspection, export, archiving and deletion.
+**Return to Document** recovers the originating link occurrence when it still
+matches. **Reopen Document** opens the last file and restores a matching
+Markdown selection. Use **Recent Documents…** for an earlier note. PDF return
+is file-level. For a saved study attempt, use **Resume Study**.
+[Reading and restart](READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart) ·
+[Study controls](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
+
+## Reconstructing a compressed solution
+
+The intended integrated workflow uses the source reader, notes,
+companion exchange and checking tools. Its components are available separately;
+MRW does not yet automate or restore the complete sequence:
+
+1. Open the solution with the question or context already present in its note
+   or linked sources. Keep the original and its attribution; outside model output can be retained as
+   supplied text without inventing a ModelCall or missing request metadata.
+2. Select a difficult passage. Identify missing definitions, assumptions,
+   intermediate claims, citations or calculations needed to justify it.
+3. Request or write an expansion tied to that passage. Explanations, examples,
+   counterexamples and diagrams are options. Preserve competing explanations
+   and corrections separately from the original.
+4. Test the step by deriving it, changing an example or examining where a
+   hypothesis enters.
+5. Follow a source or make an explicit calculation/check when appropriate.
+   Record what the evidence establishes and which version it concerns.
+6. Keep useful conclusions, remaining gaps and next actions in the working
+   documents where they are written. Resume those documents and locations
+   without re-entering their contents in a form.
+
+A reader can use an outline for selected steps and leave the rest of the proof
+in the original document. **Keep for spaced review** enrolls a source question.
+The [study design](ACTIVE_STUDY_DESIGN.md) defines which recorded outcomes affect
+its schedule.
 
 <a id="related-systems-and-reuse"></a>
 
@@ -173,46 +200,6 @@ is one optional format. **Open in Obsidian** uses the configured vault name or
 ID, with the selected notes folder's name as a fallback. The host and Obsidian
 must have access to the same file. [Obsidian configuration](OBSIDIAN_WORKFLOW.md#configure-obsidian-with-mrw).
 
-## Research that can be resumed
-
-Leave a conclusion, failed approach or next step in the working note or
-notebook. **Return to Document** recovers the originating link occurrence when
-it still matches. **Reopen Document** reopens the file and restores a matching
-Markdown selection. PDF return is file-level. VS Code handles unsaved buffers.
-[Reading and restart](READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart).
-
-A retained source citation identifies its original revision. A retained check
-applies to the input it checked. On return to a notebook, distinguish the
-saved calculation from the state of a running kernel. Opening earlier work
-does not repeat the calculation or make a model request.
-
-## Reconstructing a compressed solution
-
-The intended integrated workflow uses the source reader, notes,
-companion exchange and checking tools. Its components are available separately;
-MRW does not yet automate or restore the complete sequence:
-
-1. Open the solution with the question or context already present in its note
-   or linked sources. Keep the original and its attribution; outside model output can be retained as
-   supplied text without inventing a ModelCall or missing request metadata.
-2. Select a difficult passage. Identify missing definitions, assumptions,
-   intermediate claims, citations or calculations needed to justify it.
-3. Request or write an expansion tied to that passage. Explanations, examples,
-   counterexamples and diagrams are options. Preserve competing explanations
-   and corrections separately from the original.
-4. Test the step by deriving it, changing an example or examining where a
-   hypothesis enters.
-5. Follow a source or make an explicit calculation/check when appropriate.
-   Record what the evidence establishes and which version it concerns.
-6. Keep useful conclusions, remaining gaps and next actions in the working
-   documents where they are written. Resume those documents and locations
-   without re-entering their contents in a form.
-
-A reader can use an outline for selected steps and leave the rest of the proof
-in the original document. **Keep for spaced review** enrolls a source question.
-The [study design](ACTIVE_STUDY_DESIGN.md) defines which recorded outcomes affect
-its schedule.
-
 ## Implementation status
 
 The [design register](DESIGN_RECONCILIATION.md) identifies outstanding work on
@@ -232,3 +219,12 @@ covers [views](https://code.visualstudio.com/api/ux-guidelines/views) and the
 The core extension and Python services run on the workspace host. Optional
 companions use scoped interfaces. The bundled tutorial identifies the active
 extension build and describes the commands available in that build.
+
+## Operational feedback and maintenance
+
+The [diagnostics companion](DIAGNOSTICS_PLUGIN.md) reads MRW's versioned
+inspection interface to produce [feature-use](OPERATIONAL_USAGE.md) and
+integrity reports. A reader can request a report or enable weekly reporting.
+Reports state their scope and coverage. Core owns the event recorder and the
+checks used to read, write and recover its stores. Repairs belong to the
+application that manages the data.

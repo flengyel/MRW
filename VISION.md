@@ -6,11 +6,12 @@ and continue unfinished work.
 
 ## Mathematical understanding
 
-A paper or a checked Lean proof can leave a mathematical question open for its
-reader. Which hypothesis makes this inference valid? What is the governing idea
-of the proof? MRW connects the passage in question to definitions, cited results,
-examples and the reader’s own explanation. A reader can attempt a step on paper
-or in the editor, compare it with the proof and return to it later.
+An investigation can begin with a question or a calculation before there is
+a result to cite. A reader of an unfamiliar paper or an AI-generated proof may
+need a definition, the governing idea of the proof, or the hypothesis that
+licenses one inference. Follow the cited result, compare its hypotheses with
+those at hand, and keep the conclusion or the gap with the argument. To study
+the proof, attempt a step and compare it with the original.
 [Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md)
 
 For a paper accompanied by a Lean development, compare the types, hypotheses
@@ -29,10 +30,10 @@ conclusion depends on the admissions and which routes survive withdrawal.
 
 ## Continuing unfinished work
 
-Keep the attempted argument, a failed approach or a calculation where it was
-written. Returning to the work should recover the relevant passage and the open
-step. In a proof outline, vertex elimination can shorten the displayed argument
-while keeping the omitted steps available for expansion.
+Leave the last justified step and the open question where the argument was
+written. A working note can link directly to a retained calculation, including
+a failed one. In a proof outline, vertex elimination can shorten the displayed
+argument while keeping the omitted steps available for expansion.
 [Resuming work](docs/RESEARCH_WORKSTATION_DESIGN.md#research-that-can-be-resumed) ·
 [Vertex elimination](docs/PROOF_GRAPH_WORKFLOW.md#vertex-elimination)
 

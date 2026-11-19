@@ -1,7 +1,7 @@
 # Mathematical practice, spaced review and evidence of learning
 
-MRW starts with an argument the reader has reason to understand or use. The
-reader can look up a definition, inspect a cited result, attempt an inference,
+Source study can begin with an argument the reader has reason to understand or
+use. The reader can look up a definition, inspect a cited result, attempt an inference,
 compare it with the proof, and return later to reconstruct or apply it.
 [Source study](ACTIVE_STUDY_WORKFLOW.md) implements attempts and scheduled recall.
 Whether this helps a mathematician understand a research paper remains open.

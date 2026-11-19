@@ -1,9 +1,8 @@
 # Architecture in brief
 
-The VS Code extension connects a passage in a paper or note to the sources,
-calculations and proof steps that bear on it. MRW keeps the references needed
-to return to that work. Native editors, kernels and proof checkers manage
-their own files and execution.
+VS Code manages documents, unsaved edits and navigation. MRW connects a
+mathematical argument to the exact passages and saved calculations used in it.
+Its justification engine records which admitted premises support a derivation.
 
 ![The VS Code facade connects to the MRW core. Six groups of adapters connect it to documents and notes, sources and references, computation, proof checking, AI assistance and optional diagnostics.](assets/mrw-architecture.png)
 
@@ -20,10 +19,9 @@ The hexagon groups responsibilities. Dashed elements are proposed.
 | Justification logic engine | Checks derivations under selected admissions. Bounded search finds alternative routes and records which admissions each route uses. [Search and withdrawal](JUSTIFICATION_ROUTE_SEARCH.md) |
 | Core services | Store retained records, check their integrity and record local feature use. [Storage](ARTIFACT_STORAGE.md) · [Operational usage](OPERATIONAL_USAGE.md) |
 
-In [source study](ACTIVE_STUDY_WORKFLOW.md), a question refers to a particular
-passage. MRW keeps the submitted attempt, retained feedback and subsequent
-corrections. The reader can reopen the attempt or keep the question for spaced
-review.
+A question can remain in an ordinary note. In optional
+[source study](ACTIVE_STUDY_WORKFLOW.md), MRW also keeps the passage,
+submitted attempt, feedback and corrections.
 
 The engine implements a non-factive fragment of Sergei Artemov’s Justification
 Logic. A derivation of $t:A$ under stated admissions establishes that $t$ is a
