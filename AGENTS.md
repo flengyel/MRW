@@ -2,7 +2,8 @@
 
 ## Mathematical purpose
 
-Use the [project purpose](README.md) when describing MRW. Document optional
+Use the [project purpose](README.md) when describing MRW. Research may begin
+with an open question before there is a passage to cite. Document optional
 study commands where readers use them. Opening a document starts no study.
 Preserve submitted work, retained feedback, corrections and unfinished attempts.
 A formal check applies to the declaration checked. A reader may use a supported

@@ -61,13 +61,17 @@ Saving and reopening admit no premise and execute no Lean check; search and
 retry remain explicit. Search runs in Lean, Python validates and retains records,
 and the extension presents the interaction.
 
-The next mathematical-use test follows one argument across sessions. Select a
-passage from a paper or its Lean development, identify the grounds for one step,
-attempt it, compare the attempt with the source, and keep a question for spaced
-review. On return, reconstruct the step and try a changed hypothesis or example.
-The [learning research and evaluation](LEARNING_RESEARCH.md#evaluating-mrw-on-a-manuscript)
-specifies what would count as a benefit. Assess research continuity separately
-by resuming an unfinished argument with its sources and open question intact.
+The next test begins with an open mathematical question. For instance, can a
+result from the literature be applied at a doubtful step in an argument?
+Identify the hypotheses available there. Consult the paper, a Lean declaration
+or a calculation as the question requires. State what follows and on what
+grounds, or identify the missing hypothesis, counterexample or remaining gap.
+On return, determine whether the working note and its links recover the grounds
+for the last justified step and the question still open.
+
+When a reader chooses to revisit a proof step, assess later reconstruction
+and use on a changed example through the separate
+[study evaluation](LEARNING_RESEARCH.md#evaluating-mrw-on-a-manuscript).
 
 [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md) illustrates justification.
 Rich-output inspection and companion tests remain open. Extend an adapter or

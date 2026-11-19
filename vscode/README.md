@@ -1,9 +1,9 @@
 # Mathematical Research Workstation for VS Code
 
-MRW connects mathematical reading, source notes, calculations and proof work.
-Open a document in place, follow its references, write while reading and return
-to the argument. It retains exact source passages and results while companion
-applications keep their editing and execution workflows.
+Begin with a mathematical question in a note, a paper or a calculation.
+MRW keeps the exact passages and saved results used in an argument. Its
+justification engine shows which conclusions depend on premises the reader
+has admitted. [Mathematics in ordinary notes](../docs/MATHEMATICS_WITH_NOTES.md)
 
 **MRW 0.23.45 — Resume linked calculations.**
 [Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.45/mrw-0.23.45.vsix)

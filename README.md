@@ -16,8 +16,9 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 ## Start
 
 1. Install the VSIX and run **MRW: Set Up MRW Workspace…**.
-2. Choose **Open Document…** to read an existing paper or note. Use
-   **Choose Notes Folder…** for linked notes; Obsidian is optional.
+2. For a new question, choose a notes folder with **Choose Notes Folder…**,
+   then select **New Note…**. For an existing paper or note, use
+   **Open Document…**. [Mathematics in ordinary notes](docs/MATHEMATICS_WITH_NOTES.md)
 3. Follow references through **Contents** and use **Return to Document** to
    return to the argument. **Recent Documents…** reopens earlier work.
 
@@ -25,6 +26,11 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 <a id="justification"></a>
 
 ## Study and research
+
+VS Code can reopen the files used in an argument. Their locations alone do not
+say which passage was cited or which hypothesis justified a step. In MRW the
+reader can retain the cited passage at a particular revision and record the
+grounds for using it.
 
 | Task | Tools |
 | --- | --- |

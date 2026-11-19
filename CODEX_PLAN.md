@@ -11,9 +11,10 @@ feature, external-service or data-mutation authorization.
 
 ## Direction
 
-Start from a passage the reader is studying, a result whose grounds need
-inspection, or unfinished work in an existing document. Add an interaction
-when the existing tools leave a concrete obstacle.
+Begin with a mathematical question, a passage under study or an unfinished
+calculation. In research, establish what follows from the available grounds or
+identify what remains open. Add an interaction when the work reveals a
+concrete obstacle.
 
 The [vision](VISION.md) defines the purposes; the
 [research design](docs/RESEARCH_WORKSTATION_DESIGN.md) and
