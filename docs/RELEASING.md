@@ -1,7 +1,7 @@
 # Publish a GitHub release
 
 MRW is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
-The current release is [0.23.45](https://github.com/flengyel/MRW/releases/tag/v0.23.45).
+The current release is [0.23.46](https://github.com/flengyel/MRW/releases/tag/v0.23.46).
 GitHub-distributed updates require downloading and installing a newer VSIX;
 there is no automatic update channel or Marketplace publication in this procedure.
 

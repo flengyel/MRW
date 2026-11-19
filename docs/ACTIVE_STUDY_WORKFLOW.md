@@ -99,10 +99,9 @@ the outcome to establish its schedule. **Retire** ends review and preserves
 the earlier work.
 
 On a later visit run **MRW: Resume Study**. One study opens directly. An
-unfinished attempt reopens with its draft. In the 0.23.45 release, choose
-a recent study and begin or continue its block. On `main`, the picker also
-lists older studies with due questions and puts due studies first. Choose
-**Review due questions** to start a block of scheduled questions with the
+unfinished attempt reopens with its draft. The picker lists recent studies
+and any older studies with questions due. It lists due studies first.
+Choose **Review due questions** to review scheduled questions with the
 answers concealed.
 
 A block draws from the selected sources, including questions on matching
@@ -128,10 +127,8 @@ times; it does not add a second review. Retired questions stay out of selection.
 Missing earlier timing evidence remains unknown. The resulting intervals are
 scheduling estimates, not measures of mathematical understanding or mental effort.
 
-Choose **Report effort** after an attempt for the optional 1–9 rating. The
-0.23.45 release can also display it when a block ends. On `main`, it opens
-only on request. Missing, declined and unsampled
-ratings remain distinct. High reported effort (7–9) with repeated
+Choose **Report effort** after an attempt to open the optional 1–9 rating.
+Missing, declined and unsampled ratings remain distinct. High reported effort (7–9) with repeated
 difficulty can offer a smaller step, prerequisite, worked example or pause.
 High effort with success preserves the challenge. Offers require reader-confirmed
 recall evidence and effort linked to that attempt. Correcting the outcome
