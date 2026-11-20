@@ -7,9 +7,12 @@ vault it runs the configured creation command.
 [Notes applications](NOTE_COMPANIONS.md)
 
 When the use of a theorem is in doubt, link to its statement and write down
-why its hypotheses hold or what is missing. **Contents**, a preview link or
-**Follow Document Link** opens the supporting passage. **Return to Document**
-returns to the originating link.
+why its hypotheses hold or what is missing. Use **Insert Source or Passage
+Link…** to cite a [retained passage](READING_OUTLINE_WORKFLOW.md#retain-text-only-when-needed).
+Select the citation in **Contents**, or place the cursor on it in the Markdown
+editor and run **Follow Source or Passage Link at Cursor**. **Return to Document**
+selects the originating citation again. For ordinary file links and WikiLinks
+in the Markdown editor, use **Follow Document Link**.
 
 Run calculations in Jupyter. Link a [retained notebook result](NOTEBOOK_RESULTS.md)
 from the note to keep the saved inputs and outputs used in the argument.

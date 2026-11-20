@@ -38,9 +38,9 @@ unfinished attempt.
 
 Report **Unaided success**, **Completed with help**, **Unresolved** or **Not
 assessed**, and whether the source was consulted before submission. These are
-reader reports, not mathematical checks. Use **Correct outcome** to save a revision alongside the earlier report. On
-`main`, first expand **Correct recorded outcome**. Unsubmitted choices survive
-pause and reopen.
+reader reports, not mathematical checks. To revise a report, expand
+**Correct recorded outcome** and choose **Correct outcome**. Saving adds a
+revision. Unsubmitted choices survive pause and reopen.
 
 Starting recall conceals the source and reference answer inside the study.
 Revealing either records possible exposure, without claiming that it was read.
@@ -49,8 +49,8 @@ visible in another pane or application: MRW does not monitor those applications
 or infer consultation from tab focus. Report consultation explicitly.
 
 **Pause / save** saves the current work. **MRW: Resume Study** in the Command
-Palette restores the question and draft. When several saved records exist, it
-offers a picker even if one is already open; cancelling leaves that work in place.
+Palette restores the question and draft. One matching study opens directly.
+When the picker lists several, choose a study or cancel to keep the work open.
 After recording an outcome or
 skipping, **Continue with revised work** starts a linked, assisted attempt;
 **Next question** starts independently. Submission or Pause alone does not finish
@@ -98,9 +98,8 @@ research use and automated fixtures. Existing work is preserved.
 the outcome to establish its schedule. **Retire** ends review and preserves
 the earlier work.
 
-On a later visit run **MRW: Resume Study**. One study opens directly. An
-unfinished attempt reopens with its draft. The picker lists recent studies
-and any older studies with questions due. It lists due studies first.
+On a later visit run **MRW: Resume Study**. The picker lists recent active
+studies and older active studies with questions due. It lists due studies first.
 Choose **Review due questions** to review scheduled questions with the
 answers concealed.
 
