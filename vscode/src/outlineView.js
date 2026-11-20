@@ -8,7 +8,7 @@ const sourceReader = window.MRWSourceReader?.create({root, onBrowser:()=>post({t
 const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 let continuations = [], continuationErrors = {}, citationViews = {};
-let notes = [], noteTargets = {}, noteError, lastReadingFocus;
+let notes = [], noteTargets = {}, noteError, lastReadingFocus, orgCapture;
 let storageFrozen = false;
 let returnDestination;
 let toolbarObserver;
@@ -245,9 +245,13 @@ function companionActions(parent, region = null, pinned = false) {
   const into = el('div', undefined, directions);
   el('p', 'From your note to MRW', into);
   button(into, passage ? 'Copy link to this passage' : 'Copy link to this source', { type: 'copy_link', ...data }, 'copy-link').title =
-    'Copy an MRW destination to paste into an Obsidian note. This does not set a return note.';
+    'Copy a link that opens this retained source or passage in MRW.';
   const back = el('div', undefined, directions);
   el('p', 'From MRW to your note', back);
+  if (passage && orgCapture) {
+    button(back, 'Capture passage in Emacs', { type: 'capture_emacs', ...data }, 'capture-emacs').title =
+      'Open an Emacs capture with this exact passage and its MRW link.';
+  }
   const linked = targetNotes(region, pinned);
   if (noteError) el('p', 'Linked notes unavailable. Refresh the saved source to retry.', back, 'muted');
   else if (!linked.length) el('p', `No Obsidian note linked to ${pinned ? 'this earlier range' : passage ? 'this passage' : 'this source'} yet. Link a note to add the return destination.`, back, 'muted');
@@ -622,6 +626,7 @@ window.addEventListener('message', event => {
     model = value.model; selected = value.selected; reference = value.reference; blocked = !!value.writesBlocked; busy = false; error = '';
     continuations = value.continuations || []; continuationErrors = value.continuationErrors || {};
     notes = value.notes || []; noteTargets = value.noteTargets || {}; noteError = value.noteError;
+    orgCapture = value.orgCapture === true;
     returnDestination = value.returnDestination;
     if (!proofPreferenceLoaded) { proofsHidden = value.proofsHidden === true; proofPreferenceLoaded = true; }
     if (!diagramPreferenceLoaded) { diagramAppearance = ['paper', 'dark'].includes(value.diagramAppearance) ? value.diagramAppearance : 'theme'; diagramPreferenceLoaded = true; }

@@ -54,8 +54,9 @@ between ideas remain distinct from copying and format validation.
 
 For an Obsidian vault, MRW invokes the configured creation command. Obsidian
 creates the note and applies its template. For an ordinary folder, MRW opens
-an untitled Markdown file in VS Code. Existing notes can be edited with native
-Save and Undo.
+an untitled Markdown file in VS Code. [Capture Passage in Emacs](NOTE_COMPANIONS.md#capture-a-passage-in-emacs)
+provides a retained passage and return link to the configured Denote or Org-roam
+template. Emacs owns the resulting draft and saved note.
 
 Earlier exact-copy transfer records remain preserved. Current associations
 capture a source snapshot without requiring identical destination prose or

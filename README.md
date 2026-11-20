@@ -58,6 +58,7 @@ translation remains a development goal.
 | Integration | Use |
 | --- | --- |
 | [Obsidian](docs/OBSIDIAN_WORKFLOW.md) | Linked notes and the configured note-creation workflow. |
+| [Emacs](docs/NOTE_COMPANIONS.md#capture-a-passage-in-emacs) | Send a retained passage and its link to your Denote or Org-roam template. |
 | [Zotero](docs/ZOTERO_WORKFLOW.md) | References, attachments and citations. |
 | [Lean](docs/LEAN_STUDY_WORKFLOW.md) | Native goals, diagnostics and proof checking. |
 | [Jupyter and SagePod](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) | Notebook editing and computation. |

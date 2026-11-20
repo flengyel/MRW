@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 const { sourceSnapshot, digest } = require('./navigation');
 const {createContinuation, availability} = require('./annotationContinuation');
 const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require('./companionLinks');
+const { sendOrgCapture } = require('./orgCapture');
 
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
@@ -136,6 +137,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     await c.panel.webview.postMessage({ type: 'outline', citationViews, model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
       proofsHidden: context.workspaceState.get('mrw.readerProofsHidden.v1', false) === true,
       diagramAppearance: context.workspaceState.get('mrw.diagramAppearance.v2', 'theme'),
+      orgCapture: !!citationConfig.get('orgCaptureTemplate', ''),
       returnDestination: readingDestination?.(c.returnContext?.location || null),
       reference: c.reference, readingFocus: c.readingFocus, continuations: c.notes?.continuations || [], continuationErrors: await availability(vscode,c.notes?.continuations || []), notes: c.notes?.links || [], noteTargets: c.notes?.targets || {}, noteError: c.noteError, writesBlocked: blockedStores.has(c.store) });
     changed.fire();
@@ -259,6 +261,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         else if(value.type === 'restore_source') await lifecycle.restore(c);
         else if (value.type === 'ask_ai') await askPassage(c, value);
         else if(value.type==='copy_companion')await askPassage(c,{...value,companion:true});
+        else if (value.type === 'capture_emacs') await captureInEmacs(c, await readerTarget(c, value));
         else if (value.type === 'cancel_note') {
           if (typeof value.draft !== 'string' || !value.draft.startsWith('note:') || value.draft.length > 256 || !Number.isSafeInteger(value.request) || value.request < 1) throw Error('Invalid note draft.');
           const choice = await vscode.window.showWarningMessage('Discard unsaved note changes?',
@@ -428,7 +431,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     else await askRetained(result.context, c.root);
   }
   register('mrw.askReader', () => locked(() => askPassage(current())));
-  async function chooseTarget(passagesOnly = false, location) {
+  async function chooseTarget(passagesOnly = false, location, { showReader = true, passagePrompt = 'Choose the passage for the imported annotation' } = {}) {
     const { root, store } = location || await storage();
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
     if (!listed.outlines.length) throw new Error('No saved sources exist for this project.');
@@ -439,13 +442,28 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (passagesOnly && !loaded.outline.regions.length) throw new Error('This source has no passages. Add a passage before importing an annotation.');
     const choice = await vscode.window.showQuickPick([...(passagesOnly ? [] : [{ label: 'Whole saved source', region: null }]),
       ...loaded.outline.regions.map(r => ({ label: r.title, description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col}`, region: r.id }))],
-    { placeHolder: passagesOnly ? 'Choose the passage for the imported annotation' : 'Choose a saved source or exact retained passage' });
+    { placeHolder: passagesOnly ? passagePrompt : 'Choose a saved source or exact retained passage' });
     if (!choice) return;
     const target = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id, revision: loaded.revision, region: choice.region });
+    if (!showReader) return { c: { store, root }, target, region: choice.region };
     const c = await display(loaded, store, root);
     if (passagesOnly) c.selected = choice.region;
     return { c, target, region: choice.region };
   }
+  async function captureInEmacs(c, target) {
+    const { context } = await bridge({
+      method: 'outline_assistance_context', store: c.store, project_root: c.root, reference: target.reference,
+    });
+    const link = makeExternal({ workspace: workspaceRoute(vscode, c.root), project: c.root, reference: target.reference }, vscode.env.uriScheme);
+    // Remove Markdown escapes from the label. Keep percent escapes for Org's
+    // template expansion when an Org-roam header includes the source title.
+    const title = target.label.replace(/\\([^%])/gu, '$1');
+    await sendOrgCapture(vscode, { link, title, text: context.text });
+  }
+  register('mrw.capturePassageInEmacs', () => locked(async () => {
+    const picked = await chooseTarget(true, undefined, { showReader: false, passagePrompt: 'Choose the retained passage to capture in Emacs' });
+    if (picked) await captureInEmacs(picked.c, picked.target);
+  }));
   async function companionAction(action, c, target) {
     if (action === 'copy_link') {
       const uri = makeExternal({ workspace: workspaceRoute(vscode, c.root), project: c.root, reference: target.reference }, vscode.env.uriScheme);

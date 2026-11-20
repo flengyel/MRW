@@ -26,8 +26,7 @@ Choose **New Note…** in MRW's **Commands** view or **MRW Document** menu, or r
 Your current MRW document stays open. Use **Open in MRW** from Obsidian to return
 with the note, or select it through **Open Document**. For other kinds of
 documents, use their authoring application or VS Code extension, then open the
-file in MRW. The integrations available now are Obsidian and the VS Code editor;
-MRW does not yet invoke Emacs or The Archive.
+file in MRW. For retained passages, MRW can also [start a capture in Emacs](#capture-a-passage-in-emacs).
 
 For a saved reader annotation, **Link another note…** reuses that creation
 command or selects an existing note. Save the file in its native editor, then
@@ -53,46 +52,102 @@ Open in MRW command or an MRW note link. The [handoff details](OBSIDIAN_WORKFLOW
 distinguish these routes. Sending a command does not prove that a note was saved;
 MRW does not infer its filename or scan for a newly created file.
 
-## Proposed optional adapters
+## Capture a passage in Emacs
 
-Obsidian is currently built in. There is no notes-companion registration API,
-Emacs adapter or The Archive adapter yet. A small optional adapter should expose
-the operations its application can actually perform: create or capture a note,
-open a known note, and return a known document location to MRW. These capabilities
-need not all be present. Selection should be explicit for a notes folder; a
-folder's name or Markdown extension cannot determine its editor.
+Use **Capture passage in Emacs** in a saved source’s passage tools, or choose
+**MRW: Capture Passage in Emacs…** and select a saved passage. The command opens
+an Emacs draft with the retained passage and a link to its exact revision. Add
+your own note and finish with `C-c C-c`, or cancel with `C-c C-k`. Emacs owns the
+destination and Save. A request sent to `emacsclient` does not indicate a saved
+note. If the result is unclear, check Emacs before sending the passage again.
 
-The application should continue to own creation, templates and naming. Native
-editing of existing notes in MRW remains available. MRW should own source Return
-locations and its retained research records, and reconcile verified external
-identity/location changes through the supported integration. Preserve a target
-as supplied by the companion, including a heading or entry locator where supported;
-a captured note need not be a new file. A dispatched request, a cancelled capture
-and a confirmed saved target are different outcomes. An uncertain result must
-not trigger a second creation request.
+### Set up a capture template
 
-| Companion | Integration route to investigate | Limits |
-| --- | --- | --- |
-| Obsidian | Extract the current CLI and URI handoff into an optional adapter. | Preserve existing settings and note links. No template rewriting or automatic retry. |
-| Emacs with Org mode | Use the user's Org capture configuration through its external capture protocol. | Capture can add an entry to an existing file. MRW currently has no Org reader, Org Contents or Org backlink support; its ordinary-note return links accept Markdown only. |
-| The Archive | Use its documented note-opening URLs and, separately, verify a creation/capture route. | Its match and search links are not exact file locators. Desktop behavior and return routing need a macOS test. No MRW adapter is delivered. |
+Run Emacs and `emacsclient` on the same Linux host as the MRW extension. For
+VS Code in WSL, use Emacs in the same distribution. In the Emacs session you
+intend to use, load `org-protocol` and run `M-x server-start`. MRW calls
+`emacsclient` on the extension host’s PATH. Use the default local server.
+The examples below use Org 9.7’s per-template capture hook.
 
-Org documents an external capture protocol using `emacsclient` and the user's
-capture templates. That provides a route to investigate without copying those
-templates into MRW. See the [capture protocol](https://orgmode.org/manual/The-capture-protocol.html)
-and [capture templates](https://orgmode.org/manual/Capture-templates.html).
-The Archive documents `match`, `search` and `matchOrCreate` URLs; the last may
-create a note and must not be used as an ordinary read action. See
-[The Archive's help](https://zettelkasten.de/the-archive/help/).
+Add this shared hook to your Emacs configuration. It inserts the source link
+and passage after Org has expanded the template. Org escapes lines that could
+otherwise end the example block. The link still identifies the exact text.
 
-Opening an application and reading its file format are separate capabilities.
-An Emacs handoff alone would not make an Org file render like Markdown in MRW.
-Ordinary live-note links also remain distinct from retained citations, which
-preserve an exact revision and passage.
+```elisp
+(require 'org-protocol)
 
-Implement and test one additional companion before fixing a general API. Start
-with creating or capturing, editing in the companion, reopening the result and
-returning to the source. Check cancellation, uncertain dispatch, dirty buffers,
-restart and Windows/WSL path mapping without touching genuine notes. Keep this
-interface separate from source acquisition plugins: editing a live note is not
-importing a retained source snapshot.
+(defun my-mrw-insert-passage ()
+  (let ((link (plist-get org-store-link-plist :annotation))
+        (text (plist-get org-store-link-plist :initial)))
+    (save-excursion
+      (goto-char (point-max))
+      (when (stringp link) (insert "\n" link "\n"))
+      (when (and (stringp text) (not (string-empty-p text)))
+        (insert "\n#+begin_example\n" (org-escape-code-in-string text)
+                "\n#+end_example\n")))))
+```
+
+**Denote.** Install the `denote` Emacs package and set `denote-directory` to
+your notes folder. Denote supplies its usual title and keyword prompts.
+The following capture entry fits Christian Tietze’s setup with one Org file per
+note. Denote generates the identifier and filename. Set **MRW: Org Capture
+Backend** to **denote** and **MRW: Org Capture Template** to `m`, or use your
+own capture key in both programs.
+[Tietze’s EmacsConf setup](https://emacsconf.org/2025/talks/zettelkasten/) ·
+[Denote capture documentation](https://protesilaos.com/emacs/denote)
+
+```elisp
+(require 'denote)
+
+(defun my-mrw-denote-template ()
+  (let ((denote-org-capture-specifiers "%?\n"))
+    (denote-org-capture)))
+
+(add-to-list 'org-capture-templates
+             '("m" "MRW passage in Denote" plain
+               (file denote-last-path) (function my-mrw-denote-template)
+               :hook my-mrw-insert-passage))
+```
+
+**Org-roam.** Use your `org-roam-directory` and enable
+`org-roam-db-autosync-mode` so Org-roam can find a node by its reference. This
+example uses a capture key in `org-roam-capture-ref-templates`. If a node
+already has that exact passage as a reference, Org-roam can capture into that
+node. Set **MRW: Org Capture Backend** to **org-roam** and **MRW: Org Capture
+Template** to `m`. The adapter uses Org-roam 2.3.1’s `roam-ref` protocol.
+[Org-roam protocol documentation](https://www.orgroam.com/manual.html)
+
+```elisp
+(require 'org-roam-protocol)
+
+(add-to-list 'org-roam-capture-ref-templates
+             '("m" "MRW passage in Org-roam" plain "%?\n"
+               :target (file+head "%<%Y%m%d%H%M%S>--${slug}.org"
+                                  "#+title: ${title}\n")
+               :hook my-mrw-insert-passage))
+```
+
+### Return to the passage
+
+Register the VS Code link type in Org to follow the saved link with `C-c C-o`.
+This example uses the system URL handler through `browse-url`. On WSL the
+opener must forward `vscode:` links to Windows VS Code. If the handler is
+unavailable, copy the URL and use **MRW: Open Link from Clipboard** in the
+workspace that retained the passage. The link needs that workspace’s retained
+source store.
+
+```elisp
+(org-link-set-parameters "vscode" :follow
+  (lambda (target _) (browse-url (concat "vscode:" target))))
+```
+
+Reopen the resulting note in Denote or Org-roam for editing and backlinks.
+MRW can open an `.org` file in the native text editor through **Open Document**.
+Its Contents and backlinks for ordinary notes are Markdown features.
+
+## The Archive
+
+The Archive documents `match`, `search` and `matchOrCreate` URLs. The first two
+match notes by query. Use `matchOrCreate` only for explicit creation. An MRW
+adapter would need verified note-opening and return behavior on macOS.
+[The Archive’s help](https://zettelkasten.de/the-archive/help/)

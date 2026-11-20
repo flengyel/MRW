@@ -60,8 +60,8 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 - [Optional diagnostics plugin](DIAGNOSTICS_PLUGIN.md): bounded local reports
   and opt-in weekly scheduling, with further checks specified separately.
 
-- [Optional notes adapters](NOTE_COMPANIONS.md#proposed-optional-adapters): current
-  Obsidian handoff, possible Org capture and The Archive routes, and format limits.
+- [Notes applications](NOTE_COMPANIONS.md): current
+  Obsidian handoff, Emacs capture with Denote or Org-roam, and format limits.
 - [W3C PROV lab-notebook design](PROVENANCE_DESIGN.md): shared provenance model,
   plugin responsibilities and the notebook provenance export.
 - [Study archive/delete requirements](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies):

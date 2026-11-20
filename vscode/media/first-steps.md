@@ -181,6 +181,12 @@ The optional **Templater: Open in MRW** command described in the
 opens the current Obsidian note in MRW without inserting text. Its setup belongs
 to that guide; it is not a built-in Obsidian command.
 
+### Take a source note in Emacs
+
+Run **MRW: Capture Passage in Emacs…** to send a retained passage and its link
+to your configured Denote or Org-roam capture template. Write and save the
+note in Emacs. [Set up a template and open the saved link](https://github.com/flengyel/MRW/blob/main/docs/NOTE_COMPANIONS.md#capture-a-passage-in-emacs).
+
 ## Read mathematical notation and diagrams
 
 The preview renders mathematics and supported `\newcommand`, `\renewcommand`

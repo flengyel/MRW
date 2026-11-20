@@ -19,7 +19,8 @@ function companionStatus(vscode){
   {label:'LaTeX Workshop / PDFs',description:ext('James-Yu.latex-workshop'),guide:'RECOMMENDED_EXTENSIONS.md'},
   {label:'MRW Diagnostics',description:ext('flengyel.mrw-diagnostics')+'; weekly reporting opt-in is configured separately',guide:'DIAGNOSTICS_PLUGIN.md'},
   {label:'Codex and companion plugins',description:'Separate application; manual reviewable handoff',guide:'READER_AI_WORKFLOW.md'},
-  {label:'SageQueue / Wolfram / Emacs / The Archive',description:'No MRW adapter delivered',guide:'INTEGRATION_BOUNDARIES.md'}
+  {label:'Emacs',description:c.get('orgCaptureTemplate','')?'capture template configured; server unchecked':'capture template not configured',guide:'NOTE_COMPANIONS.md#capture-a-passage-in-emacs'},
+  {label:'SageQueue / Wolfram / The Archive',description:'No MRW adapter delivered',guide:'INTEGRATION_BOUNDARIES.md'}
  ];
 }
 function registerCompanionTools({vscode,register}){

@@ -335,8 +335,8 @@ function activate(nativeContext) {
     }});
   moveHost.registerWorkspaceMove({vscode,context,register,session:moveSession,clients:artifactClients,study:studyController,recorder,bridge:request=>runBridge(context.extensionPath,vscode.workspace.getConfiguration('mrw').get('pythonExecutable','python3'),request,{timeout:300000})});
   const refreshCoverage=()=>{
-    recorder.coverage=[...registered.map(id=>({id,status:vscode.workspace.isTrusted?'available':'unavailable',prerequisites:/Zotero|Lean|Obsidian|Notebook/.test(id)?'configuration/companion readiness unchecked':'entry point registered'})),
-      ...['ask_ai','copy_companion','edit','continue_annotation','delete_annotation','link_note','reading_return','render_diagram','stacks_citation'].map(action=>({id:'reader.'+action,status:'available',prerequisites:'reader must be open; action guards apply'})),
+    recorder.coverage=[...registered.map(id=>({id,status:vscode.workspace.isTrusted?'available':'unavailable',prerequisites:/Zotero|Lean|Obsidian|Notebook|Emacs/.test(id)?'configuration/companion readiness unchecked':'entry point registered'})),
+      ...['ask_ai','copy_companion','capture_emacs','edit','continue_annotation','delete_annotation','link_note','reading_return','render_diagram','stacks_citation'].map(action=>({id:'reader.'+action,status:'available',prerequisites:'reader must be open; action guards apply'})),
       ...['inspect','delete','restore','restore_all','update_summary','proposal','edit','ask','stacks_page','stacks_citation','source','published','upstream'].map(action=>({id:'proofGraph.'+action,status:'available',prerequisites:'graph must be open; action guards apply'})),
       {id:'study.typing',status:'uninstrumented'}];
     if(recorder.started)recorder.record('usage.coverage',{features:recorder.coverage},'observed_action',{});
