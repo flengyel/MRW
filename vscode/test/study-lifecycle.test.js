@@ -276,3 +276,56 @@ test('Resume Study finds scheduled work beyond recent studies and returns to the
   await h.run('resumeStudy');
   assert.ok(!h.lastChoices.some(row => row.id === source.id));
 });
+
+test('Resume Study recovers older unfinished work after the recent list fills', async t => {
+  const h = await fixture(t);
+  const draft = 'The proof uses the retained hypothesis here. Why does it apply?';
+  const gap = 'Does the argument need an additional hypothesis?';
+
+  const paused = await h.c.start([passage], h.root, 'Paused proof');
+  await h.send({type:'question_save', question});
+  await h.send({type:'next'});
+  await h.send({type:'pause', draft});
+  const attempt = (await h.saved(paused)).current;
+  assert.equal(attempt.draft, draft);
+  assert.equal(attempt.finished, false);
+
+  const open = await h.c.start([extra('gap')], h.root, 'Open question');
+  await h.send({type:'unresolved', text:gap});
+  const idle = await h.c.start([extra('idle')], h.root, 'Older idle study');
+  const archived = await h.c.start([extra('archived')], h.root, 'Archived question');
+  await h.send({type:'unresolved', text:gap});
+  await h.run('archiveStudy', archived);
+
+  const newest = Date.parse(archived.updated) + 60000;
+  const {createStudy} = require('../src/studyModel');
+  for (let n = 0; n < 31; n++) {
+    const recent = createStudy([extra(n)], h.root, 'Recent study ' + n);
+    recent.updated = new Date(newest + n).toISOString();
+    await fs.writeFile(path.join(h.home, 'active-studies-v1', recent.id + '.json'), JSON.stringify(recent));
+  }
+
+  h.state.clear();
+  await h.restart();
+  const recent = await h.recent();
+  assert.equal(recent.length, 30);
+  assert.ok(!recent.some(row => [paused.id, open.id].includes(row.id)));
+  await h.run('resumeStudy');
+  assert.equal(h.c.active, undefined, 'cancelling leaves work closed');
+  assert.deepEqual(h.lastChoices.slice(0, 2).map(row => [row.id, row.description]), [
+    [open.id, 'Unresolved question'],
+    [paused.id, 'Unfinished attempt']
+  ]);
+  assert.ok(!h.lastChoices.some(row => [idle.id, archived.id].includes(row.id)));
+
+  h.pick.push('Paused proof');
+  await h.run('resumeStudy');
+  assert.deepEqual(h.c.active.current, attempt);
+  assert.deepEqual(h.panels.at(-1).messages.at(-1).study.passages, [passage]);
+
+  h.pick.push('Open question');
+  await h.run('resumeStudy');
+  assert.equal(h.c.active.id, open.id);
+  assert.equal(h.c.active.unresolved, gap);
+  assert.equal(h.c.active.current, null);
+});

@@ -98,10 +98,11 @@ research use and automated fixtures. Existing work is preserved.
 the outcome to establish its schedule. **Retire** ends review and preserves
 the earlier work.
 
-On a later visit run **MRW: Resume Study**. The picker lists recent active
-studies and older active studies with questions due. It lists due studies first.
-Choose **Review due questions** to review scheduled questions with the
-answers concealed.
+On a later visit run **MRW: Resume Study**. Studies with reviews due appear
+first. Studies with an unfinished attempt or an unresolved question saved for
+later appear next, including those outside the recent list. Choose
+**Review due questions** to review scheduled questions with the answers
+concealed.
 
 A block draws from the selected sources, including questions on matching
 prerequisite passages. Review history belongs to an exact question and source

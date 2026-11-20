@@ -29,14 +29,19 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
       if (!activeStudy(study)) continue;
       // A shared question is listed under its owner. Document studies are read-only.
       const due = scheduler.scheduledReviews(study.document ? [] : study.questions, now);
-      if (!due.count && !recentIDs.has(study.id)) continue;
+      const unfinishedAttempt = Boolean(study.current && !study.current.finished);
+      const unresolvedQuestion = typeof study.unresolved === 'string' && study.unresolved.trim() !== '';
+      const unfinishedWork = unfinishedAttempt || unresolvedQuestion;
+      if (!due.count && !unfinishedWork && !recentIDs.has(study.id)) continue;
       const description = [];
       if (due.count) description.push(due.count + ' due for spaced review');
-      if (study.current && !study.current.finished) description.push('Unfinished attempt');
+      if (unfinishedAttempt) description.push('Unfinished attempt');
+      if (unresolvedQuestion) description.push('Unresolved question');
       rows.push({ label: study.title, id: study.id, description: description.join(' · '),
-        earliest: due.earliest, updated: study.updated });
+        earliest: due.earliest, unfinishedWork, updated: study.updated });
     }
-    return rows.sort((a,b) => a.earliest - b.earliest || b.updated.localeCompare(a.updated) || a.id.localeCompare(b.id));
+    return rows.sort((a,b) => a.earliest - b.earliest || Number(b.unfinishedWork) - Number(a.unfinishedWork)
+      || b.updated.localeCompare(a.updated) || a.id.localeCompare(b.id));
   }
   function load(){if(loaded)return Promise.resolve();if(!loading)loading=restore().catch(e=>{loading=undefined;throw e;});return loading;}
   async function restore(){if(!home)throw new Error('Open a folder to save study continuity.');await recorder.init();

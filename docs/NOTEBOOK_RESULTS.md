@@ -69,11 +69,11 @@ export.
 
 <a id="required-display-and-comparison-follow-up"></a>
 
-### Verification limit
+### Saved plot comparison
 
-Native viewing and comparison of rich outputs have not received a visual check
-on the tested host. See [D12](DESIGN_RECONCILIATION.md) for the remaining
-verification work.
+An isolated WSL check used VS Code 1.147.0, Jupyter 2025.9.1 and Notebook
+Renderers 1.3.0. After restarting, the native diff displayed both saved PNG
+plots from the exact retained notebooks.
 
 ## Limits and preservation
 

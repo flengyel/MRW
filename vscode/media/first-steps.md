@@ -430,7 +430,8 @@ author or check its mathematics.
 **Pause / save** keeps unfinished work. **Continue with revised work** starts a
 linked attempt after completion. **Keep for spaced review** enrolls a recall
 question. Submit an attempt and record its outcome. Later, **MRW: Resume Study**
-shows which studies have questions due. Open one and choose **Review due questions**
+lists studies with reviews due first. It also includes older studies with an
+unfinished attempt or a saved unresolved question. Choose **Review due questions**
 when ready for another attempt. Effort reports are optional. See [the study guide](https://github.com/flengyel/MRW/blob/main/docs/ACTIVE_STUDY_WORKFLOW.md) for recall,
 submission and history details. Earlier document-linked work remains readable
 through **MRW: Resume Study** in the Command Palette; its removed forms do not reopen.
