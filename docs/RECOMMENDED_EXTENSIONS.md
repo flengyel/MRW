@@ -96,17 +96,22 @@ and a separate desktop application. It has its own engines with partial
 Sage-compatible and other interfaces; it is not a VS Code extension or the
 SagePod kernel.
 
-The candidate MRW workflow is to export a notebook as `.ipynb`, keep its saved
-outputs, and use the existing **Retain Notebook Result…**, comparison and
-ordinary-note links. Opening retained results does not run cells. A public
-upstream notebook passed exact capture/read checks; live browser export,
-execution and agent integration have not been tested with MRW.
+After running the calculation in Sagebrush, open **File → Download** and
+choose `.ipynb`. In MRW, use **Retain Notebook Result…** to keep the exported
+notebook with its saved outputs. **Open Retained Notebook Result…** can reopen
+a capture or compare it with another. The
+[notebook guide](NOTEBOOK_RESULTS.md) covers comparison, note links and export.
 
-Keep the actual producer/version separate from a `sagemath` kernelspec.
-Sagebrush's reactive reruns and reported certification conditions also need to
-remain explicit. See [the design assessment](RESEARCH_WORKSTATION_DESIGN.md#sagebrush)
-for the checked revision, evidence scope and a proposed discriminant comparison.
-Sagebrush is optional; no MRW adapter is currently implemented.
+Sagebrush 0.10.2 ran two trace-matrix calculations in browser-local Sage mode.
+Both downloads included their outputs, 5 and 20. MRW 0.23.46 retained the exact
+notebooks and exported two capture accounts. In an isolated WSL window, VS Code
+compared the transcripts and reopened a retained result after restart.
+
+In this trial, both exports labeled the kernel **SageMath**. Record the
+observed Sagebrush version in a note and use **Include companion files…**
+when retaining the export. MRW describes these outputs as having unknown
+execution context. See [the design](RESEARCH_WORKSTATION_DESIGN.md#sagebrush)
+for the scope of evidence and Sagebrush's reactive execution behavior.
 
 ## Obsidian
 

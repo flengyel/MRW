@@ -1,16 +1,16 @@
 # Retained notebook results
 
-Notebook creation, editing and execution belong to Jupyter and the selected
-native editor; [the integration contract](INTEGRATION_BOUNDARIES.md) governs
-MRW's capture and reference role. A retained result is a separate snapshot, not
-the live notebook or kernel. Synchronizing its files does not restore execution
-state or authorize rerunning cells.
+The notebook's application owns creation, editing and execution. The
+[integration contract](INTEGRATION_BOUNDARIES.md) governs MRW's capture and
+reference role. A retained result captures the saved code, outputs and any
+companion files you select.
 
-Run and save a notebook using its normal Jupyter editor and kernel. **MRW:
-Retain Notebook Result…** saves a separate exact copy in this workspace's private
-storage. The notebook toolbar exposes the same action. You may include a working
-note, input data or method file. Nothing is imported into your notes folder.
-Dirty selected documents must be saved first; MRW does not save them for you.
+Run the calculation and save the notebook with its outputs. For Sagebrush,
+[download the notebook as `.ipynb`](RECOMMENDED_EXTENSIONS.md#sagebrush).
+**MRW: Retain Notebook Result…** keeps an exact copy in this workspace's private
+storage. The Jupyter notebook toolbar exposes the same action. Use
+**Include companion files…** to retain a working note, input data or method
+file with the notebook. Save any edited files before selecting them.
 
 **MRW: Open Retained Notebook Result…** lists captures by title, date and evidence.
 With Jupyter installed, it opens a read-only native notebook with its saved rich

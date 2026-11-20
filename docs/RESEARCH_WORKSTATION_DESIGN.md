@@ -111,8 +111,8 @@ adapter or replacement for the current SagePod/Jupyter workflow.
 document companion. Its [product description](https://github.com/sagemathinc/sagebrush/blob/4bcb319294e73be1fe67c602ea7a92b6d4933eb6/PRODUCT.md)
 describes browser and desktop notebooks with its own mathematical engines and
 partial Sage, Magma, Python and MATLAB interfaces. It is a separate execution
-system from SagePod/SageMath. MRW should first use exported notebooks through
-the existing capture, comparison, linking and Return workflow.
+system from SagePod/SageMath. Use its exported notebooks with the
+[notebook capture and comparison workflow](RECOMMENDED_EXTENSIONS.md#sagebrush).
 
 | MRW requirement | Fit and boundary |
 | --- | --- |
