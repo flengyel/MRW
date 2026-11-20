@@ -70,17 +70,17 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`mrw-0.23.46.vsix`. Alternatively, in that window's WSL integrated
+`mrw-0.23.47.vsix`. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/mrw-0.23.46.vsix
+code --install-extension /absolute/path/to/mrw-0.23.47.vsix
 code --list-extensions --show-versions
 ```
 
-Check that **Mathematical Research Workstation 0.23.46** appears under
+Check that **Mathematical Research Workstation 0.23.47** appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.mrw@0.23.46`. If an extension appears
+The CLI identity is `flengyel.mrw@0.23.47`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
