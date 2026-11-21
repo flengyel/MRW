@@ -27,7 +27,7 @@ async function receipt(extension){
   ||marker.device!==String(stat.dev)||marker.inode!==String(stat.ino)||marker.profile!=='MRW-Fixture-'+pointer.id
   ||marker.extension!==extension||!inside(root,extension)||extension===root)fail('fixture ownership differs');
  if(typeof process.getuid==='function'&&(stat.uid!==process.getuid()||(stat.mode&0o077)!==0))fail('fixture root must be private and owned by this user');
- if(!['isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification'].includes(marker.case))fail('this older native case needs explicit fixture/UI migration');
+ if(!['isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification','leanLesson'].includes(marker.case))fail('this older native case needs explicit fixture/UI migration');
  if(!Array.isArray(marker.projects)||!marker.projects.length||marker.projects.length>4)fail('invalid fixture projects');
  for(const project of marker.projects)if(!inside(root,await canonical(project))||project===root)fail('project leaves disposable root');
  return marker;

@@ -10,8 +10,9 @@ from uuid import uuid4
 
 def prepare(case, parent=None, seed=None, config=None, route_cache=None):
     repo=Path(__file__).resolve().parents[2]
-    allowed={'isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification'}
-    if case not in allowed:raise ValueError('This older case needs fixture/UI migration; supported cases are isolation, sourceTrash, activation, sourceReturn warrantInspection and justification')
+    allowed={'isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification','leanLesson'}
+    if case not in allowed:
+        raise ValueError('Supported native cases: '+', '.join(sorted(allowed)))
     parent=Path(parent) if parent else Path.home()/'.cache/mrw-native-tests'
     cache=Path.home()/'.cache'
     if not parent.is_absolute() or parent.resolve()!=parent or not parent.is_relative_to(cache):
@@ -22,7 +23,7 @@ def prepare(case, parent=None, seed=None, config=None, route_cache=None):
     root=Path(tempfile.mkdtemp(prefix='mrw-fixture-',dir=parent));os.chmod(root,0o700)
     (root/'workspace-storage').mkdir();(root/'global-storage').mkdir()
     identifier=str(uuid4());profile='MRW-Fixture-'+identifier
-    names={'sourceTrash':'mrw-source-trash-fixture','activation':'mrw-activation-fixture','isolation':'mrw-isolation-fixture','sourceReturn':'mrw-source-return-fixture','warrantInspection':'mrw-warrant-inspection-fixture','justification':'mrw-justification-fixture'}
+    names={'sourceTrash':'mrw-source-trash-fixture','activation':'mrw-activation-fixture','isolation':'mrw-isolation-fixture','sourceReturn':'mrw-source-return-fixture','warrantInspection':'mrw-warrant-inspection-fixture','justification':'mrw-justification-fixture','leanLesson':'mrw-lean-lesson-fixture'}
     project=root/names.get(case,'project');project.mkdir()
     extension=root/'extension';extension.mkdir()
     for name in ['src','media','python']:

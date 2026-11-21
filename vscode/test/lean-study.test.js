@@ -119,3 +119,44 @@ test('lesson actions resolve two selected Markdown files and reject unrelated Le
  const paths=h.calls.filter(x=>x.name==='setContext').at(-1).args[1];assert.ok(paths.includes(path.join(opened.root,'lessons/02-implication.md')));assert.ok(!paths.includes(path.join(opened.root,'Unrelated.lean')));
  const m=require('../package.json');assert.ok(m.contributes.menus['editor/title'].find(x=>x.command==='mrw.leanStudyActions').when.includes('mrw.leanLessonPaths'));
 });
+
+test('the working note offers the selected lesson and Return with no second lesson picker', async t => {
+ const root = await temporary(t);
+ const h = harness(root, {notesFolder: root});
+ const prior = path.join(root, 'reading.md');
+ await fs.writeFile(prior, '# Prior\nWhich hypothesis is needed?\n');
+ const doc = await h.api.workspace.openTextDocument(h.api.Uri.file(prior));
+ const editor = await h.api.window.showTextDocument(doc);
+ await h.select(editor, 8, 13);
+
+ h.picks.push(items => items.find(item => item.lesson?.id === 'implication'));
+ const opened = await h.commands.get('mrw.studyLean4')();
+ const lesson = h.api.Uri.file(path.join(opened.root, 'lessons/02-implication.md'));
+ const note = h.api.Uri.file(path.join(opened.root, 'Notes.md'));
+ const paths = h.calls.filter(call => call.name === 'setContext' && call.args[0] === 'mrw.leanLessonPaths').at(-1).args[1];
+ assert.ok(paths.includes(note.fsPath));
+ assert.ok(!paths.includes(prior));
+
+ h.picks.push(actions => actions.find(item => item.kind === 'notes'));
+ await h.commands.get('mrw.leanStudyActions')(lesson);
+ const notesEditor = h.api.window.activeTextEditor;
+ assert.equal(notesEditor.document.uri.fsPath, note.fsPath);
+ await h.change(notesEditor.document, notesEditor.document.text + '\nDraft counterexample.\n');
+ const draft = notesEditor.document.text;
+
+ h.picks.push(actions => {
+  assert.equal(actions.some(item => item.kind === 'notes'), false);
+  return actions.find(item => item.kind === 'lesson');
+ });
+ await h.commands.get('mrw.leanStudyActions')();
+ assert.equal(h.api.window.activeTextEditor.document.uri.fsPath, lesson.fsPath);
+ assert.equal(h.state.get('mrw.leanStudy.v1').lessonId, 'implication');
+
+ h.picks.push(actions => actions.find(item => item.kind === 'return'));
+ await h.commands.get('mrw.leanStudyActions')(note);
+ assert.equal(h.returned().uri, doc.uri.toString());
+ assert.equal(h.returned().start, 8);
+ assert.equal(h.returned().end, 13);
+ assert.equal(notesEditor.document.text, draft);
+ assert.doesNotMatch(await fs.readFile(note.fsPath, 'utf8'), /Draft counterexample/);
+});

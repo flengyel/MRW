@@ -374,8 +374,8 @@ and deliberate errors.
 Hover over an icon for its command name. **∀** opens Lean's menu; **Pin**
 keeps a view at one location; **Pause / Play** freezes / resumes its display;
 **Refresh** updates a paused display once; the **cog** changes goal display
-settings. The **book** opens MRW's document menu. **Lean Study Actions…**
-opens the lesson, examples and notes. See the
+settings. In the lesson or its working note, open **Lean Study Actions…**
+from the **MRW Document** menu. In Lean code, use the editor toolbar. See the
 [icon guide](https://github.com/flengyel/MRW/blob/main/docs/LEAN_STUDY_WORKFLOW.md#icons-and-controls).
 
 Install the optional official **Lean 4** extension (`leanprover.lean4`) and
@@ -387,10 +387,12 @@ code remain readable, with a route to official setup through MRW's notice.
 New projects use **MRW: Lean Study Parent**, or the notes folder when that
 setting is empty. The project is stored in `Lean Study/lean-foundations/`
 beneath that parent. Resume keeps the current working location.
-**Lean Study Actions…** opens your associated `Notes.md`, official book links, variations, solutions and deliberate
-errors. The book opens in the external browser. **Return from Lean Study**
-recovers the prior MRW document range; **Resume Lean Study** reuses your edited
-files and code location. Save and undo in their native editors. Explicit reset
+**Lean Study Actions…** opens your associated `Notes.md`, variations,
+solutions and deliberate errors. From the note, **Read lesson** reopens the
+lesson you were using. **Return to prior MRW document** takes you back to the
+location captured on entry, when available. **Resume Lean Study** reopens the
+lesson and the saved code location.
+Save and undo in their native editors. Explicit reset
 requires confirmation, preserves Undo and does not save automatically.
 
 Unfinished variations and deliberate errors are excluded from the successful
@@ -626,9 +628,9 @@ guides and shows installation and configuration status.
 
 Calculation opens native notebooks, retained results, comparison and provenance
 export. Retained notebooks are read-only; comparison submits no cell execution.
-Proofs contains Justification, Lean lessons and Proof Outline. Lesson actions apply to the
-selected lesson or associated code; shared code offers a choice. Unrelated Lean
-files keep native Lean controls.
+Proofs contains Justification, Lean lessons and Proof Outline. Lesson actions
+apply to the selected lesson, associated code or its working note. Shared code
+offers a choice. Unrelated Lean files keep native Lean controls.
 
 Source annotations stay editable after linking an external note. Copying is
 optional. A linked note can paraphrase the annotation or combine several sources.

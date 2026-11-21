@@ -30,7 +30,7 @@ the working profile and windows open. The isolated profile does not need GitHub
 sign-in or Settings Sync. Do not substitute the working profile when setup fails.
 
 Supported cases are `isolation`, `sourceTrash`, `activation`, `sourceReturn`,
-`warrantInspection` and `justification`. The activation
+`warrantInspection`, `justification` and `leanLesson`. The activation
 case uses a guarded bootstrap before its run-style test entry. Other older
 cases require explicit fixture/UI migration before they are added to this list.
 `--seed` copies at most 4,000 entries/64 MiB into the new project; symlinks and private
@@ -80,9 +80,9 @@ VS Code's profile management when no longer needed, not by editing its registry.
 
 Focused guard checks cover wrong/missing ownership, working scopes/raw contexts,
 orphaned fixture-owned state, source bindings, inherited settings, symlinks/hardlinks,
-external paths/tabs, dirty buffers and changed restart scopes. All 32 exported activation/run/check entry points are checked with a
-preflight barrier and forbidden-body spies; the guard refusal cases exercise the
-real preflight separately. Both direct Python bridges refuse unscoped/external writes and still
+external paths/tabs, dirty buffers and changed restart scopes. A test probes
+every exported activation, run and check entry point at the preflight barrier.
+Guard refusal cases exercise the real preflight separately. Both direct Python bridges refuse unscoped/external writes and still
 accept an owned fixture. Retired preparers leave supplied directories unchanged.
 
 ## Note/source/Return case
@@ -97,6 +97,17 @@ the native Return. Keep the fixture window in the foreground; bring it forward a
 if VS Code restores it behind the working window. The focus wait is bounded.
 Dialog choices and reader messages are scripted; editors, preview, bridge writes and native Memento restart
 are real. No Obsidian vault or authoring command is involved.
+
+## Lean lesson case
+
+`--case leanLesson` needs the official Lean extension enabled in the isolated
+WSL profile and the bundled lesson's pinned toolchain installed. The fixture
+opens the implication lesson, lets Lean check a counterexample in the disposable
+working copy, and uses the working note to return to the lesson and the exact
+original Markdown selection. It preserves the note draft through navigation
+and checks the saved note and code position after a fixture reload.
+Picker selections are scripted. The editors, Lean diagnostics, and reload
+are native.
 
 ## Documentary inspection case
 

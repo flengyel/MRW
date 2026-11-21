@@ -11,7 +11,8 @@ test('PDF and text readers have navigation without Markdown or study controls', 
   assert.deepEqual(menu.filter(item => !item.when).map(item => item.command),
     ['mrw.showBacklinks', 'mrw.newZettel', 'mrw.recentNotes']);
   assert.match(menu.find(item => item.command === 'mrw.refreshCitations').when, /md\|markdown/);
-  assert.equal(menu.some(item => /study|ask|create/i.test(item.command)), false);
+  assert.deepEqual(menu.filter(item => /study|ask|create/i.test(item.command)).map(item => item.command),
+    ['mrw.leanStudyActions']);
   const toolbar = c.menus['editor/title'].filter(item => item.group.startsWith('navigation'));
   for (const command of ['mrw.copyDocumentLink', 'mrw.openDocumentInObsidian', 'mrw.editDocumentSource', 'mrw.studyCurrent', 'mrw.leanStudyInfo']) {
     assert.equal(toolbar.some(item => item.command === command), false);
@@ -50,6 +51,7 @@ test('Return and companion commands have the same scope in the Document menu and
     'mrw.returnToReadingOutline': 'mrw.canReturnToDocument',
     'mrw.openDocumentInObsidian': 'resourcePath in mrw.obsidianNotePaths',
     'mrw.copyDocumentLink': 'resourcePath in mrw.noteLinkPaths',
+    'mrw.leanStudyActions': 'resourcePath in mrw.leanLessonPaths',
   };
   for (const [command, when] of Object.entries(expected)) {
     for (const menu of ['mrw.documentNavigation', 'commandPalette']) {

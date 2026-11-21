@@ -73,7 +73,7 @@ Hover over an icon to see its command name.
 | Pause / Play | Freezes the displayed state / resumes updates. |
 | Refresh, shown while paused | Updates the paused display once. |
 | Cog beside the goal | Changes which assumptions and goal details are displayed. |
-| Book, labelled MRW Document | Opens MRW's document navigation menu. |
+| MRW Document (list icon) | Opens MRW's document navigation menu. |
 
 **Lean Study Actions…** is MRW's menu for the lesson, examples, notes and
 variations. Lean's `∀` menu and InfoView controls belong to the official Lean
@@ -112,11 +112,15 @@ interaction instructions also apply to their unchanged examples.
 
 ## Actions and resumption
 
-With the examples active, choose **MRW: Lean Study Actions…** in the editor
-toolbar or Command Palette. It offers the explanation, examples, InfoView,
-associated note, official book links, each variation, complete solutions,
-deliberate errors and Return. Book links open in the external browser; this
-increment does not bundle or embed the book.
+In the examples editor, choose **Lean Study Actions…** from the toolbar.
+In the lesson preview or working note, choose **MRW Document → Lean Study
+Actions…**. The action also appears in the Command Palette for these files.
+
+In the working note, **Read lesson** reopens the lesson you were using.
+**Return to prior MRW document** appears when MRW captured a reading location
+on entry. The other actions open the working examples, InfoView, the associated
+note, variations, solutions and deliberate errors. Book links open in the
+external browser.
 
 **MRW: Return from Lean Study** restores the prior MRW Markdown document and
 its exact captured source range. **MRW: Resume Lean Study** reopens the retained

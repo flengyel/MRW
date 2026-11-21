@@ -889,6 +889,10 @@
         {
           "command": "mrw.selectReadingOutlineItem",
           "when": "false"
+        },
+        {
+          "command": "mrw.leanStudyActions",
+          "when": "resourcePath in mrw.leanLessonPaths"
         }
       ],
       "editor/title": [
@@ -909,7 +913,7 @@
         },
         {
           "command": "mrw.leanStudyActions",
-          "when": "resourcePath in mrw.leanLessonPaths",
+          "when": "resourcePath in mrw.leanLessonPaths && resourceExtname == .lean",
           "group": "navigation@20"
         },
         {
@@ -968,6 +972,11 @@
           "command": "mrw.refreshCitations",
           "when": "resourceExtname =~ /\\.(md|markdown)$/i",
           "group": "1_reading@8"
+        },
+        {
+          "command": "mrw.leanStudyActions",
+          "when": "resourcePath in mrw.leanLessonPaths",
+          "group": "3_lean@1"
         }
       ]
     },

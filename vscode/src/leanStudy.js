@@ -14,7 +14,13 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
  const lessonFiles=lesson=>[lesson.explanation,lesson.examples,...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>item.file))];
  async function advertise(){
   let paths=[];
-  if(state?.root)try{const pack=await loadPack(state.root);if(pack.manifest.packId===state.packId)paths=[...new Set(pack.manifest.lessons.flatMap(lessonFiles))].map(file=>path.join(pack.root,file));}catch{/* Missing copies have no contextual controls. */}
+  if (state?.root) try {
+   const {root, manifest} = await loadPack(state.root);
+   if (manifest.packId === state.packId) {
+    const files = [manifest.notesTemplate, ...manifest.lessons.flatMap(lessonFiles)];
+    paths = [...new Set(files)].map(file => path.join(root, file));
+   }
+  } catch {/* Missing copies have no contextual controls. */}
   await vscode.commands.executeCommand('setContext','mrw.leanLessonPaths',paths);
  }
  function selectedUri(resource){
@@ -24,9 +30,14 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
  }
  async function selectedLesson(resource){
   const uri=selectedUri(resource);
-  if(!state?.root||uri?.scheme!=='file'||!uri.fsPath.startsWith(state.root+path.sep))throw Error('Select a Lean lesson Markdown file or its associated code.');
+  if(!state?.root||uri?.scheme!=='file'||!uri.fsPath.startsWith(state.root+path.sep))throw Error('Select a Lean lesson, its code, or its working note.');
   const pack=await loadPack(state.root);if(pack.manifest.packId!==state.packId)throw Error('The study folder belongs to another pack.');
   const file=path.relative(pack.root,uri.fsPath).split(path.sep).join('/');
+  if (file === pack.manifest.notesTemplate) {
+   const lesson = pack.manifest.lessons.find(item => item.id === state.lessonId);
+   if (!lesson) throw Error('The saved lesson is unavailable. Choose Study Lean 4… to select a lesson.');
+   return {pack, lesson, file};
+  }
   const matches=pack.manifest.lessons.filter(lesson=>lessonFiles(lesson).includes(file));
   if(!matches.length)throw Error('This file is not associated with a Lean lesson. Use its native Lean controls.');
   const lesson=matches.length===1?matches[0]:(await vscode.window.showQuickPick(matches.map(lesson=>({label:lesson.title,description:'This code is shared by several lessons',lesson})),{title:'Choose the lesson for this shared code file'}))?.lesson;
@@ -91,7 +102,21 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
  register('mrw.leanStudyInfo',resource=>locked(async()=>{const selected=await selectedLesson(resource);if(selected)return info(selected);}));
  register('mrw.returnFromLeanStudy',async()=>{if(!state?.origin)throw Error('No prior MRW document location was captured. Your lesson remains open.');await returnToDocument(state.origin);});
  register('mrw.leanStudyActions',resource=>locked(async()=>{
-  const selected=await selectedLesson(resource);if(!selected)return;const {pack,lesson}=selected;const actions=[{label:'Read lesson',kind:'lesson'},{label:'Open working examples',kind:'examples'},{label:'Show native Lean InfoView',kind:'info'},{label:'Open associated note',kind:'notes'},{label:'Return to prior MRW document',kind:'return'},...lesson.bookSections.map(section=>({label:'Book: '+section.title,kind:'book',section})),...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>({label:(kind==='exercises'?'Try: ':kind==='solutions'?'Solution: ':'Deliberate error: ')+item.title,kind:'file',file:item.file}))),{label:'Reset working examples in editor…',kind:'reset'}];
+  const selected = await selectedLesson(resource);
+  if (!selected) return;
+  const {pack, lesson, file} = selected;
+  const actions = [
+   {label:'Read lesson', kind:'lesson'},
+   {label:'Open working examples', kind:'examples'},
+   {label:'Show native Lean InfoView', kind:'info'},
+  ];
+  if (file !== pack.manifest.notesTemplate) actions.push({label:'Open associated note', kind:'notes'});
+  if (state.origin) actions.push({label:'Return to prior MRW document', kind:'return'});
+  actions.push(
+   ...lesson.bookSections.map(section => ({label:'Book: '+section.title, kind:'book', section})),
+   ...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>({label:(kind==='exercises'?'Try: ':kind==='solutions'?'Solution: ':'Deliberate error: ')+item.title,kind:'file',file:item.file}))),
+   {label:'Reset working examples in editor…', kind:'reset'},
+  );
   const action=await vscode.window.showQuickPick(actions,{placeHolder:lesson.title+' — lesson actions'});if(!action)return;
   if(action.kind==='lesson')return openFile(lesson.explanation,{preview:true});
   if(action.kind==='examples')return openFile(lesson.examples);

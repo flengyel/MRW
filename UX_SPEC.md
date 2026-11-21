@@ -34,8 +34,8 @@ explicitly and retains scoped references and results.
 - Ordinary reading creates no problem or study record and offers no unsolicited
   registration. Keep saved attempts, study history, Archive and Restore, Proof Outline
   and Lean study available on request.
-- Bind lesson actions to the selected lesson or its associated code. Unrelated
-  Lean files retain native controls. Preserve lesson, code, notes and Return.
+- Bind lesson actions to the selected lesson, its code and its working note.
+  Unrelated Lean files retain native controls. Preserve lesson, code, notes and Return.
 - Name API and companion destinations where help is requested. Show exact context
   and proposed changes before application. Copying context does not send it.
 - Keep source text and reader notes prominent. Attribution and optional tools
