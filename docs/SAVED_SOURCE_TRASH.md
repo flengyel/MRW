@@ -1,8 +1,8 @@
 # Delete and restore saved sources
 
-Use **Sources and references → Delete saved source…** to move an MRW saved
-copy to Trash. The same action is under **Source details and tools** in its
-reader. The confirmation names the selected copy and explains the scope.
+Open the saved source and choose **Move to Trash…** under **Source details and
+tools**. **MRW: Delete Saved Source…** in the Command Palette opens a picker for
+the same operation. The confirmation names the selected copy and explains the scope.
 An unsaved reader draft stops deletion; save or cancel it first. Cancelling
 the picker or confirmation changes nothing.
 
@@ -11,7 +11,7 @@ It keeps its exact source revision, passages, annotations, diagrams, supporting
 artifacts and note associations. Original documents, vault notes, other saved
 sources and studies are unchanged. Trash does not reclaim their disk space.
 
-Choose **Undo** in the completion notification, or **Restore saved source…**
+Choose **Undo** in the completion notification, or **Restore saved source from Trash…**
 in Sources and references. **Open Saved Source…** also includes Restore,
 including when there are no active copies. Restore is available after restart.
 It uses the same identity and revisions; no reacquisition or copying of notes

@@ -75,7 +75,7 @@ active extension build, including when an installed update still awaits reload.
 Installing solely on the Windows interface does not install the workspace
 extension.
 
-Diagnostics reports are available from **Tools and Setup** and the Command
+Diagnostics reports are available from **Tools and Setup → History and diagnostics…** and the Command
 Palette. To enable scheduled reports, turn on **MRW Diagnostics: Weekly Enabled**.
 They run while VS Code is active; missed weekly runs coalesce into one run.
 Reporting does not repair data or invoke Codex. See [the companion guide](../diagnostics/README.md).

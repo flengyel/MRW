@@ -7,7 +7,7 @@ test('purpose menus expose retained calculations and setup without a command wal
  for(const id of Object.keys(GROUPS))assert.ok(welcome.includes('command:mrw.'+id));
  assert.ok(!welcome.includes('command:mrw.moveWorkspace'));
  for(const menu of ['editor/context','editor/title'])assert.ok(!manifest.contributes.menus[menu].some(x=>x.command==='mrw.studyCurrent'));
- assert.ok(GROUPS.calculationTools.some(x=>x[1]==='openNotebookResult'));assert.ok(GROUPS.companionTools.some(x=>x[1]==='connectZotero'));
+ assert.ok(GROUPS.calculationTools.some(x=>x[1]==='openNotebookResult'));assert.ok(GROUPS.companionTools.some(x=>x[0]==='Companion settings…'));
 });
 test('setup shows installed/configured versus unchecked states without probes and cancellation is inert',async()=>{
  const h=harness();assert.equal(h.calls.length,0);await h.handlers.get('mrw.calculationTools')();assert.equal(h.calls.length,0);
@@ -23,9 +23,10 @@ test('group selection delegates one existing action and native notebook opening 
 
 test('optional diagnostics status and supported actions are discoverable without a plugin registry',async()=>{
  const h=harness();assert.ok(companionStatus(h.vscode).find(x=>x.label==='MRW Diagnostics').description.includes('not installed'));
- h.picks.push(rows=>{assert.ok(!rows.some(x=>x.command==='mrwDiagnostics.featureUse'));return undefined;});await h.handlers.get('mrw.companionTools')();
+ const history = rows=>rows.find(x=>x.label==='History and diagnostics…');
+ h.picks.push(history,rows=>{assert.ok(!rows.some(x=>x.command==='mrwDiagnostics.featureUse'));return undefined;});await h.handlers.get('mrw.companionTools')();
  h.vscode.extensions.getExtension=id=>id==='flengyel.mrw-diagnostics'?{}:undefined;
  h.vscode.commands.getCommands=async()=>['mrwDiagnostics.featureUse','mrwDiagnostics.integrity','mrwDiagnostics.maintenance'];
- h.picks.push(rows=>rows.find(x=>x.command==='mrwDiagnostics.featureUse'));await h.handlers.get('mrw.companionTools')();
+ h.picks.push(history,rows=>rows.find(x=>x.command==='mrwDiagnostics.featureUse'));await h.handlers.get('mrw.companionTools')();
  assert.deepEqual(h.calls,[['mrwDiagnostics.featureUse']]);
 });

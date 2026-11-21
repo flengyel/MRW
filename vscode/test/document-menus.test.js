@@ -8,9 +8,9 @@ test('PDF and text readers have navigation without Markdown or study controls', 
   assert.equal(entry.group, 'navigation@10');
   assert.match(entry.when, /pdf\|txt/);
   const menu = c.menus[entry.submenu];
-  assert.deepEqual(menu.filter(item => !item.when).map(item => item.command), ['mrw.returnToReadingOutline', 'mrw.showBacklinks', 'mrw.newZettel', 'mrw.recentNotes']);
-  assert.ok(menu.filter(item => item.when && item.command !== 'mrw.refreshCitations').every(item => item.when.includes('(md|markdown)')));
-  assert.equal(menu.find(item => item.command === 'mrw.refreshCitations').when, 'resourceExtname == .md');
+  assert.deepEqual(menu.filter(item => !item.when).map(item => item.command),
+    ['mrw.showBacklinks', 'mrw.newZettel', 'mrw.recentNotes']);
+  assert.match(menu.find(item => item.command === 'mrw.refreshCitations').when, /md\|markdown/);
   assert.equal(menu.some(item => /study|ask|create/i.test(item.command)), false);
   const toolbar = c.menus['editor/title'].filter(item => item.group.startsWith('navigation'));
   for (const command of ['mrw.copyDocumentLink', 'mrw.openDocumentInObsidian', 'mrw.editDocumentSource', 'mrw.studyCurrent', 'mrw.leanStudyInfo']) {
@@ -29,7 +29,7 @@ test('document menu conditions admit local, WSL and SSH files without admitting 
   assert.equal([...entry.when.matchAll(/ =~ /g)].length, 2);
   for (const scheme of ['file', 'vscode-remote']) {
     for (const extension of ['.pdf', '.PDF', '.md', '.markdown', '.txt']) assert.equal(visible(entry.when, scheme, extension), true);
-    const noteOnly = c.menus[entry.submenu].filter(item => item.when);
+    const noteOnly = c.menus[entry.submenu].filter(item => item.when?.includes('resourceExtname'));
     for (const item of noteOnly) {
       assert.equal(visible(item.when, scheme, '.md'), true);
       assert.equal(visible(item.when, scheme, '.pdf'), false);
@@ -42,4 +42,20 @@ test('document menu conditions admit local, WSL and SSH files without admitting 
 test('Recent Documents is directly available and keeps its existing command identity',()=>{
  assert.equal(c.commands.find(x=>x.command==='mrw.recentNotes').title,'Recent Documents…');
  assert.ok(c.viewsWelcome.find(x=>x.view==='mrw.commands').contents.includes('(command:mrw.recentNotes '));
+});
+
+
+test('Return and companion commands have the same scope in the Document menu and Command Palette', () => {
+  const expected = {
+    'mrw.returnToReadingOutline': 'mrw.canReturnToDocument',
+    'mrw.openDocumentInObsidian': 'resourcePath in mrw.obsidianNotePaths',
+    'mrw.copyDocumentLink': 'resourcePath in mrw.noteLinkPaths',
+  };
+  for (const [command, when] of Object.entries(expected)) {
+    for (const menu of ['mrw.documentNavigation', 'commandPalette']) {
+      assert.equal(c.menus[menu].find(row => row.command === command).when, when);
+    }
+  }
+  assert.equal(c.submenus.find(menu => menu.id === 'mrw.documentNavigation').icon, '$(list-selection)');
+  assert.equal(c.commands.find(row => row.command === 'mrw.openOutline').icon, '$(book)');
 });

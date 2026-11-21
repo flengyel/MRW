@@ -11,7 +11,10 @@ Choose **Open Saved Source…** in MRW's **Commands** view, next to Open Documen
 Search by source title, author or passage title/tag. For example, `Stacks` or
 `08ZH` finds a saved Hausdorff-spaces section containing that lemma. The result
 shows its reader-note count and retained revision. Open it, then expand
-**Reader notes** at the relevant passage.
+**Reader notes** at the relevant passage. Use **Proofs** to show or hide all
+published proofs, or use the control on a single proof. **Add a note** opens
+the composer for that passage. Assistance commands follow in the passage's
+action row.
 
 This list belongs to the current workspace. A Markdown document that links to
 those passages is a separate file: use **Open Document…** for that file. Changing
@@ -47,7 +50,7 @@ editor is active. While a different file is active, Contents hides the preceding
 tree and identifies the active file, with directions for selecting its Markdown
 or returning to the selected document.
 
-To start a note from MRW, choose **New Note…** in **Commands** or the
+To start a note from MRW, choose **New Note…** from **Reading and notes** or the
 **MRW Document** menu. For a configured Obsidian vault, MRW brings Obsidian
 forward and runs your selected creation command; other notes folders use a blank
 VS Code Markdown editor. The current document stays open. See
@@ -61,14 +64,17 @@ offers **Open with system reader**. MRW does not install a viewer or display PDF
 bytes as text. PDF extraction, PDF Contents, page restoration and bookmarks are
 not implemented.
 
-Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
-text files offer **Return to Document** and **Show Backlinks…**. Markdown also
-offers **Show Contents**, **Edit Document Source**, **Open Note in Obsidian** and
-**Copy Note Link for Obsidian**. Backlinks search the selected notes folder;
-choose that folder first. Return uses the previous MRW navigation location, or
-the selected Contents document when no link was followed. A PDF return reopens
-the file; MRW does not restore its page. A system reader has no MRW toolbar, so
-use these commands in VS Code's Command Palette.
+Open **MRW Document** from the editor toolbar's list icon. **Return to
+Document** appears after following a link and returns to its recorded origin.
+Use **Reveal Contents Document** to reopen the selected Markdown document
+from Contents. **Show Backlinks…** searches the selected notes folder.
+
+Markdown offers **Show Contents** and **Edit Document Source**. **Copy MRW
+Note Link** is available for a note in the selected folder when the workspace
+has an address for the link. **Open Note in Obsidian** appears for notes in
+the selected Obsidian vault. PDF Return reopens the file. The PDF reader
+controls its page position. Use the Command Palette in VS Code when the PDF
+opens in a system reader.
 
 ## Note title and Obsidian handoff
 
@@ -247,12 +253,12 @@ the active extension build.
 
 ## Remove a saved copy from the active list
 
-Choose **Sources and references → Delete saved source…**, or expand **Source
-details and tools** in the reader. Save or cancel unsaved reader changes first.
+Open the saved source. Choose **Move to Trash…** under **Source details and
+tools**. Save or cancel unsaved reader changes first.
 The confirmation moves only that MRW saved copy to Trash. Its text, reader notes,
 diagrams and links are kept. Original files and vault notes are unchanged.
 
-**Undo** restores it immediately. **Restore saved source…** in Sources and
+**Undo** restores it immediately. **Restore saved source from Trash…** in Sources and
 references or Open Saved Source restores it after restart. Exact links still
 open a copy in Trash read-only, with a Restore button.
 See [scope and recovery](SAVED_SOURCE_TRASH.md).

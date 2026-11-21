@@ -497,6 +497,23 @@ test('backlinks from a Markdown preview return to that document instead of an un
 });
 
 
+test('document actions require the selected notes scope and recognize an Obsidian vault', async t => {
+  const f = await fixture(t), h = harness(f, new Map(), {notesFolder: f.notes});
+  const file = uri(f.file('1a.md'));
+  assert.deepEqual(await h.documents.noteActions(file), {obsidian: false, link: true});
+  assert.deepEqual(await h.documents.noteActions(uri(f.file('paper.pdf'))), {});
+  await fs.mkdir(path.join(f.notes, '.obsidian'));
+  assert.deepEqual(await h.documents.noteActions(file), {obsidian: true, link: true});
+  const elsewhere = path.join(f.outside, 'outside.md');
+  await fs.writeFile(elsewhere, '# Outside');
+  await fs.symlink(elsewhere, f.file('alias.md'));
+  assert.deepEqual(await h.documents.noteActions(uri(f.file('alias.md'))), {});
+  h.configuration.notesFolder = f.outside;
+  assert.deepEqual(await h.documents.noteActions(file), {});
+  assert.equal(h.state.has('mrw.documents.v1'), false);
+  assert.equal(h.external.length, 0);
+});
+
 test('Open Note in Obsidian targets the same saved file and preserves an unsent editor draft',async t=>{
  const f=await fixture(t),h=harness(f,new Map(),{notesFolder:f.notes});await fs.mkdir(path.join(f.notes,'.obsidian'));
  h.configuration.obsidianVault='Notes & research';
@@ -513,7 +530,8 @@ test('Open Note in Obsidian targets the same saved file and preserves an unsent 
 test('preview identity uses YAML title alongside the immutable filename and updates when editor text changes',async t=>{
  const f=await fixture(t),h=harness(f,new Map(),{notesFolder:f.notes});await fs.mkdir(path.join(f.notes,'.obsidian'));
  const doc=await h.doc('1a.md');await h.focus(doc);
- const wiki=registerWikiLinks({vscode:h.api,context:h.context,register:(key,callback)=>h.commands.set(key,callback),documents:h.documents});
+ const actionsForNote = await h.documents.noteActions(doc.uri);
+ const wiki=registerWikiLinks({vscode:h.api,context:h.context,register:(key,callback)=>h.commands.set(key,callback),documents:h.documents,noteActions:()=>actionsForNote});
  const md=wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
  let html=md.render(doc.getText(),{currentDocument:doc.uri});assert.match(html,/<strong[^>]*>A changed title<\/strong>/);assert.match(html,/<code>1a.md<\/code>/);
  const actions=[...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]);assert.equal(actions.length,3);assert.doesNotMatch(html,/>Problems</);
@@ -569,9 +587,11 @@ test('note URI checks workspace and vault, does not grant files or redirect a mi
 test('preview copy action copies the explicit note instead of an unrelated active editor', async t => {
   const f = await fixture(t), h = harness(f, new Map(), { notesFolder: f.notes });
   const doc = await h.doc('1a.md'), other = await h.doc('2b.md'); await h.focus(other);
-  const wiki = registerWikiLinks({ vscode:h.api, context:h.context, register:(k,v)=>h.commands.set(k,v), documents:h.documents });
+  const actions = await h.documents.noteActions(doc.uri);
+  const wiki = registerWikiLinks({ vscode:h.api, context:h.context, register:(k,v)=>h.commands.set(k,v), documents:h.documents,noteActions:()=>actions });
   const md = wiki.extendMarkdownIt(new MarkdownIt('commonmark'));
   const html = md.render(doc.getText(), { currentDocument:doc.uri });
+  assert.doesNotMatch(html, /Open in Obsidian/);
   const action = [...html.matchAll(/href="(vscode:[^"]+\/document-action[^\"]*)"/g)].map(m=>m[1]).find(href=>JSON.parse(Buffer.from(new URL(href).searchParams.get('target'),'base64url')).action==='copy');
   assert.ok(action); await wiki.handleUri(h.api.Uri.parse(action));
   const href = /\]\(([^)]+)\)$/.exec(h.clipboard)[1];

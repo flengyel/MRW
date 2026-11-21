@@ -81,10 +81,10 @@ See [continuation and recovery](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotatio
 
 1. Open the intended workspace and retained source with **MRW: Open Saved
    Source…**, or follow a source/passage link.
-2. Beside the passage, choose **Ask OpenAI API about this passage…**. The reading
-   toolbar offers **Ask OpenAI API about a passage…**; the Command Palette offers
-   **MRW: Ask OpenAI API About Reader Passage…**. Expand a hidden proof to expose
-   its action.
+2. Beside the passage, choose **Add a note** to record your thoughts or
+   **Ask OpenAI API about this passage…** to request assistance. Expand a folded
+   proof to reach its actions. **MRW: Ask OpenAI API About Reader Passage…** in
+   the Command Palette opens a passage picker for the current saved source.
 3. Enter the question, for example “Explain the governing idea and identify the
    assumptions used in this argument.” Select a model if prompted. Cancelling
    leaves the source and annotations unchanged.

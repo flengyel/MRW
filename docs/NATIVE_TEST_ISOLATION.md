@@ -90,7 +90,10 @@ accept an owned fixture. Retired preparers leave supplied directories unchanged.
 `--case sourceReturn` uses the bundled sums-of-odd-integers example in a fresh
 fixture. It chooses an ordinary notes folder outside its project, saves a reader
 annotation, follows ordinary and retained links, checks native dirty buffers and
-reloads only its own fixture window before reopening. Keep the fixture window in the foreground; bring it forward again after reload
+reloads only its own fixture window before reopening. The fixture verifies
+the command contexts for a vault note and another Markdown file. It drives
+Add a note and the Ctrl+Enter handler in the webview and checks focus before
+the native Return. Keep the fixture window in the foreground; bring it forward again after reload
 if VS Code restores it behind the working window. The focus wait is bounded.
 Dialog choices and reader messages are scripted; editors, preview, bridge writes and native Memento restart
 are real. No Obsidian vault or authoring command is involved.

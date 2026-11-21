@@ -8,7 +8,7 @@ const { isNotebookResultLink } = require('./notebookResults');
 
 // Discovery/rendering only uses the host's already-open text, never a folder
 // scan. A click rechecks the exact occurrence and uses ordinary scoped navigation.
-function registerWikiLinks({ vscode, context, register, documents, compile }) {
+function registerWikiLinks({ vscode, context, register, documents, compile, noteActions = () => ({}) }) {
   const session = randomUUID(), cache = new WeakMap();
   const citations = require('./citations').registerCitations({vscode,context,documents});
   register('mrw.refreshCitations',async()=>{for(const doc of (vscode.workspace.textDocuments||[]).slice(0,16))await citations.update(doc);});
@@ -87,7 +87,13 @@ function registerWikiLinks({ vscode, context, register, documents, compile }) {
       if (!doc || !documents.isNote(doc.uri) || vscode.workspace.isTrusted === false) return '';
       const identity = noteIdentity(doc), escape = md.utils.escapeHtml;
       const action = kind => `${scheme}://flengyel.mrw/document-action?target=${Buffer.from(JSON.stringify({ session, uri: doc.uri.toString(), action: kind }), 'utf8').toString('base64url')}`;
-      return `<aside class="mrw-note-heading" aria-label="Note identity"><strong title="${escape(identity.rawTitle)}">${escape(identity.title || identity.id)}</strong> · <code>${escape(identity.filename)}</code>${doc.isDirty ? ' · Unsaved VS Code changes' : ''}<p><a href="${escape(action('obsidian'))}">Open in Obsidian</a> · <a href="${escape(action('contents'))}">Show Contents</a> · <a href="${escape(action('copy'))}" title="Copy a note link to paste into Obsidian; opens this file in MRW after restart">Copy MRW link</a></p></aside>\n`;
+      const actions = noteActions(doc.uri);
+      const links = [
+        ['contents', 'Show Contents'],
+        ...(actions.obsidian ? [['obsidian', 'Open in Obsidian']] : []),
+        ...(actions.link ? [['copy', 'Copy MRW link']] : []),
+      ].map(([kind, label]) => `<a href="${escape(action(kind))}">${label}</a>`).join(' · ');
+      return `<aside class="mrw-note-heading" aria-label="Note identity"><strong title="${escape(identity.rawTitle)}">${escape(identity.title || identity.id)}</strong> · <code>${escape(identity.filename)}</code>${doc.isDirty ? ' · Unsaved VS Code changes' : ''}<p>${links}</p></aside>\n`;
     };
     md.renderer.rules.mrw_wikilink = (tokens, at, _options, env) => {
       const token = tokens[at], escape = md.utils.escapeHtml;

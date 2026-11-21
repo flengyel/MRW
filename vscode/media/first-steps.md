@@ -91,14 +91,17 @@ above. To create other kinds of documents, use their authoring application or
 VS Code extension, then **Open Document**.
 
 
-Use the editor toolbar's book icon, **MRW Document**, for navigation. PDFs and
-text files offer **Return to Document** and **Show Backlinks…**. Markdown also
-offers **Show Contents**, **Edit Document Source**, **Open Note in Obsidian** and
-**Copy Note Link for Obsidian**. Backlinks search the selected notes folder;
-choose that folder first. Return uses the previous MRW navigation location, or
-the selected Contents document when no link was followed. A PDF return reopens
-the file; MRW does not restore its page. A system reader has no MRW toolbar, so
-use these commands in VS Code's Command Palette.
+Open **MRW Document** from the editor toolbar's list icon. **Return to
+Document** appears after following a link and returns to its recorded origin.
+Use **Reveal Contents Document** to reopen the selected Markdown document
+from Contents. **Show Backlinks…** searches the selected notes folder.
+
+Markdown offers **Show Contents** and **Edit Document Source**. **Copy MRW
+Note Link** is available for a note in the selected folder when the workspace
+has an address for the link. **Open Note in Obsidian** appears for notes in
+the selected Obsidian vault. PDF Return reopens the file. The PDF reader
+controls its page position. Use the Command Palette in VS Code when the PDF
+opens in a system reader.
 
 Ordinary navigation and Return leave both sidebars and editor groups under
 VS Code's layout control. New notes use the active preview group; already-open
@@ -169,7 +172,7 @@ Save an edit in Obsidian and return to MRW: the clean note and preview refresh.
 Unsaved VS Code text stays intact and is labelled **Unsaved VS Code changes**;
 MRW does not save, discard or merge that draft.
 
-**Copy MRW link**, also available as **MRW: Copy Note Link for Obsidian**, copies
+**Copy MRW link**, also available as **MRW: Copy MRW Note Link**, copies
 a link to the current file for pasting into a note. It opens that file's current
 contents, including after restart. It does not pin a retained revision. If the
 link reaches another workspace, use **Copy Link and Open Workspace**, then run
@@ -570,7 +573,7 @@ for the activation error. Notes and saved research do not need to be recreated.
 Use **Choose Notes Folder…** to select the directory containing the notes.
 It can be inside or outside the workspace.
 
-Choose **New Note…** in MRW's **Commands** view or the document's **MRW Document**
+Choose **New note in your authoring application…** under **Reading and notes** or **New Note…** in the **MRW Document**
 menu. If the selected folder is an Obsidian vault, MRW brings Obsidian forward
 and runs your configured new-note command. Complete its prompts in Obsidian;
 Obsidian supplies the template and filename.
@@ -615,11 +618,11 @@ does not convert or remove them.
 
 ## Grouped tools and companion routes
 
-Commands has Open Document and Open Saved Source, then purpose menus: Reading
-and Notes, Sources and References, Calculation, Proofs, Tools and Setup, and
-Earlier Saved Work. Type in the native picker or use arrows and Enter. Escape
-preserves the current work. Setup distinguishes installed, configured and
-unchecked companions and opens their existing guides.
+Commands starts with **Open Document**, **Open Saved Source**, and **Recent
+Documents**. Open a task menu for more actions. Type a name or use the arrow keys
+and Enter. **Tools and Setup** has workspace and storage actions, companion
+settings, history and diagnostics. **Companions and setup status** opens the
+guides and shows installation and configuration status.
 
 Calculation opens native notebooks, retained results, comparison and provenance
 export. Retained notebooks are read-only; comparison submits no cell execution.
@@ -650,12 +653,12 @@ research or invoke Codex. See [diagnostics](https://github.com/flengyel/MRW/blob
 
 ## Remove a saved copy from the active list
 
-Choose **Sources and references → Delete saved source…**, or expand **Source
-details and tools** in the reader. Save or cancel unsaved reader changes first.
+Open the saved source. Choose **Move to Trash…** under **Source details and
+tools**. Save or cancel unsaved reader changes first.
 The confirmation moves only that MRW saved copy to Trash. Its text, reader notes,
 diagrams and links are kept. Original files and linked notes stay in place.
 
-**Undo** restores it immediately. **Restore saved source…** in Sources and
+**Undo** restores it immediately. **Restore saved source from Trash…** in Sources and
 references or Open Saved Source restores it after restart. Exact links still
 open a copy in Trash read-only, with a Restore button.
 See [scope and recovery](https://github.com/flengyel/MRW/blob/main/docs/SAVED_SOURCE_TRASH.md).

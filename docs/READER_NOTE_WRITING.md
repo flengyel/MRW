@@ -21,6 +21,7 @@ ordinary editing do not run TeX or a Lean checker and create no premise admissio
 See [TikZ setup and limits](TIKZ_WORKFLOW.md).
 
 The composer stays in the passage's tools area. Opening it scrolls the writing
-area into view. On narrow readers the navigation toolbar scrolls with the page
+area into view. Use **Ctrl+Enter** to save or **Escape** to cancel from the
+writing area. After cancelling a new passage note, focus returns to **Add a note**. On narrow readers the navigation toolbar scrolls with the page
 so it does not occupy the writing space. Saved notes and independently linked
 external notes keep their existing locations and editing routes.

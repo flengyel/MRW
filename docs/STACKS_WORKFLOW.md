@@ -19,8 +19,8 @@ For example, import [Topology, Hausdorff spaces (08ZD)](https://stacks.math.colu
    section, revision, saved-work destination and project, then choose **Import
    section**. Cancelling leaves saved work unchanged.
 3. Read **Hausdorff spaces** in the source reader. Use the statement/proof
-   controls to move within the section, and **Hide proofs** or **Show proofs**
-   to change the display. **Exact retained TeX for this passage** and **Open
+   controls to move within the section. **Proofs** sets their display for the
+   section. **Exact retained TeX for this passage** and **Open
    retained source** expose the unchanged source behind the rendering.
 4. Follow a local citation, such as `stacks-project:08ZE`, to its retained
    statement. **Open original source ↗** opens the current published page.

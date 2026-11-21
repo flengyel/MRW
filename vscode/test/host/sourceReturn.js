@@ -5,6 +5,29 @@ const vscode=require('vscode'),fs=require('node:fs/promises'),path=require('node
 const {digest}=require('../../src/navigation');
 const {assertFixture,clearOwnedState}=require('./fixtureGuard');
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function readerNoteProbe() {
+ const api = acquireVsCodeApi();
+ window.acquireVsCodeApi = () => api;
+ window.addEventListener('message', event => {
+  const value = event.data;
+  if (value?.type !== 'fixture_write_note') return;
+  try {
+   const passage = [...document.querySelectorAll('section')].find(node => node.dataset.region === value.region);
+   const add = passage?.querySelector('[data-action="add-reader-note"]');
+   if (!add || add.disabled) throw Error('Add a note is unavailable');
+   add.focus();
+   add.click();
+   const field = document.activeElement;
+   if (field.tagName !== 'TEXTAREA') throw Error('Add a note did not focus the editor');
+   field.value = value.annotation;
+   field.dispatchEvent(new Event('input', {bubbles:true}));
+   field.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', ctrlKey:true, bubbles:true}));
+   api.postMessage({type:'fixture_note_result', focused:document.activeElement === field});
+  } catch (error) {
+   api.postMessage({type:'fixture_note_result', error:error.message});
+  }
+ });
+}
 async function run(context){
  const scope=await assertFixture(vscode,context,context.extensionPath),root=scope.marker.root;
  if(scope.config.continuity)return continuityTrial(context);
@@ -14,7 +37,7 @@ async function run(context){
  const report={host:vscode.version,remote:vscode.env.remoteName,profile:scope.marker.profile,phase:state?'resume':'prepare',checks:state?.checks||[],errors:[],complete:false};
  const save=()=>{report.windowFocused=vscode.window.state.focused;const e=vscode.window.activeTextEditor;report.active={file:e?.document.uri.fsPath,column:e?.viewColumn,selection:e?.document.getText(e.selection),tabs:vscode.window.tabGroups.all.map(g=>({column:g.viewColumn,active:g.activeTab?.input?.viewType,uri:g.activeTab?.input?.uri?.fsPath}))};return fs.writeFile(reportFile,JSON.stringify(report,null,2)+'\n');};
  const original={panel:vscode.window.createWebviewPanel,pick:vscode.window.showQuickPick,dialog:vscode.window.showOpenDialog,error:vscode.window.showErrorMessage,execute:vscode.commands.executeCommand};
- const records=[];let previews=[],reloading=false;
+ const records=[], contexts=new Map();let previews=[],reloading=false;
  const notes=path.join(root,'external-notes'),note=path.join(notes,'reading.md'),other=path.join(notes,'other.md'),source=path.join(scope.config.project,'source.md');
  const command=(name,...args)=>original.execute('mrw.'+name,...args);
  async function wait(check,label,ms=20000){const end=Date.now()+ms;while(!check()){if(Date.now()>end)throw Error('Timed out: '+label);await pause(50);}}
@@ -29,11 +52,27 @@ async function run(context){
   vscode.window.createWebviewPanel=(...args)=>{const panel=original.panel(...args),record={panel,messages:[]};records.push(record);
    const post=panel.webview.postMessage.bind(panel.webview),listen=panel.webview.onDidReceiveMessage.bind(panel.webview);
    panel.webview.postMessage=value=>{record.messages.push(value);if(value.type==='outline')record.value=value;return post(value);};
-   panel.webview.onDidReceiveMessage=(fn,...rest)=>{record.receive=fn;return listen(fn,...rest);};return panel;};
+   panel.webview.onDidReceiveMessage=(fn,receiver,disposables)=>{
+    record.receive=fn;
+    return listen(value=>{
+     if(value.type==='fixture_note_result'){record.noteResult=value;return;}
+     return fn.call(receiver,value);
+    },undefined,disposables);
+   };
+   if(args[0]==='mrw.sourceOutline'){
+    let owner=panel.webview, descriptor;
+    while(owner&&!(descriptor=Object.getOwnPropertyDescriptor(owner,'html')))owner=Object.getPrototypeOf(owner);
+    Object.defineProperty(panel.webview,'html',{configurable:true,get:()=>descriptor.get.call(panel.webview),set(value){
+     const nonce=/script nonce="([^"]+)"/.exec(value)[1];
+     descriptor.set.call(panel.webview,value.replace('<script nonce=',`<script nonce="${nonce}">(${readerNoteProbe.toString()})()</script><script nonce=`));
+    }});
+   }
+   return panel;};
   vscode.window.showQuickPick=async(choices,options)=>{choices=await choices;if(options?.title==='Choose Notes Folder')return choices.find(c=>c.action==='browse');return choices.find(c=>c.id===state?.id)||choices.find(c=>c.id)||choices[0];};
   vscode.window.showOpenDialog=async()=>[vscode.Uri.file(notes)];
   vscode.window.showErrorMessage=async message=>{report.errors.push(message);await save();};
   vscode.commands.executeCommand=async(name,...args)=>{
+   if(name==='setContext')contexts.set(args[0],args[1]);
    if(name==='vscode.openWith'&&args[1]==='vscode.markdown.preview.editor'){
     const editor=vscode.window.activeTextEditor;previews.push({uri:args[0].toString(),text:editor?.document.uri.toString()===args[0].toString()?editor.document.getText(editor.selection):undefined});
    }return original.execute(name,...args);
@@ -44,7 +83,8 @@ async function run(context){
   const {bridge}=createArtifactStorage({vscode,context,rawBridge:request=>runBridge(context.extensionPath,'python3',request)});
   const base={store:path.join(context.storageUri.fsPath,'outlines-'+digest(scope.config.project)),project_root:scope.config.project};
   if(!state){
-   await fs.mkdir(notes);const text=await fs.readFile(path.join(context.extensionPath,'media/study-example.md'),'utf8');await fs.writeFile(source,text,{flag:'wx'});
+   assert.equal(contexts.get('mrw.canReturnToDocument'),false);
+   await fs.mkdir(path.join(notes,'.obsidian'),{recursive:true});const text=await fs.readFile(path.join(context.extensionPath,'media/study-example.md'),'utf8');await fs.writeFile(source,text,{flag:'wx'});
    const saved=await bridge({method:'outline_import_note',...base,path:source,source_revision:digest(text)}),region=saved.outline.regions[0].id;
    const reference=(await bridge({method:'outline_reference',...base,id:saved.outline.id,revision:saved.revision,region})).reference;
    const link='[Retained proof]('+reference+')',body='# Working document\n\n'+link+'\n\n[Related note](other.md#detail)\n';
@@ -52,13 +92,22 @@ async function run(context){
    report.stage='choose-notes-folder';await save();await command('chooseNotesFolder');report.stage='follow-retained-proof';await save();
    const doc=await vscode.workspace.openTextDocument(vscode.Uri.file(note));
    const unrelated=await vscode.workspace.openTextDocument(vscode.Uri.file(path.join(scope.config.project,'reading.md'))),originalText=unrelated.getText();
-   const unrelatedEditor=await focus(unrelated,1);assert.ok(await unrelatedEditor.edit(e=>e.insert(new vscode.Position(0,0),'Unsent fixture draft\n')));assert.ok(unrelated.isDirty);
-   const record=await follow(doc,reference);assert.equal(record.value.returnDestination.kind,'citation');
+   await focus(doc);
+   await wait(()=>contexts.get('mrw.obsidianNotePaths')?.includes(note),'vault command scope');
+   const unrelatedEditor=await focus(unrelated,1);
+   await wait(()=>contexts.get('mrw.obsidianNotePaths')?.length===0,'companion command hidden outside the notes scope');
+   assert.ok(await unrelatedEditor.edit(e=>e.insert(new vscode.Position(0,0),'Unsent fixture draft\n')));assert.ok(unrelated.isDirty);
+   const record=await follow(doc,reference);
+   await wait(()=>contexts.get('mrw.canReturnToDocument')===true,'Return command after a follow');
+   report.checks.push('Native document changes publish vault command scope, and Return appears after a follow');assert.equal(record.value.returnDestination.kind,'citation');
    assert.equal(record.value.model.outline.regions.find(r=>r.id===region).argument_text,saved.outline.regions[0].argument_text);
    const annotation='Reader commentary retained through Return and restart.';
-   await record.receive({type:'edit',draft:'note:'+region+':new',change:{kind:'annotation',region,id:null,purpose:'note',text:annotation,origin:'human_work',author:''}});
+   await record.panel.webview.postMessage({type:'fixture_write_note',region,annotation});
+   await wait(()=>record.noteResult,'reader note keyboard probe');
+   assert.equal(record.noteResult.error,undefined);assert.equal(record.noteResult.focused,true);
+   await wait(()=>record.value?.model?.outline.regions.find(r=>r.id===region)?.annotations.some(n=>n.text===annotation),'note saved with Ctrl+Enter');
    await returning(record,doc,link);assert.ok(unrelated.isDirty);assert.equal(await fs.readFile(note,'utf8'),body);
-   report.checks.push('selected external Markdown note follows its exact retained proof; reader note saves before Return; unrelated native draft survives');await save();
+   report.checks.push('selected external Markdown note follows its exact retained proof; Add a note transfers focus and Ctrl+Enter saves before Return; unrelated native draft survives');await save();
    await focus(doc);await edit(doc,0,0,'Unsent preface α😀\n');await returning(record,doc,link);
    assert.ok(doc.isDirty);assert.equal(await fs.readFile(note,'utf8'),body);assert.ok(unrelated.isDirty);
    report.checks.push('reader Return tracks an outside unsaved edit and reopens the actual Markdown preview without saving either draft');

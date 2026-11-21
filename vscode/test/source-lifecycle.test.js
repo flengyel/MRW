@@ -40,9 +40,14 @@ test('dismissed Undo notification never holds the reader frozen',async()=>{
  const h=harness();let notificationResolve;h.state.undo=new Promise(r=>{notificationResolve=r;});await h.api.trash(h.c);
  assert.deepEqual(h.messages,[{type:'storageRelease'}]);assert.equal(h.calls.length,1);notificationResolve(undefined);
 });
-test('source actions are discoverable through the existing Sources menu',()=>{
+test('Sources opens and restores saved sources, with deletion searchable in the Palette',()=>{
  const {GROUPS}=require('../src/companionTools'),manifest=require('../package.json');
- for(const id of ['deleteSavedSource','restoreSavedSource']){assert.ok(GROUPS.sourceTools.some(x=>x[1]===id));assert.ok(manifest.contributes.commands.some(x=>x.command==='mrw.'+id));}
+ assert.ok(GROUPS.sourceTools.some(row=>row[1]==='openOutline'));
+ assert.ok(GROUPS.sourceTools.some(row=>row[1]==='restoreSavedSource'));
+ assert.equal(GROUPS.sourceTools.some(row=>row[1]==='deleteSavedSource'),false);
+ for(const id of ['deleteSavedSource','restoreSavedSource']) {
+  assert.ok(manifest.contributes.commands.some(command=>command.command==='mrw.'+id));
+ }
 });
 
 test('a same-ID reader in another scope is never updated or trashed',async()=>{

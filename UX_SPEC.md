@@ -18,7 +18,11 @@ explicitly and retains scoped references and results.
 
 - Keep Contents and Commands. Group secondary actions by reading/notes,
   sources/references, calculation, proofs, tools/setup and earlier saved work.
-  Use contextual menus and keyboard access rather than another command wall.
+  Keep the routes to open and resume reading stable. Show Return when a link
+  has a recorded origin and show companion commands for eligible notes. Use
+  searchable command names and keep setup and maintenance in their task menus.
+  A proof display change should leave focus on the same control. Keep Add a
+  note beside its passage, ahead of assistance.
 - Open ordinary documents in place. Contents follows the selected Markdown
   document's headings and links, including unsaved text. Preserve exact Return
   occurrences and report missing, ambiguous or changed targets.

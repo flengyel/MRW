@@ -34,6 +34,8 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
   let displayedUri;
+  let returnAvailable, noteActionUri, noteActionRequest = 0, noteActionJob;
+  const noteActions = new Map();
   const differentDocument = () => displayedUri?.scheme === 'file' && displayedUri.toString() !== (document?.uri.toString() || overviewUri);
   let route = saved.route === 'ordinary' ? 'ordinary' : 'retained';
   let selected = validPin(saved.selected) ? saved.selected : undefined;
@@ -49,6 +51,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     if (document?.uri.scheme === 'file') overviewUri = document.uri.toString();
     const value = state();
     publication = publication.catch(() => {}).then(() => context.workspaceState.update(KEY, value));
+    updateReturnCommand();
     onReturnChanged?.();
     return publication;
   }
@@ -224,7 +227,40 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     documents.watchNotes();
     return model;
   }
+  const publishContext = (key, value) => Promise.resolve(vscode.commands.executeCommand('setContext', key, value)).catch(fail);
+  function updateReturnCommand() {
+    const available = !!origin || route === 'ordinary' && documents.hasOrigin();
+    if (available !== returnAvailable) {
+      returnAvailable = available;
+      void publishContext('mrw.canReturnToDocument', available);
+    }
+  }
+  function refreshNoteActions(force = false) {
+    const active = vscode.window.tabGroups?.activeTabGroup?.activeTab;
+    const uri = active ? active.input?.uri : vscode.window.activeTextEditor?.document?.uri;
+    const key = documents.isNote(uri) ? uri.toString() : undefined;
+    if (!force && noteActionUri === key && noteActionJob) return noteActionJob;
+    noteActionUri = key;
+    if (force) noteActions.clear();
+    const attempt = ++noteActionRequest;
+    const clear = Promise.all([publishContext('mrw.obsidianNotePaths', []), publishContext('mrw.noteLinkPaths', [])]);
+    noteActionJob = (async () => {
+      if (!key) return clear;
+      const actions = await documents.noteActions(uri);
+      await clear;
+      if (attempt !== noteActionRequest) return;
+      noteActions.delete(key);
+      noteActions.set(key, actions);
+      if (noteActions.size > 30) noteActions.delete(noteActions.keys().next().value);
+      await Promise.all([
+        publishContext('mrw.obsidianNotePaths', actions.obsidian ? [uri.fsPath] : []),
+        publishContext('mrw.noteLinkPaths', actions.link ? [uri.fsPath] : []),
+      ]);
+    })();
+    return noteActionJob;
+  }
   const documents = createDocuments({ vscode, context, register, trackLocation, resolveReferences, savedDocuments, sourcePlugins, followNotebookResult,
+    onNotesFolderChanged: () => void refreshNoteActions(true),
     onDisplayed: uri => { displayedUri = uri; refresh(); },
     onNavigated: async () => { route = 'ordinary'; await persist(); },
     onMarkdown: async doc => {
@@ -233,17 +269,26 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       document = doc; refresh();
       tree.description = `${noteIdentity(doc).label}${doc.isDirty ? ' •' : ''}`;
       await persist();
+      await refreshNoteActions();
     } });
-  const tabsChanged = vscode.window.tabGroups?.onDidChangeTabs?.(() => {
-    const uri = vscode.window.tabGroups.activeTabGroup?.activeTab?.input?.uri;
+  function changedTab() {
+    const uri = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;
     if (uri?.scheme === 'file') { displayedUri = uri; refresh(); }
-  });
-  const groupsChanged = vscode.window.tabGroups?.onDidChangeTabGroups?.(() => {
-    const uri = vscode.window.tabGroups.activeTabGroup?.activeTab?.input?.uri;
-    if (uri?.scheme === 'file') { displayedUri = uri; refresh(); }
-  });
-  for (const listener of [tabsChanged, groupsChanged]) if (listener) context.subscriptions.push(listener);
-  const wikiLinks = registerWikiLinks({ vscode, context, register, documents, compile });
+    void refreshNoteActions();
+  }
+  for (const listener of [
+    vscode.window.tabGroups?.onDidChangeTabs?.(changedTab),
+    vscode.window.tabGroups?.onDidChangeTabGroups?.(changedTab),
+    vscode.window.onDidChangeActiveTextEditor?.(() => void refreshNoteActions()),
+    vscode.workspace.onDidChangeConfiguration?.(e => {
+      if (e?.affectsConfiguration?.('mrw.notesFolder')) void refreshNoteActions(true);
+    }),
+    {dispose() { ++noteActionRequest; }},
+  ]) if (listener) context.subscriptions.push(listener);
+  updateReturnCommand();
+  void refreshNoteActions();
+  const wikiLinks = registerWikiLinks({ vscode, context, register, documents, compile,
+    noteActions: uri => noteActions.get(uri.toString()) || {} });
   register('mrw.openReadingOutline', value => openReadingOutline(false, false, false, value?.scheme === 'file' ? value : undefined));
   register('mrw.editDocumentSource', async value => {
     const active = value?.scheme === 'file' ? value : vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri;

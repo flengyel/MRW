@@ -37,7 +37,7 @@
     "commands": [
       {
         "command": "mrw.copyDocumentLink",
-        "title": "Copy Note Link for Obsidian",
+        "title": "Copy MRW Note Link",
         "category": "MRW",
         "icon": "$(link)"
       },
@@ -732,16 +732,6 @@
     "menus": {
       "view/title": [
         {
-          "command": "mrw.copyDocumentLink",
-          "when": "view == mrw.readingOutline",
-          "group": "0_documents@7"
-        },
-        {
-          "command": "mrw.openDocumentInObsidian",
-          "when": "view == mrw.readingOutline",
-          "group": "0_documents@6"
-        },
-        {
           "command": "mrw.editDocumentSource",
           "when": "view == mrw.readingOutline",
           "group": "0_documents@5"
@@ -753,7 +743,7 @@
         },
         {
           "command": "mrw.returnToReadingOutline",
-          "when": "view == mrw.readingOutline",
+          "when": "view == mrw.readingOutline && mrw.canReturnToDocument",
           "group": "navigation"
         },
         {
@@ -881,6 +871,18 @@
       ],
       "commandPalette": [
         {
+          "command": "mrw.returnToReadingOutline",
+          "when": "mrw.canReturnToDocument"
+        },
+        {
+          "command": "mrw.openDocumentInObsidian",
+          "when": "resourcePath in mrw.obsidianNotePaths"
+        },
+        {
+          "command": "mrw.copyDocumentLink",
+          "when": "resourcePath in mrw.noteLinkPaths"
+        },
+        {
           "command": "mrw.followWikiLink",
           "when": "false"
         },
@@ -927,7 +929,8 @@
       "mrw.documentNavigation": [
         {
           "command": "mrw.returnToReadingOutline",
-          "group": "1_navigation@1"
+          "group": "1_navigation@1",
+          "when": "mrw.canReturnToDocument"
         },
         {
           "command": "mrw.showBacklinks",
@@ -945,12 +948,12 @@
         },
         {
           "command": "mrw.openDocumentInObsidian",
-          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "when": "resourcePath in mrw.obsidianNotePaths",
           "group": "2_note@2"
         },
         {
           "command": "mrw.copyDocumentLink",
-          "when": "resourceScheme =~ /^(file|vscode-remote)$/ && (resourceExtname =~ /\\.(md|markdown)$/i)",
+          "when": "resourcePath in mrw.noteLinkPaths",
           "group": "2_note@3"
         },
         {
@@ -963,7 +966,7 @@
         },
         {
           "command": "mrw.refreshCitations",
-          "when": "resourceExtname == .md",
+          "when": "resourceExtname =~ /\\.(md|markdown)$/i",
           "group": "1_reading@8"
         }
       ]
@@ -1066,7 +1069,10 @@
         },
         "mrw.orgCaptureBackend": {
           "type": "string",
-          "enum": ["denote", "org-roam"],
+          "enum": [
+            "denote",
+            "org-roam"
+          ],
           "default": "denote",
           "scope": "machine",
           "description": "Emacs capture destination. Denote uses an Org capture template. Org-roam uses a roam-ref template."
@@ -1150,7 +1156,7 @@
       {
         "id": "mrw.documentNavigation",
         "label": "MRW Document",
-        "icon": "$(book)"
+        "icon": "$(list-selection)"
       }
     ]
   },

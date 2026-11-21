@@ -67,6 +67,24 @@ proof states and extracted supporting lemmas. Preserve a route from the
 working note to the passage and to the declaration it discusses. This lets
 the reader revisit the reasoning when the formal statement changes. [QED in context](https://doi.org/10.1145/3720426)
 
+## Finding reading commands
+
+In a controlled comparison of split menus, Findlater and McGrenere found
+that readers selected items faster from the fixed menu than from one that
+reordered its top items based on recent use. Wiedenbeck's experiment found
+better initial performance with labeled controls than with icons alone.
+Keep common reading commands in stable locations and give less familiar
+actions names a reader can recognize. Show context-specific actions when
+the active document or passage supplies their inputs. These are design
+choices to test in MRW. [Menu study](https://www.cs.ubc.ca/labs/edapt/papers/findlater2004.pdf) ·
+[Icon and label study](https://doi.org/10.1080/014492999119129)
+
+Run the same note-to-proof-and-back task with mouse and keyboard. Record the
+first action chosen, wrong turns and whether changing proof visibility or
+cancelling a note leaves focus at the work. A scripted fixture can verify
+the focus and navigation behavior. Unaided command discovery requires a
+reader. [Focus order](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html)
+
 ## Returning to an unfinished argument
 
 Parnin and Rugaber observed that programmers commonly navigated to other

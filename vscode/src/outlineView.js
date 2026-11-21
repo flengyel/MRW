@@ -18,11 +18,9 @@ const helpText = {
   'add-reader-note': 'Write a note about this passage.',
   'delete-reader-note': 'Choose an annotation stored in MRW and confirm its deletion. Linked vault notes are not deleted.',
   'link-reader-note': 'Paste a note’s Obsidian URL to link it to this passage.',
-  'ask-ai': 'Choose a retained passage and prepare a question with an exact preview. Send is a separate action.',
-  'ask-ai-passage': 'Prepare an AI question about this exact retained passage. Review the preview before sending.',
+  'ask-ai-passage': 'Prepare a question about this exact retained passage. Send is a separate action.',
   'ask-ai-pinned': 'Prepare a question about the earlier range pinned by the citation, even if the current passage changed.',
-  'hide-proofs': 'Fold published proofs in this reader. Source text and annotation drafts are kept.',
-  'show-proofs': 'Reveal published proofs in this reader without changing the saved source.',
+  'proof-visibility': 'Show or hide all published proofs. Each proof also has its own control.',
   source: 'Open the exact retained source as text. This does not open today’s upstream revision.',
   navigate: 'Open this exact source range as text; changed associations keep the earlier cited range.',
   'navigate-context': 'Open the exact retained range for this shared context.',
@@ -89,7 +87,10 @@ function post(value) {
 }
 function controls() {
   for (const button of root.querySelectorAll('button')) button.disabled = storageFrozen || busy || !!deletingDraft || button.dataset.empty === 'true' || ((blocked || model?.lifecycle?.state === 'trash') && button.dataset.write === 'true');
-  for (const input of root.querySelectorAll('input,textarea,select')) input.disabled = storageFrozen || model?.lifecycle?.state === 'trash';
+  for (const input of root.querySelectorAll('input,textarea,select')) {
+    input.disabled = storageFrozen || (input.dataset.action === 'proof-visibility'
+      ? busy || !!deletingDraft : model?.lifecycle?.state === 'trash');
+  }
   if (deletingDraft) for (const form of root.querySelectorAll('form')) {
     if (form.dataset.draft === deletingDraft || deletingDraft.endsWith(':*') && form.dataset.draft?.startsWith(deletingDraft.slice(0, -1))) {
       for (const input of form.querySelectorAll('input,textarea,select')) input.disabled = true;
@@ -129,13 +130,16 @@ function field(f, name, title, options) {
 function closeNoteDraft(key) {
   for (const box of root.querySelectorAll('details')) if (box.dataset.disclosure === key) box.open = false;
   drafts.delete(key); submittedDrafts.delete(key); saveFeedback.delete(key); openDetails.delete(key); attributionEdits.delete(key);
-  api.postMessage({ type: 'dirty', dirty: drafts.size > 0 }); render();
+  const [, region, note] = key.split(':');
+  api.postMessage({ type: 'dirty', dirty: drafts.size > 0 });
+  render(note === 'new' && region !== 'overview' ? `add-note:${region}` : key);
 }
 function noteForm(parent, region, note) {
   if (note && noteError) return;
   const key = `note:${region || 'overview'}:${note?.id || 'new'}`;
   const box = el('details', undefined, parent, 'note-editor'); keepOpen(box, key);
   const summary = el('summary', note ? 'Edit note' : 'Add a note', box);
+  summary.dataset.readerFocus = key;
   const defaults = { text: note?.text || '', origin: note?.provenance.origin || 'unknown', author: note?.provenance.author || '' };
   const f = form(box, key, defaults);
   // A refresh can supply newer attribution while preserving a text draft.
@@ -149,6 +153,7 @@ function noteForm(parent, region, note) {
   const save = button(actions, 'Save', () => {
     const v = f.read();
     if (!v.text.trim()) { feedback(key, 'Write a note before saving.', 'error'); text.focus(); return; }
+    text.focus({preventScroll: true});
     return { type: 'edit', draft: key, change: { kind: 'annotation', region,
       id: note?.id || null, purpose, text: v.text, origin: v.origin, author: v.author || null } };
   }, 'save-note', true);
@@ -156,6 +161,7 @@ function noteForm(parent, region, note) {
     if (!drafts.has(key) || !note && !f.read().text.trim()) { closeNoteDraft(key); return; }
     const request = ++cancelSequence;
     cancelledDrafts.set(request, { key, value: drafts.get(key) });
+    text.focus({preventScroll: true});
     busy = true; controls(); api.postMessage({ type: 'cancel_note', draft: key, request });
   }, 'cancel-note');
   text.addEventListener('keydown', event => {
@@ -318,6 +324,10 @@ function regionView(region, expanded) {
   render();
   [...root.querySelectorAll('section')].find(n => n.dataset.region === region)?.scrollIntoView({ block: 'start' });
 }
+function regionExpanded(region, part) {
+  return !hiddenDetails.has(region.id) && (revealed.has(region.id) ||
+    !region.collapsed && !(part?.role === 'proof' && proofsHidden));
+}
 function proofViews(hidden) {
   proofsHidden = hidden;
   for (const part of Object.values(model.outline.published?.parts || {})) {
@@ -364,12 +374,13 @@ function updateReturnDestination() {
   const context = [...root.querySelectorAll('p')].find(node => node.className === 'return-context');
   if (context) context.textContent = returnDestination?.detail || 'Opened independently. Choose a document for Contents.';
 }
-function render() {
+function render(destinationFocus) {
   if (!model) return;
   sourceReader?.update(model.outline.published?.online);
   toolbarObserver?.disconnect();
   const o = model.outline;
   const focused = document.activeElement;
+  const focusKey = destinationFocus || focused?.dataset?.readerFocus;
   const focusedForm = focused?.name && [...root.querySelectorAll('form')].find(f => f.contains?.(focused));
   const caret = focusedForm ? { key: focusedForm.dataset.draft, name: focused.name, start: focused.selectionStart, end: focused.selectionEnd } : null;
   for (const node of root.querySelectorAll('details')) if (node.dataset.disclosure) openDetails.set(node.dataset.disclosure, !!node.open);
@@ -383,22 +394,31 @@ function render() {
     published.section_number != null ? `Section ${published.section_number}: ${published.title || o.source.bibliography.title || ''}` : published.title,
     published.qualified_tag].filter(Boolean).join(' · ') : o.source.bibliography.locator || o.source.bibliography.title || 'Retained source';
   el('p', location, readingBar, 'source-location');
-  button(readingBar, 'Choose a document…', { type: 'reading_return' }, 'reading-return');
+  const returnControl = button(readingBar, 'Choose a document…', { type: 'reading_return' }, 'reading-return');
+  returnControl.dataset.readerFocus = 'reading-return';
   if (o.published && !o.published.error) {
     button(readingBar, 'Open original source ↗',
       { type: 'stacks_citation', tag: o.published.qualified_tag || o.published.tag }, 'original-source').title =
       'Open the current published page in your browser. The retained source revision and annotations stay unchanged.';
   }
-  button(readingBar, 'Ask OpenAI API about a passage…', { type: 'ask_ai' }, 'ask-ai');
-  button(readingBar, 'Refresh saved source', { type: 'refresh' }, 'refresh').title =
-    'Reload saved reader state and annotations; this does not reacquire the original document.';
-  if (Object.values(o.published?.parts || {}).some(p => p.role === 'proof' && o.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)))) {
-    for (const hidden of [true, false]) {
-      const control = el('button', hidden ? 'Hide proofs' : 'Show proofs', readingBar);
-      control.type = 'button'; control.dataset.action = hidden ? 'hide-proofs' : 'show-proofs';
-      control.title = helpText[control.dataset.action];
-      control.addEventListener('click', () => proofViews(hidden));
+  const proofs = o.regions.filter(r => {
+    const part = published?.parts?.[r.id];
+    return part?.role === 'proof' && sameSpan(r.span, part.span);
+  });
+  if (proofs.length) {
+    const label = el('label', 'Proofs ', readingBar, 'proof-visibility');
+    const control = el('select', undefined, label);
+    control.dataset.action = control.dataset.readerFocus = 'proof-visibility';
+    control.title = helpText['proof-visibility'];
+    const shown = proofs.filter(r => regionExpanded(r, published.parts[r.id])).length;
+    if (shown && shown < proofs.length) {
+      const mixed = el('option', 'Some shown', control);
+      mixed.value = 'mixed'; mixed.disabled = true;
     }
+    el('option', 'Show all', control).value = 'show';
+    el('option', 'Hide all', control).value = 'hide';
+    control.value = !shown ? 'hide' : shown === proofs.length ? 'show' : 'mixed';
+    control.addEventListener('change', () => proofViews(control.value === 'hide'));
   }
   if (model.lifecycle?.state === 'trash') {
     el('p','This saved source is in Trash. Its retained text, notes and links are kept. Restore it before editing.',root,'warning');
@@ -422,8 +442,14 @@ function render() {
     ['unchanged', 'retained upstream import'].includes(o.source_status) ? 'muted' : 'warning');
   if (reference) el('p', reference.notice, tools, 'muted');
   const toolbar = el('div', undefined, tools, 'toolbar');
-  if (model.lifecycle?.state !== 'trash') button(toolbar,'Delete saved source…',{type:'trash_source'},'trash-source',true).title='Move this MRW saved copy to Trash. Restore keeps its reader notes and retained links. Original files are unchanged.';
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
+  const refresh = button(toolbar, 'Refresh saved source', { type: 'refresh' }, 'refresh');
+  refresh.title = 'Reload saved reader state and annotations from MRW storage.';
+  refresh.dataset.readerFocus = 'refresh';
+  if (model.lifecycle?.state !== 'trash') {
+    button(toolbar, 'Move to Trash…', {type:'trash_source'}, 'trash-source', true).title =
+      'Move this saved copy to Trash. Restore keeps its passages, notes and links.';
+  }
   if (o.published?.error) el('p', o.published.error, root, 'warning');
   else if (o.published && window.MRWStacks) window.MRWStacks.header(tools, o.published, publishedAction);
   if (o.published) {
@@ -489,13 +515,13 @@ function render() {
   evidence(tools, o.artifacts.filter(a => !a.region && !importedArtifacts.has(a.id)));
   const nav = el('label', 'Reading level (freely navigable)', tools); const select = el('select', undefined, nav);
   for (const key of ['', ...levels]) { const op = el('option', key ? label(key) : 'All levels', select); op.value = key; }
-  select.value = filter; select.dataset.readingLevel = 'true';
+  select.value = filter; select.dataset.readingLevel = 'true'; select.dataset.readerFocus = 'reading-level';
   select.addEventListener('change', () => { filter = select.value; render(); });
   if (!o.regions.length) el('p', 'Select a passage in the source and add a passage. Formal evidence is optional.');
   for (const r of o.regions.filter(r => !filter || r.level === filter)) {
     const originalPart = o.published?.parts?.[r.id];
     const publishedPart = originalPart && sameSpan(originalPart.span, r.span) ? originalPart : null;
-    const expanded = !hiddenDetails.has(r.id) && (revealed.has(r.id) || !r.collapsed && !(publishedPart?.role === 'proof' && proofsHidden));
+    const expanded = regionExpanded(r, publishedPart);
     const compactProof = publishedPart?.role === 'proof' && !expanded;
     const box = el('section', undefined, root, `region${compactProof ? ' compact-proof' : ''}${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
     if (!compactProof) el('h2', r.title, box);
@@ -514,6 +540,7 @@ function render() {
       const control = el('button', compactProof ? `▸ ${r.title}` : (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box,
         compactProof ? 'proof-disclosure' : undefined);
       control.type = 'button'; control.dataset.action = (expanded ? 'hide-' : 'show-') + (proof ? 'proof' : 'details');
+      control.dataset.readerFocus = `disclosure:${r.id}`;
       control.title = `${expanded ? 'Fold' : 'Reveal'} this ${proof ? 'published proof' : 'source passage'} in the reader. Its exact text and annotation drafts are kept.`;
       control.dataset.write = String(!expanded && !publishedPart && r.argument_text === null);
       control.setAttribute('aria-expanded', String(expanded));
@@ -562,16 +589,17 @@ function render() {
     for (const n of r.annotations) noteForm(passageTools, r.id, n);
     const editor = noteForm(passageTools, r.id, null);
     if (!compactProof) {
-      const assistance = el('div', undefined, box, 'proof-navigation passage-actions');
+      const assistance = el('div', undefined, box, 'toolbar passage-actions');
       const add = el('button', 'Add a note', assistance);
       add.type = 'button'; add.dataset.action = 'add-reader-note'; add.title = helpText['add-reader-note'];
+      add.dataset.readerFocus = `add-note:${r.id}`; add.dataset.write = 'true';
       add.addEventListener('click', () => {
         for (const disclosure of [tools, passageTools, editor.box]) disclosure.open = true;
         editor.box.scrollIntoView({ block: 'start' }); editor.text.focus({ preventScroll: true });
       });
-      const remove = button(assistance, 'Delete reader note…', { type: 'delete_annotation', region: r.id }, 'delete-reader-note', true);
-      remove.dataset.empty = String(!r.annotations.length);
-      if (!r.annotations.length) remove.title = 'This passage has no MRW annotations to delete. Manage linked notes separately.';
+      if (r.annotations.length) {
+        button(assistance, 'Delete reader note…', { type: 'delete_annotation', region: r.id }, 'delete-reader-note', true);
+      }
       button(assistance, 'Link Obsidian note…', { type: 'associate_note', region: r.id, pinned: false }, 'link-reader-note', true);
       button(assistance, 'Ask OpenAI API about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
       button(assistance, 'Copy passage for Codex…', { type: 'copy_companion', region: r.id }, 'copy-companion');
@@ -584,7 +612,7 @@ function render() {
     const control = focusedHelp || hoveredHelp;
     help.textContent = control?.title || ''; help.hidden = !control;
   };
-  for (const control of root.querySelectorAll('button')) {
+  for (const control of root.querySelectorAll('button,select')) {
     if (!control.title) continue;
     control.setAttribute('aria-description', control.title);
     control.setAttribute('aria-describedby', help.id);
@@ -599,7 +627,10 @@ function render() {
     toolbarObserver = new ResizeObserver(measureToolbar); toolbarObserver.observe(readingBar); measureToolbar();
   }
   controls();
-  if (caret) {
+  if (focusKey) {
+    const control = [...root.querySelectorAll('button,select,summary')].find(node => node.dataset.readerFocus === focusKey);
+    if (control && !control.disabled) control.focus({preventScroll: true});
+  } else if (caret && !destinationFocus) {
     const form = [...root.querySelectorAll('form')].find(f => f.dataset.draft === caret.key);
     const field = form && [...form.querySelectorAll('input,textarea,select')].find(f => f.name === caret.name);
     if (field && !field.disabled) { field.focus({preventScroll:true}); if (Number.isInteger(caret.start)) field.setSelectionRange?.(caret.start, caret.end); }

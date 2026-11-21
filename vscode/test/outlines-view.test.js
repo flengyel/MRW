@@ -31,22 +31,24 @@ test('reader webview permits only nonce code with no external resource fetch or 
 
 function reader(published = false) {
   const scrolled = [], focused = [];
+  let active;
   class Node {
     constructor(tag) { this.tag = tag; this.children = []; this.dataset = {}; this.listeners = {}; this.textContent = ''; }
     append(node) { node.parent = this; this.children.push(node); }
-    replaceChildren() { this.children = []; }
+    replaceChildren() { if (this.contains(active)) active = undefined; this.children = []; }
+    contains(node) { return this === node || this.all().includes(node); }
     addEventListener(type, callback) { this.listeners[type] = callback; }
     setAttribute(name, value) { this[name] = value; }
     all() { return this.children.flatMap(n => [n, ...n.all()]); }
     querySelectorAll(tag) { return this.all().filter(n => tag.split(',').includes(n.tag)); }
     querySelector() { return this.all().find(n => n.dataset.reference); }
     scrollIntoView() { scrolled.push(this); }
-    focus() { focused.push(this); }
+    focus() { active = this; focused.push(this); }
     text() { return this.textContent + this.children.map(n => n.text()).join(' '); }
   }
   const root = new Node('main'), messages = [];
   let receive;
-  const globals = { document: { getElementById: () => root, createElement: tag => new Node(tag) },
+  const globals = { document: { getElementById: () => root, createElement: tag => new Node(tag), get activeElement() { return active; } },
     FormData: class { constructor(node) { this.values = node.all().filter(n => n.name).map(n => [n.name,n.value]); } *[Symbol.iterator]() { yield* this.values; } },
     acquireVsCodeApi: () => ({ postMessage: value => messages.push(value) }),
     addEventListener: (type, callback) => { receive = callback; } };
@@ -54,7 +56,13 @@ function reader(published = false) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/annotationView.js'), 'utf8'), globals);
   if (published) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/outlineView.js'), 'utf8'), globals);
-  return { root, messages, scrolled, focused, send: data => receive({data}),
+  return { root, messages, scrolled, focused, get active() { return active; }, send: data => receive({data}),
+    showProofs(show) {
+      const control = root.all().find(n => n.dataset.action === 'proof-visibility');
+      control.focus();
+      control.value = show ? 'show' : 'hide';
+      control.listeners.change();
+    },
     scopes: () => root.all().filter(n => n.dataset.linkScope),
     button: (node, action) => node.all().find(n => n.dataset.action === action) };
 }
@@ -79,8 +87,7 @@ test('reader AI controls distinguish current passages from an earlier pinned ran
   button('ask-ai-pinned').listeners.click();
   assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'ask_ai',pinned:true}));
   h.send({type:'idle'});
-  button('ask-ai').listeners.click();
-  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'ask_ai'}));
+  assert.equal(button('ask-ai'), undefined, 'assistance is scoped to the passage or pinned citation');
   assert.equal(h.messages.some(m => m.type === 'send_assistance'), false);
 });
 
@@ -204,14 +211,14 @@ test('hover and keyboard focus explain controls without an action; destination u
   note.all().find(node => node.tag === 'textarea').value = 'Keep my unsaved explanation'; note.listeners.input();
   const before = h.messages.length;
   const help = h.root.children.find(node => node.className === 'control-help');
-  const ask = h.button(h.root, 'ask-ai'), refresh = h.button(h.root, 'refresh');
+  const ask = h.button(h.root, 'ask-ai-passage'), refresh = h.button(h.root, 'refresh');
   assert.equal(help.hidden, true);
   ask.listeners.mouseenter(); assert.equal(help.hidden, false); assert.match(help.text(), /Send is a separate action/);
   ask.listeners.focus(); ask.listeners.mouseleave(); assert.equal(help.hidden, false);
   refresh.listeners.mouseenter(); refresh.listeners.mouseleave(); assert.match(help.text(), /Send is a separate action/);
   assert.equal(ask['aria-description'], ask.title); assert.equal(ask['aria-describedby'], help.id);
   ask.listeners.keydown({ key: 'Escape' }); assert.equal(help.hidden, true);
-  ask.listeners.blur(); refresh.listeners.focus(); assert.match(help.text(), /does not reacquire/);
+  ask.listeners.blur(); refresh.listeners.focus(); assert.match(help.text(), /from MRW storage/);
   refresh.listeners.blur(); assert.equal(help.hidden, true);
   assert.equal(h.messages.length, before);
   h.send({ type: 'return_destination', destination: { kind: 'selected', label: '← Open reading-overview.md',
@@ -266,9 +273,9 @@ test('passage note actions precede AI on one row, including the first note; open
     const region = value.model.outline.regions[0]; region.annotations = [];
     h.send(value);
     const card = () => h.root.children.find(n => n.dataset.region === region.id);
-    const row = card().children.find(n => n.className === 'proof-navigation passage-actions');
-    assert.deepEqual(row.children.map(n => n.dataset.action), ['add-reader-note', 'delete-reader-note', 'link-reader-note', 'ask-ai-passage', 'copy-companion']);
-    assert.equal(h.button(card(), 'delete-reader-note').disabled, true);
+    const row = card().children.find(n => n.className === 'toolbar passage-actions');
+    assert.deepEqual(row.children.map(n => n.dataset.action), ['add-reader-note', 'link-reader-note', 'ask-ai-passage', 'copy-companion']);
+    assert.equal(h.button(card(), 'delete-reader-note'), undefined);
     const key = `note:${region.id}:new`, find = () => h.root.all().find(n => n.dataset.draft === key);
     let form = find(); const text = form.all().find(n => n.tag === 'textarea');
     text.value = 'My own unsaved argument'; form.listeners.input();
@@ -285,6 +292,7 @@ test('passage note actions precede AI on one row, including the first note; open
     h.button(form, 'save-note').listeners.click();
     assert.equal(h.messages.at(-1).change.region, region.id);
     assert.equal(h.messages.at(-1).change.text, 'My own unsaved argument');
+    assert.equal(h.active, form.all().find(n => n.tag === 'textarea'));
   }
 });
 
@@ -395,7 +403,7 @@ test('proof notes stay beside a folded proof and keep their own disclosure state
   form.all().find(n => n.tag === 'textarea').value = 'Unsaved proof question'; form.listeners.input();
   h.send(value);
   assert.equal(notes('proof').open, true); assert.equal(notes('statement').open, false);
-  h.button(h.root, 'hide-proofs').listeners.click();
+  h.showProofs(false);
   assert.doesNotMatch(card('proof').text(), /proof published source/);
   assert.equal(notes('proof').open, true);
   notes('proof').open = false; h.send(value);
@@ -408,13 +416,31 @@ test('proof notes stay beside a folded proof and keep their own disclosure state
   assert.equal(h.messages.some(m => ['edit','toggle'].includes(m.type)), false);
 });
 
+test('proof controls preserve keyboard focus through bulk and individual changes', () => {
+  const h = reader(true), value = publishedModel();
+  value.model.outline.regions[1].collapsed = false;
+  h.send(value);
+  const oldControl = h.button(h.root, 'proof-visibility');
+  h.showProofs(false);
+  assert.equal(h.active, h.button(h.root, 'proof-visibility'));
+  assert.notEqual(h.active, oldControl);
+  assert.equal(h.active.value, 'hide');
+
+  const reveal = h.button(h.root, 'show-proof');
+  reveal.focus();
+  reveal.listeners.click();
+  assert.equal(h.active, h.button(h.root, 'hide-proof'));
+  assert.equal(h.active['aria-expanded'], 'true');
+  assert.equal(h.button(h.root, 'proof-visibility').value, 'show');
+});
+
 test('proof reading controls hide details, preserve statements and drafts, and reveal a chosen proof', () => {
   const h = reader(true), value = publishedModel(); value.model.outline.regions[1].collapsed = false;
   const before = JSON.stringify(value.model); h.send(value);
   const card = id => h.root.all().find(n => n.tag === 'section' && n.dataset.region === id);
   const form = h.root.all().find(n => n.dataset.draft === 'note:statement:new');
   form.all().find(n => n.tag === 'textarea').value = 'Unsaved reader work'; form.listeners.input();
-  h.button(h.root, 'hide-proofs').listeners.click();
+  h.showProofs(false);
   assert.match(card('statement').text(), /statement published source/);
   assert.doesNotMatch(card('proof').text(), /proof published source/);
   assert.equal(card('proof').children.length, 1, 'hidden proof has only its compact reveal control');
@@ -428,7 +454,7 @@ test('proof reading controls hide details, preserve statements and drafts, and r
   assert.doesNotMatch(card('proof').text(), /proof published source/);
   h.button(card('proof'), 'show-proof').listeners.click();
   assert.match(card('proof').text(), /proof published source/);
-  h.button(h.root, 'show-proofs').listeners.click();
+  h.showProofs(true);
   assert.match(card('proof').text(), /proof published source/);
   assert.equal(JSON.stringify(value.model), before);
   assert.equal(h.messages.some(m => ['edit','toggle','navigate'].includes(m.type)), false);
@@ -440,10 +466,10 @@ test('Return keeps local proof controls usable without a completion message and 
   form.all().find(n=>n.tag==='textarea').value='Keep this unsaved note';form.listeners.input();
   h.button(h.root,'reading-return').listeners.click();
   assert.equal(h.messages.at(-1).type,'reading_return');
-  assert.equal(h.button(h.root,'hide-proofs').disabled,false);
-  h.button(h.root,'hide-proofs').listeners.click();
+  assert.equal(h.button(h.root,'proof-visibility').disabled,false);
+  h.showProofs(false);
   const card=h.root.all().find(n=>n.tag==='section'&&n.dataset.region==='proof');
-  assert.ok(h.button(card,'show-proof'));assert.equal(h.button(h.root,'show-proofs').disabled,false);
+  assert.ok(h.button(card,'show-proof'));assert.equal(h.button(h.root,'proof-visibility').disabled,false);
   assert.ok(h.root.all().some(n=>n.tag==='textarea'&&n.value==='Keep this unsaved note'));
   assert.equal(h.messages.some(m=>m.type==='edit'||m.type==='toggle'),false);
   h.send({type:'storageCheck'});h.send({type:'idle'});
@@ -598,5 +624,5 @@ test('Trash reader retains its passage and offers Restore with editing disabled'
 
 test('active reader exposes Delete inside source details and keeps notes editable',()=>{
  const h=reader();h.send(readingModel());const control=h.root.all().find(n=>n.dataset.action==='trash-source');
- assert.ok(control);assert.equal(control.disabled,false);assert.match(control.title,/Original files are unchanged/);
+ assert.ok(control);assert.equal(control.disabled,false);assert.match(control.title,/Restore keeps its passages, notes and links/);
 });

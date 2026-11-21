@@ -20,7 +20,7 @@ const { createDocumentPicker } = require('./documentPicker');
 const { createRecentNotes } = require('./recentNotes');
 const { createObsidianNote } = require('./obsidianNotes');
 const KEY = 'mrw.documents.v1';
-function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, resolveReferences, savedDocuments, sourcePlugins, followNotebookResult, obsidianNote = createObsidianNote }) {
+function createDocuments({ vscode, context, register, trackLocation, onMarkdown = async () => {}, onDisplayed = () => {}, onNavigated = async () => {}, onNotesFolderChanged = () => {}, resolveReferences, savedDocuments, sourcePlugins, followNotebookResult, obsidianNote = createObsidianNote }) {
   const identityRoot=value=>context.mrwIdentityRoot?.(value)||value;
   const workspace = digest(JSON.stringify({ host: os.hostname(), remote: vscode.env.remoteName || '',
     workspace: identityRoot(vscode.workspace.workspaceFile?.toString()), folders: (vscode.workspace.workspaceFolders || []).map(f => identityRoot(f.uri.toString())) }));
@@ -312,6 +312,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       }
       if (attempt !== generation) return;
       folder = selected;
+      onNotesFolderChanged();
       const distinct = new Set();
       recentFolders = [selected, previous, ...recentFolders].filter(item => {
         if (!validFolder(item) || distinct.has(item.canonical)) return false;
@@ -483,6 +484,19 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     const root = configuredFolder() || folder?.canonical;
     return uri?.scheme === 'file' && markdown(uri.fsPath || '') && typeof root === 'string' && path.isAbsolute(root) && within(root, uri.fsPath);
   }
+  async function noteActions(uri) {
+    if (!isNote(uri) || vscode.workspace.isTrusted === false) return {};
+    const selected = currentFolderUri();
+    try {
+      const root = await fs.realpath(selected.fsPath);
+      if (folder?.uri === selected.toString() && root !== folder.canonical ||
+          !within(root, await canonical(uri))) return {};
+      const obsidian = (await fs.stat(path.join(root, '.obsidian')).catch(() => undefined))?.isDirectory() === true;
+      const folders = vscode.workspace.workspaceFolders || [];
+      const link = !!vscode.workspace.workspaceFile || folders.length === 1 && folders[0].uri.scheme === 'file';
+      return {obsidian, link};
+    } catch (_) { return {}; }
+  }
   async function openInObsidian(value) {
     const selected = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri || vscode.window.activeTextEditor?.document?.uri;
     const uri = value?.scheme ? value : selected || (last && vscode.Uri.parse(last));
@@ -520,7 +534,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     const doc = await vscode.workspace.openTextDocument(uri);
     const label = `${noteIdentity(doc).label} — MRW`.replace(/\s+/gu, ' ').replace(/[\\[\]]/gu, '\\$&');
     await vscode.env.clipboard.writeText(`[${label}](${link})`);
-    void vscode.window.showInformationMessage('MRW note link copied. Paste it into Obsidian.');
+    void vscode.window.showInformationMessage('Copied the link to this note in MRW.');
     return link;
   }
   async function handleUri(uri) {
@@ -621,6 +635,6 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!last) throw new Error('No document has been opened here. Use Open Document.');
     if (await display(vscode.Uri.parse(last), lastLocation, supersede(), undefined, { exactLocation: false })) await persist();
   });
-  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, openLinkedDocument, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
+  return { check, grant, follow, changed, isNote, openInObsidian, copyLink, handleUri, openLinkedDocument, noteActions, watchNotes: noteRefresh.start, returnToDocument, restoreLatest: repairSupersededDisplay, hasOrigin: () => !!origin, supersede };
 }
 module.exports = { createDocuments };
