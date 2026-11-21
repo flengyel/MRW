@@ -1302,6 +1302,22 @@ test('the offline tutorial opens a read-only Markdown preview without creating f
   assert.deepEqual(await fs.readdir(root), []);
 });
 
+test('bundled operads notes open as an ordinary Markdown document, with the associative example first', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const file = path.resolve(__dirname, '../media/operads-study/operads.md');
+  assert.equal(await h.commands.get('mrw.openOperadsNotes')(), true, h.errors.join('\n'));
+  const preview = h.commandCalls.find(call => call.name === 'markdown.showPreview');
+  assert.equal(preview.args[0].fsPath, file);
+  const doc = h.shown.find(item => item.uri.fsPath === file);
+  assert.ok(doc);
+  assert.deepEqual([...doc.getText().matchAll(/^## (.+)$/gm)].map(match => match[1]), [
+    'The list monad', 'The associative operad', 'Coloured symmetric operads', 'Algebras and trees',
+  ]);
+  assert.equal([...doc.getText().matchAll(/^```tikz$/gm)].length, 5);
+  assert.equal(h.workspaceEdits.length + h.saves.length + h.requests.length, 0);
+  assert.deepEqual(await fs.readdir(root), []);
+});
+
 test('Obsidian import offers three destinations and retains an external note as a reopenable source', async t => {
   const root=await temporary(t),note=path.join(root,'..','Note α.md');
   const text='---\r\ntitle: Note\r\n---\r\n# Claim\r\n[[Other]] ![[image.png]]\r\n\\(X\\times_ZY\\)\r\n';

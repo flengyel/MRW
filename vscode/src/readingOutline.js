@@ -304,6 +304,8 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   register('mrw.chooseReadingOverview', () => openReadingOutline(true));
   register('mrw.revealReadingDocument', () => openReadingOutline(false, false, true));
   registerTutorial({ vscode, context, register });
+  register('mrw.openOperadsNotes', () => documents.openLinkedDocument(
+    vscode.Uri.file(path.join(context.extensionPath, 'media', 'operads-study', 'operads.md'))));
   register('mrw.refreshReadingOutline', () => { refresh(); return model; });
   async function followRetainedReference(reference, editor, location, attempt, reading = false) {
     documents.supersede();

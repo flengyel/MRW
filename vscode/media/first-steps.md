@@ -351,6 +351,15 @@ bounded search is not a disproof. The
 explains the limits and the explicit context-file route. No registration form
 is required for reading or writing notes.
 
+## Read the operads notes
+
+Run **MRW: Open Operads Notes** from the Command Palette to read the bundled
+companion to Chapter 1 of Heuts and Moerdijk. The notes explain the list monad,
+construct the associative operad by flattening and then define coloured symmetric
+operads. Use **Contents** to jump to a section. Choose **Render diagram** for a
+TikZ square or triangle, or read its law in the text. Opening the notes starts
+no study. Keep your calculations and questions in a separate working note.
+
 ## Study Lean 4
 
 Choose **Study Lean 4…** in **Commands** and begin with **Introduction and

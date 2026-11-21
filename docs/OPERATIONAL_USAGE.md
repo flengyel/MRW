@@ -30,6 +30,8 @@ IDs, labels, categories, entry points and instrumentation status. Renaming a
 button must not create an unrelated feature. Record mappings when a feature
 splits, merges or is retired; do not silently combine incomparable versions.
 Every added or changed feature declares its coverage, including any omissions.
+**Open Operads Notes** records a reading invocation as `mrw.openOperadsNotes`.
+Reaching a section or reading a diagram does not establish comprehension.
 
 Count one user action once at the feature level. Correlate nested commands,
 bridge calls and external operation IDs as children; retain them for diagnosis

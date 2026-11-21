@@ -29,6 +29,12 @@ entries, unselected references, duplicate JSON keys and unknown fields are
 rejected. Imported questions remain available offline. These clipboard actions
 make no provider request and run no compiler.
 
+Run **MRW: Open Operads Notes** to read the bundled companion to Chapter 1 of
+Heuts and Moerdijk. Its Contents begins with lists and the monad laws, constructs
+the associative operad and then gives the general definition. Use the
+[diagram controls](TIKZ_WORKFLOW.md#render-a-markdown-note) to render the monad
+squares and triangles. Keep your work in your own note.
+
 ## Attempts and continuation
 
 Choose **Begin short block** or **Attempt** on a question. Type the work, or select

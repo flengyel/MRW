@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.51",
+  "version": "0.23.52",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -387,6 +387,11 @@
         "title": "Open Tutorial",
         "category": "MRW",
         "icon": "$(question)"
+      },
+      {
+        "command": "mrw.openOperadsNotes",
+        "title": "Open Operads Notes",
+        "category": "MRW"
       },
       {
         "command": "mrw.openReadingOutline",
@@ -1156,7 +1161,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.51",
+          "title": "MRW 0.23.52",
           "icon": "media/mrw.svg"
         }
       ]
