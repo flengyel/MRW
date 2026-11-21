@@ -223,8 +223,8 @@ Ordinary note opening does not require this step.
 2. Select the passage and run **MRW: Retain Document as Source**. MRW keeps that
    revision and opens its reader. Later original-file edits do not replace it.
 3. In a working Markdown document, use **MRW: Insert Source or Passage Link…**.
-   Select the inserted link in **Contents** to read the saved text; **Return to Document**
-   restores that citation's originating occurrence.
+   The link shows a short caption. Select it in **Contents** to read the saved
+   text. **Return to Document** restores the citation's exact location.
 
 **MRW: Open Saved Source…** reopens retained material. When opened directly,
 its **Open <document>** control opens the selected Contents document. Following

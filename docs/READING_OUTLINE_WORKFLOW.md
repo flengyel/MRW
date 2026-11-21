@@ -203,8 +203,10 @@ revision even if the original changes or disappears. **Refresh saved source**
 reloads saved reader state and annotations; it does not acquire a new revision.
 
 Use **Insert Source or Passage Link…** in a working Markdown document to insert
-an exact retained reference. Follow it from Contents or use **Follow Source or
-Passage Link at Cursor** in the Markdown editor. **Return to Document** restores
+a short caption with an exact retained destination. To edit a caption, change
+the text between the square brackets and keep the destination in parentheses.
+Follow the link from Contents or use **Follow Source or Passage Link at Cursor**
+in the Markdown editor. **Return to Document** restores
 the exact citation occurrence in the Markdown preview. Each reader keeps its
 own return occurrence, including nonoverlapping unsaved edits. An independently
 opened saved source offers **Open filename** for the selected Contents document,

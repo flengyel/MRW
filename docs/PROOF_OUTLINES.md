@@ -144,12 +144,12 @@ command, query, fragment, encoded argument or executable payload. It is bounded
 and strictly parsed. Only the current Markdown document's workspace-derived
 store is eligible; document text cannot choose another store or project.
 
-Insertion explicitly chooses an existing outline, then its whole retained
-source or a saved region. A normal inline Markdown link includes the supplied
-title (otherwise source filename), known bibliography, useful range/source
-locator and retained revision. Missing metadata stays unknown. The visible
-label is a citation snapshot; later metadata/annotation changes do not rewrite
-the Markdown or invalidate its target.
+Insertion explicitly chooses a saved source, then the whole source or a
+passage. The link caption uses the source title or filename, its qualified
+identifier when available, and the passage location. The destination binds
+the exact retained revision and range. Open the saved source for its
+bibliographic details. To shorten an older caption, edit the text between
+the square brackets and keep the destination in parentheses.
 
 **MRW: Follow Source or Passage Link at Cursor** accepts this reference grammar.
 It opens the existing reader; a region reference also opens and selects its

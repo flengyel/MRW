@@ -833,11 +833,16 @@ test('Markdown overview references two saved sources, follows retained regions a
   ed.selection = new Selection(new Position(0, 0), new Position(0, 0)); h.focus(ed);
   h.picks.push({ id: created[0].outline.id }, { region: created[0].outline.regions[0].id });
   const first = await h.commands.get('mrw.insertOutlineReference')();
-  assert.ok(doc.text.includes(first.reference)); assert.equal(doc.isDirty, true);
+  assert.equal(doc.text, '[' + first.label + '](' + first.reference + ')');
+  assert.equal(first.markdown, doc.text);
+  assert.match(first.label, /book.*lines 1/);
+  assert.equal(doc.isDirty, true);
   ed.selection = new Selection(new Position(0, doc.text.length), new Position(0, doc.text.length));
   h.picks.push({ id: created[1].outline.id }, { region: null });
   const second = await h.commands.get('mrw.insertOutlineReference')();
-  assert.notEqual(second.reference, first.reference); assert.ok(doc.text.includes('article'));
+  assert.notEqual(second.reference, first.reference);
+  assert.match(second.label, /article/);
+  assert.ok(doc.text.endsWith('[' + second.label + '](' + second.reference + ')'));
   const before = doc.text;
   ed.selection = new Selection(new Position(0, 3), new Position(0, 3));
   const firstFollow = await h.commands.get('mrw.followOutlineReference')();

@@ -617,10 +617,11 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
       throw new Error('Markdown or cursor changed during selection; no reference was inserted.');
     }
-    if (!await editor.edit(edit => edit.insert(selection.active, result.markdown), { undoStopBefore: true, undoStopAfter: true })) {
+    const link = `[${result.label}](${result.reference})`;
+    if (!await editor.edit(edit => edit.insert(selection.active, link), { undoStopBefore: true, undoStopAfter: true })) {
       throw new Error('VS Code could not insert the source or passage link.');
     }
-    return result;
+    return { ...result, markdown: link };
   }));
   async function followReference(reference, originEditor, presentation = {}) {
     return locked(async () => {
