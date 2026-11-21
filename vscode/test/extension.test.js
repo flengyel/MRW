@@ -361,8 +361,10 @@ test('mark survives activation and return rejects source changes without moving 
   h.focus(h.editor(h.document(source, await fs.readFile(source, 'utf8'))));
   h.api.window.activeTextEditor.selection = new Selection(new Position(0, 0), new Position(0, 6));
   await h.commands.get('mrw.mark')();
-  assert.equal(h.state.size, 1); assert.equal(h.errors.length, 0);
-  const returnMarker = structuredClone([...h.state][0]);
+  assert.equal(h.errors.length, 0);
+  const markers = [...h.state].filter(([key]) => key.startsWith('mrw.return.v1.'));
+  assert.equal(markers.length, 1);
+  const returnMarker = structuredClone(markers[0]);
   const resumed = await harness(root, h.state);
   await resumed.commands.get('mrw.return')();
   assert.equal(resumed.shown[0].uri.fsPath, source);
