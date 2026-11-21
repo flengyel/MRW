@@ -4,8 +4,8 @@ MRW supports mathematical understanding and research. Its aims are to study
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
 
-[Download MRW 0.23.48](https://github.com/flengyel/MRW/releases/download/v0.23.48/mrw-0.23.48.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.48)
+[Download MRW 0.23.49](https://github.com/flengyel/MRW/releases/download/v0.23.49/mrw-0.23.49.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.49)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md)
 
 Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
