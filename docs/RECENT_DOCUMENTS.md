@@ -4,16 +4,27 @@ Choose **Recent Documents…** beside Open Document. It reopens a recently read
 note or PDF without browsing its directory again. The list also appears in
 Reading and notes, the MRW Document menu and the Command Palette.
 
-1. Open a Markdown note, then two PDFs.
-2. Choose Recent Documents and select the earlier PDF. Its installed reader opens it.
-3. Use Return to Document to reopen the PDF from which you made that choice.
-4. After restarting this workspace, Recent Documents retains the files. Markdown
-   rows show their current YAML title or H1 fallback with the filename ID.
+1. Open a Markdown note through MRW. In **Edit Document Source**, select the
+   sentence where you left off, then open a related note or paper.
+2. Choose **Recent Documents…**. Find the earlier note by its title, filename
+   or the excerpt from your selection.
+3. Reopen it. MRW restores a matching selection in the Markdown editor.
+   **Return to Document** recovers the document you came from.
+4. Restart VS Code in the same workspace. The earlier note and its saved
+   selection are available again if the text still matches.
 
-MRW keeps thirty entries in the workspace-state list. Files
-opened through MRW are recorded, as are active/saved native reading tabs in
-the authorized scope. Binary PDF contents are not decoded for titles. Files,
-notes, private source records and dirty buffers stay where they are.
+MRW keeps thirty entries in workspace state. It records files opened through
+MRW and active or saved native reading tabs in the authorized scope. A saved
+Markdown position contains a revision and offsets. The picker reads the
+excerpt from the live buffer or a verified complete read within the 64 KiB
+title-read limit. A change to the text can leave only the title and path.
+Opening then shows the current document and reports that the saved position
+is unavailable. The Markdown preview opens normally. Preview scrolling and
+PDF page positions belong to their viewers.
+
+The picker uses the current YAML title or H1 fallback with the filename ID.
+Binary PDF contents are not decoded for titles. Files, notes, private source
+records and dirty buffers stay where they are.
 
 ## Native file history
 

@@ -55,6 +55,32 @@ test('returning to the MRW window refreshes citations without changing the open 
  focus({focused:false});assert.equal(calls,0);focus({focused:true});await new Promise(r=>setTimeout(r,380));await c.update(doc);assert.ok(calls>=1);assert.equal(c.cache.get(doc.uri.toString()).citations['[see @a]'].text,'Author');assert.equal(doc.getText(),text);assert.equal(doc.isDirty,true);for(const sub of context.subscriptions)sub.dispose();
 });
 
+test('a citation recheck redraws the preview only when the rendered result changes', async () => {
+ const text = '[@marcusNumberFields2018]';
+ const doc = {uri: {scheme: 'file', fsPath: '/fixture/n.md', toString: () => 'file:///fixture/n.md'},
+  version: 1, isDirty: true, getText: () => text};
+ const commands = [];
+ let bibliography = 'Marcus, Daniel A. 2018. Number Fields.';
+ const controller = registerCitations({
+  vscode: {
+   workspace: {textDocuments: [doc], workspaceFolders: [{uri: {fsPath: '/fixture'}}],
+    getConfiguration: () => ({get: (_, fallback) => fallback})},
+   commands: {async executeCommand(command) {commands.push(command);}},
+  },
+  context: {subscriptions: []},
+  documents: {check: async () => {}},
+  prepareNote: async () => ({citations: {[text]: {text: '(Marcus 2018)'}}, bibliography, status: 'Fixture'}),
+ });
+ await controller.update(doc);
+ await controller.update(doc);
+ assert.deepEqual(commands, ['markdown.preview.refresh']);
+ bibliography += ' Revised metadata.';
+ await controller.update(doc);
+ assert.deepEqual(commands, ['markdown.preview.refresh', 'markdown.preview.refresh']);
+ assert.equal(doc.getText(), text);
+ assert.ok(doc.isDirty);
+});
+
 test('ordinary email and citation code examples cause neither lookup nor an empty citation footer',async()=>{
  const text='Contact name@example.org. `[@example]`',doc={uri:{scheme:'file',fsPath:'/fixture/n.md',toString:()=> 'file:///fixture/n.md'},version:1,getText:()=>text};let calls=0;
  const c=registerCitations({vscode:{workspace:{isTrusted:true,textDocuments:[doc]},commands:{executeCommand:async()=>{}}},context:{subscriptions:[]},documents:{},prepareNote:async()=>{calls++;throw Error('Unexpected lookup');}});await c.update(doc);assert.equal(calls,0);assert.equal(c.cache.size,0);

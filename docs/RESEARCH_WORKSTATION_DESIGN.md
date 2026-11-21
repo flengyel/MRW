@@ -35,8 +35,12 @@ notebook result preserves the saved notebook and any selected inputs.
 
 **Return to Document** recovers the originating link occurrence when it still
 matches. **Reopen Document** opens the last file and restores a matching
-Markdown selection. Use **Recent Documents…** for an earlier note. PDF return
-is file-level. For a saved study attempt, use **Resume Study**.
+Markdown selection. **Recent Documents…** shows a short passage cue when it can
+confirm an earlier Markdown selection against the current text. The list
+can reopen at that selection. Leave the last justified step and the question
+in the note itself. PDF return is file-level. For a saved study attempt, use
+**Resume Study**.
+[Resumption research](LEARNING_RESEARCH.md#returning-to-an-unfinished-argument) ·
 [Reading and restart](READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart) ·
 [Study controls](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
 

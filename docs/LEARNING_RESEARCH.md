@@ -61,6 +61,39 @@ result and mark the extra hypothesis as a gap in the correspondence. Authorship,
 checking, correspondence and the reader's ability to reconstruct the proof
 answer different questions.
 
+Shi and colleagues observed 30 people doing their own Lean or Rocq work.
+Participants consulted outside resources, revised statements in response to
+proof states and extracted supporting lemmas. Preserve a route from the
+working note to the passage and to the declaration it discusses. This lets
+the reader revisit the reasoning when the formal statement changes. [QED in context](https://doi.org/10.1145/3720426)
+
+## Returning to an unfinished argument
+
+Parnin and Rugaber observed that programmers commonly navigated to other
+locations before resuming edits, even when they eventually edited the same
+method. Their logs measure navigation and editing. In a controlled study of
+interrupted programming tasks, Parnin and DeLine found higher task completion
+with activity cues alongside note-taking than with note-taking alone.
+Participants preferred the chronological code snippets over the symbol-based
+summary. These studies concern programming. They motivate a trial of short
+passage cues in mathematical work. [Resumption strategies](https://chrisparnin.me/pdf/parnin-sqj11.pdf) ·
+[Evaluating cues](https://www.microsoft.com/en-us/research/publication/evaluating-cues-for-resuming-interrupted-programming-tasks/)
+
+Bruce, Jones and Dumais used descriptions of earlier work to cue participants
+returning to websites months later. Participants sometimes believed they had
+returned to the intended page when the URL differed. MRW should show the nearby
+words as a recognition cue and check the saved revision before applying the
+range. The reader can open current text when the saved location is unavailable.
+The note and its links carry the question and its grounds. [Keeping found things found](https://informationr.net/ir/10-1/paper207.html) ·
+[Recent Documents](RECENT_DOCUMENTS.md)
+
+Test a return after switching documents and restarting. Record whether the
+reader finds the last justified step and identifies the open inference and its
+supporting passage. Record the search and navigation needed. Compare Recent
+Documents with the ordinary file list using comparable notes and the same
+access to sources. The restart check establishes location recovery. The reader's
+account of the inference and its grounds assesses mathematical resumption.
+
 ## Evaluating MRW on a manuscript
 
 In *Pointwise provable equality and the failure of composition*, the obstruction

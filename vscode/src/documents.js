@@ -4,7 +4,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
-const { digest } = require('./navigation');
+const { digest, validTextPosition, matchesTextPosition } = require('./navigation');
 const { qualifiedIdentifier, canonicalCitation } = require('./sourceIdentifiers');
 const { parseReadingMarkdown, zettelLinkParts, wikiTarget } = require('./readingMarkdown');
 const { buildNoteIndex, resolveNoteLink, backlinks, within, markdown } = require('./documentLinks');
@@ -31,9 +31,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   let recentFolders = Array.isArray(saved.recentFolders) ? saved.recentFolders.filter(validFolder).slice(0, 10) : [];
   let folderPublication = Promise.resolve();
   let last = typeof saved.last === 'string' ? saved.last : undefined;
-  let lastLocation = saved.location && saved.location.uri === last && /^[a-f0-9]{64}$/.test(saved.location.revision) &&
-    Number.isSafeInteger(saved.location.start) && Number.isSafeInteger(saved.location.end) &&
-    saved.location.start >= 0 && saved.location.end >= saved.location.start ? saved.location : undefined;
+  let lastLocation = saved.location?.uri === last && validTextPosition(saved.location) ? saved.location : undefined;
   const pin = saved.origin;
   let origin = pin && typeof pin.uri === 'string' && (pin.fileOnly || (/^[a-f0-9]{64}$/.test(pin.revision) && Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start)) ? pin : undefined;
   let latestDisplay;
@@ -155,7 +153,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       if (attempt !== generation) return false;
       validate?.();
       if (expectedPath && await canonical(uri) !== expectedPath) throw Error('This recent document moved or now points elsewhere. Use Open Document to choose it again.');
-      if (location && (location.invalid || digest(doc.getText()) !== location.revision || location.end > doc.getText().length)) {
+      if (location && !matchesTextPosition(doc.getText(), location)) {
         if (exactLocation) throw new Error('The exact document location changed. Open the current document and select the intended location again.');
         // Reopen chooses a file. Its saved cursor is optional; it must not
         // prevent reading current text or be mistaken for an exact Return pin.
@@ -200,7 +198,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     latestDisplay = { uri, location: shownLocation };
     lastLocation = shownLocation;
     onDisplayed(uri);
-    await notes.remember(uri, {opened: true}).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+    await notes.remember(uri, {opened: true, location: shownLocation}).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
     if (positionUnavailable) vscode.window.setStatusBarMessage?.('MRW: Opened the current document; the previous position no longer matches.', 8000);
     return true;
   }
@@ -473,7 +471,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (origin?.uri !== uri && lastLocation?.uri !== uri && latestDisplay?.location?.uri !== uri && ![...candidates].some(p => p.location.uri === uri)) return;
     const revision = digest(e.document.getText());
     if (latestDisplay?.location?.uri === uri) latestDisplay.location = trackLocation(latestDisplay.location, e.contentChanges, revision);
-    if (lastLocation?.uri === uri) lastLocation = trackLocation(lastLocation, e.contentChanges, revision);
+    if (lastLocation?.uri === uri) {
+      lastLocation = trackLocation(lastLocation, e.contentChanges, revision);
+      rememberRecentPosition();
+    }
     if (origin?.uri === uri && !origin.fileOnly) origin = trackLocation(origin, e.contentChanges, revision);
     for (const pending of candidates) if (pending.location.uri === uri && !pending.location.fileOnly) pending.location = trackLocation(pending.location, e.contentChanges, revision);
     void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
@@ -591,10 +592,10 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       return doc;
     }); } finally { creatingNote = false; }
   });
-  register('mrw.recentNotes', value => withNoteOrigin(value, async ({attempt, pending, validate}) => notes.recent({validate, openSelected:async (uri, expectedPath) => {
+  register('mrw.recentNotes', value => withNoteOrigin(value, async ({attempt, pending, validate}) => notes.recent({validate, openSelected:async (uri, expectedPath, position) => {
     // Recent entries record a location; they never grant access or redirect it.
     await check(uri); validate();
-    if (!await display(uri, undefined, attempt, validate, {expectedPath})) return;
+    if (!await display(uri, position, attempt, validate, {exactLocation: false, expectedPath})) return;
     if (pending) origin = pending.location;
     last = uri.toString(); await persist(); await onNavigated();
   }}), {optionalOrigin: true}));
@@ -604,11 +605,15 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   register('mrw.chooseNotesFolder', chooseFolder);
   register('mrw.followDocumentLink', followAtCursor);
   register('mrw.showBacklinks', showBacklinks);
+  function rememberRecentPosition() {
+    void notes.rememberPosition(lastLocation).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+  }
   const selectionChanged = vscode.window.onDidChangeTextEditorSelection?.(event => {
     const doc = event.textEditor?.document, range = event.selections?.[0];
     if (!range || doc?.isClosed || doc?.uri.toString() !== last || !markdown(doc.uri.fsPath)) return;
     lastLocation = snapshot(doc, doc.offsetAt(range.start), doc.offsetAt(range.end));
     if (latestDisplay?.uri.toString() === last) latestDisplay.location = lastLocation;
+    rememberRecentPosition();
     void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
   });
   if (selectionChanged) context.subscriptions.push(selectionChanged);

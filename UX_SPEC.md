@@ -125,7 +125,11 @@ the transcription, and distinguish corrections from the source.
 
 Use [Reopen Document and Return to Document](docs/READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart)
 and [Recent Documents](docs/RECENT_DOCUMENTS.md) to recover files and supported
-locations. Explain why a missing, changed or ambiguous exact link cannot be
+locations. In Recent Documents, keep the title, filename and path. When MRW
+can match a previous Markdown selection to the current text, show a short
+excerpt and restore the selection on opening. Store the revision and range,
+and read the excerpt only from the authorized document when showing the list.
+Explain why a missing, changed or ambiguous exact link cannot be
 followed, and preserve the last usable Return destination. Offer the current
 document when it can be opened without claiming to restore an earlier passage.
 VS Code handles dirty buffers and pane layout. MRW reopens PDFs at the file

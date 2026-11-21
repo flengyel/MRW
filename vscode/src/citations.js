@@ -3,6 +3,7 @@
 // source text or executes document filters. Live keys use a bounded owner API.
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {spawn}=require('node:child_process');
+const {isDeepStrictEqual}=require('node:util');
 const {frontMatterInfo}=require('./readingMarkdown');
 const MarkdownIt=require('../media/markdown-it/markdown-it');
 const LIMIT=4*1024*1024;
@@ -104,10 +105,16 @@ function registerCitations({vscode,context,documents,prepareNote=prepare}){
  async function perform(doc){if(disposed||!doc||doc.isClosed||doc.uri?.scheme!=='file'||! /\.(md|markdown)$/i.test(doc.uri.fsPath)||vscode.workspace.isTrusted===false)return;
   const key=doc.uri.toString(),text=doc.getText();if(text.length>LIMIT||Buffer.byteLength(text)>LIMIT){cache.set(key,{text:'',citations:{},status:'Note exceeds citation limit'});return;}if(!candidates(text).length){cache.delete(key);return;}
   const version=doc.version;
+  let value;
   try{await documents.check(doc.uri);const c=vscode.workspace.getConfiguration('mrw');const roots=[c.get('notesFolder',''),...vscode.workspace.workspaceFolders?.map(f=>f.uri.fsPath)||[]].filter(Boolean);const root=roots.find(r=>{const rel=path.relative(r,doc.uri.fsPath);return rel!== '..'&&!rel.startsWith('..'+path.sep)&&!path.isAbsolute(rel);});if(!root)return;
-   const value=await prepareNote({text,file:doc.uri.fsPath,root,configuration:{executable:c.get('citationExecutable',''),bibliography:c.get('citationBibliography',''),style:c.get('citationStyle',''),source:c.get('citationSource','auto'),zoteroLibraries:c.get('citationZoteroLibraries',[]),zoteroConnection:context.workspaceState?.get('mrw.zotero.v1',{})?.connection,host:vscode.env?.remoteName},signal:aborter.signal});if(!disposed&&!doc.isClosed&&doc.version===version)cache.set(key,{text,...value});
-  }catch(e){if(!disposed&&!doc.isClosed&&doc.version===version)cache.set(key,{text,citations:{},bibliography:'',status:e.message});}
-  finally{pending.delete(key);if(!disposed)await vscode.commands.executeCommand('markdown.preview.refresh');}
+   value=await prepareNote({text,file:doc.uri.fsPath,root,configuration:{executable:c.get('citationExecutable',''),bibliography:c.get('citationBibliography',''),style:c.get('citationStyle',''),source:c.get('citationSource','auto'),zoteroLibraries:c.get('citationZoteroLibraries',[]),zoteroConnection:context.workspaceState?.get('mrw.zotero.v1',{})?.connection,host:vscode.env?.remoteName},signal:aborter.signal});
+  }catch(e){value={citations:{},bibliography:'',status:e.message};}
+  if(disposed||doc.isClosed||doc.version!==version)return;
+  const next={text,...value};
+  if(isDeepStrictEqual(cache.get(key),next))return;
+  cache.set(key,next);
+  pending.delete(key);
+  await vscode.commands.executeCommand('markdown.preview.refresh');
  }
  function update(doc){const key=doc?.uri?.toString();if(disposed||!key||pending.has(key))return tail;pending.add(key);const job=tail.then(()=>perform(doc)).finally(()=>pending.delete(key));tail=job.catch(()=>{});return job;}
  const refresh=()=>{clearTimeout(timer);timer=setTimeout(()=>{for(const doc of (vscode.workspace.textDocuments||[]).slice(0,16))void update(doc);},300);timer.unref?.();};

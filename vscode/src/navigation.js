@@ -5,6 +5,17 @@ const crypto = require('node:crypto');
 const MAX_SOURCE = 4 * 1024 * 1024;
 const digest = data => crypto.createHash('sha256').update(data).digest('hex');
 
+function validTextPosition(position) {
+  return position && typeof position.revision === 'string' && /^[a-f0-9]{64}$/.test(position.revision) &&
+    Number.isSafeInteger(position.start) && position.start >= 0 &&
+    Number.isSafeInteger(position.end) && position.end >= position.start;
+}
+
+function matchesTextPosition(text, position) {
+  return validTextPosition(position) && !position.invalid && position.end <= text.length &&
+    digest(text) === position.revision;
+}
+
 async function sourceSnapshot(file) {
   const canonical = await fs.realpath(file);
   const metadata = await fs.lstat(file);
@@ -57,4 +68,4 @@ function httpsViewer(value) {
   return url.toString();
 }
 
-module.exports = { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer };
+module.exports = { sourceSnapshot, digest, protectedText, validateMarker, httpsViewer, validTextPosition, matchesTextPosition };

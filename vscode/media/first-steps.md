@@ -288,7 +288,7 @@ Reopen an imported section offline with **Open Saved Source…**. See
 
 | Work | Save | Resume |
 | --- | --- | --- |
-| Original document | **Ctrl+S** in its editor | **Reopen Document**, or **Open Document…** for another file |
+| Original document | **Ctrl+S** in its editor | **Reopen Document** or **Recent Documents…** |
 | Reader annotation | **Save** | **Open Saved Source…**, then **Reader notes** |
 | Optional study attempt | **Pause / save** | **MRW: Resume Study** in the Command Palette |
 | Optional proof-work question | **Save question** in **Proof work** | **Continue proof work** |
@@ -594,9 +594,14 @@ For papers, notebooks, Lean files and other documents, use the corresponding
 application or VS Code extension, then **Open Document** in MRW.
 
 Choose **Recent Documents…** beside Open Document to reopen a note, PDF or
-text file. The list keeps thirty files and survives restart. Markdown entries
-show their title and filename; PDFs show their filename and path. Existing
-recent notes remain. MRW does not scan your notes folder or copy document text.
+text file. To return to an unfinished step, select its text in **Edit Document
+Source**, then open the related note or paper. Find the earlier note by its
+title, filename or the excerpt in **Recent Documents…**. A matching selection
+is restored in the Markdown editor. If the note has changed, MRW opens the
+current text and reports that the previous position is unavailable.
+
+The list keeps thirty files and survives restart. PDF rows show the filename
+and path. MRW reads Markdown excerpts from the notes when the list opens.
 
 For older PDFs missing from this list, choose **VS Code file history…** in the
 picker, or press **Ctrl+P**. The old Recent Notes list did not record PDFs.

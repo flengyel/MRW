@@ -108,7 +108,11 @@ async function continuityTrial(context){
  const note=vscode.Uri.file(path.join(project,'trace.md')),related=vscode.Uri.file(path.join(project,'matrix.md')),needle='The [multiplication-matrix proof](matrix.md#the-repeated-blocks) explains';
  try{
   vscode.window.showErrorMessage=async message=>{report.errors.push(message);await save();};
-  vscode.window.showQuickPick=async items=>(await items).find(i=>i.entry?.uri===note.toString());
+  vscode.window.showQuickPick = async items => {
+   const row = (await items).find(item => item.entry?.uri === note.toString());
+   report.recentDetail = row?.detail;
+   return row;
+  };
   vscode.commands.executeCommand=async(name,...args)=>{
    if(name==='vscode.openWith'&&args[1]==='vscode.markdown.preview.editor'){
     const editor=vscode.window.visibleTextEditors.find(e=>e.document.uri.toString()===args[0].toString());
@@ -139,6 +143,8 @@ async function continuityTrial(context){
   assert.ok(seen,'native preview opened');
   report.expectedSelection=state.needle;report.observedSelection=seen.selection;report.expectedStart=state.at;report.observedStart=seen.start;
   report.positionRecovered=seen.selection===state.needle;
+  assert.ok(report.recentDetail?.includes(state.needle), 'Recent Documents shows the matching passage cue after restart');
+  report.checks.push('Recent Documents shows the exact working passage and restores its editor selection after a native reload');
   report.notesUnchanged=digest(await fs.readFile(note.fsPath))===report.originalHashes.note&&digest(await fs.readFile(related.fsPath))===report.originalHashes.matrix;
   assert.ok(report.positionRecovered);assert.ok(report.notesUnchanged);assert.deepEqual(report.errors,[]);
   report.complete=true;await save();await guard.clearOwnedState(context);

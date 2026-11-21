@@ -745,6 +745,36 @@ test('reopen restores a matching selection after restart and opens changed text 
   assert.equal(changed.informations.length, 0, 'Reopen requires no extra dialog');
 });
 
+test('Recent Documents restores an earlier Markdown selection after restart and omits a stale cue', async t => {
+  const f = await fixture(t), state = new Map(), h = harness(f, state, {notesFolder: f.notes});
+  const note = await h.open('1a.md');
+  const passage = '# First α😀', start = note.text.indexOf(passage);
+  h.selection(start, start + passage.length);
+  await h.open('2b.md');
+  await h.open('paper.pdf');
+
+  const restarted = harness(f, state, {notesFolder: f.notes, preview: true});
+  await restarted.commands.get('mrw.reopenDocument')();
+  const earlier = choice => choice.entry?.uri.endsWith('/1a.md');
+  restarted.setPickHook(choices => choices.find(earlier));
+  await restarted.commands.get('mrw.recentNotes')();
+  assert.match(restarted.picks.at(-1).choices.find(earlier).detail, /First α😀/);
+  const {editor, doc} = restarted.shown.at(-1);
+  assert.equal(doc.getText().slice(doc.offsetAt(editor.selection.start), doc.offsetAt(editor.selection.end)), passage);
+  assert.equal(await restarted.documents.returnToDocument(), true);
+  assert.equal(restarted.hostCalls.at(-1).args[0].fsPath, f.file('paper.pdf'));
+  assert.equal(await fs.readFile(f.file('1a.md'), 'utf8'), f.contents['1a.md']);
+  assert.ok(!JSON.stringify(state.get('mrw.recentNotes.v1')).includes(passage), 'The cue is read from the note.');
+
+  await fs.appendFile(f.file('1a.md'), '\nExternal revision\n');
+  const changed = harness(f, state, {notesFolder: f.notes});
+  changed.setPickHook(choices => choices.find(earlier));
+  await changed.commands.get('mrw.recentNotes')();
+  assert.equal(changed.picks.at(-1).choices.find(earlier).detail, f.file('1a.md'));
+  assert.equal(changed.selected(), '');
+  assert.match(changed.statuses.at(-1), /previous position no longer matches/);
+});
+
 test('only successful non-Markdown opens publish their displayed identity', async t => {
   const f = await fixture(t), h = harness(f); await h.folder(); const a = await h.open('1a.md');
   await h.follow(a, 'paper.pdf'); assert.equal(h.displayed.at(-1), f.file('paper.pdf'));
