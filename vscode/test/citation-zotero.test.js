@@ -25,14 +25,15 @@ test('snapshot identifies only selected owner libraries and its transport',async
   seen.push(p);return p.method==='user.groups'?{status:200,body:JSON.stringify({jsonrpc:'2.0',id:p.id,result:[{id:1,name:'My Library'},{id:4,name:'Algebra & geometry'},{id:6,name:'Unselected private group'}]})}:response(p,{a:{id:'a'}});
  }});
  assert.deepEqual(seen.map(p=>[p.method,p.params]),[['item.pandoc_filter',[['a'],true,['4','1']]],['user.groups',[false]]]);
- assert.match(r.status,/snapshot read \d{4}-.*; "Algebra & geometry" \(BBT library 4\), "My Library" \(BBT library 1\); Windows Zotero/);
+ assert.match(r.readAt,/^\d{4}-\d{2}-\d{2}T/);
+ assert.match(r.status,/snapshot · "Algebra & geometry" \(BBT library 4\), "My Library" \(BBT library 1\) · Windows Zotero/);
  assert.doesNotMatch(r.status,/Unselected/);assert.deepEqual(r.references,[{id:'a'}]);
 });
 test('unavailable or invalid optional names preserve the exact-key result and library IDs',async()=>{
  const groups=values=>({status:200,body:JSON.stringify({jsonrpc:'2.0',id:'different',result:values})});
  for(const metadata of [()=>{throw Error('Offline');},p=>({status:302,body:''}),p=>groups([{id:4,name:'Spoof'}]),p=>({status:200,body:JSON.stringify({jsonrpc:'2.0',id:p.id,result:[{id:4,name:'First'},{id:4,name:'Duplicate'}]})}),p=>({status:200,body:JSON.stringify({jsonrpc:'2.0',id:p.id,result:[{id:4,name:'x'.repeat(513)}]})}),p=>({status:200,body:JSON.stringify({jsonrpc:'2.0',id:p.id,result:[{id:4,name:'Bad\nname'}]})}),p=>({status:200,body:JSON.stringify({jsonrpc:'2.0',id:p.id,result:Array(1001).fill({id:4,name:'Too many'})})})]){
   const r=await resolve(['a'],{libraries:[4],request:async p=>p.method==='user.groups'?metadata(p):response(p,{a:{id:'a'}})});
-  assert.deepEqual(r.references,[{id:'a'}]);assert.match(r.status,/; BBT library 4; local Zotero/);assert.doesNotMatch(r.status,/Spoof|Duplicate|First|Too many/);
+  assert.deepEqual(r.references,[{id:'a'}]);assert.match(r.status,/· BBT library 4 · local Zotero/);assert.doesNotMatch(r.status,/Spoof|Duplicate|First|Too many/);
  }
 });
 test('default library needs no name request and cancellation remains cancellation',async()=>{

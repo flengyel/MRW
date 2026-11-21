@@ -61,6 +61,7 @@ test('a citation recheck redraws the preview only when the rendered result chang
   version: 1, isDirty: true, getText: () => text};
  const commands = [];
  let bibliography = 'Marcus, Daniel A. 2018. Number Fields.';
+ let readAt = '2026-11-20T18:00:00.000Z';
  const controller = registerCitations({
   vscode: {
    workspace: {textDocuments: [doc], workspaceFolders: [{uri: {fsPath: '/fixture'}}],
@@ -69,14 +70,19 @@ test('a citation recheck redraws the preview only when the rendered result chang
   },
   context: {subscriptions: []},
   documents: {check: async () => {}},
-  prepareNote: async () => ({citations: {[text]: {text: '(Marcus 2018)'}}, bibliography, status: 'Fixture'}),
+  prepareNote: async () => ({citations: {[text]: {text: '(Marcus 2018)'}}, bibliography,
+   status: 'Zotero / Better BibTeX snapshot', readAt}),
  });
  await controller.update(doc);
+ const firstRead = readAt;
+ readAt = '2026-11-20T18:05:00.000Z';
  await controller.update(doc);
  assert.deepEqual(commands, ['markdown.preview.refresh']);
+ assert.equal(controller.cache.get(doc.uri.toString()).readAt, firstRead);
  bibliography += ' Revised metadata.';
  await controller.update(doc);
  assert.deepEqual(commands, ['markdown.preview.refresh', 'markdown.preview.refresh']);
+ assert.equal(controller.cache.get(doc.uri.toString()).readAt, readAt);
  assert.equal(doc.getText(), text);
  assert.ok(doc.isDirty);
 });

@@ -56,7 +56,7 @@ async function prepare({text,file,root,configuration={},execute=run,resolveZoter
  const explicit=field||configuration.bibliography||metadata.references;
  const live=!explicit&&(mode==='zotero'||mode==='auto'&&(companion.pullFromZotero===true||configuration.zoteroConnection?.library?.type==='user'));
  const paths=field?(field.t==='MetaList'?field.c.map(metaString):[metaString(field)]):!live&&bib?[bib]:[];
- let sourceStatus='Local bibliography snapshot; freshness relative to Zotero is unknown.',sourceErrors={};
+ let sourceStatus='Local bibliography snapshot; freshness relative to Zotero is unknown.',sourceErrors={},readAt;
 
  if(metadata.csl)style=metaString(metadata.csl);
  if(paths.length>4)throw Error('At most four bibliography files are supported per note');
@@ -77,7 +77,7 @@ async function prepare({text,file,root,configuration={},execute=run,resolveZoter
   if(companion.pullFromZotero===true&&!configuration.zoteroLibraries?.length&&(!Array.isArray(companion.zoteroGroups)||!companion.zoteroGroups.length))throw Error('No Zotero libraries are selected in the companion configuration.');
   const libraries=configuration.zoteroLibraries?.length?configuration.zoteroLibraries:(companion.pullFromZotero===true?companion.zoteroGroups.map(g=>g.id):[]);
   const transport=configuration.zoteroConnection?.transport||(wsl?'windows':'local');
-  if(keys.length)try{const resolved=await resolveZotero(keys,{libraries,transport,signal});references=resolved.references;sourceErrors=resolved.errors;sourceStatus=resolved.status;}
+  if(keys.length)try{const resolved=await resolveZotero(keys,{libraries,transport,signal});references=resolved.references;sourceErrors=resolved.errors;sourceStatus=resolved.status;readAt=resolved.readAt;}
   catch(e){if(mode!=='auto'||!bib)throw e;await readBibliographies([bib]);sourceStatus='Zotero lookup unavailable; using '+bibliographyNotice().replace(/^Local/,'local');}
 
  }
@@ -95,10 +95,10 @@ async function prepare({text,file,root,configuration={},execute=run,resolveZoter
  // Only whitelisted metadata reaches citeproc; executable document settings,
  // remote resources, filters and unrelated YAML are never forwarded.
  const meta={references:metaValue(references)};if(metadata['reference-section-title'])meta['reference-section-title']=metadata['reference-section-title'];
- if(!valid.length)return {citations,bibliography:'',status:warning+sourceStatus};
+ if(!valid.length)return {citations,bibliography:'',status:warning+sourceStatus,readAt};
  const plain=await processCitation(args,JSON.stringify({...ast,meta,blocks}));const chunks=plain.split(separator);
  valid.forEach((key,i)=>{citations[key]={text:chunks[i].trim()};});
- return {citations,bibliography:chunks.at(-1).trim(),status:warning+sourceStatus};
+ return {citations,bibliography:chunks.at(-1).trim(),status:warning+sourceStatus,readAt};
 }
 function registerCitations({vscode,context,documents,prepareNote=prepare}){
  const cache=new Map(),pending=new Set(),watchers=[],aborter=new AbortController();let timer,tail=Promise.resolve(),disposed=false;
@@ -110,8 +110,9 @@ function registerCitations({vscode,context,documents,prepareNote=prepare}){
    value=await prepareNote({text,file:doc.uri.fsPath,root,configuration:{executable:c.get('citationExecutable',''),bibliography:c.get('citationBibliography',''),style:c.get('citationStyle',''),source:c.get('citationSource','auto'),zoteroLibraries:c.get('citationZoteroLibraries',[]),zoteroConnection:context.workspaceState?.get('mrw.zotero.v1',{})?.connection,host:vscode.env?.remoteName},signal:aborter.signal});
   }catch(e){value={citations:{},bibliography:'',status:e.message};}
   if(disposed||doc.isClosed||doc.version!==version)return;
-  const next={text,...value};
-  if(isDeepStrictEqual(cache.get(key),next))return;
+  const next={text,readAt:undefined,...value},previous=cache.get(key);
+  // Retain the read time of the snapshot shown until the rendered result changes.
+  if(previous&&isDeepStrictEqual(previous,{...next,readAt:previous.readAt}))return;
   cache.set(key,next);
   pending.delete(key);
   await vscode.commands.executeCommand('markdown.preview.refresh');
@@ -125,12 +126,13 @@ function registerCitations({vscode,context,documents,prepareNote=prepare}){
  // Watch only the explicitly scoped roots' citation files; no recursive vault read.
  function attachWatchers(){if(!vscode.workspace.createFileSystemWatcher)return;for(const w of watchers.splice(0))w.dispose();const roots=[vscode.workspace.getConfiguration('mrw').get('notesFolder',''),...vscode.workspace.workspaceFolders?.map(f=>f.uri.fsPath)||[]].filter(Boolean);for(const root of roots){const pattern=vscode.RelativePattern?new vscode.RelativePattern(root,'**/*.{bib,bibtex,csl,json,yaml,yml}'): '**/*.{bib,bibtex,csl,json,yaml,yml}';const watcher=vscode.workspace.createFileSystemWatcher?.(pattern);if(watcher){watchers.push(watcher);for(const method of ['onDidChange','onDidCreate','onDidDelete'])watcher[method]?.(refresh);}}}attachWatchers();
  context.subscriptions.push({dispose(){disposed=true;aborter.abort();clearTimeout(timer);for(const w of watchers)w.dispose();cache.clear();}});
+ const notice=value=>value?.readAt?`${value.status} · Read ${value.readAt}`:value?.status;
  function extendMarkdownIt(md){
   if(md.inline.ruler.__rules__.some(r=>r.name==='mrw_citation'))return md;
   md.inline.ruler.before('link','mrw_citation',(s,silent)=>{if(s.src[s.pos]!=='[')return false;const end=s.src.indexOf(']',s.pos+1);if(end<0||end-s.pos>2048)return false;const raw=s.src.slice(s.pos,end+1);if(['(','['].includes(s.src[end+1])||!/(?:^|[\s;\[])-?@[\w]/.test(raw))return false;if(!silent){const token=s.push('mrw_citation','',0);token.content=raw;}s.pos+=raw.length;return true;});
-  md.renderer.rules.mrw_citation=(tokens,i,_opts,env)=>{const key=env.currentDocument?.toString(),doc=vscode.workspace.textDocuments?.find(d=>d.uri.toString()===key),value=cache.get(key),raw=tokens[i].content;if(doc&&value?.text!==doc.getText())void update(doc);const hit=doc&&value?.text===doc.getText()?value.citations[raw]:null;return '<span title="'+md.utils.escapeHtml(hit?.problem||value?.status||'Citation rendering pending')+'">'+md.utils.escapeHtml(hit?.text||raw)+'</span>';};
+  md.renderer.rules.mrw_citation=(tokens,i,_opts,env)=>{const key=env.currentDocument?.toString(),doc=vscode.workspace.textDocuments?.find(d=>d.uri.toString()===key),value=cache.get(key),raw=tokens[i].content;if(doc&&value?.text!==doc.getText())void update(doc);const hit=doc&&value?.text===doc.getText()?value.citations[raw]:null;return '<span title="'+md.utils.escapeHtml(hit?.problem||notice(value)||'Citation rendering pending')+'">'+md.utils.escapeHtml(hit?.text||raw)+'</span>';};
   md.core.ruler.push('mrw_citation_footer',s=>s.tokens.push(new s.Token('mrw_citation_footer','',0)));
-  md.renderer.rules.mrw_citation_footer=(_t,_i,_o,env)=>{const doc=vscode.workspace.textDocuments?.find(d=>d.uri.toString()===env.currentDocument?.toString()),v=doc&&cache.get(doc.uri.toString());if(!v||v.text!==doc.getText())return '';return '<aside class="mrw-citation-status">'+md.utils.escapeHtml(v.status+' '+Object.values(v.citations).map(c=>c.problem||'').filter(Boolean).join('; '))+'</aside>'+(v.bibliography?'<section aria-label="Generated bibliography"><h2>References</h2><pre style="white-space:pre-wrap">'+md.utils.escapeHtml(v.bibliography)+'</pre></section>':'');};return md;
+  md.renderer.rules.mrw_citation_footer=(_t,_i,_o,env)=>{const doc=vscode.workspace.textDocuments?.find(d=>d.uri.toString()===env.currentDocument?.toString()),v=doc&&cache.get(doc.uri.toString());if(!v||v.text!==doc.getText())return '';return '<aside class="mrw-citation-status">'+md.utils.escapeHtml(notice(v)+' '+Object.values(v.citations).map(c=>c.problem||'').filter(Boolean).join('; '))+'</aside>'+(v.bibliography?'<section aria-label="Generated bibliography"><h2>References</h2><pre style="white-space:pre-wrap">'+md.utils.escapeHtml(v.bibliography)+'</pre></section>':'');};return md;
  }
  return {extendMarkdownIt,update,cache};
 }

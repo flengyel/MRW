@@ -62,6 +62,6 @@ async function resolve(keys,{libraries=[],transport='local',request,signal}={}){
  for(const key of keys)if(!Object.hasOwn(result.items,key)&&!errors.has(key))errors.set(key,0);
  const readAt=new Date().toISOString(),names=await libraryNames(libraries,send,signal);
  const scope=libraries.length?libraries.map(id=>(names.has(id)?JSON.stringify(names.get(id))+' (BBT library '+id+')':'BBT library '+id)).join(', '):'My Library (default)';
- return {references,errors:Object.fromEntries(errors),status:'Zotero / Better BibTeX snapshot read '+readAt+'; '+scope+'; '+(transport==='windows'?'Windows Zotero':'local Zotero')+'.'};
+ return {references,errors:Object.fromEntries(errors),readAt,status:'Zotero / Better BibTeX snapshot · '+scope+' · '+(transport==='windows'?'Windows Zotero':'local Zotero')};
 }
 module.exports={resolve,packet,localRequest,windowsRequest};
