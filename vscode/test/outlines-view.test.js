@@ -109,7 +109,9 @@ test('copy and return-note actions explain opposite directions and preserve expl
   assert.equal(h.button(whole,'copy-link').textContent, 'Copy link to this source');
   assert.equal(h.button(current,'copy-link').textContent, 'Copy link to this passage');
   assert.match(current.text(), /2 linked notes — choose when opening/);
-  assert.match(h.button(whole,'copy-link').title, /paste into an Obsidian note.*does not set a return note/);
+  assert.match(whole.text(), /From your note to MRW/);
+  assert.match(h.button(whole,'copy-link').title, /opens this retained source or passage in MRW/);
+  assert.match(whole.text(), /From MRW to your note/);
   assert.match(h.button(whole,'associate-note').title, /return destination from MRW/);
   h.button(whole,'copy-link').listeners.click();
   assert.equal(h.messages.filter(m => m.type === 'associate_note').length, 0);
