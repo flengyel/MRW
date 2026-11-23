@@ -19,6 +19,7 @@ book. [Chapter and PDF](https://doi.org/10.1007/978-3-031-10447-3_1)
 
 ## The list monad
 
+Write $\mathbf{Sets}$ for the category of sets and functions.
 For a set $X$, let $L(X)=\coprod_{n\ge 0}X^n$ be the set of finite ordered lists
 of elements of $X$. An entry can occur more than once. The summand $X^0$ consists
 of the single empty list $[]$. For a function $f:X\to Y$, the function
@@ -28,7 +29,7 @@ L(f)([x_1,\ldots,x_n])=[f(x_1),\ldots,f(x_n)].
 $$
 Applying an identity function leaves every entry fixed, and applying $f$ followed
 by $g$ to each entry has the effect of applying $g\circ f$. Thus $L$ is a
-functor from sets to sets.
+functor $L:\mathbf{Sets}\to\mathbf{Sets}$.
 
 The function $\eta_X:X\to L(X)$ puts an element into a singleton list,
 $\eta_X(x)=[x]$. The function $\mu_X:L(L(X))\to L(X)$ concatenates the inner
@@ -53,6 +54,7 @@ Naturality of the unit means applying $f$ commutes with inserting a singleton
 when $T=L$.
 
 ```tikz
+\huge
 \begin{tikzcd}
 X \arrow[r,"\eta_X"] \arrow[d,"f"'] & TX \arrow[d,"T(f)"] \\
 Y \arrow[r,"\eta_Y"'] & TY
@@ -63,6 +65,7 @@ Naturality of multiplication means applying $f$ to every entry gives the same
 list before or after flattening when $T=L$.
 
 ```tikz
+\huge
 \begin{tikzcd}
 T^2X \arrow[r,"\mu_X"] \arrow[d,"T^2(f)"'] & TX \arrow[d,"T(f)"] \\
 T^2Y \arrow[r,"\mu_Y"'] & TY
@@ -74,6 +77,7 @@ For lists, $\eta_{LX}$ wraps the whole list in a singleton. Flattening unwraps
 it.
 
 ```tikz
+\huge
 \begin{tikzcd}
 TX \arrow[r,"\eta_{TX}"] \arrow[dr,"\mathrm{id}_{TX}"'] &
 T^2X \arrow[d,"\mu_X"] \\
@@ -86,6 +90,7 @@ For lists, $L(\eta_X)$ wraps each entry in a singleton. Flattening joins the
 singletons. In particular, both unit laws apply to the empty list.
 
 ```tikz
+\huge
 \begin{tikzcd}
 TX \arrow[r,"T(\eta_X)"] \arrow[dr,"\mathrm{id}_{TX}"'] &
 T^2X \arrow[d,"\mu_X"] \\
@@ -97,6 +102,7 @@ The **associativity law** says that the following square commutes for every
 object $X$.
 
 ```tikz
+\huge
 \begin{tikzcd}
 T^3X \arrow[r,"T(\mu_X)"] \arrow[d,"\mu_{TX}"'] &
 T^2X \arrow[d,"\mu_X"] \\
@@ -114,12 +120,12 @@ outer, middle and inner position. Thus $(L,\eta,\mu)$ is a monad.
 
 For $n\ge 0$, let $I_n=\{1,\ldots,n\}$ be the set of input labels. Start with
 $L(I_n)$ and take the words in which each label occurs exactly once. Call this
-set $\mathrm{Ass}(n)$. For instance, $\mathrm{Ass}(2)$ contains $[1,2]$ and
-$[2,1]$, and $\mathrm{Ass}(0)$ contains just $[]$. A word tells us in which
+set $\mathrm{Assoc}(n)$. For instance, $\mathrm{Assoc}(2)$ contains $[1,2]$ and
+$[2,1]$, and $\mathrm{Assoc}(0)$ contains just $[]$. A word tells us in which
 order to read the inputs.
 
-To substitute into a word $w\in\mathrm{Ass}(n)$, choose a word
-$v_i\in\mathrm{Ass}(k_i)$ for each input label $i$. Put $N=k_1+\cdots+k_n$.
+To substitute into a word $w\in\mathrm{Assoc}(n)$, choose a word
+$v_i\in\mathrm{Assoc}(k_i)$ for each input label $i$. Put $N=k_1+\cdots+k_n$.
 Give $v_i$ the next $k_i$ labels after the first $k_1+\cdots+k_{i-1}$ labels,
 preserving its order. The renumbered word $b_i$ uses the labels assigned to
 block $i$. Define $f:I_n\to L(I_N)$ by $f(i)=b_i$. The composite is
@@ -140,16 +146,16 @@ label $i$ by $\sigma^{-1}(i)$. Relabelling whole blocks or labels within a
 block commutes with substitution in the corresponding order.
 
 This constructs the one-colour **associative operad** from the list monad.
-An operation of arity $n$ is a permutation of $n$ labels, so this is
-$\mathrm{Ass}(n)=\Sigma_n$ in the book’s notation. The free algebra for this
+An operation of arity $n$ is a permutation of $n$ labels, identifying
+$\mathrm{Assoc}(n)$ with $\Sigma_n$. The free algebra for this
 operad on a set $X$ consists of words in $X$, whose entries can repeat.
 Its free-algebra monad is $L$. [Heuts–Moerdijk, Example 1.5(b), p. 7, and §1.2.2, p. 14](https://doi.org/10.1007/978-3-031-10447-3_1)
 
 ## Coloured symmetric operads
 
 Let $C$ be a set whose elements are called **colours**. A colour specifies a
-type of input or output. A coloured symmetric operad $P$ in sets gives a set
-$P(\ell;c)$ for every list $\ell\in L(C)$ and colour $c\in C$. An element of
+type of input or output. A coloured symmetric operad $P$ in $\mathbf{Sets}$ gives
+a set $P(\ell;c)$ for every list $\ell\in L(C)$ and colour $c\in C$. An element of
 $P([c_1,\ldots,c_n];c)$ takes inputs of colours $c_1,\ldots,c_n$ in those
 positions and produces one output of colour $c$. The same colour can occur
 at several positions.
