@@ -648,8 +648,10 @@ proofs and definitions. Select a node and open its exact passage. **Return to
 Atlas** restores the node. Use **Reading list** to rename or group components.
 Open a component to write the argument or copy a companion handoff. Review and
 correct reasons before saving the proof outline.
-Use **MRW: Open Mathematical Atlas…** to recover the saved capture and
-corrections after a restart.
+Open a saved `.mrw-atlas.json` file in VS Code to recover the atlas and
+its captured passages after a restart. If it opens as JSON, use the **Open
+Mathematical Atlas…** graph button in the editor toolbar. Files outside the
+workspace open as read-only previews.
 
 Proofs contains Justification, Lean lessons and Proof Outline. Lesson actions
 apply to the selected lesson, associated code or its working note. Shared code

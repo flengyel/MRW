@@ -30,6 +30,18 @@
     }
   },
   "contributes": {
+    "customEditors": [
+      {
+        "viewType": "mrw.atlasEditor",
+        "displayName": "Mathematical Atlas",
+        "selector": [
+          {
+            "filenamePattern": "*.mrw-atlas.json"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
       "./media/diagram-theme.css"
@@ -447,7 +459,7 @@
         "command": "mrw.openAtlas",
         "title": "Open Mathematical Atlas…",
         "category": "MRW",
-        "icon": "$(list-tree)"
+        "icon": "$(graph)"
       },
       {
         "command": "mrw.returnToAtlas",
@@ -951,7 +963,7 @@
       "editor/title": [
         {
           "command": "mrw.openAtlas",
-          "when": "resourceFilename =~ /\\.mrw-atlas\\.json$/",
+          "when": "activeEditor == workbench.editors.files.textFileEditor && resourceScheme =~ /^(file|vscode-remote)$/ && resourceFilename =~ /\\.mrw-atlas\\.json$/",
           "group": "navigation"
         },
         {

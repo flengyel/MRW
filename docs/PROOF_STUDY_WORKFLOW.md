@@ -94,11 +94,17 @@ text in VS Code. Use **MRW: Return to Atlas** to recover the component or
 selected node. **Save atlas revision** keeps the captured text and descriptions.
 Accepted graphs and their exact text snapshots are saved beside it. A corrected
 companion proposal retains a link to the original.
-**MRW: Open Mathematical Atlas…** reopens a saved revision even after the
-original file changes.
-**Regenerate from source** keeps the earlier atlas available and carries
-descriptions only when their evidence still matches. Reselect an edited portion
-before regenerating a partial atlas.
+Open a saved `.mrw-atlas.json` file in VS Code to recover its views and
+captured passages, even after the original source changes. If the file opens
+as JSON, use the **Open Mathematical Atlas…** graph button in the editor
+toolbar, or choose **Reopen Editor With… → Mathematical Atlas** from the tab
+menu. Choose **Text Editor** there to inspect the JSON.
+**MRW: Open Mathematical Atlas…** also offers a file picker.
+
+Outside the workspace, the atlas and its captured passages open in a
+read-only preview. In the workspace, **Regenerate from source** keeps the
+earlier atlas and carries descriptions only when their evidence still matches.
+Reselect an edited portion before regenerating a partial atlas.
 
 The extractor recognizes supported Markdown headings, local links and named
 blocks, and LaTeX labels, statements, proof environments and literal references.

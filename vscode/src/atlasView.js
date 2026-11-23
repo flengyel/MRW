@@ -130,7 +130,7 @@ function referenceList(references, atlasIndex) {
   }).join('')}</ul>`;
 }
 
-function overview(atlas, atlasIndex) {
+function overview(atlas, atlasIndex, options = {}) {
   const ordered = overviewComponents(atlas);
   const groupable = ordered.filter(component => !component.members);
   return `<ol class="components">${ordered.map(component => {
@@ -144,7 +144,7 @@ function overview(atlas, atlasIndex) {
     </li>`;
   }).join('')}</ol>
   ${referenceList(atlasIndex.outgoing.get(undefined), atlasIndex)}
-  ${groupable.length > 1 ? `<details class="editor"><summary>Group components</summary>
+  ${!options.readOnly && groupable.length > 1 ? `<details class="editor"><summary>Group components</summary>
     <form data-change="group">
       <label for="group-title">Group title</label><input id="group-title" name="title" maxlength="240" required>
       <fieldset><legend>Components</legend>
@@ -276,8 +276,8 @@ function detailView(atlas, atlasIndex, options) {
     ${description(atlas, atlasIndex, c, false)}
     ${c.members ? `<details><summary>Member components</summary><ol>${c.members.map(id =>
       `<li>${button(atlasIndex.components.get(id).title, 'selectComponent', { component: id })}</li>`).join('')}</ol>
-      ${button('Ungroup', 'edit', { edit: 'ungroup', component })}</details>` : ''}
-    ${editDescription(atlas, c)}
+      ${options.readOnly ? '' : button('Ungroup', 'edit', { edit: 'ungroup', component })}</details>` : ''}
+    ${options.readOnly ? '' : editDescription(atlas, c)}
     <p>Explicit references can guide reading. A reason for an inference must be supplied in an argument.</p>
     <section aria-labelledby="component-evidence"><h2 id="component-evidence">Passages</h2>
       ${pager(detail)}
@@ -292,7 +292,7 @@ function detailView(atlas, atlasIndex, options) {
         ${referenceList(atlasIndex.outgoing.get(entry.id), atlasIndex)}
       </li>`).join('')}</ol>
     </section>
-    <section aria-labelledby="component-proof"><h2 id="component-proof">Argument</h2>
+    ${options.readOnly ? '' : `<section aria-labelledby="component-proof"><h2 id="component-proof">Argument</h2>
       ${options.hasGraph ? '<p>Review the retained outline and its sources.</p>'
         : '<p>Missing reason. No inference has been recorded for this component.</p>'}
       ${options.hasGraph ? `<div class="toolbar">${button('Open proof outline', 'openGraph', { component, page })}</div>` : ''}
@@ -305,7 +305,7 @@ function detailView(atlas, atlasIndex, options) {
         </div>
       </details>
       ${proposalReview(options.proposal, component, page)}
-    </section>`;
+    </section>`}`;
 }
 
 // All source and proposal strings enter this document as escaped text or escaped
@@ -443,7 +443,7 @@ function atlasHtml(_webview, atlas, options = {}) {
   const main = options.component ? detailView(atlas, atlasIndex, options) :
     `<h1 id="atlas-heading" tabindex="-1">${escape(atlas.source.title)}</h1>${visual
       ? diagramHtml(atlas, atlasIndex, options, {escape,button,exactPreview,description,referenceList})
-      : overview(atlas, atlasIndex)}`;
+      : overview(atlas, atlasIndex, options)}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; form-action 'none'; base-uri 'none'">
@@ -451,12 +451,13 @@ function atlasHtml(_webview, atlas, options = {}) {
     </head><body data-capture="${escape(atlas.source.revision)}" data-focus="${escape(options.focus || (options.proposal ? 'proposal-title' : 'atlas-heading'))}"><main${visual ? ' class="diagram-main"' : ''}>
     <nav class="toolbar" aria-label="Atlas actions">
       ${button('Open exact selection', 'openSource', { part: 'selection' })}
-      ${button('Return to source selection', 'return')}
-      ${button('Save atlas revision', 'saveAtlas')}
-      ${button('Regenerate from source', 'regenerate')}
-      ${options.previous ? button('Open earlier revision', 'openPrevious') : ''}
+      ${options.readOnly ? '' : button('Return to source selection', 'return')}
+      ${options.readOnly ? '' : button('Save atlas revision', 'saveAtlas')}
+      ${options.readOnly ? '' : button('Regenerate from source', 'regenerate')}
+      ${!options.readOnly && options.previous ? button('Open earlier revision', 'openPrevious') : ''}
     </nav>
     <p class="muted">${escape(atlas.source.title)} · lines ${origin}–${limit} · revision <code>${escape(atlas.source.revision.slice(0, 12))}</code></p>
+    ${options.readOnly ? '<p class="muted">Read-only inspection. Open a workspace containing this atlas to edit descriptions or use saved sibling outlines. Exact source actions read the captured text.</p>' : ''}
     <p role="status" id="atlas-status">${escape(options.notice)}</p>
     ${tabs}
     ${main}
@@ -464,4 +465,9 @@ function atlasHtml(_webview, atlas, options = {}) {
     </main><script nonce="${nonce}">${script}</script></body></html>`;
 }
 
-module.exports = { atlasHtml };
+function atlasOpenErrorHtml(error) {
+  const nonce = randomBytes(24).toString('base64');
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; form-action 'none'; base-uri 'none'"><title>Open mathematical atlas</title><style nonce="${nonce}">${styles}</style></head><body><main><h1>Could not open this atlas</h1><p role="alert">${escape(error)}</p><p>Check the file in Text Editor, or retry after the saved file is corrected. Existing files and captured sources have not been changed.</p><div class="toolbar">${button('Retry opening atlas','retryOpen')}${button('Open in Text Editor','openAsText')}</div></main><script nonce="${nonce}">const api=acquireVsCodeApi();document.addEventListener('click',event=>{const action=event.target.closest('button[data-type]');if(action)api.postMessage({type:action.dataset.type});});</script></body></html>`;
+}
+
+module.exports = { atlasHtml, atlasOpenErrorHtml };
