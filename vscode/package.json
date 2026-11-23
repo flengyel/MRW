@@ -394,6 +394,11 @@
         "category": "MRW"
       },
       {
+        "command": "mrw.annotateBundledNote",
+        "title": "Annotate Bundled Note",
+        "category": "MRW"
+      },
+      {
         "command": "mrw.openOperadsNotes",
         "title": "Open Operads Notes",
         "category": "MRW"
@@ -903,6 +908,10 @@
         {
           "command": "mrw.leanStudyActions",
           "when": "resourcePath in mrw.leanLessonPaths"
+        },
+        {
+          "command": "mrw.annotateBundledNote",
+          "when": "false"
         },
         {
           "command": "mrw.openOperadsNotes",
