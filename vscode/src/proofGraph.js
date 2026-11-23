@@ -17,7 +17,7 @@ async function readSources(file, graph) {
       const snapshot = await sourceSnapshot(candidate);
       if (snapshot.revision !== source.sha256) throw new Error('Snapshot changed; the earlier digest is still pinned.');
       const lines = snapshot.text.split(/\r\n|\r|\n/u);
-      if (graph.nodes.some(n => n.citations.some(c => c.source === source.id && c.end_line > lines.length))) {
+      if ([...graph.nodes, ...graph.inferences].some(item => item.citations?.some(c => c.source === source.id && c.end_line > lines.length))) {
         throw new Error('Pinned citation lies outside this snapshot.');
       }
       result[source.id] = { status: 'pinned snapshot', text: snapshot.text };
@@ -68,6 +68,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     await context.workspaceState.update(key(c.file, c.revision), model.projection.hidden);
     c.model = model;
     await c.panel.webview.postMessage({ type: 'graph', ...model,
+      atlas: !!c.atlasRoute,
       sourceStatus: Object.fromEntries(Object.entries(c.sources).map(([id, v]) => [id, v.status])),
       notice: c.notice || '', documentRevision: c.revision });
   }
@@ -123,6 +124,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
       if (m.type === 'ready' || m.type === 'refresh') { await load(c); return; }
       if (m.revision !== c.revision) throw new Error('Outline view changed; use its current controls.');
       const node = c.graph.nodes.find(n => n.id === m.node);
+      if (m.type === 'return_atlas' && c.atlasRoute) { c.atlasRoute.back(); return; }
       if (m.type === 'study_current') {
         const citation=node?.citations.find(x=>x.reference);if(!citation)throw new Error('Select a claim with a retained passage citation.');
         await vscode.commands.executeCommand('mrw.studyCurrent',{reference:citation.reference});
@@ -175,14 +177,16 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
         if (!passage || !tag || !citedTags(passage).has(tag)) throw new Error('Choose an exact Stacks tag or an explicit citation in the displayed passage.');
         await vscode.env.openExternal(vscode.Uri.parse('https://stacks.math.columbia.edu/tag/' + tag));
       } else if (m.type === 'source' || m.type === 'published' || m.type === 'upstream') {
-        if (!node || !Number.isSafeInteger(m.citation)) throw new Error('Choose a pinned source citation.');
-        const citation = node.citations[m.citation];
+        if (!Number.isSafeInteger(m.citation)) throw new Error('Choose a pinned source citation.');
+        const owner = node || (m.type === 'source' && c.graph.inferences.find(rule => rule.id === m.inference));
+        const citation = owner?.citations?.[m.citation];
         if (!citation) throw new Error('Unknown source citation.');
         const source = c.graph.sources.find(s => s.id === citation.source);
         if (m.type === 'published') {
           if (!citation.reference) throw new Error('No saved passage reference.');
           await followPinned(citation.reference, c.root);
         } else if (m.type === 'upstream') {
+          if (!source.url) throw new Error('This source has only a saved text snapshot.');
           await vscode.env.openExternal(vscode.Uri.parse(httpsViewer(source.url)));
         } else {
           // Verify the snapshot again; never show changed bytes as the pin.
@@ -191,7 +195,8 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
           const text = retained.text ?? latest.text;
           if (text === undefined) throw new Error(latest.status);
           const excerpt = text.split(/\r\n|\r|\n/u).slice(citation.start_line - 1, citation.end_line).join('\n');
-          await show(`${source.title}\nRevision: ${source.revision}\nSHA-256: ${source.sha256}\nLines ${citation.start_line}–${citation.end_line}\n${source.review}\n${source.environment || ''}\n${latest.status}\n\n${excerpt}`, 'Pinned-proof-source');
+          const uri = await show(`${source.title}\nRevision: ${source.revision}\nSHA-256: ${source.sha256}\nLines ${citation.start_line}–${citation.end_line}\n${source.review}\n${source.environment || ''}\n${latest.status}\n\n${excerpt}`, 'Pinned-proof-source');
+          if (uri) c.atlasRoute?.onEvidence(uri);
         }
       }
     } catch (error) {
@@ -203,7 +208,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
       await c.panel.webview.postMessage({ type: 'idle' });
     }
   }
-  register('mrw.openProofOutline', async uri => {
+  async function open(uri, atlasRoute) {
     const active = vscode.window.activeTextEditor?.document;
     const chosen = uri?.scheme === 'file' ? uri.fsPath : active?.uri.scheme === 'file' && active.uri.fsPath.endsWith('.mrw-proof.json') ? active.uri.fsPath : await choosePath('Open proof outline (.mrw-proof.json)');
     if (!chosen) return;
@@ -212,7 +217,9 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     const root = await projectRoot({ document: { uri: vscode.Uri.file(file) } });
     if (!within(root, file)) throw new Error('Open a proof outline inside the selected workspace.');
     if (panels.has(file)) {
-      const c = panels.get(file); c.panel.reveal();
+      const c = panels.get(file);
+      if (atlasRoute) c.atlasRoute = atlasRoute;
+      c.panel.reveal();
       if (c.busy) throw new Error('Wait for the current proof-outline action.');
       c.busy = true;
       try { await load(c); }
@@ -225,7 +232,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     await bridge({ method: 'proof_graph_parse', text: snapshot.text });
     const panel = vscode.window.createWebviewPanel('mrw.proofGraph', 'Proof outline', vscode.ViewColumn.Active,
       { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] });
-    const c = { panel, root, file, busy: false }; panels.set(file, c);
+    const c = { panel, root, file, atlasRoute, busy: false }; panels.set(file, c);
     panel.onDidDispose(() => panels.delete(file));
     panel.webview.onDidReceiveMessage(m => {const action=()=>message(c,m);return recorder?.operations&&['inspect','delete','restore','restore_all','update_summary','proposal','edit','ask','stacks_page','stacks_citation','source','published','upstream'].includes(m?.type)?recorder.operations.run('proofGraph.'+m.type,action):action();});
     if (panel.onDidChangeViewState) context.subscriptions.push(panel.onDidChangeViewState(event => {
@@ -236,7 +243,9 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     const style = await fs.readFile(path.join(context.extensionPath, 'media/proof-graph.css'), 'utf8');
     panel.webview.html = outlineHtml(script, support, style, { frameOrigins: ['https://stacks.math.columbia.edu'], kind: 'proof' });
     context.subscriptions.push(panel);
-  });
+  }
+  register('mrw.openProofOutline', uri => open(uri));
+  return open;
 }
 
 module.exports = { registerProofGraph, readSources, within, tagPassage };

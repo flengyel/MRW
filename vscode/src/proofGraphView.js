@@ -33,15 +33,16 @@
       for (const a of scope.assumptions) math(box, 'Assume ' + a);
     }
   }
-  function citations(parent, node) {
-    if (!node.citations.length) return;
-    const box = el('details', parent); el('summary', box, `Sources (${node.citations.length})`);
-    node.citations.forEach((citation, i) => {
+  function citations(parent, item, inference = false) {
+    if (!item.citations?.length) return;
+    const box = el('details', parent); el('summary', box, `Sources (${item.citations.length})`);
+    item.citations.forEach((citation, i) => {
       const source = state.graph.sources.find(s => s.id === citation.source), row = el('div', box, undefined, 'proof-navigation');
-      button(row, source.title + (citation.declaration ? ` · ${citation.declaration}` : ''), 'source', { node: node.id, citation: i }, 'Read the exact pinned source quotation.');
-      if (citation.reference) button(row, 'Reader notes', 'published', { node: node.id, citation: i }, 'Open the saved source reader and its notes.');
-      button(row, 'Upstream', 'upstream', { node: node.id, citation: i }, 'Open the pinned source URL in your browser.');
-      const tier = { published: 'Published Stacks text', human_reviewed: 'Human reviewed by the project', awaiting_human_review: 'Awaiting human review by the project' }[source.review];
+      const target = { ...(inference ? { inference: item.id } : { node: item.id }), citation: i };
+      button(row, source.title + (citation.declaration ? ` · ${citation.declaration}` : ''), 'source', target, 'Read the exact pinned source quotation.');
+      if (!inference && citation.reference) button(row, 'Reader notes', 'published', target, 'Open the saved source reader and its notes.');
+      if (!inference && source.url) button(row, 'Upstream', 'upstream', target, 'Open the pinned source URL in your browser.');
+      const tier = { published: 'Published source', human_reviewed: 'Human reviewed by the project', awaiting_human_review: 'Awaiting human review by the project' }[source.review];
       el('p', box, `${tier} · ${state.sourceStatus[source.id]}`, 'muted');
       if (source.environment) el('p', box, source.environment, 'muted');
     });
@@ -59,7 +60,7 @@
       const r = state.graph.inferences.find(r => r.id === id), item = el('section', box);
       el('p', item, `${r.premises.map(title).join(' AND ')} ⇒ ${title(r.conclusion)}`);
       if (r.discharges.length) el('p', item, 'Discharges assumptions in: ' + r.discharges.join(', '));
-      attributed(item, r.explanation);
+      attributed(item, r.explanation); citations(item, r, true);
     }
   }
   function argument(parent, node) {
@@ -150,6 +151,7 @@
     el('p', provenance, 'Structure validated. Claims and inferences remain attributed proposals; mathematical correctness has not been checked.');
     if (state.notice) el('p', header, state.notice, 'warning');
     bar.replaceChildren();
+    if (state.atlas) button(bar, 'Return to Atlas', 'return_atlas');
     button(bar, graph.description.origin === 'ai_proposal' ? 'Use AI outline' : 'Use proposed outline', 'proposal', {}, 'Apply the proposed selection.');
     button(bar, 'Restore all vertices', 'restore_all', {}, 'Display every original claim and inference.');
     button(bar, 'Edit outline', 'edit', {}, 'Edit claims and summaries in the ordinary JSON document.');
@@ -188,6 +190,7 @@
     if (data.type === 'graph') {
       clearTimeout(startupTimer);
       const previous = state; state = data;
+      if (data.atlas && !previous?.atlas) sourceMode = 'saved';
       try { render(previous); }
       catch (error) { el('p', root, 'Cannot display proof outline: ' + error.message, 'warning'); }
     }

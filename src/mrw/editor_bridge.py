@@ -94,6 +94,8 @@ def _dispatch(request):
         'review': ({'path', 'mode', 'number'}, {'revision'}),
         'contribution': ({'path', 'number', 'revision'}, set()),
         'project': ({'path', 'number', 'revision', 'destination'}, set()),
+        'atlas_publish': ({'project_root', 'path', 'text'}, set()),
+        'atlas_graph_publish': ({'project_root', 'path', 'graph', 'snapshots'}, set()),
         'proof_graph': ({'graph', 'hidden'}, set()),
         'proof_graph_parse': ({'text'}, set()),
         'study_questions_parse': ({'text', 'sources'}, set()),
@@ -157,6 +159,9 @@ def _dispatch(request):
         return action(request)
     if method in ('prepare_assistance', 'send_assistance'):
         return assistance_action(request)
+    if method in ('atlas_publish', 'atlas_graph_publish'):
+        from .atlas_records import publish_atlas, publish_graph
+        return (publish_atlas if method == 'atlas_publish' else publish_graph)(request)
     if method == 'proof_graph':
         from .proof_graph import graph_action
         return graph_action(request)

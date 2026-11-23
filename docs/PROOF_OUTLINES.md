@@ -13,6 +13,10 @@ theorem can be used while inspection of its proof is deferred.
 
 ## Generating a mathematical atlas
 
+Use [Start an atlas from a passage](PROOF_STUDY_WORKFLOW.md#start-an-atlas-from-a-passage)
+for the implemented text workflow. The design below also covers later Lean and
+multi-component proof work.
+
 A mathematical atlas is a reading outline of one or more selected sources. It
 names the main results, explains the construction or reduction joining them, and
 opens the passage where each step is made. A reader can follow the author's

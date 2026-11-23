@@ -163,3 +163,13 @@ Recheck every owned profile used in the trial, including earlier attempts.
 A completed result report does not prove that a window closed. Verify closure
 of the uniquely titled fixture after saving the report; never kill a shared
 VS Code process to clean up a test.
+
+## Mathematical atlas case
+
+Seed the guarded `atlas` case with a copy of
+`tests/fixtures/stacks/topology.tex`. It selects 08ZH in a dirty TeX editor,
+opens the component and exact proof, and checks Return. It corrects a
+reader-authored inference before publishing and reopens the saved atlas
+after a fixture-only reload and a source change. The selections and review
+actions are scripted. The development host, webview, text buffer,
+publication and reload run in native VS Code Remote–WSL.
