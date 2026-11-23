@@ -92,6 +92,7 @@ async function activate(context) {
   function observePanel(panel, kind = 'command') {
     if (observed.has(panel)) return observed.get(panel);
     const record = { panel, kind }; observed.set(panel, record); panels.push(record);
+    panel.onDidDispose(() => { record.disposed = true; });
     const listen = panel.webview.onDidReceiveMessage.bind(panel.webview);
     panel.webview.onDidReceiveMessage = (handler, receiver, disposables) => {
       record.receive = handler;
@@ -120,10 +121,11 @@ async function activate(context) {
   async function normalOpen(uri) {
     // This is deliberately the normal editor-resolution command. Only the
     // explicit Text Editor control below may request an editor override.
+    const activeAtlas = record => !record.disposed && record.kind === 'custom' &&
+      record.customUri?.toString() === uri.toString() && record.current?.atlas && record.panel.active;
     await vscode.commands.executeCommand('vscode.open', uri, { preview: false });
-    await wait(() => panels.some(record => record.kind === 'custom' && record.customUri?.toString() === uri.toString() &&
-      record.current?.atlas && record.panel.active), 'default atlas custom editor');
-    const record = panels.findLast(record => record.kind === 'custom' && record.customUri?.toString() === uri.toString() && record.panel.active);
+    await wait(() => panels.some(activeAtlas), 'default atlas custom editor');
+    const record = panels.findLast(activeAtlas);
     await wait(() => vscode.window.tabGroups.activeTabGroup.activeTab?.input?.viewType === 'mrw.atlasEditor' &&
       vscode.window.tabGroups.activeTabGroup.activeTab.input.uri.toString() === uri.toString(), 'native atlas tab identity');
     const tab = vscode.window.tabGroups.activeTabGroup.activeTab;
