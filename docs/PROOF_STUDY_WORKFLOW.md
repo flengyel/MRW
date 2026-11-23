@@ -59,11 +59,27 @@ Palette. A saved Stacks reader offers **Generate atlas…** for the
 selected passage. Its handoff keeps the qualified source and passage links.
 Lean files can be outlined as source text.
 
-MRW reads the editor revision, including unsaved text. Select a component to
-inspect the exact statement, proof and reference occurrences. Choose which
-cited statements to include. Include a cited proof only when you want to use it.
-A missing or ambiguous reference stays beside its occurrence. **Contents** is
-still available for ordinary Markdown heading navigation.
+MRW captures the editor revision, including unsaved text. Choose a view in the
+atlas.
+
+- **Proof map** opens first. Select a component to inspect its statement and
+  explicit references. If a reference links two components, follow it to the
+  cited result.
+- **Blueprint** shows individual statements, proofs and definitions where the
+  source identifies them. A citation connects the passage containing it to
+  its target. A proof link connects a statement with the proof supplied in the
+  source. Elaborated Lean dependencies and proof checks require separate
+  evidence.
+- **Reading list** shows the components in source order. Group related passages
+  or open a component to edit its title, question, hypotheses, conclusion and
+  next use.
+
+Open a component to choose which cited statements to include in the outline.
+Include a cited proof when you want to use it. A missing or ambiguous
+reference stays beside its occurrence. **Contents** remains available for
+ordinary Markdown heading navigation. In the Stacks proof of 08ZH, follow
+the citation to 08ZE and open the statement to check why the diagonal is
+closed. The Hausdorff hypothesis is on the common target $Z$.
 
 Use **Copy handoff for Codex** to copy only the selected inputs. **Import
 companion outline** opens a review. Inspect which premises are used together
@@ -73,14 +89,16 @@ inferences yourself, choose **Write an outline** and cite the relevant passage.
 The review and graph check structure. Mathematical judgment remains with the
 reader.
 
-**Open exact statement** and **Open exact proof** show the captured text.
-**Return to Atlas** takes you back to the component. Save the atlas to keep its
-captured text and descriptions. Accepted graphs and their exact text snapshots
-are saved beside it. A corrected companion proposal retains a link to the
-original. **MRW: Open Mathematical Atlas…** reopens a saved revision even
-after the original file changes. **Regenerate from source** keeps the
-earlier atlas available and carries descriptions only when their evidence still
-matches. Reselect an edited portion before regenerating a partial atlas.
+Open an exact statement, proof, or citation occurrence to read the captured
+text in VS Code. Use **MRW: Return to Atlas** to recover the component or
+selected node. **Save atlas revision** keeps the captured text and descriptions.
+Accepted graphs and their exact text snapshots are saved beside it. A corrected
+companion proposal retains a link to the original.
+**MRW: Open Mathematical Atlas…** reopens a saved revision even after the
+original file changes.
+**Regenerate from source** keeps the earlier atlas available and carries
+descriptions only when their evidence still matches. Reselect an edited portion
+before regenerating a partial atlas.
 
 The extractor recognizes supported Markdown headings, local links and named
 blocks, and LaTeX labels, statements, proof environments and literal references.

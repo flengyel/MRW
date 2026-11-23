@@ -4,7 +4,7 @@ MRW supports source-based inference graphs with attributed summaries, reversible
 vertex deletion, joint-premise alternatives, local scopes and expandable original
 steps. The graph file remains editable in VS Code. See the
 [current workflow](PROOF_GRAPH_WORKFLOW.md).
-Automatic extraction and formal checking remain separate work.
+Automatic extraction of inferences and formal checking are separate work.
 
 The scope includes textbooks, monographs, articles and AI-generated or
 AI-assisted manuscripts, with or without Lean formalizations. Orientation,
@@ -14,8 +14,9 @@ theorem can be used while inspection of its proof is deferred.
 ## Generating a mathematical atlas
 
 Use [Start an atlas from a passage](PROOF_STUDY_WORKFLOW.md#start-an-atlas-from-a-passage)
-for the implemented text workflow. The design below also covers later Lean and
-multi-component proof work.
+for the component **Proof map**, passage-level **Blueprint**, and editable
+**Reading list**. The design below also covers later Lean and multi-component
+proof work.
 
 A mathematical atlas is a reading outline of one or more selected sources. It
 names the main results, explains the construction or reduction joining them, and

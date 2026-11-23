@@ -2,6 +2,7 @@
 
 const { randomBytes } = require('node:crypto');
 const { detailPage, handoffEntries, overviewComponents, ownerOf } = require('./atlasModel');
+const { diagramHtml, diagramStyles, diagramScript, diagramPositionStyles } = require('./atlasDiagramView');
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -332,7 +333,7 @@ const script = String.raw`
     }
     form.addEventListener('input', () => {
       drafts[key] = values(form);
-      api.setState({drafts});
+      api.setState({...api.getState(),drafts});
     });
   }
   document.addEventListener('click', event => {
@@ -384,6 +385,7 @@ const script = String.raw`
       if (Object.keys(fields).length) api.postMessage({type:'edit',change:{type:'component',component:target.dataset.component,fields}});
     }
   });
+  ${diagramScript}
   const focus = document.getElementById(document.body.dataset.focus) || document.getElementById('atlas-heading');
   focus?.focus();
 })();
@@ -435,13 +437,18 @@ function atlasHtml(_webview, atlas, options = {}) {
   const { selection } = atlas.extraction;
   const origin = atlas.source.text.slice(0, selection.start).split(/\r\n|\r|\n/).length;
   const limit = atlas.source.text.slice(0, selection.end).split(/\r\n|\r|\n/).length;
+  const visual = !options.component && options.diagram && options.view !== 'list';
+  const tabs = options.view ? `<nav class="atlas-view-tabs" aria-label="Atlas views">${[['map', 'Proof map'], ['blueprint', 'Blueprint'], ['list', 'Reading list']].map(([view, label]) =>
+    `<button type="button" id="atlas-view-${view}" aria-pressed="${options.view === view}" data-type="selectView" data-view="${view}">${label}</button>`).join('')}</nav>` : '';
   const main = options.component ? detailView(atlas, atlasIndex, options) :
-    `<h1 id="atlas-heading" tabindex="-1">${escape(atlas.source.title)}</h1>${overview(atlas, atlasIndex)}`;
+    `<h1 id="atlas-heading" tabindex="-1">${escape(atlas.source.title)}</h1>${visual
+      ? diagramHtml(atlas, atlasIndex, options, {escape,button,exactPreview,description,referenceList})
+      : overview(atlas, atlasIndex)}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; form-action 'none'; base-uri 'none'">
-    <title>Mathematical Atlas</title><style nonce="${nonce}">${styles}</style>
-    </head><body data-focus="${escape(options.focus || (options.proposal ? 'proposal-title' : 'atlas-heading'))}"><main>
+    <title>Mathematical Atlas</title><style nonce="${nonce}">${styles}${diagramStyles}${diagramPositionStyles(visual ? options.diagram : undefined)}</style>
+    </head><body data-capture="${escape(atlas.source.revision)}" data-focus="${escape(options.focus || (options.proposal ? 'proposal-title' : 'atlas-heading'))}"><main${visual ? ' class="diagram-main"' : ''}>
     <nav class="toolbar" aria-label="Atlas actions">
       ${button('Open exact selection', 'openSource', { part: 'selection' })}
       ${button('Return to source selection', 'return')}
@@ -451,6 +458,7 @@ function atlasHtml(_webview, atlas, options = {}) {
     </nav>
     <p class="muted">${escape(atlas.source.title)} · lines ${origin}–${limit} · revision <code>${escape(atlas.source.revision.slice(0, 12))}</code></p>
     <p role="status" id="atlas-status">${escape(options.notice)}</p>
+    ${tabs}
     ${main}
     ${atlas.extraction.limitations?.length ? `<details><summary>Extraction notes</summary><ul>${atlas.extraction.limitations.map(note => `<li>${escape(note)}</li>`).join('')}</ul></details>` : ''}
     </main><script nonce="${nonce}">${script}</script></body></html>`;

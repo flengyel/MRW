@@ -642,10 +642,12 @@ guides and shows installation and configuration status.
 Calculation opens native notebooks, retained results, comparison and provenance
 export. Retained notebooks are read-only; comparison submits no cell execution.
 To outline a theorem or section, select it in a Markdown or LaTeX editor and run
-**MRW: Generate Mathematical Atlas…**. Follow the cited statement or open
-the exact proof. **Return to Atlas** takes you back to the component. Copy
-a companion handoff only when you want a proposal, or write the argument
-in the atlas. Review and correct reasons before saving the proof outline.
+**MRW: Generate Mathematical Atlas…**. **Proof map** connects components by
+explicit source citations. Switch to **Blueprint** to see individual statements,
+proofs and definitions. Select a node and open its exact passage. **Return to
+Atlas** restores the node. Use **Reading list** to rename or group components.
+Open a component to write the argument or copy a companion handoff. Review and
+correct reasons before saving the proof outline.
 Use **MRW: Open Mathematical Atlas…** to recover the saved capture and
 corrections after a restart.
 
