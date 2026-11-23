@@ -186,9 +186,9 @@ async function harness(root, state = new Map(), options = {}) {
     return require(name);
   };
   vm.runInThisContext(`(function(require,module){${source}\n})`)(requires, module);
-  module.exports.activate(context);
+  const { extendMarkdownIt } = module.exports.activate(context);
   shutdowns.set(root,[...(shutdowns.get(root)||[]),()=>module.exports.deactivate()]);
-  return { api, commands, errors, shown, reads, requests, opens, dialogs, saveChoices, saveDialogs, workspaceEdits, saves, commandCalls, inputs, picks, endings, panels, state, document, editor, providers, executed,
+  return { api, commands, errors, shown, reads, requests, opens, dialogs, extendMarkdownIt, saveChoices, saveDialogs, workspaceEdits, saves, commandCalls, inputs, picks, endings, panels, state, document, editor, providers, executed,
     changeDocument(doc, at, length, text) { doc.text = doc.text.slice(0, at) + text + doc.text.slice(at + length); doc.version++; doc.isDirty = true;
       changeListener({ document: doc, contentChanges: [{ rangeOffset: at, rangeLength: length, text }] }); },
     closeDocument(doc) { doc.isClosed = true; storedDocuments.delete(doc.uri.toString()); closeListener(doc); },
@@ -1315,6 +1315,53 @@ test('bundled operads notes open as an ordinary Markdown document, with the asso
   ]);
   assert.equal([...doc.getText().matchAll(/^```tikz$/gm)].length, 5);
   assert.equal(h.workspaceEdits.length + h.saves.length + h.requests.length, 0);
+  assert.deepEqual(await fs.readdir(root), []);
+});
+
+test('bundled notes retain reader comments only after the annotation action, and reopen with them', async t => {
+  const root = await temporary(t);
+  const h = await harness(root);
+  const MarkdownIt = require('../media/markdown-it/markdown-it');
+  async function openPreview(host) {
+    await host.commands.get('mrw.openOperadsNotes')();
+    const doc = host.shown.at(-1);
+    host.api.workspace.textDocuments = [doc];
+    const md = host.extendMarkdownIt(new MarkdownIt('commonmark'));
+    const preview = () => md.render(doc.getText(), { currentDocument: doc.uri });
+    const href = preview().match(/href="([^"]+)">Annotate saved copy…<\/a>/)?.[1];
+    assert.ok(href, 'the bundled preview shows an explicit annotation action');
+    const action = { scheme: 'vscode', authority: 'flengyel.mrw', path: '/document-action', toString: () => href };
+    return { doc, preview, action };
+  }
+
+  const first = await openPreview(h);
+  const original = await fs.readFile(first.doc.uri.fsPath, 'utf8');
+  assert.equal(h.requests.length, 0);
+  first.doc.isDirty = true;
+  assert.doesNotMatch(first.preview(), /Annotate saved copy/);
+  await h.api.uriHandler.handleUri(first.action);
+  assert.match(h.errors.pop(), /Reopen the bundled notes/);
+  assert.equal(h.requests.length, 0, 'a stale preview cannot retain a dirty note');
+  first.doc.isDirty = false;
+
+  await h.api.uriHandler.handleUri(first.action);
+  assert.deepEqual(h.errors, []);
+  const reader = h.panels[0];
+  const retained = reader.webview.messages.findLast(m => m.type === 'outline').model.outline;
+  assert.equal(retained.source.bibliography.title, 'Operads from finite lists');
+  assert.equal(retained.regions[0].argument_text, original);
+  const comment = 'Why do empty blocks still fill an outer slot?';
+  await reader.receive({type:'edit',change:{kind:'annotation',region:retained.regions[0].id,id:null,purpose:'question',origin:'human_work',author:null,text:comment}});
+
+  const restarted = await harness(root, h.state);
+  const next = await openPreview(restarted);
+  assert.equal(restarted.requests.length, 0);
+  await restarted.api.uriHandler.handleUri(next.action);
+  assert.deepEqual(restarted.errors, []);
+  const reopened = restarted.panels[0].webview.messages.findLast(m => m.type === 'outline').model.outline;
+  assert.equal(reopened.id, retained.id);
+  assert.equal(reopened.regions[0].annotations[0].text, comment);
+  assert.equal(await fs.readFile(first.doc.uri.fsPath, 'utf8'), original);
   assert.deepEqual(await fs.readdir(root), []);
 });
 

@@ -506,17 +506,35 @@ def mutate(store, change):
     return store.publish(value)
 
 
-def import_note(store, source):
+def _bundled_note(value):
+    fields(value, {'id', 'title'}, 'bundled note')
+    identifier = text(value['id'], 'bundled note identifier', 128)
+    if re.fullmatch(r'mrw:[a-z0-9]+(?:-[a-z0-9]+)*', identifier) is None:
+        raise ValueError('Invalid bundled note identifier')
+    title = text(value['title'], 'bundled note title', 256)
+    if not title.strip() or not title.isprintable():
+        raise ValueError('Invalid bundled note title')
+    return identifier, title
+
+
+def import_note(store, source, bundle=None):
     if source.path.suffix.lower() not in {'.md', '.markdown'}:
         raise ValueError('Choose an Obsidian .md or .markdown note')
     value, starts, lines = line_table(source)
     if not value.strip():
         raise ValueError('The selected note is empty')
-    store.id = str(uuid5(NAMESPACE_URL, str(store.root) + '\0obsidian-note\0' + str(source.path) + '\0' + source.revision))
+    if bundle is not None:
+        locator, title = bundle
+        source_key = 'mrw-bundled-note\0' + locator
+    else:
+        locator, title = None, source.path.stem
+        source_key = 'obsidian-note\0' + str(source.path)
+    store.id = str(uuid5(NAMESPACE_URL, '\0'.join((str(store.root), source_key, source.revision))))
     store.directory = store.base / store.id
     if (store.directory / 'outline.json').exists():
         saved = OutlineStore(str(store.base), str(store.root), store.id)
-        if saved.state['source']['path'] != str(source.path) or saved.state['source']['revision'] != source.revision:
+        saved_source = saved.state['source']
+        if saved_source['revision'] != source.revision or (bundle is None and saved_source['path'] != str(source.path)):
             raise ValueError('Saved document identity differs; no saved source was replaced')
         saved.require_active()
         return dict(**saved.view(), reused=True)
@@ -544,9 +562,10 @@ def import_note(store, source):
     if len(regions) > 1:
         for index, region in enumerate(regions, 1):
             region['title'] = f'Note — part {index}'
+    bibliography = dict.fromkeys(BIBLIOGRAPHY)
+    bibliography.update(title=title, locator=locator)
     store.state = dict(schema=SCHEMA, version=1, id=store.id, project_root=str(store.root), created_at=now(),
-        source=dict(path=str(source.path), revision=source.revision, authorship='unknown',
-                    bibliography={key: source.path.stem if key == 'title' else None for key in BIBLIOGRAPHY}),
+        source=dict(path=str(source.path), revision=source.revision, authorship='unknown', bibliography=bibliography),
         regions=regions, contexts=[], annotations=[], artifacts=[])
     validate_state(store.state, store.root, store.id)
     try:
@@ -595,7 +614,8 @@ def outline_action(request):
                                    len(r['annotations']) for r in saved.state['regions'])))
         return {'outlines': result}
     if method == 'outline_import_note':
-        return import_note(store, ordinary_source(request['path'], request['source_revision']))
+        bundle = _bundled_note(request['bundle']) if 'bundle' in request else None
+        return import_note(store, ordinary_source(request['path'], request['source_revision']), bundle)
     if method == 'outline_create':
         source = ordinary_source(request['path'], request['source_revision'])
         store.id = str(uuid4()); store.directory = store.base / store.id

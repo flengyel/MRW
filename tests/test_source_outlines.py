@@ -119,6 +119,76 @@ class SourceOutlineTests(unittest.TestCase):
         self.assertEqual(previous['outline']['annotations'], saved['outline']['annotations'])
         self.assertEqual(previous['outline']['regions'][0]['argument_text'], '# Note\nOriginal text.')
 
+    def test_bundled_note_reopens_by_identity_and_revision_across_installs(self):
+        bundle = dict(id='mrw:operads-from-finite-lists', title='Operads from finite lists')
+        old_path = self.home / 'old-install' / 'operads.md'
+        new_path = self.home / 'new-install' / 'operads.md'
+        raw = '# Operads from finite lists\r\nAn exact passage about $\\mathbf{Sets}$.\r\n'.encode()
+        digest = sha256(raw).hexdigest()
+        for path in (old_path, new_path):
+            path.parent.mkdir()
+            path.write_bytes(raw)
+        imported = self.call('outline_import_note', path=str(old_path), source_revision=digest, bundle=bundle)
+        identifier = imported['outline']['id']
+        region = imported['outline']['regions'][0]['id']
+        saved = self.call('outline_mutate', id=identifier, revision=imported['revision'],
+                          change=dict(kind='annotation', region=region, id=None, purpose='note',
+                                      text='Keep the note on this exact revision', origin='human_work', author='Reader'))
+        self.assertEqual(saved['outline']['source']['bibliography']['title'], bundle['title'])
+        self.assertEqual(saved['outline']['source']['bibliography']['locator'], bundle['id'])
+        self.assertEqual(old_path.read_bytes(), raw)
+        old_path.unlink()
+        reopened = self.call('outline_import_note', path=str(new_path), source_revision=digest, bundle=bundle)
+        self.assertTrue(reopened['reused'])
+        self.assertEqual(reopened['outline']['id'], identifier)
+        self.assertEqual(reopened['revision'], saved['revision'])
+        self.assertEqual(reopened['outline']['regions'], saved['outline']['regions'])
+        self.assertEqual(new_path.read_bytes(), raw)
+
+        other = self.call('outline_import_note', path=str(new_path), source_revision=digest,
+                          bundle=dict(id='mrw:another-note', title='Another note'))
+        self.assertNotEqual(other['outline']['id'], identifier)
+        newer = raw + b'Another passage.\n'
+        new_path.write_bytes(newer)
+        imported_new = self.call('outline_import_note', path=str(new_path), source_revision=sha256(newer).hexdigest(), bundle=bundle)
+        self.assertFalse(imported_new['reused'])
+        self.assertNotEqual(imported_new['outline']['id'], identifier)
+        self.assertEqual(imported_new['outline']['regions'][0]['annotations'], [])
+        previous = self.call('outline_load', id=identifier)
+        self.assertEqual(previous['outline']['regions'], saved['outline']['regions'])
+        retained = self.call('outline_document', id=identifier, revision=previous['revision'], artifact=None)
+        self.assertEqual(retained['text'].encode(), raw)
+        self.assertEqual(new_path.read_bytes(), newer)
+
+    def test_invalid_bundle_identity_or_title_leaves_saved_sources_unchanged(self):
+        path = self.home / 'operads.md'
+        path.write_text('# Operads\nExact text.\n')
+        valid = dict(id='mrw:operads-from-finite-lists', title='Operads from finite lists')
+        before = self.call('outline_list')
+        for bundle in (None, {}, dict(valid, id='stacks-project:operads'), dict(valid, id='mrw:a/b'),
+                       dict(valid, id='mrw:' + 'a' * 128), dict(valid, title=' '),
+                       dict(valid, title='Multiline\nTitle'), dict(valid, title='α' * 129),
+                       dict(valid, extra=True)):
+            with self.subTest(bundle=bundle), self.assertRaisesRegex(ValueError, 'bundled note'):
+                self.call('outline_import_note', path=str(path), source_revision=sha256(path.read_bytes()).hexdigest(), bundle=bundle)
+        self.assertEqual(self.call('outline_list'), before)
+
+    def test_bundled_note_import_does_not_restore_a_trashed_revision(self):
+        bundle = dict(id='mrw:operads-from-finite-lists', title='Operads from finite lists')
+        path = self.home / 'operads.md'
+        raw = b'# Operads\nKeep the retained revision.\n'
+        path.write_bytes(raw)
+        digest = sha256(raw).hexdigest()
+        imported = self.call('outline_import_note', path=str(path), source_revision=digest, bundle=bundle)
+        identifier = imported['outline']['id']
+        trashed = self.call('outline_trash', id=identifier, revision=imported['revision'], status_revision=None)
+        renamed = path.with_name('same-bytes.md')
+        path.rename(renamed)
+        with self.assertRaisesRegex(ValueError, 'in Trash'):
+            self.call('outline_import_note', path=str(renamed), source_revision=digest, bundle=bundle)
+        self.assertEqual(self.call('outline_load', id=identifier)['lifecycle'], trashed['lifecycle'])
+        self.assertEqual(renamed.read_bytes(), raw)
+
     def test_obsidian_note_chunks_preserve_all_unicode_and_line_endings(self):
         for text in ['a'*(MAX_REGION-1)+'\r\n😀end\r', 'α😀'*(MAX_REGION//5)+'tail', 'line\r\n'*(MAX_REGION//5)]:
             with self.subTest(length=len(text)):

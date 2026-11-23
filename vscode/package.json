@@ -389,6 +389,11 @@
         "icon": "$(question)"
       },
       {
+        "command": "mrw.openLearningMaterials",
+        "title": "Learning Materials…",
+        "category": "MRW"
+      },
+      {
         "command": "mrw.openOperadsNotes",
         "title": "Open Operads Notes",
         "category": "MRW"
@@ -898,6 +903,18 @@
         {
           "command": "mrw.leanStudyActions",
           "when": "resourcePath in mrw.leanLessonPaths"
+        },
+        {
+          "command": "mrw.openOperadsNotes",
+          "when": "false"
+        },
+        {
+          "command": "mrw.openStudyExample",
+          "when": "false"
+        },
+        {
+          "command": "mrw.studyLean4",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -1150,7 +1167,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
+        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Learning Materials…](command:mrw.openLearningMaterials \"Choose notes, a practice study or a Lean lesson.\")\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
       },
       {
         "view": "mrw.readingOutline",

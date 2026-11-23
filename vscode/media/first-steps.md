@@ -351,19 +351,24 @@ bounded search is not a disproof. The
 explains the limits and the explicit context-file route. No registration form
 is required for reading or writing notes.
 
-## Read the operads notes
+## Learning materials
 
-Run **MRW: Open Operads Notes** from the Command Palette to read the bundled
-companion to Chapter 1 of Heuts and Moerdijk. The notes explain the list monad,
-construct the associative operad by flattening and then define coloured symmetric
-operads. Use **Contents** to jump to a section. Choose **Render diagram** for a
-TikZ square or triangle, or read its law in the text. Opening the notes starts
-no study. Keep your calculations and questions in a separate working note.
+Choose **Learning Materials…** in **Commands** to open a note, a practice
+study or a Lean lesson.
+
+- **Operads from finite lists** opens the companion to Chapter 1 of Heuts and
+  Moerdijk. Use **Contents** to jump to a section and **Render diagram** to
+  draw a TikZ square or triangle. To comment, choose **Annotate saved copy…**
+  above the preview and then **Add a note** in the saved-source reader. The
+  current workspace keeps the exact copy and its reader notes.
+- **Sums of odd integers** opens the induction example and its two practice
+  questions. Reopen a saved attempt through **Resume Study**.
+- **Lean 4 lessons** lists the bundled lessons and any enabled lesson packs.
 
 ## Study Lean 4
 
-Choose **Study Lean 4…** in **Commands** and begin with **Introduction and
-functions**. Its introduction explains formalization and the purpose of the
+Choose **Learning Materials… → Lean 4 lessons** and begin with **Introduction
+and functions**. Its introduction explains formalization and the purpose of the
 three lessons, followed by contents and instructions for the examples and InfoView. Follow the contents links to **Implication as a function
 on proofs**, then **Dependent application**. Each lesson also links to its
 sections and back to the tutorial contents. Each lesson introduces its terminology before the
@@ -493,8 +498,7 @@ and structure, not the mathematical argument. See
 - [Saved-work storage and recovery](https://github.com/flengyel/MRW/blob/main/docs/ARTIFACT_STORAGE.md)
 - [SagePod computation](https://github.com/flengyel/MRW/blob/main/docs/GETTING_STARTED_WSL_SAGEPOD.md)
 
-**MRW: Open Study Example** supplies an optional offline demonstration. Reopen
-this active build's guide with **MRW: Open Tutorial**.
+Reopen this active build's guide with **MRW: Open Tutorial**.
 
 
 ## Read a published section

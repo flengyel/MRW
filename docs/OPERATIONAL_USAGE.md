@@ -30,8 +30,10 @@ IDs, labels, categories, entry points and instrumentation status. Renaming a
 button must not create an unrelated feature. Record mappings when a feature
 splits, merges or is retired; do not silently combine incomparable versions.
 Every added or changed feature declares its coverage, including any omissions.
-**Open Operads Notes** records a reading invocation as `mrw.openOperadsNotes`.
-Reaching a section or reading a diagram does not establish comprehension.
+**Learning Materials…** records `mrw.openLearningMaterials`. The selected
+reader, practice example or lesson command is a child operation. The preview's
+**Annotate saved copy…** records `mrw.annotateBundledNote` when it opens the
+workspace's saved copy. Saving the comment remains a reader action.
 
 Count one user action once at the feature level. Correlate nested commands,
 bridge calls and external operation IDs as children; retain them for diagnosis

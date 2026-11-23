@@ -29,7 +29,7 @@ function validPin(pin) {
     Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start;
 }
 
-function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile, sourcePlugins, followNotebookResult }) {
+function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile, sourcePlugins, openBundledNote, followNotebookResult }) {
   const saved = context.workspaceState.get(KEY) || {};
   let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
@@ -287,7 +287,9 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   ]) if (listener) context.subscriptions.push(listener);
   updateReturnCommand();
   void refreshNoteActions();
-  const wikiLinks = registerWikiLinks({ vscode, context, register, documents, compile,
+  const operads = vscode.Uri.file(path.join(context.extensionPath, 'media', 'operads-study', 'operads.md'));
+  const isBundledNote = uri => uri?.toString() === operads.toString();
+  const wikiLinks = registerWikiLinks({ vscode, context, register, documents, compile, isBundledNote,
     noteActions: uri => noteActions.get(uri.toString()) || {} });
   register('mrw.openReadingOutline', value => openReadingOutline(false, false, false, value?.scheme === 'file' ? value : undefined));
   register('mrw.editDocumentSource', async value => {
@@ -304,8 +306,13 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   register('mrw.chooseReadingOverview', () => openReadingOutline(true));
   register('mrw.revealReadingDocument', () => openReadingOutline(false, false, true));
   registerTutorial({ vscode, context, register });
-  register('mrw.openOperadsNotes', () => documents.openLinkedDocument(
-    vscode.Uri.file(path.join(context.extensionPath, 'media', 'operads-study', 'operads.md'))));
+  register('mrw.openOperadsNotes', () => documents.openLinkedDocument(operads));
+  register('mrw.annotateBundledNote', async (uri, revision) => {
+    if (!isBundledNote(uri)) throw new Error('This action requires the bundled notes.');
+    const note = vscode.workspace.textDocuments?.find(doc => isBundledNote(doc.uri) && !doc.isClosed);
+    if (!note || note.isDirty || digest(note.getText()) !== revision) throw new Error('Reopen the bundled notes before annotating their saved text.');
+    return openBundledNote(note, revision, { id: 'mrw:operads-from-finite-lists', title: 'Operads from finite lists' });
+  });
   register('mrw.refreshReadingOutline', () => { refresh(); return model; });
   async function followRetainedReference(reference, editor, location, attempt, reading = false) {
     documents.supersede();

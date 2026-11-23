@@ -115,7 +115,7 @@ def _dispatch(request):
         'outline_source_reparse': ({'store','project_root','id','revision'},set()),
         'outline_list': ({'store', 'project_root'}, set()),
         'outline_create': ({'store', 'project_root', 'path', 'source_revision'}, set()),
-        'outline_import_note': ({'store', 'project_root', 'path', 'source_revision'}, set()),
+        'outline_import_note': ({'store', 'project_root', 'path', 'source_revision'}, {'bundle'}),
         'outline_trash_list': ({'store', 'project_root'}, set()),
         'outline_trash': ({'store', 'project_root', 'id', 'revision', 'status_revision'}, set()),
         'outline_restore': ({'store', 'project_root', 'id', 'revision', 'status_revision'}, set()),

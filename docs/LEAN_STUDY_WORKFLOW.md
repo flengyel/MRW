@@ -1,7 +1,7 @@
 # Study Lean 4
 
-Choose **Study Lean 4…** in MRW's **Commands** area, or run **MRW: Study Lean
-4…** from the Command Palette. The introductory sequence has three lessons:
+Choose **Learning Materials… → Lean 4 lessons** in MRW's **Commands** view.
+The introductory sequence has three lessons.
 
 1. **Introduction and functions** explains what formalization entails and how
    the three constructions are related. It then defines terms, types, binders

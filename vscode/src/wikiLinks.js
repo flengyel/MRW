@@ -1,5 +1,6 @@
 'use strict';
 const { randomUUID } = require('node:crypto');
+const { digest } = require('./navigation');
 const { noteIdentity } = require('./noteIdentity');
 const { documentColumn } = require('./documentPresentation');
 const { parseReadingMarkdown, zettelLinkParts, frontMatterInfo } = require('./readingMarkdown');
@@ -8,7 +9,7 @@ const { isNotebookResultLink } = require('./notebookResults');
 
 // Discovery/rendering only uses the host's already-open text, never a folder
 // scan. A click rechecks the exact occurrence and uses ordinary scoped navigation.
-function registerWikiLinks({ vscode, context, register, documents, compile, noteActions = () => ({}) }) {
+function registerWikiLinks({ vscode, context, register, documents, compile, noteActions = () => ({}), isBundledNote = () => false }) {
   const session = randomUUID(), cache = new WeakMap();
   const citations = require('./citations').registerCitations({vscode,context,documents});
   register('mrw.refreshCitations',async()=>{for(const doc of (vscode.workspace.textDocuments||[]).slice(0,16))await citations.update(doc);});
@@ -84,15 +85,24 @@ function registerWikiLinks({ vscode, context, register, documents, compile, note
     md.core.ruler.push('mrw_note_heading', state => { state.tokens.unshift(new state.Token('mrw_note_heading', '', 0)); });
     md.renderer.rules.mrw_note_heading = (_tokens, _at, _options, env) => {
       const doc = vscode.workspace.textDocuments?.find(d => d.uri.toString() === env.currentDocument?.toString());
-      if (!doc || !documents.isNote(doc.uri) || vscode.workspace.isTrusted === false) return '';
+      if (!doc || vscode.workspace.isTrusted === false) return '';
+      const bundled = isBundledNote(doc.uri);
+      if (!bundled && !documents.isNote(doc.uri)) return '';
       const identity = noteIdentity(doc), escape = md.utils.escapeHtml;
-      const action = kind => `${scheme}://flengyel.mrw/document-action?target=${Buffer.from(JSON.stringify({ session, uri: doc.uri.toString(), action: kind }), 'utf8').toString('base64url')}`;
+      const action = kind => {
+        const target = { session, uri: doc.uri.toString(), action: kind };
+        if (kind === 'annotate-bundled') target.revision = digest(doc.getText());
+        return `${scheme}://flengyel.mrw/document-action?target=${Buffer.from(JSON.stringify(target), 'utf8').toString('base64url')}`;
+      };
       const actions = noteActions(doc.uri);
       const links = [
         ['contents', 'Show Contents'],
+        ...(bundled && !doc.isDirty ? [['annotate-bundled', 'Annotate saved copy…']] : []),
         ...(actions.obsidian ? [['obsidian', 'Open in Obsidian']] : []),
         ...(actions.link ? [['copy', 'Copy MRW link']] : []),
       ].map(([kind, label]) => `<a href="${escape(action(kind))}">${label}</a>`).join(' · ');
+      if (bundled) return `<aside class="mrw-note-heading" aria-label="Bundled note actions"><p>${links}</p></aside>
+`;
       return `<aside class="mrw-note-heading" aria-label="Note identity"><strong title="${escape(identity.rawTitle)}">${escape(identity.title || identity.id)}</strong> · <code>${escape(identity.filename)}</code>${doc.isDirty ? ' · Unsaved VS Code changes' : ''}<p>${links}</p></aside>\n`;
     };
     md.renderer.rules.mrw_wikilink = (tokens, at, _options, env) => {
@@ -134,8 +144,13 @@ function registerWikiLinks({ vscode, context, register, documents, compile, note
     const data = JSON.parse(Buffer.from(pairs[0][1], 'base64url').toString('utf8'));
     if (uri.path === '/document-diagram') { await math.handle(data); return true; }
     if (uri.path === '/document-action') {
-      if (data?.session !== session || typeof data.uri !== 'string' || data.uri.length > 8192 || !['obsidian', 'contents', 'copy'].includes(data.action)) throw new Error('This note action is unavailable. Reopen the preview.');
+      if (data?.session !== session || typeof data.uri !== 'string' || data.uri.length > 8192 || !['obsidian', 'contents', 'copy', 'annotate-bundled'].includes(data.action)) throw new Error('This note action is unavailable. Reopen the preview.');
       const source = vscode.Uri.parse(data.uri);
+      if (data.action === 'annotate-bundled') {
+        if (!isBundledNote(source)) throw new Error('This action requires the bundled notes.');
+        await vscode.commands.executeCommand('mrw.annotateBundledNote', source, data.revision);
+        return true;
+      }
       await documents.check(source);
       if (data.action === 'obsidian') await documents.openInObsidian(source);
       else if (data.action === 'copy') await documents.copyLink(source);

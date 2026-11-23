@@ -29,11 +29,14 @@ entries, unselected references, duplicate JSON keys and unknown fields are
 rejected. Imported questions remain available offline. These clipboard actions
 make no provider request and run no compiler.
 
-Run **MRW: Open Operads Notes** to read the bundled companion to Chapter 1 of
-Heuts and Moerdijk. Its Contents begins with lists and the monad laws, constructs
-the associative operad and then gives the general definition. Use the
-[diagram controls](TIKZ_WORKFLOW.md#render-a-markdown-note) to render the monad
-squares and triangles. Keep your work in your own note.
+Choose **Learning Materials… → Operads from finite lists** for the notes
+on Chapter 1 of Heuts and Moerdijk. Their Contents leads from the list monad to
+the associative operad and the general definition. Use
+[Render diagram](TIKZ_WORKFLOW.md#render-a-markdown-note) for the TikZ diagrams.
+To comment, choose **Annotate saved copy…** in the preview, then **Add a note**
+in the saved-source reader. **Open Saved Source…** also finds retained
+revisions and their comments. Reopening identical bundled text reuses the
+saved copy in this workspace, including after an extension update.
 
 ## Attempts and continuation
 
@@ -94,8 +97,8 @@ exposure for that submission. Receiving help afterward does not relabel earlier
 work. Copying a request or retaining a reply does not establish that help was used
 or that it was useful.
 
-For an offline example, **MRW: Open Study Example** opens original attributed
-text and two questions. Its history is labeled `practice_demo`, separately from
+Choose **Learning Materials… → Sums of odd integers** for the offline
+induction example and two questions. Its history is labeled `practice_demo`, separately from
 research use and automated fixtures. Existing work is preserved.
 
 ## Review and effort

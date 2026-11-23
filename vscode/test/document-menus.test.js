@@ -61,3 +61,54 @@ test('Return and companion commands have the same scope in the Document menu and
   assert.equal(c.submenus.find(menu => menu.id === 'mrw.documentNavigation').icon, '$(list-selection)');
   assert.equal(c.commands.find(row => row.command === 'mrw.openOutline').icon, '$(book)');
 });
+
+test('Learning Materials is the visible entry for the three sample routes', () => {
+  const command = c.commands.find(item => item.command === 'mrw.openLearningMaterials');
+  assert.equal(command.title, 'Learning Materials…');
+  assert.equal(c.menus.commandPalette.some(item => item.command === command.command && item.when === 'false'), false);
+  assert.match(c.viewsWelcome.find(item => item.view === 'mrw.commands').contents,
+    /\[Learning Materials…\]\(command:mrw\.openLearningMaterials /);
+  for (const command of ['mrw.openOperadsNotes', 'mrw.openStudyExample', 'mrw.studyLean4']) {
+    assert.equal(c.menus.commandPalette.find(item => item.command === command).when, 'false');
+  }
+  const { GROUPS } = require('../src/companionTools');
+  assert.ok(GROUPS.readingTools.some(([, command]) => command === 'openLearningMaterials'));
+  assert.deepEqual(GROUPS.proofTools.filter(([, command]) => /Lean|leanStudy/.test(command)).map(([, command]) => command),
+    ['resumeLeanStudy', 'leanStudyActions']);
+});
+
+test('the Learning Materials picker opens only the chosen material and permits cancelling', async () => {
+  const { registerCompanionTools } = require('../src/companionTools');
+  const handlers = new Map();
+  const opened = [];
+  const routes = new Map([
+    ['Operads from finite lists', 'mrw.openOperadsNotes'],
+    ['Sums of odd integers', 'mrw.openStudyExample'],
+    ['Lean 4 lessons', 'mrw.studyLean4'],
+  ]);
+  let choice;
+  const vscode = {
+    window: { async showQuickPick(items, options) {
+      assert.equal(options.title, 'Learning materials');
+      assert.equal(options.matchOnDescription, true);
+      assert.deepEqual(items.map(item => item.label), [...routes.keys()]);
+      assert.ok(items.every(item => item.description));
+      return items.find(item => item.label === choice);
+    } },
+    commands: { async executeCommand(command) {
+      opened.push(command);
+      return command;
+    } },
+  };
+  registerCompanionTools({vscode, register: (id, handler) => handlers.set(id, handler)});
+  const pick = handlers.get('mrw.openLearningMaterials');
+  assert.equal(await pick(), undefined);
+  assert.deepEqual(opened, []);
+  for (const [label, command] of routes) {
+    choice = label;
+    assert.equal(await pick(), command);
+  }
+  choice = undefined;
+  assert.equal(await pick(), undefined);
+  assert.deepEqual(opened, [...routes.values()]);
+});

@@ -938,6 +938,24 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const target=await bridge(request(c,'outline_reference',{region:c.selected||null}));
     return rows.studyPassage(target.reference,root);
   };
+  rows.openBundledNote = (document, revision, bundle) => locked(async () => {
+    const { store, root } = await storage(vscode.window.activeTextEditor);
+    const source = await sourceSnapshot(document.uri.fsPath);
+    if (document.isClosed || document.isDirty || digest(document.getText()) !== revision ||
+        normalize(document.getText()) !== normalize(source.text)) {
+      throw new Error('The bundled notes changed. Reopen the preview to annotate the current text.');
+    }
+    writable({ store });
+    let result;
+    try {
+      result = await bridge({ method: 'outline_import_note', store, project_root: root,
+        path: source.path, source_revision: source.revision, bundle });
+    } catch (error) {
+      if (error.code !== 'ACTION_REJECTED') blockedStores.add(store);
+      throw error;
+    }
+    return (await display(result, store, root)).result;
+  });
   rows.loadStudyExample = () => locked(async () => {
     const {store,root}=await storage(vscode.window.activeTextEditor);writable({store});
     const source=await sourceSnapshot(path.join(context.extensionPath,'media/study-example.md'));
