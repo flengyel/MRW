@@ -29,7 +29,7 @@ function validPin(pin) {
     Number.isSafeInteger(pin.start) && Number.isSafeInteger(pin.end) && pin.start >= 0 && pin.end >= pin.start;
 }
 
-function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile, sourcePlugins, openBundledNote, followNotebookResult }) {
+function registerReadingOutline({ vscode, context, register, followReference, resolveReferences, onReturnChanged, onDocumentChange, savedDocuments, compile, sourcePlugins, openBundledNote, followNotebookResult, returnFromAtlas }) {
   const saved = context.workspaceState.get(KEY) || {};
   let overviewUri = typeof saved.uri === 'string' ? saved.uri : undefined;
   let document, model, timer, generation = 0, origin = validPin(saved.origin) ? saved.origin : undefined;
@@ -361,6 +361,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     await persist();
   });
   async function returnToReadingOutline(options) {
+    if (!options && returnFromAtlas?.()) return;
     if (!options?.retained && route === 'ordinary' && await documents.returnToDocument()) return;
     documents.supersede();
     const destination = options && Object.hasOwn(options, 'location') ? options.location : origin;

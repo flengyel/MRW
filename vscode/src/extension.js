@@ -12,6 +12,7 @@ const { registerSourcePlugins } = require('./sourcePlugins');
 const { registerReadingOutline } = require('./readingOutline');
 const { registerProofGraph } = require('./proofGraph');
 const { registerProofStudy } = require('./proofStudy');
+const { registerAtlas } = require('./atlas');
 const { registerActiveStudy } = require('./activeStudy');
 const { StudyHistory } = require('./studyHistory');
 const { createArtifactStorage } = require('./artifactStorage');
@@ -308,8 +309,10 @@ function activate(nativeContext) {
     askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
     readingDestination: location => readingController.returnDestination(location),
     handleDocumentUri: async uri => await notebooks.handleUri(uri) || await zotero.handleUri(uri) || readingController.handleDocumentUri(uri), relocateRoute:moveSession.rebaseRoute });
+  let atlasController;
   const readingController = registerReadingOutline({ vscode, context, register, followReference: outlineRows.followReference,
     compile: rawBridge, sourcePlugins, openBundledNote: outlineRows.openBundledNote, followNotebookResult: uri => notebooks.handleUri(uri, {showActions:false}),
+    returnFromAtlas: () => atlasController?.returnFromCapture(),
     savedDocuments: outlineRows.savedDocuments, resolveReferences: outlineRows.resolveReferenceIdentities, onReturnChanged: outlineRows.updateReturnDestinations, onDocumentChange: event => studyController.documentChanged(event) });
   require('./companionTools').registerCompanionTools({vscode,context,register});
   require('./justification').registerJustification({vscode,context,register,bridge,rawBridge,projectRoot,reading:readingController,show,artifactClients,recorder,selectPassages:root=>outlineRows.selectStudyPrerequisites(root,[])});
@@ -318,8 +321,9 @@ function activate(nativeContext) {
   registerLeanStudy({vscode,context,register,trackLocation:require('./readingOutline').trackLocation,
     readingLocation:()=>readingController.currentLocation(),
     returnToDocument:location=>vscode.commands.executeCommand('mrw.returnToReadingOutline',{retained:true,location})});
-  registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
+  const openProofGraph = registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });
+  atlasController = registerAtlas({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, openProofGraph, readPassage: outlineRows.studyPassage });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   registerProofStudy({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });

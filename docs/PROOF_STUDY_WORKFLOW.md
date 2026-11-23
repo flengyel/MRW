@@ -51,6 +51,44 @@ current graph format.
 
 <a id="steps-removed-and-remaining-friction"></a>
 
+## Start an atlas from a passage
+
+Select a theorem and proof or a prose section in Markdown or LaTeX. Run
+**MRW: Generate Mathematical Atlas…** from the editor context menu or Command
+Palette. A saved Stacks reader offers **Generate atlas…** for the
+selected passage. Its handoff keeps the qualified source and passage links.
+Lean files can be outlined as source text.
+
+MRW reads the editor revision, including unsaved text. Select a component to
+inspect the exact statement, proof and reference occurrences. Choose which
+cited statements to include. Include a cited proof only when you want to use it.
+A missing or ambiguous reference stays beside its occurrence. **Contents** is
+still available for ordinary Markdown heading navigation.
+
+Use **Copy handoff for Codex** to copy only the selected inputs. **Import
+companion outline** opens a review. Inspect which premises are used together
+and correct the reason or premises before accepting. An inference needs a cited
+reason. Keep an unresolved reason visible in the explanation. To supply the
+inferences yourself, choose **Write an outline** and cite the relevant passage.
+The review and graph check structure. Mathematical judgment remains with the
+reader.
+
+**Open exact statement** and **Open exact proof** show the captured text.
+**Return to Atlas** takes you back to the component. Save the atlas to keep its
+captured text and descriptions. Accepted graphs and their exact text snapshots
+are saved beside it. A corrected companion proposal retains a link to the
+original. **MRW: Open Mathematical Atlas…** reopens a saved revision even
+after the original file changes. **Regenerate from source** keeps the
+earlier atlas available and carries descriptions only when their evidence still
+matches. Reselect an edited portion before regenerating a partial atlas.
+
+The extractor recognizes supported Markdown headings, local links and named
+blocks, and LaTeX labels, statements, proof environments and literal references.
+It does not run TeX, follow external bibliography files, extract PDF text, or
+elaborate Lean. Open a separate bounded proof graph for a component. The atlas
+does not project inference across component boundaries. Reopening and reading
+saved passages use local data.
+
 ## Limits
 
 Passage selection and transfer to and from Codex are manual. The returned

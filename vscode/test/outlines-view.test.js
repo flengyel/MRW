@@ -183,6 +183,19 @@ function publishedModel() {
   return value;
 }
 
+test('retained Stacks theorem action requests its passage without forwarding source data', () => {
+  const h = reader(true), value = publishedModel();
+  value.model.outline.published.source_id = 'stacks-project';
+  value.model.outline.published.format = 'tex';
+  h.send(value);
+  const statement = h.root.all().find(n => n.dataset.region === 'statement' && n.tag === 'section');
+  h.button(statement, 'generate-atlas').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'generate_atlas',region:'statement'}));
+  value.model.outline.published.source_id = 'kerodon';
+  h.send(value);
+  assert.equal(h.button(h.root, 'generate-atlas'), undefined);
+});
+
 test('source collection, section and qualified identity stay visible above text while hashes remain collapsed', () => {
   for (const [source, collection, chapter, section, tag] of [
     ['stacks-project', 'The Stacks Project', 'Topology', 3, '08ZD'],

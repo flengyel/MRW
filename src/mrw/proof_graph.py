@@ -65,7 +65,7 @@ def validate(graph):
     text(graph['title'], 240); explanation(graph['description'])
     sources = {}
     for s in items(graph['sources'], 16):
-        fields(s, {'id', 'title', 'file', 'sha256', 'url', 'revision', 'review'}, {'environment'})
+        fields(s, {'id', 'title', 'file', 'sha256', 'revision', 'review'}, {'environment', 'url'})
         identifier(s['id']); text(s['title'], 240); text(s['revision'], 160)
         if s['id'] in sources:
             raise ValueError('Duplicate source identifier')
@@ -74,9 +74,10 @@ def validate(graph):
             raise ValueError('Source snapshot must be a relative text file')
         if not isinstance(s['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', s['sha256']):
             raise ValueError('Source snapshot digest required')
-        url = urlsplit(text(s['url'], 2048))
-        if url.scheme != 'https' or not url.hostname or url.username or url.password:
-            raise ValueError('Source URL must be HTTPS')
+        if 'url' in s:
+            url = urlsplit(text(s['url'], 2048))
+            if url.scheme != 'https' or not url.hostname or url.username or url.password:
+                raise ValueError('Source URL must be HTTPS')
         if s['review'] not in ('published', 'human_reviewed', 'awaiting_human_review'):
             raise ValueError('Invalid source review tier')
         if 'environment' in s:
@@ -102,13 +103,8 @@ def validate(graph):
                 raise ValueError('Missing or cyclic local scope')
             chain.append(current); current = scopes[current]['parent']
         chains[sid] = list(reversed(chain))
-    nodes = {}
-    for n in items(graph['nodes'], MAX_NODES, False):
-        fields(n, {'id', 'title', 'claim', 'explanation', 'scope', 'citations'})
-        identifier(n['id']); identifier(n['scope']); text(n['title'], 240); text(n['claim']); explanation(n['explanation'])
-        if n['id'] in nodes or n['scope'] not in scopes:
-            raise ValueError('Duplicate node or missing scope')
-        for c in items(n['citations'], 12):
+    def citations(value):
+        for c in items(value, 12):
             fields(c, {'source', 'start_line', 'end_line'}, {'declaration', 'reference'})
             identifier(c['source'])
             if c['source'] not in sources or any(type(c[k]) is not int for k in ('start_line', 'end_line')) or not 1 <= c['start_line'] <= c['end_line'] <= 1000000:
@@ -118,13 +114,22 @@ def validate(graph):
             if 'reference' in c:
                 from .outline_references import parse_reference
                 parse_reference(c['reference'])
+
+    nodes = {}
+    for n in items(graph['nodes'], MAX_NODES, False):
+        fields(n, {'id', 'title', 'claim', 'explanation', 'scope', 'citations'})
+        identifier(n['id']); identifier(n['scope']); text(n['title'], 240); text(n['claim']); explanation(n['explanation'])
+        if n['id'] in nodes or n['scope'] not in scopes:
+            raise ValueError('Duplicate node or missing scope')
+        citations(n['citations'])
         nodes[n['id']] = n
     rules, incoming, successors = {}, {n: [] for n in nodes}, {n: set() for n in nodes}
     pinned = set(ids(graph['goals'], MAX_NODES, False))
     if not pinned <= nodes.keys():
         raise ValueError('Missing proof outline goal')
     for rule in items(graph['inferences'], MAX_RULES):
-        fields(rule, {'id', 'premises', 'conclusion', 'explanation', 'discharges'})
+        fields(rule, {'id', 'premises', 'conclusion', 'explanation', 'discharges'}, {'citations'})
+        citations(rule.get('citations', []))
         identifier(rule['id']); identifier(rule['conclusion']); explanation(rule['explanation'])
         premises = ids(rule['premises'], 16, False)
         if rule['id'] in rules or not set(premises + [rule['conclusion']]) <= nodes.keys():

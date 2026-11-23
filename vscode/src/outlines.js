@@ -10,6 +10,94 @@ const { sendOrgCapture } = require('./orgCapture');
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
 
+function retainedOffsets(text) {
+  // Saved ranges count Unicode scalars on lines without the UTF-8 BOM. Atlas
+  // positions index the exact retained text in UTF-16, including its EOLs.
+  const first = text.startsWith('\uFEFF') ? 1 : 0;
+  const body = text.slice(first);
+  const lines = body.split(/\r\n|\r|\n/g);
+  const starts = [first, ...Array.from(body.matchAll(/\r\n|\r|\n/g), m => first + m.index + m[0].length)];
+  return (line, column) => {
+    const content = lines[line - 1];
+    if (typeof content !== 'string' || !Number.isSafeInteger(column) || column < 0) {
+      throw new Error('A retained passage range is outside the atlas source.');
+    }
+    const prefix = Array.from(content).slice(0, column);
+    if (prefix.length !== column) throw new Error('A retained passage range is outside the atlas source.');
+    return starts[line - 1] + prefix.join('').length;
+  };
+}
+
+function samePublishedSpan(first, second) {
+  return first && second && ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col']
+    .every(field => first[field] === second[field]);
+}
+
+function stacksUpstream(published) {
+  const parts = typeof published.source_file === 'string' ? published.source_file.split('/') : [];
+  if (/^[a-f0-9]{40}$/.test(published.commit) && parts.length &&
+      parts.every(part => /^[\w.-]+$/.test(part) && part !== '.' && part !== '..')) {
+    return `https://github.com/stacks/stacks-project/blob/${published.commit}/${parts.join('/')}`;
+  }
+  try {
+    const citation = new URL(published.citation);
+    if (citation.origin === 'https://stacks.math.columbia.edu' && !citation.username &&
+        !citation.password && /^\/tag\/[A-Z0-9]{4}$/.test(citation.pathname) && !citation.search && !citation.hash) {
+      return citation.href;
+    }
+  } catch { /* No external destination is available. */ }
+  return null;
+}
+
+async function retainedAtlasInput(controller, regionId, read) {
+  const { outline } = controller.result;
+  const published = outline.published;
+  if (published?.source_id !== 'stacks-project' || published.error ||
+      (published.format && published.format !== 'tex')) {
+    throw new Error('Choose a statement or proof in a retained Stacks Project section.');
+  }
+  const paired = outline.regions.flatMap(region => {
+    const part = published.parts?.[region.id];
+    return part && ['statement', 'proof'].includes(part.role) && samePublishedSpan(region.span, part.span)
+      ? [{ region, part }] : [];
+  });
+  const selected = paired.find(({region}) => region.id === regionId);
+  if (!selected) throw new Error('The retained statement or proof changed. Refresh the saved source and choose it again.');
+  if (paired.length > 128) throw new Error('The retained section exceeds the atlas passage limit.');
+  const {text, source_revision: revision} = await read('outline_document', {artifact: null});
+  if (outline.source.revision !== revision || digest(text) !== revision) {
+    throw new Error('The atlas source does not match the exact retained revision.');
+  }
+  const offset = retainedOffsets(text);
+  const title = outline.source.bibliography.title || published.title;
+  const upstream = stacksUpstream(published);
+  const passages = [];
+  let selection;
+  for (const {region, part} of paired) {
+    const span = part.span;
+    const start = offset(span.start_line, span.start_col), end = offset(span.end_line, span.end_col);
+    const selectedText = text.slice(start, end);
+    if (span.source_revision !== revision || start >= end || selectedText !== part.exact_text) {
+      throw new Error('A published passage no longer matches the exact retained revision.');
+    }
+    const {reference} = await read('outline_reference', {region: region.id});
+    if (!/^stacks-project:[A-Z0-9]{4}$/.test(part.qualified_tag) || typeof reference !== 'string' ||
+        !reference.startsWith(`mrw-outline:v2/${part.qualified_tag}/`) || !reference.includes(`/${revision}/`)) {
+      throw new Error('The retained passage has no qualified Stacks Project reference.');
+    }
+    passages.push({start, end, reference, qualified_id: part.qualified_tag,
+      label: `${part.qualified_tag} ${part.role} · ${title}`, text: selectedText, url: upstream,
+      authors: published.authors || outline.source.bibliography.authors, license: published.license || null,
+      review: 'published', source_revision: revision});
+    if (part.qualified_tag === selected.part.qualified_tag) {
+      selection = selection ? {start: Math.min(start, selection.start), end: Math.max(end, selection.end)} : {start, end};
+    }
+  }
+  const {reference: uri} = await read('outline_reference', {region: null});
+  return {root: controller.root, language: 'latex', uri, text, revision, title, selection,
+    passages: passages.sort((a, b) => a.start - b.start), upstream};
+}
+
 // Only retained metadata is needed to find a source; no original-file or
 // network lookup, and no changes to its stored revision or annotations.
 function savedSourceChoice(source) {
@@ -298,6 +386,11 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         else if (value.type === 'proof_study') await vscode.commands.executeCommand('mrw.prepareProofStudy');
         else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline', { retained: true, location: c.returnContext?.location || null });
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
+        else if (value.type === 'generate_atlas') {
+          const retained = await retainedAtlasInput(c, value.region,
+            (method, extra) => bridge(request(c, method, extra)));
+          await vscode.commands.executeCommand('mrw.generateAtlas', {retained});
+        }
         else if (value.type === 'navigate') await navigate(c, { region: value.region, statement: !!value.statement });
         else if (value.type === 'navigate_context') await navigate(c, { context: value.context });
         else if (value.type === 'stacks_reference') {
@@ -895,7 +988,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const followed = await bridge({ method: 'outline_follow_reference', store, project_root: root, reference });
     const { context: selected } = await bridge({ method: 'outline_assistance_context', store, project_root: root, reference });
     const pub = followed.outline.published, bib = followed.outline.source.bibliography;
-    const url = pub && /^[a-f0-9]{40}$/.test(pub.commit) ? `https://github.com/stacks/stacks-project/blob/${pub.commit}/${pub.source_file}` : bib.reference;
+    const url = pub?.source_id === 'stacks-project' && /^[a-f0-9]{40}$/.test(pub.commit) ? `https://github.com/stacks/stacks-project/blob/${pub.commit}/${pub.source_file}` : bib.reference;
     const part = pub?.parts?.[followed.reference.region];
     return { reference, qualified_id: followed.reference.qualified_id || pub?.qualified_tag, label: part ? `${part.qualified_tag || part.tag} ${part.role} · ${bib.title}` : followed.reference.label, text: selected.text, source_revision: selected.source_revision,
       url, authors: pub?.authors || bib.authors || null, license: pub?.license || null, review: pub ? 'published' : 'awaiting_human_review' };
@@ -1006,4 +1099,4 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   return rows;
 }
 
-module.exports = { registerOutlines, outlineHtml, normalize };
+module.exports = { registerOutlines, outlineHtml, normalize, retainedAtlasInput };

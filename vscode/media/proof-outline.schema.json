@@ -161,7 +161,6 @@
         "title",
         "file",
         "sha256",
-        "url",
         "revision",
         "review"
       ],
@@ -194,7 +193,7 @@
         "reference": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^mrw-outline:v1/"
+          "pattern": "^mrw-outline:v[12]/"
         }
       },
       "required": [
@@ -340,6 +339,14 @@
             "maxLength": 64
           },
           "maxItems": 16,
+          "minItems": 0
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/citation"
+          },
+          "maxItems": 12,
           "minItems": 0
         }
       },

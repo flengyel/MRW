@@ -344,9 +344,11 @@ function proofNavigation(parent, part) {
   // source, not an inferred dependency or a claim that a proof is correct.
   const candidates = Object.values(model.outline.published.parts).filter(p => p.tag === part.tag && p.role === role);
   const targets = candidates.filter(p => model.outline.regions.some(r => r.id === p.region && sameSpan(r.span, p.span)));
+  const atlas = model.outline.published.source_id === 'stacks-project' &&
+    [undefined, 'tex'].includes(model.outline.published.format);
   if (!targets.length) {
     if (candidates.length) el('p', `The published ${role}'s reading association changed. Its original text remains in the retained source.`, parent, 'warning');
-    return;
+    if (!atlas) return;
   }
   const nav = el('nav', undefined, parent, 'proof-navigation');
   for (const [index, target] of targets.entries()) {
@@ -356,6 +358,8 @@ function proofNavigation(parent, part) {
     link.title = `Read the published ${role} in this exact retained source.`;
     link.addEventListener('click', () => jumpPublished(target.region));
   }
+  if (atlas) button(nav, 'Generate atlas…', {type: 'generate_atlas', region: part.region}, 'generate-atlas').title =
+    'Outline this result using the retained statement, proof and cited passages.';
 }
 function publishedAction(type, target) {
   if (type === 'stacks_jump') return jumpPublished(target);

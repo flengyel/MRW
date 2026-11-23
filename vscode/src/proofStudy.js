@@ -3,46 +3,51 @@ const fs = require('node:fs/promises'), path = require('node:path'), crypto = re
 const { isDeepStrictEqual } = require('node:util');
 const { digest } = require('./navigation'), { within } = require('./proofGraph'), { outlineHtml } = require('./outlines');
 const encoded = value => JSON.stringify(value, null, 2) + '\n';
-function studyPassages(selected) {
+function studyPassages(selected, atlas = false) {
   if (!Array.isArray(selected) || !selected.length || selected.length > 16) throw new Error('Choose one proof and at most fifteen prerequisites.');
-  if (new Set(selected.map(p => p.reference)).size !== selected.length) throw new Error('A passage was selected twice.');
+  if (new Set(selected.map(p => p.reference || (atlas && p.anchor))).size !== selected.length) throw new Error('A passage was selected twice.');
   return selected.map((p, i) => {
     if (typeof p.text !== 'string' || !p.text.trim() || Buffer.byteLength(p.text) > 128 * 1024 ||
-        typeof p.reference !== 'string' || !/^mrw-outline:v[12]\//.test(p.reference) || !/^[a-f0-9]{64}$/.test(p.source_revision) ||
+        (!(typeof p.reference === 'string' && /^mrw-outline:v[12]\//.test(p.reference)) &&
+          !(atlas && typeof p.anchor === 'string' && p.anchor.length <= 160 && p.anchor)) ||
+        !/^[a-f0-9]{64}$/.test(p.source_revision) ||
         !['published','human_reviewed','awaiting_human_review'].includes(p.review) || typeof p.label !== 'string' || p.label.length > 240) throw new Error('Choose a nonempty exact retained passage.');
-    const url = new URL(p.url);
-    if (url.protocol !== 'https:' || url.username || url.password) throw new Error('The retained source needs an HTTPS bibliographic reference.');
+    if (p.url) {
+      const url = new URL(p.url);
+      if (url.protocol !== 'https:' || url.username || url.password) throw new Error('The bibliographic reference must be HTTPS.');
+    }
     return { ...p, id: 'passage-' + (i + 1), role: i === 0 ? 'proof' : 'prerequisite', sha256: digest(p.text) };
   });
 }
 function sources(study) {
   return study.passages.map(p => ({ id: p.id, title: [p.authors, p.label].filter(Boolean).join(' · ').slice(0, 240), file: 'study-sources/' + p.sha256 + '.txt',
-    sha256: p.sha256, url: p.url, revision: p.source_revision, review: p.review }));
+    sha256: p.sha256, ...(p.url ? { url: p.url } : {}), revision: p.source_revision, review: p.review }));
 }
-function validateStudy(study) {
+function validateStudy(study, atlas = false) {
   if (study?.version !== 1 || typeof study.title !== 'string' || !study.title.trim() || study.title.length > 240 ||
       typeof study.question !== 'string' || study.question.length > 8192 || !study.question.trim() ||
       (study.outline !== null && (typeof study.outline !== 'string' || path.basename(study.outline) !== study.outline || !study.outline.endsWith('.mrw-proof.json')))) throw new Error('Invalid proof study.');
-  const passages = studyPassages(study.passages);
+  const passages = studyPassages(study.passages, atlas);
   if (passages.some((p, i) => p.sha256 !== study.passages[i].sha256 || p.id !== study.passages[i].id || p.role !== study.passages[i].role)) throw new Error('Study passage identity or exact text changed.');
   if (Buffer.byteLength(encoded(study)) > 1024 * 1024) throw new Error('Proof study exceeds 1 MiB.');
   return study;
 }
-function handoff(study, schema) {
-  validateStudy(study);
+function handoff(study, schema, atlas = false) {
+  validateStudy(study, atlas);
   const fence = String.fromCharCode(96).repeat(4);
   const rows = ['# ' + study.title, '', 'Question: ' + study.question, '',
     'Propose a source-based proof outline as one JSON object using the schema below.',
     'Use origin "ai_proposal" and identify the author in every explanation. Preserve hypotheses,',
     'joint premises, alternative inferences and local scope. Identify unsupported steps in their explanations.',
     'Structural validation is separate from mathematical checking.',
-    'Use only these selected sources. Copy their source entries exactly. Each citation must include',
-    'the corresponding MRW reference below and line numbers within its exact passage snapshot.',
+    'Use only these selected sources. Copy their source entries exactly.',
+    'Cite line numbers within each exact passage snapshot. Include its MRW reference if supplied.',
+    ...(atlas ? ['Cite the reason for each inference. Describe unresolved steps in an explanation without adding an inference for them.'] : []),
     'Do not request or infer access to other private files, reader notes or evidence.', '',
     'Source entries:', fence + 'json', encoded(sources(study)).trimEnd(), fence, ''];
   for (const p of study.passages) {
     const quote = String.fromCharCode(96).repeat(Math.max(4, ...(p.text.match(/\x60+/g) || []).map(s => s.length + 1)));
-    rows.push('## ' + p.role + ': ' + p.label, 'Source: ' + p.id, 'Reference: ' + p.reference,
+    rows.push('## ' + p.role + ': ' + p.label, 'Source: ' + p.id, ...(p.reference ? ['Reference: ' + p.reference] : ['Capture anchor: ' + p.anchor]),
       ...(p.authors ? ['Authors: ' + p.authors] : []), ...(p.license ? ['License: ' + p.license] : []),
       'Retained source SHA-256: ' + p.source_revision, 'Passage SHA-256: ' + p.sha256,
       'Snapshot lines: 1–' + p.text.split(/\r\n|\r|\n/u).length, quote + 'text', p.text, quote, '');
@@ -50,17 +55,30 @@ function handoff(study, schema) {
   rows.push('## Outline schema', fence + 'json', encoded(schema).trimEnd(), fence);
   return rows.join('\n');
 }
-function bindProposal(graph, study) {
+function bindProposal(graph, study, atlas = false) {
   if (!isDeepStrictEqual(graph.sources, sources(study))) throw new Error('Proposal sources differ from the handoff. Keep its exact source entries.');
   const byId = new Map(study.passages.map(p => [p.id, p]));
-  for (const n of graph.nodes) for (const c of n.citations) {
+  for (const item of [...graph.nodes, ...graph.inferences]) for (const c of item.citations || []) {
     const p = byId.get(c.source);
     if (!p || c.reference !== p.reference || c.end_line > p.text.split(/\r\n|\r|\n/u).length) throw new Error('A citation leaves its selected passage or changes its MRW reference.');
+  }
+  if (atlas && graph.inferences.some(inference => !inference.citations?.length)) {
+    throw new Error('Cite the approved reason for each inference. Keep unsupported steps as gaps in an explanation.');
   }
   const explanations = [graph.description, ...graph.nodes.map(n => n.explanation), ...graph.inferences.map(n => n.explanation)];
   if (explanations.some(e => e.origin !== 'ai_proposal' || !e.author?.trim())) throw new Error('Identify the proposal author in each AI explanation.');
   if (!graph.nodes.some(n => n.citations.some(c => c.source === study.passages[0].id))) throw new Error('The outline must cite the selected proof.');
   return graph;
+}
+async function readProposal(clipboard, bridge, study, atlas = false) {
+  let raw = (await clipboard.readText()).trim();
+  if (raw.startsWith(String.fromCharCode(96).repeat(3))) {
+    const match = /^\x60{3}(?:json)?\s*\n([\s\S]*?)\n\x60{3}\s*$/i.exec(raw);
+    if (!match) throw new Error('Copy the JSON object or its complete JSON code block.');
+    raw = match[1];
+  }
+  const checked = await bridge({ method: 'proof_graph_parse', text: raw });
+  return bindProposal(checked.graph, study, atlas);
 }
 function registerProofStudy({ vscode, context, register, bridge, projectRoot, choosePath, selectPassages, readPassage, startStudy, recorder }) {
   const sessions = new Map(), last = 'mrw.proofStudy.v1';
@@ -102,13 +120,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
       handoff: handoff(c.study, await schema()), outline: c.study.outline, notice, file: c.file });
   }
   async function importProposal(c) {
-    let raw = (await vscode.env.clipboard.readText()).trim();
-    if (raw.startsWith(String.fromCharCode(96).repeat(3))) {
-      const match = /^\x60{3}(?:json)?\s*\n([\s\S]*?)\n\x60{3}\s*$/i.exec(raw);
-      if (!match) throw new Error('Copy the JSON object or its complete JSON code block.');
-      raw = match[1];
-    }
-    const checked = await bridge({ method: 'proof_graph_parse', text: raw }); bindProposal(checked.graph, c.study);
+    const graph = await readProposal(vscode.env.clipboard, bridge, c.study);
     const uri = await vscode.window.showSaveDialog({ title: 'Save proposed outline',
       defaultUri: vscode.Uri.file(c.file.replace(/\.mrw-study\.json$/, '-' + crypto.randomUUID().slice(0, 8) + '.mrw-proof.json')),
       filters: { 'MRW proof outline': ['mrw-proof.json'] } });
@@ -133,7 +145,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
         await fs.writeFile(snapshot, Buffer.from(p.text, 'utf8'), { flag: 'wx', mode: 0o600 });
       }
     }
-    await create(file, encoded(checked.graph));
+    await create(file, encoded(graph));
     await update(c, { ...c.study, outline: path.basename(file) }); await send(c, 'Outline imported. Structure validated; mathematics not checked.');
     await vscode.commands.executeCommand('mrw.openProofOutline', vscode.Uri.file(file));
   }
@@ -183,4 +195,4 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
     if (file) await open(await scoped(file, root, '.mrw-study.json'), root);
   });
 }
-module.exports = { registerProofStudy, studyPassages, sources, validateStudy, handoff, bindProposal };
+module.exports = { registerProofStudy, readProposal, studyPassages, sources, validateStudy, handoff, bindProposal };
