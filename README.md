@@ -34,7 +34,7 @@ grounds for using it.
 
 | Task | Tools |
 | --- | --- |
-| Understand an argument | [Proof outlines and source passages](docs/PROOF_STUDY_WORKFLOW.md), with native Lean goals and diagnostics for formal proofs. |
+| Understand an argument | [Generate a mathematical atlas](docs/PROOF_STUDY_WORKFLOW.md#start-an-atlas-from-a-passage). Follow cited results in the **Proof map**, inspect exact passages in the **Blueprint**, or edit components through the **Reading list**. |
 | Revisit a proof step | In **Study Current Material**, enter a question and choose **Keep for spaced review**. Return through **Resume Study**. [Attempts, feedback and scheduling](docs/ACTIVE_STUDY_WORKFLOW.md#review-and-effort). |
 | Calculate | Jupyter and SagePod; [retained notebook results](docs/NOTEBOOK_RESULTS.md) preserve saved calculations for comparison. |
 | Examine grounds | [Source-linked reasons and admitted premises](docs/JUSTIFICATION_WORKFLOW.md), using Artemov's Justification Logic. |

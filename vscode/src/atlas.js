@@ -8,6 +8,7 @@ const { within } = require('./proofGraph');
 const { studyPassages, sources, handoff, readProposal, bindProposal } = require('./proofStudy');
 const { extractAtlasText } = require('./atlasText');
 const { DETAIL_LIMIT, createAtlas, validateAtlas, editAtlas, evidenceSpan, handoffEntries } = require('./atlasModel');
+const { atlasDiagram } = require('./atlasDiagram');
 const { atlasHtml } = require('./atlasView');
 
 const SUFFIX = '.mrw-atlas.json';
@@ -184,7 +185,10 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
 
   function render(c, notice = '', focus) {
     const component = c.atlas.components.find(candidate => candidate.id === c.component);
+    const diagramState = c.views[c.view];
+    c.diagram = !component && diagramState ? atlasDiagram(c.atlas, c.view, diagramState) : undefined;
     c.panel.webview.html = atlasHtml(c.panel.webview, c.atlas, {
+      view: c.view, diagram: c.diagram,
       component: component?.id, page: c.page, focus, notice, proposal: c.pending?.component === component?.id && c.pending?.page === c.page ? c.pending : undefined,
       hasGraph: !!c.atlas.graphs?.[component?.id + ':' + c.page],
       previous: !!c.atlas.previous?.file,
@@ -287,11 +291,34 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     c.busy = true;
     try {
       const component = c.atlas.components.find(item => item.id === (m.component || c.component));
+      if (m.type === 'selectView' && ['map', 'blueprint', 'list'].includes(m.view)) {
+        c.view = m.view;
+        c.component = undefined;
+        c.page = 0;
+        render(c, '', 'atlas-view-' + c.view); return;
+      }
+      if (m.type === 'selectNode' && c.diagram?.nodes.some(node => node.id === m.node)) {
+        c.views[c.view].selected = m.node;
+        render(c, '', 'diagram-node-' + m.node); return;
+      }
+      if (m.type === 'showDiagramPage' && c.diagram && Number.isSafeInteger(m.page) && m.page >= 0 && m.page < c.diagram.pageCount) {
+        const linked = m.node && c.diagram.boundaryEdges.some(edge =>
+          (edge.from === m.node && edge.fromPage === m.page) || (edge.to === m.node && edge.toPage === m.page));
+        c.views[c.view] = { page: m.page, selected: linked ? m.node : undefined };
+        render(c, '', linked ? 'diagram-node-' + m.node : 'atlas-diagram'); return;
+      }
       if (m.type === 'selectComponent' && component) {
-        c.component = component.id; c.page = 0; render(c); return;
+        if (c.diagram) c.views[c.view] = { page: c.diagram.page, selected: c.diagram.selected };
+        const index = component.itemIds.indexOf(m.entry);
+        c.component = component.id;
+        c.page = index < 0 ? 0 : Math.floor(index / DETAIL_LIMIT);
+        render(c, '', index < 0 ? undefined : 'entry-' + m.entry); return;
       }
       if (m.type === 'showOverview') {
-        c.component = undefined; c.page = 0; render(c, '', component && 'component-' + component.id); return;
+        c.component = undefined;
+        c.page = 0;
+        const selected = c.views[c.view]?.selected;
+        render(c, '', selected ? 'diagram-node-' + selected : component && 'component-' + component.id); return;
       }
       if (m.type === 'selectPage' && component && Number.isSafeInteger(m.page) && m.page >= 0 && m.page * DETAIL_LIMIT < component.itemIds.length) {
         c.component = component.id; c.page = m.page; render(c); return;
@@ -304,8 +331,15 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
       }
       if (m.type === 'openSource') {
         const span = evidenceSpan(c.atlas, m);
-        if (!span) throw new Error('The evidence range is unavailable.');
-        await showSource(c, span, () => back(c, (m.returnEntry || m.entry) && 'entry-' + (m.returnEntry || m.entry)));
+        const { view, diagram, component: origin, page } = c;
+        const viewState = { page: diagram?.page, selected: diagram?.selected };
+        const entry = m.returnEntry || m.entry;
+        const focus = diagram?.selected ? 'diagram-node-' + diagram.selected : entry && 'entry-' + entry;
+        await showSource(c, span, () => {
+          Object.assign(c, { view, component: origin, page });
+          if (diagram) c.views[view] = viewState;
+          back(c, focus);
+        });
       } else if (m.type === 'return') {
         const uri = vscode.Uri.parse(c.atlas.source.uri);
         const span = c.atlas.extraction.selection;
@@ -388,7 +422,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const panel = vscode.window.createWebviewPanel('mrw.atlas', atlas.source.title + ' — Atlas', vscode.ViewColumn.Active,
       { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] });
     const uri = vscode.Uri.from({ scheme: SOURCE_SCHEME, authority: randomUUID(), path: '/' + atlas.source.title });
-    const c = { panel, atlas, root, file, folder, uri, page: 0, unsaved: !file };
+    const c = { panel, atlas, root, file, folder, uri, page: 0, view: 'map', views: { map: {}, blueprint: {} }, unsaved: !file };
     if (file) sessions.set(file, c);
     reader.set(uri.toString(), c);
     panel.webview.onDidReceiveMessage(m => message(c, m));

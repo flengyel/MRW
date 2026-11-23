@@ -30,7 +30,7 @@ the working profile and windows open. The isolated profile does not need GitHub
 sign-in or Settings Sync. Do not substitute the working profile when setup fails.
 
 Supported cases are `isolation`, `sourceTrash`, `activation`, `sourceReturn`,
-`warrantInspection`, `justification` and `leanLesson`. The activation
+`warrantInspection`, `justification`, `leanLesson` and `atlas`. The activation
 case uses a guarded bootstrap before its run-style test entry. Other older
 cases require explicit fixture/UI migration before they are added to this list.
 `--seed` copies at most 4,000 entries/64 MiB into the new project; symlinks and private
@@ -168,8 +168,9 @@ VS Code process to clean up a test.
 
 Seed the guarded `atlas` case with a copy of
 `tests/fixtures/stacks/topology.tex`. It selects 08ZH in a dirty TeX editor,
-opens the component and exact proof, and checks Return. It corrects a
-reader-authored inference before publishing and reopens the saved atlas
+checks the 08ZE citation in the Proof map, and opens the exact proof from a
+separate node in the Blueprint. Return restores focus to that node. The case
+corrects a reader-authored inference before publishing and reopens the saved atlas
 after a fixture-only reload and a source change. The selections and review
-actions are scripted. The development host, webview, text buffer,
-publication and reload run in native VS Code Remote–WSL.
+actions are scripted. The development host, webview, text buffer, publication
+and reload run in native VS Code Remote–WSL.
