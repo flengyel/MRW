@@ -9,11 +9,15 @@ const { studyPassages, sources, handoff, readProposal, bindProposal } = require(
 const { extractAtlasText } = require('./atlasText');
 const { DETAIL_LIMIT, createAtlas, validateAtlas, editAtlas, evidenceSpan, handoffEntries } = require('./atlasModel');
 const { atlasDiagram } = require('./atlasDiagram');
-const { atlasHtml } = require('./atlasView');
+const { atlasHtml, atlasOpenErrorHtml } = require('./atlasView');
 
 const SUFFIX = '.mrw-atlas.json';
 const MAX_ATLAS = 2 * 1024 * 1024;
 const SOURCE_SCHEME = 'mrw-atlas-source';
+const READ_ONLY_ACTIONS = new Set([
+  'selectView', 'selectNode', 'showDiagramPage', 'selectComponent', 'showOverview',
+  'selectPage', 'followEntry', 'openSource', 'return', 'openAsText',
+]);
 const encode = value => JSON.stringify(value, null, 2) + '\n';
 
 function format(doc) {
@@ -188,11 +192,11 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const diagramState = c.views[c.view];
     c.diagram = !component && diagramState ? atlasDiagram(c.atlas, c.view, diagramState) : undefined;
     c.panel.webview.html = atlasHtml(c.panel.webview, c.atlas, {
-      view: c.view, diagram: c.diagram,
+      view: c.view, diagram: c.diagram, readOnly: c.readOnly,
       component: component?.id, page: c.page, focus, notice, proposal: c.pending?.component === component?.id && c.pending?.page === c.page ? c.pending : undefined,
-      hasGraph: !!c.atlas.graphs?.[component?.id + ':' + c.page],
-      previous: !!c.atlas.previous?.file,
-      hasOriginal: !!c.atlas.graphOriginals?.[component?.id + ':' + c.page],
+      hasGraph: !c.readOnly && !!c.atlas.graphs?.[component?.id + ':' + c.page],
+      previous: !c.readOnly && !!c.atlas.previous?.file,
+      hasOriginal: !c.readOnly && !!c.atlas.graphOriginals?.[component?.id + ':' + c.page],
     });
   }
 
@@ -203,7 +207,9 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const bom = value !== c.atlas.source.text && '\ufeff' + value === c.atlas.source.text ? 1 : 0;
     if (value !== c.atlas.source.text && !bom) throw new Error('The captured source could not be shown exactly.');
     const range = new vscode.Range(doc.positionAt(Math.max(0, span.start - bom)), doc.positionAt(Math.max(0, span.end - bom)));
-    const editor = await vscode.window.showTextDocument(doc, { viewColumn: c.panel.viewColumn, preview: true, selection: range });
+    // Pinned evidence does not replace a native custom editor's preview tab.
+    // One capture URI per atlas reuses the same evidence tab for every passage.
+    const editor = await vscode.window.showTextDocument(doc, { viewColumn: c.panel.viewColumn, preview: !c.customEditor, selection: range });
     editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     if (returnToEntry) sourceBefore.set(key, { owner: c, action: returnToEntry });
   }
@@ -214,6 +220,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
   }
 
   async function save(c) {
+    if (c.readOnly) throw new Error('Open a workspace containing this atlas to save a new revision.');
     const oldFile = c.file;
     const folder = oldFile ? path.dirname(oldFile) : c.folder || c.root;
     const title = c.atlas.source.title.replace(/\.[^.]+$/, '').replace(/[^\w.-]/gu, '-').slice(0, 80) || 'atlas';
@@ -229,12 +236,36 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const raw = encode(record);
     if (Buffer.byteLength(raw) > MAX_ATLAS) throw new Error('Atlas exceeds 2 MiB. Select a smaller source.');
     const result = await bridge({ method: 'atlas_publish', project_root: c.root, path: target.fsPath, text: raw });
-    if (oldFile) sessions.delete(oldFile);
+    if (c.customEditor) {
+      // A native tab's URI identifies the revision it opened. Keep that capture
+      // there and continue the saved successor in a separate atlas panel.
+      const continuation = {
+        component: c.component, page: c.page, view: c.view,
+        views: structuredClone(c.views), pending: c.pending, handoff: c.handoff,
+      };
+      let successor;
+      try { successor = createPanel(c.root, record, result.path); }
+      catch (error) {
+        throw new Error('Saved ' + result.path + ', but its viewer could not open: ' + error.message + '. Reopen that file to continue.');
+      }
+      c.atlas = c.savedAtlas;
+      c.unsaved = false;
+      c.pending = undefined;
+      c.handoff = undefined;
+      if (!c.atlas.components.some(component => component.id === c.component)) {
+        c.component = undefined; c.page = 0;
+      }
+      render(c, 'This tab retains its opened revision. The saved successor opens separately.');
+      Object.assign(successor, continuation);
+      render(successor, 'Saved ' + path.basename(result.path));
+      return successor;
+    }
+    if (oldFile && sessions.get(oldFile) === c) sessions.delete(oldFile);
     c.file = result.path;
     c.atlas = record;
     c.unsaved = false;
     sessions.set(c.file, c);
-    return true;
+    return c;
   }
 
   function proofRoute(c) {
@@ -266,7 +297,11 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     await checkInputs(c, result.study);
     if (result.original) bindProposal(result.original, result.study, true);
     const checked = await bridge({ method: 'proof_graph', graph: result.graph, hidden: [] });
-    if (!c.file && !await save(c)) return;
+    if (!c.file) {
+      const saved = await save(c);
+      if (!saved) return;
+      c = saved;
+    }
     const folder = path.dirname(c.file);
     const snapshots = Object.fromEntries(result.study.passages.map(passage => [passage.id, passage.text]));
     const publish = async (outline, prefix) => {
@@ -279,8 +314,12 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const before = c.atlas;
     c.atlas = { ...before, graphs: { ...before.graphs, [key]: path.basename(file) },
       ...(original ? { graphOriginals: { ...before.graphOriginals, [key]: path.basename(original) } } : {}) };
-    try { await save(c); }
-    catch (error) { c.atlas = before; throw error; }
+    const owner = c;
+    try { c = await save(c); }
+    catch (error) {
+      if (!owner.customEditor || owner.atlas !== owner.savedAtlas) owner.atlas = before;
+      throw error;
+    }
     c.pending = undefined;
     render(c, 'Proof outline saved.');
     return openProofGraph(vscode.Uri.file(file), proofRoute(c));
@@ -290,6 +329,10 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     if (c.busy || !m || typeof m !== 'object') return;
     c.busy = true;
     try {
+      if (c.readOnly && !READ_ONLY_ACTIONS.has(m.type)) {
+        render(c, 'Read-only inspection. Open a workspace containing this atlas to edit it or use saved sibling files.');
+        return;
+      }
       const component = c.atlas.components.find(item => item.id === (m.component || c.component));
       if (m.type === 'selectView' && ['map', 'blueprint', 'list'].includes(m.view)) {
         c.view = m.view;
@@ -340,7 +383,13 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
           if (diagram) c.views[view] = viewState;
           back(c, focus);
         });
+      } else if (m.type === 'openAsText' && c.file) {
+        await vscode.commands.executeCommand('vscode.openWith', vscode.Uri.file(c.file), 'default', { preview: false });
       } else if (m.type === 'return') {
+        if (c.readOnly) {
+          await showSource(c, c.atlas.extraction.selection, () => back(c));
+          return;
+        }
         const uri = vscode.Uri.parse(c.atlas.source.uri);
         const span = c.atlas.extraction.selection;
         let original;
@@ -360,7 +409,8 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         if (!c.atlas.components.some(item => item.id === c.component)) { c.component = undefined; c.page = 0; }
         render(c, 'Correction kept in this atlas. Save to retain it.');
       } else if (m.type === 'saveAtlas') {
-        if (await save(c)) render(c, 'Saved ' + path.basename(c.file));
+        const saved = await save(c);
+        if (saved) render(saved, 'Saved ' + path.basename(saved.file));
       } else if (m.type === 'regenerate') {
         if (c.atlas.source.language === 'lean' || c.atlas.source.passages) throw new Error('Generate an atlas from the intended source revision. The earlier atlas remains available.');
         const doc = await vscode.workspace.openTextDocument(vscode.Uri.parse(c.atlas.source.uri));
@@ -374,10 +424,11 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         if (!range && (old.start !== 0 || old.end !== c.atlas.source.text.length)) {
           throw new Error('Select the intended passage in the changed document, then regenerate.');
         }
-        if (c.unsaved && !await save(c)) return;
-        const previous = c.file ? { id: c.atlas.id, file: path.basename(c.file) } : undefined;
-        createPanel(c.root, { ...createAtlas({ source, extraction: extractAtlasText(source.text, source.language, range), previous: c.atlas }),
-          id: randomUUID(), previous }, undefined, 'New capture. The earlier atlas is still available.', c.file && path.dirname(c.file));
+        const prior = c.unsaved ? await save(c) : c;
+        if (!prior) return;
+        const previous = prior.file ? { id: prior.atlas.id, file: path.basename(prior.file) } : undefined;
+        createPanel(prior.root, { ...createAtlas({ source, extraction: extractAtlasText(source.text, source.language, range), previous: prior.atlas }),
+          id: randomUUID(), previous }, undefined, 'New capture. The earlier atlas is still available.', prior.file && path.dirname(prior.file));
       } else if (m.type === 'openPrevious' && c.file && c.atlas.previous?.file) {
         await open(vscode.Uri.file(path.join(path.dirname(c.file), c.atlas.previous.file)));
       } else if (m.type === 'copyHandoff' && component) {
@@ -417,17 +468,20 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     finally { c.busy = false; }
   }
 
-  function createPanel(root, atlas, file, notice = '', folder) {
+  function createPanel(root, atlas, file, notice = '', folder, suppliedPanel, readOnly = false) {
     localRecord(atlas);
-    const panel = vscode.window.createWebviewPanel('mrw.atlas', atlas.source.title + ' — Atlas', vscode.ViewColumn.Active,
+    const panel = suppliedPanel || vscode.window.createWebviewPanel('mrw.atlas', atlas.source.title + ' — Atlas', vscode.ViewColumn.Active,
       { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] });
+    if (suppliedPanel) panel.webview.options = { ...panel.webview.options, enableScripts: true, localResourceRoots: [] };
+    panel.title = atlas.source.title + ' — Atlas';
     const uri = vscode.Uri.from({ scheme: SOURCE_SCHEME, authority: randomUUID(), path: '/' + atlas.source.title });
-    const c = { panel, atlas, root, file, folder, uri, page: 0, view: 'map', views: { map: {}, blueprint: {} }, unsaved: !file };
+    const c = { panel, atlas, root, file, folder, uri, page: 0, view: 'map', views: { map: {}, blueprint: {} }, unsaved: !file, readOnly, customEditor: !!suppliedPanel };
+    if (suppliedPanel) c.savedAtlas = structuredClone(atlas);
     if (file) sessions.set(file, c);
     reader.set(uri.toString(), c);
     panel.webview.onDidReceiveMessage(m => message(c, m));
     panel.onDidDispose(() => {
-      if (c.file) sessions.delete(c.file);
+      if (c.file && sessions.get(c.file) === c) sessions.delete(c.file);
       reader.delete(uri.toString());
       for (const [key, value] of sourceBefore) if (value.owner === c) sourceBefore.delete(key);
     });
@@ -441,14 +495,79 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const selection = uri?.scheme === 'file' ? uri.fsPath : active?.scheme === 'file' && active.fsPath.endsWith(SUFFIX)
       ? active.fsPath : await choosePath('Open saved mathematical atlas');
     if (!selection) return;
-    const saved = await sourceSnapshot(selection), root = await projectRoot({ document: { uri: vscode.Uri.file(saved.path) } });
-    if (!within(root, saved.path) || !saved.path.endsWith(SUFFIX) || Buffer.byteLength(saved.text) > MAX_ATLAS) {
-      throw new Error('Choose a saved atlas inside this workspace (up to 2 MiB).');
+    const loaded = await readAtlas(vscode.Uri.file(selection));
+    if (sessions.has(loaded.path)) { back(sessions.get(loaded.path)); return; }
+    if (customEditorRegistered) {
+      return vscode.commands.executeCommand('vscode.openWith', vscode.Uri.file(loaded.path), 'mrw.atlasEditor', { preview: false });
     }
-    const record = localRecord(JSON.parse(saved.text));
-    if (sessions.has(saved.path)) { back(sessions.get(saved.path)); return; }
-    return createPanel(root, record, saved.path);
+    return createPanel(loaded.root, loaded.record, loaded.path, '', undefined, undefined, loaded.readOnly);
   }
+
+
+  // Opening a file is inspection: derive its scope from matching canonical
+  // workspace folders, never a chooser or the source URI stored in the JSON.
+  async function readAtlas(uri) {
+    if (uri?.scheme !== 'file' || !uri.fsPath.endsWith(SUFFIX)) throw new Error('Choose a local .mrw-atlas.json file.');
+    const saved = await sourceSnapshot(uri.fsPath);
+    if (!saved.path.endsWith(SUFFIX) || Buffer.byteLength(saved.text) > MAX_ATLAS) throw new Error('Choose a saved atlas up to 2 MiB.');
+    const record = localRecord(JSON.parse(saved.text));
+    let root;
+    const matched = vscode.workspace.getWorkspaceFolder?.(vscode.Uri.file(saved.path));
+    const folders = [...(matched ? [matched] : []), ...(vscode.workspace.workspaceFolders || [])];
+    for (const folder of folders) {
+      if (folder?.uri?.scheme !== 'file') continue;
+      const candidate = await fs.realpath(folder.uri.fsPath).catch(() => undefined);
+      if (candidate && within(candidate, saved.path) && (!root || candidate.length > root.length)) root = candidate;
+    }
+    return { path: saved.path, record, root: root || null, readOnly: !root || vscode.workspace.isTrusted === false };
+  }
+
+  async function openCustomDocument(uri, _openContext, token) {
+    const document = { uri, dispose() {} };
+    if (token?.isCancellationRequested) return document;
+    try { document.loaded = await readAtlas(uri); }
+    catch (error) { document.error = error.message; }
+    return document;
+  }
+
+  async function resolveCustomEditor(document, panel, token) {
+    if (token?.isCancellationRequested) return;
+    if (!document.loaded && !document.error) {
+      try { document.loaded = await readAtlas(document.uri); }
+      catch (error) { document.error = error.message; }
+    }
+    if (document.loaded) {
+      const loaded = document.loaded;
+      return createPanel(loaded.root, loaded.record, loaded.path, '', undefined, panel, loaded.readOnly);
+    }
+    panel.webview.options = { ...panel.webview.options, enableScripts: true, localResourceRoots: [] };
+    panel.title = path.basename(document.uri.fsPath || document.uri.path) + ' — Atlas';
+    panel.webview.html = atlasOpenErrorHtml(document.error || 'Atlas opening was cancelled.');
+    let busy = false;
+    const listener = panel.webview.onDidReceiveMessage(async m => {
+      if (busy || !m || !['retryOpen', 'openAsText'].includes(m.type)) return;
+      busy = true;
+      try {
+        if (m.type === 'openAsText') {
+          return await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default', { preview: false });
+        }
+        const loaded = await readAtlas(document.uri);
+        if (token?.isCancellationRequested) return;
+        document.loaded = loaded;
+        document.error = undefined;
+        listener.dispose();
+        return createPanel(loaded.root, loaded.record, loaded.path, '', undefined, panel, loaded.readOnly);
+      } catch (error) {
+        document.error = error.message;
+        panel.webview.html = atlasOpenErrorHtml(document.error);
+      } finally { busy = false; }
+    });
+    panel.onDidDispose(() => listener.dispose());
+  }
+  const customEditorRegistered = typeof vscode.window.registerCustomEditorProvider === 'function';
+  if (customEditorRegistered) context.subscriptions.push(vscode.window.registerCustomEditorProvider('mrw.atlasEditor',
+    { openCustomDocument, resolveCustomEditor },
+    { supportsMultipleEditorsPerDocument: false, webviewOptions: { retainContextWhenHidden: true } }));
 
   async function generate(invocation) {
     const retained = invocation?.retained;

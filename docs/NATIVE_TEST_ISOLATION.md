@@ -174,3 +174,8 @@ corrects a reader-authored inference before publishing and reopens the saved atl
 after a fixture-only reload and a source change. The selections and review
 actions are scripted. The development host, webview, text buffer, publication
 and reload run in native VS Code Remote–WSL.
+
+The native case also uses VS Code's default editor resolution to open a saved
+atlas in the workspace and a read-only copy elsewhere under the fixture root.
+It checks the graph views, captured evidence, Return and explicit Text Editor
+opening while comparing the retained file bytes.
