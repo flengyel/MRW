@@ -44,6 +44,20 @@ in the note itself. PDF return is file-level. For a saved study attempt, use
 [Reading and restart](READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart) ·
 [Study controls](ACTIVE_STUDY_DESIGN.md#archive-and-delete-studies)
 
+## Mathematical atlases
+
+The proposed atlas lets a reader start with a chapter or theorem and see what
+each part contributes. Each component states its inputs and conclusion and
+opens the passage or declaration on which it rests. A reader can follow the
+argument backwards, defer a cited proof, or expand a step to inspect the
+premises used together. A chapter without formal proofs can be read through
+its definitions, examples and references.
+
+MRW currently imports proposed outlines from selected passages and can hide or
+restore intermediate claims. Generating an atlas from a new text or Lean proof
+is a design requirement. The [generation design](PROOF_OUTLINES.md#generating-a-mathematical-atlas)
+specifies extraction, correction, evidence and examples.
+
 ## Reconstructing a compressed solution
 
 The intended integrated workflow uses the source reader, notes,

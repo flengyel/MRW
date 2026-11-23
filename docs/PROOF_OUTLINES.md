@@ -11,6 +11,106 @@ AI-assisted manuscripts, with or without Lean formalizations. Orientation,
 central concepts, governing ideas and details are freely navigable. A cited
 theorem can be used while inspection of its proof is deferred.
 
+## Generating a mathematical atlas
+
+A mathematical atlas is a reading outline of one or more selected sources. It
+names the main results, explains the construction or reduction joining them, and
+opens the passage where each step is made. A reader can follow the author's
+order or start at a conclusion and ask which result supplies the next step.
+In an expository section the outline can consist entirely of definitions,
+examples and their uses. The [RH and Dirichlet GRH atlas](https://nasqret.github.io/riemann-rev/atlas/#map-section)
+illustrates this movement between a component map and the declarations behind
+it. Its [companion site](https://nasqret.github.io/riemann-rev/) derives several
+reading views from a prepared map. The following design covers generation from
+a new source.
+
+### From text to an outline
+
+1. On request, capture the selected passage or section at its exact revision.
+   For Markdown and LaTeX, collect headings, named statements, proof boundaries,
+   labels and explicit references supported by the parser. Preserve source order
+   and exact spans. Show unresolved references in place. A local manuscript
+   needs no public URL in the proposed workflow. A PDF citation requires the
+   retained edition and page. A transcription also records its origin and, when
+   available, the region on that page.
+2. Start with the question or selected result. Follow its explicit references.
+   A reader or an explicitly requested companion can then propose the decisive
+   intermediate claims, the premises used together, and why they yield each
+   conclusion. Keep the quotation beside each proposed inference. Record an
+   omitted justification as a gap. A citation, definition or preceding section
+   can guide reading without supplying a premise.
+3. Build the overview around the principal construction and reductions. For
+   each component, give the mathematical question it answers, the hypotheses
+   it uses, the result it supplies, and where that result is used next. A
+   shared lemma has one source identity and can appear in several components.
+   The reader can rename or regroup components, choose a different route and
+   open a cited theorem while deferring its proof.
+
+### From a Lean proof to an outline
+
+For the selected declaration at a pinned project revision and toolchain,
+record its exact type. On explicit extraction, collect referenced constants
+from its elaborated type and proof value separately, when available. Keep
+direct uses distinguishable from transitive dependencies. Report unavailable
+values and unavailable locations. Within a proof, a named local lemma or
+subterm can anchor a step when an elaboration record locates it in the source
+and identifies the local hypotheses. Mark synthesized terms without a reliable
+source span accordingly. Defer to Lean and its supported interfaces for
+elaboration. A constant list alone supplies no account of the local reasoning.
+
+A correspondence between an informal step and a declaration records both
+revisions and the comparison of hypotheses and conclusion. A check of a
+conditional theorem identifies its outstanding hypotheses. A paraphrase, a
+proposed correspondence and a reported replay retain their respective authors
+and evidence. Inspection makes no admission to the justification engine.
+
+### Reading, editing and scale
+
+Use the existing proof graph for an individual inference outline. Grouping
+claims into a component gives the reader a name for a mathematical argument.
+Vertex elimination within that component retains the joint premises and
+alternative derivations specified below. A map between components names the
+result used at each boundary. Expanding a component opens its cited claims
+and exact sources. Return restores the originating selection. Provide the
+same reading route through keyboard-accessible text.
+
+A large work may have a small overview whose entries open bounded detail
+graphs on demand. Shared results link to the same retained occurrence.
+Expose the boundary of each loaded portion. If expanding alternatives would
+exceed a display bound, keep the prior view and offer a narrower expansion.
+The current graph format accepts 64 claims and 128 inferences and bounds the
+projection at 1,024 derivations. Regeneration from changed material creates a
+new revision and preserves the earlier outline, attributions and reader
+corrections for comparison. Reopening a saved atlas requires no network,
+model request, compilation or notebook execution.
+
+### Acceptance examples
+
+- Start from the published proof of Stacks lemma
+  [08ZH](https://stacks.math.columbia.edu/tag/08ZH). For continuous maps
+  $f:X\to Z$ and $g:Y\to Z$ with $Z$ Hausdorff, the map
+  $(x,y)\mapsto(f(x),g(y))$ identifies the fiber product as the inverse image
+  of the closed diagonal. The reader should be able to find the use of
+  [08ZE](https://stacks.math.columbia.edu/tag/08ZE) and state exactly where
+  the Hausdorff hypothesis enters. Start separately from the pinned Lean source
+  in the [existing example](../tests/fixtures/proof_graph_08zh.json) and locate
+  the closed-equalizer application. Compare the two routes only after extraction.
+- If $A,B$ jointly yield $C$, $D$ also yields $C$, and $C,E$ jointly yield
+  $F$, hiding $C$ leaves two alternatives for $F$, with premise sets
+  $\{A,B,E\}$ and $\{D,E\}$. Each expands to its own original inferences.
+  In a proof by discharge, retain the local scope boundary.
+- Open a prose-only section containing a definition and an unresolved citation.
+  After a reader corrects the overview and the source changes, reopen the old
+  quotation and the attributed correction. A chapter with circular
+  cross-references must remain readable in source order.
+
+The first implementation should take a selected text through anchored
+reference extraction, review of a proposed argument, correction and reopening.
+The existing [proof-study handoff](PROOF_STUDY_WORKFLOW.md) and graph viewer
+supply the review and display routes. A Lean adapter can first expose the type
+and value dependencies of one declaration. Extraction of local proof steps
+requires its own evidence and acceptance example.
+
 ## Visible claims and explanations
 
 The reader retains useful intermediate claims and hides the arguments between
