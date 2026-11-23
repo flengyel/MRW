@@ -85,7 +85,9 @@ test('restart cannot redirect a pinned native store',async t=>{
 });
 test('every native entry reaches the preflight barrier before activation, commands or writes',async()=>{
  const dir=path.join(__dirname,'host');let count=0;
- for(const file of (await fs.readdir(dir)).filter(n=>n.endsWith('.js')&&n!=='fixtureGuard.js')){
+ const entries=(await fs.readdir(dir)).filter(n=>n.endsWith('.js')&&n!=='fixtureGuard.js');
+ assert.ok(entries.includes('atlas.js'));
+ for(const file of entries){
   const filename=path.join(dir,file),req=createRequire(filename),module={exports:{}};let mutations=0,gates=0;
   const forbidden=()=>{mutations++;throw Error('Unexpected native test mutation');};
   const vscode={workspace:{workspaceFolders:[]},window:{},commands:{executeCommand:forbidden}};
@@ -97,7 +99,7 @@ test('every native entry reaches the preflight barrier before activation, comman
   }
   assert.equal(mutations,0,file);assert.ok(gates>0,file);
  }
- assert.equal(count,34);
+ assert.equal(count,35);
 });
 test('both direct Python test bridges refuse unscoped and outside writes',async t=>{
  const base=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-bridge-guard-'));t.after(()=>fs.rm(base,{recursive:true,force:true}));
