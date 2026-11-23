@@ -173,6 +173,7 @@ async function harness(root, state = new Map(), options = {}) {
     if (name === './sourcePlugins') return require('../src/sourcePlugins');
     if (name === './outlines') return require('../src/outlines');
     if (name === './readingOutline') return require('../src/readingOutline');
+    if (name === './atlas') return require('../src/atlas');
     if (name === './workspaceMoveHost') return require('../src/workspaceMoveHost');
     if (name === './activeStudy') return require('../src/activeStudy');
     if (name === './studyHistory') return {StudyHistory:class extends require('../src/studyHistory').StudyHistory{constructor(...a){super(a[0],a[1],{origin:'test'});}}};

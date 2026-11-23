@@ -48,7 +48,7 @@ test('Recent Documents is directly available and keeps its existing command iden
 
 test('Return and companion commands have the same scope in the Document menu and Command Palette', () => {
   const expected = {
-    'mrw.returnToReadingOutline': 'mrw.canReturnToDocument',
+    'mrw.returnToReadingOutline': 'mrw.canReturnToDocument || resourceScheme == mrw-atlas-source',
     'mrw.openDocumentInObsidian': 'resourcePath in mrw.obsidianNotePaths',
     'mrw.copyDocumentLink': 'resourcePath in mrw.noteLinkPaths',
     'mrw.leanStudyActions': 'resourcePath in mrw.leanLessonPaths',
@@ -60,6 +60,8 @@ test('Return and companion commands have the same scope in the Document menu and
   }
   assert.equal(c.submenus.find(menu => menu.id === 'mrw.documentNavigation').icon, '$(list-selection)');
   assert.equal(c.commands.find(row => row.command === 'mrw.openOutline').icon, '$(book)');
+  assert.equal(c.menus['editor/title'].find(row => row.command === 'mrw.returnToAtlas').when,
+    'resourceScheme == mrw-atlas-source');
 });
 
 test('Learning Materials is the visible entry for the three sample routes', () => {
