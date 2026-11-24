@@ -3,6 +3,7 @@ import argparse
 from hashlib import sha256
 import json
 from pathlib import Path, PurePosixPath
+import tomllib
 from zipfile import ZipFile
 
 
@@ -10,6 +11,9 @@ def verify(archive):
     extension = Path(__file__).resolve().parents[1]
     repository = extension.parent
     manifest = json.loads((extension / 'package.json').read_text())
+    metadata = tomllib.loads((repository / 'pyproject.toml').read_text())
+    if metadata['project']['version'] != manifest['version']:
+        raise ValueError('The Python distribution and the MRW extension must have the same version')
     containers = manifest.get('contributes', {}).get('viewsContainers', {}).get('activitybar', [])
     mrw_container = next((item for item in containers if item.get('id') == 'mrw'), {})
     if mrw_container.get('title') != f'MRW {manifest["version"]}':

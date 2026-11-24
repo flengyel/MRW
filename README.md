@@ -81,7 +81,7 @@ libraries for your system.
 
 The VSIX bundles the Python service from its release source and runs it with the
 workspace host’s Python. **MRW: Open Tutorial** reports the active VS Code
-build. The standalone distribution has its own Python package metadata.
+build. The standalone distribution and the extension use the same release version.
 
 ## Data and transfers
 

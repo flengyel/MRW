@@ -282,6 +282,8 @@ press F5. Use a disposable workspace, not working notes or saved research.
 From the repository root:
 
 ```sh
+npm ci --prefix vscode --ignore-scripts
+npm run bundle-core --prefix vscode
 npm run check --prefix vscode
 npm test --prefix vscode
 PYTHONPATH=src python3 -m unittest discover -s tests -v

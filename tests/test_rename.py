@@ -19,6 +19,8 @@ class RenameTests(unittest.TestCase):
         self.assertEqual(metadata['name'], 'mrw')
         self.assertEqual(metadata['scripts'], {'mrw': 'mrw.cli:main'})
         self.assertEqual(metadata['version'], mrw.__version__)
+        extension = json.loads((ROOT / 'vscode/package.json').read_text())
+        self.assertEqual(extension['version'], mrw.__version__)
         self.assertEqual({p.name for p in (ROOT / 'src').iterdir() if p.is_dir() and (p / '__init__.py').exists()}, {'mrw'})
 
     def test_bundler_clears_generated_package_debris(self):

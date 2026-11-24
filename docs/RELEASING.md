@@ -20,8 +20,9 @@ The steps below apply when building a new version.
    tags and all releases, including drafts. Choose an unused patch version;
    never move a published tag or overwrite a published asset. Use an isolated
    worktree when needed and keep the working VS Code window and private data intact.
-2. Update `vscode/package.json` and matching root metadata in
-   `vscode/package-lock.json`, preserving dependency pins. Set the `mrw` Activity
+2. Update `vscode/package.json`, matching root metadata in
+   `vscode/package-lock.json`, `pyproject.toml` and `src/mrw/__init__.py` to the
+   same version. Preserve dependency pins. Set the `mrw` Activity
    Bar container title to `MRW <version>` in the manifest; VS Code uses it for
    the icon hover and sidebar heading. Package verification rejects a stale title.
    Update versioned release and VSIX links in both READMEs and the installation
