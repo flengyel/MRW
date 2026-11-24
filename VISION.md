@@ -14,11 +14,11 @@ those at hand, and keep the conclusion or the gap with the argument. To study
 the proof, attempt a step and compare it with the original.
 [Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md)
 
-For a paper accompanied by a Lean development, compare the types, hypotheses
-and conclusion of the declaration with the statement on the page. Lean checks the
-formal declaration. Whether it expresses the intended theorem requires a separate
-judgment. Explanation in English and formalization in Lean are intended uses.
-[Lean workflow](docs/LEAN_STUDY_WORKFLOW.md)
+MRW aims to help readers compare the types, hypotheses and conclusions of a
+paper’s statements with those of declarations in a pinned Lean development.
+Lean checks the declarations. Deciding whether they express the paper’s
+theorems calls for a separate mathematical judgment.
+[Planned paper–Lean correspondence review](docs/DESIGN_RECONCILIATION.md#paper-lean-correspondence-review)
 
 ## Grounds for using a result
 

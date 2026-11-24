@@ -3,6 +3,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const { hostStoragePath } = require('./hostStorage');
 const FIELDS = { question: 'Current mathematical question', correction: 'Human correction / changed assumption / alternative',
   last_conclusion: 'Last useful conclusion (human task summary)', unresolved_issue: 'Unresolved issue (human task summary)' };
 const passageNumbers = text => {
@@ -33,8 +34,9 @@ function registerInvestigation({ vscode, context, register, bridge, show, projec
   }
   async function load() {
     const root = await projectRoot(vscode.window.activeTextEditor);
-    if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for investigation state.');
-    const store = path.join(context.storageUri.fsPath, `investigation-${crypto.createHash('sha256').update(root).digest('hex')}`);
+    const home = hostStoragePath(vscode, context.storageUri);
+    if (!home) throw new Error('Open a local workspace for investigation state.');
+    const store = path.join(home, `investigation-${crypto.createHash('sha256').update(root).digest('hex')}`);
     if (state && state.project_root !== root && human && JSON.stringify(human) !== JSON.stringify(state.active?.summary)) {
       throw new Error('Save or end the current human task summary before changing projects.');
     }

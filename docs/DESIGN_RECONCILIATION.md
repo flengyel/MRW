@@ -78,6 +78,8 @@ and use on a changed example through the separate
 Companion tests remain open. Extend an adapter or the justification engine
 when a mathematical task calls for it.
 
+<a id="paper-lean-correspondence-review"></a>
+
 **Deferred: paper–Lean correspondence review.** The selected case is
 [*Maximality of the Došen–Petrić Boolean Category*](https://arxiv.org/abs/2611.19496).
 Resolve the current manuscript and Lean revisions together. Compare definitions,

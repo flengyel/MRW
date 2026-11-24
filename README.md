@@ -69,6 +69,20 @@ translation remains a development goal.
 
 [Architecture](docs/ARCHITECTURE.md) · [Data model](DOMAIN_MODEL.md)
 
+## Standalone Qt application
+
+The Python distribution includes a desktop editor and the `mrw` command line.
+To use the desktop editor, install from a source checkout in a Python 3.11+
+virtual environment with `python -m pip install .`, then run `mrw gui`. Desktop
+use requires a graphical session, PySide6 with QtPdf, and the Qt platform
+libraries for your system.
+[Qt Linux requirements](https://doc.qt.io/qt-6/linux-requirements.html) ·
+[Standalone editor behavior](UX_SPEC.md#standalone-qt-maintenance)
+
+The VSIX bundles the Python service from its release source and runs it with the
+workspace host’s Python. **MRW: Open Tutorial** reports the active VS Code
+build. The standalone distribution has its own Python package metadata.
+
 ## Data and transfers
 
 Ordinary files remain in their editors. MRW stores retained sources and study

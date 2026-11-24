@@ -2,7 +2,14 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto'),cp=require('node:child_process'),vm=require('node:vm');
 const {createRequire}=require('node:module');
 const guard=require('./host/fixtureGuard');
-const uri=file=>({scheme:'file',fsPath:file,toString:()=>require('node:url').pathToFileURL(file).href});
+const uri=file=>({scheme:'file',authority:'',path:file,fsPath:file,query:'',fragment:'',
+ with(changes){return {...this,...changes};},toString(){return this.scheme==='file'?require('node:url').pathToFileURL(file).href:this.scheme+':'+file;}});
+function freshGuard(){
+ const filename=path.join(__dirname,'host/fixtureGuard.js'),module={exports:{}};
+ vm.runInNewContext('(function(require,module,__filename,__dirname){'+require('node:fs').readFileSync(filename,'utf8')+'\n})',
+  {process,Buffer,console,URL})(createRequire(filename),module,filename,path.dirname(filename));
+ return module.exports;
+}
 async function fixture(t){
  const base=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-guard-'));t.after(()=>fs.rm(base,{recursive:true,force:true}));
  const root=path.join(base,'owned'),project=path.join(root,'project'),extension=path.join(root,'extension'),id=crypto.randomUUID(),profile='MRW-Fixture-'+id;
@@ -25,6 +32,96 @@ test('declared fixture keeps native context/stores and pins restart identity',as
  const f=await fixture(t),result=await f.check();assert.notEqual(result.context,f.context);assert.equal(result.storage,path.join(f.root,'workspace-storage'));
  assert.equal(JSON.parse(await fs.readFile(path.join(f.root,'native-scope.json'))).id,f.id);
  await f.check();assert.equal(process.env.MRW_TEST_FIXTURE,path.join(f.root,'.mrw-native-fixture.json'));
+});
+test('local Linux native userdata URIs keep their scheme inside the owned facade', {skip:process.platform!=='linux'},async t=>{
+ const f=await fixture(t);f.vscode.env={remoteName:undefined};
+ f.context.storageUri=uri(f.storage).with({scheme:'vscode-userdata'});
+ f.context.globalStorageUri=uri(f.global).with({scheme:'vscode-userdata'});
+ const nativeNote=path.join(f.global,'unrelated.txt');await fs.writeFile(nativeNote,'Keep native storage intact.');
+ f.nativeGlobal.set('existing-research',{text:'Keep genuine state.'});
+ const result=await f.check();
+ assert.equal(result.context.storageUri.scheme,'vscode-userdata');assert.equal(result.context.globalStorageUri.scheme,'vscode-userdata');
+ assert.equal(result.context.storageUri.fsPath,path.join(f.root,'workspace-storage'));
+ assert.equal(result.context.globalStorageUri.fsPath,path.join(f.root,'global-storage'));
+ assert.equal(guard.scopeInfo(result.context).nativeStorage,f.storage);assert.equal(guard.scopeInfo(result.context).nativeGlobal,f.global);
+ await result.context.globalState.update('test-result',{synthetic:true});
+ assert.deepEqual(f.nativeGlobal.get('existing-research'),{text:'Keep genuine state.'});
+ assert.equal(f.nativeGlobal.get('test-result'),undefined);
+ assert.deepEqual(f.nativeGlobal.get('mrw.fixture.'+f.id+'.test-result'),{synthetic:true});
+ assert.equal(await fs.readFile(nativeNote,'utf8'),'Keep native storage intact.');
+ const pin=JSON.parse(await fs.readFile(path.join(f.root,'native-scope.json'),'utf8'));
+ assert.equal(pin.storage,path.join(f.root,'workspace-storage'));assert.equal(pin.global,path.join(f.root,'global-storage'));
+ await guard.clearOwnedState(result.context);assert.deepEqual(f.nativeGlobal.get('existing-research'),{text:'Keep genuine state.'});
+ await f.check();
+});
+test('guarded bootstrap passes only the owned userdata facade to production activation',{skip:process.platform!=='linux'},async t=>{
+ const f=await fixture(t),local=freshGuard(),module={exports:{}};let activated;
+ f.marker.case='activation';await f.put(path.join(f.root,'.mrw-native-fixture.json'),f.marker);
+ f.vscode.env={remoteName:undefined};
+ f.context.storageUri=uri(f.storage).with({scheme:'vscode-userdata'});f.context.globalStorageUri=uri(f.global).with({scheme:'vscode-userdata'});
+ const filename=path.join(__dirname,'host/bootstrap.js'),staged=path.join(f.extension,'test/host/bootstrap.js');
+ vm.runInNewContext('(function(require,module,__filename){'+await fs.readFile(filename,'utf8')+'\n})',{process})(name=>{
+  if(name==='vscode')return f.vscode;
+  if(name==='./fixtureGuard')return local;
+  if(name==='../../src/extension')return {activate:context=>{activated=context;return {mrwInspection:{version:1}};}};
+  throw Error('Unexpected bootstrap import '+name);
+ },module,staged);
+ const api=await module.exports.activate(f.context);
+ assert.equal(api.fixtureContext,activated);assert.notEqual(activated,f.context);
+ assert.equal(activated.storageUri.scheme,'vscode-userdata');assert.equal(activated.globalStorageUri.scheme,'vscode-userdata');
+ assert.equal(activated.storageUri.fsPath,path.join(f.root,'workspace-storage'));assert.equal(activated.globalStorageUri.fsPath,path.join(f.root,'global-storage'));
+ assert.equal(activated.globalState.get('outside-state'),undefined);
+ assert.equal(local.scopeInfo(activated).nativeGlobal,f.global);assert.equal(api.mrwInspection.version,1);
+});
+test('userdata remains unavailable for remote or unidentified hosts and redirected URIs',async t=>{
+ for(const kind of ['remote','missing-env','authority','other-scheme']){
+  const f=await fixture(t);f.vscode.env={remoteName:kind==='remote'?'wsl':undefined};
+  if(kind==='missing-env')delete f.vscode.env;
+  f.context.storageUri=uri(f.storage).with({scheme:kind==='other-scheme'?'vscode-remote':'vscode-userdata',authority:kind==='authority'?'remote.example':''});
+  f.context.globalStorageUri=uri(f.global).with({scheme:'vscode-userdata'});
+  await assert.rejects(f.check(),/local native storage required/);
+  await assert.rejects(fs.stat(path.join(f.root,'native-scope.json')),/ENOENT/);
+  assert.deepEqual([...f.nativeWorkspace.keys()],[]);assert.deepEqual([...f.nativeGlobal.keys()],[]);
+ }
+});
+test('fixture host identity is checked before native storage URIs are interpreted',async t=>{
+ for(const kind of ['production','extension','project']){
+  const f=await fixture(t);let reads=0;
+  Object.defineProperties(f.context,{storageUri:{get(){reads++;throw Error('Native storage interpreted too early');}},globalStorageUri:{get(){reads++;throw Error('Native storage interpreted too early');}}});
+  if(kind==='production')f.context.extensionMode=1;
+  if(kind==='extension')f.context.extensionPath=f.project;
+  if(kind==='project')f.vscode.workspace.workspaceFolders=[{uri:uri(f.base)}];
+  await assert.rejects(f.check(),/Development\/Test|wrong development extension|active workspace/);
+  assert.equal(reads,0);await assert.rejects(fs.stat(path.join(f.root,'native-scope.json')),/ENOENT/);
+ }
+});
+test('large packaged manifest does not mask the guarded bootstrap activation refusal',async t=>{
+ const f=await fixture(t),local=freshGuard(),refusal=Error('MRW native fixture refused: original native storage refusal');
+ f.marker.case='activation';await f.put(path.join(f.root,'.mrw-native-fixture.json'),f.marker);
+ await f.put(path.join(f.extension,'package.json'),{main:'./test/host/bootstrap.js',description:'x'.repeat(40000)});
+ let activated=0,bodies=0;
+ f.vscode.extensions={getExtension:id=>{assert.equal(id,'flengyel.mrw');return {extensionPath:f.extension,activate:async()=>{activated++;throw refusal;}};}};
+ const entry=local.protect({run:async()=>{bodies++;}},{vscode:f.vscode,filename:path.join(f.extension,'test/host/activation.js')});
+ await assert.rejects(entry.run(),error=>error===refusal);
+ assert.equal(activated,1);assert.equal(bodies,0);
+ await assert.rejects(fs.stat(path.join(f.root,'native-scope.json')),/ENOENT/);
+});
+test('manifest allowance does not enlarge receipt or configuration metadata budgets',async t=>{
+ for(const kind of ['manifest','receipt','config']){
+  const f=await fixture(t);let activated=0,bodies=0;
+  f.marker.case='activation';await f.put(path.join(f.root,'.mrw-native-fixture.json'),f.marker);
+  if(kind==='manifest'){
+   await f.put(path.join(f.extension,'package.json'),{main:'./test/host/bootstrap.js',description:'x'.repeat(1024*1024)});
+   f.vscode.extensions={getExtension:()=>({extensionPath:f.extension,activate:async()=>{activated++;return {fixtureContext:f.context};}})};
+   const entry=freshGuard().protect({run:async()=>{bodies++;}},{vscode:f.vscode,filename:path.join(f.extension,'test/host/activation.js')});
+   await assert.rejects(entry.run(),/invalid fixture metadata/);assert.equal(activated,0);assert.equal(bodies,0);
+  }else{
+   if(kind==='receipt'){f.marker.padding='x'.repeat(32768);await f.put(path.join(f.root,'.mrw-native-fixture.json'),f.marker);}
+   else {f.config.padding='x'.repeat(32768);await f.put(path.join(f.extension,'host-test.json'),f.config);}
+   await assert.rejects(f.check(),/invalid fixture metadata/);
+  }
+  await assert.rejects(fs.stat(path.join(f.root,'native-scope.json')),/ENOENT/);
+ }
 });
 test('missing receipt, mismatched inode and production mode refuse before scope publication',async t=>{
  for(const kind of ['missing','inode','production']){const f=await fixture(t);

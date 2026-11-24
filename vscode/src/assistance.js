@@ -4,6 +4,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { digest, protectedText } = require('./navigation');
 const { registerInvestigation } = require('./investigation');
+const { hostStoragePath } = require('./hostStorage');
 
 function capture(editor) {
   const doc = editor && editor.document;
@@ -75,8 +76,9 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     const configured = vscode.workspace.getConfiguration('mrw').get('model', '');
     const model = configured || await vscode.window.showInputBox({ prompt: 'OpenAI model identifier for this request' });
     if (model === undefined) return;
-    if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for assistance records.');
-    const directory = path.join(context.storageUri.fsPath, 'model-calls');
+    const home = hostStoragePath(vscode, context.storageUri);
+    if (!home) throw new Error('Open a local workspace for assistance records.');
+    const directory = path.join(home, 'model-calls');
     const id = `assistance-${crypto.randomUUID()}`;
     draft = { project_root: root, target, contexts: [target], question, model,
       output: path.join(directory, `${id}.json`), exchange_id: id };

@@ -6,6 +6,7 @@ const { sourceSnapshot, digest } = require('./navigation');
 const {createContinuation, availability} = require('./annotationContinuation');
 const { makeExternal, parseExternal, workspaceRoute, obsidianTarget } = require('./companionLinks');
 const { sendOrgCapture } = require('./orgCapture');
+const { hostStoragePath } = require('./hostStorage');
 
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
@@ -491,8 +492,9 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   }
   async function storage(editor) {
     const root = await projectRoot(editor);
-    if (!context.storageUri || context.storageUri.scheme !== 'file') throw new Error('Open a local workspace for private saved sources.');
-    return { root, store: path.join(context.storageUri.fsPath, `outlines-${digest(root)}`) };
+    const home = hostStoragePath(vscode, context.storageUri);
+    if (!home) throw new Error('Open a local workspace for private saved sources.');
+    return { root, store: path.join(home, `outlines-${digest(root)}`) };
   }
   async function readerTarget(c, value) {
     if (value.note) {
@@ -1070,8 +1072,9 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       // Background discovery must never open a workspace-folder picker.
       const folders=vscode.workspace.workspaceFolders || [];
       const folder=(invokingUri && vscode.workspace.getWorkspaceFolder?.(invokingUri)) || (folders.length===1?folders[0]:undefined);
-      if (!folder || folder.uri.scheme!=='file' || context.storageUri?.scheme!=='file') throw new Error('Use Saved copy… to choose a project.');
-      const root=await fs.realpath(folder.uri.fsPath),store=path.join(context.storageUri.fsPath,`outlines-${digest(root)}`);
+      const home=hostStoragePath(vscode,context.storageUri);
+      if (!folder || folder.uri.scheme!=='file' || !home) throw new Error('Use Saved copy… to choose a project.');
+      const root=await fs.realpath(folder.uri.fsPath),store=path.join(home,`outlines-${digest(root)}`);
       if(token?.isCancellationRequested)throw new Error('Saved-copy listing cancelled.');
       const result=await bridge({method:'outline_list',store,project_root:root},{signal:controller.signal});
       return result.outlines.map(o => ({ ...savedSourceChoice(o), store, root }));
