@@ -138,7 +138,7 @@
     const search = el('input', controls); search.type = 'search'; search.placeholder = 'Find a claim'; search.setAttribute('aria-label', 'Find a claim');
     search.addEventListener('keydown', e => { if (e.key === 'Enter' && search.value.trim()) { const id = map.find(search.value.trim()); if (id) selectNode(id, true); } });
     mapHost = el('div', stage); map = window.MRWProofMap.create(mapHost, selectNode);
-    el('p', stage, 'Select to read · drag to pan · wheel to zoom · dashed arrows cross deleted steps', 'proof-legend');
+    el('p', stage, 'Select to read · drag to pan · Ctrl+wheel to zoom · dashed arrows cross deleted steps', 'proof-legend');
     inspector = el('aside', shell, undefined, 'proof-inspector'); inspector.setAttribute('aria-label', 'Selected claim and Stacks passage');
     readingList = el('details', root, undefined, 'proof-reading-list');
     clearSelection();

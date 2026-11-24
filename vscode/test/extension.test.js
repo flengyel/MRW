@@ -107,6 +107,7 @@ async function harness(root, state = new Map(), options = {}) {
     window: {
       createQuickPick() { return api.lastDocumentPicker=quickPicker(()=>WAIT); },
       activeTextEditor: undefined,
+      tabGroups: options.tabGroups,
       createWebviewPanel(type, title, column) {
         let receive, viewState;
         const panel = { title, viewColumn: column === -2 ? (api.window.activeTextEditor?.viewColumn || 1) + 1 : column, dispose() {}, reveal() {},
@@ -1829,7 +1830,7 @@ test('navigator opens exact published mathematics without changing surrounding l
   assert.equal(h.shown.at(-1), doc);
   assert.equal(h.api.window.activeTextEditor.viewColumn, 1);
   assert.equal(h.api.readingTree.description, 'overview.md');
-  assert.ok(h.api.readingTree.message.includes(file));
+  assert.ok(h.api.readingTree.message.includes('overview.md') && !h.api.readingTree.message.includes(root));
   h.focus(unrelated);
   await h.commands.get('mrw.revealReadingDocument')();
   assert.equal(h.api.window.activeTextEditor.document, doc);
@@ -1838,7 +1839,7 @@ test('navigator opens exact published mathematics without changing surrounding l
   await h.commands.get('mrw.chooseReadingOverview')();
   assert.equal(h.shown.length, shownBeforeCancel);
   assert.equal(JSON.stringify(h.state.get('mrw.readingOutline.v1')), selectedBeforeCancel);
-  assert.ok(h.api.readingTree.message.includes(file));
+  assert.ok(h.api.readingTree.message.includes('overview.md') && !h.api.readingTree.message.includes(root));
   h.changeDocument(doc, 0, 0, 'Unsaved notes\n\n');
   model = await h.commands.get('mrw.refreshReadingOutline')();
   const node = model.all[1];
@@ -1906,7 +1907,7 @@ test('saved-source opening is discoverable and independent of an earlier citatio
   assert.equal(doc.getText(h.api.window.activeTextEditor.selection), ref.markdown);
   await h.commands.get('mrw.openOutline')();
   const independent = panel.webview.messages.findLast(message => message.type === 'outline').returnDestination;
-  assert.equal(independent.kind, 'selected'); assert.match(independent.detail, /Opened independently/);
+  assert.equal(independent.kind, 'selected'); assert.equal(independent.detail, 'Opened directly.');
   assert.equal(independent.path, file);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   assert.ok(manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents.includes('[Open Document…](command:mrw.openDocument '));
@@ -2573,12 +2574,43 @@ test('background saved-copy discovery never prompts for a project in an ambiguou
 });
 
 test('Contents hides the preceding Markdown tree for a text document and restores it on Return', async t => {
-  const root = await temporary(t), h = await harness(root), a = path.join(root, 'a.md');
-  await fs.writeFile(a, '# Mathematics\n\n[Text](plain.txt)\n'); await fs.writeFile(path.join(root, 'plain.txt'), 'A text file.');
-  const doc = h.document(a, await fs.readFile(a, 'utf8')); doc.languageId = 'markdown'; h.focus(h.editor(doc));
+  const root = await temporary(t), notes = path.join(root, 'notes');
+  let changedTab;
+  const tabGroups = {
+    activeTabGroup: { viewColumn: 1 },
+    onDidChangeTabs(listener) { changedTab = listener; return {dispose() {}}; },
+  };
+  const h = await harness(root, new Map(), {tabGroups});
+  function showTab(doc) {
+    tabGroups.activeTabGroup.activeTab = { input: {uri: doc.uri} };
+    h.focus(h.editor(doc));
+    changedTab();
+  }
+  await fs.mkdir(notes);
+  const a = path.join(notes, 'a.md');
+  const plain = path.join(notes, 'plain.txt');
+  await fs.writeFile(a, '# Mathematics\n\n[Text](plain.txt)\n');
+  await fs.writeFile(plain, 'A text file.');
+  showTab(h.document(plain, 'A text file.'));
+  assert.equal(h.api.readingTree.message, 'Contents is available for Markdown notes');
+  assert.deepEqual(h.api.readingProvider.getChildren(), []);
+
+  const doc = h.document(a, await fs.readFile(a, 'utf8')); doc.languageId = 'markdown'; showTab(doc);
   const nav = await h.commands.get('mrw.openReadingOutline')(); assert.equal(h.api.readingProvider.getChildren().length, 1);
+  function assertRevealRow() {
+    const [node] = h.api.readingProvider.getChildren();
+    const reveal = h.api.readingProvider.getTreeItem(node);
+    assert.equal(reveal.label, 'Contents: notes/a.md · Reveal');
+    assert.equal(reveal.tooltip, a);
+    assert.equal(reveal.command.command, 'mrw.revealReadingDocument');
+    assert.equal(h.api.readingTree.message, undefined);
+  }
+
+  showTab(h.document(path.join(notes, 'another.md'), '# Other note'));
+  assertRevealRow();
+  showTab(doc);
   await h.commands.get('mrw.selectReadingOutlineItem')(nav.all.find(n => n.kind === 'document_link'));
-  assert.deepEqual(h.api.readingProvider.getChildren(), []); assert.match(h.api.readingTree.message, /plain.txt.*Markdown only/);
+  assertRevealRow();
   assert.equal(h.state.get('mrw.readingOutline.v1').uri, doc.uri.toString());
   await h.commands.get('mrw.returnToReadingOutline')(); assert.equal(h.api.readingProvider.getChildren()[0].label, 'Mathematics');
   assert.match(h.api.readingTree.message, /Contents: .*a.md/); assert.deepEqual(h.errors, []);

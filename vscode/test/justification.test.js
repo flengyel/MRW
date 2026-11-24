@@ -52,6 +52,18 @@ test('local Linux userdata storage reaches checker setup and stages the search i
  assert.equal(run.store,stage.store);assert.equal(run.cache,cache);
  assert.deepEqual(h.errors,[]);
 });
+test('the checker reader shows the actionable missing toolchain message', async () => {
+ const h = harness();
+ await h.open();
+ const message = 'Lean 4.32.2 is missing or incomplete on this workspace host. Run `elan toolchain install leanprover/lean4:v4.32.2` in its terminal, then run Build Local Justification Checker again.';
+ h.setService(async request => {
+  if (request.method === 'route_setup') throw Error(message);
+  return h.defaultService(request);
+ });
+ await h.send('build');
+ assert.deepEqual(h.errors, ['MRW: ' + message]);
+ assert.equal(h.panels[0].messages.at(-1).error, message);
+});
 test('remote userdata storage cannot stage or run a justification search',async()=>{
  const h=harness();await h.open();
  h.vscode.env={remoteName:'wsl'};

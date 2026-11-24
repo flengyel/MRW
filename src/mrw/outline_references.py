@@ -70,7 +70,7 @@ def short_label(store, source, span, region=None):
     if span:
         title = region['title'].strip() if region else ''
         if not title or re.fullmatch(r'Passage [1-9][0-9]*', title):
-            title = passage_title(span_text(source, span)) or title or 'Retained passage'
+            title = passage_title(span_text(source, span), proposal=False) or title or 'Retained passage'
         parts.append(title[:100])
     else:
         parts.append('saved source')

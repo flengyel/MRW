@@ -39,7 +39,10 @@ const GROUPS={
   ['Resume retained Zotero reference…','resumeZoteroReference'],
  ],
  calculationTools:[['Open notebook…','openNotebook'],['Retain saved notebook result…','retainNotebookResult'],['Open / compare retained results…','openNotebookResult'],['Export notebook provenance…','exportNotebookProvenance'],['SagePod and Jupyter setup',null,'GETTING_STARTED_WSL_SAGEPOD.md']],
- proofTools:[['Justification…','openJustification'],['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],
+ proofTools:[
+  ['Generate Mathematical Atlas…','generateAtlas'],
+  ['Open Mathematical Atlas…','openAtlas'],
+  ['Justification…','openJustification'],['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],
  earlierWork:[['Resume saved study','resumeStudy'],['Resume investigation','resumeInvestigation'],
   ['Inspect study history','inspectStudyHistory'],['Export study history…','exportStudyHistory'],['Show archived studies','showArchivedStudies'],
   ['Show trashed studies','showDeletedStudies'],['Manage saved studies…',null,null,null,'studies']],

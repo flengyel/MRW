@@ -67,6 +67,26 @@ function el(tag, text, parent = root, className) {
   if (className) node.className = className;
   parent.append(node); return node;
 }
+function retainedText(parent, text, markdown, kind, id) {
+  if (typeof text !== 'string') return;
+  let exact = parent;
+  if (markdown) {
+    const prose = el('div', undefined, parent, 'retained-prose');
+    prose.innerHTML = markdown.preview(text, 'markdown', 16 * 1024);
+    exact = el('details', undefined, parent, 'source-exact');
+    const key = `exact:${kind}:${id}`;
+    keepOpen(exact, key);
+    el('summary', 'Exact text', exact).dataset.readerFocus = key;
+  }
+  el('pre', text, exact).dataset[kind] = id;
+}
+function passageAssistance(parent, scope) {
+  const more = el('details', undefined, parent, 'passage-more');
+  const key = `passage-more:${scope}`;
+  keepOpen(more, key);
+  el('summary', 'More…', more).dataset.readerFocus = key;
+  return el('div', undefined, more, 'toolbar');
+}
 function post(value) {
   if (value.type === 'continue_annotation') {
     const key = `note:${value.region || 'overview'}:${value.annotation}`;
@@ -376,13 +396,14 @@ function updateReturnDestination() {
   control.title = [returnDestination?.detail || 'Choose Markdown for Contents before returning.', returnDestination?.path].filter(Boolean).join('\n');
   control.setAttribute('aria-description', control.title);
   const context = [...root.querySelectorAll('p')].find(node => node.className === 'return-context');
-  if (context) context.textContent = returnDestination?.detail || 'Opened independently. Choose a document for Contents.';
+  if (context) context.textContent = returnDestination?.detail || 'Opened directly.';
 }
 function render(destinationFocus) {
   if (!model) return;
   sourceReader?.update(model.outline.published?.online);
   toolbarObserver?.disconnect();
   const o = model.outline;
+  const markdown = /\.(?:md|markdown)$/i.test(o.source.path) && window.MRWPassagePreview;
   const focused = document.activeElement;
   const focusKey = destinationFocus || focused?.dataset?.readerFocus;
   const focusedForm = focused?.name && [...root.querySelectorAll('form')].find(f => f.contains?.(focused));
@@ -432,7 +453,8 @@ function render(destinationFocus) {
   updateReturnDestination();
   if (reference?.status === 'changed or removed') {
     el('p', reference.notice, root, 'warning').dataset.reference = 'true';
-    button(root, 'Ask OpenAI API about the earlier linked passage…', { type: 'ask_ai', pinned: true }, 'ask-ai-pinned');
+    button(passageAssistance(root, 'pinned'), 'Ask OpenAI API about the earlier linked passage…',
+      { type: 'ask_ai', pinned: true }, 'ask-ai-pinned');
   }
   if (o.retained_error) el('p', `Retained source unavailable: ${o.retained_error}. No source text was guessed.`, root, 'warning');
   if (error) el('p', error, root, 'warning').dataset.error = 'true';
@@ -494,7 +516,7 @@ function render(destinationFocus) {
       const box = el('details', undefined, root, 'context'); box.open = true;
       box.dataset.contextItem = c.id;
       el('summary', `${label(c.kind)}: ${c.label}`, box); el('p', spanLocation(c.span), box, 'muted');
-      if (c.text !== null) el('pre', c.text, box).dataset.context = c.id;
+      retainedText(box, c.text, markdown, 'context', c.id);
       button(box, 'Go to source context', { type: 'navigate_context', context: c.id }, 'navigate-context');
       const contextTools = el('details', undefined, tools); el('summary', `Edit context: ${c.label}`, contextTools);
       const key = `context:${c.id}`, cf = form(contextTools, key, { context_kind: c.kind, label: c.label });
@@ -534,11 +556,11 @@ function render(destinationFocus) {
     if (r.statement && !publishedPart) {
       const statement = el('div', undefined, box, 'statement');
       el('p', r.statement.kind === 'declaration_statement' ? 'Exact declaration statement (reader-labeled source selection)' : 'Exact source statement (reader-selected)', statement);
-      if (r.statement_text !== null) el('pre', r.statement_text, statement).dataset.statement = r.id;
+      retainedText(statement, r.statement_text, markdown, 'statement', r.id);
       button(statement, 'Go to statement', { type: 'navigate', region: r.id, statement: true }, 'navigate-statement');
     } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
     if (!expanded && !compactProof) el('p', 'Argument detail hidden.', box, 'muted');
-    else if (r.argument_text !== null && !publishedPart) el('pre', r.argument_text, box).dataset.argument = r.id;
+    else if (!publishedPart) retainedText(box, r.argument_text, markdown, 'argument', r.id);
     if (!publishedPart || publishedPart.role === 'proof') {
       const proof = publishedPart?.role === 'proof';
       const control = el('button', compactProof ? `▸ ${r.title}` : (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box,
@@ -605,8 +627,9 @@ function render(destinationFocus) {
         button(assistance, 'Delete reader note…', { type: 'delete_annotation', region: r.id }, 'delete-reader-note', true);
       }
       button(assistance, 'Link Obsidian note…', { type: 'associate_note', region: r.id, pinned: false }, 'link-reader-note', true);
-      button(assistance, 'Ask OpenAI API about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
-      button(assistance, 'Copy passage for Codex…', { type: 'copy_companion', region: r.id }, 'copy-companion');
+      const more = passageAssistance(assistance, r.id);
+      button(more, 'Ask OpenAI API about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
+      button(more, 'Copy passage for Codex…', { type: 'copy_companion', region: r.id }, 'copy-companion');
     }
   }
   const help = el('p', '', root, 'control-help');

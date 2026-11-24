@@ -151,6 +151,10 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .reader-diagram{margin:14px 0}.reader-diagram img{max-width:100%;height:auto;background:white;padding:6px;box-sizing:border-box}.reader-diagram figcaption{margin:4px 0}
 .reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
 .proof-map{overflow:auto;max-width:100%;margin:12px 0}.proof-map svg{display:block}.proof-map text{cursor:pointer}
+.region,.region>h2,.retained-prose,.source-exact{min-width:0;max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
+.region>h2,.passage-tools>summary{white-space:normal}
+.retained-prose{line-height:1.6;overflow-x:auto}.retained-prose .atlas-math-display{display:block}.retained-prose .atlas-math-display,.retained-prose table{max-width:100%;overflow-x:auto}.retained-prose table{display:block}
+.source-exact>summary,.passage-more>summary{cursor:pointer}.passage-more>summary{padding:6px 9px;margin:3px}.passage-actions>.passage-more[open]{flex-basis:100%}
 ${diagramStyle}
 .published-svg{max-width:100%;height:auto;color:var(--vscode-editor-foreground)}
 </style></head><body><main id="reader" aria-live="polite">Opening ${caption.toLowerCase()}…</main>
@@ -476,7 +480,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
       const support = [];
-      for (const name of ['media/markdown-it/markdown-it.js', 'media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js']) {
+      for (const name of ['media/markdown-it/markdown-it.js', 'media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/atlasPreview.js']) {
         support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
       }
       for(const name of ['sourceReader.js','sourceRendering.js'])support.push(await fs.readFile(path.join(context.extensionPath, 'src',name), 'utf8'));

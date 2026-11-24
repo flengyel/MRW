@@ -53,6 +53,9 @@ function reader(published = false) {
     acquireVsCodeApi: () => ({ postMessage: value => messages.push(value) }),
     addEventListener: (type, callback) => { receive = callback; } };
   globals.window = globals;
+  globals.markdownit = require('../media/markdown-it/markdown-it.js');
+  globals.katex = require('../media/katex/katex.min.js');
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/atlasPreview.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/annotationView.js'), 'utf8'), globals);
   if (published) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/outlineView.js'), 'utf8'), globals);
@@ -160,6 +163,37 @@ test('reader keeps all region forms outside the source flow and focuses the reso
   h.send(value); assert.equal(h.scrolled.length, count, 'refresh does not steal focus from an annotation draft');
 });
 
+test('retained Markdown displays inert reading markup alongside unchanged exact passages', () => {
+  const h = reader(), value = readingModel(), { outline } = value.model;
+  outline.source.path = '/fixture.md';
+  const region = outline.regions[0];
+  const exact = '**Lemma 1.** For $p \\mid ab$, either $p \\mid a$ or $p \\mid b$.\r\n\r\n' +
+    '*Proof.* [Reference](https://example.test) ![Figure](https://example.test/fig.png)\r\n' +
+    '<script>alert(1)</script>';
+  region.collapsed = false;
+  region.argument_text = exact;
+  region.statement = {kind:'statement'};
+  region.statement_text = '**Lemma 1.** A statement.';
+  outline.contexts = [{id:'context1',kind:'hypothesis',span:region.span,label:'Assumption',text:'**Prime** $p$.'}];
+  h.send(value);
+  const passage = h.root.children.find(n => n.dataset.region === region.id);
+  const block = passage.children.find(n => n.className === 'retained-prose');
+  assert.match(block.innerHTML, /<strong>Lemma 1\.<\/strong>/);
+  assert.match(block.innerHTML, /<em>Proof\.<\/em>/);
+  assert.match(block.innerHTML, /<math/);
+  assert.match(block.innerHTML, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.doesNotMatch(block.innerHTML, /\*\*|<img(?:\s|>)|<a(?:\s|>)|<script(?:\s|>)/);
+  const retained = passage.children.find(n => n.className === 'source-exact');
+  assert.equal(retained.open, false);
+  assert.equal(retained.children[0].textContent, 'Exact text');
+  assert.equal(retained.children[1].textContent, exact);
+  assert.equal(retained.children[1].dataset.argument, region.id);
+  assert.equal(passage.all().find(n => n.dataset.statement === region.id).textContent, region.statement_text);
+  assert.equal(h.root.all().find(n => n.dataset.context === 'context1').textContent, outline.contexts[0].text);
+  retained.open = true; h.send(value);
+  assert.equal(h.root.all().find(n => n.dataset.disclosure === 'exact:argument:changed').open, true);
+});
+
 test('a retained publication error remains visible outside collapsed tools', () => {
   const h = reader(), value = readingModel();
   value.model.outline.published = { error: 'Retained acquisition unavailable' };
@@ -205,7 +239,7 @@ test('source collection, section and qualified identity stay visible above text 
     Object.assign(value.model.outline.published, { source_id: source, source_name: collection, chapter, section_number: section,
       title: 'Hausdorff spaces', qualified_tag: `${source}:${tag}`, source_revision: 'secret-hash' });
     value.returnDestination = { kind: 'citation', label: '← Return to reading-overview.md',
-      path: '/notes/reading-overview.md', detail: 'From a document citation. Return to its exact occurrence in reading-overview.md.' };
+      path: '/notes/reading-overview.md', detail: 'Opened from a link in notes/reading-overview.md.' };
     h.send(value);
     const bar = h.root.children.find(node => node.className === 'toolbar reading-bar');
     const location = bar.children.find(node => node.className === 'source-location');
@@ -214,7 +248,7 @@ test('source collection, section and qualified identity stay visible above text 
     assert.equal(bar.text().includes('secret-hash'), false);
     assert.equal(h.root.children.find(node => node.className === 'reader-tools').open, false);
     assert.match(h.button(h.root, 'reading-return').text(), /Return to reading-overview.md/);
-    assert.match(h.root.children.find(node => node.className === 'return-context').text(), /exact occurrence/);
+    assert.equal(h.root.children.find(node => node.className === 'return-context').text(), 'Opened from a link in notes/reading-overview.md.');
   }
 });
 
@@ -235,9 +269,9 @@ test('hover and keyboard focus explain controls without an action; destination u
   refresh.listeners.blur(); assert.equal(help.hidden, true);
   assert.equal(h.messages.length, before);
   h.send({ type: 'return_destination', destination: { kind: 'selected', label: '← Open reading-overview.md',
-    path: '/notes/reading-overview.md', detail: 'Opened independently. Open the selected Contents document; no citation occurrence was followed.' } });
+    path: '/notes/reading-overview.md', detail: 'Opened directly.' } });
   assert.match(h.button(h.root, 'reading-return').text(), /Open reading-overview.md/);
-  assert.match(h.root.children.find(node => node.className === 'return-context').text(), /Opened independently/);
+  assert.equal(h.root.children.find(node => node.className === 'return-context').text(), 'Opened directly.');
   assert.ok(h.button(h.root, 'reading-return').title.includes('/notes/reading-overview.md'));
   assert.equal(note.all().find(node => node.tag === 'textarea').value, 'Keep my unsaved explanation');
   assert.equal(h.root.all().find(node => node.dataset.draft === 'note:statement:new' && node.tag === 'form'), note);
@@ -280,14 +314,20 @@ test('saved notes appear with their passage while annotation forms stay outside 
   assert.equal(h.messages.some(m=>['edit','toggle'].includes(m.type)), false, 'folding notes changes no saved text');
 });
 
-test('passage note actions precede AI on one row, including the first note; opening preserves drafts', () => {
+test('passage notes stay on the action row and both AI commands are under More', () => {
   for (const published of [false, true]) {
     const h = reader(published), value = published ? publishedModel() : readingModel();
     const region = value.model.outline.regions[0]; region.annotations = [];
     h.send(value);
     const card = () => h.root.children.find(n => n.dataset.region === region.id);
     const row = card().children.find(n => n.className === 'toolbar passage-actions');
-    assert.deepEqual(row.children.map(n => n.dataset.action), ['add-reader-note', 'link-reader-note', 'ask-ai-passage', 'copy-companion']);
+    assert.deepEqual(row.children.filter(n => n.tag === 'button').map(n => n.dataset.action),
+      ['add-reader-note', 'link-reader-note']);
+    const more = row.children.find(n => n.className === 'passage-more');
+    assert.equal(more.children[0].textContent, 'More…');
+    assert.equal(more.open, false);
+    assert.deepEqual(more.querySelectorAll('button').map(n => n.dataset.action),
+      ['ask-ai-passage', 'copy-companion']);
     assert.equal(h.button(card(), 'delete-reader-note'), undefined);
     const key = `note:${region.id}:new`, find = () => h.root.all().find(n => n.dataset.draft === key);
     let form = find(); const text = form.all().find(n => n.tag === 'textarea');

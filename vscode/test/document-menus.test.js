@@ -74,6 +74,12 @@ test('Sources and references groups the existing commands for citing a passage',
   }
 });
 
+test('Proofs exposes both existing mathematical atlas commands', () => {
+  const { proofTools } = require('../src/companionTools').GROUPS;
+  assert.deepEqual(proofTools.slice(0, 2).map(([title, id]) => [title, id]), [
+    ['Generate Mathematical Atlas…', 'generateAtlas'], ['Open Mathematical Atlas…', 'openAtlas'],
+  ]);
+});
 test('Examples is the visible entry for the three sample routes', () => {
   const command = c.commands.find(item => item.command === 'mrw.openLearningMaterials');
   assert.equal(command.title, 'Examples…');

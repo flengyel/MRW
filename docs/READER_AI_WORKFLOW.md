@@ -63,11 +63,10 @@ changed environment. MRW does not edit this script or store the credential.
 
 ## Ask, preview and send
 
-A passage's action row offers **Add a note**, **Delete reader note…**,
-**Link Obsidian note…** and **Ask OpenAI API about this passage…**. Reader notes
-work without AI. Add opens the passage's editor without changing its draft; Delete
-selects a saved note if needed and asks for confirmation. Saving or deleting
-one note preserves other annotations and retained source text.
+Use **Add a note**, **Delete reader note…** or **Link Obsidian note…** beside
+the passage. **More…** holds **Ask OpenAI API about this passage…** and **Copy
+passage for Codex…**. **Add a note** keeps the passage’s draft. **Delete
+reader note…** selects a saved note if needed and asks for confirmation.
 A note linked through **Link Obsidian note…** stays in the vault and
 opens in Obsidian. MRW stores passage annotations with the saved source. **Change or remove
 link…** removes only an MRW association, not the note file. It retains the exact
@@ -81,10 +80,10 @@ See [continuation and recovery](OBSIDIAN_WORKFLOW.md#continue-a-reader-annotatio
 
 1. Open the intended workspace and retained source with **MRW: Open Saved
    Source…**, or follow a source/passage link.
-2. Beside the passage, choose **Add a note** to record your thoughts or
-   **Ask OpenAI API about this passage…** to request assistance. Expand a folded
-   proof to reach its actions. **MRW: Ask OpenAI API About Reader Passage…** in
-   the Command Palette opens a passage picker for the current saved source.
+2. Beside the passage, choose **More… → Ask OpenAI API about this passage…**.
+   Expand a folded proof to reach its actions. **MRW: Ask OpenAI API About Reader
+   Passage…** in the Command Palette opens a passage picker for the current
+   saved source.
 3. Enter the question, for example “Explain the governing idea and identify the
    assumptions used in this argument.” Select a model if prompted. Cancelling
    leaves the source and annotations unchanged.
@@ -113,9 +112,9 @@ or disappears. MRW resolves the exact reference within the matching workspace
 and store. It does not substitute a similarly named file, search another
 workspace or normalize quotation bytes.
 
-For a changed passage association, **Ask OpenAI API about the earlier linked
-passage…** keeps the saved link's original range and reports the change in the
-preview. Current passage buttons use the displayed reader
+For a changed passage association, **More… → Ask OpenAI API about the earlier
+linked passage…** uses the range stored in the link and reports the change in
+the preview. Current passage buttons use the displayed reader
 revision. A stale reader fails explicitly; refresh it and select the intended
 passage again. Missing storage, wrong scope and oversized requests are reported
 without substituting or truncating the source.

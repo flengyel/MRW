@@ -77,7 +77,7 @@ drafts.
 
 Markdown opens in preview and supplies Contents. **MRW: Show Contents** selects
 or reveals that document; **MRW: Choose Document…** selects another Markdown
-file. Contents identifies its filename and path. **MRW: Reveal Contents Document**
+file. Contents shows its workspace-relative name. The tooltip shows the full path. **MRW: Reveal Contents Document**
 brings it back into view. When another file is active, Contents hides the
 preceding tree and identifies the active file. PDFs and text files do not acquire
 a Markdown outline.
@@ -232,10 +232,12 @@ Ordinary note opening does not require this step.
 its **Open <document>** control opens the selected Contents document. Following
 a citation from Contents gives **Return to <document>** for that exact occurrence.
 
-Each visible passage has
-**Add a note**, **Delete reader note…**, **Link Obsidian note…** and **Ask OpenAI API about this passage…**
-on one line, in that order. **Add a note** opens that passage's annotation
-editor. Enter your text and attribution, then **Save**.
+Markdown passages show formatted text and mathematics. Open **Exact text**
+to see the stored quotation.
+
+Choose **Add a note** to open the passage’s annotation editor. Enter your text
+and attribution, then **Save**. **More…** holds **Ask OpenAI API about this
+passage…** and **Copy passage for Codex…**.
 **Reader notes** displays the saved text beside the passage. **Delete reader
 note…** selects a saved note when there are several, then asks for confirmation;
 it is disabled when there are none. Cancelling preserves notes and drafts.
@@ -645,9 +647,11 @@ export. Retained notebooks are read-only; comparison submits no cell execution.
 To outline a theorem or section, select it in a Markdown or LaTeX editor and run
 **MRW: Generate Mathematical Atlas…**. **Proof map** connects components by
 explicit source citations. Switch to **Blueprint** to see individual statements,
-proofs and definitions. Both diagrams wrap to fit the pane. Select **Fit** to
-reset a view after zooming or panning. Select a node to read its typeset passage
-or open the exact source. **Return to Atlas** restores the node. Use **Reading
+proofs and definitions. LaTeX atlases open with numbered results and labelled
+equations. Use **Show prose** to include surrounding passages. Zoom with
+**Ctrl+wheel** or the zoom buttons. **Fit** resets the view, and narrow panes
+can use additional diagram pages. Select a node to read its typeset passage or
+open the exact source. **Return to Atlas** restores the node. Use **Reading
 list** to rename or group components.
 Open a component to write the argument or copy a companion handoff. Review and
 correct reasons before saving the proof outline.

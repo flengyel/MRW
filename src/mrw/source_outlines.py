@@ -146,27 +146,58 @@ def span_text(source, span, limit=MAX_REGION):
     return selected
 
 
-def passage_title(exact_text):
+NUMBERED_TITLE = re.compile(
+    r'(?:Lemma|Theorem|Definition|Proposition|Corollary|Remark|Example|Conjecture|Axiom)'
+    r' [0-9]+(?:\.[0-9]+)*(?=$|[ .:()–—])',
+    re.IGNORECASE,
+)
+
+
+def passage_title(exact_text, *, proposal=True):
     """Suggest a short caption from the first nonempty line of a selection."""
     first = next((line.strip() for line in exact_text.splitlines() if line.strip()), '')
     heading = re.match(r'^#{1,6}\s+(.*)', first)
     if heading:
         first = re.sub(r'\s+#+$', '', heading[1])
-    first = re.sub(r'^(\*\*|__)(.+?)\1', r'\2', first)
+    marks = r'\*\*|__|\*|_' if proposal else r'\*\*|__'
+    first = re.sub(rf'^({marks})(.+?)\1', r'\2', first)
+    if proposal:
+        first = re.sub(r'^\\(?:textit|emph)\{([^{}]+)\}', r'\1', first)
     first = ' '.join(first.split())
     first = ''.join(c if c.isprintable() else f'U+{ord(c):04X}' for c in first)
-    numbered = re.match(
-        r'(?:Lemma|Theorem|Definition|Proposition|Corollary|Remark|Example|Conjecture|Axiom)'
-        r' [0-9]+(?:\.[0-9]+)*(?=$|[ .:()–—])',
-        first, re.IGNORECASE,
-    )
+    numbered = NUMBERED_TITLE.match(first)
     if numbered:
         first = numbered[0]
+    if proposal and re.match(r'^Proof(?:$|[.:](?:\s|$))', first, re.IGNORECASE):
+        return 'Proof'
     if len(first) <= 80:
         return first
     prefix = first[:79].rstrip()
     words, _, _ = prefix.rpartition(' ')
     return (words if len(words) >= 40 else prefix) + '…'
+
+
+def preceding_numbered_result(source, span, regions):
+    """Read the source label of an adjacent retained result."""
+    start_line, start_column = span['start_line'], span['start_col']
+
+    def end(region):
+        return region['span']['end_line'], region['span']['end_col']
+
+    previous = max((region for region in regions if end(region) <= (start_line, start_column)),
+                   key=end, default=None)
+    if previous is None:
+        return None
+    end_line, end_column = end(previous)
+    source_text, starts, _ = line_table(source)
+    gap = source_text[starts[end_line - 1] + end_column:starts[start_line - 1] + start_column]
+    if gap.strip():
+        return None
+    title = passage_title(span_text(source, previous['span']))
+    if NUMBERED_TITLE.fullmatch(title) and title.split()[0].casefold() in {
+        'lemma', 'theorem', 'proposition', 'corollary',
+    }:
+        return title
 
 
 def host_point(source, span, side):
@@ -461,6 +492,10 @@ def mutate(store, change):
         fields(change, {'kind', 'start', 'end'}, 'region selection')
         span = select_span(source, change['start'], change['end'])
         title = passage_title(span_text(source, span)) or f'Passage {len(value["regions"]) + 1}'
+        if title == 'Proof':
+            result = preceding_numbered_result(source, span, value['regions'])
+            if result:
+                title = 'Proof of ' + result
         value['regions'].append(dict(id=str(uuid4()), title=title,
             level='argument', span=span, statement=None, collapsed=False, annotations=[]))
     elif kind == 'statement':

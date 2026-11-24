@@ -38,7 +38,7 @@ async function run(context){
   await documents.returnToDocument();assert.equal(context.workspaceState.get('mrw.documents.v1').last,a.uri.toString());
   report.checks.push('Heading WikiLink opens its exact destination and Return keeps the original occurrence');
   const plain=require('../../src/readingMarkdown').parseReadingMarkdown(a.getText()).all.find(n=>n.target==='plain.txt');await documents.follow(a,plain);
-  assert.equal(provider.getChildren().length,0);assert.match(tree.message,/plain.txt.*Markdown only/);await documents.returnToDocument();assert.ok(provider.getChildren().length);
+  assert.equal(provider.getChildren().length,1);assert.match(provider.getTreeItem(provider.getChildren()[0]).label,/^Contents: .* · Reveal$/);await documents.returnToDocument();assert.ok(provider.getChildren().length);
   report.checks.push('Text-file opening clears the previous Markdown tree; Return restores it');
   html=await render();const href=/href="([^"]*\/document-diagram\?[^\"]+)"/.exec(html)[1].replaceAll('&amp;','&');await handler.handleUri(vscode.Uri.parse(href));
   html=await render();assert.match(html,/mrw-diagram-dark/);assert.match(html,/data:image\/svg/);assert.equal(await fs.readFile(a.uri.fsPath,'utf8'),before);

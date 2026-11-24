@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from mrw.editor_bridge import dispatch
-from mrw.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE, mutate
+from mrw.source_outlines import OutlineStore, MAX_REGION, MAX_SOURCE, mutate, passage_title
 
 
 class SourceOutlineTests(unittest.TestCase):
@@ -42,6 +42,38 @@ class SourceOutlineTests(unittest.TestCase):
     def add(self, start=None, end=None):
         self.edit(kind='add_region', start=start or [0, 1], end=end or [1, 5])
         return self.saved['outline']['regions'][-1]
+
+    def test_passage_title_reads_proof_and_result_markup(self):
+        examples = (
+            ('*Proof.* An argument.', 'Proof'),
+            ('_Proof._ An argument.', 'Proof'),
+            (r'\textit{Proof.} An argument.', 'Proof'),
+            (r'\emph{Proof.} An argument.', 'Proof'),
+            ('**Lemma 1.** A claim.', 'Lemma 1'),
+            ('## __Theorem 3.2.__', 'Theorem 3.2'),
+            ('Proof.pdf is an attachment', 'Proof.pdf is an attachment'),
+        )
+        for text, title in examples:
+            with self.subTest(text=text):
+                self.assertEqual(passage_title(text), title)
+        self.assertEqual(passage_title('*Proof.* An argument.', proposal=False), '*Proof.* An argument.')
+
+    def test_new_proof_title_uses_only_an_adjacent_retained_numbered_result(self):
+        lines = ['**Lemma 1.** A claim.', '', '*Proof.* An argument.',
+                 'A later independent calculation.', '_Proof._ Another argument.']
+        raw = '\r\n'.join(lines).encode()
+        self.source.write_bytes(raw)
+        self.saved = self.call('outline_create', path=str(self.source), source_revision=sha256(raw).hexdigest())
+        result = self.add([0, 0], [0, len(lines[0])])
+        self.assertEqual(self.add([4, 0], [4, len(lines[4])])['title'], 'Proof')
+        proof = self.add([2, 0], [2, len(lines[2])])
+        self.assertEqual((result['title'], proof['title']), ('Lemma 1', 'Proof of Lemma 1'))
+        self.assertEqual(proof['argument_text'], lines[2])
+        self.edit(kind='region', region=proof['id'], title='My proof selection', level='argument', collapsed=False)
+        loaded = self.call('outline_load', id=self.saved['outline']['id'])
+        titles = [region['title'] for region in loaded['outline']['regions']]
+        self.assertEqual(titles, ['Lemma 1', 'Proof', 'My proof selection'])
+        self.assertEqual(self.source.read_bytes(), raw)
 
     def note(self, region=None, content='Reader question: why does this step follow?', origin='human_work'):
         return self.edit(kind='annotation', region=region, id=None, purpose='question', text=content,

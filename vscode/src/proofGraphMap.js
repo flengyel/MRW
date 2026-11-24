@@ -17,7 +17,7 @@
   function create(parent, onSelect) {
     const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'); parent.append(svg);
     svg.setAttribute('class', 'proof-canvas'); svg.setAttribute('role', 'group'); svg.setAttribute('tabindex', '0');
-    svg.setAttribute('aria-label', 'Proof graph. Select a vertex to read its Stacks passage. Drag to pan; use the wheel or zoom controls.');
+    svg.setAttribute('aria-label', 'Proof graph. Select a vertex to read its Stacks passage. Drag to pan. Use Ctrl+wheel or the zoom controls to zoom.');
     let model, selected, positions = {}, bounds = { width: 700, height: 500 }, camera, manual = false;
     let animation, cameraAnimation, dragging, dragged = false;
     const groups = new Map(), lines = new Map(); let retiring = new Map();
@@ -135,7 +135,11 @@
       svg.setAttribute('data-animating', duration ? 'true' : 'false');
       step(time); highlight(); if (!manual || !camera) fit(!!camera);
     }
-    svg.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? .85 : 1 / .85, point(e)); }, { passive: false });
+    svg.addEventListener('wheel', event => {
+      if (!(event.ctrlKey || event.metaKey) || !camera || event.deltaY === 0) return;
+      event.preventDefault();
+      zoom(event.deltaY < 0 ? .85 : 1 / .85, point(event));
+    }, { passive: false });
     svg.addEventListener('pointerdown', e => {
       if (e.button !== 0 || !camera) return;
       cancel(cameraAnimation); dragged = false; manual = true;

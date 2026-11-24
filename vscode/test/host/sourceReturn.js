@@ -13,6 +13,16 @@ function readerNoteProbe() {
   if (value?.type !== 'fixture_write_note') return;
   try {
    const passage = [...document.querySelectorAll('section')].find(node => node.dataset.region === value.region);
+   const rendered = passage?.querySelector(':scope > .retained-prose');
+   const exact = passage?.querySelector(':scope > details.source-exact');
+   const more = passage?.querySelector('.passage-more');
+   if (rendered?.querySelector('h1')?.textContent !== 'Sums of odd integers' || !rendered.querySelector('math')) {
+    throw Error('The retained Markdown heading and mathematics were not rendered');
+   }
+   if (exact?.querySelector('summary')?.textContent !== 'Exact text' ||
+       exact.querySelector('pre')?.textContent !== value.exactText) throw Error('Exact retained text differs');
+   if (more?.open !== false || !more.querySelector('[data-action="ask-ai-passage"]') ||
+       !more.querySelector('[data-action="copy-companion"]')) throw Error('Assistance controls are not under More');
    const add = passage?.querySelector('[data-action="add-reader-note"]');
    if (!add || add.disabled) throw Error('Add a note is unavailable');
    add.focus();
@@ -102,9 +112,11 @@ async function run(context){
    report.checks.push('Native document changes publish vault command scope, and Return appears after a follow');assert.equal(record.value.returnDestination.kind,'citation');
    assert.equal(record.value.model.outline.regions.find(r=>r.id===region).argument_text,saved.outline.regions[0].argument_text);
    const annotation='Reader commentary retained through Return and restart.';
-   await record.panel.webview.postMessage({type:'fixture_write_note',region,annotation});
+   await record.panel.webview.postMessage({type:'fixture_write_note',region,annotation,
+    exactText:saved.outline.regions[0].argument_text});
    await wait(()=>record.noteResult,'reader note keyboard probe');
    assert.equal(record.noteResult.error,undefined);assert.equal(record.noteResult.focused,true);
+   report.checks.push('retained Markdown and mathematics render beside unchanged Exact text; both assistance controls are folded under More');
    await wait(()=>record.value?.model?.outline.regions.find(r=>r.id===region)?.annotations.some(n=>n.text===annotation),'note saved with Ctrl+Enter');
    await returning(record,doc,link);assert.ok(unrelated.isDirty);assert.equal(await fs.readFile(note,'utf8'),body);
    report.checks.push('selected external Markdown note follows its exact retained proof; Add a note transfers focus and Ctrl+Enter saves before Return; unrelated native draft survives');await save();

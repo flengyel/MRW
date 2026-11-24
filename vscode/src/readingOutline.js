@@ -36,7 +36,19 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   let displayedUri;
   let returnAvailable, noteActionUri, noteActionRequest = 0, noteActionJob;
   const noteActions = new Map();
-  const differentDocument = () => displayedUri?.scheme === 'file' && displayedUri.toString() !== (document?.uri.toString() || overviewUri);
+  const selectedUri = () => document?.uri || (overviewUri && vscode.Uri.parse(overviewUri));
+  const differentDocument = () => displayedUri?.scheme === 'file' && displayedUri.toString() !== selectedUri()?.toString();
+  const revealItem = {};
+
+  function documentLabel(uri) {
+    const name = path.basename(uri.path);
+    if (uri.scheme !== 'file') return name;
+    const folder = vscode.workspace.getWorkspaceFolder?.(uri);
+    if (folder?.uri.scheme !== 'file') return name;
+    const relative = path.relative(folder.uri.fsPath, uri.fsPath);
+    return relative && relative !== '..' && !relative.startsWith('..' + path.sep) && !path.isAbsolute(relative)
+      ? relative : name;
+  }
   let route = saved.route === 'ordinary' ? 'ordinary' : 'retained';
   let selected = validPin(saved.selected) ? saved.selected : undefined;
   let collapsed = new Set(Array.isArray(saved.collapsed) ? saved.collapsed.filter(x => typeof x === 'string').slice(0, 1000) : []);
@@ -58,17 +70,28 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   function returnDestination(location = origin) {
     const citation = validPin(location);
     const target = citation ? location.uri : document?.uri.toString() || overviewUri;
-    if (!target) return { kind: 'choose', label: 'Choose a document…', detail: 'Opened independently. Choose Markdown for Contents before returning.' };
+    if (!target) return { kind: 'choose', label: 'Choose a document…', detail: 'Opened directly.' };
     const uri = vscode.Uri.parse(target);
     const filename = path.basename(uri.path);
     return { kind: citation ? 'citation' : 'selected', label: `← ${citation ? 'Return to' : 'Open'} ${filename}`,
       path: uri.fsPath || target,
-      detail: citation ? `From a document citation. Return to its exact occurrence in ${filename}.` : `Opened independently. Open the selected Contents document ${filename}; no citation occurrence was followed.` };
+      detail: citation ? `Opened from a link in ${documentLabel(uri)}.` : 'Opened directly.' };
   }
   const provider = {
     onDidChangeTreeData: changed.event,
-    getChildren: node => differentDocument() ? [] : node ? node.children : model?.roots || [],
+    getChildren(node) {
+      if (differentDocument()) return !node && selectedUri() ? [revealItem] : [];
+      return node ? node.children || [] : model?.roots || [];
+    },
     getTreeItem(node) {
+      if (node === revealItem) {
+        const uri = selectedUri();
+        if (!uri) return new vscode.TreeItem('Contents is available for Markdown notes');
+        const item = new vscode.TreeItem(`Contents: ${documentLabel(uri)} · Reveal`, vscode.TreeItemCollapsibleState.None);
+        item.tooltip = uri.fsPath || uri.toString();
+        item.command = { command: 'mrw.revealReadingDocument', title: 'Reveal Contents Document' };
+        return item;
+      }
       // Citation prose remains authoritative in Markdown. The tree shows its
       // short title; its original label and exact location remain in the tooltip.
       const title = node.kind === 'reference' ? node.label.split(' · ')[0] : node.label;
@@ -84,16 +107,10 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   };
   const tree = vscode.window.createTreeView('mrw.readingOutline', { treeDataProvider: provider, showCollapseAll: true });
   function identifyDocument() {
-    const uri = document?.uri || (overviewUri && vscode.Uri.parse(overviewUri));
-    if (differentDocument()) {
-      tree.description = path.basename(displayedUri.path);
-      tree.message = `Contents is not showing ${displayedUri.fsPath || displayedUri.toString()}. ` +
-        (/\.(md|markdown)$/i.test(displayedUri.path) ? 'Use Show Contents to select this Markdown document.' : 'MRW supplies Contents for Markdown only.') +
-        (uri ? `\nSelected Markdown: ${uri.fsPath || uri.toString()}. Use Reveal Contents Document to return to it.` : '');
-      return;
-    }
-    tree.description = uri ? `${path.basename(uri.path)}${document?.isDirty ? ' •' : ''}` : undefined;
-    tree.message = uri ? `Contents: ${uri.fsPath || uri.toString()}` : undefined;
+    const uri = selectedUri();
+    tree.description = uri && !differentDocument() ? `${path.basename(uri.path)}${document?.isDirty ? ' •' : ''}` : undefined;
+    tree.message = !uri ? 'Contents is available for Markdown notes' :
+      differentDocument() ? undefined : `Contents: ${documentLabel(uri)}`;
   }
   identifyDocument();
   // The initial empty view shows Contents guidance. Commands live in their
@@ -104,11 +121,14 @@ function registerReadingOutline({ vscode, context, register, followReference, re
     if (!document || document.isClosed) { model = undefined; changed.fire(); return; }
     try {
       model = parseReadingMarkdown(document.getText());
-      tree.description = `${noteIdentity(document).label}${document.isDirty ? ' •' : ''}`;
+      if (!differentDocument()) tree.description = `${noteIdentity(document).label}${document.isDirty ? ' •' : ''}`;
       for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
       const notice = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? '' : 'Add Markdown headings or file, note, or MRW passage links.';
       if (notice && !differentDocument()) tree.message += `\n${notice}`;
-    } catch (error) { model = undefined; tree.message += `\n${error.message}`; }
+    } catch (error) {
+      model = undefined;
+      if (!differentDocument()) tree.message += `\n${error.message}`;
+    }
     changed.fire();
   }
   const isOverview = doc => doc && !doc.isClosed && doc.languageId === 'markdown' && ['file', 'untitled'].includes(doc.uri.scheme);
