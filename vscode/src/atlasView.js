@@ -3,10 +3,10 @@
 const { randomBytes } = require('node:crypto');
 const { detailPage, handoffEntries, overviewComponents, ownerOf } = require('./atlasModel');
 const { diagramHtml, diagramStyles, diagramScript, diagramPositionStyles } = require('./atlasDiagramView');
+const { escape, preview } = require('./atlasPreview');
 
-const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-}[ch]));
+const READING_PREVIEW_LIMIT = 4096;
+const SUMMARY_PREVIEW_LIMIT = 280;
 const fields = [['question', 'Question'], ['hypotheses', 'Hypotheses'], ['conclusion', 'Conclusion'], ['nextUse', 'Next use']];
 const asArray = value => Array.isArray(value) ? value : [];
 const resultKinds = new Set(['theorem', 'lemma', 'proposition', 'corollary', 'claim', 'fact']);
@@ -35,13 +35,8 @@ function indices(atlas) {
   return { entries, components, incoming, outgoing, lineStarts };
 }
 
-function excerpt(fragment, limit) {
-  return `<pre>${escape(fragment.slice(0, limit))}</pre>${fragment.length > limit
-    ? '<p class="muted">Open the exact source to read the remainder.</p>' : ''}`;
-}
-
-function exactPreview(text, span) {
-  return span ? excerpt(text.slice(span.start, span.end), 1800) : '';
+function exactPreview(text, span, language, limit = READING_PREVIEW_LIMIT) {
+  return span ? preview(text.slice(span.start, span.end), language, limit) : '';
 }
 
 function nextUse(atlasIndex, component) {
@@ -75,19 +70,19 @@ function splitStatement(text, entry, language) {
 function description(atlas, atlasIndex, component, compact = false) {
   const entry = component.itemIds.length === 1 ? atlasIndex.entries.get(component.itemIds[0]) : undefined;
   const result = entry?.statement || (!entry?.section ? entry : undefined);
-  const text = atlas.source.text;
-  const split = splitStatement(text, entry, atlas.source.language);
-  const exact = result ? `<details${compact ? '' : ' open'}><summary>Exact statement or passage</summary>
-      ${excerpt(text.slice(result.start, result.end), compact ? 280 : 1800)}
+  const { text, language } = atlas.source;
+  const limit = compact ? SUMMARY_PREVIEW_LIMIT : READING_PREVIEW_LIMIT;
+  const split = splitStatement(text, entry, language);
+  const exact = result ? `<details${compact ? '' : ' open'}><summary>${entry.statement ? 'Statement' : 'Source passage'}</summary>
+      ${exactPreview(text, result, language, limit)}
       ${button('Open exact source', 'openSource', { entry: entry.id, part: entry.statement ? 'statement' : 'entry' },
         compact ? 'entry-' + entry.id : undefined)}</details>`
     : 'Open the component for its passages.';
   const defaults = [
     resultKinds.has(entry?.kind) ? `<p>What does ${escape(component.title)} establish?</p>` : 'No question recorded.',
-    split ? `<p>From the statement</p>${split.hypotheses.map(fragment => excerpt(fragment, compact ? 280 : 1800)).join('')}`
-      : 'See the exact statement for the stated conditions.',
-    (split ? `<p>From the statement</p>${excerpt(split.conclusion, compact ? 280 : 1800)}`
-      : (compact && result ? excerpt(text.slice(result.start, result.end), 280) : '')) + exact,
+    split ? `<p>From the statement</p>${split.hypotheses.map(fragment => preview(fragment, language, limit)).join('')}`
+      : 'See the statement for the stated conditions.',
+    (split ? `<p>From the statement</p>${preview(split.conclusion, language, limit)}` : '') + exact,
     nextUse(atlasIndex, component),
   ];
   return `<dl class="summary">${fields.map(([key, label], index) => `<dt>${label}</dt><dd>${component[key]
@@ -175,7 +170,7 @@ function pager(detail) {
   </nav>`;
 }
 
-function citationList(citations, sources, passages, kind) {
+function citationList(citations, sources, passages, kind, language) {
   if (!citations?.length) return `<p class="muted">No retained citation for this ${kind}.</p>`;
   return `<ul class="references" aria-label="Cited passages">${citations.map(cite => {
     const source = sources.get(cite.source), passage = passages.get(cite.source);
@@ -183,7 +178,7 @@ function citationList(citations, sources, passages, kind) {
     const title = escape(source?.title || cite.source);
     const lines = cite.start_line === cite.end_line ? 'line ' + cite.start_line : 'lines ' + cite.start_line + '–' + cite.end_line;
     const label = title + ' · ' + lines;
-    return retained ? `<li><details><summary>${label}</summary>${excerpt(retained, 1800)}</details></li>` : `<li>${label}</li>`;
+    return retained ? `<li><details><summary>${label}</summary>${preview(retained, language, READING_PREVIEW_LIMIT)}</details></li>` : `<li>${label}</li>`;
   }).join('')}</ul>`;
 }
 
@@ -215,7 +210,7 @@ function inferenceForm(nodes, sources, component, page, rule) {
     </form></details>`;
 }
 
-function proposalReview(proposal, component, page) {
+function proposalReview(proposal, component, page, language) {
   const graph = proposal?.graph || proposal;
   const nodes = asArray(graph?.nodes);
   if (!nodes.length) return '';
@@ -236,7 +231,7 @@ function proposalReview(proposal, component, page) {
     <h3>Claims</h3><ol>${nodes.map(node =>
       `<li><strong>${escape(node.title)}</strong><p>${escape(node.claim)}</p>
       ${node.explanation?.text ? `<p>${escape(node.explanation.text)}</p>` : ''}${attributed(node.explanation)}
-      ${citationList(node.citations, sources, passages, 'claim')}</li>`).join('')}</ol>
+      ${citationList(node.citations, sources, passages, 'claim', language)}</li>`).join('')}</ol>
     ${inferences.length ? `<h3>Inferences</h3><ol>${inferences.map(rule => {
       const number = (seen.get(rule.conclusion) || 0) + 1;
       seen.set(rule.conclusion, number);
@@ -250,10 +245,10 @@ function proposalReview(proposal, component, page) {
         <p><strong>Conclusion</strong> ${escape(names.get(rule.conclusion))}</p>
         <p>${escape(rule.explanation?.text || 'Reason unavailable')}</p>${attributed(rule.explanation)}
         ${rule.discharges?.length ? `<p>Discharges ${escape(rule.discharges.join(', '))}</p>` : ''}
-        ${citationList(rule.citations, sources, passages, 'inference')}
+        ${citationList(rule.citations, sources, passages, 'inference', language)}
         ${previous ? `<details><summary>Original proposal for this inference</summary>
           <p><strong>Joint premises</strong> ${joint(prior.premises)}</p><p>${escape(prior.explanation?.text)}</p>
-          ${attributed(prior.explanation)}${citationList(prior.citations, sources, passages, 'inference')}</details>` : ''}
+          ${attributed(prior.explanation)}${citationList(prior.citations, sources, passages, 'inference', language)}</details>` : ''}
         ${inferenceForm(nodes, sources, component, page, rule)}
       </li>`;
     }).join('')}</ol>` : '<p>No inference has been recorded.</p>'}
@@ -288,7 +283,8 @@ function detailView(atlas, atlasIndex, options) {
           ${entry.statement ? button('Open exact statement', 'openSource', { entry: entry.id, part: 'statement' }) : ''}
           ${entry.proof ? button('Open exact proof', 'openSource', { entry: entry.id, part: 'proof' }) : ''}
         </div>
-        ${c.members || !entry.statement ? `<details><summary>Source excerpt</summary>${exactPreview(atlas.source.text, entry.statement || entry)}</details>` : ''}
+        ${c.members || !entry.statement ? `<details><summary>Source excerpt</summary>${exactPreview(atlas.source.text, entry.statement || entry, atlas.source.language)}</details>` : ''}
+        ${entry.proof ? `<details><summary>Proof</summary>${exactPreview(atlas.source.text, entry.proof, atlas.source.language)}</details>` : ''}
         ${referenceList(atlasIndex.outgoing.get(entry.id), atlasIndex)}
       </li>`).join('')}</ol>
     </section>
@@ -304,7 +300,7 @@ function detailView(atlas, atlasIndex, options) {
           ${button('Import companion outline', 'importProposal', { component, page })}
         </div>
       </details>
-      ${proposalReview(options.proposal, component, page)}
+      ${proposalReview(options.proposal, component, page, atlas.source.language)}
     </section>`}`;
 }
 
@@ -416,6 +412,12 @@ const styles = `
   .muted { color: var(--vscode-descriptionForeground); }
   pre { white-space: pre-wrap; background: var(--vscode-textCodeBlock-background);
     padding: .7rem; font-family: var(--vscode-editor-font-family, monospace); }
+  .atlas-reading p { margin: .4rem 0; }
+  .atlas-reading ol, .atlas-reading ul { padding-inline-start: 1.5em; }
+  .atlas-reading li > p { margin: .2em 0; }
+  .atlas-reading .atlas-math-display { display: block; overflow-x: auto; margin: .6em 0; }
+  .atlas-reading .atlas-raw-math { white-space: pre-wrap; }
+  .atlas-reading .atlas-inline-reference { color: var(--vscode-textLink-foreground); }
   details { margin: .5rem 0; }
   summary { cursor: pointer; }
   fieldset { border: 1px solid var(--vscode-panel-border); margin: .5rem 0; max-height: 18rem; overflow: auto; }

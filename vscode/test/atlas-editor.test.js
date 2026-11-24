@@ -234,6 +234,45 @@ test('Open Mathematical Atlas command uses native editor routing when registered
 });
 
 
+test('switching from the 08ZE component opens the wrapped 08ZH Blueprint', async t => {
+  const h = await harness(t);
+  const text = await fs.readFile(path.join(__dirname, '../../tests/fixtures/stacks/topology.tex'), 'utf8');
+  const start = text.indexOf('\\begin{lemma}\n\\label{lemma-fibre-product-closed}');
+  const end = text.indexOf('\\end{proof}', start) + '\\end{proof}'.length;
+  const file = path.join(h.root, 'hausdorff.mrw-atlas.json');
+  const record = {
+    ...createAtlas({
+      source: { title: 'Hausdorff spaces', uri: 'file:///topology.tex', text, language: 'latex', revision: digest(text) },
+      extraction: extractAtlasText(text, 'latex', { start, end }),
+    }),
+    id: randomUUID(),
+  };
+  await fs.writeFile(file, JSON.stringify(record));
+  const original = await fs.readFile(file);
+  const document = await h.custom.provider.openCustomDocument(h.uri(file), {}, {});
+  const panel = h.panel();
+  const current = await h.custom.provider.resolveCustomEditor(document, panel, {});
+  assert.equal(current.diagram.nodes.length, 2);
+
+  const viewport = { width: 570, height: 540 };
+  await panel.receive({ type: 'fitDiagramLayout', view: 'map', ...viewport });
+  const lemma = record.extraction.entries.find(entry => entry.label === 'lemma-Hausdorff');
+  await panel.receive({ type: 'selectComponent', component: lemma.id });
+  await panel.receive({ type: 'selectView', view: 'blueprint' });
+  assert.equal(current.component, undefined);
+  assert.equal(current.diagram.nodes.length, 4);
+  assert.equal(new Set(current.diagram.nodes.map(node => node.y)).size, 2);
+  assert.match(panel.webview.html, /id="atlas-view-blueprint" aria-pressed="true"/);
+
+  const proof = current.diagram.nodes.find(node => node.entryId === lemma.id && node.part === 'proof');
+  await panel.receive({ type: 'selectNode', node: proof.id });
+  assert.equal(current.diagram.selected, proof.id);
+  assert.match(panel.webview.html, /data-part="proof"/);
+  assert.match(panel.webview.html, /<math\b/);
+  assert.deepEqual(await fs.readFile(file), original);
+  assert.deepEqual(h.errors, []);
+});
+
 test('saving from a native atlas preserves its opened revision and continues a separate successor', async t => {
   const h = await harness(t);
   const file = path.join(h.root, 'original.mrw-atlas.json');

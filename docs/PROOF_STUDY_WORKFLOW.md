@@ -74,6 +74,11 @@ atlas.
   or open a component to edit its title, question, hypotheses, conclusion and
   next use.
 
+The Proof map and Blueprint wrap to fit the pane. Drag the background to pan,
+use **+** or **−** to zoom, and select **Fit** to reset the view. Selecting a
+node displays its passage with supported mathematics typeset. Use **Open exact
+source** to inspect the original text.
+
 Open a component to choose which cited statements to include in the outline.
 Include a cited proof when you want to use it. A missing or ambiguous
 reference stays beside its occurrence. **Contents** remains available for

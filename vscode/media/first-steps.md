@@ -351,10 +351,9 @@ bounded search is not a disproof. The
 explains the limits and the explicit context-file route. No registration form
 is required for reading or writing notes.
 
-## Learning materials
+## Notes and Examples
 
-Choose **Learning Materials…** in **Commands** to open a note, a practice
-study or a Lean lesson.
+Open **Notes and Examples…** in **Commands**.
 
 - **Operads from finite lists** opens the companion to Chapter 1 of Heuts and
   Moerdijk. Use **Contents** to jump to a section and **Render diagram** to
@@ -367,7 +366,7 @@ study or a Lean lesson.
 
 ## Study Lean 4
 
-Choose **Learning Materials… → Lean 4 lessons** and begin with **Introduction
+Choose **Notes and Examples… → Lean 4 lessons** and begin with **Introduction
 and functions**. Its introduction explains formalization and the purpose of the
 three lessons, followed by contents and instructions for the examples and InfoView. Follow the contents links to **Implication as a function
 on proofs**, then **Dependent application**. Each lesson also links to its
@@ -644,8 +643,10 @@ export. Retained notebooks are read-only; comparison submits no cell execution.
 To outline a theorem or section, select it in a Markdown or LaTeX editor and run
 **MRW: Generate Mathematical Atlas…**. **Proof map** connects components by
 explicit source citations. Switch to **Blueprint** to see individual statements,
-proofs and definitions. Select a node and open its exact passage. **Return to
-Atlas** restores the node. Use **Reading list** to rename or group components.
+proofs and definitions. Both diagrams wrap to fit the pane. Select **Fit** to
+reset a view after zooming or panning. Select a node to read its typeset passage
+or open the exact source. **Return to Atlas** restores the node. Use **Reading
+list** to rename or group components.
 Open a component to write the argument or copy a companion handoff. Review and
 correct reasons before saving the proof outline.
 Open a saved `.mrw-atlas.json` file in VS Code to recover the atlas and

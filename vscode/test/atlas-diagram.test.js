@@ -6,7 +6,7 @@ const path = require('node:path');
 const { extractAtlasText } = require('../src/atlasText');
 const { createAtlas, editAtlas } = require('../src/atlasModel');
 const { digest } = require('../src/navigation');
-const { atlasDiagram, NODE_WIDTH, NODE_HEIGHT, PAGE_SIZE, MARGIN } = require('../src/atlasDiagram');
+const { atlasDiagram, fitAtlasDiagram, NODE_WIDTH, NODE_HEIGHT, PAGE_SIZE, MARGIN } = require('../src/atlasDiagram');
 
 function source(text, language = 'latex', range) {
   return createAtlas({ source: { text, revision: digest(text), title: 'Unpublished source',
@@ -66,6 +66,28 @@ test('Blueprint separates exact statements and proofs and cites into the proof o
     assert.ok(proof.x < statement.x);
   }
   assert.ok(provider.x < consumer.x); geometry(model);
+});
+
+test('a narrow Blueprint wraps its ranks into readable rows with the same evidence', async () => {
+  const text = await fs.readFile(path.resolve(__dirname, '../../tests/fixtures/stacks/topology.tex'), 'utf8');
+  const start = text.indexOf('\\begin{lemma}\n\\label{lemma-fibre-product-closed}');
+  const end = text.indexOf('\\end{proof}', start) + '\\end{proof}'.length;
+  const atlas = source(text, 'latex', { start, end });
+  const original = atlasDiagram(atlas, 'blueprint');
+  const viewport = { width: 570, height: 540 };
+  const wrapped = fitAtlasDiagram(original, viewport);
+  const graphScale = ({ width, height }) => Math.min((viewport.width - 40) / width, (viewport.height - 40) / height);
+  assert.ok(graphScale(original) < 0.5 && graphScale(wrapped) > 0.8);
+  assert.equal(new Set(original.nodes.map(node => node.y)).size, 1);
+  assert.equal(new Set(wrapped.nodes.map(node => node.y)).size, 2);
+  assert.deepEqual(wrapped.nodes.map(node => node.id), original.nodes.map(node => node.id));
+  assert.deepEqual(wrapped.edges, original.edges);
+  assert.equal(wrapped.selected, original.selected);
+  const positions = new Map(wrapped.nodes.map(node => [node.id, node]));
+  const citation = wrapped.edges.find(edge => edge.kind === 'citation');
+  assert.equal(positions.get(citation.from).x, positions.get(citation.to).x);
+  assert.ok(positions.get(citation.from).y < positions.get(citation.to).y);
+  geometry(wrapped);
 });
 
 test('a citation inside a labelled equation belongs to its enclosing displayed proof', () => {

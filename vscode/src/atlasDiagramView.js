@@ -91,7 +91,7 @@ function diagramHtml(atlas, index, options, render) {
       <aside class="diagram-inspector" aria-label="Selected diagram node">
         ${selected ? `<p class="diagram-kind">${escape(selected.kind || 'component')}</p><h2>${escape(selected.title)}</h2>
           <div class="toolbar">${component ? button('Open component', 'selectComponent', { component: component.id, entry:entry?.id }) : ''}${entry && span ? button(part === 'proof' ? 'Open exact proof' : part === 'statement' ? 'Open exact statement' : 'Open exact passage', 'openSource', { entry: entry.id, part }) : ''}</div>
-          ${span ? `<details open><summary>Exact ${part === 'proof' ? 'proof passage' : part === 'statement' ? 'statement' : 'source passage'}</summary>${exactPreview(atlas.source.text, span)}</details>` : '<p class="muted">Open the component to inspect its individual source passages.</p>'}
+          ${span ? `<details open><summary>Exact ${part === 'proof' ? 'proof passage' : part === 'statement' ? 'statement' : 'source passage'}</summary>${exactPreview(atlas.source.text, span, atlas.source.language)}</details>` : '<p class="muted">Open the component to inspect its individual source passages.</p>'}
           ${component ? `<details><summary>Component description</summary>${description(atlas, index, component, true)}</details>` : ''}
           ${adjacent.length ? `<details open><summary>Connections (${adjacent.length})</summary><ul class="diagram-connections">${adjacent.map(edge => {
             const other = byId.get(edge.from === selected.id ? edge.to : edge.from);
@@ -165,9 +165,25 @@ const diagramScript = String.raw`
     const meter = diagramRoot.querySelector('[data-diagram-scale]');
     const stateKey = document.body.dataset.capture + ':' + diagramRoot.dataset.view + ':' + diagramRoot.dataset.page + ':' + diagramRoot.dataset.layout;
     const viewports = stored.viewports || {};
-    let scale = 1, x = 0, y = 0, drag;
+    let scale = 1, x = 0, y = 0, drag, mode = 'fit';
+    let layoutQueued = false, sentLayoutSize;
+    const notifyFitLayout = () => {
+      const send = () => {
+        layoutQueued = false;
+        if (mode !== 'fit' || drag) return;
+        const width = viewport.clientWidth, height = viewport.clientHeight;
+        if (width <= 40 || height <= 40) return;
+        const size = width + ':' + height;
+        if (size === sentLayoutSize) return;
+        sentLayoutSize = size;
+        api.postMessage({type:'fitDiagramLayout',view:diagramRoot.dataset.view,width,height,focus:document.activeElement?.id});
+      };
+      if (layoutQueued) return;
+      layoutQueued = true;
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(send); else send();
+    };
     const saveViewport = () => {
-      viewports[stateKey] = {scale, x, y};
+      viewports[stateKey] = {scale, x, y, mode};
       for (const key of Object.keys(viewports).slice(0, -12)) delete viewports[key];
       api.setState({...api.getState(), viewports});
     };
@@ -175,33 +191,36 @@ const diagramScript = String.raw`
       layer.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')';
       meter.textContent = Math.round(scale * 100) + '%';
     };
-    const fit = (readable = false) => {
+    const fit = () => {
+      // A hidden or not-yet-laid-out webview gets its first fit on resize.
+      if (viewport.clientWidth <= 40 || viewport.clientHeight <= 40) return;
       const width = Number(diagramRoot.dataset.width), height = Number(diagramRoot.dataset.height);
-      const fitted = Math.min(1.15, Math.max(.01, Math.min((viewport.clientWidth - 40) / width, (viewport.clientHeight - 40) / height)));
-      scale = readable ? Math.max(.8, fitted) : fitted;
+      scale = Math.min(1.15, (viewport.clientWidth - 40) / width, (viewport.clientHeight - 40) / height);
+      mode = 'fit';
       x = (viewport.clientWidth - width * scale) / 2; y = (viewport.clientHeight - height * scale) / 2;
-      const selected = viewport.querySelector('.diagram-node.is-selected');
-      if (readable && selected && scale > fitted) {
-        x = viewport.clientWidth / 2 - (Number(selected.dataset.x) + 94) * scale;
-        y = viewport.clientHeight / 2 - (Number(selected.dataset.y) + 33) * scale;
-      }
-      paint(); saveViewport();
+      paint(); saveViewport(); notifyFitLayout();
     };
     const zoom = (factor, px = viewport.clientWidth / 2, py = viewport.clientHeight / 2) => {
       const next = Math.min(2.5, Math.max(.01, scale * factor));
       x = px - (px - x) * next / scale; y = py - (py - y) * next / scale; scale = next;
+      mode = 'manual';
       paint(); saveViewport();
     };
     const reveal = node => {
       const left = Number(node.dataset.x), top = Number(node.dataset.y);
       if (x + left * scale < 5 || x + (left + 188) * scale > viewport.clientWidth - 5 || y + top * scale < 5 || y + (top + 66) * scale > viewport.clientHeight - 5) {
-        x = viewport.clientWidth / 2 - (left + 94) * scale; y = viewport.clientHeight / 2 - (top + 33) * scale; paint(); saveViewport();
+        x = viewport.clientWidth / 2 - (left + 94) * scale; y = viewport.clientHeight / 2 - (top + 33) * scale; mode = 'manual'; paint(); saveViewport();
       }
     };
     const saved = viewports[stateKey];
-    if (saved && [saved.scale,saved.x,saved.y].every(Number.isFinite) && saved.scale >= .01 && saved.scale <= 2.5) {
-      ({scale,x,y} = saved); paint();
-    } else fit(true);
+    // Older cameras do not distinguish the clipped automatic 80% framing from
+    // user movement. Refit those once; keep explicitly adjusted new cameras.
+    if (saved?.mode === 'manual' && [saved.scale,saved.x,saved.y].every(Number.isFinite) && saved.scale > 0 && saved.scale <= 2.5) {
+      ({scale,x,y,mode} = saved); paint();
+    } else fit();
+    if (typeof ResizeObserver === 'function') {
+      new ResizeObserver(() => { if (mode === 'fit' && !drag) fit(); }).observe(viewport);
+    }
     diagramRoot.querySelectorAll('[data-diagram-action]').forEach(control => control.addEventListener('click', () => {
       if (control.dataset.diagramAction === 'fit') fit(); else zoom(control.dataset.diagramAction === 'in' ? 1.25 : .8);
     }));
@@ -213,8 +232,13 @@ const diagramScript = String.raw`
       if (event.button !== 0 || event.target.closest('button')) return;
       drag = {clientX:event.clientX,clientY:event.clientY,x,y}; viewport.setPointerCapture(event.pointerId);
     });
-    viewport.addEventListener('pointermove', event => {if (!drag) return; x = drag.x + event.clientX - drag.clientX; y = drag.y + event.clientY - drag.clientY; paint();});
-    const release = () => {if (drag) {drag = undefined; saveViewport();}};
+    viewport.addEventListener('pointermove', event => {
+      if (!drag) return;
+      const nextX = drag.x + event.clientX - drag.clientX, nextY = drag.y + event.clientY - drag.clientY;
+      if (nextX === x && nextY === y) return;
+      x = nextX; y = nextY; mode = 'manual'; paint();
+    });
+    const release = () => {if (drag) {drag = undefined; if (mode === 'fit') fit(); else saveViewport();}};
     viewport.addEventListener('pointerup', release); viewport.addEventListener('pointercancel', release);
     viewport.addEventListener('focusin', event => {const node = event.target.closest('.diagram-node'); if (node) reveal(node);});
     viewport.addEventListener('keydown', event => {

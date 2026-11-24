@@ -36,7 +36,7 @@ test('map and blueprint render visible edges, readable native node buttons, exac
   assert.match(html, /data-component="/);assert.match(html, /data-part="statement"/);assert.match(html, /Captured &lt;source&gt;/);
   const proof=record.extraction.entries.find(entry=>entry.proof),blueprint=atlasDiagram(record,'blueprint',{selected:'entry:'+proof.id+':proof'});
   const detail=atlasHtml(null,record,{view:'blueprint',diagram:blueprint});
-  assert.match(detail,/data-relation="proof"/);assert.match(detail,/data-kind="proof"/);assert.match(detail,/Exact proof passage/);assert.match(detail,/Use Lemma~\\ref\{lem:base\}/);
+  assert.match(detail,/data-relation="proof"/);assert.match(detail,/data-kind="proof"/);assert.match(detail,/Exact proof passage/);assert.match(detail,/Use Lemma\s*<span class="atlas-inline-reference">\[lem:base\]<\/span>/);
   assert.match(detail,/data-part="proof"/);assert.match(detail,/Lean dependencies not available/);assert.match(detail,/stroke-dasharray: 6 4/);
   assert.match(detail,/Proof passage → statement/);
   // The generated controller contains no source interpolation and stays valid JS.
@@ -67,20 +67,195 @@ test('self-reference arcs stay outside node text and geometry accepts only numer
 });
 
 
-test('diagram camera starts readable, explicit Fit includes the full page, keyboard focuses nodes and drafts survive',()=>{
-  const handlers={},controls={},layer={style:{}},meter={};let state={drafts:{retained:{question:'Unsent writing'}}},focused;
-  const nodes=[{dataset:{x:'72',y:'72'},focus(){focused=this;},classList:{contains:()=>true}},{dataset:{x:'372',y:'72'},focus(){focused=this;},classList:{contains:()=>true}}];
-  for(const node of nodes)node.closest=selector=>selector==='.diagram-node'||selector==='button'?node:null;
-  const viewport={clientWidth:600,clientHeight:400,addEventListener:(name,fn)=>handlers[name]=fn,querySelector:()=>nodes[0],querySelectorAll:()=>nodes,getBoundingClientRect:()=>({left:0,top:0}),setPointerCapture(){}};
-  const root={dataset:{view:'map',page:'0',layout:'new-layout',width:'1000',height:'7000'},querySelector:selector=>selector==='[data-diagram-viewport]'?viewport:selector==='[data-diagram-layer]'?layer:meter,
-    querySelectorAll:()=>['in','out','fit'].map(action=>({dataset:{diagramAction:action},addEventListener:(_,fn)=>controls[action]=fn}))};
-  const document={body:{dataset:{capture:'source',focus:'diagram-node-first'}},querySelector:()=>root,getElementById:()=>nodes[0]};
-  const api={getState:()=>state,setState:value=>state=value};
-  vm.runInNewContext(diagramScript,{document,api,stored:state});
-  assert.equal(meter.textContent,'80%');assert.match(layer.style.transform,/scale\(0\.8\)/);assert.equal(state.drafts.retained.question,'Unsent writing');
-  controls.fit();assert.ok(parseInt(meter.textContent)<15,'explicit fit can show the whole tall page');
-  handlers.keydown({key:'ArrowRight',target:nodes[0],preventDefault(){}});assert.equal(focused,nodes[1]);
-  controls.in();assert.equal(state.drafts.retained.question,'Unsent writing');assert.ok(Object.keys(state.viewports)[0].endsWith(':new-layout'));
+function cameraHarness({diagram, view='map', width=400, height=464, state={}, focus, deferredFrames=false}={}) {
+  const handlers={}, controls={}, layer={style:{}}, meter={}, messages=[], frames=[];
+  const key='source:'+view+':0:new-layout';
+  let currentState=state, focused, resized;
+  const nodes=diagram.nodes.map(node=>({
+    dataset:{x:String(node.x),y:String(node.y)},
+    id:'diagram-node-'+node.id,
+    classList:{contains:className=>className==='diagram-node'},
+    focus(){focused=this; document.activeElement=this; handlers.focusin?.({target:this});},
+    closest(selector){return selector==='.diagram-node'||selector==='button'?this:null;},
+  }));
+  const viewport={
+    clientWidth:width,
+    clientHeight:height,
+    addEventListener:(name,handler)=>{handlers[name]=handler;},
+    querySelectorAll:()=>nodes,
+    getBoundingClientRect:()=>({left:0,top:0}),
+    setPointerCapture(){},
+  };
+  const root={
+    dataset:{view,page:'0',layout:'new-layout',width:String(diagram.width),height:String(diagram.height)},
+    querySelector:selector=>selector==='[data-diagram-viewport]'?viewport:selector==='[data-diagram-layer]'?layer:meter,
+    querySelectorAll:()=>['in','out','fit'].map(action=>({
+      dataset:{diagramAction:action},
+      addEventListener:(_,handler)=>{controls[action]=handler;},
+    })),
+  };
+  const document={
+    body:{dataset:{capture:'source',focus:focus?'diagram-node-'+focus:''}},
+    activeElement:{id:'atlas-heading'},
+    querySelector:()=>root,
+    getElementById:id=>nodes.find(node=>node.id===id),
+  };
+  const api={
+    getState:()=>currentState,
+    setState:value=>{currentState=value;},
+    postMessage:message=>{messages.push(JSON.parse(JSON.stringify(message)));},
+  };
+  class ResizeObserver {
+    constructor(callback){resized=callback;}
+    observe(target){assert.equal(target,viewport);}
+  }
+  const animation=deferredFrames?{requestAnimationFrame:callback=>{frames.push(callback);}}:{};
+  vm.runInNewContext(diagramScript,{document,api,stored:currentState,ResizeObserver,...animation});
+  return {
+    handlers,controls,nodes,layer,meter,key,
+    camera:()=>currentState.viewports?.[key],
+    state:()=>currentState,
+    focused:()=>focused,
+    messages:()=>messages,
+    flushFrames(){for (const callback of frames.splice(0)) callback();},
+    resize(nextWidth,nextHeight){viewport.clientWidth=nextWidth; viewport.clientHeight=nextHeight; resized();},
+    assertFits(){
+      const {scale,x,y}=currentState.viewports[key], tolerance=1e-8;
+      assert.ok(x>=20-tolerance,'left edge is visible');
+      assert.ok(y>=20-tolerance,'top edge is visible');
+      assert.ok(x+diagram.width*scale<=viewport.clientWidth-20+tolerance,'right edge is visible');
+      assert.ok(y+diagram.height*scale<=viewport.clientHeight-20+tolerance,'bottom edge is visible');
+    },
+  };
+}
+
+test('Proof map and Blueprint initially fit every node in a narrow pane, including when focus targets the right node',()=>{
+  const record=atlas(source);
+  for (const view of ['map','blueprint']) {
+    const diagram=atlasDiagram(record,view);
+    const rightmost=diagram.nodes.reduce((right,node)=>node.x>right.x?node:right);
+    for (const [width,height] of [[400,464],[320,400]]) {
+      const camera=cameraHarness({diagram,view,width,height,focus:rightmost.id});
+      assert.ok(camera.camera().scale<.8,'reproduces the former automatic 80% crop');
+      assert.equal(camera.camera().mode,'fit');
+      camera.assertFits();
+    }
+  }
+});
+
+test('fitted cameras adapt to pane resize and delayed layout without restoring an older clipped camera',()=>{
+  const diagram=atlasDiagram(atlas(source),'map');
+  const state={
+    drafts:{retained:{question:'Unsent writing'}},
+    viewports:{'source:map:0:new-layout':{scale:.8,x:-125,y:35}},
+  };
+  const camera=cameraHarness({diagram,state});
+  assert.ok(camera.camera().scale<.8);
+  camera.assertFits();
+  camera.resize(240,300);
+  camera.assertFits();
+  const fittedState=structuredClone(camera.state());
+  const reopened=cameraHarness({diagram,width:600,height:500,state:fittedState});
+  assert.notEqual(reopened.camera().scale,camera.camera().scale,'fitted state is recalculated for a new pane');
+  reopened.assertFits();
+  assert.equal(reopened.state().drafts.retained.question,'Unsent writing');
+
+  const hidden=cameraHarness({diagram,width:0,height:0});
+  assert.equal(hidden.camera(),undefined,'do not persist a camera before layout exists');
+  hidden.resize(400,464);
+  hidden.assertFits();
+});
+
+test('deliberate pan and zoom survive resize and reopening; Fit opts back into automatic framing',()=>{
+  const diagram=atlasDiagram(atlas(source),'map');
+  const camera=cameraHarness({diagram,state:{drafts:{retained:{question:'Unsent writing'}}}});
+  camera.handlers.pointerdown({button:0,target:{closest:()=>null},clientX:100,clientY:100,pointerId:1});
+  camera.handlers.pointermove({clientX:140,clientY:120});
+  camera.handlers.pointerup();
+  assert.equal(camera.camera().mode,'manual');
+  const panned={...camera.camera()};
+  camera.resize(320,400);
+  assert.deepEqual({...camera.camera()},panned,'resize preserves deliberate pan');
+  const reopened=cameraHarness({diagram,width:320,height:400,state:structuredClone(camera.state())});
+  assert.deepEqual({...reopened.camera()},panned,'reopening preserves a tagged manual camera');
+  reopened.controls.in();
+  assert.ok(reopened.camera().scale>panned.scale);
+  const zoomed={...reopened.camera()};
+  reopened.resize(500,500);
+  assert.deepEqual({...reopened.camera()},zoomed,'resize preserves deliberate zoom');
+  reopened.controls.fit();
+  assert.equal(reopened.camera().mode,'fit');
+  reopened.assertFits();
+  reopened.resize(240,300);
+  reopened.assertFits();
+  assert.equal(reopened.state().drafts.retained.question,'Unsent writing');
+});
+
+test('a tall page fits below 15%; keyboard navigation still reveals focused nodes after zoom',()=>{
+  const diagram={
+    width:1000,height:7000,
+    nodes:[{id:'first',x:72,y:72},{id:'last',x:372,y:6800}],
+  };
+  const camera=cameraHarness({diagram,width:600,height:400,focus:'first'});
+  assert.ok(camera.camera().scale<.15);
+  camera.assertFits();
+  for (let count=0;count<8;count++) camera.controls.in();
+  camera.handlers.keydown({key:'End',target:camera.nodes[0],preventDefault(){}});
+  assert.equal(camera.focused(),camera.nodes[1]);
+  const {x,y,scale}=camera.camera(), node=diagram.nodes[1];
+  assert.ok(x+node.x*scale>=5 && x+(node.x+188)*scale<=595);
+  assert.ok(y+node.y*scale>=5 && y+(node.y+66)*scale<=395);
+  camera.handlers.keydown({key:'0',target:camera.nodes[1],preventDefault(){}});
+  camera.assertFits();
+});
+
+test('fitted layout reports measured dimensions and focus once per size; manual resize waits for Fit',()=>{
+  const diagram=atlasDiagram(atlas(source),'blueprint');
+  const camera=cameraHarness({diagram,view:'blueprint',deferredFrames:true});
+  assert.equal(camera.messages().length,0,'wait for the animation frame after layout and focus');
+  camera.nodes[0].focus();
+  camera.resize(420,480);
+  camera.resize(440,500);
+  camera.flushFrames();
+  assert.deepEqual(camera.messages(),[{
+    type:'fitDiagramLayout',view:'blueprint',width:440,height:500,focus:camera.nodes[0].id,
+  }]);
+  camera.resize(440,500);
+  camera.controls.fit();
+  camera.flushFrames();
+  assert.equal(camera.messages().length,1,'do not repeat an unchanged fitted size');
+
+  camera.controls.in();
+  camera.resize(320,400);
+  camera.flushFrames();
+  assert.equal(camera.messages().length,1,'manual camera resize does not request rewrapping');
+  camera.controls.fit();
+  camera.flushFrames();
+  assert.deepEqual(camera.messages()[1],{
+    type:'fitDiagramLayout',view:'blueprint',width:320,height:400,focus:camera.nodes[0].id,
+  });
+  camera.assertFits();
+});
+
+test('layout signal works without animation APIs and never publishes hidden dimensions or a restored manual camera',()=>{
+  const diagram=atlasDiagram(atlas(source),'map');
+  const hidden=cameraHarness({diagram,width:0,height:0});
+  assert.equal(hidden.messages().length,0);
+  hidden.resize(400,464);
+  assert.equal(hidden.messages().length,1);
+  assert.equal(hidden.messages()[0].view,'map');
+  const state={viewports:{'source:map:0:new-layout':{scale:.7,x:10,y:20,mode:'manual'}}};
+  const manual=cameraHarness({diagram,state});
+  assert.equal(manual.messages().length,0);
+  manual.resize(320,400);
+  assert.equal(manual.messages().length,0);
+  manual.controls.fit();
+  assert.equal(manual.messages().length,1);
+
+  const interrupted=cameraHarness({diagram,deferredFrames:true});
+  interrupted.controls.in();
+  interrupted.flushFrames();
+  assert.equal(interrupted.messages().length,0,'a queued fit does not override a subsequent manual camera');
 });
 
 

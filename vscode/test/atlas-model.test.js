@@ -72,8 +72,10 @@ test('an initial 08ZH overview quotes the explicit assumptions and conclusion fr
   const atlas = createAtlas({ source: source(text, 'latex'), extraction: extractAtlasText(text, 'latex', { start, end }) });
   const html = atlasHtml(null, atlas);
   assert.match(html, /<dt>Question<\/dt><dd><p>What does Lemma \(lemma-fibre-product-closed\) establish\?/);
-  assert.match(html, /<dt>Hypotheses<\/dt><dd><p>From the statement<\/p><pre>Let \$X[\s\S]*?If \$Z\$ is Hausdorff/);
-  assert.match(html, /<dt>Conclusion<\/dt><dd><p>From the statement<\/p><pre>\$X \\times_Z Y\$ is closed in \$X \\times Y\$\./);
+  const hypotheses = /<dt>Hypotheses<\/dt><dd>([\s\S]*?)<\/dd>/.exec(html.match(/<dl class="summary"><dt>Question<\/dt><dd><p>What does Lemma \(lemma-fibre-product-closed\) establish\?[\s\S]*?<\/dl>/)[0])[1];
+  assert.match(hypotheses, /Let <span class="katex"><math/);
+  assert.match(hypotheses, /<mi>Z<\/mi>[\s\S]*? is Hausdorff/);
+  assert.match(html, /<dt>Conclusion<\/dt><dd><p>From the statement<\/p><div class="atlas-reading"><p><span class="katex"><math[\s\S]*? is closed in <span class="katex"><math/);
   assert.ok(html.includes('data-part="statement"'));
 });
 

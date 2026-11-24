@@ -8,7 +8,7 @@ an arbitrary workspace.
 The working example is [examples/lean-lesson-pack](../examples/lean-lesson-pack/pack.json)
 in a source checkout (also available by downloading the repository). Copy that
 directory outside the installation, then run **MRW: Add Lean Lesson
-Pack…** and select it. **Learning Materials… → Lean 4 lessons** immediately
+Pack…** and select it. **Notes and Examples… → Lean 4 lessons** immediately
 includes its identity-proof lesson. No extension edit, rebuild or reload is needed. **Manage Lean Lesson
 Packs…** enables, disables or removes registrations. Existing working copies
 remain resumable when the source registration is disabled or removed.
