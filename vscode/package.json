@@ -402,7 +402,7 @@
       },
       {
         "command": "mrw.openLearningMaterials",
-        "title": "Notes and Examples…",
+        "title": "Examples…",
         "category": "MRW"
       },
       {
@@ -1220,7 +1220,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Notes and Examples…](command:mrw.openLearningMaterials \"Open bundled notes, an example, or a Lean lesson.\")\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
+        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Examples…](command:mrw.openLearningMaterials \"Browse operads notes, an induction example, and Lean 4 lessons.\")\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
       },
       {
         "view": "mrw.readingOutline",

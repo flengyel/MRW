@@ -351,9 +351,9 @@ bounded search is not a disproof. The
 explains the limits and the explicit context-file route. No registration form
 is required for reading or writing notes.
 
-## Notes and Examples
+## Examples
 
-Open **Notes and Examples…** in **Commands**.
+Open **Examples…** in **Commands**.
 
 - **Operads from finite lists** opens the companion to Chapter 1 of Heuts and
   Moerdijk. Use **Contents** to jump to a section and **Render diagram** to
@@ -366,7 +366,7 @@ Open **Notes and Examples…** in **Commands**.
 
 ## Study Lean 4
 
-Choose **Notes and Examples… → Lean 4 lessons** and begin with **Introduction
+Choose **Examples… → Lean 4 lessons** and begin with **Introduction
 and functions**. Its introduction explains formalization and the purpose of the
 three lessons, followed by contents and instructions for the examples and InfoView. Follow the contents links to **Implication as a function
 on proofs**, then **Dependent application**. Each lesson also links to its

@@ -64,23 +64,23 @@ test('Return and companion commands have the same scope in the Document menu and
     'resourceScheme == mrw-atlas-source');
 });
 
-test('Notes and Examples is the visible entry for the three sample routes', () => {
+test('Examples is the visible entry for the three sample routes', () => {
   const command = c.commands.find(item => item.command === 'mrw.openLearningMaterials');
-  assert.equal(command.title, 'Notes and Examples…');
+  assert.equal(command.title, 'Examples…');
   assert.equal(c.menus.commandPalette.some(item => item.command === command.command && item.when === 'false'), false);
   assert.match(c.viewsWelcome.find(item => item.view === 'mrw.commands').contents,
-    /\[Notes and Examples…\]\(command:mrw\.openLearningMaterials /);
+    /\[Examples…\]\(command:mrw\.openLearningMaterials /);
   for (const command of ['mrw.openOperadsNotes', 'mrw.openStudyExample', 'mrw.studyLean4']) {
     assert.equal(c.menus.commandPalette.find(item => item.command === command).when, 'false');
   }
   const { GROUPS } = require('../src/companionTools');
   assert.deepEqual(GROUPS.readingTools.find(([, id]) => id === 'openLearningMaterials'),
-    ['Notes and Examples…', 'openLearningMaterials']);
+    ['Examples…', 'openLearningMaterials']);
   assert.deepEqual(GROUPS.proofTools.filter(([, command]) => /Lean|leanStudy/.test(command)).map(([, command]) => command),
     ['resumeLeanStudy', 'leanStudyActions']);
 });
 
-test('the Notes and Examples picker opens only the chosen material and permits cancelling', async () => {
+test('the Examples picker opens only the chosen material and permits cancelling', async () => {
   const { registerCompanionTools } = require('../src/companionTools');
   const handlers = new Map();
   const opened = [];
@@ -92,8 +92,8 @@ test('the Notes and Examples picker opens only the chosen material and permits c
   let choice;
   const vscode = {
     window: { async showQuickPick(items, options) {
-      assert.equal(options.title, 'Notes and Examples');
-      assert.equal(options.placeHolder, 'Choose a note, example, or lesson');
+      assert.equal(options.title, 'Examples');
+      assert.equal(options.placeHolder, 'Choose an example or lesson');
       assert.equal(options.matchOnDescription, true);
       assert.deepEqual(items.map(item => item.label), [...routes.keys()]);
       assert.ok(items.every(item => item.description));

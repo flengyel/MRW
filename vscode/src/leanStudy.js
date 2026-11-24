@@ -35,7 +35,7 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
   const file=path.relative(pack.root,uri.fsPath).split(path.sep).join('/');
   if (file === pack.manifest.notesTemplate) {
    const lesson = pack.manifest.lessons.find(item => item.id === state.lessonId);
-   if (!lesson) throw Error('The saved lesson is unavailable. Choose Notes and Examples… → Lean 4 lessons.');
+   if (!lesson) throw Error('The saved lesson is unavailable. Choose Examples… → Lean 4 lessons.');
    return {pack, lesson, file};
   }
   const matches=pack.manifest.lessons.filter(lesson=>lessonFiles(lesson).includes(file));
@@ -64,7 +64,7 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
  }
  function column(file){const uri=vscode.Uri.file(file).toString();return vscode.window.visibleTextEditors?.find(e=>e.document.uri.toString()===uri)?.viewColumn||vscode.window.tabGroups?.all?.find(g=>g.tabs.some(t=>t.input?.uri?.toString()===uri))?.viewColumn;}
  async function current(){
-  if(!state?.root)throw Error('Open a lesson from Notes and Examples… → Lean 4 lessons.');
+  if(!state?.root)throw Error('Open a lesson from Examples… → Lean 4 lessons.');
   const pack=await loadPack(state.root);if(pack.manifest.packId!==state.packId)throw Error('The study folder belongs to another pack.');
   const lesson=pack.manifest.lessons.find(l=>l.id===state.lessonId);if(!lesson)throw Error('The saved lesson is unavailable; no working file was replaced.');return {pack,lesson};
  }
@@ -138,7 +138,7 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
   const chosen=await vscode.window.showOpenDialog({title:'Register a local Lean lesson pack (data only)',canSelectFiles:false,canSelectFolders:true,canSelectMany:false});if(!chosen?.length)return;
   if(chosen[0].scheme!=='file')throw Error('Choose a local lesson-pack folder.');const pack=await loadPack(chosen[0].fsPath);
   if(pack.manifest.packId===(await loadPack(builtin)).manifest.packId||registrations.some(e=>e.packId===pack.manifest.packId&&e.root!==pack.root))throw Error('A different lesson pack already owns that pack ID.');
-  registrations=[...registrations.filter(e=>e.packId!==pack.manifest.packId),{packId:pack.manifest.packId,root:pack.root,enabled:true}];await saveRegistry();void vscode.window.showInformationMessage('Lesson pack registered. Use Notes and Examples… → Lean 4 lessons; no rebuild or reload is needed.');
+  registrations=[...registrations.filter(e=>e.packId!==pack.manifest.packId),{packId:pack.manifest.packId,root:pack.root,enabled:true}];await saveRegistry();void vscode.window.showInformationMessage('Lesson pack registered. Use Examples… → Lean 4 lessons; no rebuild or reload is needed.');
  });
  register('mrw.manageLeanLessonPacks',async()=>{
   const chosen=await vscode.window.showQuickPick(registrations.map(e=>({label:e.packId,description:e.enabled?'Enabled':'Disabled',...e})),{placeHolder:'Registered local lesson packs; working copies stay usable'});if(!chosen)return;
