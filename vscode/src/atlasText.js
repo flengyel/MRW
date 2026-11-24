@@ -10,6 +10,8 @@ const KINDS = new Map(Object.entries({ theorem: 'theorem', thm: 'theorem', lemma
   definition: 'definition', defn: 'definition', example: 'example', ex: 'example', remark: 'remark', rem: 'remark',
   assumption: 'assumption', axiom: 'axiom', conjecture: 'conjecture', claim: 'claim', fact: 'fact',
   notation: 'notation', exercise: 'exercise', problem: 'problem', statement: 'statement', proof: 'proof' }));
+const SECTIONS = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph'];
+const printedNumber = value => typeof value === 'string' && value.length <= 64 && /^[A-Za-z0-9]+(?:[.:-][A-Za-z0-9]+)*$/.test(value);
 const compact = value => value.replace(/\s+/gu, ' ').trim();
 const title = value => Array.from(compact(value)).slice(0, 240).join('');
 const mask = value => value.replace(/[^\r\n]/g, ' ');
@@ -107,17 +109,87 @@ function latexVisible(state) {
   return chars.join('');
 }
 
-function latex(state) {
-  const visible = latexVisible(state), environments = new Map(KINDS), structural = [], stack = [], proofs = [], labels = [];
-  // Literal \newtheorem declarations are data; definitions in inputs are not read.
-  for (const match of visible.matchAll(/\\newtheorem\*?/g)) {
-    if (escaped(visible, match.index)) continue;
-    const name = group(visible, match.index + match[0].length); if (!name) continue;
-    const counter = optional(visible, name.end), display = group(visible, counter?.end ?? name.end); if (!display) continue;
-    environments.set(name.value.trim(), KINDS.get(display.value.trim().toLowerCase()) || 'statement');
-    structural.push({ start: match.index, end: optional(visible, display.end)?.end ?? display.end });
+function parsePrintedLabels(auxiliary) {
+  const labels = new Map();
+  for (const line of auxiliary.split(/\r\n|\n|\r/u)) {
+    const command = /^[ \t]*\\newlabel(?=[\s{])/.exec(line);
+    if (!command) continue;
+    const key = group(line, command[0].length);
+    if (!key || !key.value || key.value.length > 1024) continue;
+    const fields = group(line, key.end);
+    const number = fields && group(fields.value, 0);
+    const value = number?.value.trim();
+    // Conflicting definitions give no reliable printed number for the label.
+    if (labels.has(key.value) && labels.get(key.value) !== value) labels.set(key.value, null);
+    else if (!labels.has(key.value)) labels.set(key.value, printedNumber(value) ? value : null);
   }
-  const tokens = /\\(begin|end|label|part|chapter|section|subsection|subsubsection|paragraph|subparagraph|bibitem|(?:[Cc]ref|[Ee]qref|[Aa]utoref|[Nn]ameref|[Vv]ref|ref)|(?:cite[a-zA-Z]*|parencite|textcite)|input|include|bibliography|title|author|date|maketitle|tableofcontents|phantomsection|newtheorem)\*?(?![A-Za-z])/g;
+  return labels;
+}
+
+function theoremDeclarations(visible, structural) {
+  const declarations = new Map();
+  for (const match of visible.matchAll(/\\newtheorem\*?(?![A-Za-z])/g)) {
+    if (escaped(visible, match.index)) continue;
+    const name = group(visible, match.index + match[0].length);
+    if (!name) continue;
+    const shared = optional(visible, name.end), display = group(visible, shared?.end ?? name.end);
+    if (!display) continue;
+    const within = optional(visible, display.end), caption = compact(display.value), id = name.value.trim();
+    declarations.set(id, { kind: KINDS.get(caption.toLowerCase()) || 'statement',
+      display: /^[\p{L}\p{N}\s-]{1,100}$/u.test(caption) ? caption : undefined,
+      shared: shared?.value.trim(), within: within?.value.trim(), unnumbered: match[0].endsWith('*') });
+    structural.push({ start: match.index, end: within?.end ?? display.end });
+  }
+  return declarations;
+}
+
+function nextTheoremNumber(name, declarations, sectionNumbers, theoremNumbers, chapterStyle) {
+  const seen = new Set();
+  let declaration = declarations.get(name);
+  while (declaration?.shared) {
+    if (seen.has(name)) return undefined;
+    seen.add(name);
+    name = declaration.shared;
+    declaration = declarations.get(name);
+  }
+  if (!declaration || declaration.unnumbered) return undefined;
+  const within = declaration.within, level = SECTIONS.indexOf(within);
+  // Custom counters and parts can use different formats, for which the
+  // auxiliary is authoritative.
+  if (within && level < 1) return undefined;
+  const chapter = chapterStyle || sectionNumbers.has('chapter');
+  const first = chapter || level === 1 ? 1 : 2;
+  const prefix = within ? SECTIONS.slice(first, level + 1).map(key => sectionNumbers.get(key) || 0).join('.') : '';
+  const previous = theoremNumbers.get(name);
+  const count = previous?.prefix === prefix ? previous.count + 1 : 1;
+  theoremNumbers.set(name, { prefix, count });
+  return prefix ? [prefix, count].join('.') : String(count);
+}
+
+function mscFrontMatter(visible, bodyStart, stop) {
+  const result = [];
+  const intro = visible.slice(bodyStart, stop);
+  const msc = /^[ \t]*(?:\\noindent[ \t]*)?(?:\\(?:textit|textbf|emph)\s*\{[ \t]*)?(?:\d{4}[ \t]+)?(?:Mathematics Subject Classification|MSC(?:[ \t]+\d{4})?)(?=[\s.:}\\]|$)/gmi;
+  for (const match of intro.matchAll(msc)) {
+    const start = bodyStart + match.index;
+    if (start < (result.at(-1)?.end ?? bodyStart)) continue;
+    const tail = intro.slice(match.index);
+    const separator = /\r?\n[ \t]*\r?\n/.exec(tail);
+    result.push({ start, end: separator ? start + separator.index : stop, title: 'Mathematics Subject Classification' });
+  }
+  return result;
+}
+
+function latex(state, selection, options) {
+  const visible = latexVisible(state), structural = [], stack = [], proofs = [], labels = [], front = [];
+  const declarations = theoremDeclarations(visible, structural);
+  const sectionNumbers = new Map(), theoremNumbers = new Map();
+  const chapterStyle = /\\documentclass(?:\s*\[[^\]]*\])?\s*\{(?:report|book|amsbook|memoir)\}/.test(visible);
+  // A source that explicitly alters the displayed counters needs a current
+  // auxiliary. Keep source labels as the fallback instead of guessing.
+  const customCounters = /(?<!\\)\\(?:appendix|setcounter|addtocounter|counterwithin|counterwithout)(?![A-Za-z])/.test(visible) ||
+    /(?<!\\)\\(?:renewcommand|def)\s*\{?\\the[A-Za-z]+/.test(state.text);
+  const tokens = /\\(begin|end|label|part|chapter|section|subsection|subsubsection|paragraph|subparagraph|bibitem|(?:[Cc]ref|[Ee]qref|[Aa]utoref|[Nn]ameref|[Vv]ref|ref)|(?:cite[a-zA-Z]*|parencite|textcite)|input|include|bibliography|title|author|date|maketitle|subjclass|keywords|tableofcontents|phantomsection|newtheorem)\*?(?![A-Za-z])/g;
   let match, commands = 0, bodyStart = 0, bodyEnd = state.text.length;
   while ((match = tokens.exec(visible))) {
     if (escaped(visible, match.index)) continue;
@@ -125,9 +197,11 @@ function latex(state) {
     const command = match[1], start = match.index;
     let at = tokens.lastIndex, argument;
     if (['maketitle', 'tableofcontents', 'phantomsection'].includes(command)) {
-      structural.push({ start, end: at }); continue;
+      structural.push({ start, end: at });
+      if (command === 'maketitle') front.push({ start, end: at, title: 'Title page' });
+      continue;
     }
-    if (/^(?:part|chapter|section|subsection|subsubsection|paragraph|subparagraph|bibitem|cite|parencite|textcite)/.test(command)) {
+    if (SECTIONS.includes(command) || /^(?:bibitem|subjclass|cite|parencite|textcite)/.test(command)) {
       for (let n = 0; n < 2; n++) { const opt = optional(visible, at); if (!opt) break; at = opt.end; }
     }
     argument = group(visible, at);
@@ -136,10 +210,17 @@ function latex(state) {
     const value = argument.value.trim();
     if (command === 'begin') {
       if (stack.length >= 64) { issue(state, 'LaTeX nesting exceeds the 64-environment limit.'); break; }
-      const kind = environments.get(value) || (/^(?:equation|align|alignat|gather|multline|displaymath)\*?$/.test(value) ? 'equation' : null);
+      const declaration = declarations.get(value);
+      const kind = declaration?.kind || KINDS.get(value) ||
+        (/^(?:equation|align|alignat|gather|multline|displaymath)\*?$/.test(value) ? 'equation' : null);
       const opt = optional(visible, argument.end);
+      const number = declaration && !customCounters ?
+        nextTheoremNumber(value, declarations, sectionNumbers, theoremNumbers, chapterStyle) : undefined;
+      const unnumbered = declaration?.unnumbered || value.endsWith('*') || value === 'displaymath';
       const node = kind && entry(state, { kind, title: opt?.value || (kind === 'proof' ? 'Proof' : kind[0].toUpperCase() + kind.slice(1)),
-        start, end: state.text.length, statement: { start, end: state.text.length }, _environment: value, _proofTitle: kind === 'proof' ? opt?.value : undefined });
+        start, end: state.text.length, statement: { start, end: state.text.length }, _environment: value,
+        _proofTitle: kind === 'proof' ? opt?.value : undefined, _display: declaration?.display, _number: number,
+        ...(unnumbered ? { unnumbered: true } : {}) });
       if (node && kind === 'proof') proofs.push(node);
       stack.push({ name: value, start, node });
       if (value === 'document') { bodyStart = argument.end; structural.push({ start, end: argument.end }); }
@@ -148,18 +229,28 @@ function latex(state) {
       if (index < 0) { issue(state, `Unmatched \\end{${value}} was not used as a boundary.`); continue; }
       for (const orphan of stack.slice(index + 1)) if (orphan.node) issue(state, `Unclosed ${orphan.name} environment ends at the enclosing boundary.`);
       const closed = stack.splice(index);
-      for (const item of closed) if (item.node) { item.node.end = argument.end; item.node.statement.end = argument.end; }
+      for (const item of closed) {
+        if (item.node) { item.node.end = argument.end; item.node.statement.end = argument.end; }
+        if (item.name === 'abstract') front.push({ start: item.start, end: argument.end, title: 'Abstract' });
+      }
       if (value === 'document') { bodyEnd = start; structural.push({ start, end: argument.end }); }
     } else if (command === 'label') {
       labels.push({ label: value, start, end: argument.end, enclosing: [...stack].reverse().find(item => item.node)?.node });
       structural.push({ start, end: argument.end });
-    } else if (/^(?:part|chapter|section|subsection|subsubsection|paragraph|subparagraph)$/.test(command)) {
-      const level = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph'].indexOf(command);
+    } else if (SECTIONS.includes(command)) {
+      const level = SECTIONS.indexOf(command);
+      if (!match[0].endsWith('*') && level >= 1) {
+        sectionNumbers.set(command, (sectionNumbers.get(command) || 0) + 1);
+        for (const child of SECTIONS.slice(level + 1)) sectionNumbers.delete(child);
+      }
       entry(state, { kind: 'section', section: true, level, title: argument.value, start, end: argument.end });
     } else if (command === 'bibitem') {
       entry(state, { kind: 'bibliography', title: value, label: value, labels: [value], start, end: argument.end, _citation: true });
-    } else if (/^(?:input|include|bibliography|title|author|date|newtheorem)$/.test(command)) {
+    } else if (/^(?:input|include|bibliography|title|author|date|newtheorem|subjclass|keywords)$/.test(command)) {
       structural.push({ start, end: argument.end });
+      const frontTitle = { title: 'Title', author: 'Author', date: 'Date',
+        subjclass: 'Mathematics Subject Classification', keywords: 'Keywords' }[command];
+      if (frontTitle) front.push({ start, end: argument.end, title: frontTitle });
       if (['input', 'include', 'bibliography'].includes(command)) issue(state, 'External LaTeX inputs and bibliographies are not expanded.');
     } else {
       const citation = /^(?:cite|parencite|textcite)/.test(command);
@@ -169,7 +260,10 @@ function latex(state) {
       });
     }
   }
-  for (const item of stack) if (item.node) { issue(state, `Unclosed ${item.name} environment ends at the document boundary.`); item.node.incomplete = true; }
+  for (const item of stack) {
+    if (item.node) { issue(state, `Unclosed ${item.name} environment ends at the document boundary.`); item.node.incomplete = true; }
+    if (item.name === 'abstract') front.push({ start: item.start, end: bodyEnd, title: 'Abstract' });
+  }
   // Attach a proof only to a containing statement or an immediately preceding
   // statement. An intervening mathematical paragraph prevents that guess.
   for (const proof of proofs) {
@@ -208,8 +302,27 @@ function latex(state) {
     const boundary = visible.indexOf('\\end{thebibliography}', node.end);
     node.end = Math.min(next?.start ?? state.text.length, boundary < 0 ? state.text.length : boundary);
   }
-  for (const node of state.entries) if (node.label && !node.section && node.title === node.kind[0].toUpperCase() + node.kind.slice(1)) node.title += ` (${node.label})`;
-  const excluded = [...state.entries, ...structural, { start: 0, end: bodyStart }, { start: bodyEnd, end: state.text.length }];
+  for (const node of state.entries) {
+    const base = node.kind[0].toUpperCase() + node.kind.slice(1);
+    if (node.label && !node.section && node.title === base) node.title += ` (${node.label})`;
+    if (node.section || node.unnumbered || node.kind === 'proof' || !node._environment) continue;
+    const auxiliaryNumber = node.labels.map(label => options.printedLabels?.get(label)).find(printedNumber);
+    const number = auxiliaryNumber || node._number;
+    if (number) {
+      node.printedNumber = number;
+      node.printedTitle = `${node._display || base} ${number}`;
+    }
+  }
+  const firstSection = state.entries.find(node => node.section && node.start >= bodyStart)?.start ?? bodyEnd;
+  front.push(...mscFrontMatter(visible, bodyStart, firstSection));
+  const inFront = node => front.some(span => span.start <= node.start && node.end <= span.end);
+  state.entries = state.entries.filter(node => !inFront(node));
+  const explicitlyIncluded = front.filter(span => selection && (selection.start === selection.end ?
+    span.start <= selection.start && selection.start < span.end : intersects(span, selection)));
+  for (const span of explicitlyIncluded) entry(state, { kind: 'frontmatter', frontMatter: true, ...span });
+  state.references = state.references.filter(ref => !inFront(ref) ||
+    explicitlyIncluded.some(span => span.start <= ref.start && ref.end <= span.end));
+  const excluded = [...state.entries, ...structural, ...front, { start: 0, end: bodyStart }, { start: bodyEnd, end: state.text.length }];
   paragraphs(state, visible, excluded);
   issue(state, 'LaTeX is parsed lexically; macros, mathematical validity and inferred dependencies are not evaluated.');
 }
@@ -310,14 +423,14 @@ function markdown(state) {
   issue(state, 'Markdown extraction uses explicit headings, named paragraphs and references; it does not infer a proof or dependency from prose.');
 }
 
-function extractAtlasText(text, language, range) {
+function extractAtlasText(text, language, range, options = {}) {
   if (typeof text !== 'string') throw new TypeError('Supply the exact editor text.');
   if (Buffer.byteLength(text, 'utf8') > MAX_BYTES) throw new Error('Atlas text exceeds the 4 MiB extraction limit.');
   if (!['markdown', 'latex'].includes(language)) throw new Error('Text atlas extraction supports Markdown and LaTeX.');
   let selection = range === undefined ? { start: 0, end: text.length } : { start: range?.start, end: range?.end };
   if (![selection.start, selection.end].every(Number.isSafeInteger) || selection.start < 0 || selection.end < selection.start || selection.end > text.length) throw new Error('The selected UTF-16 range is outside the supplied editor text.');
   const state = { text, entries: [], references: [], limitations: [] };
-  if (language === 'markdown') markdown(state); else latex(state);
+  if (language === 'markdown') markdown(state); else latex(state, range === undefined ? null : selection, options);
   state.entries.sort((a, b) => a.start - b.start || a.end - b.end);
   const counts = new Map(), anchors = new Map(), citations = new Map();
   for (const node of state.entries) {
@@ -375,4 +488,4 @@ function extractAtlasText(text, language, range) {
   if (!entries.length) issue(state, 'The selection contains no supported prose, heading or named mathematical entry.');
   return { entries, references, limitations: state.limitations, selection };
 }
-module.exports = { extractAtlasText };
+module.exports = { extractAtlasText, parsePrintedLabels };

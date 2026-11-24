@@ -2,3 +2,6 @@
 vscode/media/markdown-it/markdown-it.js -text -whitespace
 vscode/media/katex/auto-render.min.js -text -whitespace
 vscode/media/fsrs/index.cjs -text -whitespace
+
+# Keep the author’s v38 atlas fixture at its exact captured revision.
+vscode/test/fixtures/failure-of-composition-v38.tex -text -whitespace

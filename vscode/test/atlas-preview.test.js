@@ -9,7 +9,7 @@ const { extractAtlasText } = require('../src/atlasText');
 const { createAtlas, evidenceSpan } = require('../src/atlasModel');
 const { atlasDiagram } = require('../src/atlasDiagram');
 const { atlasHtml } = require('../src/atlasView');
-const { preview } = require('../src/atlasPreview');
+const { preview, texPreviewContext } = require('../src/atlasPreview');
 
 test('the Stacks atlas renders the 08ZE list and the 08ZH proof with exact source actions', async () => {
   const text = await fs.readFile(path.resolve(__dirname, '../../tests/fixtures/stacks/topology.tex'), 'utf8');
@@ -82,4 +82,54 @@ test('unknown structure and unsafe math stay visible as inert exact text', () =>
   for (const html of [fallback, unsafe, markdown]) assert.doesNotMatch(html, /<img\b|<script\b|<a\b|<(?:span|math)[^>]*\shref=/);
   const longer = preview(String.raw`\begin{proof}A long proof cannot be previewed in full.\end{proof}`, 'latex', 25);
   assert.match(longer, /<pre>[\s\S]*?Open the exact source to read the remainder/);
+});
+
+test('literal TeX preamble commands are scoped to display and citations remain inert', () => {
+  const text = String.raw`\newcommand{\PA}{\mathrm{PA}}
+\newcommand{\pair}[2]{(#1,#2)}
+\newcommand{\bad}{\href{https://example.org}{X}}
+\begin{document}`;
+  const exact = String.raw`\noindent\textit{A source.} See \cite[p.~267]{Feferman}.
+\begin{align}
+\PA\vdash \pair{x}{y} \label{eq:display}
+\end{align}
+And $\bad$.`;
+  const rendered = preview(exact, 'latex', 4096, texPreviewContext(text));
+  assert.match(rendered, /<em>A source\.<\/em>/);
+  assert.match(rendered, /<span class="atlas-inline-reference">\[Feferman, p\. 267\]<\/span>/);
+  assert.match(rendered, /<math[^>]* display="block"/);
+  assert.match(rendered, /<mi mathvariant="normal">P<\/mi><mi mathvariant="normal">A<\/mi>/);
+  assert.doesNotMatch(rendered, /\\label\{eq:display\}|<a\b|\shref=/);
+  assert.match(rendered, /<code class="atlas-raw-math"[^>]*>\$\\bad\$/);
+  assert.match(preview(String.raw`$\PA$`, 'latex', 4096), /atlas-raw-math/);
+});
+
+test('the v38 manuscript opens on numbered results and a readable one-page map while retaining prose', async () => {
+  const text = await fs.readFile(path.join(__dirname, 'fixtures/failure-of-composition-v38.tex'), 'utf8');
+  const source = { title: 'Pointwise provable equality', uri: 'file:///workspace/v38.tex', language: 'latex', text, revision: digest(text) };
+  const atlas = createAtlas({ source, extraction: extractAtlasText(text, 'latex') });
+  const before = structuredClone(atlas);
+  const resultTitles = ['Theorem 1', 'Corollary 2', 'Theorem 3', 'Theorem 4', 'Proposition 5', 'Proposition 6'];
+  const html = atlasHtml(null, atlas, { view: 'list' });
+  const names = Array.from(html.matchAll(/<h2><button [^>]*id="component-[^"]+">([^<]+)<\/button><\/h2>/gu), match => match[1]);
+  assert.deepEqual(names.slice(0, 6), resultTitles);
+  assert.match(html, /Show prose|class="atlas-section"/);
+  assert.match(html, /<code class="muted">thm:characterization<\/code>/);
+  assert.match(html, /For every consistent recursively enumerable [\s\S]*?<math/);
+  assert.doesNotMatch(html, /Preview unavailable|No question recorded|See the statement for the stated conditions/);
+  const viewport = { width: 760, height: 460 };
+  const diagram = atlasDiagram(atlas, 'map', { readable: true, viewport });
+  assert.equal(diagram.pageCount, 1);
+  assert.deepEqual(diagram.nodes.filter(node => resultTitles.includes(node.title)).map(node => node.title), resultTitles);
+  assert.ok(diagram.nodes.some(node => atlas.extraction.entries.find(entry => entry.id === node.entryId)?.label === 'eq:graph-realization'));
+  assert.ok(diagram.nodes.every(node => !['prose', 'section', 'bibliography'].includes(node.kind)));
+  assert.ok(Math.min((viewport.width - 40) / diagram.width, (viewport.height - 40) / diagram.height) >= diagram.minimumScale);
+  const narrow = atlasDiagram(atlas, 'map', { readable: true, viewport: {width: 340, height: 360} });
+  assert.equal(narrow.total, diagram.total);
+  assert.ok(narrow.pageCount > 1);
+  const expanded = atlasHtml(null, atlas, { view: 'list', showProse: true });
+  assert.match(expanded, /Hide prose/);
+  assert.match(expanded, /\[Feferman, p\. 267\]/);
+  assert.ok(atlas.extraction.references.some(reference => reference.label === 'eq:graph-realization' && reference.status === 'resolved'));
+  assert.deepEqual(atlas, before);
 });

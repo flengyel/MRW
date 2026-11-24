@@ -3,6 +3,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const os = require('node:os');
+const { digest } = require('../src/navigation');
+const { readAtlasAux } = require('../src/atlasAux');
 const { extractAtlasText } = require('../src/atlasText');
 
 function spans(text, result) {
@@ -248,4 +251,93 @@ See [@Real; @Second].`;
   const parsed = extractAtlasText(markdown, 'markdown');
   assert.deepEqual(parsed.references.map(n => n.label), ['Real', 'Second']);
   assert.equal(parsed.entries.some(n => !n.title), false); spans(markdown, parsed);
+});
+
+test('v38 theorem numbering uses the shared counter and omits front matter until explicitly selected', async () => {
+  const text = await fs.readFile(path.join(__dirname, 'fixtures/failure-of-composition-v38.tex'), 'utf8');
+  assert.equal(digest(text), '94e80f24abd3a9c17fffa9075a017fdb1f04ea48995ad35b263386a4ddf6613b');
+  const result = extractAtlasText(text, 'latex');
+  const numbered = result.entries.filter(node => node.printedTitle);
+  assert.deepEqual(numbered.map(node => node.printedTitle), [
+    'Theorem 1', 'Corollary 2', 'Theorem 3', 'Theorem 4', 'Proposition 5', 'Proposition 6',
+  ]);
+  assert.equal(numbered[2].label, 'thm:characterization');
+  assert.equal(numbered[2].title, 'Theorem (thm:characterization)');
+  const equation = result.entries.find(node => node.label === 'eq:graph-realization');
+  const feferman = result.references.find(ref => ref.label === 'Feferman' && ref.raw === String.raw`\cite[p.~267]{Feferman}`);
+  assert.equal(equation.kind, 'equation');
+  assert.ok(feferman);
+  assert.ok(result.references.some(ref => ref.target === equation.id && ref.owner === feferman.owner));
+  const start = text.indexOf(String.raw`\maketitle`);
+  const end = text.indexOf(String.raw`\section{Introduction}`);
+  assert.ok(result.entries.every(node => node.start >= end));
+  const selected = extractAtlasText(text, 'latex', { start, end });
+  assert.deepEqual(selected.entries.filter(node => node.frontMatter).map(node => node.title),
+    ['Title page', 'Abstract', 'Mathematics Subject Classification']);
+  assert.match(text.slice(selected.entries[1].start, selected.entries[1].end), /^\\begin{abstract}[\s\S]+\\end{abstract}$/);
+  spans(text, result);
+  spans(text, selected);
+});
+
+test('LaTeX theorem counters reset by section, share across kinds and skip starred headings and environments', () => {
+  const text = String.raw`\documentclass{article}
+\newtheorem{result}{Theorem}[section]
+\newtheorem{consequence}[result]{Corollary}
+\newtheorem{definition}{Definition}[subsection]
+\newtheorem*{observation}{Remark}
+\section{First}
+\begin{result}\label{first}A statement.\end{result}
+\section*{Interlude}
+\begin{consequence}\label{second}A consequence.\end{consequence}
+\subsection{More results}
+\begin{definition}\label{def}A definition.\end{definition}
+\begin{observation}\label{unnumbered}A remark.\end{observation}
+\section{Second}
+\begin{result}\label{third}A statement.\end{result}
+\subsection{More definitions}
+\begin{definition}\label{other}A definition.\end{definition}
+`;
+  const result = extractAtlasText(text, 'latex');
+  const captions = result.entries.filter(node => node.printedTitle).map(node => node.printedTitle);
+  assert.deepEqual(captions, ['Theorem 1.1', 'Corollary 1.2', 'Definition 1.1.1', 'Theorem 2.1', 'Definition 2.1.1']);
+  const unnumbered = result.entries.find(node => node.label === 'unnumbered');
+  assert.equal(unnumbered.printedTitle, undefined);
+  assert.equal(unnumbered.unnumbered, true);
+  assert.equal(extractAtlasText(text + '\n' + String.raw`\setcounter{result}{9}`, 'latex')
+    .entries.find(node => node.label === 'first').printedTitle, undefined);
+});
+
+test('the auxiliary is bounded and local, and only applies to the current saved source', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'mrw-atlas-aux-'));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const source = path.join(directory, 'paper.tex'), auxiliary = path.join(directory, 'paper.aux');
+  const text = String.raw`\newtheorem{theorem}{Theorem}
+\begin{theorem}\label{label:result}A statement.\end{theorem}
+\begin{equation}\label{label:eq}x=x\end{equation}
+`;
+  const numbers = String.raw`\newlabel{label:result}{{A.4}{2}{A title}{theorem.4}{}}
+\newlabel{label:eq}{{7a}{2}{A title}{equation.7}{}}
+\newlabel{ignored}{{\input{x}}{3}}
+\newlabel{duplicate}{{1}{3}}
+\newlabel{duplicate}{{2}{3}}
+`;
+  await fs.writeFile(source, text);
+  await fs.writeFile(auxiliary, numbers);
+  await fs.utimes(source, 1000, 1000);
+  await fs.utimes(auxiliary, 1100, 1100);
+  const printedLabels = await readAtlasAux(source, text);
+  assert.deepEqual([...printedLabels], [
+    ['label:result', 'A.4'], ['label:eq', '7a'], ['ignored', null], ['duplicate', null],
+  ]);
+  const result = extractAtlasText(text, 'latex', undefined, { printedLabels });
+  assert.deepEqual(result.entries.map(node => node.printedTitle), ['Theorem A.4', 'Equation 7a']);
+  assert.equal(await readAtlasAux(source, text + '\nnew editor text'), undefined);
+  await fs.utimes(auxiliary, 900, 900);
+  assert.equal(await readAtlasAux(source, text), undefined);
+  assert.equal(extractAtlasText(text, 'latex').entries[0].printedTitle, 'Theorem 1');
+  await fs.writeFile(auxiliary, 'x'.repeat(1024 * 1024 + 1));
+  assert.equal(await readAtlasAux(source, text), undefined);
+  await fs.rename(auxiliary, path.join(directory, 'other.aux'));
+  await fs.symlink(path.join(directory, 'other.aux'), auxiliary);
+  assert.equal(await readAtlasAux(source, text), undefined);
 });

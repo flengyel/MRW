@@ -32,6 +32,10 @@ function validateAtlas(atlas) {
   for (const entry of extraction.entries) {
     if (!identifier(entry.id) || entries.has(entry.id) || !text(entry.kind, 64) ||
         !text(entry.title, 1024) || !entry.title.trim() || !range(entry, length) ||
+        (entry.printedTitle != null && (!text(entry.printedTitle, 240) || !entry.printedTitle.trim())) ||
+        (entry.printedNumber != null && (!text(entry.printedNumber, 64) || !entry.printedNumber.trim())) ||
+        (entry.frontMatter != null && typeof entry.frontMatter !== 'boolean') ||
+        (entry.unnumbered != null && typeof entry.unnumbered !== 'boolean') ||
         ['proof', 'statement'].some(part => entry[part] != null &&
           (!range(entry[part], length) || entry[part].start < entry.start || entry[part].end > entry.end))) {
       throw new Error('An atlas passage has an invalid identity or range.');

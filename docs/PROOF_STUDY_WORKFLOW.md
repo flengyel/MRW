@@ -70,14 +70,19 @@ atlas.
   its target. A proof link connects a statement with the proof supplied in the
   source. Elaborated Lean dependencies and proof checks require separate
   evidence.
-- **Reading list** shows the components in source order. Group related passages
-  or open a component to edit its title, question, hypotheses, conclusion and
-  next use.
+- **Reading list** shows the components by passage. Group related passages or
+  open a component to edit its title, question, hypotheses, conclusion and next
+  use.
 
-The Proof map and Blueprint wrap to fit the pane. Drag the background to pan,
-use **+** or **−** to zoom, and select **Fit** to reset the view. Selecting a
-node displays its passage with supported mathematics typeset. Use **Open exact
-source** to inspect the original text.
+LaTeX atlases open with numbered results and labelled equations. Use **Show
+prose** to include the surrounding passages. The reading list groups results
+by section. MRW uses printed numbers from a current adjacent `.aux` when
+available, or computes them from local theorem declarations it can resolve.
+
+The diagrams wrap and split into pages when the pane is narrow. Drag to pan,
+use **Ctrl+wheel** or **+** and **−** to zoom, and select **Fit** to reset the
+view. Select a node to read its typeset passage. **Open exact source** opens the
+captured text.
 
 Open a component to choose which cited statements to include in the outline.
 Include a cited proof when you want to use it. A missing or ambiguous

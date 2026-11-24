@@ -1,12 +1,12 @@
+(function (katex, markdownIt) {
 'use strict';
 
-const katex = require('../media/katex/katex.min.js');
-const markdown = require('../media/markdown-it/markdown-it.js')({ html: false, linkify: false });
+const markdown = markdownIt({ html: false, linkify: false });
 const MAX_DEPTH = 24;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[ch]));
-const wrappers = /^(?:theorem|thm|lemma|lem|proposition|prop|corollary|cor|claim|fact|definition|defn|example|remark|exercise|proof|slogan)\*?$/;
+const wrappers = /^(?:theorem|thm|lemma|lem|proposition|prop|corollary|cor|claim|fact|definition|defn|example|remark|exercise|proof|slogan|abstract)\*?$/;
 const emphasis = { emph: 'em', textit: 'em', textbf: 'strong', texttt: 'code' };
 const displayEnvironments = { equation: '', align: 'aligned', gather: 'gathered' };
 const openingMath = ['$$', '$', '\\(', '\\['];
@@ -21,13 +21,14 @@ function unescapedIndex(text, marker, start) {
   return -1;
 }
 
-function formula(body, exact, display) {
+function formula(body, exact, display, macros = {}) {
   let blocked = false;
   try {
-    const math = katex.renderToString(body, { output: 'mathml', displayMode: display,
+    const cleaned = body.replace(/(?<!\\)\\(?:label\s*\{[^{}]*\}|nonumber\b|notag\b)/gu, '');
+    const math = katex.renderToString(cleaned, { output: 'mathml', displayMode: display,
       trust: () => { blocked = true; return false; },
       strict: 'error', throwOnError: true, maxExpand: 1000,
-      maxSize: 20, macros: {}, globalGroup: false });
+      maxSize: 20, macros: { ...macros }, globalGroup: false });
     if (!blocked) return display ? '<span class="atlas-math-display">' + math + '</span>' : math;
   } catch {
     // Keep the exact formula if KaTeX cannot render it.
@@ -81,7 +82,35 @@ function braced(text, start) {
   throw new Error('Unclosed braced argument.');
 }
 
-function renderTex(text, inlineOnly = false, depth = 0) {
+function optional(text, start) {
+  const match = /^\s*\[((?:[^\]\\]|\\.)*)\]/u.exec(text.slice(start));
+  return match && { body: match[1], end: start + match[0].length };
+}
+
+function texPreviewContext(text) {
+  const macros = {}, environments = new Set();
+  const preamble = text.slice(0, 65536).split(/\\begin\s*\{document\}/u, 1)[0]
+    .replace(/(?<!\\)%[^\r\n]*/gu, '');
+  for (const match of preamble.matchAll(/(?<!\\)\\(newcommand|newtheorem)\*?(?![a-zA-Z])/gu)) {
+    if (Object.keys(macros).length + environments.size >= 64) break;
+    try {
+      const name = braced(preamble, match.index + match[0].length);
+      if (match[1] === 'newtheorem') {
+        if (/^[a-zA-Z][a-zA-Z0-9*]{0,48}$/u.test(name.body)) environments.add(name.body.replace(/\*$/u, ''));
+      } else if (/^\\[a-zA-Z]{1,40}$/u.test(name.body)) {
+        const arity = optional(preamble, name.end);
+        if (arity && !/^[0-4]$/u.test(arity.body)) continue;
+        const definition = braced(preamble, arity?.end ?? name.end);
+        if (definition.body.length <= 1024) macros[name.body] = definition.body;
+      }
+    } catch {
+      // Only complete literal declarations can affect the preview.
+    }
+  }
+  return { macros, environments };
+}
+
+function renderTex(text, inlineOnly = false, depth = 0, context = {}) {
   if (depth >= MAX_DEPTH) throw new Error('TeX display nesting exceeds the preview limit.');
   let at = 0;
   function read(end = '', inList = false, level = depth) {
@@ -96,7 +125,7 @@ function renderTex(text, inlineOnly = false, depth = 0) {
       if (end && tail.startsWith(end)) { paragraph(); at += end.length; return { html: blocks.join(''), ended: true }; }
       if (inList && /^\\item\b/u.test(tail)) { paragraph(); return { html: blocks.join(''), ended: false }; }
       const next = mathSpan(text, at);
-      if (next) { inline.push(formula(next.body, text.slice(at, next.end), next.display)); at = next.end; continue; }
+      if (next) { inline.push(formula(next.body, text.slice(at, next.end), next.display, context.macros)); at = next.end; continue; }
       const char = text[at];
       if (openingMath.some(marker => tail.startsWith(marker))) throw new Error('Unclosed mathematical delimiter.');
       if (char === '%') { at += /^[^\r\n]*(?:\r\n|\r|\n)?/u.exec(tail)[0].length; continue; }
@@ -132,8 +161,8 @@ function renderTex(text, inlineOnly = false, depth = 0) {
               throw new Error('Malformed or empty TeX list.');
             }
             blocks.push('</' + tag + '>');
-          } else if (wrappers.test(env)) {
-            if (title) blocks.push('<p><strong>' + renderTex(title[1], true, level + 1) + '</strong></p>');
+          } else if (wrappers.test(env) || context.environments?.has(base)) {
+            if (title) blocks.push('<p><strong>' + renderTex(title[1], true, level + 1, context) + '</strong></p>');
             blocks.push(read(close, false, level + 1).html);
           } else if (Object.hasOwn(displayEnvironments, base)) {
             const stop = unescapedIndex(text, close, at);
@@ -141,16 +170,26 @@ function renderTex(text, inlineOnly = false, depth = 0) {
             const body = text.slice(at, stop), aligned = displayEnvironments[base];
             at = stop + close.length;
             blocks.push(formula(aligned ? '\\begin{' + aligned + '}' + body + '\\end{' + aligned + '}' : body,
-              command[0] + '{' + env + '}' + body + close, true));
+              command[0] + '{' + env + '}' + body + close, true, context.macros));
           } else throw new Error('Unsupported display environment ' + env + '.');
-        } else if (['label', 'ref', 'eqref', 'autoref', 'cref', 'cite', ...Object.keys(emphasis)].includes(name)) {
+        } else if (/^(?:cite|citep|citet|parencite|textcite)$/u.test(name)) {
+          const first = optional(text, at), second = first && optional(text, first.end);
+          const argument = braced(text, second?.end ?? first?.end ?? at);
+          const keys = argument.body.split(',').map(key => escape(key.trim())).join(', ');
+          const locator = second?.body ?? first?.body;
+          const prefix = second ? renderTex(first.body, true, level + 1, context) + ' ' : '';
+          inline.push('<span class="atlas-inline-reference">[' + prefix + keys +
+            (locator ? ', ' + renderTex(locator.replace(/~/gu, ' '), true, level + 1, context) : '') + ']</span>');
+          at = argument.end;
+        } else if (['label', 'ref', 'eqref', 'autoref', 'cref', ...Object.keys(emphasis)].includes(name)) {
           const argument = braced(text, at);
           at = argument.end;
           if (Object.hasOwn(emphasis, name)) {
             const tag = emphasis[name];
-            inline.push('<' + tag + '>' + renderTex(argument.body, true, level + 1) + '</' + tag + '>');
+            inline.push('<' + tag + '>' + renderTex(argument.body, true, level + 1, context) + '</' + tag + '>');
           } else if (name !== 'label') inline.push('<span class="atlas-inline-reference">[' + escape(argument.body) + ']</span>');
-        } else if (name === 'noindent') continue;
+        } else if (['noindent', 'maketitle'].includes(name)) continue;
+        else if (name === 'S') inline.push('§');
         else if (['par', 'smallskip', 'medskip', 'bigskip', '\\'].includes(name)) paragraph();
         else if (['%', '&', '_', '#', '$', '{', '}'].includes(name)) inline.push(escape(name));
         else if ([' ', ',', ';'].includes(name)) inline.push(' ');
@@ -160,7 +199,7 @@ function renderTex(text, inlineOnly = false, depth = 0) {
       if (char === '{') {
         const argument = braced(text, at);
         const style = /^\s*\\(it|bf|tt)\b\s*/u.exec(argument.body);
-        const value = renderTex(style ? argument.body.slice(style[0].length) : argument.body, true, level + 1);
+        const value = renderTex(style ? argument.body.slice(style[0].length) : argument.body, true, level + 1, context);
         const tag = { it: 'em', bf: 'strong', tt: 'code' }[style?.[1]];
         inline.push(tag ? '<' + tag + '>' + value + '</' + tag + '>' : value);
         at = argument.end;
@@ -177,14 +216,14 @@ function renderTex(text, inlineOnly = false, depth = 0) {
   return read().html;
 }
 
-function preview(fragment, language, limit) {
+function preview(fragment, language, limit, context) {
   const clipped = fragment.length > limit;
   const shown = fragment.slice(0, limit);
   const remainder = clipped ? '<p class="muted">Open the exact source to read the remainder.</p>' : '';
   try {
     if (language === 'latex' || language === 'tex') {
       if (clipped) return '<pre>' + escape(shown) + '</pre>' + remainder;
-      return '<div class="atlas-reading">' + renderTex(shown) + '</div>';
+      return '<div class="atlas-reading">' + renderTex(shown, false, 0, context) + '</div>';
     }
     if (language === 'markdown') return '<div class="atlas-reading">' + markdown.render(shown) + '</div>' + remainder;
   } catch (error) {
@@ -193,4 +232,8 @@ function preview(fragment, language, limit) {
   return '<pre>' + escape(shown) + '</pre>' + remainder;
 }
 
-module.exports = { escape, preview };
+const api = { escape, preview, texPreviewContext };
+if (typeof module === 'object' && module?.exports) module.exports = api;
+else window.MRWPassagePreview = api;
+})(typeof module === 'object' && module?.exports ? require('../media/katex/katex.min.js') : window.katex,
+   typeof module === 'object' && module?.exports ? require('../media/markdown-it/markdown-it.js') : window.markdownit);

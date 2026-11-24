@@ -5,11 +5,29 @@ const { validateAtlas, overviewComponents, ownerOf } = require('./atlasModel');
 
 const NODE_WIDTH = 188, NODE_HEIGHT = 66, PAGE_SIZE = 32, MARGIN = 72;
 const COLUMN_GAP = 112, ROW_GAP = 64, WRAP_GAP = 44;
+const READABLE_SCALE = .75, COMPACT_MARGIN = 20, COMPACT_COLUMN_GAP = 28, COMPACT_ROW_GAP = 20;
 const resultKinds = new Set(['theorem', 'lemma', 'proposition', 'corollary', 'claim', 'fact', 'statement']);
+const namedKinds = new Set([...resultKinds, 'definition', 'example', 'remark', 'assumption', 'axiom', 'conjecture',
+  'notation', 'exercise', 'problem']);
 const componentNode = id => `component:${id}`;
 const entryNode = (id, part) => `entry:${id}:${part}`;
 
-function sourceNodes(atlas, view) {
+const isTexAtlas = atlas => ['latex', 'tex'].includes(atlas.source.language);
+
+function visibleAtlasEntries(atlas, showProse) {
+  if (!isTexAtlas(atlas) || showProse) return undefined;
+  const visible = atlas.extraction.entries.filter(entry => namedKinds.has(entry.kind) && entry.unnumbered !== true ||
+    entry.kind === 'equation' && (entry.label || entry.labels?.length) || entry.frontMatter === true);
+  // A selection with no named result may be an intentional prose excerpt.
+  return visible.length ? new Set(visible.map(entry => entry.id)) : undefined;
+}
+
+function componentTitle(component, entry) {
+  return entry?.printedTitle && component.title === entry.title
+    ? entry.printedTitle : component.title;
+}
+
+function sourceNodes(atlas, view, visibleEntries) {
   const entries = new Map(atlas.extraction.entries.map(entry => [entry.id, entry]));
   const components = overviewComponents(atlas), originals = new Map(atlas.components.map(component => [component.id, component]));
   const owner = new Map();
@@ -17,17 +35,21 @@ function sourceNodes(atlas, view) {
   const nodes = [], main = new Map(), proof = new Map();
   if (view === 'map') {
     for (const component of components) {
-      const entry = component.itemIds.length === 1 ? entries.get(component.itemIds[0]) : undefined;
-      const node = { id: componentNode(component.id), title: component.title, kind: component.members ? 'group' : entry.kind,
+      const ids = component.itemIds.filter(id => !visibleEntries || visibleEntries.has(id));
+      if (!ids.length) continue;
+      const entry = component.itemIds.length === 1 ? entries.get(ids[0]) : undefined;
+      const node = { id: componentNode(component.id), title: componentTitle(component, entry), kind: component.members ? 'group' : entry.kind,
         componentId: component.id, entryId: entry?.id ?? null, part: entry?.statement ? 'statement' : 'entry' };
       nodes.push(node);
-      for (const id of component.itemIds) main.set(id, node.id);
+      for (const id of ids) main.set(id, node.id);
     }
   } else {
     for (const entry of atlas.extraction.entries) {
+      if (visibleEntries && !visibleEntries.has(entry.id)) continue;
       const part = entry.statement && entry.kind !== 'proof' ? 'statement' : 'entry';
       const kind = resultKinds.has(entry.kind) && entry.statement ? 'statement' : entry.kind;
-      const component = owner.get(entry.id), title = originals.get(entry.id)?.title || entry.title;
+      const component = owner.get(entry.id), original = originals.get(entry.id);
+      const title = original ? componentTitle(original, entry) : entry.title;
       const node = { id: entryNode(entry.id, part), title, kind, componentId: component.id, entryId: entry.id, part };
       nodes.push(node); main.set(entry.id, node.id);
       if (entry.proof && entry.kind !== 'proof') {
@@ -194,21 +216,52 @@ function fitAtlasDiagram(diagram, viewport) {
   return { ...diagram, nodes, ...place(nodes, viewport) };
 }
 
+const fittingScale = ({ width, height }, viewport) =>
+  Math.min(1.15, (viewport.width - 40) / width, (viewport.height - 40) / height);
+
+function compactCapacity(viewport) {
+  const columns = Math.max(1, Math.floor(((viewport.width - 40) / READABLE_SCALE -
+    2 * COMPACT_MARGIN + COMPACT_COLUMN_GAP) / (NODE_WIDTH + COMPACT_COLUMN_GAP)));
+  const rows = Math.max(1, Math.floor(((viewport.height - 40) / READABLE_SCALE -
+    2 * COMPACT_MARGIN + COMPACT_ROW_GAP) / (NODE_HEIGHT + COMPACT_ROW_GAP)));
+  return Math.min(PAGE_SIZE, columns * rows);
+}
+
+function compactPlace(nodes, viewport) {
+  let layout, best = 0;
+  for (let columns = 1; columns <= Math.max(nodes.length, 1); columns++) {
+    const rows = Math.max(1, Math.ceil(nodes.length / columns));
+    const shape = { width: 2 * COMPACT_MARGIN + columns * NODE_WIDTH + (columns - 1) * COMPACT_COLUMN_GAP,
+      height: 2 * COMPACT_MARGIN + rows * NODE_HEIGHT + (rows - 1) * COMPACT_ROW_GAP };
+    const scale = fittingScale(shape, viewport);
+    if (scale > best || !layout) { layout = { ...shape, columns }; best = scale; }
+  }
+  for (const [index, node] of nodes.entries()) {
+    node.x = COMPACT_MARGIN + index % layout.columns * (NODE_WIDTH + COMPACT_COLUMN_GAP);
+    node.y = COMPACT_MARGIN + Math.floor(index / layout.columns) * (NODE_HEIGHT + COMPACT_ROW_GAP);
+  }
+  return { width: layout.width, height: layout.height, layoutColumns: 'compact:' + layout.columns };
+}
+
 function atlasDiagram(atlas, view, options = {}) {
   validateAtlas(atlas);
   if (!['map', 'blueprint'].includes(view)) throw new Error('Choose Proof map or Blueprint.');
-  const model = sourceNodes(atlas, view), links = sourceEdges(atlas, view, model);
+  const visibleEntries = visibleAtlasEntries(atlas, options.showProse);
+  const model = sourceNodes(atlas, view, visibleEntries), links = sourceEdges(atlas, view, model);
+  const readable = !!options.readable && isTexAtlas(atlas);
+  const viewport = options.viewport || (readable ? { width: 760, height: 460 } : undefined);
+  const capacity = readable ? compactCapacity(viewport) : PAGE_SIZE;
   const explicitPage = Object.hasOwn(options, 'page');
-  const selectedEntry = atlas.extraction.entries.find(entry => entry.selected);
+  const selectedEntry = atlas.extraction.entries.find(entry => entry.selected && model.main.has(entry.id));
   const desired = model.nodes.some(node => node.id === options.selected) ? options.selected :
     !explicitPage && selectedEntry ? model.main.get(selectedEntry.id) : undefined;
   const at = model.nodes.findIndex(node => node.id === desired);
-  const page = explicitPage ? options.page : at >= 0 ? Math.floor(at / PAGE_SIZE) : 0;
-  const total = model.nodes.length, pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = explicitPage ? options.page : at >= 0 ? Math.floor(at / capacity) : 0;
+  const total = model.nodes.length, pageCount = Math.max(1, Math.ceil(total / capacity));
   const index = Number.isSafeInteger(page) ? Math.min(Math.max(0, page), pageCount - 1) : 0;
-  const nodes = model.nodes.slice(index * PAGE_SIZE, (index + 1) * PAGE_SIZE);
+  const nodes = model.nodes.slice(index * capacity, (index + 1) * capacity);
   const visible = new Set(nodes.map(node => node.id)), nodeById = new Map(model.nodes.map(node => [node.id, node]));
-  const nodePages = new Map(model.nodes.map((node, at) => [node.id, Math.floor(at / PAGE_SIZE)]));
+  const nodePages = new Map(model.nodes.map((node, at) => [node.id, Math.floor(at / capacity)]));
   const edges = links.edges.filter(edge => visible.has(edge.from) && visible.has(edge.to));
   const omitted = { incoming: 0, outgoing: 0 }, boundaryEdges = [];
   for (const edge of links.edges) {
@@ -221,11 +274,14 @@ function atlasDiagram(atlas, view, options = {}) {
   const incident = new Set(links.edges.flatMap(edge => [edge.from, edge.to]));
   const levels = sourceLevels(model.nodes, links.edges);
   for (const node of nodes) if (incident.has(node.id)) node.rank = levels.get(node.id);
-  const dimensions = place(nodes, options.viewport);
+  const ranked = place(nodes, viewport);
+  const dimensions = readable && fittingScale(ranked, viewport) < READABLE_SCALE ? compactPlace(nodes, viewport) : ranked;
   return { nodes, edges, ...dimensions, page: index, pageCount, total,
+    ...(readable ? { minimumScale: READABLE_SCALE } : {}),
     selected: visible.has(desired) ? desired : nodes[0]?.id ?? null, omitted, boundaryEdges,
     unresolved: atlas.extraction.references.filter(reference => reference.status !== 'resolved').map(reference => reference.id),
     unmappedReferences: links.unmappedReferences };
 }
 
-module.exports = { atlasDiagram, fitAtlasDiagram, NODE_WIDTH, NODE_HEIGHT, PAGE_SIZE, MARGIN };
+module.exports = { atlasDiagram, fitAtlasDiagram, visibleAtlasEntries, componentTitle, isTexAtlas,
+  NODE_WIDTH, NODE_HEIGHT, PAGE_SIZE, MARGIN };

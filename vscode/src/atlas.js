@@ -7,8 +7,9 @@ const { digest, sourceSnapshot } = require('./navigation');
 const { within } = require('./proofGraph');
 const { studyPassages, sources, handoff, readProposal, bindProposal } = require('./proofStudy');
 const { extractAtlasText } = require('./atlasText');
+const { readAtlasAux } = require('./atlasAux');
 const { DETAIL_LIMIT, createAtlas, validateAtlas, editAtlas, evidenceSpan, handoffEntries } = require('./atlasModel');
-const { atlasDiagram, fitAtlasDiagram } = require('./atlasDiagram');
+const { atlasDiagram, fitAtlasDiagram, isTexAtlas } = require('./atlasDiagram');
 const { atlasHtml, atlasOpenErrorHtml } = require('./atlasView');
 
 const SUFFIX = '.mrw-atlas.json';
@@ -16,7 +17,7 @@ const MAX_ATLAS = 2 * 1024 * 1024;
 const SOURCE_SCHEME = 'mrw-atlas-source';
 const READ_ONLY_ACTIONS = new Set([
   'selectView', 'selectNode', 'showDiagramPage', 'fitDiagramLayout', 'selectComponent', 'showOverview',
-  'selectPage', 'followEntry', 'openSource', 'return', 'openAsText',
+  'selectPage', 'followEntry', 'openSource', 'return', 'openAsText', 'toggleProse',
 ]);
 const encode = value => JSON.stringify(value, null, 2) + '\n';
 
@@ -187,15 +188,21 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     },
   }));
 
+  async function extractDocument(source, doc, range) {
+    const printedLabels = source.language === 'latex' && doc.uri.scheme === 'file' && !doc.isDirty
+      ? await readAtlasAux(doc.uri.fsPath, source.text) : undefined;
+    return extractAtlasText(source.text, source.language, range, { printedLabels });
+  }
+
   function render(c, notice = '', focus, fittedDiagram) {
     const component = c.atlas.components.find(candidate => candidate.id === c.component);
     const diagramState = c.views[c.view];
     c.diagram = !component && diagramState ? fittedDiagram || atlasDiagram(c.atlas, c.view, {
-      ...diagramState, viewport: diagramState.viewport || c.viewport,
+      ...diagramState, viewport: diagramState.viewport || c.viewport, readable: true, showProse: c.showProse,
     }) : undefined;
     c.notice = notice;
     c.panel.webview.html = atlasHtml(c.panel.webview, c.atlas, {
-      view: c.view, diagram: c.diagram, readOnly: c.readOnly,
+      view: c.view, diagram: c.diagram, readOnly: c.readOnly, showProse: c.showProse,
       component: component?.id, page: c.page, focus, notice, proposal: c.pending?.component === component?.id && c.pending?.page === c.page ? c.pending : undefined,
       hasGraph: !c.readOnly && !!c.atlas.graphs?.[component?.id + ':' + c.page],
       previous: !c.readOnly && !!c.atlas.previous?.file,
@@ -337,6 +344,11 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         return;
       }
       const component = c.atlas.components.find(item => item.id === (m.component || c.component));
+      if (m.type === 'toggleProse' && !component && isTexAtlas(c.atlas)) {
+        c.showProse = !c.showProse;
+        c.views = { map: {}, blueprint: {} };
+        render(c, '', 'atlas-show-prose'); return;
+      }
       if (m.type === 'selectView' && ['map', 'blueprint', 'list'].includes(m.view)) {
         c.view = m.view;
         c.component = undefined;
@@ -349,8 +361,14 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         const state = c.views[c.view];
         if (state.viewport?.width === width && state.viewport.height === height) return;
         c.viewport = state.viewport = { width, height };
-        const fitted = fitAtlasDiagram(c.diagram, c.viewport);
-        if (fitted.layoutColumns !== c.diagram.layoutColumns) {
+        const fitted = c.diagram.minimumScale
+          ? atlasDiagram(c.atlas, c.view, { selected: c.diagram.selected, viewport: c.viewport,
+            readable: true, showProse: c.showProse })
+          : fitAtlasDiagram(c.diagram, c.viewport);
+        if (fitted.layoutColumns !== c.diagram.layoutColumns || fitted.page !== c.diagram.page ||
+            fitted.pageCount !== c.diagram.pageCount || fitted.nodes.length !== c.diagram.nodes.length ||
+            fitted.nodes[0]?.id !== c.diagram.nodes[0]?.id) {
+          if (fitted.minimumScale) Object.assign(state, { page: fitted.page, selected: fitted.selected });
           const focus = typeof m.focus === 'string' && /^[\w:.-]{1,256}$/.test(m.focus) ? m.focus : 'atlas-view-' + c.view;
           render(c, c.notice, focus, fitted);
         }
@@ -433,17 +451,22 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         const source = captureSource(doc);
         const editor = vscode.window.visibleTextEditors.find(item => item.document === doc);
         const old = c.atlas.extraction.selection;
+        const wholeDocument = old.start === 0 && old.end === c.atlas.source.text.length;
+        // Full-document bounds also represent implicit extraction. Front-matter
+        // entries record when the reader deliberately selected that material.
+        const earlierRange = wholeDocument && !c.atlas.extraction.entries.some(entry => entry.frontMatter)
+          ? undefined : old;
         const recent = selections.get(doc);
-        const range = source.revision === c.atlas.source.revision ? old : editor && !editor.selection.isEmpty
+        const range = source.revision === c.atlas.source.revision ? earlierRange : editor && !editor.selection.isEmpty
           ? { start: doc.offsetAt(editor.selection.start), end: doc.offsetAt(editor.selection.end) }
           : recent?.version === doc.version ? { start: recent.start, end: recent.end } : undefined;
-        if (!range && (old.start !== 0 || old.end !== c.atlas.source.text.length)) {
+        if (!range && !wholeDocument) {
           throw new Error('Select the intended passage in the changed document, then regenerate.');
         }
         const prior = c.unsaved ? await save(c) : c;
         if (!prior) return;
         const previous = prior.file ? { id: prior.atlas.id, file: path.basename(prior.file) } : undefined;
-        createPanel(prior.root, { ...createAtlas({ source, extraction: extractAtlasText(source.text, source.language, range), previous: prior.atlas }),
+        createPanel(prior.root, { ...createAtlas({ source, extraction: await extractDocument(source, doc, range), previous: prior.atlas }),
           id: randomUUID(), previous }, undefined, 'New capture. The earlier atlas is still available.', prior.file && path.dirname(prior.file));
       } else if (m.type === 'openPrevious' && c.file && c.atlas.previous?.file) {
         await open(vscode.Uri.file(path.join(path.dirname(c.file), c.atlas.previous.file)));
@@ -597,7 +620,10 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
       for (const entry of extraction.entries) {
         const span = entry.statement || entry;
         const passage = source.passages.find(p => p.start === span.start && p.end === span.end);
-        if (passage?.qualified_id) entry.title = passage.qualified_id + ' · ' + entry.title;
+        if (passage?.qualified_id) {
+          entry.title = passage.qualified_id + ' · ' + entry.title;
+          if (entry.printedTitle) entry.printedTitle = passage.qualified_id + ' · ' + entry.printedTitle;
+        }
       }
       return createPanel(root, { ...createAtlas({ source, extraction }), id: randomUUID() });
     }
@@ -610,7 +636,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const root = await projectRoot(editor);
     let extraction;
     if (source.language === 'lean') extraction = await lean(vscode, editor, source, selection);
-    else extraction = extractAtlasText(source.text, source.language, selection);
+    else extraction = await extractDocument(source, editor.document, selection);
     if (!extraction) return;
     return createPanel(root, { ...createAtlas({ source, extraction }), id: randomUUID() });
   }

@@ -2,8 +2,9 @@
 
 const { randomBytes } = require('node:crypto');
 const { detailPage, handoffEntries, overviewComponents, ownerOf } = require('./atlasModel');
+const { componentTitle, isTexAtlas, visibleAtlasEntries } = require('./atlasDiagram');
 const { diagramHtml, diagramStyles, diagramScript, diagramPositionStyles } = require('./atlasDiagramView');
-const { escape, preview } = require('./atlasPreview');
+const { escape, preview, texPreviewContext } = require('./atlasPreview');
 
 const READING_PREVIEW_LIMIT = 4096;
 const SUMMARY_PREVIEW_LIMIT = 280;
@@ -32,11 +33,20 @@ function indices(atlas) {
     append(outgoing, owner, reference);
     if (owner && reference.target) append(incoming, reference.target, { owner, reference });
   }
-  return { entries, components, incoming, outgoing, lineStarts };
+  const tex = isTexAtlas(atlas) ? texPreviewContext(atlas.source.text) : undefined;
+  return { entries, components, incoming, outgoing, lineStarts, tex };
 }
 
-function exactPreview(text, span, language, limit = READING_PREVIEW_LIMIT) {
-  return span ? preview(text.slice(span.start, span.end), language, limit) : '';
+function exactPreview(text, span, language, limit = READING_PREVIEW_LIMIT, tex) {
+  return span ? preview(text.slice(span.start, span.end), language, limit, tex) : '';
+}
+
+function titleFor(atlasIndex, component) {
+  return componentTitle(component, component.members ? undefined : atlasIndex.entries.get(component.itemIds[0]));
+}
+
+function entryLabel(entry) {
+  return entry?.printedTitle && entry.label ? `<code class="muted">${escape(entry.label)}</code>` : '';
 }
 
 function nextUse(atlasIndex, component) {
@@ -45,10 +55,10 @@ function nextUse(atlasIndex, component) {
     .filter(site => !own.has(site.owner));
   return useSites.length
     ? `<p>Explicitly referenced by</p><ul>${useSites.map(({ owner, reference }) => `<li>
-        ${button(atlasIndex.components.get(owner).title, 'followEntry', { entry: owner })}
+        ${button(titleFor(atlasIndex, atlasIndex.components.get(owner)), 'followEntry', { entry: owner })}
         ${button('Open occurrence', 'openSource', { reference: reference.id })}
       </li>`).join('')}</ul>`
-    : '<p class="muted">No explicit use located in this atlas.</p>';
+    : '';
 }
 
 function splitStatement(text, entry, language) {
@@ -71,22 +81,24 @@ function description(atlas, atlasIndex, component, compact = false) {
   const entry = component.itemIds.length === 1 ? atlasIndex.entries.get(component.itemIds[0]) : undefined;
   const result = entry?.statement || (!entry?.section ? entry : undefined);
   const { text, language } = atlas.source;
-  const limit = compact ? SUMMARY_PREVIEW_LIMIT : READING_PREVIEW_LIMIT;
+  const limit = compact && !isTexAtlas(atlas) ? SUMMARY_PREVIEW_LIMIT : READING_PREVIEW_LIMIT;
   const split = splitStatement(text, entry, language);
   const exact = result ? `<details${compact ? '' : ' open'}><summary>${entry.statement ? 'Statement' : 'Source passage'}</summary>
-      ${exactPreview(text, result, language, limit)}
+      ${exactPreview(text, result, language, limit, atlasIndex.tex)}
       ${button('Open exact source', 'openSource', { entry: entry.id, part: entry.statement ? 'statement' : 'entry' },
         compact ? 'entry-' + entry.id : undefined)}</details>`
-    : 'Open the component for its passages.';
+    : '';
   const defaults = [
-    resultKinds.has(entry?.kind) ? `<p>What does ${escape(component.title)} establish?</p>` : 'No question recorded.',
-    split ? `<p>From the statement</p>${split.hypotheses.map(fragment => preview(fragment, language, limit)).join('')}`
-      : 'See the statement for the stated conditions.',
-    (split ? `<p>From the statement</p>${preview(split.conclusion, language, limit)}` : '') + exact,
+    resultKinds.has(entry?.kind) ? `<p>What does ${escape(titleFor(atlasIndex, component))} establish?</p>` : '',
+    split ? `<p>From the statement</p>${split.hypotheses.map(fragment => preview(fragment, language, limit, atlasIndex.tex)).join('')}` : '',
+    (split ? `<p>From the statement</p>${preview(split.conclusion, language, limit, atlasIndex.tex)}` : '') + exact,
     nextUse(atlasIndex, component),
   ];
-  return `<dl class="summary">${fields.map(([key, label], index) => `<dt>${label}</dt><dd>${component[key]
-    ? `<p>${escape(component[key])}</p>` : defaults[index]}</dd>`).join('')}</dl>${component.attribution
+  const rows = fields.map(([key, label], index) => {
+    const value = component[key] ? `<p>${escape(component[key])}</p>` : defaults[index];
+    return value ? `<dt>${label}</dt><dd>${value}</dd>` : '';
+  }).join('');
+  return `${rows ? `<dl class="summary">${rows}</dl>` : ''}${component.attribution
     ? `<p class="muted">Description edited by ${escape(component.attribution)}.${component.carriedFrom ? ' Carried from matching retained evidence.' : ''}</p>` : ''}`;
 }
 
@@ -119,31 +131,48 @@ function referenceList(references, atlasIndex) {
       ${target ? `<div class="toolbar">${button('Open cited statement', 'openSource', { entry: target.id,
         part: target.statement ? 'statement' : 'entry', 'return-entry': reference.owner })}
         <span class="muted">${rangeLabel(target.statement || target, atlasIndex.lineStarts)}</span>
-        ${button('Follow ' + atlasIndex.components.get(target.id).title, 'followEntry', { entry: target.id })}</div>` : ''}
+        ${button('Follow ' + titleFor(atlasIndex, atlasIndex.components.get(target.id)), 'followEntry', { entry: target.id })}</div>` : ''}
       ${reference.status === 'ambiguous' && reference.candidates?.length ? `<details><summary>Possible targets</summary><ul>${reference.candidates.map(id =>
-        `<li>${button(atlasIndex.components.get(id).title, 'openSource', { entry: id, 'return-entry': reference.owner })}</li>`).join('')}</ul></details>` : ''}</li>`;
+        `<li>${button(titleFor(atlasIndex, atlasIndex.components.get(id)), 'openSource', { entry: id, 'return-entry': reference.owner })}</li>`).join('')}</ul></details>` : ''}</li>`;
   }).join('')}</ul>`;
 }
 
 function overview(atlas, atlasIndex, options = {}) {
-  const ordered = overviewComponents(atlas);
+  const visible = visibleAtlasEntries(atlas, options.showProse);
+  const ordered = overviewComponents(atlas).filter(c => !visible || c.itemIds.some(id => visible.has(id)));
   const groupable = ordered.filter(component => !component.members);
-  return `<ol class="components">${ordered.map(component => {
+  const cards = components => `<ol class="components">${components.map(component => {
     const first = atlasIndex.entries.get(component.itemIds[0]);
     const kind = component.members ? `${component.members.length} passages` :
       first.selected ? first.kind : first.candidate ? 'Possible reference target' : 'Referenced or context passage';
     return `<li>
-      <h2>${button(component.title, 'selectComponent', { component: component.id }, 'component-' + component.id)}</h2>
-      <p class="muted">${escape(kind)}</p>
+      <h2>${button(titleFor(atlasIndex, component), 'selectComponent', { component: component.id }, 'component-' + component.id)}</h2>
+      <p class="muted">${escape(kind)} ${component.members ? '' : entryLabel(first)}</p>
       ${description(atlas, atlasIndex, component, true)}
     </li>`;
-  }).join('')}</ol>
+  }).join('')}</ol>`;
+  const sections = visible ? atlas.extraction.entries.filter(entry => entry.section) : [];
+  const first = c => atlasIndex.entries.get(c.itemIds.find(id => visible.has(id)));
+  const group = components => {
+    const rows = [];
+    for (const component of components) {
+      const section = sections.findLast(item => item.start <= first(component).start);
+      if (!rows.length || rows.at(-1).section !== section) rows.push({ section, components: [] });
+      rows.at(-1).components.push(component);
+    }
+    return rows.map(({ section, components }) => `${section ? `<h2 class="atlas-section">${escape(section.title)}</h2>` : ''}${cards(components)}`).join('');
+  };
+  const equations = visible ? ordered.filter(c => !c.members && first(c).kind === 'equation') : [];
+  const equationIds = new Set(equations.map(c => c.id));
+  const list = visible ? group(ordered.filter(c => !equationIds.has(c.id))) +
+    (equations.length ? '<h2>Labelled equations</h2>' + group(equations) : '') : cards(ordered);
+  return `${list}
   ${referenceList(atlasIndex.outgoing.get(undefined), atlasIndex)}
   ${!options.readOnly && groupable.length > 1 ? `<details class="editor"><summary>Group components</summary>
     <form data-change="group">
       <label for="group-title">Group title</label><input id="group-title" name="title" maxlength="240" required>
       <fieldset><legend>Components</legend>
-        ${groupable.map(c => `<label class="choice"><input type="checkbox" name="components" value="${escape(c.id)}"> ${escape(c.title)}</label>`).join('')}
+        ${groupable.map(c => `<label class="choice"><input type="checkbox" name="components" value="${escape(c.id)}"> ${escape(titleFor(atlasIndex, c))}</label>`).join('')}
       </fieldset><button type="submit">Create group</button>
     </form></details>` : ''}`;
 }
@@ -262,29 +291,30 @@ function detailView(atlas, atlasIndex, options) {
   const component = c.id, page = detail.index;
   const { optional } = handoffEntries(atlas, component, page);
   const inputs = optional.map(entry => `<li><div class="toolbar">
-    <label class="choice"><input type="checkbox" data-handoff value="${escape(entry.id)}"> ${escape(atlasIndex.components.get(entry.id).title)}</label>
+    <label class="choice"><input type="checkbox" data-handoff value="${escape(entry.id)}"> ${escape(titleFor(atlasIndex, atlasIndex.components.get(entry.id)))}</label>
     ${button('Open statement or passage', 'openSource', { entry: entry.id, part: entry.statement ? 'statement' : 'entry' })}
     ${entry.proof ? button('Open proof', 'openSource', { entry: entry.id, part: 'proof' }) : ''}
     </div>${entry.proof ? `<label class="choice"><input type="checkbox" data-handoff-proof value="${escape(entry.id)}"> Include proof</label>` : ''}</li>`);
   return `<nav class="toolbar" aria-label="Atlas navigation">${button('All components', 'showOverview', { component })}</nav>
-    <h1 id="atlas-heading" tabindex="-1">${escape(c.title)}</h1>
+    <h1 id="atlas-heading" tabindex="-1">${escape(titleFor(atlasIndex, c))}</h1>
+    ${!c.members ? entryLabel(atlasIndex.entries.get(c.itemIds[0])) : ''}
     ${description(atlas, atlasIndex, c, false)}
     ${c.members ? `<details><summary>Member components</summary><ol>${c.members.map(id =>
-      `<li>${button(atlasIndex.components.get(id).title, 'selectComponent', { component: id })}</li>`).join('')}</ol>
+      `<li>${button(titleFor(atlasIndex, atlasIndex.components.get(id)), 'selectComponent', { component: id })}</li>`).join('')}</ol>
       ${options.readOnly ? '' : button('Ungroup', 'edit', { edit: 'ungroup', component })}</details>` : ''}
     ${options.readOnly ? '' : editDescription(atlas, c)}
     <p>Explicit references can guide reading. A reason for an inference must be supplied in an argument.</p>
     <section aria-labelledby="component-evidence"><h2 id="component-evidence">Passages</h2>
       ${pager(detail)}
       <ol start="${detail.first}">${detail.entries.map(entry => `<li><h3>
-        ${button('Open exact source for ' + entry.title, 'openSource', { entry: entry.id, part: 'entry' }, 'entry-' + entry.id)}</h3>
+        ${button('Open exact source for ' + titleFor(atlasIndex, atlasIndex.components.get(entry.id)), 'openSource', { entry: entry.id, part: 'entry' }, 'entry-' + entry.id)}</h3>
         ${entry.partial ? '<p class="muted">The original selection covers part of this passage.</p>' : ''}
         <div class="toolbar">
           ${entry.statement ? button('Open exact statement', 'openSource', { entry: entry.id, part: 'statement' }) : ''}
           ${entry.proof ? button('Open exact proof', 'openSource', { entry: entry.id, part: 'proof' }) : ''}
         </div>
-        ${c.members || !entry.statement ? `<details><summary>Source excerpt</summary>${exactPreview(atlas.source.text, entry.statement || entry, atlas.source.language)}</details>` : ''}
-        ${entry.proof ? `<details><summary>Proof</summary>${exactPreview(atlas.source.text, entry.proof, atlas.source.language)}</details>` : ''}
+        ${c.members || !entry.statement ? `<details><summary>Source excerpt</summary>${exactPreview(atlas.source.text, entry.statement || entry, atlas.source.language, undefined, atlasIndex.tex)}</details>` : ''}
+        ${entry.proof ? `<details><summary>Proof</summary>${exactPreview(atlas.source.text, entry.proof, atlas.source.language, undefined, atlasIndex.tex)}</details>` : ''}
         ${referenceList(atlasIndex.outgoing.get(entry.id), atlasIndex)}
       </li>`).join('')}</ol>
     </section>
@@ -440,11 +470,14 @@ function atlasHtml(_webview, atlas, options = {}) {
   const origin = atlas.source.text.slice(0, selection.start).split(/\r\n|\r|\n/).length;
   const limit = atlas.source.text.slice(0, selection.end).split(/\r\n|\r|\n/).length;
   const visual = !options.component && options.diagram && options.view !== 'list';
+  const results = visibleAtlasEntries(atlas, false);
+  const proseToggle = !options.component && results && atlas.extraction.entries.some(entry => !entry.section && !results.has(entry.id))
+    ? `<button type="button" id="atlas-show-prose" aria-pressed="${!!options.showProse}" data-type="toggleProse">${options.showProse ? 'Hide prose' : 'Show prose'}</button>` : '';
   const tabs = options.view ? `<nav class="atlas-view-tabs" aria-label="Atlas views">${[['map', 'Proof map'], ['blueprint', 'Blueprint'], ['list', 'Reading list']].map(([view, label]) =>
-    `<button type="button" id="atlas-view-${view}" aria-pressed="${options.view === view}" data-type="selectView" data-view="${view}">${label}</button>`).join('')}</nav>` : '';
+    `<button type="button" id="atlas-view-${view}" aria-pressed="${options.view === view}" data-type="selectView" data-view="${view}">${label}</button>`).join('')}${proseToggle}</nav>` : proseToggle;
   const main = options.component ? detailView(atlas, atlasIndex, options) :
     `<h1 id="atlas-heading" tabindex="-1">${escape(atlas.source.title)}</h1>${visual
-      ? diagramHtml(atlas, atlasIndex, options, {escape,button,exactPreview,description,referenceList})
+      ? diagramHtml(atlas, atlasIndex, options, {escape,button,exactPreview,description,referenceList,entryLabel})
       : overview(atlas, atlasIndex, options)}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">

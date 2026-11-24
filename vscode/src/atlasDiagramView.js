@@ -30,7 +30,7 @@ function edgePath(from, to) {
 }
 
 function diagramHtml(atlas, index, options, render) {
-  const { escape, button, exactPreview, description, referenceList } = render;
+  const { escape, button, exactPreview, description, referenceList, entryLabel } = render;
   const diagram = options.diagram;
   if (!diagram) return '';
   const nodes = Array.isArray(diagram.nodes) ? diagram.nodes : [];
@@ -60,7 +60,7 @@ function diagramHtml(atlas, index, options, render) {
   const span = part === 'proof' ? entry?.proof : part === 'statement' ? entry?.statement : entry;
   const page = Number.isSafeInteger(diagram.page) ? diagram.page : 0;
   const pages = Math.max(1, Number.isSafeInteger(diagram.pageCount) ? diagram.pageCount : 1);
-  return `<section class="atlas-diagram" id="atlas-diagram" tabindex="-1" aria-label="${label}" data-diagram data-view="${escape(options.view)}" data-width="${width}" data-height="${height}" data-page="${page}" data-layout="${layout}">
+  return `<section class="atlas-diagram" id="atlas-diagram" tabindex="-1" aria-label="${label}" data-diagram data-view="${escape(options.view)}" data-width="${width}" data-height="${height}" data-page="${page}" data-layout="${layout}"${diagram.minimumScale ? ` data-readable="${finite(diagram.minimumScale)}"` : ''}>
     <div class="diagram-topbar">
       <p class="muted">${options.view === 'blueprint' ? 'Source relationships · Lean dependencies not available' : 'Components and their explicit references'}. Arrows do not certify an inference.</p>
       <div class="diagram-controls" role="group" aria-label="Diagram viewport">
@@ -73,7 +73,7 @@ function diagramHtml(atlas, index, options, render) {
     ${pages > 1 ? `<nav class="diagram-pages" aria-label="Diagram pages">${page > 0 ? button('Previous diagram page', 'showDiagramPage', { page: page - 1 }) : ''}<span>Page ${page + 1} of ${pages} · ${nodes.length} of ${escape(diagram.total)} nodes</span>${page + 1 < pages ? button('Next diagram page', 'showDiagramPage', { page: page + 1 }) : ''}</nav>` : ''}
     <p class="diagram-legend muted"><span>Cited passage → citing passage</span>${options.view === 'blueprint' ? '<span class="proof">Proof passage → statement</span>' : ''}</p>
     <div class="diagram-layout">
-      <div class="diagram-viewport" data-diagram-viewport tabindex="0" aria-label="${label}. Drag empty space to pan. Use plus or minus to zoom, zero to fit. Tab reaches nodes; arrow keys move among them.">
+      <div class="diagram-viewport" data-diagram-viewport tabindex="0" aria-label="${label}. Drag empty space to pan. Use Ctrl+wheel or plus and minus to zoom, zero to fit. Tab reaches nodes; arrow keys move among them.">
         <div class="diagram-layer" data-diagram-layer>
           <svg class="diagram-edges" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">
             <defs><marker id="atlas-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 9 4.5 L 0 9 z"/></marker><marker id="atlas-proof-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 9 4.5 L 0 9 z"/></marker></defs>
@@ -90,8 +90,9 @@ function diagramHtml(atlas, index, options, render) {
       </div>
       <aside class="diagram-inspector" aria-label="Selected diagram node">
         ${selected ? `<p class="diagram-kind">${escape(selected.kind || 'component')}</p><h2>${escape(selected.title)}</h2>
+          ${entryLabel(entry)}
           <div class="toolbar">${component ? button('Open component', 'selectComponent', { component: component.id, entry:entry?.id }) : ''}${entry && span ? button(part === 'proof' ? 'Open exact proof' : part === 'statement' ? 'Open exact statement' : 'Open exact passage', 'openSource', { entry: entry.id, part }) : ''}</div>
-          ${span ? `<details open><summary>Exact ${part === 'proof' ? 'proof passage' : part === 'statement' ? 'statement' : 'source passage'}</summary>${exactPreview(atlas.source.text, span, atlas.source.language)}</details>` : '<p class="muted">Open the component to inspect its individual source passages.</p>'}
+          ${span ? `<details open><summary>Exact ${part === 'proof' ? 'proof passage' : part === 'statement' ? 'statement' : 'source passage'}</summary>${exactPreview(atlas.source.text, span, atlas.source.language, undefined, index.tex)}</details>` : '<p class="muted">Open the component to inspect its individual source passages.</p>'}
           ${component ? `<details><summary>Component description</summary>${description(atlas, index, component, true)}</details>` : ''}
           ${adjacent.length ? `<details open><summary>Connections (${adjacent.length})</summary><ul class="diagram-connections">${adjacent.map(edge => {
             const other = byId.get(edge.from === selected.id ? edge.to : edge.from);
@@ -104,7 +105,7 @@ function diagramHtml(atlas, index, options, render) {
           ${entry ? referenceList(index.outgoing.get(entry.id), index) : ''}` : '<p>Select a node to inspect its exact source and connections.</p>'}
       </aside>
     </div>
-    <p class="diagram-help muted">Drag the background to pan · + / − zoom · 0 fits · arrow keys move between focused nodes. The Reading list also provides every component and its source links.</p>
+    <p class="diagram-help muted">Drag the background to pan · Ctrl+wheel or + / − to zoom · 0 fits · arrow keys move between focused nodes. The Reading list provides the source links.</p>
   </section>`;
 }
 
@@ -153,6 +154,10 @@ const diagramStyles = `
   .diagram-empty { padding: 1rem; }
   body.vscode-high-contrast .diagram-node, body.vscode-high-contrast-light .diagram-node { border-color: var(--vscode-contrastBorder); }
   body.vscode-high-contrast .diagram-node.is-selected, body.vscode-high-contrast-light .diagram-node.is-selected { outline: 2px solid var(--vscode-focusBorder); }
+  @media (max-width: 72rem) {
+    .atlas-diagram[data-readable] .diagram-layout { grid-template-columns: 1fr; }
+    .atlas-diagram[data-readable] .diagram-inspector { border-left: 0; border-top: 1px solid var(--vscode-panel-border); }
+  }
   @media (max-width: 56rem) { .diagram-layout { grid-template-columns: 1fr; } .diagram-viewport { height: 27rem; min-height: 24rem; } .diagram-inspector { border-left: 0; border-top: 1px solid var(--vscode-panel-border); max-height: 28rem; } }
 `;
 
@@ -195,9 +200,11 @@ const diagramScript = String.raw`
       // A hidden or not-yet-laid-out webview gets its first fit on resize.
       if (viewport.clientWidth <= 40 || viewport.clientHeight <= 40) return;
       const width = Number(diagramRoot.dataset.width), height = Number(diagramRoot.dataset.height);
-      scale = Math.min(1.15, (viewport.clientWidth - 40) / width, (viewport.clientHeight - 40) / height);
+      const minimum = Number(diagramRoot.dataset.readable) || 0;
+      scale = Math.max(minimum, Math.min(1.15, (viewport.clientWidth - 40) / width, (viewport.clientHeight - 40) / height));
       mode = 'fit';
-      x = (viewport.clientWidth - width * scale) / 2; y = (viewport.clientHeight - height * scale) / 2;
+      x = Math.max(0, (viewport.clientWidth - width * scale) / 2);
+      y = Math.max(0, (viewport.clientHeight - height * scale) / 2);
       paint(); saveViewport(); notifyFitLayout();
     };
     const zoom = (factor, px = viewport.clientWidth / 2, py = viewport.clientHeight / 2) => {
@@ -225,6 +232,7 @@ const diagramScript = String.raw`
       if (control.dataset.diagramAction === 'fit') fit(); else zoom(control.dataset.diagramAction === 'in' ? 1.25 : .8);
     }));
     viewport.addEventListener('wheel', event => {
+      if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
       const rect = viewport.getBoundingClientRect(); zoom(event.deltaY < 0 ? 1.12 : 1 / 1.12, event.clientX - rect.left, event.clientY - rect.top);
     }, {passive:false});

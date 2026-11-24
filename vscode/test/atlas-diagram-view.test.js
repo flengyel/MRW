@@ -191,6 +191,29 @@ test('deliberate pan and zoom survive resize and reopening; Fit opts back into a
   assert.equal(reopened.state().drafts.retained.question,'Unsent writing');
 });
 
+test('atlas diagrams leave wheel scrolling alone and zoom around the pointer with Ctrl or Meta', () => {
+  for (const view of ['map', 'blueprint']) {
+    const diagram = atlasDiagram(atlas(source), view);
+    const camera = cameraHarness({ diagram, view });
+    const saved = { ...camera.camera() };
+    let prevented = 0;
+    const pointer = { deltaY: -100, clientX: 170, clientY: 115, preventDefault() { prevented++; } };
+    camera.handlers.wheel(pointer);
+    assert.equal(prevented, 0);
+    assert.deepEqual({ ...camera.camera() }, saved);
+    for (const modifier of ['ctrlKey', 'metaKey']) {
+      const before = { ...camera.camera() };
+      camera.handlers.wheel({ ...pointer, [modifier]: true });
+      const after = camera.camera();
+      assert.ok(after.scale > before.scale);
+      for (const [axis, position] of [['x', pointer.clientX], ['y', pointer.clientY]]) {
+        assert.ok(Math.abs((position - before[axis]) / before.scale - (position - after[axis]) / after.scale) < 1e-8);
+      }
+    }
+    assert.equal(prevented, 2);
+  }
+});
+
 test('a tall page fits below 15%; keyboard navigation still reveals focused nodes after zoom',()=>{
   const diagram={
     width:1000,height:7000,

@@ -166,6 +166,42 @@ test('native custom editor renders a saved atlas without publishing or choosing 
   assert.equal(h.errors.length, 0);
 });
 
+test('the saved LaTeX atlas filters results in its panel and toggles prose without rewriting the record', async t => {
+  const h = await harness(t);
+  const text = String.raw`\newtheorem{theorem}{Theorem}
+\begin{document}
+\section{Context}
+Original explanatory passage for the atlas.
+
+\begin{theorem}\label{thm:result}
+A retained statement.
+\end{theorem}
+\end{document}`;
+  const record = { ...createAtlas({
+    source: { title: 'Fixture', uri: 'file:/never-read-source.tex', text, language: 'latex', revision: digest(text) },
+    extraction: extractAtlasText(text, 'latex'),
+  }), id: randomUUID() };
+  const file = path.join(h.outside, 'source.mrw-atlas.json');
+  const saved = JSON.stringify(record);
+  await fs.writeFile(file, saved);
+  const document = await h.custom.provider.openCustomDocument(h.uri(file), {}, {});
+  const panel = h.panel();
+  const c = await h.custom.provider.resolveCustomEditor(document, panel, {});
+  assert.equal(c.readOnly, true);
+  assert.match(panel.webview.html, /data-readable="0\.75"/);
+  assert.match(panel.webview.html, /Theorem 1/);
+  assert.match(panel.webview.html, /Show prose/);
+  assert.doesNotMatch(panel.webview.html, /Original explanatory passage/);
+  await panel.receive({ type: 'selectView', view: 'list' });
+  await panel.receive({ type: 'toggleProse' });
+  assert.match(panel.webview.html, /aria-pressed="true" data-type="toggleProse">Hide prose/);
+  assert.match(panel.webview.html, /Original explanatory passage/);
+  await panel.receive({ type: 'toggleProse' });
+  assert.doesNotMatch(panel.webview.html, /Original explanatory passage/);
+  assert.equal(await fs.readFile(file, 'utf8'), saved);
+  assert.deepEqual(h.errors, []);
+});
+
 test('external atlas stays read-only, uses only captured evidence and preserves Return', async t => {
   const h = await harness(t);
   const file = path.join(h.outside, 'external.mrw-atlas.json');
@@ -333,4 +369,48 @@ test('a saved successor that fails to open leaves the current atlas correction a
   assert.equal(original.unsaved, true);
   assert.equal(original.atlas.components[0].title, 'Keep this correction');
   assert.match(h.errors[0], /Saved .*but its viewer could not open/);
+});
+
+test('regenerating an unchanged LaTeX atlas keeps deliberate front matter and uses fresh printed labels', async t => {
+  const h = await harness(t);
+  h.api.window.visibleTextEditors = [];
+  const file = path.join(h.root, 'article.tex');
+  const auxiliary = path.join(h.root, 'article.aux');
+  const text = String.raw`\newtheorem{theorem}{Theorem}
+\begin{document}
+\maketitle
+\begin{abstract}
+A summary meant for the title page.
+\end{abstract}
+
+\section{Results}
+\begin{theorem}\label{thm:result}
+A retained statement.
+\end{theorem}
+\end{document}`;
+  const source = { title: 'Article', uri: h.uri(file).toString(), text, language: 'latex', revision: digest(text) };
+  await fs.writeFile(file, text);
+  await fs.writeFile(auxiliary, String.raw`\newlabel{thm:result}{{17}{1}}`);
+  await fs.utimes(file, 1000, 1000);
+  await fs.utimes(auxiliary, 1100, 1100);
+
+  for (const explicit of [false, true]) {
+    const selection = explicit ? { start: 0, end: text.length } : undefined;
+    const record = { ...createAtlas({ source, extraction: extractAtlasText(text, 'latex', selection) }),
+      id: randomUUID() };
+    const savedFile = path.join(h.root, (explicit ? 'selected' : 'implicit') + '.mrw-atlas.json');
+    const original = JSON.stringify(record);
+    await fs.writeFile(savedFile, original);
+    const saved = await h.custom.provider.openCustomDocument(h.uri(savedFile), {}, {});
+    const panel = h.panel();
+    await h.custom.provider.resolveCustomEditor(saved, panel, {});
+    await panel.receive({ type: 'regenerate' });
+    const successor = h.panels.at(-1);
+    assert.ok(successor);
+    await successor.receive({ type: 'selectView', view: 'list' });
+    assert.match(successor.webview.html, />Theorem 17<\/button>/);
+    assert.equal(successor.webview.html.includes('>Abstract</button>'), explicit);
+    assert.equal(await fs.readFile(savedFile, 'utf8'), original);
+  }
+  assert.deepEqual(h.errors, []);
 });
