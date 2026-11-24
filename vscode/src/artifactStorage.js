@@ -3,6 +3,7 @@
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const { randomUUID } = require('node:crypto');
+const { hostStoragePath } = require('./hostStorage');
 const renameKey = 'mrw.preparedFolderRenames.v1';
 const within = (child, parent) => {
   const relative = path.relative(parent, child);
@@ -11,8 +12,9 @@ const within = (child, parent) => {
 function createArtifactStorage({ vscode, context, rawBridge }) {
   let epoch, initialization, moving = false;
   const home = () => {
-    if (context.storageUri?.scheme !== 'file') throw new Error('Open a Linux/WSL/SSH workspace for saved MRW artifacts.');
-    return context.storageUri.fsPath;
+    const location = hostStoragePath(vscode, context.storageUri);
+    if (!location) throw new Error('Open a Linux/WSL/SSH workspace for saved MRW artifacts.');
+    return location;
   };
   const control = (method, extra = {}, options) => rawBridge({ method, artifact_home: home(), ...extra }, options);
   async function refresh() {
@@ -73,8 +75,8 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       if (folders.length !== 1) throw new Error('Prepare a folder rename in its own single-folder workspace.');
       const current = await refresh();
       if (current.recovery_required) throw new Error('Run MRW: Recover Artifact Move before preparing a folder rename.');
-      if (context.globalStorageUri?.scheme !== 'file') throw new Error('Folder rename preparation needs host-local extension storage.');
-      const parent = context.globalStorageUri.fsPath;
+      const parent = hostStoragePath(vscode, context.globalStorageUri);
+      if (!parent) throw new Error('Folder rename preparation needs host-local extension storage.');
       if (folders.some(root => within(parent, root))) throw new Error('Saved work must be outside the project folder being renamed.');
       const destination = path.join(parent, 'saved-work-' + randomUUID());
       const choice = await vscode.window.showWarningMessage(

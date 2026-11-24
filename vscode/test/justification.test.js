@@ -4,7 +4,7 @@ const {registerJustification}=require('../src/justification');
 function request(){return {id:'11111111-1111-4111-8111-111111111111',goal:['atom',{id:'E'}],claims:[{id:'E',display_name:'Euclid lemma'}],sources:[],context:{id:'original',admissions:['a','bridge']},admissions:[{id:'a',scope:'This claim',rationale:'Chosen source'},{id:'bridge',scope:'This implication',rationale:'Chosen argument'}],withdrawal:null};}
 function result(q,revision='a'.repeat(64)){return {revision,effective:structuredClone(q),record:{request:structuredClone(q),response:{routes:[{admission_ids:['a','bridge']}],statistics:{limits_hit:[]}},verification:{checked_at:'2026-11-15T12:00:00Z'}}};}
 function harness(store={intents:new Map(),results:new Map()}){
- const commands=new Map(),requests=[],panels=[],errors=[],clients=[],picks=[],warnings=[],origins=[],context={extensionPath:path.resolve(__dirname,'..'),storageUri:{fsPath:'/tmp/mrw-unit-private'},globalStorageUri:{scheme:'file',fsPath:'/tmp/mrw-unit-global'},subscriptions:[]};
+ const commands=new Map(),requests=[],panels=[],errors=[],clients=[],picks=[],warnings=[],origins=[],context={extensionPath:path.resolve(__dirname,'..'),storageUri:{scheme:'file',fsPath:'/tmp/mrw-unit-private'},globalStorageUri:{scheme:'file',fsPath:'/tmp/mrw-unit-global'},subscriptions:[]};
  const q=request();let location={uri:'file:///tmp/source.md',revision:'a'.repeat(64),start:0,end:0};
  const defaultService=async p=>{
   if(p.method==='route_list')return {records:[...store.results.values()].map(r=>({goal:'Euclid lemma',revision:r.revision,routes:1,checked:'now'}))};
@@ -34,8 +34,33 @@ function harness(store={intents:new Map(),results:new Map()}){
  const controller=registerJustification({vscode,context,register:(id,fn)=>commands.set(id,fn),bridge:raw,rawBridge:raw,projectRoot:async()=>'/tmp/mrw-unit-project',reading:{currentLocation:()=>structuredClone(location),returnToStudy:async loc=>origins.push(loc)},show:async()=>{},artifactClients:clients});
  const open=async()=>{await commands.get('mrw.openJustification')();return panels.at(-1);};
  const send=async(type,panel=panels.at(-1),fields={})=>{await panel.receive({type,generation:panel.messages.at(-1).generation,...fields});await new Promise(r=>setTimeout(r,15));};
- return {store,defaultService,setLocation(v){location=v;},commands,requests,panels,errors,clients,picks,warnings,origins,controller,vscode,open,send,setService(fn){service=fn;}};
+ return {store,defaultService,setLocation(v){location=v;},commands,requests,panels,errors,clients,picks,warnings,origins,controller,vscode,context,open,send,setService(fn){service=fn;}};
 }
+test('local Linux userdata storage reaches checker setup and stages the search in private workspace storage',{skip:process.platform!=='linux'},async()=>{
+ const h=harness();
+ h.vscode.env={};
+ h.context.storageUri.scheme='vscode-userdata';
+ h.context.globalStorageUri.scheme='vscode-userdata';
+ const cache=path.join(h.context.globalStorageUri.fsPath,'justification-checkers');
+ await h.commands.get('mrw.setupJustificationChecker')();
+ assert.equal(h.requests.find(p=>p.method==='route_setup').cache,cache);
+
+ await h.open();await h.send('search');
+ const [stage,run]=h.requests.filter(p=>p.method==='route_stage'||p.method==='route_run');
+ assert.equal(stage.method,'route_stage');assert.equal(run.method,'route_run');
+ assert.equal(path.dirname(stage.store),h.context.storageUri.fsPath);
+ assert.equal(run.store,stage.store);assert.equal(run.cache,cache);
+ assert.deepEqual(h.errors,[]);
+});
+test('remote userdata storage cannot stage or run a justification search',async()=>{
+ const h=harness();await h.open();
+ h.vscode.env={remoteName:'wsl'};
+ h.context.globalStorageUri.scheme='vscode-userdata';
+ await assert.rejects(h.commands.get('mrw.setupJustificationChecker')(),/host-local/);
+ await h.send('search');
+ assert.match(h.errors[0],/host-local/);
+ assert.equal(h.requests.some(p=>['route_setup','route_stage','route_run'].includes(p.method)),false);
+});
 test('opening an example performs no build, search, admission or persistence',async()=>{
  const h=harness(),p=await h.open();assert.deepEqual(h.requests.map(r=>r.method),['route_list','route_pending','route_material_list','route_example']);
  assert.ok(p.webview.html.includes('Opening justification'));assert.ok(p.messages.at(-1).pending);assert.equal(p.messages.at(-1).result,null);

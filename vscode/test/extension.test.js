@@ -149,8 +149,8 @@ async function harness(root, state = new Map(), options = {}) {
   };
   const extension = path.resolve(__dirname, '..');
   const global = options.globalState || new Map();
-  const context = { extensionPath: extension, storageUri: uri(options.storage || path.join(root, '..', 'private-state')),
-    globalStorageUri: uri(options.globalHome || path.join(root, '..', 'global-state')),
+  const context = { extensionPath: extension, storageUri: uri(options.storage || path.join(root, '..', 'private-state'), options.storageScheme),
+    globalStorageUri: uri(options.globalHome || path.join(root, '..', 'global-state'), options.storageScheme),
     globalState: { get: (key, fallback) => global.get(key) ?? fallback, async update(key, value) { global.set(key, value); } },
     subscriptions: [], workspaceState: {
     get: (key, fallback) => state.get(key) ?? fallback, keys: () => [...state.keys()],
@@ -1094,10 +1094,13 @@ test('adopted synchronized identity permits an old external route only in the ex
 test('prepare, real folder rename, reconnect and reopen preserve exact passages, annotations and earlier links', async t => {
   const root = await temporary(t, true), original = 'α😀 retained\nproof α\n';
   const source = path.join(root, 'source α.txt'); await fs.writeFile(source, original);
-  const globalState = new Map(), h = await harness(root, new Map(), { globalState });
+  const storageScheme = process.platform === 'linux' ? 'vscode-userdata' : 'file';
+  const globalState = new Map(), h = await harness(root, new Map(), { globalState, storageScheme });
   const editor = h.editor(h.document(source, original));
   editor.selection = new Selection(new Position(0, 1), new Position(1, 5)); h.focus(editor);
-  const created = await h.commands.get('mrw.createOutline')(), region = created.outline.regions[0];
+  const created = await h.commands.get('mrw.createOutline')();
+  assert.deepEqual(h.errors, []);
+  const region = created.outline.regions[0];
   await h.panels[0].receive({ type: 'edit', change: { kind: 'annotation', region: region.id, id: null,
     purpose: 'explanation', text: 'Synthetic AI explanation α', origin: 'ai_proposal', author: 'Synthetic AI' } });
   h.picks.push({ id: created.outline.id }, { region: region.id });
@@ -1110,7 +1113,7 @@ test('prepare, real folder rename, reconnect and reopen preserve exact passages,
   const hints = globalState.get('mrw.preparedFolderRenames.v1');
   assert.equal(hints[prepared.store_id].location, prepared.location);
   const renamed = path.join(root, '..', 'Renamed study α'); await fs.rename(root, renamed);
-  const options = { globalState, storage: path.join(renamed, '..', 'renamed-private-state') };
+  const options = { globalState, storageScheme, storage: path.join(renamed, '..', 'renamed-private-state') };
   const receiver = await harness(renamed, new Map(), options);
   receiver.endings.push('Reconnect saved work');
   const connected = await receiver.commands.get('mrw.reconnectRenamedFolder')();

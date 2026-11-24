@@ -3,17 +3,20 @@ const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('n
 const {digest}=require('./navigation'),{outlineHtml}=require('./outlines');
 const locations=require('./workspacePaths');
 const materialTools=require('./groundsMaterial');
+const {hostStoragePath}=require('./hostStorage');
 const HEX=/^[a-f0-9]{64}$/;
 function goalLabel(request){const goal=request.goal;return goal?.[0]==='atom'?request.claims.find(c=>c.id===goal[1].id)?.display_name||'Selected claim':'Selected claim';}
 function registerJustification({vscode,context,register,bridge,rawBridge,projectRoot,reading,show,artifactClients,recorder,selectPassages}){
  let current,opening=0,frozen=false;const views=new Set();
  const cache=()=>{
-  if(context.globalStorageUri?.scheme!=='file')throw Error('Use a host-local MRW extension installation.');
-  return path.join(context.globalStorageUri.fsPath,'justification-checkers');
+  const home=hostStoragePath(vscode,context.globalStorageUri);
+  if(!home)throw Error('Use a host-local MRW extension installation.');
+  return path.join(home,'justification-checkers');
  };
  const project=async()=>{
-  if(!context.storageUri?.fsPath)throw Error('Open a saved workspace to retain justification results.');
-  const root=await projectRoot();return {root,store:path.join(context.storageUri.fsPath,'justification-'+digest(root))};
+  const home=hostStoragePath(vscode,context.storageUri);
+  if(!home)throw Error('Open a saved workspace to retain justification results.');
+  const root=await projectRoot();return {root,store:path.join(home,'justification-'+digest(root))};
  };
  const call=(c,method,fields={},options)=>bridge({method:'route_'+method,store:c.store,project_root:c.root,...fields},options);
  const reportError=e=>void vscode.window.showErrorMessage('MRW: '+e.message);
@@ -34,10 +37,11 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
  async function run(c){
   if(!c.request)throw Error('Choose an explicit context before searching.');
   const request=c.request;
+  const checkerCache=cache();
   const notes=vscode.workspace.getConfiguration?.('mrw').get('notesFolder','')||'';
   const staged=await call(c,'stage',{request,origin:locations.encode(c.origin||null,c.root,notes)});
   c.intent=staged.intent;c.origin=locations.decode(staged.origin,c.root);send(c);
-  const result=await progress('MRW: checking routes under the displayed admissions',options=>call(c,'run',{request,cache:cache()},options));
+  const result=await progress('MRW: checking routes under the displayed admissions',options=>call(c,'run',{request,cache:checkerCache},options));
   if(!c.disposed){c.value=result;c.request=null;c.error='';c.panel.title='Grounds: '+goalLabel(result.effective);}
  }
  async function message(c,value){

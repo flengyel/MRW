@@ -1,6 +1,7 @@
 // Test-only preflight. It never changes settings, storage bindings or user data.
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path');
+const {hostStoragePath}=require('../../src/hostStorage');
 const UUID=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 let verified;
 const contexts=new WeakMap();
@@ -96,16 +97,36 @@ function memento(owner,prefix,writes){
   keys:()=>owner.keys().filter(key=>key.startsWith(prefix)).map(key=>key.slice(prefix.length)),
   setKeysForSync:()=>fail('fixture state must not enter Settings Sync')};
 }
+async function nativeHost(vscode,context,marker){
+ if(!context||![vscode.ExtensionMode?.Development,vscode.ExtensionMode?.Test].filter(v=>v!==undefined).includes(context.extensionMode))fail('a Development/Test extension context is required');
+ if(await canonical(context.extensionPath)!==marker.extension)fail('wrong development extension');
+ const folders=vscode.workspace.workspaceFolders;
+ if(!Array.isArray(folders)||folders.length!==1||folders[0].uri.scheme!=='file')fail('exactly one local disposable workspace is required');
+ const project=await canonical(folders[0].uri.fsPath);
+ if(!marker.projects.includes(project))fail('active workspace is not the declared disposable project');
+ if(vscode.workspace.workspaceFile&&!inside(marker.root,await canonical(vscode.workspace.workspaceFile.fsPath)))fail('workspace file leaves disposable scope');
+ return project;
+}
 async function isolateContext(vscode,native,extension){
  if(contexts.has(native))return native;
  const marker=await receipt(extension),prefix='mrw.fixture.'+marker.id+'.',writes=[];
- if(native?.storageUri?.scheme!=='file'||native?.globalStorageUri?.scheme!=='file')fail('local native storage required');
+ // Verify the declared host before interpreting its native storage URIs. The
+ // production helper recognizes only host-local filesystem storage; this does
+ // not grant those directories to test code or widen the fixture write scope.
+ await nativeHost(vscode,native,marker);
+ const nativeStorageUri=native.storageUri,nativeGlobalUri=native.globalStorageUri;
+ const nativeStorage=hostStoragePath(vscode,nativeStorageUri),nativeGlobal=hostStoragePath(vscode,nativeGlobalUri);
+ if(!nativeStorage||!nativeGlobal)fail('local native storage required');
+ const ownedUri=(name,original)=>{
+  const file=vscode.Uri.file(path.join(marker.root,name));
+  return original.scheme==='vscode-userdata'?file.with({scheme:'vscode-userdata'}):file;
+ };
  // All persistence still uses native Memento.update. No state database is
  // edited directly, and the working extension's keys are never exposed.
  const overrides={storagePath:path.join(marker.root,'workspace-storage'),globalStoragePath:path.join(marker.root,'global-storage'),
   secrets:{get:()=>fail('native secret access is disabled; use a synthetic test transport'),store:()=>fail('native secret access is disabled'),delete:()=>fail('native secret access is disabled')},
-  storageUri:vscode.Uri.file(path.join(marker.root,'workspace-storage')),
-  globalStorageUri:vscode.Uri.file(path.join(marker.root,'global-storage')),
+  storageUri:ownedUri('workspace-storage',nativeStorageUri),
+  globalStorageUri:ownedUri('global-storage',nativeGlobalUri),
   workspaceState:memento(native.workspaceState,prefix,writes),globalState:memento(native.globalState,prefix,writes)};
  const context=new Proxy({}, {get:(_target,key)=>{
   if(Object.hasOwn(overrides,key))return overrides[key];
@@ -115,12 +136,12 @@ async function isolateContext(vscode,native,extension){
  getOwnPropertyDescriptor:(_target,key)=>{
   const descriptor=Reflect.getOwnPropertyDescriptor(native,key);
   return Object.hasOwn(overrides,key)||descriptor?{configurable:true,enumerable:Object.hasOwn(overrides,key)||descriptor.enumerable,get:()=>context[key]}:undefined;}});
- contexts.set(context,{native,prefix,writes});
+ contexts.set(context,{native,prefix,writes,nativeStorage,nativeGlobal});
  await assertFixture(vscode,context,extension);return context;
 }
 function scopeInfo(context){
  const info=contexts.get(context);if(!info)fail('unisolated native context');
- return {prefix:info.prefix,writes:info.writes.slice(),nativeStorage:info.native.storageUri.fsPath,nativeGlobal:info.native.globalStorageUri.fsPath};
+ return {prefix:info.prefix,writes:info.writes.slice(),nativeStorage:info.nativeStorage,nativeGlobal:info.nativeGlobal};
 }
 async function clearOwnedState(context){
  const info=contexts.get(context);if(!info)fail('unisolated native context');
@@ -131,21 +152,15 @@ async function clearOwnedState(context){
 async function assertFixture(vscode,context,extension){
  const marker=await receipt(extension);
  const info=scopeInfo(context);
- if(!context||![vscode.ExtensionMode?.Development,vscode.ExtensionMode?.Test].filter(v=>v!==undefined).includes(context.extensionMode))fail('a Development/Test extension context is required');
- if(await canonical(context.extensionPath)!==marker.extension)fail('wrong development extension');
- const folders=vscode.workspace.workspaceFolders;
- if(!Array.isArray(folders)||folders.length!==1||folders[0].uri.scheme!=='file')fail('exactly one local disposable workspace is required');
- const project=await canonical(folders[0].uri.fsPath);
- if(!marker.projects.includes(project))fail('active workspace is not the declared disposable project');
- if(vscode.workspace.workspaceFile&&!inside(marker.root,await canonical(vscode.workspace.workspaceFile.fsPath)))fail('workspace file leaves disposable scope');
+ const project=await nativeHost(vscode,context,marker);
  const config=await json(path.join(extension,'host-test.json'));
  if(config.vault||config.obsidianExecutable)fail('native companion mutation needs a separately verified owner fixture; this harness is disabled until supplied');
  if(config.project!==project||!inside(marker.root,await canonical(config.artifacts)))fail('configuration does not match the disposable project/artifacts');
  await tree(marker.root,marker);
- const global=await canonical(context.globalStorageUri.fsPath);
- if(global!==path.join(marker.root,'global-storage')||context.storageUri.fsPath!==path.join(marker.root,'workspace-storage'))fail('native store facade leaves disposable scope');
- if(context.storageUri?.scheme!=='file')fail('local native workspace storage required');
- const storage=await canonical(context.storageUri.fsPath);
+ const globalPath=hostStoragePath(vscode,context.globalStorageUri),storagePath=hostStoragePath(vscode,context.storageUri);
+ if(!globalPath||!storagePath)fail('local native storage facade required');
+ const global=await canonical(globalPath),storage=await canonical(storagePath);
+ if(global!==path.join(marker.root,'global-storage')||storage!==path.join(marker.root,'workspace-storage'))fail('native store facade leaves disposable scope');
  const pinPath=path.join(marker.root,'native-scope.json');
  let pin;try{pin=await json(pinPath);}catch(e){if(e.code!=='ENOENT')throw e;}
  if(pin&&(pin.id!==marker.id||pin.storage!==storage||pin.global!==global||pin.project!==project||pin.nativeStorage!==info.nativeStorage||pin.nativeGlobal!==info.nativeGlobal))fail('native stores differ from the fixture first launch');
@@ -180,7 +195,9 @@ function protect(exports,options){
    if(entry!==declaration.case&&!(declaration.case==='activation'&&['bootstrap','notes'].includes(entry)))fail('undeclared native entry point');
    let context=name==='activate'?args[0]:verified?.context;
    if(!context){
-    const marker=await receipt(extension),manifest=await json(path.join(extension,'package.json'));
+    // The packaged command manifest is larger than ownership/control metadata.
+    // Keep its own bounded budget so its size cannot hide an activation refusal.
+    const marker=await receipt(extension),manifest=await json(path.join(extension,'package.json'),1024*1024);
     if(manifest.main!=='./test/host/bootstrap.js')fail('run-style tests require the guarded bootstrap');
     const installed=options.vscode.extensions.getExtension('flengyel.mrw');
     if(installed?.extensionPath!==marker.extension)fail('installed working extension cannot be a test target');
