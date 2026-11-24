@@ -1,9 +1,8 @@
 """Scoped Markdown navigation to retained sources; no publication or execution."""
 from hashlib import sha256
 import re
-import string
 
-from .source_outlines import OutlineStore, host_point, item_by_id, span_text
+from .source_outlines import OutlineStore, host_point, item_by_id, passage_title, span_text
 
 HEX = r'[a-f0-9]{64}'
 UUID = r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}'
@@ -56,19 +55,25 @@ def locator(span):
 
 
 def markdown_label(value):
-    # Preserve readable Unicode; source metadata cannot introduce links/HTML.
+    # Preserve ordinary punctuation such as the dots in filenames and result
+    # numbers. Escape inline markup and protect % in the Emacs handoff.
     value = ' '.join(value.split())
     value = ''.join(c if c.isprintable() else f'U+{ord(c):04X}' for c in value)
-    return ''.join('\\' + c if c in string.punctuation else c for c in value)
+    special = '\\[]<>*_~$%&`'
+    return ''.join('\\' + c if c in special else c for c in value)
 
 
-def short_label(store, source, span):
+def short_label(store, source, span, region=None):
     bib = store.state['source']['bibliography']
     published = published_identity(store, span=span)
     parts = ([published] if published else []) + [(bib['title'] or source.path.name)[:100]]
-    if bib['locator']:
-        parts.append(bib['locator'][:60])
-    parts.append(locator(span) if span else 'source outline')
+    if span:
+        title = region['title'].strip() if region else ''
+        if not title or re.fullmatch(r'Passage [1-9][0-9]*', title):
+            title = passage_title(span_text(source, span)) or title or 'Retained passage'
+        parts.append(title[:100])
+    else:
+        parts.append('saved source')
     return markdown_label(' · '.join(parts))
 
 
@@ -122,8 +127,9 @@ def reference_action(request):
                   f"Passage link: {locator(ref['span'])}. " +
                   ('Passage association unchanged; exact retained passage opened.' if status == 'unchanged' else
                    'Passage association changed or removed; the originally referenced retained passage is opened, not the current passage range.'))
-        result['reference'] = dict(uri=request['reference'], label=short_label(store, source, ref['span']), status=status, notice=notice,
-                                   region=ref['region'] if status == 'unchanged' else None)
+        current_region = region if status == 'unchanged' else None
+        result['reference'] = dict(uri=request['reference'], label=short_label(store, source, ref['span'], current_region),
+                                   status=status, notice=notice, region=ref['region'] if current_region else None)
         result['reference'].update(qualified_id=published_identity(store, ref['region'], ref['span']), source_revision=source.revision, passage=ref['span'])
         result['document'] = document
         return result
@@ -137,7 +143,7 @@ def reference_action(request):
     parts.append('source: ' + str(source.path))
     parts.append(f"{region['title']}; {locator(region['span'])}" if region else 'whole saved source')
     parts.append('retained SHA-256 ' + source.revision[:12])
-    label = short_label(store, source, region['span'] if region else None)
+    label = short_label(store, source, region['span'] if region else None, region)
     return dict(reference=uri, label=label, markdown=f"[{markdown_label(' · '.join(parts))}]({uri})")
 
 

@@ -196,17 +196,21 @@ Markdown document per window.
 
 ## Retain text only when needed
 
-Use **Retain Document as Source** when a saved UTF-8 text document and selected
-passage need to remain available at an exact revision. This does not import a
-PDF. **Open Document… → Saved copy** or **MRW: Open Saved Source…** reopens that
-revision even if the original changes or disappears. **Refresh saved source**
-reloads saved reader state and annotations; it does not acquire a new revision.
+Under **Sources and references**, use **Retain Document as Source** to keep a
+saved UTF-8 text document at an exact revision. If you select text first, MRW
+keeps that passage and names it from a heading, a result name such as
+“Lemma 1”, or its opening words. The status bar confirms the saved passage.
+Use **Open Saved Source…** or **Open Document… → Saved copy** to reopen the
+saved revision after edits to the original. **Refresh saved source** reloads the
+saved reader and its annotations.
 
-Use **Insert Source or Passage Link…** in a working Markdown document to insert
-a short caption with an exact retained destination. To edit a caption, change
-the text between the square brackets and keep the destination in parentheses.
-Follow the link from Contents or use **Follow Source or Passage Link at Cursor**
-in the Markdown editor. **Return to Document** restores
+In a working Markdown document, choose **Insert Source or Passage Link…**.
+The first choice links the recently retained passage from this session when
+one is available. Choose a saved source to see its other passages. To edit
+the caption in Markdown, change the text between the brackets and keep the
+destination in parentheses. Follow the link from Contents or use **Follow
+Source or Passage Link at Cursor**. An exact text tab names the source and
+marks it as retained. **Return to Document** restores
 the exact citation occurrence in the Markdown preview. Each reader keeps its
 own return occurrence, including nonoverlapping unsaved edits. An independently
 opened saved source offers **Open filename** for the selected Contents document,

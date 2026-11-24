@@ -146,6 +146,29 @@ def span_text(source, span, limit=MAX_REGION):
     return selected
 
 
+def passage_title(exact_text):
+    """Suggest a short caption from the first nonempty line of a selection."""
+    first = next((line.strip() for line in exact_text.splitlines() if line.strip()), '')
+    heading = re.match(r'^#{1,6}\s+(.*)', first)
+    if heading:
+        first = re.sub(r'\s+#+$', '', heading[1])
+    first = re.sub(r'^(\*\*|__)(.+?)\1', r'\2', first)
+    first = ' '.join(first.split())
+    first = ''.join(c if c.isprintable() else f'U+{ord(c):04X}' for c in first)
+    numbered = re.match(
+        r'(?:Lemma|Theorem|Definition|Proposition|Corollary|Remark|Example|Conjecture|Axiom)'
+        r' [0-9]+(?:\.[0-9]+)*(?=$|[ .:()–—])',
+        first, re.IGNORECASE,
+    )
+    if numbered:
+        first = numbered[0]
+    if len(first) <= 80:
+        return first
+    prefix = first[:79].rstrip()
+    words, _, _ = prefix.rpartition(' ')
+    return (words if len(words) >= 40 else prefix) + '…'
+
+
 def host_point(source, span, side):
     _, _, lines = line_table(source)
     line, column = span[f'{side}_line'] - 1, span[f'{side}_col']
@@ -436,8 +459,9 @@ def mutate(store, change):
         return item
     if kind == 'add_region':
         fields(change, {'kind', 'start', 'end'}, 'region selection')
-        span = selection()
-        value['regions'].append(dict(id=str(uuid4()), title=f'Passage {len(value["regions"]) + 1}',
+        span = select_span(source, change['start'], change['end'])
+        title = passage_title(span_text(source, span)) or f'Passage {len(value["regions"]) + 1}'
+        value['regions'].append(dict(id=str(uuid4()), title=title,
             level='argument', span=span, statement=None, collapsed=False, annotations=[]))
     elif kind == 'statement':
         fields(change, {'kind', 'region', 'statement_kind', 'start', 'end'}, 'statement selection')

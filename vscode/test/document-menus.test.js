@@ -64,6 +64,16 @@ test('Return and companion commands have the same scope in the Document menu and
     'resourceScheme == mrw-atlas-source');
 });
 
+test('Sources and references groups the existing commands for citing a passage', () => {
+  const { sourceTools } = require('../src/companionTools').GROUPS;
+  const commands = ['createOutline', 'insertOutlineReference', 'followOutlineReference'];
+  const entries = sourceTools.filter(([, id]) => commands.includes(id));
+  assert.deepEqual(entries.map(([, id]) => id), commands);
+  for (const [title, id] of entries) {
+    assert.equal(title, c.commands.find(command => command.command === 'mrw.' + id).title);
+  }
+});
+
 test('Examples is the visible entry for the three sample routes', () => {
   const command = c.commands.find(item => item.command === 'mrw.openLearningMaterials');
   assert.equal(command.title, 'Examples…');

@@ -80,12 +80,37 @@ class OutlineReferenceTests(unittest.TestCase):
             self.call('outline_assistance_context', reference=ref)
         self.assertEqual(before, self.inventory())
 
+    def test_named_passage_captions_keep_ordinary_punctuation_and_pin_the_same_range(self):
+        paper = self.root / 'paper (draft).md'
+        lines = ['**Lemma 1.** If a prime divides a product, it divides a factor.',
+                 '## The main construction ###',
+                 'Use the construction on each input.']
+        raw = ('\n'.join(lines) + '\n').encode()
+        paper.write_bytes(raw)
+        self.saved = self.call('outline_create', path=str(paper), source_revision=sha256(raw).hexdigest())
+        for index, title in enumerate(['Lemma 1', 'The main construction', lines[-1]]):
+            with self.subTest(title=title):
+                self.edit(kind='add_region', start=[index, 0], end=[index, len(lines[index])])
+                self.region = self.saved['outline']['regions'][-1]
+                self.assertEqual(self.region['title'], title)
+                ref = self.ref()
+                self.assertEqual(ref['label'], f'paper (draft).md · {title}')
+                self.assertTrue(ref['reference'].endswith(f'/{index + 1}.0-{index + 1}.{len(lines[index])}'))
+                self.assertEqual(self.follow(ref)['reference']['label'], ref['label'])
+        original = self.ref()
+        self.edit(kind='region', region=self.region['id'], title='Reader title [a]',
+                  level='argument', collapsed=False)
+        self.assertEqual(self.ref()['reference'], original['reference'])
+        self.assertEqual(self.ref()['label'], r'paper (draft).md · Reader title \[a\]')
+        self.assertEqual(paper.read_bytes(), raw)
+
     def test_two_sources_and_bibliography_annotation_edits_do_not_change_identity(self):
         bib = dict(title='Book [α] <tag>', authors='Known author', edition='2nd', revision=None,
                    locator='§ 2', reference='Supplied citation')
         self.edit(kind='metadata', bibliography=bib, authorship='human')
         region, whole = self.ref(), self.ref(False)
         self.assertIn(r'Book \[α\] \<tag\>', region['markdown'])
+        self.assertIn(r'Book \[α\] \<tag\>', region['label'])
         self.assertIn('Known author', region['markdown']); self.assertIn('§ 2', region['markdown'])
         self.assertNotIn('revision:', region['markdown'])
         self.edit(kind='annotation', region=None, id=None, purpose='question', origin='human_work', author=None, text='A reader question')
@@ -104,6 +129,7 @@ class OutlineReferenceTests(unittest.TestCase):
         before = self.inventory(); followed = self.follow(ref)
         self.assertEqual(followed['reference']['status'], 'changed or removed')
         self.assertIsNone(followed['reference']['region'])
+        self.assertEqual(followed['reference']['label'], ref['label'])
         self.assertEqual(followed['document']['start'], [0, 1]); self.assertEqual(followed['document']['end'], [1, 5])
         self.assertEqual(followed['document']['text'].encode(), self.raw)
         self.assertEqual(self.inventory(), before)

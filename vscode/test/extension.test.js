@@ -836,7 +836,8 @@ test('Markdown overview references two saved sources, follows retained regions a
   const first = await h.commands.get('mrw.insertOutlineReference')();
   assert.equal(doc.text, '[' + first.label + '](' + first.reference + ')');
   assert.equal(first.markdown, doc.text);
-  assert.match(first.label, /book.*lines 1/);
+  assert.match(first.label, /^book\.md · .+/u);
+  assert.ok(!first.label.includes('scalar columns'));
   assert.equal(doc.isDirty, true);
   ed.selection = new Selection(new Position(0, doc.text.length), new Position(0, doc.text.length));
   h.picks.push({ id: created[1].outline.id }, { region: null });
@@ -850,6 +851,7 @@ test('Markdown overview references two saved sources, follows retained regions a
   assert.ok(firstFollow, h.errors.join('\n'));
   assert.equal(firstFollow.status, 'unchanged');
   assert.equal(h.api.window.activeTextEditor.document.uri.scheme, 'mrw-record');
+  assert.match(path.basename(h.api.window.activeTextEditor.document.uri.path), /^book\.md \(retained \d{4}-\d{2}-\d{2}\)\.txt$/u);
   assert.equal(h.api.window.activeTextEditor.document.languageId, 'plaintext');
   assert.equal(h.api.window.activeTextEditor.selection.start.character, 1);
   assert.equal(doc.text, before);
@@ -865,6 +867,52 @@ test('Markdown overview references two saved sources, follows retained regions a
   assert.equal(restarted.panels[0].webview.messages.findLast(message => message.type === 'outline').selected, null);
   assert.equal(restarted.api.window.activeTextEditor.document.getText(), 'α😀 → β\r\nClaim.\r\n');
   assert.equal(md.text, before); assert.deepEqual(restarted.errors, []); assert.deepEqual(h.errors, []);
+});
+
+test('Markdown insertion offers the recently retained passage in one choice and rejects a changed pin', async t => {
+  const root = await temporary(t), h = await harness(root);
+  const source = path.join(root, 'paper.md'), text = 'Lemma 1. If a prime divides a product.\n';
+  await fs.writeFile(source, text);
+  const editor = h.editor(h.document(source, text)), notices = [];
+  editor.selection = new Selection(new Position(0, 0), new Position(0, text.trimEnd().length));
+  h.focus(editor);
+  h.api.window.setStatusBarMessage = message => notices.push(message);
+  const saved = await h.commands.get('mrw.createOutline')();
+  const passage = saved.outline.regions[0];
+  assert.deepEqual(notices, [`MRW: Retained “${passage.title}” from paper.md.`]);
+
+  const file = path.join(root, 'note.md');
+  await fs.writeFile(file, '');
+  const doc = h.document(file, '');
+  doc.languageId = 'markdown';
+  const note = h.editor(doc);
+  note.selection = new Selection(new Position(0, 0), new Position(0, 0));
+  h.focus(note);
+  let picks = 0;
+  h.api.window.showQuickPick = async choices => {
+    picks++;
+    assert.equal(choices[0].label, passage.title);
+    assert.equal(choices[0].description, 'Recently retained passage');
+    assert.equal(choices[0].detail, 'paper.md');
+    return choices[0];
+  };
+  const link = await h.commands.get('mrw.insertOutlineReference')();
+  assert.equal(picks, 1);
+  assert.ok(link.reference.includes('/' + passage.id + '/'));
+  assert.equal(doc.text, link.markdown);
+
+  await h.panels[0].receive({ type: 'edit', change: { kind: 'replace_region', region: passage.id, start: [0, 0], end: [0, 8] } });
+  h.focus(note);
+  await h.commands.get('mrw.insertOutlineReference')();
+  assert.match(h.errors.pop(), /recently retained passage changed/);
+  assert.equal(doc.text, link.markdown);
+
+  h.api.window.showQuickPick = async choices => choices.find(choice => choice.id === saved.outline.id && !choice.recent)
+    ?? choices.find(choice => choice.region === null);
+  const whole = await h.commands.get('mrw.insertOutlineReference')();
+  assert.notEqual(whole.reference, link.reference);
+  assert.ok(!whole.reference.includes('/' + passage.id + '/'));
+  assert.deepEqual(h.errors, []);
 });
 
 test('Markdown reference insertion respects cancellation, editor changes, workspace and document boundaries', async t => {
