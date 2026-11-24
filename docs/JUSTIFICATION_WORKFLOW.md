@@ -70,11 +70,12 @@ text. Opening the view creates no admission or saved result.
 
 Choose **Search under these admissions** to run the bounded Lean search and
 retain its certificates. If its local checker is unavailable, expand **Local
-checker setup** and choose **Build local checker**. This explicit build uses an
-already installed Lean 4.32.2 toolchain and downloads nothing. It currently
-requires the verified Linux x86-64/WSL build environment. Different compiler
-output is rejected; ordinary reading and saved-result inspection remain usable.
-The official Lean editor extension is optional for this headless checker.
+checker setup** and choose **Build local checker**. It runs Lake from the
+installed Lean 4.32.2 toolchain and downloads nothing. If Lean 4.32.2 is missing,
+install it in the workspace host’s terminal with
+`elan toolchain install leanprover/lean4:v4.32.2`, then retry the build.
+The checker requires the verified Linux x86-64/WSL build environment. MRW
+rejects different compiler output. The official Lean editor extension is optional.
 
 Each route lists its admitted grounds. A source button opens the retained
 passage in the same reader; **Back to routes** restores the comparison.
