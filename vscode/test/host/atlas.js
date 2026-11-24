@@ -89,6 +89,12 @@ async function activate(context) {
     await wait(() => vscode.window.activeTextEditor?.document === doc, doc.uri.path);
     return editor;
   }
+  function assertSeparateNodes(first, second) {
+    assert.ok(first?.width > 80 && second?.width > 80, 'Both graph nodes have readable width');
+    assert.ok(first.x + first.width <= second.x || second.x + second.width <= first.x ||
+      first.y + first.height <= second.y || second.y + second.height <= first.y,
+      'Graph nodes occupy separate positions');
+  }
   function observePanel(panel, kind = 'command') {
     if (observed.has(panel)) return observed.get(panel);
     const record = { panel, kind }; observed.set(panel, record); panels.push(record);
@@ -197,7 +203,7 @@ async function activate(context) {
       assert.equal(current.view, 'map');
       const map = await measure(record);
       const nodeBox = id => map.boxes.find(box => box.id === 'component:' + id);
-      assert.ok(nodeBox(diagonal.id).width > 80 && nodeBox(theorem.id).x > nodeBox(diagonal.id).x);
+      assertSeparateNodes(nodeBox(diagonal.id), nodeBox(theorem.id));
       assert.ok(map.edges.includes('citation'));
       assert.equal(current.diagram.selected, 'component:' + theorem.id);
       await click(record, '[data-type="openSource"][data-part="statement"]');
@@ -212,7 +218,7 @@ async function activate(context) {
       const proofId = 'entry:' + theorem.id + ':proof';
       const proofBox = blueprint.boxes.find(box => box.id === proofId);
       const statementBox = blueprint.boxes.find(box => box.id === 'entry:' + theorem.id + ':statement');
-      assert.ok(proofBox?.width > 80 && statementBox?.x > proofBox.x);
+      assertSeparateNodes(proofBox, statementBox);
       assert.ok(blueprint.edges.includes('proof') && blueprint.edges.includes('citation'));
       await click(record, '[data-type="selectNode"][data-node="' + proofId + '"]');
       await wait(() => current.diagram.selected === proofId, 'selected Blueprint proof');

@@ -4,7 +4,7 @@
 const { validateAtlas, overviewComponents, ownerOf } = require('./atlasModel');
 
 const NODE_WIDTH = 188, NODE_HEIGHT = 66, PAGE_SIZE = 32, MARGIN = 72;
-const COLUMN_GAP = 112, ROW_GAP = 64;
+const COLUMN_GAP = 112, ROW_GAP = 64, WRAP_GAP = 44;
 const resultKinds = new Set(['theorem', 'lemma', 'proposition', 'corollary', 'claim', 'fact', 'statement']);
 const componentNode = id => `component:${id}`;
 const entryNode = (id, part) => `entry:${id}:${part}`;
@@ -124,33 +124,74 @@ function sourceLevels(nodes, edges) {
   return new Map(nodes.map(node => [node.id, rank[cluster.get(node.id)]]));
 }
 
-function place(nodes, levels, incident) {
-  const connected = nodes.filter(node => incident.has(node.id)), isolated = nodes.filter(node => !incident.has(node.id));
-  const ranks = [...new Set(connected.map(node => levels.get(node.id)))].sort((a, b) => a - b);
-  const columns = ranks.map(rank => connected.filter(node => levels.get(node.id) === rank));
-  const rows = Math.max(1, ...columns.map(column => column.length));
-  let height = connected.length ? 2 * MARGIN + rows * NODE_HEIGHT + (rows - 1) * ROW_GAP : 0;
-  let width = connected.length ? 2 * MARGIN + ranks.length * NODE_WIDTH + Math.max(0, ranks.length - 1) * COLUMN_GAP : 0;
-  for (let column = 0; column < columns.length; column++) {
-    const group = columns[column], offset = (rows - group.length) * (NODE_HEIGHT + ROW_GAP) / 2;
-    for (let row = 0; row < group.length; row++) {
-      group[row].x = MARGIN + column * (NODE_WIDTH + COLUMN_GAP);
-      group[row].y = MARGIN + offset + row * (NODE_HEIGHT + ROW_GAP);
-    }
+function diagramGeometry(columns, gridCount, gridColumns, rankColumns) {
+  const lanes = [];
+  for (let index = 0; index < columns.length; index += rankColumns) {
+    const groups = columns.slice(index, index + rankColumns);
+    const rows = Math.max(...groups.map(group => group.length));
+    lanes.push({ groups, rows, height: rows * NODE_HEIGHT + (rows - 1) * ROW_GAP });
   }
-  if (isolated.length) {
-    // Absence of a source relation is not a long dependency chain. Keep such
-    // entries in a compact reading grid, separate from the evidenced ranks.
-    const columns = Math.min(4, Math.ceil(Math.sqrt(isolated.length))), rows = Math.ceil(isolated.length / columns);
-    const top = connected.length ? height + ROW_GAP : MARGIN, gapX = 36, gapY = 28;
-    for (let index = 0; index < isolated.length; index++) {
-      isolated[index].x = MARGIN + index % columns * (NODE_WIDTH + gapX);
-      isolated[index].y = top + Math.floor(index / columns) * (NODE_HEIGHT + gapY);
-    }
-    width = Math.max(width, 2 * MARGIN + columns * NODE_WIDTH + (columns - 1) * gapX);
-    height = top + rows * NODE_HEIGHT + (rows - 1) * gapY + MARGIN;
+  const rankWidth = lanes.length ? 2 * MARGIN + rankColumns * NODE_WIDTH + (rankColumns - 1) * COLUMN_GAP : 0;
+  const rankHeight = lanes.length ? 2 * MARGIN + lanes.reduce((sum, lane) => sum + lane.height, 0) + (lanes.length - 1) * WRAP_GAP : 0;
+  const gridRows = Math.ceil(gridCount / gridColumns);
+  const gridTop = rankHeight ? rankHeight + ROW_GAP : MARGIN;
+  const gridWidth = gridCount ? 2 * MARGIN + gridColumns * NODE_WIDTH + (gridColumns - 1) * 36 : 0;
+  const height = gridCount ? gridTop + gridRows * NODE_HEIGHT + (gridRows - 1) * 28 + MARGIN : rankHeight;
+  return { lanes, rankColumns, gridColumns, gridTop, height, width: Math.max(rankWidth, gridWidth, 2 * MARGIN + NODE_WIDTH) };
+}
+
+function place(nodes, viewport) {
+  const groups = new Map(), isolated = [];
+  for (const node of nodes) {
+    if (node.rank === undefined) { isolated.push(node); continue; }
+    if (!groups.has(node.rank)) groups.set(node.rank, []);
+    groups.get(node.rank).push(node);
   }
-  return { width: Math.max(2 * MARGIN + NODE_WIDTH, width), height };
+  const columns = [...groups.keys()].sort((a, b) => a - b).map(rank => groups.get(rank));
+  const maxRanks = Math.max(1, columns.length);
+  const maxGrid = Math.max(1, Math.min(4, Math.ceil(Math.sqrt(isolated.length))));
+  let layout = diagramGeometry(columns, isolated.length, maxGrid, maxRanks);
+  if (viewport) {
+    const scale = ({ width, height }) => Math.min(1.15, (viewport.width - 40) / width, (viewport.height - 40) / height);
+    const candidates = [];
+    for (let rankCount = 1; rankCount <= maxRanks; rankCount++) {
+      for (let gridCount = 1; gridCount <= maxGrid; gridCount++) {
+        const candidate = diagramGeometry(columns, isolated.length, gridCount, rankCount);
+        candidates.push({ candidate, scale: scale(candidate) });
+      }
+    }
+    const bestScale = Math.max(...candidates.map(choice => choice.scale));
+    // Use wider rows when they remain nearly as legible. This avoids turning a
+    // short argument into a single tall column just to gain a few percent.
+    const minimum = bestScale >= .8 ? Math.max(.8, bestScale - .1) : bestScale;
+    layout = candidates.findLast(choice => choice.scale >= minimum).candidate;
+  }
+
+  // Alternate row direction so adjacent ranks on either side of a wrap sit
+  // across a vertical gap. Branches at the same rank stay together.
+  let top = MARGIN;
+  for (const [laneIndex, lane] of layout.lanes.entries()) {
+    for (const [index, group] of lane.groups.entries()) {
+      const column = laneIndex % 2 ? layout.rankColumns - 1 - index : index;
+      const offset = (lane.rows - group.length) * (NODE_HEIGHT + ROW_GAP) / 2;
+      for (const [row, node] of group.entries()) {
+        node.x = MARGIN + column * (NODE_WIDTH + COLUMN_GAP);
+        node.y = top + offset + row * (NODE_HEIGHT + ROW_GAP);
+      }
+    }
+    top += lane.height + WRAP_GAP;
+  }
+  for (const [index, node] of isolated.entries()) {
+    node.x = MARGIN + index % layout.gridColumns * (NODE_WIDTH + 36);
+    node.y = layout.gridTop + Math.floor(index / layout.gridColumns) * (NODE_HEIGHT + 28);
+  }
+  const { width, height, rankColumns, gridColumns } = layout;
+  return { width, height, layoutColumns: `${rankColumns}:${gridColumns}` };
+}
+
+function fitAtlasDiagram(diagram, viewport) {
+  const nodes = diagram.nodes.map(node => ({ ...node }));
+  return { ...diagram, nodes, ...place(nodes, viewport) };
 }
 
 function atlasDiagram(atlas, view, options = {}) {
@@ -178,11 +219,13 @@ function atlasDiagram(atlas, view, options = {}) {
       fromPage: nodePages.get(edge.from), toPage: nodePages.get(edge.to) });
   }
   const incident = new Set(links.edges.flatMap(edge => [edge.from, edge.to]));
-  const dimensions = place(nodes, sourceLevels(model.nodes, links.edges), incident);
+  const levels = sourceLevels(model.nodes, links.edges);
+  for (const node of nodes) if (incident.has(node.id)) node.rank = levels.get(node.id);
+  const dimensions = place(nodes, options.viewport);
   return { nodes, edges, ...dimensions, page: index, pageCount, total,
     selected: visible.has(desired) ? desired : nodes[0]?.id ?? null, omitted, boundaryEdges,
     unresolved: atlas.extraction.references.filter(reference => reference.status !== 'resolved').map(reference => reference.id),
     unmappedReferences: links.unmappedReferences };
 }
 
-module.exports = { atlasDiagram, NODE_WIDTH, NODE_HEIGHT, PAGE_SIZE, MARGIN };
+module.exports = { atlasDiagram, fitAtlasDiagram, NODE_WIDTH, NODE_HEIGHT, PAGE_SIZE, MARGIN };

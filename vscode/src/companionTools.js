@@ -25,7 +25,7 @@ const SETUP = {
  ]},
 };
 const GROUPS={
- readingTools:[['Open document…','openDocument'],['New note in your authoring application…','newZettel'],['Recent documents…','recentNotes'],['Reopen document','reopenDocument'],['Learning materials…','openLearningMaterials'],['Show Contents','openReadingOutline'],['Show backlinks…','showBacklinks'],['Choose notes folder…','chooseNotesFolder']],
+ readingTools:[['Open document…','openDocument'],['New note in your authoring application…','newZettel'],['Recent documents…','recentNotes'],['Reopen document','reopenDocument'],['Notes and Examples…','openLearningMaterials'],['Show Contents','openReadingOutline'],['Show backlinks…','showBacklinks'],['Choose notes folder…','chooseNotesFolder']],
  sourceTools:[['Open saved source…','openOutline'],['Restore saved source from Trash…','restoreSavedSource'],['Import Stacks Project section…','importStacksSection'],['Import Kerodon section…','importKerodonSection'],['Import source (including nLab)…','importSource'],['Find Zotero reference…','findZoteroReference'],['Resume retained Zotero reference…','resumeZoteroReference']],
  calculationTools:[['Open notebook…','openNotebook'],['Retain saved notebook result…','retainNotebookResult'],['Open / compare retained results…','openNotebookResult'],['Export notebook provenance…','exportNotebookProvenance'],['SagePod and Jupyter setup',null,'GETTING_STARTED_WSL_SAGEPOD.md']],
  proofTools:[['Justification…','openJustification'],['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],
@@ -86,9 +86,9 @@ function registerCompanionTools({vscode,register}){
  register('mrw.openLearningMaterials', async () => {
   const selected = await vscode.window.showQuickPick([
    {label:'Operads from finite lists', description:'Notes · list monad and operad substitution', command:'mrw.openOperadsNotes'},
-   {label:'Sums of odd integers', description:'Practice study · induction and two questions', command:'mrw.openStudyExample'},
+   {label:'Sums of odd integers', description:'Induction and two questions', command:'mrw.openStudyExample'},
    {label:'Lean 4 lessons', description:'Built-in and registered lesson packs', command:'mrw.studyLean4'},
-  ], {title:'Learning materials', placeHolder:'Choose notes, a practice study or a lesson', matchOnDescription:true});
+  ], {title:'Notes and Examples', placeHolder:'Choose a note, example, or lesson', matchOnDescription:true});
   if (selected) return vscode.commands.executeCommand(selected.command);
  });
  register('mrw.openNotebook',async()=>{

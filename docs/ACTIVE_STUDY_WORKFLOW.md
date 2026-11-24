@@ -29,7 +29,7 @@ entries, unselected references, duplicate JSON keys and unknown fields are
 rejected. Imported questions remain available offline. These clipboard actions
 make no provider request and run no compiler.
 
-Choose **Learning Materials… → Operads from finite lists** for the notes
+Choose **Notes and Examples… → Operads from finite lists** for the notes
 on Chapter 1 of Heuts and Moerdijk. Their Contents leads from the list monad to
 the associative operad and the general definition. Use
 [Render diagram](TIKZ_WORKFLOW.md#render-a-markdown-note) for the TikZ diagrams.
@@ -97,7 +97,7 @@ exposure for that submission. Receiving help afterward does not relabel earlier
 work. Copying a request or retaining a reply does not establish that help was used
 or that it was useful.
 
-Choose **Learning Materials… → Sums of odd integers** for the offline
+Choose **Notes and Examples… → Sums of odd integers** for the offline
 induction example and two questions. Its history is labeled `practice_demo`, separately from
 research use and automated fixtures. Existing work is preserved.
 

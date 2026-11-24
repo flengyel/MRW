@@ -8,14 +8,14 @@ const { within } = require('./proofGraph');
 const { studyPassages, sources, handoff, readProposal, bindProposal } = require('./proofStudy');
 const { extractAtlasText } = require('./atlasText');
 const { DETAIL_LIMIT, createAtlas, validateAtlas, editAtlas, evidenceSpan, handoffEntries } = require('./atlasModel');
-const { atlasDiagram } = require('./atlasDiagram');
+const { atlasDiagram, fitAtlasDiagram } = require('./atlasDiagram');
 const { atlasHtml, atlasOpenErrorHtml } = require('./atlasView');
 
 const SUFFIX = '.mrw-atlas.json';
 const MAX_ATLAS = 2 * 1024 * 1024;
 const SOURCE_SCHEME = 'mrw-atlas-source';
 const READ_ONLY_ACTIONS = new Set([
-  'selectView', 'selectNode', 'showDiagramPage', 'selectComponent', 'showOverview',
+  'selectView', 'selectNode', 'showDiagramPage', 'fitDiagramLayout', 'selectComponent', 'showOverview',
   'selectPage', 'followEntry', 'openSource', 'return', 'openAsText',
 ]);
 const encode = value => JSON.stringify(value, null, 2) + '\n';
@@ -187,10 +187,13 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     },
   }));
 
-  function render(c, notice = '', focus) {
+  function render(c, notice = '', focus, fittedDiagram) {
     const component = c.atlas.components.find(candidate => candidate.id === c.component);
     const diagramState = c.views[c.view];
-    c.diagram = !component && diagramState ? atlasDiagram(c.atlas, c.view, diagramState) : undefined;
+    c.diagram = !component && diagramState ? fittedDiagram || atlasDiagram(c.atlas, c.view, {
+      ...diagramState, viewport: diagramState.viewport || c.viewport,
+    }) : undefined;
+    c.notice = notice;
     c.panel.webview.html = atlasHtml(c.panel.webview, c.atlas, {
       view: c.view, diagram: c.diagram, readOnly: c.readOnly,
       component: component?.id, page: c.page, focus, notice, proposal: c.pending?.component === component?.id && c.pending?.page === c.page ? c.pending : undefined,
@@ -241,7 +244,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
       // there and continue the saved successor in a separate atlas panel.
       const continuation = {
         component: c.component, page: c.page, view: c.view,
-        views: structuredClone(c.views), pending: c.pending, handoff: c.handoff,
+        views: structuredClone(c.views), viewport: c.viewport, pending: c.pending, handoff: c.handoff,
       };
       let successor;
       try { successor = createPanel(c.root, record, result.path); }
@@ -340,6 +343,19 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         c.page = 0;
         render(c, '', 'atlas-view-' + c.view); return;
       }
+      if (m.type === 'fitDiagramLayout' && c.diagram && m.view === c.view) {
+        const { width, height } = m;
+        if (![width, height].every(value => Number.isSafeInteger(value) && value > 40 && value <= 32768)) return;
+        const state = c.views[c.view];
+        if (state.viewport?.width === width && state.viewport.height === height) return;
+        c.viewport = state.viewport = { width, height };
+        const fitted = fitAtlasDiagram(c.diagram, c.viewport);
+        if (fitted.layoutColumns !== c.diagram.layoutColumns) {
+          const focus = typeof m.focus === 'string' && /^[\w:.-]{1,256}$/.test(m.focus) ? m.focus : 'atlas-view-' + c.view;
+          render(c, c.notice, focus, fitted);
+        }
+        return;
+      }
       if (m.type === 'selectNode' && c.diagram?.nodes.some(node => node.id === m.node)) {
         c.views[c.view].selected = m.node;
         render(c, '', 'diagram-node-' + m.node); return;
@@ -347,11 +363,11 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
       if (m.type === 'showDiagramPage' && c.diagram && Number.isSafeInteger(m.page) && m.page >= 0 && m.page < c.diagram.pageCount) {
         const linked = m.node && c.diagram.boundaryEdges.some(edge =>
           (edge.from === m.node && edge.fromPage === m.page) || (edge.to === m.node && edge.toPage === m.page));
-        c.views[c.view] = { page: m.page, selected: linked ? m.node : undefined };
+        c.views[c.view] = { ...c.views[c.view], page: m.page, selected: linked ? m.node : undefined };
         render(c, '', linked ? 'diagram-node-' + m.node : 'atlas-diagram'); return;
       }
       if (m.type === 'selectComponent' && component) {
-        if (c.diagram) c.views[c.view] = { page: c.diagram.page, selected: c.diagram.selected };
+        if (c.diagram) c.views[c.view] = { ...c.views[c.view], page: c.diagram.page, selected: c.diagram.selected };
         const index = component.itemIds.indexOf(m.entry);
         c.component = component.id;
         c.page = index < 0 ? 0 : Math.floor(index / DETAIL_LIMIT);
@@ -375,7 +391,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
       if (m.type === 'openSource') {
         const span = evidenceSpan(c.atlas, m);
         const { view, diagram, component: origin, page } = c;
-        const viewState = { page: diagram?.page, selected: diagram?.selected };
+        const viewState = { ...c.views[view], page: diagram?.page, selected: diagram?.selected };
         const entry = m.returnEntry || m.entry;
         const focus = diagram?.selected ? 'diagram-node-' + diagram.selected : entry && 'entry-' + entry;
         await showSource(c, span, () => {

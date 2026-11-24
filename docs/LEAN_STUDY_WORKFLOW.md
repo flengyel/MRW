@@ -1,6 +1,6 @@
 # Study Lean 4
 
-Choose **Learning Materials… → Lean 4 lessons** in MRW's **Commands** view.
+Choose **Notes and Examples… → Lean 4 lessons** in MRW's **Commands** view.
 The introductory sequence has three lessons.
 
 1. **Introduction and functions** explains what formalization entails and how
