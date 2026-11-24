@@ -10,6 +10,14 @@ const { hostStoragePath } = require('./hostStorage');
 
 const normalize = text => text.replace(/^\uFEFF/u, '').replace(/\r\n|\r/g, '\n');
 const point = p => [p.line, p.character];
+const sameSpan = (a, b) => !!a && !!b &&
+  ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col'].every(key => a[key] === b[key]);
+
+function retainedTextTitle(outline) {
+  const name = Array.from(path.basename(outline.source.path).replace(/[\p{C}\\]/gu, ' ')).slice(0, 96).join('').trim();
+  const date = /^\d{4}-\d{2}-\d{2}T/u.test(outline.created_at) ? ' ' + outline.created_at.slice(0, 10) : '';
+  return (name || 'Source') + ' (retained' + date + ')';
+}
 
 function retainedOffsets(text) {
   // Saved ranges count Unicode scalars on lines without the UTF-8 BOM. Atlas
@@ -154,7 +162,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
   }));
-  let active, busy = false, focusSerial = 0;
+  let active, recentPassage, busy = false, focusSerial = 0;
   artifactClients?.push({
     async cancelFreeze(){for(const c of panels.values())await c.panel.webview.postMessage({type:'storageRelease'});},
     async freeze(allowDirty = false) {
@@ -288,7 +296,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   }
   async function openDocument(c, artifact = null, pinned) {
     const result = pinned || await bridge(request(c, 'outline_document', { artifact }));
-    const uri = await show(artifact ? result.text : result.text.replace(/^\uFEFF/u, ''), artifact ? 'Retained-outline-artifact' : 'Retained-outline-source', undefined,
+    const uri = await show(artifact ? result.text : result.text.replace(/^\uFEFF/u, ''), artifact ? 'Retained artifact' : retainedTextTitle(c.result.outline), undefined,
       { viewColumn: vscode.ViewColumn.One });
     if (!artifact) retainedViews.set(uri.toString(), { id: c.result.outline.id, revision: result.source_revision,
       textRevision: digest(normalize(result.text)) });
@@ -698,18 +706,37 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const document = editor.document, version = document.version, selection = editor.selection;
     const listed = await bridge({ method: 'outline_list', store, project_root: root });
     if (!listed.outlines.length) throw new Error('No saved sources exist for this project.');
-    const outline = await vscode.window.showQuickPick(listed.outlines.map(o => ({ label: o.title || path.basename(o.path),
-      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id })), { placeHolder: 'Open a saved source' });
+    const choices = listed.outlines.map(o => ({ label: o.title || path.basename(o.path),
+      description: o.locator || o.path, detail: o.upstream_revision || o.revision.slice(0, 12), id: o.id }));
+    const recentSource = recentPassage?.store === store && recentPassage.root === root
+      ? choices.find(o => o.id === recentPassage.id) : undefined;
+    if (recentSource) choices.unshift({ label: recentPassage.title, description: 'Recently retained passage',
+      detail: recentSource.label, recent: true });
+    const outline = await vscode.window.showQuickPick(choices, {
+      placeHolder: recentSource ? 'Choose a saved source or the recently retained passage' : 'Choose a saved source',
+    });
     if (!outline) return;
-    const loaded = await bridge({ method: 'outline_load', store, project_root: root, id: outline.id });
-    const target = await vscode.window.showQuickPick([{ label: 'Whole saved source', region: null },
-      ...loaded.outline.regions.map(r => ({ label: r.title,
-        description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col} (scalar columns)`, region: r.id }))],
-    { placeHolder: 'Choose the whole source or an exact saved passage' });
-    if (!target) return;
-    const result = await bridge({ method: 'outline_reference', store, project_root: root, id: outline.id,
-      revision: loaded.revision, region: target.region });
-    if (vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
+    const id = outline.recent ? recentPassage.id : outline.id;
+    const loaded = await bridge({ method: 'outline_load', store, project_root: root, id });
+    let region;
+    if (outline.recent) {
+      const saved = loaded.outline.regions.find(r => r.id === recentPassage.region);
+      if (!sameSpan(saved?.span, recentPassage.span)) {
+        recentPassage = undefined;
+        throw new Error('The recently retained passage changed. Choose a passage from its saved source.');
+      }
+      region = saved.id;
+    } else {
+      const target = await vscode.window.showQuickPick([{ label: 'Whole saved source', region: null },
+        ...loaded.outline.regions.map(r => ({ label: r.title,
+          description: `Lines ${r.span.start_line}:${r.span.start_col}–${r.span.end_line}:${r.span.end_col}`, region: r.id }))],
+      { placeHolder: 'Choose the whole source or an exact saved passage' });
+      if (!target) return;
+      region = target.region;
+    }
+    const result = await bridge({ method: 'outline_reference', store, project_root: root, id,
+      revision: loaded.revision, region });
+    if (document.isClosed || vscode.window.activeTextEditor !== editor || document.version !== version || !editor.selection.isEqual(selection)) {
       throw new Error('Markdown or cursor changed during selection; no reference was inserted.');
     }
     const link = `[${result.label}](${result.reference})`;
@@ -730,7 +757,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const region = result.outline.regions.find(r => r.id === result.reference.region);
     const part = result.outline.published?.parts?.[region?.id];
     const renderedExact = presentation.reading && result.reference.status === 'unchanged' && part && !region.collapsed &&
-      ['source_revision', 'start_line', 'start_col', 'end_line', 'end_col'].every(key => part.span[key] === region.span[key]);
+      sameSpan(part.span, region.span);
     // Changed/removed associations still open their original pinned text. A
     // current rendered region is used only after the existing resolver accepts it.
     if (result.document && !renderedExact) await openDocument(c, null, result.document);
@@ -877,7 +904,19 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (!applied) throw new Error('The editor declined the note insertion.');
     vscode.window.setStatusBarMessage('MRW: Note inserted into the document. Save with Ctrl+S.', 6000);
   }));
-  async function createFromSelection(invocation){
+  async function addPassage(c, selected, announce) {
+    const result = await mutate(c, { kind: 'add_region', ...selected });
+    const region = result.outline.regions.at(-1);
+    c.selected = region.id;
+    await send(c, result);
+    if (announce) {
+      recentPassage = { store: c.store, root: c.root, id: result.outline.id, region: region.id, title: region.title, span: region.span };
+      const filename = path.basename(result.outline.source.path);
+      vscode.window.setStatusBarMessage(`MRW: Retained “${region.title}” from ${filename}.`, 6000);
+    }
+    return result;
+  }
+  async function createFromSelection(invocation, announce = false){
     const {editor,document,version,range}=invocation;
     if(document.isClosed||document.version!==version)throw new Error('The selected source changed before retention.');
     if (document.isDirty) throw new Error('Save the source before creating an exact saved source.');
@@ -891,13 +930,13 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(store); throw error; }
     const c = await display(result, store, root);
     if (!range.isEmpty) {
-      const added = await mutate(c, { kind: 'add_region', start: point(range.start), end: point(range.end) });
-      c.selected = added.outline.regions.at(-1).id;
-      await send(c, added);
+      await addPassage(c, { start: point(range.start), end: point(range.end) }, announce);
+    } else if (announce) {
+      vscode.window.setStatusBarMessage(`MRW: Retained ${path.basename(result.outline.source.path)} as a source.`, 6000);
     }
     return c.result;
   }
-  register('mrw.createOutline', () => locked(async()=>{const editor=ordinaryEditor();return createFromSelection({editor,document:editor.document,version:editor.document.version,range:editor.selection});}));
+  register('mrw.createOutline', () => locked(async()=>{const editor=ordinaryEditor();return createFromSelection({editor,document:editor.document,version:editor.document.version,range:editor.selection}, true);}));
   register('mrw.refreshSourceOutline', () => locked(() => refresh(current())));
   register('mrw.openOutline', () => locked(async () => {
     const { store, root } = await storage(vscode.window.activeTextEditor);
@@ -914,8 +953,8 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   }));
   register('mrw.addOutlineRegion', () => locked(async () => {
     const c = current(); const selected = await selection(c);
-    const result = await mutate(c, { kind: 'add_region', ...selected }); c.selected = result.outline.regions.at(-1).id;
-    await send(c, result); c.panel.reveal(c.panel.viewColumn); return result;
+    const result = await addPassage(c, selected, true);
+    c.panel.reveal(c.panel.viewColumn); return result;
   }));
   register('mrw.setOutlineStatement', () => locked(async () => {
     const c = current(), selected = await selection(c), region = await selectedRegion(c);

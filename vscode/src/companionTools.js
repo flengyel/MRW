@@ -26,7 +26,18 @@ const SETUP = {
 };
 const GROUPS={
  readingTools:[['Open document…','openDocument'],['New note in your authoring application…','newZettel'],['Recent documents…','recentNotes'],['Reopen document','reopenDocument'],['Examples…','openLearningMaterials'],['Show Contents','openReadingOutline'],['Show backlinks…','showBacklinks'],['Choose notes folder…','chooseNotesFolder']],
- sourceTools:[['Open saved source…','openOutline'],['Restore saved source from Trash…','restoreSavedSource'],['Import Stacks Project section…','importStacksSection'],['Import Kerodon section…','importKerodonSection'],['Import source (including nLab)…','importSource'],['Find Zotero reference…','findZoteroReference'],['Resume retained Zotero reference…','resumeZoteroReference']],
+ sourceTools:[
+  ['Open Saved Source…','openOutline'],
+  ['Retain Document as Source','createOutline'],
+  ['Insert Source or Passage Link…','insertOutlineReference'],
+  ['Follow Source or Passage Link at Cursor','followOutlineReference'],
+  ['Restore saved source from Trash…','restoreSavedSource'],
+  ['Import Stacks Project section…','importStacksSection'],
+  ['Import Kerodon section…','importKerodonSection'],
+  ['Import source (including nLab)…','importSource'],
+  ['Find Zotero reference…','findZoteroReference'],
+  ['Resume retained Zotero reference…','resumeZoteroReference'],
+ ],
  calculationTools:[['Open notebook…','openNotebook'],['Retain saved notebook result…','retainNotebookResult'],['Open / compare retained results…','openNotebookResult'],['Export notebook provenance…','exportNotebookProvenance'],['SagePod and Jupyter setup',null,'GETTING_STARTED_WSL_SAGEPOD.md']],
  proofTools:[['Justification…','openJustification'],['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],
  earlierWork:[['Resume saved study','resumeStudy'],['Resume investigation','resumeInvestigation'],

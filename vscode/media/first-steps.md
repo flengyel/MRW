@@ -220,11 +220,13 @@ Retain text when a stable revision is needed for citations or reader annotations
 Ordinary note opening does not require this step.
 
 1. Open a UTF-8 text, Markdown or TeX source and save its editor changes.
-2. Select the passage and run **MRW: Retain Document as Source**. MRW keeps that
-   revision and opens its reader. Later original-file edits do not replace it.
-3. In a working Markdown document, use **MRW: Insert Source or Passage Link…**.
-   The link shows a short caption. Select it in **Contents** to read the saved
-   text. **Return to Document** restores the citation's exact location.
+2. Select the passage and choose **Sources and references → Retain Document as
+   Source**. The status bar confirms the passage by name. MRW keeps the selected
+   revision for later reading.
+3. In a working Markdown document, choose **Insert Source or Passage Link…**
+   from the same menu. Choose the recently retained passage, or browse a saved
+   source. Follow the caption in **Contents** to read the retained text.
+   **Return to Document** restores the citation’s exact location.
 
 **MRW: Open Saved Source…** reopens retained material. When opened directly,
 its **Open <document>** control opens the selected Contents document. Following

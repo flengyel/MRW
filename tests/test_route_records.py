@@ -4,6 +4,7 @@ from hashlib import sha256
 import json
 import os
 from pathlib import Path
+import platform
 import subprocess
 import tempfile
 import unittest
@@ -17,6 +18,70 @@ from mrw.editor_bridge import dispatch
 
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=os.environ.get('MRW_ROUTE_CHECKER_CACHE')
+
+
+@unittest.skipUnless(platform.system() == 'Linux' and platform.machine() in ('x86_64', 'AMD64'),
+                     'Route checker setup supports Linux x86-64')
+class OfflineSetupTests(unittest.TestCase):
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory(prefix='mrw-route-setup-')
+        self.addCleanup(temp.cleanup)
+        self.root = Path(temp.name).resolve()
+        self.assets = self.root / 'assets'
+        for name, entry in current_engine()['sources'].items():
+            destination = self.assets / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes((ROOT / entry['source']).read_bytes())
+        self.elan = self.root / 'elan'
+        self.shims = self.elan / 'bin'
+        self.shims.mkdir(parents=True)
+        manager = self.shims / 'elan'
+        manager.write_text('#!/bin/sh\nexit 98\n')
+        manager.chmod(0o700)
+        self.cache = self.root / 'cache'
+        self.env = {'HOME': str(self.root), 'ELAN_HOME': str(self.elan), 'PATH': str(self.shims)}
+
+    def make_local_tools(self):
+        root = self.elan / 'toolchains' / 'leanprover--lean4---v4.32.2'
+        tools = root / 'bin'
+        tools.mkdir(parents=True)
+        library = root / 'lib' / 'lean'
+        library.mkdir(parents=True)
+        (library / 'Init.olean').touch()
+        for name in ('lake', 'lean'):
+            binary = tools / name
+            binary.write_text('#!/bin/sh\nexit 97\n')
+            binary.chmod(0o700)
+        return tools
+
+    def test_missing_toolchain_refuses_without_starting_any_process(self):
+        with patch.dict(os.environ, self.env, clear=True):
+            with patch('mrw.route_checker.process', side_effect=AssertionError('started a process')):
+                with self.assertRaisesRegex(ValueError, r'Lean 4\.32\.2 is missing.*elan toolchain install leanprover/lean4:v4\.32\.2'):
+                    dispatch(dict(protocol=1, method='route_setup', assets=str(self.assets), cache=str(self.cache)))
+        self.assertEqual(list(self.cache.glob('.building-route-*')), [])
+
+    def test_redirected_lake_shim_is_refused(self):
+        tools = self.make_local_tools()
+        (tools / 'lake').unlink()
+        (tools / 'lake').symlink_to(self.shims / 'elan')
+        with patch.dict(os.environ, self.env, clear=True):
+            with patch('mrw.route_checker.process', side_effect=AssertionError('started a process')):
+                with self.assertRaisesRegex(ValueError, 'missing or incomplete'):
+                    setup(self.assets, self.cache)
+
+    def test_build_calls_local_lake_with_no_elan_lookup(self):
+        tools = self.make_local_tools()
+        with patch.dict(os.environ, self.env, clear=True):
+            with patch('mrw.route_checker.process', side_effect=ValueError('fixture stopped before build')) as launch:
+                with self.assertRaisesRegex(ValueError, 'fixture stopped'):
+                    setup(self.assets, self.cache)
+        self.assertEqual(launch.call_args.args[0], [str(tools / 'lake'), 'build', 'route_search'])
+        environment = launch.call_args.kwargs['env']
+        self.assertEqual(environment['ELAN'], '')
+        self.assertNotIn('ELAN_HOME', environment)
+        self.assertEqual(environment['PATH'].split(os.pathsep)[0], str(tools))
+        self.assertEqual(list(self.cache.glob('.building-route-*')), [])
 
 
 class RouteMetadataTests(unittest.TestCase):

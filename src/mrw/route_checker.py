@@ -98,6 +98,32 @@ def process(argv, *, cwd, env, data=None, timeout=30, limit=8*1024*1024):
     return bytes(out),bytes(err)
 
 
+def _installed_lake(toolchain):
+    # Elan and Lake use this encoding for pinned distribution directories.
+    # Resolve the local installation without executing a toolchain manager.
+    elan_home = os.environ.get('ELAN_HOME')
+    home = Path(elan_home).expanduser() if elan_home else Path.home() / '.elan'
+    directory = toolchain.replace('/', '--').replace(':', '---')
+    version = toolchain.rsplit(':', 1)[-1].removeprefix('v')
+    instructions = (
+        f'Lean {version} is missing or incomplete on this workspace host. '
+        f'Run `elan toolchain install {toolchain}` in its terminal, '
+        'then run Build Local Justification Checker again.'
+    )
+    try:
+        install = (home / 'toolchains' / directory).resolve(strict=True)
+        bin_dir = install / 'bin'
+        binaries = (bin_dir / 'lean', bin_dir / 'lake')
+        if not (install / 'lib' / 'lean' / 'Init.olean').is_file():
+            raise ValueError(instructions)
+        for binary in binaries:
+            if binary.resolve(strict=True) != binary or not binary.is_file() or not os.access(binary, os.X_OK):
+                raise ValueError(instructions)
+    except (OSError, RuntimeError) as error:
+        raise ValueError(instructions) from error
+    return bin_dir / 'lake'
+
+
 def setup(assets, cache):
     engine=current_engine();target=root(cache);parent=target.parent
     if platform.system()!='Linux' or platform.machine() not in ('x86_64','AMD64'):
@@ -109,16 +135,16 @@ def setup(assets, cache):
     private_directory(parent)
     with file_lock(target,parent/'locks'):
         if target.exists():verify(cache);return dict(ready=True,path=str(target),built=False)
-        elan=shutil.which('elan')
-        if not elan: raise ValueError('Install Lean/elan on this workspace host first. Setup downloads nothing.')
+        lake = _installed_lake(engine['toolchain'])
         temp=Path(tempfile.mkdtemp(prefix='.building-route-',dir=parent))
         try:
             for name in engine['sources']:
                 dest=temp/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source/name,dest)
-            env={k:v for k,v in os.environ.items() if k in ('HOME','ELAN_HOME','USER','TMPDIR')}
-            env.update(PATH=str(Path(elan).parent)+':/usr/bin:/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8',NO_COLOR='1',GIT_TERMINAL_PROMPT='0')
-            # `elan run` installs only with --install. The copied manifest has no dependencies.
-            argv=[elan,'run',engine['toolchain'],'lake','build','route_search']
+            env = {key: value for key, value in os.environ.items() if key in ('HOME', 'USER', 'TMPDIR')}
+            env.update(PATH=str(lake.parent) + ':/usr/bin:/bin', ELAN='', LANG='C.UTF-8',
+                       LC_ALL='C.UTF-8', NO_COLOR='1', GIT_TERMINAL_PROMPT='0')
+            # The checked runtime manifest has no dependencies. Start the installed Lake directly.
+            argv = [str(lake), 'build', 'route_search']
             out,err=process(argv,cwd=temp,env=env,timeout=180,limit=2*1024*1024)
             (temp/'build.log').write_bytes(out+err)
             exe=temp/'.lake/routes-build/bin/route_search'
