@@ -292,6 +292,6 @@ test('a retained source provides the exact manuscript for an atlas correspondenc
   const retained = { ...source, uri };
   assert.equal(sourcePacket(retained).uri, uri);
   await h.controller.begin({ root: '/tmp/mrw-project', source: retained });
-  assert.match(h.view().messages.at(-1).html, /Triangle/);
+  assert.match(h.view().messages.at(-1).html, /inert content/);
   assert.deepEqual(h.methods(), []);
 });
