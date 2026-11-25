@@ -2,6 +2,7 @@
 
 // A view of retained source structure, never an inference or proof checker.
 const { validateAtlas, overviewComponents, ownerOf } = require('./atlasModel');
+const { atlasDisplayEntries } = require('./atlasText');
 
 const NODE_WIDTH = 188, NODE_HEIGHT = 66, PAGE_SIZE = 32, MARGIN = 72;
 const COLUMN_GAP = 112, ROW_GAP = 64, WRAP_GAP = 44;
@@ -28,7 +29,8 @@ function componentTitle(component, entry) {
 }
 
 function sourceNodes(atlas, view, visibleEntries) {
-  const entries = new Map(atlas.extraction.entries.map(entry => [entry.id, entry]));
+  const displayEntries = atlasDisplayEntries(atlas);
+  const entries = new Map(displayEntries.map(entry => [entry.id, entry]));
   const components = overviewComponents(atlas), originals = new Map(atlas.components.map(component => [component.id, component]));
   const owner = new Map();
   for (const component of components) for (const id of component.itemIds) owner.set(id, component);
@@ -44,7 +46,7 @@ function sourceNodes(atlas, view, visibleEntries) {
       for (const id of ids) main.set(id, node.id);
     }
   } else {
-    for (const entry of atlas.extraction.entries) {
+    for (const entry of displayEntries) {
       if (visibleEntries && !visibleEntries.has(entry.id)) continue;
       const part = entry.statement && entry.kind !== 'proof' ? 'statement' : 'entry';
       const kind = resultKinds.has(entry.kind) && entry.statement ? 'statement' : entry.kind;

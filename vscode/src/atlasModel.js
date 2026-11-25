@@ -12,6 +12,22 @@ const text = (value, limit) => typeof value === 'string' && value.length <= limi
 const range = (value, length) => value && Number.isSafeInteger(value.start) &&
   Number.isSafeInteger(value.end) && 0 <= value.start && value.start < value.end && value.end <= length;
 
+function validLabelNumbers(entry) {
+  if (entry.labelNumbers === undefined) return true;
+  if (!Array.isArray(entry.labels) || !Array.isArray(entry.labelNumbers) ||
+      entry.labelNumbers.length > entry.labels.length || entry.labelNumbers.length > 20000) return false;
+  const labels = new Set(entry.labels);
+  const seen = new Set();
+  return entry.labelNumbers.every(pair => {
+    if (!Array.isArray(pair) || pair.length !== 2) return false;
+    const [label, number] = pair;
+    if (!text(label, 1024) || !labels.has(label) || seen.has(label) ||
+        !text(number, 64) || !/^[A-Za-z0-9]+(?:[.:-][A-Za-z0-9]+)*$/u.test(number)) return false;
+    seen.add(label);
+    return true;
+  });
+}
+
 function validateAtlas(atlas) {
   const { source, extraction, components } = atlas ?? {};
   if (atlas?.version !== 1 || !source || !text(source.text, MAX_TEXT) || !source.text.trim() ||
@@ -34,6 +50,7 @@ function validateAtlas(atlas) {
         !text(entry.title, 1024) || !entry.title.trim() || !range(entry, length) ||
         (entry.printedTitle != null && (!text(entry.printedTitle, 240) || !entry.printedTitle.trim())) ||
         (entry.printedNumber != null && (!text(entry.printedNumber, 64) || !entry.printedNumber.trim())) ||
+        !validLabelNumbers(entry) ||
         (entry.frontMatter != null && typeof entry.frontMatter !== 'boolean') ||
         (entry.unnumbered != null && typeof entry.unnumbered !== 'boolean') ||
         ['proof', 'statement'].some(part => entry[part] != null &&

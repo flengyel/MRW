@@ -349,6 +349,40 @@ test('saving from a native atlas preserves its opened revision and continues a s
   assert.equal(h.errors.length, 0);
 });
 
+test('a numbered equation link opens retained text from a 0.23.61 atlas without changing its bytes', async t => {
+  const h = await harness(t);
+  const text = String.raw`\newtheorem{theorem}{Theorem}
+\begin{equation}\label{eq:target}x=x\end{equation}
+\begin{theorem}\label{thm:result}By \eqref{eq:target}, the claim follows.\end{theorem}
+`;
+  const extraction = extractAtlasText(text, 'latex');
+  const equation = extraction.entries.find(entry => entry.label === 'eq:target');
+  const theorem = extraction.entries.find(entry => entry.label === 'thm:result');
+  for (const entry of extraction.entries) delete entry.labelNumbers;
+  delete equation.printedNumber;
+  delete equation.printedTitle;
+  const record = { ...createAtlas({ source: {
+    title: 'Prior capture', uri: 'file:///capture.tex', text, language: 'latex', revision: digest(text),
+  }, extraction }), id: randomUUID() };
+  const file = path.join(h.root, 'prior.mrw-atlas.json');
+  await fs.writeFile(file, JSON.stringify(record));
+  const original = await fs.readFile(file);
+  const document = await h.custom.provider.openCustomDocument(h.uri(file), {}, {});
+  const panel = h.panel();
+  await h.custom.provider.resolveCustomEditor(document, panel, {});
+  await panel.receive({ type: 'selectComponent', component: theorem.id });
+  const [, type, entry, part] = /<a class="atlas-inline-reference"[^>]+data-type="([^"]+)" data-entry="([^"]+)" data-part="([^"]+)">\(1\)<\/a>/
+    .exec(panel.webview.html);
+  await panel.receive({ type, entry, part });
+  const [, exactDocument, options] = h.calls.findLast(call => call[0] === 'showTextDocument');
+  assert.equal(exactDocument.uri.scheme, 'mrw-atlas-source');
+  assert.equal(exactDocument.getText().slice(
+    exactDocument.offsetAt(options.selection.start), exactDocument.offsetAt(options.selection.end)),
+  String.raw`\begin{equation}\label{eq:target}x=x\end{equation}`);
+  assert.deepEqual(await fs.readFile(file), original);
+  assert.deepEqual(h.errors, []);
+});
+
 test('a saved successor that fails to open leaves the current atlas correction available', async t => {
   const h = await harness(t);
   const file = path.join(h.root, 'original.mrw-atlas.json');

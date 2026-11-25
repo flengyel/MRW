@@ -147,7 +147,7 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .proof-navigation{display:flex;gap:12px;margin:10px 0}.proof-navigation button{background:none;color:var(--vscode-textLink-foreground);padding:3px 0;margin:0;text-decoration:underline}.reader-note-text{white-space:pre-wrap;line-height:1.6}
 .save-feedback{min-height:1.2em}.save-confirmation{color:var(--vscode-testing-iconPassed,var(--vscode-foreground))}
 .source-location{flex-basis:100%;margin:3px 0;font-size:.9em}.return-context{font-size:.9em}.region,[data-reference]{scroll-margin-top:var(--reader-toolbar-height,60px)}.control-help{position:fixed;bottom:8px;left:12px;right:12px;z-index:5;margin:0;padding:8px;border:1px solid var(--vscode-focusBorder);background:var(--vscode-editorHoverWidget-background,var(--vscode-editor-background));color:var(--vscode-editorHoverWidget-foreground,var(--vscode-editor-foreground));pointer-events:none;white-space:pre-wrap}button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--vscode-focusBorder);outline-offset:2px}
-.region.compact-proof{border:0;margin:0;padding:2px 0}.proof-disclosure{background:none;color:var(--vscode-textLink-foreground);padding:2px 0;margin:0;text-align:left}.reader-notes{margin:14px 0}.reader-notes>summary{cursor:pointer;font-weight:600;padding:4px 0}
+.region.compact-proof{border:0;margin:0;padding:2px 0}.region.selected{padding-inline:10px}.proof-disclosure{background:none;color:var(--vscode-textLink-foreground);padding:2px 0;margin:0;text-align:left}.reader-notes{margin:14px 0}.reader-notes>summary{cursor:pointer;font-weight:600;padding:4px 0}
 .reader-diagram{margin:14px 0}.reader-diagram img{max-width:100%;height:auto;background:white;padding:6px;box-sizing:border-box}.reader-diagram figcaption{margin:4px 0}
 .reader-diagram[data-appearance="dark"] img{background:#1e1e1e}.reader-diagram label{display:inline-block;margin-right:8px}
 .proof-map{overflow:auto;max-width:100%;margin:12px 0}.proof-map svg{display:block}.proof-map text{cursor:pointer}
@@ -480,7 +480,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       // Trusted bundled code only: no source/annotation text enters this HTML.
       // Inline the nonce script so offline WSL use needs no resource fetch.
       const support = [];
-      for (const name of ['media/markdown-it/markdown-it.js', 'media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/atlasPreview.js']) {
+      for (const name of ['media/markdown-it/markdown-it.js', 'media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/mathNegation.js', 'src/annotationView.js', 'src/atlasPreview.js']) {
         support.push(await fs.readFile(path.join(context.extensionPath, name), 'utf8'));
       }
       for(const name of ['sourceReader.js','sourceRendering.js'])support.push(await fs.readFile(path.join(context.extensionPath, 'src',name), 'utf8'));

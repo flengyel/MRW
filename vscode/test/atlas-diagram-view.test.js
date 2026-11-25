@@ -62,7 +62,8 @@ test('bounded diagram pages expose off-page evidence and paging instead of losin
 });
 
 test('self-reference arcs stay outside node text and geometry accepts only numeric positions',()=>{
-  const node={id:'self',x:72,y:72};const arc=edgePath(node,node);assert.match(arc.path,/^M /);assert.ok(arc.x>node.x+188);assert.ok(Number.isFinite(arc.y));
+  const node={id:'self',x:72,y:72};
+  assert.equal(edgePath(node,node), 'M 260 105 C 322 105 322 25 166 72');
   assert.equal(diagramPositionStyles({nodes:[{x:'bad',y:Infinity}],width:NaN,height:NaN}).includes('NaN'),false);
 });
 
@@ -287,5 +288,10 @@ test('coincident citation arrows combine labels while keeping every exact occurr
  diagram.edges.push({...edge,label:'another-label',referenceId:'another-reference',references:['another-reference','third-reference']});diagram.selected=edge.from;
  const html=atlasHtml(null,record,{view:'map',diagram});
  assert.equal([...html.matchAll(/data-relation="citation"/g)].length,1);
- assert.match(html,/lem:base · another-label/);assert.match(html,/data-reference="another-reference"/);assert.match(html,/data-reference="third-reference"/);
+ const edges = html.match(/<svg class="diagram-edges"[\s\S]+?<\/svg>/)[0];
+ assert.match(edges, /<title>[^<]+lem:base · another-label<\/title>/);
+ assert.doesNotMatch(edges, /<text[\s>]/);
+ assert.match(html, /class="muted">[^<]*another-label<\/p>/);
+ assert.match(html, /data-reference="another-reference"/);
+ assert.match(html, /data-reference="third-reference"/);
 });

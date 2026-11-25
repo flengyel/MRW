@@ -13,7 +13,7 @@ const short = (value, length) => {
 function edgePath(from, to) {
   const ax = finite(from.x) + NODE_WIDTH / 2, ay = finite(from.y) + NODE_HEIGHT / 2;
   const bx = finite(to.x) + NODE_WIDTH / 2, by = finite(to.y) + NODE_HEIGHT / 2;
-  if (from.id === to.id) return {path:`M ${ax + NODE_WIDTH / 2} ${ay} C ${ax + NODE_WIDTH / 2 + 62} ${ay} ${ax + NODE_WIDTH / 2 + 62} ${ay - 80} ${ax} ${ay - NODE_HEIGHT / 2}`,x:ax + NODE_WIDTH / 2 + 34,y:ay - 42};
+  if (from.id === to.id) return `M ${ax + NODE_WIDTH / 2} ${ay} C ${ax + NODE_WIDTH / 2 + 62} ${ay} ${ax + NODE_WIDTH / 2 + 62} ${ay - 80} ${ax} ${ay - NODE_HEIGHT / 2}`;
   let sx, sy, tx, ty, curve;
   if (Math.abs(by - ay) > Math.abs(bx - ax) / 2) {
     const direction = by >= ay ? 1 : -1;
@@ -26,7 +26,7 @@ function edgePath(from, to) {
     tx = bx - direction * NODE_WIDTH / 2; ty = by;
     curve = `C ${(sx + tx) / 2} ${sy} ${(sx + tx) / 2} ${ty} ${tx} ${ty}`;
   }
-  return { path: `M ${sx} ${sy} ${curve}`, x: (sx + tx) / 2, y: (sy + ty) / 2 };
+  return `M ${sx} ${sy} ${curve}`;
 }
 
 function diagramHtml(atlas, index, options, render) {
@@ -78,10 +78,10 @@ function diagramHtml(atlas, index, options, render) {
           <svg class="diagram-edges" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">
             <defs><marker id="atlas-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 9 4.5 L 0 9 z"/></marker><marker id="atlas-proof-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 9 4.5 L 0 9 z"/></marker></defs>
             ${[...arcs.values()].map(edge => {
-              const route = edgePath(byId.get(edge.from), byId.get(edge.to));
+              const path = edgePath(byId.get(edge.from), byId.get(edge.to));
               const selectedEdge = selected && (edge.from === selected.id || edge.to === selected.id);
               const label = edge.labels.join(' · ');
-              return `<g class="diagram-edge${selectedEdge ? ' is-related' : ''}" data-kind="${escape(edge.kind)}"><title>${escape(byId.get(edge.from).title)} → ${escape(byId.get(edge.to).title)}: ${escape(short(label || edge.kind, 500))}</title><path d="${route.path}" data-relation="${escape(edge.kind === 'proof-of' ? 'proof' : edge.kind)}" marker-end="url(#${edge.kind === 'citation' ? 'atlas-arrow' : 'atlas-proof-arrow'})"/>${label ? `<text x="${route.x}" y="${route.y - 7}" text-anchor="middle">${escape(short(label, 35))}</text>` : ''}</g>`;
+              return `<g class="diagram-edge${selectedEdge ? ' is-related' : ''}" data-kind="${escape(edge.kind)}"><title>${escape(byId.get(edge.from).title)} → ${escape(byId.get(edge.to).title)}: ${escape(short(label || edge.kind, 500))}</title><path d="${path}" data-relation="${escape(edge.kind === 'proof-of' ? 'proof' : edge.kind)}" marker-end="url(#${edge.kind === 'citation' ? 'atlas-arrow' : 'atlas-proof-arrow'})"/></g>`;
             }).join('')}
           </svg>
           ${nodes.map((node, position) => `<button type="button" class="diagram-node diagram-position-${position}${node.id === selected?.id ? ' is-selected' : ''}${adjacent.some(edge => edge.from === node.id || edge.to === node.id) ? ' is-related' : ''}" id="diagram-node-${escape(node.id)}" data-type="selectNode" data-node="${escape(node.id)}" data-x="${finite(node.x)}" data-y="${finite(node.y)}" aria-pressed="${node.id === selected?.id}" title="${escape(node.title)}"><span class="diagram-kind">${escape(node.kind || 'component')}</span><span class="diagram-title">${escape(short(node.title, 66))}</span></button>`).join('')}
@@ -131,7 +131,6 @@ const diagramStyles = `
   .diagram-edge[data-kind="proof"] > path, .diagram-edge[data-kind="proof-of"] > path { stroke-dasharray: 6 4; stroke: var(--vscode-charts-green, var(--vscode-descriptionForeground)); }
   .diagram-edges #atlas-proof-arrow path { fill: var(--vscode-charts-green, var(--vscode-descriptionForeground)); }
   .diagram-edge.is-related > path { stroke: var(--vscode-charts-blue, var(--vscode-focusBorder)); opacity: 1; stroke-width: 2; }
-  .diagram-edge > text { fill: var(--vscode-editor-foreground); stroke: var(--vscode-editor-background); stroke-width: 5px; stroke-linejoin: round; paint-order: stroke; font-family: var(--vscode-font-family); font-size: 11px; }
   .diagram-node { position: absolute; width: 188px; height: 66px; margin: 0; padding: 7px 10px; text-align: left; overflow: hidden; display: flex; flex-direction: column; gap: 3px; border-radius: 4px; color: var(--vscode-editor-foreground); background: var(--vscode-sideBar-background, var(--vscode-editor-background)); border: 1px solid var(--vscode-panel-border, var(--vscode-descriptionForeground)); box-shadow: 0 1px 3px var(--vscode-widget-shadow); }
   .diagram-node:hover { background: var(--vscode-list-hoverBackground); border-color: var(--vscode-descriptionForeground); }
   .diagram-node.is-related { border-color: var(--vscode-charts-blue, var(--vscode-focusBorder)); }

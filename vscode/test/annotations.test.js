@@ -37,7 +37,7 @@ function view() {
     } },
   };
   globals.window = globals;
-  for (const name of ['media/katex/auto-render.min.js', 'src/annotationView.js']) {
+  for (const name of ['media/katex/auto-render.min.js', 'src/mathNegation.js', 'src/annotationView.js']) {
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', name), 'utf8'), globals);
   }
   const root = new Node('section');
@@ -146,3 +146,12 @@ test('Theme falls back to a readable paper image when a dark rendering is unavai
 test('bundled Markdown links and citation display preserve exact mathematical annotation text',()=>{const h=view();h.globals.markdownit=require('../media/markdown-it/markdown-it');const text='Let \\(X\\times_Y X\\). [Source](https://example.test) and [@a].';h.render(text,{citationView:{citations:{'[@a]':{text:'(Author 2020)'}},status:'Local bibliography snapshot'}});assert.equal(h.raw().textContent,text);assert.equal(h.math().length,1);const a=h.root.all().find(n=>n.nodeName==='a');assert.equal(a.href,'https://example.test');assert.equal(a.textContent,'Source');assert.match(h.root.childNodes[0].textContent,/Author 2020/);});
 
 test('annotation citation examples stay exact beside a live resolved citation',()=>{const h=view();h.globals.markdownit=require('../media/markdown-it/markdown-it');h.render('Live [@a]. Code `[@a]`. Escaped \\[@a].',{citationView:{citations:{'[@a]':{text:'(Author 2020)'}}}});const visible=h.root.childNodes[0].textContent;assert.match(visible,/Live \(Author 2020\)/);assert.match(visible,/Code `\[@a\]`/);assert.ok(visible.includes('Escaped \\[@a].'));});
+
+test('reader annotations render a negated relation and preserve the exact TeX', () => {
+  const h = view(), text = String.raw`\(g\not\approx_T z\)`;
+  h.render(text);
+  assert.equal(h.math().length, 1);
+  assert.match(h.math()[0].mathml, /<msub><mo[^>]*>≉<\/mo><mi>T<\/mi><\/msub>/u);
+  assert.doesNotMatch(h.math()[0].mathml, /\u0338/u);
+  assert.equal(h.raw().textContent, text);
+});

@@ -29,7 +29,7 @@ test('renderer refuses external resources and independent expressions do not sha
 });
 
 test('bundled math code stays under the existing nonce policy without network/fonts', () => {
-  const support = ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/annotationView.js', 'src/stacksView.js'].map(n =>
+  const support = ['media/katex/katex.min.js', 'media/katex/auto-render.min.js', 'src/mathNegation.js', 'src/annotationView.js', 'src/stacksView.js'].map(n =>
     fs.readFileSync(path.join(__dirname, '..', n), 'utf8'));
   const html = outlineHtml('const inert = "</script>";', support);
   assert.match(html, /default-src 'none'/);
@@ -49,16 +49,23 @@ test('published prose remains inert and retained/external references have distin
     katex: { render(text, node, options) { mathCalls.push(options); node.innerHTML = katex.renderToString(text, options); } },
   };
   globals.window = globals;
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/mathNegation.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   const parent = new Node('section');
   globals.MRWStacks.part(parent, { region: 'fixture', exact_text: 'Exact retained source',
     tokens: [{ kind: 'text', text: '<img src=x onerror=bad>' }, { kind: 'math', text: 'X \\times_Z Y', display: false },
+      { kind: 'math', text: String.raw`g\not\approx_T z`, display: false },
       { kind: 'reference', tag: '08ZE', label: 'lemma', retained: true },
       { kind: 'reference', tag: '004E', label: 'section', retained: false }] },
   (...args) => actions.push(args));
   assert.equal(parent.all().some(n => n.tag === 'img'), false);
   assert.ok(parent.all().some(n => n.textContent === '<img src=x onerror=bad>'));
   assert.equal(mathCalls[0].trust, false); assert.equal(mathCalls[0].output, 'mathml');
+  const math = parent.all().filter(n => n.innerHTML);
+  assert.equal(math.length, 2);
+  assert.match(math[1].innerHTML, /<msub><mo[^>]*>≉<\/mo><mi>T<\/mi><\/msub>/u);
+  assert.doesNotMatch(math[1].innerHTML, /\u0338/u);
+  assert.ok(parent.all().some(n => n.tag === 'pre' && n.textContent === 'Exact retained source'));
   const buttons = parent.all().filter(n => n.tag === 'button');
   for (const button of buttons) button.listeners.click();
   assert.deepEqual(actions.map(v => [...v]), [['stacks_reference', '08ZE'], ['stacks_citation', '004E']]);

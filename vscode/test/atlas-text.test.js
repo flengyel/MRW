@@ -257,7 +257,7 @@ test('v38 theorem numbering uses the shared counter and omits front matter until
   const text = await fs.readFile(path.join(__dirname, 'fixtures/failure-of-composition-v38.tex'), 'utf8');
   assert.equal(digest(text), '94e80f24abd3a9c17fffa9075a017fdb1f04ea48995ad35b263386a4ddf6613b');
   const result = extractAtlasText(text, 'latex');
-  const numbered = result.entries.filter(node => node.printedTitle);
+  const numbered = result.entries.filter(node => node.printedTitle && node.kind !== 'equation');
   assert.deepEqual(numbered.map(node => node.printedTitle), [
     'Theorem 1', 'Corollary 2', 'Theorem 3', 'Theorem 4', 'Proposition 5', 'Proposition 6',
   ]);
@@ -266,6 +266,11 @@ test('v38 theorem numbering uses the shared counter and omits front matter until
   const equation = result.entries.find(node => node.label === 'eq:graph-realization');
   const feferman = result.references.find(ref => ref.label === 'Feferman' && ref.raw === String.raw`\cite[p.~267]{Feferman}`);
   assert.equal(equation.kind, 'equation');
+  assert.equal(equation.printedTitle, 'Equation (5)');
+  assert.deepEqual(result.entries.find(node => node.label === 'eq:uniform').labelNumbers,
+    [['eq:uniform', '1'], ['eq:pointwise', '2']]);
+  assert.equal(result.entries.find(node => node.label === 'eq:quotient-composition').printedTitle, 'Equation (3)');
+  assert.equal(new Map(numbered[2].labelNumbers).get('it:pi'), '3');
   assert.ok(feferman);
   assert.ok(result.references.some(ref => ref.target === equation.id && ref.owner === feferman.owner));
   const start = text.indexOf(String.raw`\maketitle`);
@@ -277,6 +282,29 @@ test('v38 theorem numbering uses the shared counter and omits front matter until
   assert.match(text.slice(selected.entries[1].start, selected.entries[1].end), /^\\begin{abstract}[\s\S]+\\end{abstract}$/);
   spans(text, result);
   spans(text, selected);
+});
+
+test('the equation counter counts unlabelled displays, skips unnumbered rows and respects a section reset', () => {
+  const text = String.raw`\numberwithin{equation}{section}
+\begin{document}
+\section{First}
+\begin{equation}x=x\end{equation}
+\begin{equation*}y=y\end{equation*}
+\begin{align}
+ a&=a \notag\\
+ b&=\begin{aligned}b\\b\end{aligned}\label{eq:b}\\[.3em]
+ c&=c\label{eq:c}
+\end{align}
+\section{Second}
+\begin{equation}d=d\label{eq:d}\end{equation}
+\end{document}
+`;
+  const result = extractAtlasText(text, 'latex');
+  const align = result.entries.find(node => node.label === 'eq:b');
+  assert.deepEqual(align.labelNumbers, [['eq:b', '1.2'], ['eq:c', '1.3']]);
+  assert.equal(align.printedTitle, 'Equations (1.2), (1.3)');
+  assert.equal(result.entries.find(node => node.label === 'eq:d').printedTitle, 'Equation (2.1)');
+  spans(text, result);
 });
 
 test('LaTeX theorem counters reset by section, share across kinds and skip starred headings and environments', () => {
@@ -330,7 +358,8 @@ test('the auxiliary is bounded and local, and only applies to the current saved 
     ['label:result', 'A.4'], ['label:eq', '7a'], ['ignored', null], ['duplicate', null],
   ]);
   const result = extractAtlasText(text, 'latex', undefined, { printedLabels });
-  assert.deepEqual(result.entries.map(node => node.printedTitle), ['Theorem A.4', 'Equation 7a']);
+  assert.deepEqual(result.entries.map(node => node.printedTitle), ['Theorem A.4', 'Equation (7a)']);
+  assert.deepEqual(result.entries[1].labelNumbers, [['label:eq', '7a']]);
   assert.equal(await readAtlasAux(source, text + '\nnew editor text'), undefined);
   await fs.utimes(auxiliary, 900, 900);
   assert.equal(await readAtlasAux(source, text), undefined);

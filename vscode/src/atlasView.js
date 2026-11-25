@@ -4,10 +4,12 @@ const { randomBytes } = require('node:crypto');
 const { detailPage, handoffEntries, overviewComponents, ownerOf } = require('./atlasModel');
 const { componentTitle, isTexAtlas, visibleAtlasEntries } = require('./atlasDiagram');
 const { diagramHtml, diagramStyles, diagramScript, diagramPositionStyles } = require('./atlasDiagramView');
-const { escape, preview, texPreviewContext } = require('./atlasPreview');
+const { atlasDisplayEntries } = require('./atlasText');
+const { escape, excerpt, preview, texPreviewContext } = require('./atlasPreview');
 
 const READING_PREVIEW_LIMIT = 4096;
 const SUMMARY_PREVIEW_LIMIT = 280;
+const CITING_EXCERPT_LIMIT = 560;
 const fields = [['question', 'Question'], ['hypotheses', 'Hypotheses'], ['conclusion', 'Conclusion'], ['nextUse', 'Next use']];
 const asArray = value => Array.isArray(value) ? value : [];
 const resultKinds = new Set(['theorem', 'lemma', 'proposition', 'corollary', 'claim', 'fact']);
@@ -19,11 +21,15 @@ function button(label, type, data = {}, id) {
 }
 
 function indices(atlas) {
-  const entries = new Map(atlas.extraction.entries.map(entry => [entry.id, entry]));
+  const entries = new Map(atlasDisplayEntries(atlas).map(entry => [entry.id, entry]));
   const components = new Map(atlas.components.map(component => [component.id, component]));
   const incoming = new Map(), outgoing = new Map();
   const lineStarts = [0];
   for (const match of atlas.source.text.matchAll(/\r\n|\r|\n/gu)) lineStarts.push(match.index + match[0].length);
+  const tex = isTexAtlas(atlas) ? { ...texPreviewContext(atlas.source.text), references: new Map() } : undefined;
+  const paragraphBreaks = tex ? Array.from(atlas.source.text.matchAll(/(?:\r\n|\r(?!\n)|\n)[ \t]*(?:\r\n|\r(?!\n)|\n)/gu),
+    match => ({ start: match.index, end: match.index + match[0].length })) : undefined;
+  const labelNumbers = tex && new Map([...entries.values()].map(entry => [entry.id, new Map(entry.labelNumbers)]));
   const append = (map, key, value) => {
     if (!map.has(key)) map.set(key, []);
     map.get(key).push(value);
@@ -32,9 +38,14 @@ function indices(atlas) {
     const owner = ownerOf(atlas.extraction, reference);
     append(outgoing, owner, reference);
     if (owner && reference.target) append(incoming, reference.target, { owner, reference });
+    if (tex && reference.kind === 'reference' && reference.target) {
+      const target = entries.get(reference.target);
+      const number = labelNumbers.get(target.id).get(reference.label) ||
+        (!target.labelNumbers && target.label === reference.label ? target.printedNumber : undefined);
+      if (number) tex.references.set(reference.label, { number, kind: target.kind, entry: target.id });
+    }
   }
-  const tex = isTexAtlas(atlas) ? texPreviewContext(atlas.source.text) : undefined;
-  return { entries, components, incoming, outgoing, lineStarts, tex };
+  return { entries, components, incoming, outgoing, lineStarts, paragraphBreaks, tex };
 }
 
 function exactPreview(text, span, language, limit = READING_PREVIEW_LIMIT, tex) {
@@ -49,14 +60,47 @@ function entryLabel(entry) {
   return entry?.printedTitle && entry.label ? `<code class="muted">${escape(entry.label)}</code>` : '';
 }
 
-function nextUse(atlasIndex, component) {
+function citingParagraph(atlasIndex, entry, reference) {
+  const part = [entry.proof, entry.statement, entry].find(span =>
+    span && span.start <= reference.start && reference.end <= span.end);
+  if (!part) return reference;
+  const breaks = atlasIndex.paragraphBreaks;
+  let low = 0, high = breaks.length;
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (breaks[mid].end <= reference.start) low = mid + 1;
+    else high = mid;
+  }
+  return { start: Math.max(part.start, breaks[low - 1]?.end ?? part.start),
+    end: Math.min(part.end, Math.max(reference.end, breaks[low]?.start ?? part.end)) };
+}
+
+function nextUse(atlas, atlasIndex, component) {
   const own = new Set(component.itemIds);
   const useSites = component.itemIds.flatMap(id => atlasIndex.incoming.get(id) || [])
     .filter(site => !own.has(site.owner));
-  return useSites.length
+  if (!atlasIndex.tex) return useSites.length
     ? `<p>Explicitly referenced by</p><ul>${useSites.map(({ owner, reference }) => `<li>
         ${button(titleFor(atlasIndex, atlasIndex.components.get(owner)), 'followEntry', { entry: owner })}
         ${button('Open occurrence', 'openSource', { reference: reference.id })}
+      </li>`).join('')}</ul>`
+    : '';
+  const paragraphs = new Map();
+  for (const { owner, reference } of useSites) {
+    const span = citingParagraph(atlasIndex, atlasIndex.entries.get(owner), reference);
+    const key = span.start + ':' + span.end;
+    if (!paragraphs.has(key)) paragraphs.set(key, { span, owner, references: [] });
+    paragraphs.get(key).references.push(reference);
+  }
+  return paragraphs.size
+    ? `<p>Explicitly referenced by</p><ul class="atlas-citing-passages">${[...paragraphs.values()].map(({ span, owner, references }) => `<li>
+        ${excerpt(atlas.source.text.slice(span.start, span.end), atlas.source.language, CITING_EXCERPT_LIMIT, atlasIndex.tex)}
+        ${references.length > 1 ? '<p class="muted">' + references.length + ' references in this passage</p>' : ''}
+        <div class="toolbar">
+          ${button('Open citing component', 'followEntry', { entry: owner })}
+          ${references.map((reference, index) => button(references.length > 1 ? 'Open occurrence ' + (index + 1) : 'Open occurrence',
+            'openSource', { reference: reference.id })).join('')}
+        </div>
       </li>`).join('')}</ul>`
     : '';
 }
@@ -92,7 +136,7 @@ function description(atlas, atlasIndex, component, compact = false) {
     resultKinds.has(entry?.kind) ? `<p>What does ${escape(titleFor(atlasIndex, component))} establish?</p>` : '',
     split ? `<p>From the statement</p>${split.hypotheses.map(fragment => preview(fragment, language, limit, atlasIndex.tex)).join('')}` : '',
     (split ? `<p>From the statement</p>${preview(split.conclusion, language, limit, atlasIndex.tex)}` : '') + exact,
-    nextUse(atlasIndex, component),
+    nextUse(atlas, atlasIndex, component),
   ];
   const rows = fields.map(([key, label], index) => {
     const value = component[key] ? `<p>${escape(component[key])}</p>` : defaults[index];
@@ -141,7 +185,7 @@ function overview(atlas, atlasIndex, options = {}) {
   const visible = visibleAtlasEntries(atlas, options.showProse);
   const ordered = overviewComponents(atlas).filter(c => !visible || c.itemIds.some(id => visible.has(id)));
   const groupable = ordered.filter(component => !component.members);
-  const cards = components => `<ol class="components">${components.map(component => {
+  const cards = components => `<ul class="components" role="list">${components.map(component => {
     const first = atlasIndex.entries.get(component.itemIds[0]);
     const kind = component.members ? `${component.members.length} passages` :
       first.selected ? first.kind : first.candidate ? 'Possible reference target' : 'Referenced or context passage';
@@ -150,7 +194,7 @@ function overview(atlas, atlasIndex, options = {}) {
       <p class="muted">${escape(kind)} ${component.members ? '' : entryLabel(first)}</p>
       ${description(atlas, atlasIndex, component, true)}
     </li>`;
-  }).join('')}</ol>`;
+  }).join('')}</ul>`;
   const sections = visible ? atlas.extraction.entries.filter(entry => entry.section) : [];
   const first = c => atlasIndex.entries.get(c.itemIds.find(id => visible.has(id)));
   const group = components => {
@@ -363,8 +407,9 @@ const script = String.raw`
     });
   }
   document.addEventListener('click', event => {
-    const action = event.target.closest('button[data-type]');
+    const action = event.target.closest('button[data-type], a[data-type="openSource"]');
     if (!action) return;
+    event.preventDefault();
     const message = {...action.dataset};
     if (message.page !== undefined) message.page = Number(message.page);
     if (message.index !== undefined) message.index = Number(message.index);
@@ -432,7 +477,7 @@ const styles = `
   button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible,
   [tabindex="-1"]:focus { outline: 1px solid var(--vscode-focusBorder); outline-offset: 2px; }
   .toolbar { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem; }
-  .components { padding-left: 1.5rem; }
+  .components { list-style: none; padding-inline-start: 0; }
   .components > li { border-bottom: 1px solid var(--vscode-panel-border); padding: .15rem 0 1rem; }
   .components h2 button { font-weight: 600; }
   .summary { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .35rem 1rem; max-width: 60rem; }

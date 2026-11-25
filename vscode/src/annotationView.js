@@ -46,7 +46,10 @@
           ...(options.inlineDollars ? [{left:'$',right:'$',display:false}] : [])],
         output: 'mathml', trust: false, strict: 'error', throwOnError: true,
         maxExpand: 1000, maxSize: 20, macros, globalGroup: false,
-        preProcess: math => { for (const key of Object.keys(macros)) delete macros[key]; return math; },
+        preProcess: math => {
+          for (const key of Object.keys(macros)) delete macros[key];
+          return window.MRWNormalizeNegatedRelations(math);
+        },
         errorCallback: () => { errors++; },
       });
     } catch {

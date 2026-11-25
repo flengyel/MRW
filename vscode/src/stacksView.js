@@ -22,7 +22,7 @@
       } else if (value.kind === 'math') {
         const target = node(value.display ? 'div' : 'span', parent, undefined, 'published-math');
         try {
-          window.katex.render(value.text, target, { output: 'mathml', displayMode: value.display,
+          window.katex.render(window.MRWNormalizeNegatedRelations(value.text), target, { output: 'mathml', displayMode: value.display,
             trust: false, strict: 'error', throwOnError: true, maxExpand: 1000,
             maxSize: 20, macros: {}, globalGroup: false });
         } catch (error) {

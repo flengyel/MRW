@@ -77,7 +77,9 @@ atlas.
 LaTeX atlases open with numbered results and labelled equations. Use **Show
 prose** to include the surrounding passages. The reading list groups results
 by section. MRW uses printed numbers from a current adjacent `.aux` when
-available, or computes them from local theorem declarations it can resolve.
+available, or computes them from local theorem and equation counters it can
+resolve. Follow a numbered equation reference to its retained passage.
+Citing excerpts appear once per passage, with controls for each occurrence.
 
 The diagrams wrap and split into pages when the pane is narrow. Drag to pan,
 use **Ctrl+wheel** or **+** and **−** to zoom, and select **Fit** to reset the

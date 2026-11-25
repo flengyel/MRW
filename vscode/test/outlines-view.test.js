@@ -6,6 +6,11 @@ const path = require('node:path');
 const vm = require('node:vm');
 const { outlineHtml } = require('../src/outlines');
 
+test('selected passage has inline padding after compact proof spacing', () => {
+  const html = outlineHtml('');
+  assert.match(html, /\.region\.compact-proof\{[^}]+\}\s*\.region\.selected\{padding-inline:10px\}/);
+});
+
 test('reader script loads alongside unforgeable browser globals and requests its saved model', () => {
   const messages = [], listeners = [];
   const globals = { document: { getElementById: () => ({}) },
@@ -55,6 +60,7 @@ function reader(published = false) {
   globals.window = globals;
   globals.markdownit = require('../media/markdown-it/markdown-it.js');
   globals.katex = require('../media/katex/katex.min.js');
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/mathNegation.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/atlasPreview.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/annotationView.js'), 'utf8'), globals);
   if (published) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);

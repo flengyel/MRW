@@ -1,4 +1,4 @@
-(function (katex, markdownIt) {
+(function (katex, markdownIt, normalizeNegatedRelations) {
 'use strict';
 
 const markdown = markdownIt({ html: false, linkify: false });
@@ -8,6 +8,8 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
 }[ch]));
 const wrappers = /^(?:theorem|thm|lemma|lem|proposition|prop|corollary|cor|claim|fact|definition|defn|example|remark|exercise|proof|slogan|abstract)\*?$/;
 const emphasis = { emph: 'em', textit: 'em', textbf: 'strong', texttt: 'code' };
+const accents = { '"': '\u0308', "'": '\u0301', '\x60': '\u0300', '^': '\u0302', '~': '\u0303',
+  '=': '\u0304', '.': '\u0307', u: '\u0306', v: '\u030C', H: '\u030B', c: '\u0327', r: '\u030A' };
 const displayEnvironments = { equation: '', align: 'aligned', gather: 'gathered' };
 const openingMath = ['$$', '$', '\\(', '\\['];
 const closingMath = { '$$': '$$', '$': '$', '\\(': '\\)', '\\[': '\\]' };
@@ -25,7 +27,7 @@ function formula(body, exact, display, macros = {}) {
   let blocked = false;
   try {
     const cleaned = body.replace(/(?<!\\)\\(?:label\s*\{[^{}]*\}|nonumber\b|notag\b)/gu, '');
-    const math = katex.renderToString(cleaned, { output: 'mathml', displayMode: display,
+    const math = katex.renderToString(normalizeNegatedRelations(cleaned), { output: 'mathml', displayMode: display,
       trust: () => { blocked = true; return false; },
       strict: 'error', throwOnError: true, maxExpand: 1000,
       maxSize: 20, macros: { ...macros }, globalGroup: false });
@@ -85,6 +87,22 @@ function braced(text, start) {
 function optional(text, start) {
   const match = /^\s*\[((?:[^\]\\]|\\.)*)\]/u.exec(text.slice(start));
   return match && { body: match[1], end: start + match[0].length };
+}
+
+function textAccent(text, start, combining) {
+  const base = /^\s*(\{([\p{L}])\}|([\p{L}]))/u.exec(text.slice(start));
+  if (!base) throw new Error('Unsupported TeX accent.');
+  return { value: ((base[2] || base[3]) + combining).normalize('NFC'), end: start + base[0].length };
+}
+
+function renderedReference(label, name, context) {
+  const target = context.references?.get(label);
+  if (!target?.number) return '<span class="atlas-inline-reference">[' + escape(label) + ']</span>';
+  const value = name === 'eqref' ? '(' + target.number + ')' : target.number;
+  if (target.kind !== 'equation') return '<span class="atlas-inline-reference">' + escape(value) + '</span>';
+  const entry = escape(target.entry);
+  return '<a class="atlas-inline-reference" href="#entry-' + entry + '" data-type="openSource" data-entry="' +
+    entry + '" data-part="statement">' + escape(value) + '</a>';
 }
 
 function texPreviewContext(text) {
@@ -181,13 +199,19 @@ function renderTex(text, inlineOnly = false, depth = 0, context = {}) {
           inline.push('<span class="atlas-inline-reference">[' + prefix + keys +
             (locator ? ', ' + renderTex(locator.replace(/~/gu, ' '), true, level + 1, context) : '') + ']</span>');
           at = argument.end;
-        } else if (['label', 'ref', 'eqref', 'autoref', 'cref', ...Object.keys(emphasis)].includes(name)) {
+        } else if (['label', 'ref', 'eqref', 'autoref', 'cref', ...Object.keys(emphasis)].includes(name.toLowerCase())) {
           const argument = braced(text, at);
           at = argument.end;
           if (Object.hasOwn(emphasis, name)) {
             const tag = emphasis[name];
             inline.push('<' + tag + '>' + renderTex(argument.body, true, level + 1, context) + '</' + tag + '>');
-          } else if (name !== 'label') inline.push('<span class="atlas-inline-reference">[' + escape(argument.body) + ']</span>');
+          } else if (name !== 'label') {
+            inline.push(argument.body.split(',').map(label => renderedReference(label.trim(), name.toLowerCase(), context)).join(', '));
+          }
+        } else if (Object.hasOwn(accents, name)) {
+          const accent = textAccent(text, at, accents[name]);
+          inline.push(escape(accent.value));
+          at = accent.end;
         } else if (['noindent', 'maketitle'].includes(name)) continue;
         else if (name === 'S') inline.push('§');
         else if (['par', 'smallskip', 'medskip', 'bigskip', '\\'].includes(name)) paragraph();
@@ -232,8 +256,40 @@ function preview(fragment, language, limit, context) {
   return '<pre>' + escape(shown) + '</pre>' + remainder;
 }
 
-const api = { escape, preview, texPreviewContext };
+function excerpt(fragment, language, limit, context) {
+  const tex = language === 'latex' || language === 'tex';
+  let text = fragment.trim();
+  if (tex) {
+    const opening = /^\\begin\{([^{}]+)\}(?:\[[^\]\r\n]*\])?\s*/u.exec(text);
+    if (opening && (wrappers.test(opening[1]) || context?.environments?.has(opening[1]))) text = text.slice(opening[0].length);
+    const closing = /\s*\\end\{([^{}]+)\}$/u.exec(text);
+    if (closing && (wrappers.test(closing[1]) || context?.environments?.has(closing[1]))) text = text.slice(0, closing.index);
+  }
+  // Try complete words near the budget. A prefix ending in math or a braced
+  // command is invalid TeX and is retried at the previous boundary.
+  const boundaries = [...text.slice(0, limit + 1).matchAll(/\s+/gu)].map(match => match.index);
+  if (text.length <= limit) boundaries.push(text.length);
+  for (const end of boundaries.slice(-32).reverse()) {
+    if (!end) continue;
+    const shown = text.slice(0, end);
+    try {
+      let rendered = tex ? renderTex(shown, false, 0, context)
+        : language === 'markdown' ? markdown.render(shown) : '<p>' + escape(shown) + '</p>';
+      if (!rendered) continue;
+      const clipped = end < text.length ? '<span class="atlas-ellipsis" aria-label="Excerpt continues">…</span>' : '';
+      if (clipped && rendered.endsWith('</p>')) rendered = rendered.slice(0, -4) + clipped + '</p>';
+      else rendered += clipped;
+      return '<div class="atlas-reading atlas-excerpt">' + rendered + '</div>';
+    } catch {
+      // The retained occurrence is still available through its source action.
+    }
+  }
+  return '';
+}
+
+const api = { escape, excerpt, preview, texPreviewContext };
 if (typeof module === 'object' && module?.exports) module.exports = api;
 else window.MRWPassagePreview = api;
 })(typeof module === 'object' && module?.exports ? require('../media/katex/katex.min.js') : window.katex,
-   typeof module === 'object' && module?.exports ? require('../media/markdown-it/markdown-it.js') : window.markdownit);
+   typeof module === 'object' && module?.exports ? require('../media/markdown-it/markdown-it.js') : window.markdownit,
+   typeof module === 'object' && module?.exports ? require('./mathNegation') : window.MRWNormalizeNegatedRelations);

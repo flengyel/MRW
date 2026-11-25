@@ -11,6 +11,7 @@ const KINDS = new Map(Object.entries({ theorem: 'theorem', thm: 'theorem', lemma
   assumption: 'assumption', axiom: 'axiom', conjecture: 'conjecture', claim: 'claim', fact: 'fact',
   notation: 'notation', exercise: 'exercise', problem: 'problem', statement: 'statement', proof: 'proof' }));
 const SECTIONS = ['part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph'];
+const NUMBERED_DISPLAYS = /^(?:equation|align|alignat|gather|multline)$/u;
 const printedNumber = value => typeof value === 'string' && value.length <= 64 && /^[A-Za-z0-9]+(?:[.:-][A-Za-z0-9]+)*$/.test(value);
 const compact = value => value.replace(/\s+/gu, ' ').trim();
 const title = value => Array.from(compact(value)).slice(0, 240).join('');
@@ -153,17 +154,49 @@ function nextTheoremNumber(name, declarations, sectionNumbers, theoremNumbers, c
     declaration = declarations.get(name);
   }
   if (!declaration || declaration.unnumbered) return undefined;
-  const within = declaration.within, level = SECTIONS.indexOf(within);
+  const prefix = counterPrefix(declaration.within, sectionNumbers, chapterStyle);
+  if (prefix === undefined) return undefined;
+  const previous = theoremNumbers.get(name);
+  const count = previous?.prefix === prefix ? previous.count + 1 : 1;
+  theoremNumbers.set(name, { prefix, count });
+  return prefix ? [prefix, count].join('.') : String(count);
+}
+
+function counterPrefix(within, sectionNumbers, chapterStyle) {
+  const level = SECTIONS.indexOf(within);
   // Custom counters and parts can use different formats, for which the
   // auxiliary is authoritative.
   if (within && level < 1) return undefined;
   const chapter = chapterStyle || sectionNumbers.has('chapter');
   const first = chapter || level === 1 ? 1 : 2;
-  const prefix = within ? SECTIONS.slice(first, level + 1).map(key => sectionNumbers.get(key) || 0).join('.') : '';
-  const previous = theoremNumbers.get(name);
-  const count = previous?.prefix === prefix ? previous.count + 1 : 1;
-  theoremNumbers.set(name, { prefix, count });
-  return prefix ? [prefix, count].join('.') : String(count);
+  return within ? SECTIONS.slice(first, level + 1).map(key => sectionNumbers.get(key) || 0).join('.') : '';
+}
+
+// AMS align and gather number rows; a nested aligned or cases block
+// contributes no rows to the outer counter.
+function displayRows(visible, display, end) {
+  if (!/^(?:align|alignat|gather)$/u.test(display.name)) {
+    return [{ start: display.bodyStart, end }];
+  }
+  const rows = [];
+  const commands = /\\begin\s*\{[^{}]+\}|\\end\s*\{[^{}]+\}|\\\\\*?|\\[{}]|[{}]/gu;
+  const body = visible.slice(display.bodyStart, end);
+  let start = 0, depth = 0, braces = 0, match;
+  while ((match = commands.exec(body))) {
+    if (match[0].startsWith('\\begin')) depth++;
+    else if (match[0].startsWith('\\end')) depth--;
+    else if (match[0] === '{') braces++;
+    else if (match[0] === '}') braces--;
+    else if (match[0].startsWith('\\\\') && !depth && !braces) {
+      rows.push({ start: display.bodyStart + start, end: display.bodyStart + match.index });
+      const tail = optional(body, match.index + match[0].length);
+      start = tail?.end ?? match.index + match[0].length;
+      // Row spacing is outside the next row.
+      if (tail) commands.lastIndex = tail.end;
+    }
+  }
+  if (body.slice(start).trim()) rows.push({ start: display.bodyStart + start, end });
+  return rows;
 }
 
 function mscFrontMatter(visible, bodyStart, stop) {
@@ -189,7 +222,31 @@ function latex(state, selection, options) {
   // auxiliary. Keep source labels as the fallback instead of guessing.
   const customCounters = /(?<!\\)\\(?:appendix|setcounter|addtocounter|counterwithin|counterwithout)(?![A-Za-z])/.test(visible) ||
     /(?<!\\)\\(?:renewcommand|def)\s*\{?\\the[A-Za-z]+/.test(state.text);
-  const tokens = /\\(begin|end|label|part|chapter|section|subsection|subsubsection|paragraph|subparagraph|bibitem|(?:[Cc]ref|[Ee]qref|[Aa]utoref|[Nn]ameref|[Vv]ref|ref)|(?:cite[a-zA-Z]*|parencite|textcite)|input|include|bibliography|title|author|date|maketitle|subjclass|keywords|tableofcontents|phantomsection|newtheorem)\*?(?![A-Za-z])/g;
+  const equationWithin = [...visible.matchAll(/(?<!\\)\\numberwithin\s*\{equation\}\s*\{([A-Za-z]+)\}/gu)]
+    .at(-1)?.[1] || (chapterStyle ? 'chapter' : undefined);
+  let equationPrefix, equationCount = 0;
+  function numberDisplay(display, end) {
+    const { node } = display;
+    if (customCounters || !NUMBERED_DISPLAYS.test(display.name)) return;
+    const prefix = counterPrefix(equationWithin, sectionNumbers, chapterStyle);
+    if (prefix === undefined) return;
+    if (prefix !== equationPrefix) { equationPrefix = prefix; equationCount = 0; }
+    let labelIndex = 0;
+    for (const row of displayRows(visible, display, end)) {
+      const body = visible.slice(row.start, row.end);
+      const tag = /(?<!\\)\\tag\*?(?![A-Za-z])/u.exec(body);
+      const number = tag ? group(body, tag.index + tag[0].length)?.value.trim()
+        : /(?<!\\)\\(?:notag|nonumber)(?![A-Za-z])/u.test(body) ? undefined
+          : prefix ? prefix + '.' + ++equationCount : String(++equationCount);
+      const usableNumber = printedNumber(number) ? number : undefined;
+      node._number ||= usableNumber;
+      while (labelIndex < display.labels.length && display.labels[labelIndex].start < row.end) {
+        const label = display.labels[labelIndex++];
+        if (row.start <= label.start && label.end <= row.end) label.number = usableNumber;
+      }
+    }
+  }
+  const tokens = /\\(begin|end|label|item|part|chapter|section|subsection|subsubsection|paragraph|subparagraph|bibitem|(?:[Cc]ref|[Ee]qref|[Aa]utoref|[Nn]ameref|[Vv]ref|ref)|(?:cite[a-zA-Z]*|parencite|textcite)|input|include|bibliography|title|author|date|maketitle|subjclass|keywords|tableofcontents|phantomsection|newtheorem)\*?(?![A-Za-z])/g;
   let match, commands = 0, bodyStart = 0, bodyEnd = state.text.length;
   while ((match = tokens.exec(visible))) {
     if (escaped(visible, match.index)) continue;
@@ -199,6 +256,14 @@ function latex(state, selection, options) {
     if (['maketitle', 'tableofcontents', 'phantomsection'].includes(command)) {
       structural.push({ start, end: at });
       if (command === 'maketitle') front.push({ start, end: at, title: 'Title page' });
+      continue;
+    }
+    if (command === 'item') {
+      const list = stack.at(-1);
+      if (list?.itemCount !== undefined) {
+        const caption = optional(visible, at);
+        list.itemNumber = caption ? undefined : String(++list.itemCount);
+      }
       continue;
     }
     if (SECTIONS.includes(command) || /^(?:bibitem|subjclass|cite|parencite|textcite)/.test(command)) {
@@ -222,7 +287,10 @@ function latex(state, selection, options) {
         _proofTitle: kind === 'proof' ? opt?.value : undefined, _display: declaration?.display, _number: number,
         ...(unnumbered ? { unnumbered: true } : {}) });
       if (node && kind === 'proof') proofs.push(node);
-      stack.push({ name: value, start, node });
+      const basicEnumerate = !customCounters && value === 'enumerate' && !opt &&
+        !stack.some(item => item.name === 'enumerate');
+      stack.push({ name: value, start, node, bodyStart: argument.end, labels: [],
+        ...(basicEnumerate ? { itemCount: 0 } : {}) });
       if (value === 'document') { bodyStart = argument.end; structural.push({ start, end: argument.end }); }
     } else if (command === 'end') {
       const index = stack.findLastIndex(item => item.name === value);
@@ -233,9 +301,14 @@ function latex(state, selection, options) {
         if (item.node) { item.node.end = argument.end; item.node.statement.end = argument.end; }
         if (item.name === 'abstract') front.push({ start: item.start, end: argument.end, title: 'Abstract' });
       }
+      if (closed[0].node?.kind === 'equation') numberDisplay(closed[0], start);
       if (value === 'document') { bodyEnd = start; structural.push({ start, end: argument.end }); }
     } else if (command === 'label') {
-      labels.push({ label: value, start, end: argument.end, enclosing: [...stack].reverse().find(item => item.node)?.node });
+      const enclosing = stack.findLast(item => item.node);
+      const label = { label: value, start, end: argument.end, enclosing: enclosing?.node,
+        direct: enclosing === stack.at(-1), number: stack.at(-1)?.itemNumber };
+      labels.push(label);
+      if (enclosing?.node.kind === 'equation') enclosing.labels.push(label);
       structural.push({ start, end: argument.end });
     } else if (SECTIONS.includes(command)) {
       const level = SECTIONS.indexOf(command);
@@ -243,7 +316,10 @@ function latex(state, selection, options) {
         sectionNumbers.set(command, (sectionNumbers.get(command) || 0) + 1);
         for (const child of SECTIONS.slice(level + 1)) sectionNumbers.delete(child);
       }
-      entry(state, { kind: 'section', section: true, level, title: argument.value, start, end: argument.end });
+      const prefix = !customCounters && !match[0].endsWith('*') && level >= 1 &&
+        counterPrefix(command, sectionNumbers, chapterStyle);
+      entry(state, { kind: 'section', section: true, level, title: argument.value, start, end: argument.end,
+        ...(prefix ? { printedNumber: prefix } : {}) });
     } else if (command === 'bibitem') {
       entry(state, { kind: 'bibliography', title: value, label: value, labels: [value], start, end: argument.end, _citation: true });
     } else if (/^(?:input|include|bibliography|title|author|date|newtheorem|subjclass|keywords)$/.test(command)) {
@@ -294,7 +370,16 @@ function latex(state, selection, options) {
       let end = visible.indexOf('\n\n', item.end); if (end < 0) end = bodyEnd;
       owner = entry(state, { kind: 'label', title: item.label, start, end, labels: [] });
     }
-    if (owner) { owner.labels.push(item.label); owner.label ||= item.label; }
+    if (owner) {
+      owner.labels.push(item.label); owner.label ||= item.label;
+      const compiled = options.printedLabels?.get(item.label);
+      const number = printedNumber(compiled) ? compiled : item.number || (owner.kind === 'equation' ? undefined
+        : (item.direct || owner.section) ? owner._number || owner.printedNumber : undefined);
+      if (number) {
+        (owner._labelNumbers ||= new Map()).set(item.label, number);
+        if (item.direct || owner.kind === 'equation') owner._titleNumber ||= number;
+      }
+    }
   }
   state.entries = state.entries.filter(n => !n._attached);
   for (const node of state.entries.filter(n => n.kind === 'bibliography')) {
@@ -305,12 +390,17 @@ function latex(state, selection, options) {
   for (const node of state.entries) {
     const base = node.kind[0].toUpperCase() + node.kind.slice(1);
     if (node.label && !node.section && node.title === base) node.title += ` (${node.label})`;
+    const labelNumbers = node._labelNumbers ? [...node._labelNumbers] : [];
+    if (labelNumbers.length) node.labelNumbers = labelNumbers;
     if (node.section || node.unnumbered || node.kind === 'proof' || !node._environment) continue;
-    const auxiliaryNumber = node.labels.map(label => options.printedLabels?.get(label)).find(printedNumber);
-    const number = auxiliaryNumber || node._number;
+    const number = node._titleNumber || (node.kind !== 'equation' || !node.labels.length ? node._number : undefined);
     if (number) {
       node.printedNumber = number;
-      node.printedTitle = `${node._display || base} ${number}`;
+      if (node.kind === 'equation') {
+        const numbers = [...new Set(labelNumbers.length ? labelNumbers.map(([, value]) => value) : [number])];
+        const title = numbers.map(value => '(' + value + ')').join(', ');
+        node.printedTitle = title.length > 220 || numbers.length === 1 ? 'Equation (' + number + ')' : 'Equations ' + title;
+      } else node.printedTitle = `${node._display || base} ${number}`;
     }
   }
   const firstSection = state.entries.find(node => node.section && node.start >= bodyStart)?.start ?? bodyEnd;
@@ -488,4 +578,37 @@ function extractAtlasText(text, language, range, options = {}) {
   if (!entries.length) issue(state, 'The selection contains no supported prose, heading or named mathematical entry.');
   return { entries, references, limitations: state.limitations, selection };
 }
-module.exports = { extractAtlasText, parsePrintedLabels };
+const displayEntries = new WeakMap();
+function atlasDisplayEntries(atlas) {
+  const { source, extraction } = atlas;
+  if (source.language !== 'latex' ||
+      !extraction.entries.some(entry => entry.kind === 'equation' && entry.label && !entry.labelNumbers)) {
+    return extraction.entries;
+  }
+  if (!displayEntries.has(atlas)) {
+    // Older atlases can show numbers from their retained text without reading
+    // today's working file or auxiliary and without changing the saved record.
+    const numbered = new Map(extractAtlasText(source.text, 'latex', extraction.selection).entries
+      .filter(entry => entry.labelNumbers?.length)
+      .map(entry => [entry.id, entry]));
+    displayEntries.set(atlas, extraction.entries.map(entry => {
+      const candidate = !entry.labelNumbers && numbered.get(entry.id);
+      const matching = candidate?.start === entry.start && candidate?.end === entry.end;
+      if (entry.kind === 'equation' && entry.label && entry.printedNumber && !entry.labelNumbers &&
+          (!matching || candidate.printedNumber !== entry.printedNumber)) {
+        return { ...entry, printedTitle: 'Equation (' + entry.printedNumber + ')',
+          labelNumbers: [[entry.label, entry.printedNumber]] };
+      }
+      if (!matching) return entry;
+      const { printedNumber, printedTitle, labelNumbers } = candidate;
+      const labels = labelNumbers.map(([label, number]) =>
+        [label, label === entry.label && entry.printedNumber ? entry.printedNumber : number]);
+      return { ...entry, printedNumber: entry.printedNumber ?? printedNumber,
+        printedTitle: entry.kind === 'equation' ? printedTitle : entry.printedTitle ?? printedTitle,
+        labelNumbers: labels };
+    }));
+  }
+  return displayEntries.get(atlas);
+}
+
+module.exports = { atlasDisplayEntries, extractAtlasText, parsePrintedLabels };

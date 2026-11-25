@@ -119,7 +119,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
    panel.webview.onDidReceiveMessage(value=>{const action=()=>message(c,value);const known=['search','build','return','record','predecessor','withdraw','cancel_successor','copy_material','import_material','edit_material','accept_material','proposal_record'];void (recorder?.operations&&known.includes(value?.type)?recorder.operations.run('justification.'+value.type,action):action());}),panel.onDidChangeViewState(event=>{if(event.webviewPanel.visible)send(c);}));
   try{
    const support=[];
-   for(const name of ['media/markdown-it/markdown-it.js','media/katex/katex.min.js','media/katex/auto-render.min.js','src/annotationView.js'])support.push(await fs.readFile(path.join(context.extensionPath,name),'utf8'));
+   for(const name of ['media/markdown-it/markdown-it.js','media/katex/katex.min.js','media/katex/auto-render.min.js','src/mathNegation.js','src/annotationView.js'])support.push(await fs.readFile(path.join(context.extensionPath,name),'utf8'));
    if(c.disposed)return;
    panel.webview.html=outlineHtml(await fs.readFile(path.join(context.extensionPath,'src/justificationView.js'),'utf8'),support,'',{kind:'justification'});
   }catch(error){panel.dispose();throw error;}
