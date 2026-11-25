@@ -36,7 +36,7 @@ separate states; publication does not authorize installation or forced reload.
 | D12 | **Retained calculations.** Keep rich outputs, input/method revisions, notes and proof links available through comparison and export. [Notebook workflow](NOTEBOOK_RESULTS.md). | Native read-only notebook viewing and diff use Jupyter. Transcripts are the fallback. An isolated WSL check reopened exact retained notebooks after restart and displayed both saved PNG outputs in the native diff. Capture, comparison and export have focused tests. |
 | D13 | **Zotero references.** Connect references, attachments and Return through the supported owner API. [Workflow](ZOTERO_WORKFLOW.md). | Sources exposes Find/Resume Zotero and setup. Connector/attachment/Return regressions cover the supported route. A live attachment interaction remains unobserved; no mutation of Zotero is authorized. |
 | D14 | **Research resumption.** Recover documents, supported locations, conclusions, gaps and attempts through existing links and prose. | Partial. Return, Reopen and saved-calculation links survive supported restarts. [Recent Documents](RECENT_DOCUMENTS.md) shows a short excerpt for matching Markdown positions and can restore a selection in an earlier note. A changed revision opens the current note with a status message. Resume Study finds unfinished attempts and saved unresolved questions beyond the recent list. Wider continuity and reconstruction of compressed arguments remain open. |
-| D15 | **Evidence and justification.** Separate source capture, producer accounts, observed execution, reproduction, formal checking, scoped admission, contextual derivability, correspondence and human judgment. [Guide](JUSTIFICATION_WORKFLOW.md). | Partial. The Lean J₀/J(CS) checker and bounded Application search retain certificates, exact admission dependencies and successor contexts. The reader preserves source snapshots, withdrawal, earlier contexts, Return and unfinished requests. [Source-driven preparation](SOURCE_GROUNDS_WORKFLOW.md) supports attributed proposals, corrections and explicit admission. Capture/import/correction invoke neither admission nor Lean. Reopening performs no new check. Derivability is non-factive and relative to the admitted context. General Hilbert/CS search and paper–Lean correspondence review remain open. |
+| D15 | **Evidence and justification.** Separate source capture, producer accounts, observed execution, reproduction, formal checking, scoped admission, contextual derivability, correspondence and human judgment. [Guide](JUSTIFICATION_WORKFLOW.md). | Partial. The Lean J₀/J(CS) checker and bounded Application search retain certificates, exact admission dependencies and successor contexts. The reader preserves source snapshots, withdrawal, earlier contexts, Return and unfinished requests. [Source-driven preparation](SOURCE_GROUNDS_WORKFLOW.md) supports attributed proposals, corrections and explicit admission. Capture/import/correction invoke neither admission nor Lean. Reopening performs no new check. Derivability is non-factive and relative to the admitted context. General Hilbert/CS search remains open. [Paper–Lean correspondence review](CORRESPONDENCE_REVIEW.md) is proposed. |
 | D16 | **Feature use.** Record used, available-but-unused, unavailable, uninstrumented and unknown periods. [Contract](OPERATIONAL_USAGE.md). | Bounded local aggregation uses stable feature IDs and correlated operations. Test/development/scheduled origins are excluded. [History](HISTORY_ACTIVITY_VIEW.md) preserves detailed exports and gap notices. Missing coverage is not zero use; shared aggregation remains partial. |
 | D17 | **Integrity and hygiene.** Optional diagnostics supplies bounded, read-only reports; core retains essential checks. [Design](DIAGNOSTICS_PLUGIN.md). | Inspection API 1 supports streamed hashes/metadata/manifests, pending/deletion observations, manual reports and opt-in weekly scheduling. External/remote targets, complete schemas/dependencies and passage anchors remain unchecked. |
 | D18 | **Maintenance.** Revalidate report findings against the design before making bounded corrections. [Contract](CODEX_MAINTENANCE.md). | Explicit export and Codex clipboard handoff retain reports as untrusted input. A report authorizes neither a model call nor a repair. Automatic maintenance scheduling is not implemented. |
@@ -80,13 +80,11 @@ when a mathematical task calls for it.
 
 <a id="paper-lean-correspondence-review"></a>
 
-**Deferred: paper–Lean correspondence review.** The selected case is
+**Proposed: [paper–Lean correspondence review](CORRESPONDENCE_REVIEW.md).**
+The acceptance case is
 [*Maximality of the Došen–Petrić Boolean Category*](https://arxiv.org/abs/2611.19496).
-Resolve the current manuscript and Lean revisions together. Compare definitions,
-types, hypotheses, quantifiers, conclusions and dependencies; preserve exact
-passages and reviewed correspondence records. A Lean check alone does not
-establish correspondence. The source-selection prototype remains outside main
-and the release.
+The design specifies a revision-pinned comparison of printed statements and
+Lean declarations, a second reading saved before reveal, and a report.
 
 ## Reuse and boundaries
 

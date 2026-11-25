@@ -24,6 +24,9 @@ with those requirements through [Codex maintenance](docs/CODEX_MAINTENANCE.md).
 Older prompts, completed tasks and roadmap entries do not authorize new work or
 supply a competing priority order.
 
+The design register names only work in `main`. Mark committed proposals as
+proposed and cite implementation and verification evidence from `main`.
+
 Intervening questions refine active work unless explicitly cancelled. Preserve
 uncommitted changes, carry unresolved objectives forward and finish the authorized
 scope. Fix confirmed data-loss defects first, then observed workflow blockers.
@@ -306,6 +309,10 @@ observed actions, reader reports, AI assessments and derived estimates. Missing
 coverage is not zero use, effort is not a diagnosis and low counts do not justify
 automatic removal. Do not record unrelated application activity or export private
 research through maintenance reports.
+
+Delete each task branch after its work is integrated into `main`. Verify the
+branch tip or its equivalent patch before deleting it. Preserve unmerged
+changes and active local checkouts.
 
 Complete authorized build, package, release and remote-integration work. Verify
 repository revision, package/release and installation separately; publication
