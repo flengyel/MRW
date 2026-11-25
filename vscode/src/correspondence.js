@@ -60,8 +60,8 @@ function sourcePacket(source) {
     throw Error('Choose an exact pinned passage from a manuscript of at most 1 MiB.');
   }
   const locator = new URL(uri);
-  if (!['file:', 'https:'].includes(locator.protocol) || locator.username || locator.password) {
-    throw Error('Save the manuscript as a file or retain an HTTPS manuscript before reviewing it.');
+  if (!['file:', 'https:', 'mrw-outline:'].includes(locator.protocol) || locator.username || locator.password) {
+    throw Error('Save the manuscript as a file or choose a retained source before reviewing it.');
   }
   if (Buffer.byteLength(text.slice(start, end)) > MAX_PASSAGE) throw Error('Choose a passage of at most 256 KiB.');
   return { title, uri, revision, text, language, start, end,

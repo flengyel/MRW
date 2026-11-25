@@ -285,3 +285,13 @@ test('reading a different Lean declaration cannot replace an unsaved review draf
   assert.deepEqual(panel.messages.at(-1).clear, ['review-new']);
   assert.equal(h.methods().includes('correspondence_save'), false);
 });
+
+test('a retained source provides the exact manuscript for an atlas correspondence review', async () => {
+  const h = harness();
+  const uri = 'mrw-outline:v1/' + 'a'.repeat(64) + '/00000000-0000-4000-8000-000000000000/' + source.revision;
+  const retained = { ...source, uri };
+  assert.equal(sourcePacket(retained).uri, uri);
+  await h.controller.begin({ root: '/tmp/mrw-project', source: retained });
+  assert.match(h.view().messages.at(-1).html, /Triangle/);
+  assert.deepEqual(h.methods(), []);
+});
