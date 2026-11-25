@@ -42,8 +42,10 @@ const GROUPS={
  proofTools:[
   ['Generate Mathematical Atlas…','generateAtlas'],
   ['Open Mathematical Atlas…','openAtlas'],
+  ['Correspondence review…','correspondenceReview'],
   ['Justification…','openJustification'],['Open Proof Outline…','openProofOutline'],['Open Lean proof and keep Return','openProof'],['Resume Lean study','resumeLeanStudy'],['Actions for selected lesson…','leanStudyActions'],['Work through a proof…','prepareProofStudy'],['Continue proof work','resumeProofStudy']],
  earlierWork:[['Resume saved study','resumeStudy'],['Resume investigation','resumeInvestigation'],
+  ['Correspondence reports…','correspondenceReports'],
   ['Inspect study history','inspectStudyHistory'],['Export study history…','exportStudyHistory'],['Show archived studies','showArchivedStudies'],
   ['Show trashed studies','showDeletedStudies'],['Manage saved studies…',null,null,null,'studies']],
  companionTools:[['Companions and setup status',null,'RECOMMENDED_EXTENSIONS.md'],

@@ -11,7 +11,7 @@ const { createAtlas } = require('../src/atlasModel');
 const { extractAtlasText } = require('../src/atlasText');
 const { digest } = require('../src/navigation');
 
-async function harness(t) {
+async function harness(t, { compareWithLean } = {}) {
   const home = await fs.mkdtemp(path.join(os.tmpdir(), 'mrw-atlas-editor-'));
   t.after(() => fs.rm(home, { recursive: true, force: true }));
   const root = path.join(home, 'workspace');
@@ -96,7 +96,7 @@ async function harness(t) {
   };
   const context = { subscriptions: [], extensionPath: path.resolve(__dirname, '..') };
   const controller = registerAtlas({
-    vscode: api, context,
+    vscode: api, context, compareWithLean,
     register: (id, fn) => handlers.set(id, fn),
     bridge: async request => {
       assert.ok(writes.allowed, 'Opening must not call bridge');
@@ -446,5 +446,38 @@ A retained statement.
     assert.equal(successor.webview.html.includes('>Abstract</button>'), explicit);
     assert.equal(await fs.readFile(savedFile, 'utf8'), original);
   }
+  assert.deepEqual(h.errors, []);
+});
+
+test('atlas comparison hands off the selected pinned statement and leaves the atlas untouched', async t => {
+  const captured = [];
+  const h = await harness(t, { compareWithLean: async input => captured.push(input) });
+  const file = path.join(h.root, 'sample.mrw-atlas.json');
+  const text = String.raw`\newtheorem{theorem}{Theorem}
+\begin{theorem}The retained statement.\end{theorem}
+\begin{proof}A separate proof.\end{proof}
+`;
+  const record = { ...createAtlas({
+    source: { title: 'Paper', uri: 'file:///paper.tex', language: 'latex', text, revision: digest(text) },
+    extraction: extractAtlasText(text, 'latex'),
+  }), id: randomUUID() };
+  const original = JSON.stringify(record);
+  await fs.writeFile(file, original);
+  const document = await h.custom.provider.openCustomDocument(h.uri(file), {}, {});
+  const panel = h.panel();
+  await h.custom.provider.resolveCustomEditor(document, panel, {});
+  const theorem = record.extraction.entries.find(entry => entry.kind === 'theorem');
+  await panel.receive({type: 'selectComponent', component: theorem.id});
+  assert.match(panel.webview.html, /Compare with Lean declaration…/);
+  await panel.receive({type: 'compareLean', component: theorem.id, entry: theorem.id,
+    source: {text: 'Message data cannot replace the retained statement.'}});
+  assert.equal(captured.length, 1);
+  const {root, source} = captured[0];
+  assert.equal(root, h.root);
+  assert.equal(source.text, record.source.text);
+  assert.equal(source.revision, record.source.revision);
+  assert.equal(source.start, theorem.statement.start);
+  assert.equal(source.end, theorem.statement.end);
+  assert.equal(await fs.readFile(file, 'utf8'), original);
   assert.deepEqual(h.errors, []);
 });

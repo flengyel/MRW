@@ -161,7 +161,7 @@ ${diagramStyle}
 <script nonce="${nonce}">${script.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 
-function registerOutlines({ vscode, context, register, bridge, sourcePlugins, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri, relocateRoute = async value=>value }) {
+function registerOutlines({ vscode, context, register, bridge, sourcePlugins, show, projectRoot, ordinaryEditor, choosePath, changed, artifactClients, askRetained, compareWithLean, recorder, onMaterial, checkDocument, readingDestination, handleDocumentUri, relocateRoute = async value=>value }) {
   const panels = new Map(), retainedViews = new Map(), blockedStores = new Set();
   context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
     if (document.isClosed) retainedViews.delete(document.uri.toString());
@@ -399,6 +399,27 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         else if (value.type === 'proof_study') await vscode.commands.executeCommand('mrw.prepareProofStudy');
         else if (value.type === 'reading_return') await vscode.commands.executeCommand('mrw.returnToReadingOutline', { retained: true, location: c.returnContext?.location || null });
         else if (value.type === 'artifact') await openDocument(c, value.artifact);
+        else if (value.type === 'compare_lean' && compareWithLean) {
+          const read = (method, extra) => bridge(request(c, method, extra));
+          const outline = c.result.outline;
+          const region = outline.regions.find(item => item.id === value.region);
+          if (!region || /\.lean$/i.test(outline.source.path)) throw new Error('Choose a printed statement or passage.');
+          const span = region.statement?.span || region.span;
+          const {text, source_revision: revision} = await read('outline_document', {artifact: null});
+          if (span.source_revision !== revision || digest(text) !== revision) {
+            throw new Error('The statement does not match the retained source revision.');
+          }
+          const offset = retainedOffsets(text);
+          const language = /\.tex$/i.test(outline.source.path) || outline.published?.format === 'tex' ? 'latex'
+            : /\.(?:md|markdown)$/i.test(outline.source.path) ? 'markdown' : 'plaintext';
+          const start = offset(span.start_line, span.start_col), end = offset(span.end_line, span.end_col);
+          const reference = sameSpan(span, region.span) ? (await read('outline_reference', {region: region.id})).reference : undefined;
+          await compareWithLean({ root: c.root, source: {
+            title: outline.source.bibliography.title || path.basename(outline.source.path),
+            label: region.title, uri: vscode.Uri.file(outline.source.path).toString(),
+            revision, language, text, start, end, ...(reference ? {reference} : {}),
+          } });
+        }
         else if (value.type === 'generate_atlas') {
           const retained = await retainedAtlasInput(c, value.region,
             (method, extra) => bridge(request(c, method, extra)));

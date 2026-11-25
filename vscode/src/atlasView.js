@@ -356,6 +356,7 @@ function detailView(atlas, atlasIndex, options) {
         <div class="toolbar">
           ${entry.statement ? button('Open exact statement', 'openSource', { entry: entry.id, part: 'statement' }) : ''}
           ${entry.proof ? button('Open exact proof', 'openSource', { entry: entry.id, part: 'proof' }) : ''}
+          ${options.canCompare && !entry.section ? button('Compare with Lean declaration…', 'compareLean', { component, entry: entry.id }) : ''}
         </div>
         ${c.members || !entry.statement ? `<details><summary>Source excerpt</summary>${exactPreview(atlas.source.text, entry.statement || entry, atlas.source.language, undefined, atlasIndex.tex)}</details>` : ''}
         ${entry.proof ? `<details><summary>Proof</summary>${exactPreview(atlas.source.text, entry.proof, atlas.source.language, undefined, atlasIndex.tex)}</details>` : ''}

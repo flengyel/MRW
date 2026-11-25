@@ -305,8 +305,11 @@ function activate(nativeContext) {
   const assistanceRows = registerAssistance({ vscode, context, register, bridge, show, projectRoot, changed, review,
     ordinaryEditor, choosePath, getReview: () => currentReview && { ...currentReview }, artifactClients });
   const sourcePlugins=registerSourcePlugins({vscode,register,rawBridge});
+  const correspondence = require('./correspondence').registerCorrespondence({
+    vscode, context, register, bridge, rawBridge, projectRoot, artifactClients, show, choosePath,
+  });
   const outlineRows = registerOutlines({sourcePlugins, vscode, context, register, bridge, show, projectRoot, changed, ordinaryEditor, choosePath, artifactClients,
-    askRetained: assistanceRows.askRetained, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
+    askRetained: assistanceRows.askRetained, compareWithLean: correspondence.begin, recorder, onMaterial, checkDocument: uri => readingController.checkFile(uri),
     readingDestination: location => readingController.returnDestination(location),
     handleDocumentUri: async uri => await notebooks.handleUri(uri) || await zotero.handleUri(uri) || readingController.handleDocumentUri(uri), relocateRoute:moveSession.rebaseRoute });
   let atlasController;
@@ -323,7 +326,8 @@ function activate(nativeContext) {
     returnToDocument:location=>vscode.commands.executeCommand('mrw.returnToReadingOutline',{retained:true,location})});
   const openProofGraph = registerProofGraph({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, show,
     askProof: assistanceRows.askProof, followPinned: outlineRows.followPinned, readPinned: outlineRows.readPinned, recorder, onMaterial });
-  atlasController = registerAtlas({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath, openProofGraph, readPassage: outlineRows.studyPassage });
+  atlasController = registerAtlas({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
+    openProofGraph, readPassage: outlineRows.studyPassage, compareWithLean: correspondence.begin });
   artifactStorage.registerCommands({ register, clients: artifactClients, projectRoot, changed });
   registerProofStudy({ vscode, context, register, bridge: rawBridge, projectRoot, choosePath,
     selectPassages: outlineRows.selectStudyPassages, readPassage: outlineRows.studyPassage, recorder, startStudy:(...args)=>studyController.start(...args) });

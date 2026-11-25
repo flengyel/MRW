@@ -2,16 +2,19 @@
 
 const { digest } = require('./navigation');
 
-function inspectLeanSource({source, declaration, selection}) {
-    const {start, end} = selection;
+function writtenLeanDeclarations(source) {
     const written = /^(?:(?:private|protected|public)[ \t]+)?(?:theorem|lemma)[ \t]+([\p{L}_][\p{L}\p{N}_'.]*)(?=\s|[([{:]|$)/gmu;
     const declarations = [...source.matchAll(written)];
-    const named = declarations.map((match, index) => ({
+    return declarations.map((match, index) => ({
         name: match[1],
         start: match.index,
         end: declarations[index + 1]?.index ?? source.length,
     }));
-    const matching = named.filter(item => (!declaration || item.name === declaration ||
+}
+
+function inspectLeanSource({source, declaration, selection}) {
+    const {start, end} = selection;
+    const matching = writtenLeanDeclarations(source).filter(item => (!declaration || item.name === declaration ||
         declaration.endsWith('.' + item.name)) && (start === end
         ? item.start <= start && start < item.end
         : start < item.end && item.start < end));
@@ -30,4 +33,4 @@ function inspectLeanSource({source, declaration, selection}) {
     };
 }
 
-module.exports = { inspectLeanSource };
+module.exports = { inspectLeanSource, writtenLeanDeclarations };

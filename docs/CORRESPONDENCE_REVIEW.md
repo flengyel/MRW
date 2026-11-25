@@ -1,6 +1,6 @@
 # Paper–Lean correspondence review
 
-**Proposed.** See the [design register](DESIGN_RECONCILIATION.md#paper-lean-correspondence-review).
+See the [design register](DESIGN_RECONCILIATION.md#paper-lean-correspondence-review).
 
 A reader comparing a paper with a Lean development needs to know which
 declaration is claimed to formalize a printed result and why the reader
@@ -9,7 +9,7 @@ quantifiers, conclusion and assumptions. A build can succeed with admitted
 axioms or unfinished proofs. A declaration's type and axiom dependencies are
 evidence for the review. The correspondence judgment belongs to the reviewer.
 
-MRW would retain each judgment against exact source revisions, detect changes
+MRW retains each judgment against exact source revisions, detect changes
 to either side and record a second reader's reconstruction before revealing
 the Lean declaration or the first review.
 
@@ -56,9 +56,12 @@ An existing proof verification has its own record.
 Use the project's pinned toolchain, as in `lake env lean`, after verifying
 that the toolchain and the current compiled import closure are available.
 The action is explicit, cancellable and subject to timeout and byte limits.
-Run only trusted project code under a boundary that prevents network access
-and writes to the research project. Lake configuration and Lean imports can
-execute code. If the required build artifacts are missing or stale, ask the
+Use a trusted Git checkout on a Linux workspace host (including WSL2),
+with Bubblewrap supporting `--tmp-overlay` and the pinned Lean/Lake toolchain
+already installed. Lake configuration and Lean imports execute in a sandbox
+with no network and a read-only project. Temporary overlays contain Lake’s
+freshness-check writes. Dependencies must be available within the selected
+project or toolchain. If the required build artifacts are missing or stale, ask the
 reader to **Build the project first** with `lake build <module>`. MRW does
 not run that command, update dependencies or fetch a toolchain or cache.
 Opening a review uses saved evidence and reads current revisions without
@@ -135,7 +138,9 @@ to a reader-selected path and refuses to overwrite a file. **Delete report…**
 moves only the snapshot to reversible Trash. **Earlier saved work** lists
 saved reports and reports in Trash with **Restore** and a separate
 **Permanently delete** action. Reviews, generated facts, discrepancies, second
-readings and exports survive each snapshot lifecycle action.
+readings and exports survive each snapshot lifecycle action. Permanent deletion
+removes the report from the active store and prevents its recovery through
+MRW. Earlier storage generations and exported copies may retain its bytes.
 
 ## Acceptance
 

@@ -1,8 +1,7 @@
 """One explicit editor action per bounded JSON request on standard input.
 
-Run through the extension's isolated launcher. No daemon, executable project
-configuration, Qt controller, or Lean process is involved. Only the explicit
-Send action can invoke the existing model adapter.
+Run through the extension's isolated launcher. Only explicit execution actions
+invoke an external model or a Lean process.
 """
 
 from dataclasses import asdict
@@ -145,12 +144,22 @@ def _dispatch(request):
         'outline_render_diagram': ({'store', 'project_root', 'id', 'revision', 'annotation', 'code'}, set()),
         'document_render_diagram': ({'code'}, set()),
     }
+    if isinstance(method, str) and method.startswith('correspondence_'):
+        from .correspondence_records import FIELDS
+        fields.update(FIELDS)
+        fields['correspondence_collect'] = ({'project', 'module', 'declaration'}, set())
     if not isinstance(method, str) or method not in fields:
         raise ValueError('Unknown editor action')
     required, optional = fields[method]
     required = required | {'protocol', 'method'}
     if not required <= request.keys() or request.keys() - required - optional:
         raise ValueError('Invalid editor action fields')
+    if method == 'correspondence_collect':
+        from .lean_correspondence import collect
+        return collect(request['project'], request['module'], request['declaration'])
+    if method.startswith('correspondence_'):
+        from .correspondence_records import action
+        return action(request)
     if method.startswith('route_'):
         from .route_records import action
         return action(request)

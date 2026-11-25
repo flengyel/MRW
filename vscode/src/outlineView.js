@@ -603,6 +603,8 @@ function render(destinationFocus) {
       revealed.delete(r.id); hiddenDetails.delete(r.id); return { type: 'toggle', region: r.id };
     }, 'toggle', true);
     button(actions, o.published ? 'Open exact retained passage' : 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
+    if (!/\.lean$/i.test(o.source.path)) button(actions, 'Compare with Lean declaration…',
+      { type: 'compare_lean', region: r.id }, 'compare-lean');
     if (o.published) {
       const links = el('details', undefined, passageTools); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
     } else companionActions(passageTools, r.id);

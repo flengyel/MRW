@@ -132,3 +132,11 @@ test('the Examples picker opens only the chosen material and permits cancelling'
   assert.equal(await pick(), undefined);
   assert.deepEqual(opened, [...routes.values()]);
 });
+
+test('correspondence review and saved reports are available in their task menus', () => {
+  const { GROUPS } = require('../src/companionTools');
+  for (const [group, id] of [['proofTools', 'correspondenceReview'], ['earlierWork', 'correspondenceReports']]) {
+    assert.ok(GROUPS[group].some(([, action]) => action === id));
+    assert.ok(c.commands.some(command => command.command === 'mrw.' + id));
+  }
+});

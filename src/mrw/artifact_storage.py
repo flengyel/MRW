@@ -15,6 +15,7 @@ import tempfile
 from uuid import uuid4
 
 from .artifact_context import CURRENT, COORDINATED, stable_paths
+from .correspondence_records import WRITE_METHODS as CORRESPONDENCE_WRITES
 from .local_files import read_bounded
 from .mutable_files import file_lock, save_mutable, sync_directory
 from .private_persistence import persist_private_new
@@ -24,10 +25,10 @@ from .workspace import strict_json
 LIMIT = 512 * 1024 * 1024
 MAX_FILES = 20000
 JSON_LIMIT = 32 * 1024 * 1024
-FAMILY = re.compile(r'(outlines|investigation|justification)-[a-f0-9]{64}')
+FAMILY = re.compile(r'(outlines|investigation|justification|correspondence)-[a-f0-9]{64}')
 HEX = re.compile(r'[a-f0-9]{64}')
 WRITE = {'route_material_create', 'route_material_import', 'route_material_edit', 'route_material_accept', 'route_stage', 'route_run', 'outline_trash', 'outline_restore', 'outline_continue_note', 'outline_source_import', 'outline_create', 'outline_import_note', 'outline_mutate', 'outline_attach', 'outline_update_note', 'outline_stacks_import', 'outline_kerodon_import', 'outline_render_diagram',
-         'update_investigation', 'end_investigation', 'resume_investigation', 'send_assistance'}
+         'update_investigation', 'end_investigation', 'resume_investigation', 'send_assistance'} | CORRESPONDENCE_WRITES
 
 
 def canonical(value):
@@ -51,6 +52,12 @@ def regular(path):
     if not stat.S_ISREG(st.st_mode) or st.st_nlink != 1:
         raise ValueError('Artifact payloads must be regular non-symlink files without external hard links: ' + str(path))
     return st
+
+
+CORRESPONDENCE_FILE = re.compile(
+    r'(?:(?:reviews|readings|observations)/[a-f0-9]{64}|'
+    r'reports/[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12})\.json'
+)
 
 
 def inventory(root, *, legacy=False):
@@ -80,6 +87,10 @@ def inventory(root, *, legacy=False):
                     owned=owned or (len(parts)==2 and parts[0].startswith('justification-') and re.fullmatch(r'[a-f0-9]{64}\.json',parts[1]))
                     owned=owned or (len(parts)==3 and parts[0].startswith('justification-') and parts[1] in ('pending','preparations') and re.fullmatch(r'[a-f0-9]{64}\.json',parts[2]))
                     owned=owned or (len(parts)==3 and parts[0].startswith('outlines-') and re.fullmatch(r'[a-f0-9-]{36}',parts[1]) and (parts[2] in ('outline.json','obsidian-links.json','diagram-renders.json','source-status.json') or re.fullmatch(r'(?:source|artifact)-[a-f0-9]{64}\.bin',parts[2])))
+                    owned = owned or (
+                        len(parts) == 3 and parts[0].startswith('correspondence-') and
+                        CORRESPONDENCE_FILE.fullmatch('/'.join(parts[1:]))
+                    )
                     if not owned: continue
                 st = regular(p)
                 raw = read_bounded(p, LIMIT, 'artifact payload')
@@ -340,6 +351,7 @@ class ArtifactStorage:
     def validate_payload(self, payload, ident, *, allow_pending=True):
         """Validate required retained bytes and existing investigation identities."""
         from .source_outlines import OutlineStore
+        from .correspondence_records import validate_store as validate_correspondence
         from .outline_notes import note_action
         from .editor_investigation import InvestigationStore, checked_parent, as_state
         from .investigation_actions import restore_investigation
@@ -371,6 +383,7 @@ class ArtifactStorage:
             for _intent in catalog(payload/('justification-'+key), root):pass
             from .route_materials import listing as materials_listing
             for _material in materials_listing(payload/('justification-'+key),root):pass
+            validate_correspondence(payload/('correspondence-'+key), root)
             inv = InvestigationStore(str(payload/('investigation-'+key)), root)
             if inv.active:
                 checked_parent(inv.active)
@@ -388,7 +401,15 @@ class ArtifactStorage:
         if self.home.exists():
             for folder in self.home.iterdir():
                 if not FAMILY.fullmatch(folder.name): continue
-                paths = folder.glob('*/outline.json') if folder.name.startswith('outlines-') else [*folder.glob('*.json'),*folder.glob('pending/*.json'),*folder.glob('preparations/*.json')] if folder.name.startswith('justification-') else [folder/'active.json']
+                if folder.name.startswith('outlines-'):
+                    paths = folder.glob('*/outline.json')
+                elif folder.name.startswith('justification-'):
+                    paths = [*folder.glob('*.json'), *folder.glob('pending/*.json'), *folder.glob('preparations/*.json')]
+                elif folder.name.startswith('correspondence-'):
+                    paths = (file for file in folder.glob('*/*.json')
+                             if CORRESPONDENCE_FILE.fullmatch(file.relative_to(folder).as_posix()))
+                else:
+                    paths = [folder/'active.json']
                 for path in paths:
                     if path.exists(): projects[read_json(path)['project_root']] = True
         return dict(schema='mrw-artifact-store',version=2,id=str(uuid4()),original_home=str(self.home),
@@ -745,7 +766,7 @@ class ArtifactStorage:
         """Every updated extension writer enters this exclusion and reads binding."""
         if self.journal.exists(): raise ValueError('Artifact operation needs recovery; run MRW: Recover Artifact Move. Writes remain blocked')
         status=self.status(); b,_=self.binding();method=request['method']
-        mutating=method in WRITE or method == 'project'
+        mutating=method in WRITE or method in ('project','correspondence_report_export')
         if mutating and request.pop('artifact_epoch',None) != status['epoch']:
             raise ValueError('Artifact location changed; this stale client cannot write. Refresh Artifact Location and reopen the reader; unsaved text is retained')
         request.pop('artifact_epoch',None)
@@ -782,7 +803,10 @@ class ArtifactStorage:
                 if root not in b['projects']: raise ValueError('Wrong workspace project; explicitly open the synchronized store for this local folder first')
                 original=b['projects'][root];value['project_root']=original
                 if 'store' in value:
-                    family='outlines' if method.startswith('outline_') else 'justification' if method.startswith('route_') else 'investigation'
+                    family = ('outlines' if method.startswith('outline_')
+                              else 'justification' if method.startswith('route_')
+                              else 'correspondence' if method.startswith('correspondence_')
+                              else 'investigation')
                     expected=self.home/(family+'-'+digest(root.encode()))
                     if Path(value['store']) != expected:
                         raise ValueError('Unexpected or stale private-store locator')

@@ -492,6 +492,20 @@ reopens the saved question and linked outline. Graph validation checks reference
 and structure, not the mathematical argument. See
 [the proof workflow](https://github.com/flengyel/MRW/blob/main/docs/PROOF_STUDY_WORKFLOW.md).
 
+## Compare a paper with Lean
+
+From a saved passage or atlas statement, choose **Compare with Lean declaration…**.
+Select a trusted local Git checkout, its Lean module and the qualified declaration
+name. **Read Lean declaration** requires an installed pinned toolchain, a current
+Lake build and Bubblewrap on the Linux workspace host. It displays the type,
+implicit hypotheses and axiom dependencies beside the printed statement.
+
+Record which parts match and explain any difference. **Proofs… → Correspondence
+review…** reopens saved judgments and lets a second reader write a reconstruction
+before revealing the Lean evidence or the first review. **Earlier saved work →
+Correspondence reports…** opens report snapshots. Reading evidence again requires
+an explicit action.
+
 ## Optional integrations and guides
 
 - [Documents, Contents and backlinks](https://github.com/flengyel/MRW/blob/main/docs/READING_OUTLINE_WORKFLOW.md)

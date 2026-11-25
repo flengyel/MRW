@@ -175,7 +175,7 @@ async function reviewDraft(bridge, proposal, change, add = false) {
   return { ...proposal, graph: checked.graph, corrected: true };
 }
 
-function registerAtlas({ vscode, context, register, bridge, projectRoot, choosePath, openProofGraph, readPassage }) {
+function registerAtlas({ vscode, context, register, bridge, projectRoot, choosePath, openProofGraph, readPassage, compareWithLean }) {
   const sessions = new Map(), reader = new Map(), sourceBefore = new Map(), selections = new WeakMap();
   context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection?.(({ textEditor }) => {
     const { document, selection } = textEditor;
@@ -194,6 +194,12 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     return extractAtlasText(source.text, source.language, range, { printedLabels });
   }
 
+  function canCompare(c) {
+    const { language, uri } = c.atlas.source;
+    return !!(compareWithLean && c.root && !c.readOnly && language !== 'lean' &&
+      /^(?:file|https|mrw-outline):/.test(uri));
+  }
+
   function render(c, notice = '', focus, fittedDiagram) {
     const component = c.atlas.components.find(candidate => candidate.id === c.component);
     const diagramState = c.views[c.view];
@@ -203,6 +209,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     c.notice = notice;
     c.panel.webview.html = atlasHtml(c.panel.webview, c.atlas, {
       view: c.view, diagram: c.diagram, readOnly: c.readOnly, showProse: c.showProse,
+      canCompare: canCompare(c),
       component: component?.id, page: c.page, focus, notice, proposal: c.pending?.component === component?.id && c.pending?.page === c.page ? c.pending : undefined,
       hasGraph: !c.readOnly && !!c.atlas.graphs?.[component?.id + ':' + c.page],
       previous: !c.readOnly && !!c.atlas.previous?.file,
@@ -405,6 +412,18 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
         if (!target) throw new Error('The linked entry is unavailable.');
         c.component = target.id; c.page = Math.floor(target.itemIds.indexOf(m.entry) / DETAIL_LIMIT);
         render(c, '', 'entry-' + m.entry); return;
+      }
+      if (m.type === 'compareLean' && canCompare(c) &&
+          component?.id === c.component && component.itemIds.includes(m.entry)) {
+        const entry = c.atlas.extraction.entries.find(item => item.id === m.entry);
+        if (!entry || entry.section) throw new Error('Choose a printed statement or passage.');
+        const span = evidenceSpan(c.atlas, { entry: entry.id, part: entry.statement ? 'statement' : 'entry' });
+        const { title, uri, text, language, revision } = c.atlas.source;
+        await compareWithLean({ root: c.root, source: {
+          title, uri, text, language, revision, label: entry.printedTitle || entry.title,
+          start: span.start, end: span.end,
+        } });
+        return;
       }
       if (m.type === 'openSource') {
         const span = evidenceSpan(c.atlas, m);
