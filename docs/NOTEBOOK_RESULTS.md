@@ -1,18 +1,18 @@
 # Retained notebook results
 
 The notebook's application owns creation, editing and execution. The
-[integration contract](INTEGRATION_BOUNDARIES.md) governs MRW's capture and
+[integration contract](INTEGRATION_BOUNDARIES.md) governs GOLEM XIV's capture and
 reference role. A retained result captures the saved code, outputs and any
 companion files you select.
 
 Run the calculation and save the notebook with its outputs. For Sagebrush,
 [download the notebook as `.ipynb`](RECOMMENDED_EXTENSIONS.md#sagebrush).
-**MRW: Retain Notebook Result…** keeps an exact copy in this workspace's private
+**Retain Notebook Result…** keeps an exact copy in this workspace's private
 storage. The Jupyter notebook toolbar exposes the same action. Use
 **Include companion files…** to retain a working note, input data or method
 file with the notebook. Save any edited files before selecting them.
 
-**MRW: Open Retained Notebook Result…** lists captures by title, date and evidence.
+**Open Retained Notebook Result…** lists captures by title, date and evidence.
 With Jupyter installed, it opens a read-only native notebook with its saved rich
 outputs. Otherwise, it opens a plain-text transcript. The action picker offers:
 
@@ -23,7 +23,7 @@ outputs. Otherwise, it opens a plain-text transcript. The action picker offers:
 - Delete this retained copy after showing its scope.
 
 Escape closes the action picker and leaves the result open. Reopening,
-comparison and export do not start a kernel. **MRW: Open Link from Clipboard**
+comparison and export do not start a kernel. **Open Link from Clipboard**
 follows a copied result link in its owning workspace. Paste that URI into an
 ordinary Markdown link to keep it beside the argument. Preview, Contents and
 source-editor links open that saved result directly, without another action
@@ -33,12 +33,12 @@ stale links preserve the previous Return destination and unsaved work.
 Workspace relocation
 carries the results and rebases links through the existing move record.
 
-**MRW: Export Notebook Provenance…** selects several captures for one ZIP. The
+**Export Notebook Provenance…** selects several captures for one ZIP. The
 archive contains exact notebooks and companions, readable transcripts, an
 artifact/checksum manifest, and separate Turtle files for the named provenance
 accounts. It includes the selected files' saved metadata and content; choose
 what to share accordingly. Original absolute paths are not added to the export.
-A destination must be a new ZIP file; MRW refuses to overwrite one.
+A destination must be a new ZIP file; GOLEM XIV refuses to overwrite one.
 
 ## What a result establishes
 
@@ -51,7 +51,7 @@ Structure and integrity checks do not check the mathematics.
 The [quadratic discriminant examples](../examples/notebook-provenance/README.md)
 include two Sage methods, a failed construction, an ordinary working note and an
 optional explicit execution helper. The helper starts a fresh kernel and records
-its report; it is not called by MRW. See the [profile](NOTEBOOK_PROVENANCE_PROFILE.md)
+its report; it is not called by GOLEM XIV. See the [profile](NOTEBOOK_PROVENANCE_PROFILE.md)
 for the exact receipt and export format.
 
 <a id="native-retained-result-viewing"></a>
@@ -80,8 +80,8 @@ plots from the exact retained notebooks.
 Retain at most one 16 MiB notebook and sixteen companion files, each at most
 16 MiB and together at most 32 MiB. Exports accept up to eight captures and
 64 MiB of original material. Rich outputs remain in the exact notebook; the
-MRW transcript renders plain text and errors, not HTML, plots or widgets. Binary
-companions are available through export. MRW does not record arbitrary kernel
+GOLEM XIV transcript renders plain text and errors, not HTML, plots or widgets. Binary
+companions are available through export. GOLEM XIV does not record arbitrary kernel
 state, authenticate producers or automatically collect external dependencies.
 
 Deletion removes the chosen private snapshot, including its copied companions.

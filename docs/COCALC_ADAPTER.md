@@ -5,7 +5,7 @@ integration test is delivered by this document.
 
 A CoCalc adapter would connect a remote project or notebook to the notes and
 arguments that use it. CoCalc would retain collaborative editing, computation
-and project management. MRW would keep the association, retained result and
+and project management. GOLEM XIV would keep the association, retained result and
 context needed to resume or compare the work.
 
 ## First workflow
@@ -14,12 +14,12 @@ context needed to resume or compare the work.
    associate with the work. Retain the origin, project ID and file locator;
    a title alone is insufficient identity.
 2. Open that target through the deployment's supported browser route and
-   ordinary CoCalc authentication. Preserve the originating MRW document and
+   ordinary CoCalc authentication. Preserve the originating GOLEM XIV document and
    its supported Return location.
 3. Edit, run and save in CoCalc using its native controls. Handoff itself
-   submits no computation from MRW.
+   submits no computation from GOLEM XIV.
 4. Deliberately download/export the saved notebook and selected companion
-   files. Retain those exact files through MRW's existing
+   files. Retain those exact files through GOLEM XIV's existing
    [notebook-result workflow](NOTEBOOK_RESULTS.md), with the source association
    and available revision/execution metadata.
 5. Reopen and compare retained results offline. A later export is a new capture;
@@ -36,16 +36,16 @@ another notebook editor or cloud computing service.
 | Responsibility | Owner and boundary |
 | --- | --- |
 | Project and collaborative document lifecycle | CoCalc creates, edits, saves, renames and manages its project files through its supported interfaces. |
-| Kernels and execution | CoCalc owns execution and its live state. A proposed MRW execution action would require a later explicit operation contract. |
-| Association and capture | MRW keeps the external target separately from its own capture ID, exact retained bytes and links to notes or claims. |
+| Kernels and execution | CoCalc owns execution and its live state. A proposed GOLEM XIV execution action would require a later explicit operation contract. |
+| Association and capture | GOLEM XIV keeps the external target separately from its own capture ID, exact retained bytes and links to notes or claims. |
 | Authentication | The initial handoff reuses ordinary CoCalc authentication. Later authenticated operations must select the deployment/account/project explicitly and use supported scoped credentials outside research artifacts. |
-| Revision and observed outcome | Record only available source revisions and actual observations. A URL, cell ID or saved output alone supplies no immutable revision, MRW-observed run or independent reproduction. |
+| Revision and observed outcome | Record only available source revisions and actual observations. A URL, cell ID or saved output alone supplies no immutable revision, GOLEM XIV-observed run or independent reproduction. |
 | Changed, moved or unavailable target | Preserve earlier captures and show the unresolved association. Relink explicitly when identity can be established; never substitute a same-title project. |
 
 This first increment does not manage CoCalc accounts, collaborators, billing,
 project startup/shutdown, live notebook synchronization or automatic reruns.
 Opening a remote editor may have its own native lifecycle behavior; record that
-separately from an MRW-issued operation.
+separately from a GOLEM XIV-issued operation.
 
 ## Supported interfaces to evaluate
 

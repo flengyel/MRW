@@ -1,6 +1,6 @@
 # Vision
 
-MRW supports mathematical understanding and research. Its aims are to study
+GOLEM XIV supports mathematical understanding and research. Its aims are to study
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
 
@@ -14,7 +14,7 @@ those at hand, and keep the conclusion or the gap with the argument. To study
 the proof, attempt a step and compare it with the original.
 [Study workflow](docs/ACTIVE_STUDY_WORKFLOW.md)
 
-MRW helps readers compare the types, hypotheses and conclusions of a
+GOLEM XIV helps readers compare the types, hypotheses and conclusions of a
 paper’s statements with those of declarations in a pinned Lean development.
 Lean checks the declarations. Deciding whether they express the paper’s
 theorems calls for a separate mathematical judgment.
@@ -24,7 +24,7 @@ theorems calls for a separate mathematical judgment.
 
 A mathematician may have sufficient grounds to use a theorem while still seeking
 an explanation of its proof. An exact passage identifies what was cited. An
-admission records what was accepted. MRW’s justification engine shows how a
+admission records what was accepted. GOLEM XIV’s justification engine shows how a
 conclusion depends on the admissions and which routes survive withdrawal.
 [Euclid’s lemma](docs/JUSTIFICATION_EUCLID_EXAMPLE.md)
 

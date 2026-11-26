@@ -1,19 +1,19 @@
 # Publish a GitHub release
 
-MRW is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
-The current release is [0.23.64](https://github.com/flengyel/MRW/releases/tag/v0.23.64).
+GOLEM XIV is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
+The current release is [0.23.64](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64).
 GitHub-distributed updates require downloading and installing a newer VSIX;
 there is no automatic update channel or Marketplace publication in this procedure.
 
 Publish normal releases by default (`prerelease: false`) and mark the newest
 release as **Latest**. Reserve the prerelease flag for an explicitly designated
-test candidate. MRW remains experimental; that description does not require the
+test candidate. GOLEM XIV remains experimental; that description does not require the
 GitHub prerelease flag.
 
 To promote an existing prerelease, clear **Set as a pre-release**, select
 **Set as the latest release**, and save. Keep its tag, version, assets and
 checksums unchanged; changing release metadata requires no rebuild. Verify the
-release page and the [latest-release link](https://github.com/flengyel/MRW/releases/latest).
+release page and the [latest-release link](https://github.com/flengyel/GOLEMXIV/releases/latest).
 The steps below apply when building a new version.
 
 1. Fetch origin and reconcile main without discarding local work. Inspect remote
@@ -22,8 +22,8 @@ The steps below apply when building a new version.
    worktree when needed and keep the working VS Code window and private data intact.
 2. Update `vscode/package.json`, matching root metadata in
    `vscode/package-lock.json`, `pyproject.toml` and `src/mrw/__init__.py` to the
-   same version. Preserve dependency pins. Set the `mrw` Activity
-   Bar container title to `MRW <version>` in the manifest; VS Code uses it for
+   same version. Preserve dependency pins. Update the version in the manifest’s `mrw` Activity
+   Bar container title; VS Code uses it for
    the icon hover and sidebar heading. Package verification rejects a stale title.
    Update versioned release and VSIX links in both READMEs and the installation
    guide. Keep release facts and check results in release notes or the pull

@@ -6,10 +6,10 @@ written in notes require none of these steps. For explanatory prose without a
 proof graph, see [AI assistance](READER_AI_WORKFLOW.md) or
 [source-study help](ACTIVE_STUDY_WORKFLOW.md#retain-companion-help).
 
-Run **MRW: Work through a proof…** from the Command Palette, or choose **Work
+Run **Work through a proof…** from the Command Palette, or choose **Work
 through a proof…** in the retained reader. Select the proof and any prerequisite
 passages, enter the question, and save the work. Only selected passages are
-included. **MRW: Continue proof work** reopens the saved question, passages and
+included. **Continue proof work** reopens the saved question, passages and
 any imported outline.
 
 In the proof-study view:
@@ -24,7 +24,7 @@ In the proof-study view:
    explanation. Identify the author and choose Reader correction or AI proposal.
    **Save summary** edits and saves the ordinary outline file; VS Code owns undo.
 4. Return to the study tab to update the unfinished question with **Save
-   question**. **MRW: Continue proof work** returns to the remembered study.
+   question**. **Continue proof work** returns to the remembered study.
    An active `.mrw-study.json` file takes precedence; its editor title also has
    a study icon.
 
@@ -34,7 +34,7 @@ graph. Exact UTF-8 quotation files are saved in `study-sources` beside them.
 Imports create new files and refuse overwrites.
 
 The handoff excludes unselected reader notes and supplied evidence. Copying and
-importing are explicit; MRW sends no API request, runs no compiler and retrieves
+importing are explicit; GOLEM XIV sends no API request, runs no compiler and retrieves
 no new source in these steps. A graph vertex can open its corresponding Stacks
 Project page through an explicit link.
 
@@ -44,7 +44,7 @@ the graph. It does not establish mathematical correctness or the sufficiency of
 the premises. Proposed explanations keep AI attribution; reader corrections are
 separate attributed edits.
 
-Copying the study file carries its quotation text, but private MRW destinations
+Copying the study file carries its quotation text, but private GOLEM XIV destinations
 still require the matching saved-source store. A study using local sources needs
 an HTTPS bibliographic reference in the retained source description to fit the
 current graph format.
@@ -54,12 +54,12 @@ current graph format.
 ## Start an atlas from a passage
 
 Select a theorem and proof or a prose section in Markdown or LaTeX. Run
-**MRW: Generate Mathematical Atlas…** from the editor context menu or Command
+**Generate Mathematical Atlas…** from the editor context menu or Command
 Palette. A saved Stacks reader offers **Generate atlas…** for the
 selected passage. Its handoff keeps the qualified source and passage links.
 Lean files can be outlined as source text.
 
-MRW captures the editor revision, including unsaved text. Choose a view in the
+GOLEM XIV captures the editor revision, including unsaved text. Choose a view in the
 atlas.
 
 - **Proof map** opens first. Select a component to inspect its statement and
@@ -76,7 +76,7 @@ atlas.
 
 LaTeX atlases open with numbered results and labelled equations. Use **Show
 prose** to include the surrounding passages. The reading list groups results
-by section. MRW uses printed numbers from a current adjacent `.aux` when
+by section. GOLEM XIV uses printed numbers from a current adjacent `.aux` when
 available, or computes them from local theorem and equation counters it can
 resolve. Follow a numbered equation reference to its retained passage.
 Citing excerpts appear once per passage, with controls for each occurrence.
@@ -102,7 +102,7 @@ The review and graph check structure. Mathematical judgment remains with the
 reader.
 
 Open an exact statement, proof, or citation occurrence to read the captured
-text in VS Code. Use **MRW: Return to Atlas** to recover the component or
+text in VS Code. Use **Return to Atlas** to recover the component or
 selected node. **Save atlas revision** keeps the captured text and descriptions.
 Accepted graphs and their exact text snapshots are saved beside it. A corrected
 companion proposal retains a link to the original.
@@ -111,7 +111,7 @@ captured passages, even after the original source changes. If the file opens
 as JSON, use the **Open Mathematical Atlas…** graph button in the editor
 toolbar, or choose **Reopen Editor With… → Mathematical Atlas** from the tab
 menu. Choose **Text Editor** there to inspect the JSON.
-**MRW: Open Mathematical Atlas…** also offers a file picker.
+**Open Mathematical Atlas…** also offers a file picker.
 
 Outside the workspace, the atlas and its captured passages open in a
 read-only preview. In the workspace, **Regenerate from source** keeps the

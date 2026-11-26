@@ -1,13 +1,13 @@
 # Lean lesson packs: content API 1
 
-A lesson pack supplies files and references to MRW's installed Lean integration.
-It supplies no executable MRW hooks and does not implement another language
-integration. Registration is explicit; MRW never discovers packs by scanning
+A lesson pack supplies files and references to GOLEM XIV's installed Lean integration.
+It supplies no executable GOLEM XIV hooks and does not implement another language
+integration. Registration is explicit; GOLEM XIV never discovers packs by scanning
 an arbitrary workspace.
 
 The working example is [examples/lean-lesson-pack](../examples/lean-lesson-pack/pack.json)
 in a source checkout (also available by downloading the repository). Copy that
-directory outside the installation, then run **MRW: Add Lean Lesson
+directory outside the installation, then run **Add Lean Lesson
 Pack…** and select it. **Examples… → Lean 4 lessons** immediately
 includes its identity-proof lesson. No extension edit, rebuild or reload is needed. **Manage Lean Lesson
 Packs…** enables, disables or removes registrations. Existing working copies
@@ -78,7 +78,7 @@ validation, compiler results and mathematical review.
 
 The first opening copies declared files to `<parent>/Lean Study/<packId>/`.
 The copy contains a manifest snapshot, a small `.study-copy.json` ownership
-marker and `.originals` seed text for explicit example reset. MRW keeps pack and
+marker and `.originals` seed text for explicit example reset. GOLEM XIV keeps pack and
 lesson IDs separate from its local root locator and code selection. It records
 no server-internal identifier or inferred proof-completion state.
 
@@ -91,5 +91,5 @@ registration does not delete its working files.
 
 The bundled pack lives in `vscode/media/lean-study/`; the installed integration
 is `vscode/src/leanStudy.js`, and the data loader is `lessonPacks.js`.
-The external example demonstrates content extensibility only. MRW's
+The external example demonstrates content extensibility only. GOLEM XIV's
 [source plugins](SOURCE_PLUGINS.md) have their own source-acquisition contract.

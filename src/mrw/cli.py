@@ -15,11 +15,11 @@ from mrw.source import SourceDocument, SourceError
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mrw",
-        description="Mathematical Research Workstation and legacy mathematical study commands.",
+        description="GOLEM XIV mathematical research and study commands.",
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
-    gui = commands.add_parser("gui", help="open Mathematical Research Workstation")
+    gui = commands.add_parser("gui", help="open the GOLEM XIV Qt editor")
     gui.add_argument("project", type=Path, nargs="?", help="project directory to open or resume")
 
     orient = commands.add_parser(

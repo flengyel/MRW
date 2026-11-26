@@ -1,9 +1,9 @@
 # Workspace relocation
 
-Requested behavior: move an MRW workspace while preserving its identity, ordinary
-work, retained sources, annotations, Studies, history and working links. The name
-**MRW** is generic. Its identity must not be derived from the command that created
-it or the current subject. The commands are **MRW: Move Workspace…** and **MRW: Recover Workspace Move**.
+Requested behavior: move a GOLEM XIV workspace while preserving its identity, ordinary
+work, retained sources, annotations, Studies, history and working links. The
+workspace identity must be independent of the command that created it and the
+current subject. The commands are **Move Workspace…** and **Recover Workspace Move**.
 
 The existing artifact mover already verifies a complete candidate and atomically
 commits the saved-source binding. It covers the records listed in
@@ -22,14 +22,14 @@ VS Code's separate state databases and routing links held in external notes.
 3. Prepare and verify the destination without replacing occupied paths. Preserve
    relative and absolute folder mappings and source references. Retained source
    revisions and exact passages must not be changed to match the new location.
-4. Publish one durable MRW authority switch after verification. An interrupted
+4. Publish one durable GOLEM XIV authority switch after verification. An interrupted
    precommit move leaves the original authoritative; an interrupted postcommit
    move recovers the committed destination before cleanup. An ambiguous result
    must block further writes rather than create two writable authorities.
 5. Reopen under an explicit host action after saving. Treat VS Code window opening
    as a separate recoverable step, not part of a filesystem-atomic operation.
    Preserve original data until destination reopening and content checks succeed.
-6. Account for existing MRW/Obsidian routing links without rewriting mathematical
+6. Account for existing GOLEM XIV/Obsidian routing links without rewriting mathematical
    notes silently. Preserve the qualified source identifier, revision and passage.
 
 A same-filesystem directory rename and a cross-filesystem copy have different
@@ -54,7 +54,7 @@ that moves only a subset under the name “Move Workspace”.
 
 1. Open the saved `.code-workspace` file. Its containing directory must also be
    one of its workspace folders. Save native editors, including notebooks, and
-   finish or copy unsent reader/Ask drafts. Close other MRW windows using the
+   finish or copy unsent reader/Ask drafts. Close other GOLEM XIV windows using the
    workspace or a saved store inside it. Stop builds or other programs writing
    files there while the move runs.
 2. Run **Move Workspace…**. Enter a new absolute directory on persistent Linux
@@ -62,7 +62,7 @@ that moves only a subset under the name “Move Workspace”.
    describes its scope and asks before copying. Leave the workspace files unchanged until the destination opens.
    External notes folders and
    externally stored sources and shared history remain in place.
-3. MRW checkpoints study drafts and pending history, closes its write gate,
+3. GOLEM XIV checkpoints study drafts and pending history, closes its write gate,
    inventories the files and copies them. It checks the destination and rechecks
    the source before committing. No source file is removed.
 4. Choose **Open moved workspace** to reuse this window. This explicit action
@@ -80,16 +80,16 @@ from merging work belonging to several earlier workspaces.
 
 ## Authority, locations and identity
 
-The host's MRW global storage contains `workspace-moves-v1/`. Each move has an
+The host's GOLEM XIV global storage contains `workspace-moves-v1/`. Each move has an
 intent, file hashes and a committed or aborted state. A synchronized atomic
 record replacement is the authority switch. Linux `flock` (util-linux) serializes
 moves, recovery and session registration, and the kernel releases its lock after
-process death. Old sessions refuse further MRW writes after commitment. The
+process death. Old sessions refuse further GOLEM XIV writes after commitment. The
 transaction is host-local; copying its files to another host or VS Code profile
 does not transfer its authority.
 
-The destination contains `.mrw-workspace-data/`: private MRW stores, a snapshot
-of MRW workspace settings/state, and file-tab locations. The original VS Code
+The destination contains `.mrw-workspace-data/`: private GOLEM XIV stores, a snapshot
+of GOLEM XIV workspace settings/state, and file-tab locations. The original VS Code
 state database is neither copied nor edited. The destination's first activation
 verifies the complete candidate before enabling work. Subsequent saves use the
 existing study/history stores at the new location.
@@ -103,7 +103,7 @@ passages, reader annotations and immutable history batches are not rewritten.
 
 Workspace and owned folder settings are adjusted in the candidate when they
 refer inside the moved root. Ordinary note contents remain byte-for-byte intact.
-MRW links resolve earlier workspace routes through the committed mapping; a link
+GOLEM XIV links resolve earlier workspace routes through the committed mapping; a link
 received by the retired workspace offers **Copy link and open moved workspace**,
 followed by **Open Link from Clipboard**. This extra handoff remains necessary
 when an external launcher still names the old workspace. Existing Obsidian
@@ -114,12 +114,12 @@ configuration and note text are not silently edited.
 The command supports local Linux filesystems, including WSL and Linux SSH hosts.
 It refuses Windows, network and memory-backed destinations, symlinked root paths,
 occupied destinations, special files and snapshots above 8 GiB or 100,000 entries.
-Private MRW storage must not contain symlinks. Ordinary directory symlinks are
+Private GOLEM XIV storage must not contain symlinks. Ordinary directory symlinks are
 retained as links, not traversed. Internal links are
 adjusted to the candidate; external targets remain external. A shared-history
 collection nested inside the workspace must be placed outside it before moving.
 
-The atomic step selects MRW's authority; it cannot atomically relocate the entire
+The atomic step selects GOLEM XIV's authority; it cannot atomically relocate the entire
 VS Code process, other extensions or a running external program. Dirty native
 buffers prevent the move. Study drafts are checkpointed; unsent reader/Ask drafts
 prevent it. Unsupported transient tabs must be reopened through their own tools.

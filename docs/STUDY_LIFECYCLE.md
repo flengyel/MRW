@@ -3,8 +3,8 @@
 These Command Palette commands manage saved study records. They do not manage
 Lean lesson directories, proof-outline documents or ordinary notes.
 
-Run **MRW: Archive Study** or **MRW: Delete Study…** from the Command Palette
-and select the saved record. **MRW: Resume Study** reopens active saved work.
+Run **Archive Study** or **Delete Study…** from the Command Palette
+and select the saved record. **Resume Study** reopens active saved work.
 
 - **Archive Study** removes the study from active lists and automatic Resume
   selection. Its drafts, questions, attempts, responses, history, review

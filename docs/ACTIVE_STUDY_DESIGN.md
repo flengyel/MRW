@@ -81,7 +81,7 @@ A study starts explicitly from a supported current passage/selection or Resume. 
 
 Use the selected retained reader passage, selected proof claim with its exact citation, active ordinary text selection through the existing capture/retention path, or the resumed study's saved passage. Keep source revision and question revision explicit. If a host cannot supply the selected text, explain that boundary locally; do not guess PDF text or notebook state from a filename.
 
-Within an explicitly opened source study, selecting its material updates context and review eligibility. It does not automatically generate a question, send a provider request, mark successful recall, rewrite an interval or capture other open files. Log the MRW navigation event. Focus moving into an answer form, Codex pane or menu must not replace the study source. A deliberate switch of study source preserves the unfinished attempt and updates context for the next task.
+Within an explicitly opened source study, selecting its material updates context and review eligibility. It does not automatically generate a question, send a provider request, mark successful recall, rewrite an interval or capture other open files. Log the GOLEM XIV navigation event. Focus moving into an answer form, Codex pane or menu must not replace the study source. A deliberate switch of study source preserves the unfinished attempt and updates context for the next task.
 
 Eligible review questions belong to the current source/study or explicitly selected prerequisite passages. Unrelated open tabs and the rest of the workspace are outside this review scope. Shared source identity may establish membership; mathematical prerequisite relationships require an explicit link, not a path-name guess.
 
@@ -150,13 +150,13 @@ If a high-effort threshold is needed initially, 7–9 is a documented provisiona
 ## Instrumentation for two uses
 
 The [history workflow](USAGE_HISTORY.md) describes configurable storage and
-exports. Use one recorder for MRW commands and study interactions. Request
+exports. Use one recorder for GOLEM XIV commands and study interactions. Request
 subjective input sparingly; keep observed actions, reader reports and estimates
 distinct.
 
 ### Event envelope and categories
 
-Every event carries an ID, session sequence, UTC timestamp, monotonic duration where relevant, MRW version/commit, event-schema version, policy version and scheduler version/parameter identifier. Link study/source/passage/question revisions when applicable. Distinguish production use from developer fixtures and automated tests.
+Every event carries an ID, session sequence, UTC timestamp, monotonic duration where relevant, GOLEM XIV version/commit, event-schema version, policy version and scheduler version/parameter identifier. Link study/source/passage/question revisions when applicable. Distinguish production use from developer fixtures and automated tests.
 
 Evidence kinds are observed action, reader report, AI assessment, external-check result and derived estimate. Derived estimates identify their input events and model/version; they never overwrite observations. Corrections link to the earlier event.
 
@@ -173,7 +173,7 @@ Record, where supported:
 
 Keep exact submitted questions/attempts by immutable snapshot or immutable record reference; avoid repeated copies of complete sources. Record meaningful edits/submissions, not every keystroke. An answer can be absent for paper work. Do not infer failure from absence.
 
-Keep data local by default, outside source repositories and packaged fixtures. Record activity inside MRW and explicit source interactions, not unrelated applications. Reuse existing identity and persistence boundaries. Batch writes outside the UI path; a failed recorder reports a gap without blocking reading or losing drafts. Expose Inspect study history, correction and explicit export. Existing personal study logs must never enter Git or a VSIX.
+Keep data local by default, outside source repositories and packaged fixtures. Record activity inside GOLEM XIV and explicit source interactions, not unrelated applications. Reuse existing identity and persistence boundaries. Batch writes outside the UI path; a failed recorder reports a gap without blocking reading or losing drafts. Expose Inspect study history, correction and explicit export. Existing personal study logs must never enter Git or a VSIX.
 
 ### Immediate use
 

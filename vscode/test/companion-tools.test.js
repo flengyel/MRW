@@ -12,7 +12,7 @@ test('purpose menus expose retained calculations and setup without a command wal
 test('setup shows installed/configured versus unchecked states without probes and cancellation is inert',async()=>{
  const h=harness();assert.equal(h.calls.length,0);await h.handlers.get('mrw.calculationTools')();assert.equal(h.calls.length,0);
  h.picks.push(rows=>rows.find(x=>x.label==='Companions and setup status'),rows=>{assert.ok(rows.find(x=>x.label==='Lean 4').description.includes('not installed'));assert.ok(rows.find(x=>x.label==='Obsidian').description.includes('not configured'));return rows.find(x=>x.label==='Jupyter / SagePod');});
- await h.handlers.get('mrw.companionTools')();assert.deepEqual(h.calls,[['external','https://github.com/flengyel/MRW/blob/main/docs/GETTING_STARTED_WSL_SAGEPOD.md']]);
+ await h.handlers.get('mrw.companionTools')();assert.deepEqual(h.calls,[['external','https://github.com/flengyel/GOLEMXIV/blob/main/docs/GETTING_STARTED_WSL_SAGEPOD.md']]);
  h.vscode.extensions.getExtension=()=>({});assert.ok(companionStatus(h.vscode).find(x=>x.label==='Lean 4').description.includes('extension installed; connection not checked; toolchain not checked'));
 });
 test('group selection delegates one existing action and native notebook opening submits no kernel work',async()=>{

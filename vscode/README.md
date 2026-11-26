@@ -1,16 +1,18 @@
-# Mathematical Research Workstation for VS Code
+# GOLEM XIV for VS Code
+
+<a id="mathematical-research-workstation-for-vs-code"></a>
 
 Begin with a mathematical question in a note, a paper or a calculation.
-MRW keeps the exact passages and saved results used in an argument. Its
+GOLEM XIV keeps the exact passages and saved results used in an argument. Its
 justification engine shows which conclusions depend on premises the reader
 has admitted. [Mathematics in ordinary notes](../docs/MATHEMATICS_WITH_NOTES.md)
 
-**MRW 0.23.64**
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.64/mrw-0.23.64.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.64)
+**GOLEM XIV 0.23.64**
+[Download the VSIX](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix)
+· [Release and checksums](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64)
 · [Installation](../docs/INSTALLATION.md).
 The extension ID is `flengyel.mrw`. GitHub updates require installing a newer
-VSIX; there is no Marketplace listing. MRW remains experimental.
+VSIX; there is no Marketplace listing. GOLEM XIV remains experimental.
 
 <a id="open-existing-work"></a>
 
@@ -39,12 +41,12 @@ annotations. Search `Stacks`, `Kerodon` or a passage tag to find a saved section
 
 Contents reflects unsaved Markdown text. VS Code owns editing and buffer
 recovery. PDF text extraction, PDF Contents, page restoration and preview scroll
-restoration are outside MRW's current capabilities.
+restoration are outside GOLEM XIV's current capabilities.
 [Navigation and Return](../docs/READING_OUTLINE_WORKFLOW.md).
 
 ### Notes while reading
 
-**New Note…** in Commands or the MRW Document menu delegates to the configured
+**New Note…** in Commands or the editor’s document menu delegates to the configured
 authoring application. For Obsidian, it runs your selected creation command and
 template; it does not substitute a reduced template. An ordinary notes folder
 uses a blank Markdown editor. Your current document stays open.
@@ -64,11 +66,11 @@ Select Markdown text and choose **Justification… → Use selected Markdown tex
 or choose saved passages. Copy their exact text and schema to Codex, import its
 proposal and correct claim summaries in the reader. Select the grounds to admit;
 Lean search remains a separate action. Sources, supplied attribution and corrections
-are retained. See the [workflow](https://github.com/flengyel/MRW/blob/main/docs/SOURCE_GROUNDS_WORKFLOW.md).
+are retained. See the [workflow](https://github.com/flengyel/GOLEMXIV/blob/main/docs/SOURCE_GROUNDS_WORKFLOW.md).
 
 Choose **Proofs → Justification… → Explore Euclid’s lemma**. Read the supplied
 Bézout and unique-factorization arguments and their admissions, then choose
-**Search under these admissions**. MRW retains the checked routes and exact
+**Search under these admissions**. GOLEM XIV retains the checked routes and exact
 source snapshots. A source button opens its passage; **Back to routes** restores
 the comparison.
 
@@ -105,7 +107,7 @@ nLab; snapshots remain readable without their plugin.
 
 ## Workspace hosts and dependencies
 
-MRW and Python run on a Linux workspace host, including WSL2 or Remote SSH.
+GOLEM XIV and Python run on a Linux workspace host, including WSL2 or Remote SSH.
 Windows VS Code may provide the interface. Ordinary reading requires VS Code
 1.95+ and Python 3.11+, normally `python3`; set `mrw.pythonExecutable` in
 User/Remote settings when needed. It requires no Qt, Lean, SageMath or AI account.
@@ -120,7 +122,7 @@ store and a trusted file workspace.
 
 Install `mrw-0.23.64.vsix` with **Extensions: Install from VSIX…** in the intended
 workspace host. The recommended optional companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.64/mrw-diagnostics-0.1.0.vsix).
+[GOLEM XIV Diagnostics 0.1.0](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-diagnostics-0.1.0.vsix).
 Its weekly reports are opt-in. Save work before a requested reload and retain
 workspace storage when upgrading.
 
@@ -145,7 +147,7 @@ are excluded. [Release procedure](../docs/RELEASING.md).
   of the justification runtime's 4.32.2. Live goals use the official
   `leanprover.lean4` extension on the workspace host.
 - [SagePod/Jupyter](../docs/GETTING_STARTED_WSL_SAGEPOD.md): computation in an
-  external kernel. Opening MRW starts no container and runs no cells.
+  external kernel. Opening GOLEM XIV starts no container and runs no cells.
 - [Proof Outlines](../docs/PROOF_GRAPH_WORKFLOW.md): claims, cited passages,
   editable summaries and reversible display simplification. Graph validation
   does not check a mathematical proof.
@@ -170,18 +172,18 @@ bibliography actually read. [Zotero workflow](../docs/ZOTERO_WORKFLOW.md).
 Retain a saved notebook with optional companion notes, reopen its outputs,
 compare alternatives and export their provenance. Producer-reported execution
 and retained output bytes remain distinct; reopening restores no kernel or
-running job. SageQueue queues SageMath jobs through SagePod; an MRW adapter
+running job. SageQueue queues SageMath jobs through SagePod; a GOLEM XIV adapter
 is not implemented. [Notebook workflow](../docs/NOTEBOOK_RESULTS.md).
 
 ## Data and history
 
 Ordinary notes, notebooks and Lean files remain files owned by their editors.
-MRW stores source captures, annotations, API investigation records and immutable
+GOLEM XIV stores source captures, annotations, API investigation records and immutable
 justification results separately. Copying a note link does not copy its private
 target. Source-note and linked-note associations preserve each work's
 text and attribution independently.
 
-History records MRW operations, versions and outcomes rather than unrelated
+History records GOLEM XIV operations, versions and outcomes rather than unrelated
 application activity. **Inspect Study History** and **Export Study History…**
 provide local reports; exports may contain private mathematics. Diagnostics and
 shared history are optional. Missing observations are not zero use.
@@ -270,8 +272,8 @@ continuation and automatic retry are outside this workflow.
 
 ### Obsidian companion notes
 
-MRW resolves note IDs and backlinks within the chosen folder. Obsidian creates
-notes through its configured command and template; MRW opens the same files.
+GOLEM XIV resolves note IDs and backlinks within the chosen folder. Obsidian creates
+notes through its configured command and template; GOLEM XIV opens the same files.
 It neither discovers arbitrary vaults nor synchronizes them.
 [Obsidian setup](../docs/OBSIDIAN_WORKFLOW.md).
 
@@ -299,5 +301,5 @@ The guarded native preparer is `vscode/scripts/prepare-native-host.py`.
 
 [Contributing](../CONTRIBUTING.md) describes development requirements.
 
-The package includes MRW's [Apache-2.0 license](../LICENSE) and notices for
+The package includes GOLEM XIV's [Apache-2.0 license](../LICENSE) and notices for
 KaTeX, markdown-it, ts-fsrs and Quiver. Source material retains its own license.

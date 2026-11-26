@@ -360,5 +360,5 @@
       "additionalProperties": false
     }
   },
-  "description": "MRW proof outline v1. The core additionally checks references, unique identifiers, DAG structure, joint-premise projection and scope discharge. These are structural checks, not mathematical checking."
+  "description": "GOLEM XIV proof outline v1. The core additionally checks references, unique identifiers, DAG structure, joint-premise projection and scope discharge. These are structural checks, not mathematical checking."
 }

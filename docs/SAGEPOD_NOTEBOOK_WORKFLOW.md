@@ -3,22 +3,22 @@
 Follow [the integration contract](INTEGRATION_BOUNDARIES.md): Jupyter owns native
 notebook operations, SagePod its runtime, and SageQueue its jobs. An explicit
 future adapter may delegate supported operations; it must not duplicate these
-systems. Current MRW capabilities are described below.
+systems. Current GOLEM XIV capabilities are described below.
 
 For installation, [choose the reading or computation path](INSTALLATION.md).
-SagePod is MRW's optional computation companion. For a first notebook connection,
-follow [Install MRW and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
+SagePod is GOLEM XIV's optional computation companion. For a first notebook connection,
+follow [Install GOLEM XIV and use SagePod in WSL2](GETTING_STARTED_WSL_SAGEPOD.md).
 This companion guide preserves the workflow boundaries and recorded host
-evidence. See [the installation guide](INSTALLATION.md) for the current MRW
+evidence. See [the installation guide](INSTALLATION.md) for the current GOLEM XIV
 package and installation commands.
 
 Use an ordinary `.ipynb` for explanations, rendered mathematics, Sage code and
 saved outputs. VS Code and Microsoft's Jupyter extension provide the notebook
 editor and kernel interaction; SagePod provides SageMath in its existing
-container. MRW provides saved sources, exact retained passages, annotations
+container. GOLEM XIV provides saved sources, exact retained passages, annotations
 and Contents for Markdown documents. Its Python backend stays on the workspace
 host.
-No new MRW runtime, notebook controller or container service is required.
+No new GOLEM XIV runtime, notebook controller or container service is required.
 
 ## Batch jobs with SageQueue
 
@@ -28,11 +28,11 @@ for batch scripts; it manages submissions, partitions, workers, resource limits
 and logs. It does not provide another SageMath container. Use Jupyter for the
 interactive notebook workflow below and SageQueue for batch jobs. See the
 [companion guide](RECOMMENDED_EXTENSIONS.md#sagemath-sagepod-jupyter-and-sagequeue)
-and SageQueue's current setup instructions. MRW does not submit or monitor queue
-jobs, and opening MRW starts neither workers nor notebook execution.
+and SageQueue's current setup instructions. GOLEM XIV does not submit or monitor queue
+jobs, and opening GOLEM XIV starts neither workers nor notebook execution.
 A future queue adapter must use SageQueue's commands/API and retain its task IDs,
 status and cancellation/retry semantics. It must not edit queue internals or
-invent a second scheduler. Synchronizing notebook files or MRW references does
+invent a second scheduler. Synchronizing notebook files or GOLEM XIV references does
 not synchronize running kernels, worker state or the container environment.
 
 ## Open the existing environment
@@ -49,8 +49,8 @@ language extension's separate **Run SageMath File** command or require Sage on
 the workspace host. Its [language registration](https://github.com/n-WN/sagemath-vscode-enhanced/blob/main/package.json)
 is separate from Jupyter's server/kernel handling.
 
-MRW introduced the overview-reference actions in 0.5.0. Python
-3.11+ on the workspace host remains MRW's requirement; the Sage kernel uses the
+GOLEM XIV introduced the overview-reference actions in 0.5.0. Python
+3.11+ on the workspace host remains GOLEM XIV's requirement; the Sage kernel uses the
 Python and Sage installed inside SagePod. Python/Pylance extensions are optional
 for this existing-server workflow; they do not install SageMath.
 
@@ -113,7 +113,7 @@ and [notebook operations](https://code.visualstudio.com/docs/datascience/jupyter
 | --- | --- |
 | Workspace host `~/Jupyter` | Existing persistent ordinary files edited and saved by VS Code |
 | SagePod `/home/sage/notebooks` | The same bind mount as seen by Sage/Jupyter inside the container |
-| Workspace-host MRW private extension storage | Saved sources and annotations; outside the notebook mount |
+| Workspace-host GOLEM XIV private extension storage | Saved sources and annotations; outside the notebook mount |
 | Live Sage kernel | Variables and unsaved computation state; separate from `.ipynb` bytes |
 
 For example, host `~/Jupyter/mrw-sagepod-study/sagepod-study.ipynb` corresponds
@@ -125,21 +125,21 @@ host file. It does not require the server's Contents API to save that file.
 
 Use ordinary relative links in a Markdown cell, for example
 `[Working note](overview.md)`. Keep that Markdown document in the study workspace;
-it can contain references inserted using **MRW: Insert Source or Passage Link…**.
-Open the note in the Markdown editor, put the cursor in an MRW reference,
-and run **MRW: Follow Source or Passage Link at Cursor**. This explicit action opens
-the reader and retained material. **MRW: Show Contents** offers heading and
-MRW-link navigation for a Markdown document in the workspace.
+it can contain references inserted using **Insert Source or Passage Link…**.
+Open the note in the Markdown editor, put the cursor in a GOLEM XIV reference,
+and run **Follow Source or Passage Link at Cursor**. This explicit action opens
+the reader and retained material. **Show Contents** offers heading and
+GOLEM XIV-link navigation for a Markdown document in the workspace.
 Return to the notebook via an ordinary link in the working note, an open tab,
-or Explorer. No notebook-cell bridge is needed for this movement. MRW reference
+or Explorer. No notebook-cell bridge is needed for this movement. GOLEM XIV reference
 commands operate on ordinary Markdown editors, not notebook cells or Markdown
 preview clicks.
 
 Copying the notebook and its companion ordinary files preserves those files
-and relative links. **It does not transfer MRW's private targets.** Manual folder
+and relative links. **It does not transfer GOLEM XIV's private targets.** Manual folder
 renaming or copying files to another host does not relocate retained sources.
 Use [Move Workspace](WORKSPACE_RELOCATION_DESIGN.md) for supported relocation of
-a workspace and its private MRW stores, or the narrower
+a workspace and its private GOLEM XIV stores, or the narrower
 [saved-work mover](ARTIFACT_STORAGE.md) for its listed source and research records.
 References and a successful calculation confer no proof-checking status.
 
@@ -155,7 +155,7 @@ for this notebook and confirm the restart. This discards this kernel's variables
 and executes cells in document order. Do not restart another notebook's kernel
 or shut down the shared SagePod container. Save the new outputs explicitly.
 Record the Sage/kernel versions and any external data or packages needed.
-Opening/restoring MRW starts no container and runs no notebook cells.
+Opening/restoring GOLEM XIV starts no container and runs no notebook cells.
 
 Direct notebook-cell assistance, automatic response insertion, automatic
-execution and kernel-memory restoration remain outside MRW.
+execution and kernel-memory restoration remain outside GOLEM XIV.

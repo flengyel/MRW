@@ -6,7 +6,7 @@ companion explanations or scheduled recall. They are separate from ordinary
 link creates no study. Questions and solutions can remain in their existing
 notes.
 
-To start, select a saved passage and run **MRW: Study Current Material**, or choose
+To start, select a saved passage and run **Study Current Material**, or choose
 **Study current material** in the retained reader. A graph claim with a retained
 citation also offers **Study this claim**. Saved text, Markdown and TeX selections
 are supported; unsaved source changes, PDF extraction and notebook state are
@@ -54,10 +54,10 @@ revision. Unsubmitted choices survive pause and reopen.
 Starting recall conceals the source and reference answer inside the study.
 Revealing either records possible exposure, without claiming that it was read.
 Later exposure does not change an earlier submission. The source may still be
-visible in another pane or application: MRW does not monitor those applications
+visible in another pane or application: GOLEM XIV does not monitor those applications
 or infer consultation from tab focus. Report consultation explicitly.
 
-**Pause / save** saves the current work. **MRW: Resume Study** in the Command
+**Pause / save** saves the current work. **Resume Study** in the Command
 Palette restores the question and draft. One matching study opens directly.
 When the picker lists several, choose a study or cancel to keep the work open.
 After recording an outcome or
@@ -107,7 +107,7 @@ research use and automated fixtures. Existing work is preserved.
 the outcome to establish its schedule. **Retire** ends review and preserves
 the earlier work.
 
-On a later visit run **MRW: Resume Study**. Studies with reviews due appear
+On a later visit run **Resume Study**. Studies with reviews due appear
 first. Studies with an unfinished attempt or an unresolved question saved for
 later appear next, including those outside the recent list. Choose
 **Review due questions** to review scheduled questions with the answers
@@ -150,11 +150,11 @@ reported outcomes to force a review interval.
 
 ## History and export
 
-Use **MRW: Resume Study**, **MRW: Inspect Study History** and
-**MRW: Export Study History…** in the Command Palette. Ordinary notes and the
+Use **Resume Study**, **Inspect Study History** and
+**Export Study History…** in the Command Palette. Ordinary notes and the
 Lean tutorial need no study record.
 
-MRW records its navigation, submissions, question/review decisions, exposure,
+GOLEM XIV records its navigation, submissions, question/review decisions, exposure,
 effort reports, help offers, cancellations, errors, operation times and
 resumption. Records include available source/question/attempt identity and
 software versions. It does not record unrelated application activity or
@@ -203,7 +203,7 @@ test counts nor these reports establish a learning benefit.
 
 ## Manage saved studies
 
-Run **MRW: Archive Study** or **MRW: Delete Study…** from the Command Palette
+Run **Archive Study** or **Delete Study…** from the Command Palette
 and select the saved record.
 [Archive, Restore, Trash, Undo and permanent deletion](STUDY_LIFECYCLE.md)
 manage optional saved work without deleting ordinary documents or shared sources.

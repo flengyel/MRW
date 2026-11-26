@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1420" viewBox="0 0 1800 1420" role="img" aria-labelledby="title desc">
-<title id="title">MRW architecture: ports, adapters and justification</title>
-<desc id="desc">The VS Code facade leads to MRW's core, which contains workflow coordination, a canonical data model, the integral justification logic engine, storage integrity and usage recording. The engine traces claims to grounds and admitted assumptions and checks stated inferences. The reader compares routes found by bounded search and can withdraw an admission. Lean checks the returned derivations. A CoCalc adapter is proposed for remote projects and notebooks. Ports and adapters connect documents and notes, sources and references, computation, external proof checking, AI assistance and optional diagnostics. Provenance, external checking and contextual justification remain distinct. Dashed elements are proposed. Diagnostic reports feed Codex review against the design before corrections.</desc>
+<title id="title">GOLEM XIV architecture: ports, adapters and justification</title>
+<desc id="desc">The VS Code facade leads to the GOLEM XIV core, which contains workflow coordination, a canonical data model, the integral justification logic engine, storage integrity and usage recording. The engine traces claims to grounds and admitted assumptions and checks stated inferences. The reader compares routes found by bounded search and can withdraw an admission. Lean checks the returned derivations. A CoCalc adapter is proposed for remote projects and notebooks. Ports and adapters connect documents and notes, sources and references, computation, external proof checking, AI assistance and optional diagnostics. Provenance, external checking and contextual justification remain distinct. Dashed elements are proposed. Diagnostic reports feed Codex review against the design before corrections.</desc>
 <defs>
   <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8" fill="none" stroke="#638198" stroke-width="1.5"/></marker>
 </defs>
@@ -18,16 +18,16 @@ text { font-family: 'DejaVu Sans', sans-serif; fill:#18364c; }
 .dash { stroke-dasharray:10 8; }
 </style>
 <rect width="1800" height="1420" rx="24" fill="#f7f9fc"/>
-<text x="60" y="73" class="title">Mathematical Research Workstation</text>
+<text x="60" y="73" class="title">GOLEM XIV</text>
 <text x="60" y="116" class="subtitle">Ports and adapters for continuing mathematical work across tools</text>
 <rect x="635" y="156" width="530" height="138" rx="20" fill="#163c58"/>
 <text x="900" y="191" text-anchor="middle" style="font-size:19px;letter-spacing:2px;fill:#a8dcf0;font-weight:700">VS CODE WORKBENCH</text>
-<text x="900" y="232" text-anchor="middle" style="font-size:31px;fill:#fff;font-weight:700">MRW facade</text>
+<text x="900" y="232" text-anchor="middle" style="font-size:31px;fill:#fff;font-weight:700">GOLEM XIV facade</text>
 <text x="900" y="268" text-anchor="middle" style="font-size:22px;fill:#d5e6f2">Contextual actions · native-editor handoffs</text>
 <path d="M900 294 V328" fill="none" stroke="#638198" stroke-width="3" marker-end="url(#arrow)"/>
 <path d="M900 330 L1260 510 L1260 910 L900 1090 L540 910 L540 510 Z" fill="#eaf1fb" stroke="#91abc4" stroke-width="3"/>
 <path d="M900 354 L1238 523 L1238 897 L900 1066 L562 897 L562 523 Z" fill="none" stroke="#cbd8e7" stroke-width="1.5"/>
-<text x="900" y="440" text-anchor="middle" class="eyebrow">MRW CORE</text>
+<text x="900" y="440" text-anchor="middle" class="eyebrow">GOLEM XIV CORE</text>
 <text x="900" y="479" text-anchor="middle" class="small">Independent of the external tools</text>
 
 <rect x="625" y="500" width="550" height="90" rx="17" fill="#fff" stroke="#d3deec" stroke-width="1.5"/>

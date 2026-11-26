@@ -29,9 +29,9 @@ separate states; publication does not authorize installation or forced reload.
 | D05 | **Editing and synchronization.** Preserve dirty buffers, revision conflicts, deletion markers and offline records. | Current storage qualifications remain binding. Synchronization does not coordinate concurrent writers or restore a kernel or queue. Check stale mappings and conflicting edits without silent overwrite. |
 | D06 | **Optional companions.** Distinguish source readers, lesson packs, native extensions and external services. | Grouped setup shows installed, configured and unchecked states. Opening setup does not probe services or install software. Reachability is checked by the relevant action. |
 | D07 | **Command context.** Group actions by task and bind them to the selected document. [UX](../UX_SPEC.md#evaluation-follow-up--interface-and-continuity). | The sidebar keeps its three reading entry points. The editor menu shows Return for a recorded origin and companion actions for eligible notes. Setup opens smaller task menus. Proof display changes restore control focus. [Reader notes](READER_NOTE_WRITING.md) opens a focused composer and keeps assistance at the passage. Broader first-use and theme observations remain open. |
-| D08 | **Lean lessons.** Resolve the selected lesson, associated code and working note. [Workflow](LEAN_STUDY_WORKFLOW.md). | Native WSL checks covered the working note, exact Return and restoration of the saved note and code selection after reload. Opening performs no MRW-issued check. The pinned lessons build with Lean. Live InfoView in this route still awaits an isolated companion check. |
+| D08 | **Lean lessons.** Resolve the selected lesson, associated code and working note. [Workflow](LEAN_STUDY_WORKFLOW.md). | Native WSL checks covered the working note, exact Return and restoration of the saved note and code selection after reload. Opening performs no GOLEM XIV-issued check. The pinned lessons build with Lean. Live InfoView in this route still awaits an isolated companion check. |
 | D09 | **Optional study.** Ordinary reading creates no study record and opens no registration form. [Study workflow](ACTIVE_STUDY_WORKFLOW.md). | Source study, history, review, lifecycle commands, Proof Outlines and Lean study remain independently available. |
-| D10 | **AI destination and review.** Identify API requests and companion handoffs where chosen. [AI workflow](READER_AI_WORKFLOW.md). | API requests require exact preview and separate Send. General Ask records an exact passage target and a general question; it does not classify the question as a result explanation. Codex clipboard actions copy selected context and references without sending. Companion behavior after paste remains outside MRW's observed boundary. |
+| D10 | **AI destination and review.** Identify API requests and companion handoffs where chosen. [AI workflow](READER_AI_WORKFLOW.md). | API requests require exact preview and separate Send. General Ask records an exact passage target and a general question; it does not classify the question as a result explanation. Codex clipboard actions copy selected context and references without sending. Companion behavior after paste remains outside GOLEM XIV's observed boundary. |
 | D11 | **Note, source and Return.** Navigate linked work without imposing one repository or note format. | Contents, preview and exact Return preserve dirty buffers and retained references. Inserted captions give the source and passage. The destination keeps the exact citation. Scripted note/source/Return and restart checks have exercised the native route. The Examples picker opens the operads notes, the induction example and Lean lessons. The operads preview opens reader notes on an exact saved copy on request. [Emacs capture](NOTE_COMPANIONS.md#capture-a-passage-in-emacs) delegates the saved passage to Denote or Org-roam. Obsidian creation and desktop link handling from Emacs remain separate checks. [Navigation](READING_OUTLINE_WORKFLOW.md). |
 | D12 | **Retained calculations.** Keep rich outputs, input/method revisions, notes and proof links available through comparison and export. [Notebook workflow](NOTEBOOK_RESULTS.md). | Native read-only notebook viewing and diff use Jupyter. Transcripts are the fallback. An isolated WSL check reopened exact retained notebooks after restart and displayed both saved PNG outputs in the native diff. Capture, comparison and export have focused tests. |
 | D13 | **Zotero references.** Connect references, attachments and Return through the supported owner API. [Workflow](ZOTERO_WORKFLOW.md). | Sources exposes Find/Resume Zotero and setup. Connector/attachment/Return regressions cover the supported route. A live attachment interaction remains unobserved; no mutation of Zotero is authorized. |
@@ -72,7 +72,7 @@ for the last justified step and the question still open.
 
 When a reader chooses to revisit a proof step, assess later reconstruction
 and use on a changed example through the separate
-[study evaluation](LEARNING_RESEARCH.md#evaluating-mrw-on-a-manuscript).
+[study evaluation](LEARNING_RESEARCH.md#evaluating-golem-xiv-on-a-manuscript).
 
 [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md) illustrates justification.
 Companion tests remain open. Extend an adapter or the justification engine
@@ -84,7 +84,7 @@ when a mathematical task calls for it.
 The acceptance case is
 [*Maximality of the Došen–Petrić Boolean Category*](https://arxiv.org/abs/2611.19496).
 The reader compares a retained statement with a declaration from a pinned local
-build. MRW records each judgment, a second reading saved before reveal, and an
+build. GOLEM XIV records each judgment, a second reading saved before reveal, and an
 optional report. The correspondence tests cover stale builds, changed signatures,
 unfinished proofs and report recovery. Checking proof structure and finding a
 matching declaration automatically remain open.

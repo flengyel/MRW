@@ -1,13 +1,13 @@
 # TikZ diagrams in notes and annotations
 
-MRW renders `tikz` fenced blocks in ordinary Markdown notes and in saved-source
+GOLEM XIV renders `tikz` fenced blocks in ordinary Markdown notes and in saved-source
 annotations. Choose **Render diagram** to compile a block; opening, saving or
 refreshing a note never starts the compiler. The diagram is a view of its code,
 not a check of its mathematical content.
 
 ## Render a Markdown note
 
-1. Open a `.md` or `.markdown` file through **MRW: Open Document…**, then view
+1. Open a `.md` or `.markdown` file through **Open Document…**, then view
    its Markdown preview.
 2. Add a fenced `tikz` block, or use one already present in the note:
 
@@ -54,7 +54,7 @@ when the package is installed. Do not add another document class. Use one PDF
 page per block; split multipage output into separate fences. Include the closing
 fence. Code in fences with other language labels remains uncompiled.
 
-The same fenced syntax is used by Obsidian's TikZJax plugin, but MRW does not
+The same fenced syntax is used by Obsidian's TikZJax plugin, but GOLEM XIV does not
 install or invoke that plugin. Ordinary-note mathematical macros are read from
 supported balanced command definitions in leading front matter. This does not
 evaluate arbitrary YAML or supply a general LaTeX preamble to the note preview.

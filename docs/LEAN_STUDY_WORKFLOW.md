@@ -1,6 +1,6 @@
 # Study Lean 4
 
-Choose **Examples… → Lean 4 lessons** in MRW's **Commands** view.
+Choose **Examples… → Lean 4 lessons** in GOLEM XIV's **Commands** view.
 The introductory sequence has three lessons.
 
 1. **Introduction and functions** explains what formalization entails and how
@@ -18,7 +18,7 @@ share the editable examples and associated note. Their primary text is
 [*Theorem Proving in Lean 4*](https://lean-lang.org/theorem_proving_in_lean4/),
 by Jeremy Avigad, Leonardo de Moura, Soonho Kong and Sebastian Ullrich, with
 contributions from the Lean Community. The companion text and examples were
-prepared with Codex for MRW and are separate from the book.
+prepared with Codex for GOLEM XIV and are separate from the book.
 
 ## Files and live goals
 
@@ -42,7 +42,7 @@ Replace `_` with your proposed expression. An unfinished variation reports a mis
 term; a deliberate error reports a type mismatch. Undo is available in the
 native editor, and `Study/Solutions.lean` contains completed variations.
 
-MRW opens the lesson preview and editable Lean examples as ordinary tabs.
+GOLEM XIV opens the lesson preview and editable Lean examples as ordinary tabs.
 The official Lean extension opens its InfoView beside the code. Switch between
 the lesson and code tabs; resize the native groups to suit the display.
 
@@ -51,15 +51,15 @@ diagnostics, hovers, Go to Definition and live goals. Install it on the workspac
 host. **In a WSL2 window, choose Install in WSL: Debian**, and install Lean/elan
 on Debian, rather than relying on a Windows installation. See the
 [official setup instructions](https://lean-lang.org/install/).
-MRW uses its supported **Lean 4: InfoView: Display Goal** command
+GOLEM XIV uses its supported **Lean 4: InfoView: Display Goal** command
 (`lean4.displayGoal`). It has no separate Lean server or live-goal API.
 
 The bundled project pins `leanprover/lean4:v4.33.0`, matching the book version
-checked for this unit. It needs only Lean core. Opening MRW starts no Lean build
+checked for this unit. It needs only Lean core. Opening GOLEM XIV starts no Lean build
 or toolchain download. Opening Lean code lets the official extension perform
 its normal project setup; a missing pinned toolchain may require installation
 through that extension. No global elan default or research-project configuration
-is changed. Without the extension, MRW still opens the explanation and code,
+is changed. Without the extension, GOLEM XIV still opens the explanation and code,
 and offers the official setup link.
 
 ## Icons and controls
@@ -73,9 +73,9 @@ Hover over an icon to see its command name.
 | Pause / Play | Freezes the displayed state / resumes updates. |
 | Refresh, shown while paused | Updates the paused display once. |
 | Cog beside the goal | Changes which assumptions and goal details are displayed. |
-| MRW Document (list icon) | Opens MRW's document navigation menu. |
+| Document navigation (list icon) | Opens GOLEM XIV's document navigation menu. |
 
-**Lean Study Actions…** is MRW's menu for the lesson, examples, notes and
+**Lean Study Actions…** is GOLEM XIV's menu for the lesson, examples, notes and
 variations. Lean's `∀` menu and InfoView controls belong to the official Lean
 extension. Its [manual](https://github.com/leanprover/vscode-lean4/blob/master/vscode-lean4/manual/manual.md#status-bar)
 describes the other controls. Use Pin to compare two locations; use Pause when
@@ -83,9 +83,9 @@ you want the display to stay still.
 
 ## Your working copy
 
-**MRW: Lean Study Parent** selects the parent for new projects. The default
-[MRW workspace setup](WORKSPACE_SETUP.md) sets it to `~/mrw-work` on Linux,
-independently of the notes folder. If empty, **MRW: Notes Folder** supplies the
+The `mrw.leanStudyParent` setting selects the parent for new projects. The default
+[GOLEM XIV workspace setup](WORKSPACE_SETUP.md) sets it to `~/mrw-work` on Linux,
+independently of the notes folder. If empty, `mrw.notesFolder` supplies the
 parent; otherwise a folder picker asks. Resuming a study keeps its existing
 location, even after either setting changes. The project is created
 at `<parent>/Lean Study/lean-foundations/`. No new vault is required. Files in
@@ -103,7 +103,7 @@ the installed extension remain untouched.
 | `lean-toolchain`, `lakefile.toml`, `Study.lean` | Dedicated core-only project and successful default build |
 
 Save, undo and recover drafts through the native editors. The project and notes
-remain usable without MRW or the original lesson pack. An occupied unrelated
+remain usable without GOLEM XIV or the original lesson pack. An occupied unrelated
 folder is rejected. Reopening reuses the working copy, including its lesson
 version. A pack update never silently replaces these files. Pack 1.1.4 supplies
 the introduction, contents and three lessons for new copies. Earlier copies keep
@@ -113,20 +113,21 @@ interaction instructions also apply to their unchanged examples.
 ## Actions and resumption
 
 In the examples editor, choose **Lean Study Actions…** from the toolbar.
-In the lesson preview or working note, choose **MRW Document → Lean Study
-Actions…**. The action also appears in the Command Palette for these files.
+In the lesson preview or working note, choose **Lean Study Actions…** from the
+document navigation menu. The action also appears in the Command Palette for
+these files.
 
 In the working note, **Read lesson** reopens the lesson you were using.
-**Return to prior MRW document** appears when MRW captured a reading location
-on entry. The other actions open the working examples, InfoView, the associated
-note, variations, solutions and deliberate errors. Book links open in the
-external browser.
+When GOLEM XIV has captured a reading location on entry, the menu also
+offers a return to that document. The other actions open the working examples,
+InfoView, the associated note, variations, solutions and deliberate errors. Book
+links open in the external browser.
 
-**MRW: Return from Lean Study** restores the prior MRW Markdown document and
-its exact captured source range. **MRW: Resume Lean Study** reopens the retained
+**Return from Lean Study** restores the prior GOLEM XIV Markdown document and
+its exact captured source range. **Resume Lean Study** reopens the retained
 lesson and code location in this workspace, including after closing their tabs
 or restarting. Saved edits and notes remain in their files; VS Code owns unsaved
-recovery. MRW tracks in-session edits to the return range. If the document changes
+recovery. GOLEM XIV tracks in-session edits to the return range. If the document changes
 outside that tracking and the pin no longer matches, Return reports that it
 cannot recover the exact range instead of guessing.
 

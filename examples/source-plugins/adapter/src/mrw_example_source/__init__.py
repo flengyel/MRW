@@ -1,4 +1,4 @@
-"""Minimal external adapter, installed separately from MRW's VSIX.
+"""Minimal external adapter, installed separately from the GOLEM XIV VSIX.
 
 This example uses Kerodon's public HTML as a working acquisition case. Replace
 parse with a parser for your own format; the store and reader remain core-owned.

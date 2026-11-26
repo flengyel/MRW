@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Explicitly execute a trusted notebook in a fresh kernel and save its receipt.
 
-Requires nbclient/nbformat in the producer environment, not in MRW. Never imported
-or invoked by the extension. Refuses to overwrite either input or output files.
+Requires nbclient/nbformat in the producer environment. GOLEM XIV never imports
+or invokes this script. Refuses to overwrite either input or output files.
 """
 import argparse
 from datetime import datetime, timezone

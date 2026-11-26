@@ -1,6 +1,6 @@
-# Choose where MRW keeps saved work
+# Choose where GOLEM XIV keeps saved work
 
-MRW keeps retained sources, outlines, annotations and associated records
+GOLEM XIV keeps retained sources, outlines, annotations and associated records
 separately from ordinary notes and notebooks. A saved-work move applies to one
 VS Code workspace. Ordinary notes and notebooks stay at their existing paths.
 
@@ -24,20 +24,20 @@ another record operation. Completion notifications do not block reading.
 ## Move this workspace's saved artifacts
 
 1. Save reader annotations and human investigation summaries. Finish any active
-   MRW request. Close older MRW windows using this store; executables predating
+   GOLEM XIV request. Close older GOLEM XIV windows using this store; executables predating
    0.7.0 cannot honor the new migration exclusion. Ordinary notes and notebooks
    can stay open in their editors.
-2. Run **MRW: Show Artifact Location** in the intended workspace.
-3. Run **MRW: Move Saved Work Directory…**. Enter an absolute **new directory**
+2. Run **Show Artifact Location** in the intended workspace.
+3. Run **Move Saved Work Directory…**. Enter an absolute **new directory**
    on the Linux/WSL/SSH workspace host. Its parent must already exist.
 4. Review the current directory, destination, affected project folders and
    workspace scope. Choose **Move saved work** to commit the operation.
 5. The result shows the effective directory. Open readers rebind to it. Run
-   **MRW: Show Artifact Location** whenever you want to check it.
+   **Show Artifact Location** whenever you want to check it.
 
 The setting `mrw.artifactMoveDestination` only supplies the input's suggested
 path. Changing it never switches stores, initializes a new store or moves work.
-An existing directory belongs to the separate opening operation below; MRW never
+An existing directory belongs to the separate opening operation below; GOLEM XIV never
 merges stores. Symlinks, redirected paths, self-moves, ancestor/descendant moves
 and destinations overlapping host-local VS Code storage are rejected.
 
@@ -46,7 +46,7 @@ replacement, hard-link publication and directory synchronization. Windows-backed
 private storage remains unqualified. Do not treat pausing synchronization or
 closing Obsidian as a supported remedy for failed capability checks. Another
 mount must pass its own checks; changing a setting does not establish support.
-Ordinary Windows-vault notes can stay in place while MRW's private store remains
+Ordinary Windows-vault notes can stay in place while GOLEM XIV's private store remains
 on the Linux host.
 
 ## What moves
@@ -71,10 +71,10 @@ in this workspace. The confirmation lists the project roots. Its scope is:
 Unresolved transmissions must be reconciled or explicitly ended before moving
 or initially opening a copied store. Navigation/migration never sends a request.
 Ordinary source documents, Markdown/Obsidian notes, notebooks, scans/PDFs in the
-vault, explicit exported records and unrelated files stay where they are. MRW
+vault, explicit exported records and unrelated files stay where they are. GOLEM XIV
 does not collect arbitrary record graphs or exports: the dependency closure here
 is the reader's retained evidence and the saved investigation's exact parent and
-child records. Unknown files in old MRW directories are preserved.
+child records. Unknown files in old GOLEM XIV directories are preserved.
 
 These are **host-local**, outside the chosen directory: the active-location
 binding, transaction/recovery journals, writer and publication locks, output
@@ -88,7 +88,7 @@ includes private workspace stores; ordinary copying or renaming does not.
 
 ## Commit, cancellation and recovery
 
-MRW holds writer exclusion, records exact content hashes and deletion identities,
+GOLEM XIV holds writer exclusion, records exact content hashes and deletion identities,
 then copies to staging **on the destination filesystem**. It verifies complete
 retained content and dependencies and checks that the source has not changed.
 It durably publishes the destination, then atomically replaces and synchronizes
@@ -96,15 +96,15 @@ one **host-local active-store binding**. That is the authority switch; copying
 and deletion across volumes are not one filesystem operation.
 
 - Before commit, failure/cancellation leaves the original active and intact.
-  Run **MRW: Recover Artifact Move** after interruption. An incomplete staging
+  Run **Recover Artifact Move** after interruption. An incomplete staging
   directory without a complete recorded deletion inventory is retained for
   inspection and its path is reported.
 - After commit, the destination remains authoritative. Cleanup deletes only
-  inventoried MRW-owned files with the same identity and bytes. It never
+  inventoried GOLEM XIV-owned files with the same identity and bytes. It never
   recursively deletes the enclosing VS Code directory. Changed/unrelated files
   are preserved.
 - **Move committed; old copies still need cleanup** means the switch succeeded
-  but cleanup did not. Run **MRW: Recover Artifact Move** to retry. Operations
+  but cleanup did not. Run **Recover Artifact Move** to retry. Operations
   stay blocked while the persisted transaction requires recovery. Do not choose
   the old copy or copy its contents back over the destination.
 - If binding replacement succeeds but synchronization is uncertain, both copies
@@ -113,33 +113,33 @@ and deletion across volumes are not one filesystem operation.
   phase or directory timestamp cannot select authority.
 
 Successful completion means the old inventoried artifact payloads were removed.
-An unavailable bound directory produces an error; MRW never creates an empty
-replacement. Restore its mount and run recovery/refresh. **MRW: Refresh Artifact
+An unavailable bound directory produces an error; GOLEM XIV never creates an empty
+replacement. Restore its mount and run recovery/refresh. **Refresh Artifact
 Location** rebinds an already open updated window after another local window
 moved its store; it retains reader drafts. Stale clients cannot write to the old
-location. MRW's locks coordinate updated local processes in the same VS Code
+location. GOLEM XIV's locks coordinate updated local processes in the same VS Code
 user-data installation; they do not coordinate different computers, profiles or
 arbitrary filesystem edits. Use one active writing installation per store.
 
 ## Open a complete synchronized copy on another computer
 
 Relocation and network synchronization are separate. Use your existing
-synchronization arrangement only with a filesystem that preserves MRW's required
-publication and private permissions. MRW installs no synchronization service.
+synchronization arrangement only with a filesystem that preserves GOLEM XIV's required
+publication and private permissions. GOLEM XIV installs no synchronization service.
 
-1. Stop writing on the first computer. Finish recovery and close MRW windows
+1. Stop writing on the first computer. Finish recovery and close GOLEM XIV windows
    using the store. Wait for your synchronization tool to finish copying the
    entire selected artifact directory, including its identity, manifest and
    generation files. Verify ownership and permissions on the receiving host after initial creation
    and later replacement. Windows-backed private stores
    are not qualified for this handover.
 2. On the receiving computer, open a workspace with one local folder for each
-   project in the store. This workspace must have no existing MRW saved artifacts
+   project in the store. This workspace must have no existing GOLEM XIV saved artifacts
    or store binding. There is no replace/merge operation in this release.
-3. Run **MRW: Open Saved Work Directory…** and choose the local complete
+3. Run **Open Saved Work Directory…** and choose the local complete
    copy. Map each stored project explicitly to its local folder, then confirm
    **Open saved work** and the one-writing-computer requirement.
-4. MRW verifies every required file/hash and record dependency before binding.
+4. GOLEM XIV verifies every required file/hash and record dependency before binding.
    The same spelling of a directory path is never evidence of identity.
 5. When switching computers again, stop writing, close and finish synchronization
    before opening/refreshing the other installation. Do not let both write at once.
@@ -147,7 +147,7 @@ publication and private permissions. MRW installs no synchronization service.
 A manifest arriving first is insufficient. Missing bytes, altered records,
 unexpected active-generation files and Syncthing conflict copies cause explicit
 unavailable/conflict errors. Restore a complete consistent copy through your
-normal backup/synchronization process; MRW neither selects the newer file nor
+normal backup/synchronization process; GOLEM XIV neither selects the newer file nor
 merges conflicting stores. Simultaneous writers whose changes have not yet
 arrived cannot be detected locally; the single-writer procedure is mandatory.
 A second-host synchronization acceptance check remains unavailable in the tested
@@ -166,7 +166,7 @@ of paths. Verified compatibility mappings preserve its earlier path-derived
 scopes. Immutable source provenance and absolute record locators stay unchanged;
 explicit local bindings/aliases resolve retained records at the new location.
 
-On another computer, open the mapped workspace yourself and use **MRW: Open Link
+On another computer, open the mapped workspace yourself and use **Open Link
 from Clipboard** with the old link. Its verified store identity permits the old
 routing to resolve locally. A wrong/unbound window still offers **Copy Link and
 Open Workspace**, whose saved address may belong to the original computer.
@@ -175,10 +175,10 @@ open your mapped local workspace and use the clipboard command. Original-source
 navigation can remain unavailable if its original path is absent; exact
 retained passages and Obsidian associations remain accessible.
 
-**Copying or synchronizing a note alone does not copy its MRW saved material.**
+**Copying or synchronizing a note alone does not copy its GOLEM XIV saved material.**
 Moving/synchronizing the complete artifact store is the separate operation that
 makes those sources, outlines and annotations available. Obsidian URLs still
-need a corresponding local vault/note; MRW never copies or rewrites the vault.
+need a corresponding local vault/note; GOLEM XIV never copies or rewrites the vault.
 Handwritten work remains in the existing note/attachment workflow.
 
 Limits: 20,000 inventoried files and 512 MiB aggregate, including retained

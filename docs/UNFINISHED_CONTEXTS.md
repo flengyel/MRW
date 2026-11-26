@@ -17,7 +17,7 @@ bytes remain; completed intents are suppressed from the unfinished list.
 Workspace Return paths use the existing relative-location encoding. External
 notes keep their recorded notes root; choosing a different notes folder cannot
 redirect an earlier Return location. The existing navigation authorization and
-exact-revision checks still govern opening that destination. MRW does not save
+exact-revision checks still govern opening that destination. GOLEM XIV does not save
 or reconstruct ordinary editor buffers.
 
 Managed publication, movement, interrupted HEAD recovery and private file locks

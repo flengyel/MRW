@@ -1,6 +1,6 @@
 'use strict';
 // Purpose menus over existing commands; configuration inspection never probes a service.
-const GUIDES='https://github.com/flengyel/MRW/blob/main/docs/';
+const GUIDES='https://github.com/flengyel/GOLEMXIV/blob/main/docs/';
 const SETUP = {
  workspace: {title: 'Workspace and storage', rows: [
   ['Choose notes folder…','chooseNotesFolder'], ['Set up MRW workspace…','setupWorkspace'],

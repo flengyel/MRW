@@ -1,7 +1,7 @@
 {
   "name": "mrw-diagnostics",
   "displayName": "MRW Diagnostics",
-  "description": "Optional read-only feature-use and integrity reports for MRW.",
+  "description": "Optional read-only feature-use and integrity reports for GOLEM XIV.",
   "publisher": "flengyel",
   "version": "0.1.0",
   "license": "Apache-2.0",
@@ -64,7 +64,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/flengyel/MRW.git",
+    "url": "https://github.com/flengyel/GOLEMXIV.git",
     "directory": "diagnostics"
   }
 }

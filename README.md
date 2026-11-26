@@ -1,4 +1,4 @@
-# Mathematical Research Workstation
+# GOLEM XIV — Mathematical Research Workstation
 
 <p align="center">
   <picture>
@@ -7,12 +7,12 @@
   </picture>
 </p>
 
-MRW supports mathematical understanding and research. Its aims are to study
+GOLEM XIV supports mathematical understanding and research. Its aims are to study
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
 
-[Download MRW 0.23.64](https://github.com/flengyel/MRW/releases/download/v0.23.64/mrw-0.23.64.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.64)
+[Download GOLEM XIV 0.23.64](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix)
+· [Release and checksums](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md)
 
 Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
@@ -22,7 +22,8 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 
 ## Start
 
-1. Install the VSIX and run **MRW: Set Up MRW Workspace…**.
+1. Install the VSIX. In the Command Palette, search for `Set Up Workspace`
+   and run the extension’s workspace setup command.
 2. For a new question, choose a notes folder with **Choose Notes Folder…**,
    then select **New Note…**. For an existing paper or note, use
    **Open Document…**. [Mathematics in ordinary notes](docs/MATHEMATICS_WITH_NOTES.md)
@@ -35,7 +36,7 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 ## Study and research
 
 VS Code can reopen the files used in an argument. Their locations alone do not
-say which passage was cited or which hypothesis justified a step. In MRW the
+say which passage was cited or which hypothesis justified a step. In GOLEM XIV, the
 reader can retain the cited passage at a particular revision and record the
 grounds for using it.
 
@@ -72,27 +73,24 @@ translation remains a development goal.
 
 ## Architecture
 
-![MRW architecture](docs/assets/mrw-architecture.png)
+![GOLEM XIV architecture](docs/assets/mrw-architecture.png)
 
 [Architecture](docs/ARCHITECTURE.md) · [Data model](DOMAIN_MODEL.md)
 
-## Standalone Qt application
+## Qt editor (source installation)
 
-The Python distribution includes a desktop editor and the `mrw` command line.
-To use the desktop editor, install from a source checkout in a Python 3.11+
-virtual environment with `python -m pip install .`, then run `mrw gui`. Desktop
-use requires a graphical session, PySide6 with QtPdf, and the Qt platform
-libraries for your system.
-[Qt Linux requirements](https://doc.qt.io/qt-6/linux-requirements.html) ·
-[Standalone editor behavior](UX_SPEC.md#standalone-qt-maintenance)
+The source tree also includes an older [Qt desktop editor](src/mrw/gui.py).
+To run it, install the Python package in a Python 3.11+ virtual environment
+with `python -m pip install .`, then run `mrw gui`. It requires a graphical
+session, PySide6 with QtPdf, and the [Qt platform libraries](https://doc.qt.io/qt-6/linux-requirements.html).
+[Desktop editor behavior](UX_SPEC.md#standalone-qt-maintenance)
 
-The VSIX bundles the Python service from its release source and runs it with the
-workspace host’s Python. **MRW: Open Tutorial** reports the active VS Code
-build. The standalone distribution and the extension use the same release version.
+The VS Code extension bundles its Python service and runs it with the workspace
+host’s Python. **Open Tutorial** reports the active extension build.
 
 ## Data and transfers
 
-Ordinary files remain in their editors. MRW stores retained sources and study
+Ordinary files remain in their editors. GOLEM XIV stores retained sources and study
 records separately; copying notes does not transfer their saved targets.
 [Storage scope and moves](docs/ARTIFACT_STORAGE.md).
 

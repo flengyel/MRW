@@ -1,17 +1,17 @@
 # Architecture in brief
 
-VS Code manages documents, unsaved edits and navigation. MRW connects a
+VS Code manages documents, unsaved edits and navigation. GOLEM XIV connects a
 mathematical argument to the exact passages and saved calculations used in it.
 Its justification engine records which admitted premises support a derivation.
 
-![The VS Code facade connects to the MRW core. Six groups of adapters connect it to documents and notes, sources and references, computation, proof checking, AI assistance and optional diagnostics.](assets/mrw-architecture.png)
+![The VS Code facade connects to the GOLEM XIV core. Six groups of adapters connect it to documents and notes, sources and references, computation, proof checking, AI assistance and optional diagnostics.](assets/mrw-architecture.png)
 
 The hexagon groups responsibilities. Dashed elements are proposed.
 [Scalable diagram](assets/mrw-architecture.svg) · [Implementation status](DESIGN_RECONCILIATION.md)
 
 | Component | Responsibility |
 | --- | --- |
-| Facade | Presents MRW actions in the context of the current document or selection. |
+| Facade | Presents GOLEM XIV actions in the context of the current document or selection. |
 | Ports and adapters | A port specifies an operation the core needs. An adapter implements it for a particular editor, source or service. |
 | Anti-corruption layer | Translates external records while preserving their identity, revision and attribution. A citation returned by a reference manager, for example, identifies a work. It supplies no premise until the reader admits one. |
 | Workflow coordination | Connects actions across tools and records which requests were dispatched, accepted or completed. Returning to a saved calculation opens its result without executing the notebook. |
@@ -20,7 +20,7 @@ The hexagon groups responsibilities. Dashed elements are proposed.
 | Core services | Store retained records, check their integrity and record local feature use. [Storage](ARTIFACT_STORAGE.md) · [Operational usage](OPERATIONAL_USAGE.md) |
 
 A question can remain in an ordinary note. In optional
-[source study](ACTIVE_STUDY_WORKFLOW.md), MRW also keeps the passage,
+[source study](ACTIVE_STUDY_WORKFLOW.md), GOLEM XIV also keeps the passage,
 submitted attempt, feedback and corrections.
 
 The engine implements a non-factive fragment of Sergei Artemov’s Justification

@@ -9,7 +9,7 @@ quantifiers, conclusion and assumptions. A build can succeed with admitted
 axioms or unfinished proofs. A declaration's type and axiom dependencies are
 evidence for the review. The correspondence judgment belongs to the reviewer.
 
-MRW retains each judgment against exact source revisions, detect changes
+GOLEM XIV retains each judgment against exact source revisions, detect changes
 to either side and record a second reader's reconstruction before revealing
 the Lean declaration or the first review.
 
@@ -62,7 +62,7 @@ already installed. Lake configuration and Lean imports execute in a sandbox
 with no network and a read-only project. Temporary overlays contain Lake’s
 freshness-check writes. Dependencies must be available within the selected
 project or toolchain. If the required build artifacts are missing or stale, ask the
-reader to **Build the project first** with `lake build <module>`. MRW does
+reader to **Build the project first** with `lake build <module>`. GOLEM XIV does
 not run that command, update dependencies or fetch a toolchain or cache.
 Opening a review uses saved evidence and reads current revisions without
 running Lean.
@@ -89,9 +89,9 @@ generated facts, reviewer, time and any supplied attribution.
 The aspect verdicts are `matches`, `lean_assumes_more`,
 `lean_proves_less`, `lean_stronger` and `not_comparable`. Each reason
 identifies the relevant evidence. A declaration that depends on `sorryAx`
-has an unfinished proof. MRW keeps the aspect judgments and opens a
+has an unfinished proof. GOLEM XIV keeps the aspect judgments and opens a
 discrepancy. The overall verdict stays unresolved. For declarations without
-that dependency, MRW applies these rules.
+that dependency, GOLEM XIV applies these rules.
 
 | Aspect judgments or proof status | Overall result |
 | --- | --- |
@@ -109,7 +109,7 @@ creates a `signature_changed` discrepancy. An absent declaration creates
 `declaration_missing`. Keep the earlier review and its exact evidence
 available. A missing current file leaves its comparison unresolved. Older
 reviews and saved reports keep their stored revisions. When they depend on
-`sorryAx`, MRW displays the unresolved proof obligation in the review and
+`sorryAx`, GOLEM XIV displays the unresolved proof obligation in the review and
 report and includes it in exports made after the update.
 
 ## Second reading
@@ -125,7 +125,7 @@ report and includes it in exports made after the update.
    earlier readings.
 
 The report says “reconstruction saved before reveal.” This describes what
-happened in MRW. Readers may have consulted material elsewhere.
+happened in GOLEM XIV. Readers may have consulted material elsewhere.
 
 ## Reports
 
@@ -136,7 +136,7 @@ Each review shows its verdict, aspect judgments, axioms, open discrepancies
 and second-reading status. Filter for open discrepancies, stale reviews or
 missing second readings.
 
-**Save report** writes an immutable snapshot to the workspace's private MRW
+**Save report** writes an immutable snapshot to the workspace's private GOLEM XIV
 store. Keep exact references to the reviews and revisions for comparison or
 regeneration. **Export report…** writes a Markdown copy with exact references
 to a reader-selected path and refuses to overwrite a file. **Delete report…**
@@ -145,7 +145,7 @@ saved reports and reports in Trash with **Restore** and a separate
 **Permanently delete** action. Reviews, generated facts, discrepancies, second
 readings and exports survive each snapshot lifecycle action. Permanent deletion
 removes the report from the active store and prevents its recovery through
-MRW. Earlier storage generations and exported copies may retain its bytes.
+GOLEM XIV. Earlier storage generations and exported copies may retain its bytes.
 
 ## Acceptance
 
@@ -157,7 +157,7 @@ and use a matching local build in an isolated copy.
 1. Review each numbered result and the Appendix D theorems against the
    declarations in the [claim map](https://github.com/flengyel/Dosen-Petric-Maximality/blob/76a4ea71f257746bb6ea2cb2e686e85914c7347c/docs/MANUSCRIPT_COMPLETE_CLAIM_MAP.md).
    Compare the report with the claim map and Palomar statements. Explain each
-   difference as a review finding or an MRW defect.
+   difference as a review finding or a GOLEM XIV defect.
 2. Read a declaration with an unfinished proof from the challenge module in
    its own Lean environment. Check that `sorryAx` is visible and blocks the
    overall verdict for matching and differing aspect judgments. The solution

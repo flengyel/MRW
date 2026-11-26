@@ -1348,10 +1348,9 @@ test('the offline tutorial opens a read-only Markdown preview without creating f
   const call = h.commandCalls.find(call => call.name === 'markdown.showPreview');
   assert.ok(call); assert.equal(call.args[0].scheme, 'mrw-help');
   const doc = await h.api.workspace.openTextDocument(call.args[0]);
-  const exact = await fs.readFile(path.resolve(__dirname, '../media/first-steps.md'), 'utf8');
-  assert.ok(doc.getText().includes('Active extension: **MRW'));
+  assert.ok(doc.getText().includes('Active extension: **GOLEM XIV'));
   assert.ok(doc.getText().includes('Open Document'));
-  assert.ok(doc.getText().includes('https://github.com/flengyel/MRW/blob/main/docs/'));
+  assert.ok(doc.getText().includes('https://github.com/flengyel/GOLEMXIV/blob/main/docs/'));
   assert.equal(h.workspaceEdits.length, 0); assert.equal(h.requests.length, 0);
   assert.deepEqual(await fs.readdir(root), []);
 });

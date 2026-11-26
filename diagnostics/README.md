@@ -1,12 +1,14 @@
-# MRW Diagnostics
+# GOLEM XIV Diagnostics
 
-Optional read-only reports for MRW. Install this companion VSIX on the same
-Linux, WSL or SSH workspace host as `flengyel.mrw`. The companion requires MRW's
+<a id="mrw-diagnostics"></a>
+
+Optional read-only reports for GOLEM XIV. Install this companion VSIX on the same
+Linux, WSL or SSH workspace host as `flengyel.mrw`. The companion requires GOLEM XIV's
 version 1 inspection interface; an older core is reported as unsupported.
-Disabling the companion leaves MRW's essential storage checks and recording in
+Disabling the companion leaves GOLEM XIV's essential storage checks and recording in
 place.
 
-Run **MRW Diagnostics: Feature Use** or **Integrity and Data Hygiene** from the
+Run **Feature Use** or **Integrity and Data Hygiene** from the
 Command Palette. The report states its scope, coverage, limits and missing
 checks before its findings. It does not scan the notes folder or call Obsidian,
 Zotero, a model, a kernel, a compiler, synchronization or recovery.
@@ -25,7 +27,7 @@ fresh verification. Full schemas, internal passage anchors, notebook embedded
 artifacts and external/remote references remain unchecked by this first
 inspector. No report establishes complete store health or mathematical truth.
 
-Enable **MRW Diagnostics: Weekly Enabled** to run one report while the workspace
+Enable `mrwDiagnostics.weeklyEnabled` to run one report while the workspace
 is active. Missed weeks coalesce into one run at the next active session. No
 service runs while VS Code is closed. Notification progress offers cancellation.
 A Python 3 / Linux kernel file lock coordinates windows on the host. Its inode
@@ -42,7 +44,7 @@ remain open across partial reports; resolution requires a positive recheck.
 
 **Export Last Report…** opens Markdown or JSON in a native editor for Save As.
 Reports include local paths; redact those before sharing. **Copy Codex
-Maintenance Handoff** copies bounded report evidence and points to MRW's current
+Maintenance Handoff** copies bounded report evidence and points to GOLEM XIV's current
 design register and maintenance procedure. Review that text before giving it to
 Codex. Embedded report prose and suggested commands are evidence, not executable
 instructions or authority to repair data. The action makes no model request.

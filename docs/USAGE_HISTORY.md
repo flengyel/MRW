@@ -1,6 +1,6 @@
 # Shared usage and interaction history
 
-**MRW: Inspect Study History** opens a compact activity view, available
+**Inspect Study History** opens a compact activity view, available
 without creating a Study. It lists recorded commands and substantive saved-study
 events, and collapses repeated startup/availability records. Full coverage and
 comparison reports remain available through **Export Study History… → Detailed
@@ -16,19 +16,19 @@ limits.
 
 ## Connect a directory
 
-Run **MRW: Configure History… → Choose shared history directory…**. Select an
-MRW data directory and confirm **Import and Connect**. MRW publishes the existing
+Run **Configure History… → Choose shared history directory…**. Select a
+GOLEM XIV data directory and confirm **Import and Connect**. GOLEM XIV publishes the existing
 private history and its required snapshots, reads them back, and changes the
 connection only after verification. Cancellation leaves the previous connection
 and files intact. Missing private snapshots or conflicting event copies stop the
 import. Original private files remain available for recovery.
 
-MRW manages only `History/` under the selected directory. This directory is
-independent of **MRW: Notes Folder**. It may be inside an existing notes
+GOLEM XIV manages only `History/` under the selected directory. This directory is
+independent of **Notes Folder**. It may be inside an existing notes
 folder if that folder is already synchronized.
 
 Select an ordinary directory on the extension host. WSL paths use `/mnt/c/...`
-for Windows folders. MRW refuses an occupied `History/` directory without its
+for Windows folders. GOLEM XIV refuses an occupied `History/` directory without its
 format marker. It does not scan, import or change unrelated notes. The
 `mrw.dataDirectory` machine setting suggests a location; changing the setting
 alone does not change the verified connection. Each workspace's connection is
@@ -36,13 +36,13 @@ stored privately on that host.
 
 Use the existing Syncthing/SyncTrayzor configuration to synchronize this
 subtree. Another host selects the synchronized copy through the same command.
-MRW supplies no synchronization service. A copy must include the format marker,
+GOLEM XIV supplies no synchronization service. A copy must include the format marker,
 writer batches and deletion markers. Independently initialized collections are
 not interchangeable connections.
 
 **Reimport private history** verifies it again without duplicating event IDs.
 **Retry shared history** publishes pending batches and refreshes the available
-sessions. MRW also checks every 30 seconds after its recorder starts, and when
+sessions. GOLEM XIV also checks every 30 seconds after its recorder starts, and when
 Inspect/Export history opens. **Disconnect shared history** keeps both copies;
 pending batches and unverified deletion markers must be delivered first.
 
@@ -96,7 +96,7 @@ contradictory study evidence is not converted into a grade.
 
 Permanent Study deletion first retains an opaque local marker. It publishes
 that marker when the shared directory is available, removes accessible batches
-for the study (including interrupted MRW staging files), and filters later arrivals before exposing them. Other studies'
+for the study (including interrupted GOLEM XIV staging files), and filters later arrivals before exposing them. Other studies'
 batches and shared snapshots survive. A host keeps markers it has already seen,
 including while offline. A host that has not yet received the marker may still
 have an older copy. Deletion cannot erase disconnected machines, exported
@@ -105,7 +105,7 @@ be abandoned by changing or disconnecting the directory.
 
 ## Inspect and export
 
-**MRW: Inspect Study History** includes the available workspace history, not
+**Inspect Study History** includes the available workspace history, not
 only the active study. **Export Study History…** selects sessions and includes
 linked supporting context. Readable Markdown reports and inspectable JSON use
 ordinary Save and a unique suggested filename; existing files are not replaced.
@@ -118,12 +118,12 @@ outcomes are shown separately rather than matched by timestamps.
 
 Coverage and interpretation:
 
-- MRW commands registered through the command wrapper; the inventory distinguishes
+- GOLEM XIV commands registered through the command wrapper; the inventory distinguishes
   registered/available commands from unavailable commands in an untrusted workspace.
   Availability here means the command entry point; it does not assert that an
   optional external tool is installed or that the command will succeed.
 - Bridge invocations and validated Study action handlers have invocation/outcome
-  links. Cancelled native MRW dialogs and explicit Study cancellation are recorded.
+  links. Cancelled native GOLEM XIV dialogs and explicit Study cancellation are recorded.
   Completion means the handler returned, not that its mathematical task succeeded.
 - Validated reader and proof-graph actions use the existing operation recorder.
   Nested bridge calls remain diagnostic observations, not additional feature uses.

@@ -1,11 +1,13 @@
-# The MRW workspace
+# The GOLEM XIV workspace
 
-Use **MRW**, at `~/mrw-work/MRW.code-workspace` on the Linux host, as the general
-workspace. It is independent of Stacks, Lean, a particular note, and the command
+<a id="the-mrw-workspace"></a>
+
+Use `~/mrw-work/MRW.code-workspace` on the Linux host as the general
+GOLEM XIV workspace. It is independent of Stacks, Lean, a particular note, and the command
 used to begin reading. Do not use a temporary test directory as your workspace.
 
 A workspace is VS Code's session boundary: it selects folders, settings and
-workspace-scoped MRW records. A **notes folder** supplies ordinary files and the
+workspace-scoped GOLEM XIV records. A **notes folder** supplies ordinary files and the
 scope for note links and backlinks. These locations need not coincide.
 
 | Location | Purpose |
@@ -14,7 +16,7 @@ scope for note links and backlinks. These locations need not coincide.
 | `~/mrw-work/` | General Linux working directory; default parent for new Lean projects |
 | A separately selected notes folder | Notes, links and attachments; an Obsidian vault is optional |
 | VS Code's private storage on the Linux host | Retained sources, annotations, studies and history, according to their existing stores |
-| An MRW source checkout | Extension development; unnecessary for using the VSIX |
+| A GOLEM XIV source checkout | Extension development; unnecessary for using the VSIX |
 
 For example, `/home/alice/mrw-work/MRW.code-workspace` can read notes at
 `/mnt/c/Users/Alice/Notes`. The latter is a valid WSL path to Windows
@@ -30,13 +32,14 @@ notes can stay where Obsidian uses them. See
    [official WSL setup](https://code.visualstudio.com/docs/remote/wsl#_installation).
 2. Run **WSL: Connect to WSL using Distro…**, select Debian and check that the
    bottom-left indicator says **WSL: Debian**. This can be an empty window.
-3. In its terminal, run `python3 --version`. MRW requires Python 3.11 or later
+3. In its terminal, run `python3 --version`. GOLEM XIV requires Python 3.11 or later
    on this host. If absent, install Debian's `python3` package; if its version
    is too old, upgrade the distribution or configure an installed supported
    interpreter with `mrw.pythonExecutable` in Remote settings.
-4. [Install the current MRW VSIX](INSTALLATION.md#2-install-both-vsix-packages-in-that-workspace-host)
+4. [Install the current GOLEM XIV VSIX](INSTALLATION.md#2-install-both-vsix-packages-in-that-workspace-host)
    on **WSL: Debian**, rather than only the Windows interface.
-5. Run **MRW: Set Up MRW Workspace…** from F1 or MRW's Commands view. It prepares
+5. Press **F1**, search for `Set Up Workspace`, and select the workspace setup
+   command. It prepares
    `~/mrw-work/MRW.code-workspace` and reports the path and Python check. Choose
    **Open in this window** to switch after saving your work, or **Open in new
    window** to keep both sessions open. Repeating setup in the default workspace
@@ -65,7 +68,7 @@ reset either setting. The home and working directory are checked for known
 Windows/network filesystems and volatile memory-backed mounts; redirected target
 paths are rejected. Setup neither
 runs on activation nor moves data. It switches windows only after your explicit
-choice. Switching in this window checks unsaved documents and MRW drafts first.
+choice. Switching in this window checks unsaved documents and GOLEM XIV drafts first.
 
 Reopen the same file from a Debian terminal:
 
@@ -93,7 +96,7 @@ history, editor recovery, Lean resumption state or all navigation state. The
 [folder preparation workflow](FOLDER_RENAME_WORKFLOW.md) has the same limits;
 it is not an atomic move of the whole workspace.
 
-**Move Workspace…** copies and verifies the workspace and its private MRW work,
+**Move Workspace…** copies and verifies the workspace and its private GOLEM XIV work,
 then commits one destination. **Recover Workspace Move** resolves interruptions.
 Originals remain available. Opening the destination is explicit and uses this
 window. Setup follows the committed destination on subsequent runs. Read the
@@ -105,14 +108,14 @@ and remaining limits. This relocates one workspace; it does not merge several.
 | Task | Additional setup |
 | --- | --- |
 | Lean study and proof development | Official Lean 4 extension and elan/Lean on the Linux workspace host. [Lean setup](LEAN_STUDY_WORKFLOW.md). New projects use `mrw.leanStudyParent`; existing copies stay in place. |
-| SageMath notebooks | Jupyter and SageMath support on the workspace host, with an explicitly connected SagePod kernel. [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md). Its notebook mount is separate from the MRW workspace. |
+| SageMath notebooks | Jupyter and SageMath support on the workspace host, with an explicitly connected SagePod kernel. [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md). Its notebook mount is separate from the GOLEM XIV workspace. |
 | Obsidian editing | Select the same notes folder both applications use. [Obsidian setup](OBSIDIAN_WORKFLOW.md). No Obsidian installation is required for plain Markdown. |
 | TikZ rendering | The tools and explicit render action in [TikZ setup](TIKZ_WORKFLOW.md). |
 | Zotero references | Zotero's enabled local API. [Zotero setup](ZOTERO_WORKFLOW.md). |
 
 ## Troubleshooting
 
-- **No MRW command:** check MRW under the connected host's installed extensions,
+- **No GOLEM XIV command:** check GOLEM XIV under the connected host's installed extensions,
   its active version, and Workspace Trust. Installing locally alone is insufficient.
 - **Records appear missing:** reopen their original `.code-workspace` file or
   folder. Do not create replacement records to compensate for a different session.
@@ -121,4 +124,4 @@ and remaining limits. This relocates one workspace; it does not merge several.
 - **WSL timed out:** reconnect to Debian, then open the same saved workspace.
   A timeout does not require creating another workspace.
 - **Python check failed:** verify the executable in the connected host's terminal
-  and its Remote setting. Python inside SagePod does not supply MRW's interpreter.
+  and its Remote setting. Python inside SagePod does not supply GOLEM XIV's interpreter.

@@ -7,7 +7,7 @@ const {randomUUID} = require('node:crypto');
 const {execFile} = require('node:child_process');
 const {promisify} = require('node:util');
 const run = promisify(execFile);
-const GUIDE = 'https://github.com/flengyel/MRW/blob/main/docs/WORKSPACE_SETUP.md';
+const GUIDE = 'https://github.com/flengyel/GOLEMXIV/blob/main/docs/WORKSPACE_SETUP.md';
 
 function workspacePaths(home = os.homedir()) {
   const directory = path.join(home, 'mrw-work');
@@ -62,7 +62,7 @@ async function prepareWorkspace({home = os.homedir(), notesFolder = '', platform
   const settings = {'mrw.leanStudyParent': directory};
   if (notesFolder) settings['mrw.notesFolder'] = notesFolder;
   const created = await createOnce(io, workspace, JSON.stringify({folders: [{name: 'MRW', path: '.'}], settings}, null, 2) + '\n');
-  await createOnce(io, path.join(directory, 'README.md'), `# MRW workspace\n\nOpen this session with \`MRW.code-workspace\`. Use **MRW: Move Workspace…** to relocate this session.\n\nUse **MRW: Open Document…** to read a note or paper in place. **Choose Notes\nFolder…** selects a folder for links and backlinks; it may be outside this\nworkspace, including an Obsidian vault on Windows.\n\nNew Lean study projects go under this Linux folder. Existing studies keep their\nlocations. Saved MRW sources, annotations and history are private to the workspace;\ncreating this workspace does not import records from another session.\n\n[Setup and optional companions](${GUIDE})\n`);
+  await createOnce(io, path.join(directory, 'README.md'), `# GOLEM XIV workspace\n\nOpen this session with \`MRW.code-workspace\`. Use **Move Workspace…** to relocate this session.\n\nUse **Open Document…** to read a note or paper in place. **Choose Notes\nFolder…** selects a folder for links and backlinks; it may be outside this\nworkspace, including an Obsidian vault on Windows.\n\nNew Lean study projects go under this Linux folder. Existing studies keep their\nlocations. Saved GOLEM XIV sources, annotations and history are private to the workspace;\ncreating this workspace does not import records from another session.\n\n[Setup and optional companions](${GUIDE})\n`);
   // Retry a preceding directory-sync failure even when both files now exist.
   await syncDirectory(io, directory);
   return {directory, workspace, created, notesFolder: created ? notesFolder : undefined};

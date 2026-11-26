@@ -1,6 +1,6 @@
 # Operational feature use
 
-Feature-use statistics are a standing MRW design requirement. They show which
+Feature-use statistics are a standing GOLEM XIV design requirement. They show which
 features are used, which remain unused and where failures or friction warrant
 investigation. They are separate from mathematical evidence, learning assessment
 and reported cognitive load. Maintaining them must not require a Study, a
@@ -9,7 +9,7 @@ question registration form or a change to ordinary mathematical work.
 ## Current implementation and gaps
 
 Core records command, bridge and validated Study-action invocations,
-outcomes and durations. **MRW: Inspect Study History** opens a compact activity
+outcomes and durations. **Inspect Study History** opens a compact activity
 view; **Export Study History… → Detailed comparison and coverage** retains the
 full usage table and study measures. **Events and submitted snapshots** retains
 the JSON export. Recording is local by
@@ -55,7 +55,7 @@ The report distinguishes these cases:
 | Used | An attributable user invocation occurred in the selected recorded interval. |
 | Available, unused | No invocation occurred during an interval with established availability and complete instrumentation. |
 | Unavailable | The required entry point or declared prerequisite was unavailable during the stated interval. |
-| Uninstrumented | MRW cannot observe this feature's use completely. |
+| Uninstrumented | GOLEM XIV cannot observe this feature's use completely. |
 | Unknown or partial | Recording was disabled, history is missing, a device is offline, or coverage cannot be established. |
 
 Availability of a command is distinct from readiness of its optional companion.
@@ -78,7 +78,7 @@ history before interpreting counts. Initial summaries need:
 - comparisons with another selected period or version, retaining changes in
   availability and recording coverage.
 
-Define an active day as a writer-reported date containing recorded human MRW
+Define an active day as a writer-reported date containing recorded huma GOLEM XIV
 activity. Show days with established feature availability separately. Neither
 is total wall-clock availability or evidence of work on an unobserved device.
 Session-based rates require an explicit session definition before introduction.
@@ -99,7 +99,7 @@ as a question rather than a mandate to remove the feature.
 
 ## Recording and resource boundaries
 
-Keep lightweight recording in MRW core, independent of the reporting plugin.
+Keep lightweight recording in GOLEM XIV core, independent of the reporting plugin.
 Reuse `mrw.usageRecording`, the local history store and explicit sharing choices.
 Operational counts need no document bodies, filenames, prompts, replies,
 keystrokes, credentials or unrelated application activity. Existing submitted

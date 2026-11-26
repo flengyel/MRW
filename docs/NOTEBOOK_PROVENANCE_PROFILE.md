@@ -1,4 +1,4 @@
-# MRW notebook provenance profile 1
+# GOLEM XIV notebook provenance profile 1
 
 This bounded profile uses [PROV-O](https://www.w3.org/TR/prov-o/). It describes
 retention and, when supplied, a producer's execution report. It does not check
@@ -7,8 +7,8 @@ mathematics or claim complete PROV-CONSTRAINTS conformance.
 ## Identity and accounts
 
 A retention has a random UUID, independent of its filename, workspace and content
-hash. This is an MRW capture identity; it does not replace the run UUID in a
-producer receipt. A future profile extension for external notebook or queue-task
+hash. This UUID identifies the GOLEM XIV capture. The producer receipt retains
+its own run UUID. A future profile extension for external notebook or queue-task
 identities must retain their producer and scope without inferring them from paths
 or cell counters. Those additional fields are not supplied by profile 1.
 The [integration contract](INTEGRATION_BOUNDARIES.md) governs this distinction.
@@ -19,11 +19,11 @@ the original files. An export ZIP contains a manifest, exact artifacts, a readab
 transcript and one Turtle file per named bundle. Bundle identity and attribution
 are in the manifest. Separate accounts are not silently merged.
 
-The MRW account observes a capture activity. It `prov:used` the selected file
+The GOLEM XIV account observes a capture activity. It `prov:used` the selected file
 revisions; the retained notebook and selected companions `prov:wasGeneratedBy`
 that capture and `prov:wasDerivedFrom` their exact originals, by byte copying.
-The software agent is MRW, with the active extension version and matching clean
-build marker when available; direct bridge calls without that identity say
+The software agent is GOLEM XIV. The export identifies it as `mrw`, with the
+active extension version and matching clean build marker when available; direct bridge calls without that identity say
 unknown. A content hash establishes integrity, not authorship.
 Capture time is not execution time. Original absolute paths are private locators
 and are omitted from exports.
@@ -31,7 +31,7 @@ and are omitted from exports.
 ## Execution evidence
 
 Ordinary saved outputs have unknown execution context: they may predate the
-current code. Their cell association and execution counts are preserved, but MRW
+current code. Their cell association and execution counts are preserved, but GOLEM XIV
 does not assert that the current code generated them.
 
 The optional `metadata.mrw_execution` receipt has schema `mrw-notebook-run:1`,
@@ -45,11 +45,11 @@ It makes no claim about unselected files, secrets, live kernel memory or earlier
 interactive state. Stochastic/data-dependent work must record its seed and input
 versions in the notebook and explicitly retain relevant files.
 
-A matching receipt becomes a **producer-reported** bundle, separate from MRW's
+A matching receipt becomes a **producer-reported** bundle, separate from GOLEM XIV's
 observed capture. Its execution activity `prov:used` a code entity typed also as
 `prov:Plan`; the output entity `prov:wasGeneratedBy` that activity. The activity
-`prov:wasAssociatedWith` the named software producer. MRW neither authenticates
-the report nor promotes it to an MRW-observed execution. Companion files are
+`prov:wasAssociatedWith` the named software producer. GOLEM XIV neither authenticates
+the report nor treats the execution as an event it observed. Companion files are
 associated selected material, not automatically asserted execution inputs.
 No output-to-code derivation is inferred just from use and generation.
 
