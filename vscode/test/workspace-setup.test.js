@@ -16,18 +16,21 @@ test('repeat setup preserves settings, README, notes and unrelated files byte-fo
  assert.equal(await fs.readFile(first.workspace,'utf8'),customized);assert.equal(await fs.readFile(readme,'utf8'),'My workspace instructions');assert.equal(await fs.readFile(path.join(notesFolder,'note.md'),'utf8'),'# My work\n');
  assert.deepEqual((await fs.readdir(first.directory)).sort(),['MRW.code-workspace','README.md']);
 });
-test('setup reopens a Research workspace without forking its settings or replacing its README', async t => {
+test('setup reopens a renamed workspace with customized MRW settings', async t => {
  const home = await fixture(t);
  const directory = path.join(home, 'mrw-work');
  const workspace = path.join(directory, 'Research.code-workspace');
  await fs.mkdir(directory);
- const previousSettings = '// Existing workspace settings\n'+JSON.stringify({folders:[{name:'Research',path:'.'}],settings:{'mrw.leanStudyParent':directory,'mrw.notesFolder':'/vault'}}).replace(/}}$/, ',},}');
- await fs.writeFile(workspace, previousSettings);
  await fs.writeFile(path.join(directory, 'README.md'), 'Reader instructions.');
- const result = await prepareWorkspace({home, notesFolder: '/another-vault'});
- assert.equal(result.workspace, workspace);
- assert.equal(result.created, false);
- assert.equal(await fs.readFile(workspace, 'utf8'), previousSettings);
+ for (const folderPath of ['.', './', directory]) {
+  const config = {folders:[{name:'Research',path:folderPath}],settings:{'mrw.notesFolder':'/vault'}};
+  const previousSettings = '// Existing workspace settings\n'+JSON.stringify(config).replace(/}}$/, ',},}');
+  await fs.writeFile(workspace, previousSettings);
+  const result = await prepareWorkspace({home, notesFolder: '/another-vault'});
+  assert.equal(result.workspace, workspace, folderPath);
+  assert.equal(result.created, false);
+  assert.equal(await fs.readFile(workspace, 'utf8'), previousSettings);
+ }
  assert.equal(await fs.readFile(path.join(directory, 'README.md'), 'utf8'), 'Reader instructions.');
  assert.deepEqual((await fs.readdir(directory)).sort(), ['README.md', 'Research.code-workspace']);
  await fs.unlink(path.join(directory, 'README.md'));

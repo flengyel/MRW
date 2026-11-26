@@ -25,7 +25,7 @@ async function regular(io, file) {
     return true;
   } catch (error) { if (error.code === 'ENOENT') return false; throw error; }
 }
-async function isSetupWorkspace(io, file, directory, active) {
+async function isSetupWorkspace(io, file, directory) {
   // Workspace files contain configuration, never executable content. Read one
   // bounded regular file without following a replacement symlink or FIFO.
   let handle;
@@ -42,10 +42,10 @@ async function isSetupWorkspace(io, file, directory, active) {
     }
     if (offset !== stat.size) return false;
     const config = jsonc(buffer.toString('utf8', 0, offset).replace(/^\uFEFF/, ''));
-    if (!Array.isArray(config?.folders) || !config.folders.some(folder => folder?.path === '.')) return false;
-    const settings = config.settings || {};
-    return settings['mrw.leanStudyParent'] === directory
-      || (file === active && Object.keys(settings).some(key => key.startsWith('mrw.')));
+    const usesRoot = folder => typeof folder?.path === 'string' && folder.path.length > 0
+      && path.resolve(directory, folder.path) === directory;
+    if (!Array.isArray(config?.folders) || !config.folders.some(usesRoot)) return false;
+    return Object.keys(config.settings || {}).some(key => key.startsWith('mrw.'));
   } catch (error) {
     if (error instanceof SyntaxError || ['ELOOP', 'ENOENT'].includes(error.code)) return false;
     throw error;
@@ -70,7 +70,7 @@ async function selectWorkspace(paths, active, io, registeredSources, resolveDefa
     }
   }
   if (active && path.dirname(active) === directory && active.endsWith('.code-workspace')
-      && await isSetupWorkspace(io, active, directory, active)) return choose(active);
+      && await isSetupWorkspace(io, active, directory)) return choose(active);
   if (options.has(workspace)) return choose(workspace);
   let entries;
   try { entries = await io.readdir(directory, {withFileTypes:true}); }
@@ -78,7 +78,7 @@ async function selectWorkspace(paths, active, io, registeredSources, resolveDefa
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('.code-workspace')) continue;
     const file = path.join(directory, entry.name);
-    if (!options.has(file) && await isSetupWorkspace(io, file, directory, active)) options.set(file, undefined);
+    if (!options.has(file) && await isSetupWorkspace(io, file, directory)) options.set(file, undefined);
   }
   if (options.size > 1) throw Error('Several MRW workspaces are available. Open the intended workspace in VS Code and run setup again.');
   return choose(options.size ? options.keys().next().value : workspace);

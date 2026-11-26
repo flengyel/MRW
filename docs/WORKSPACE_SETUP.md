@@ -59,10 +59,9 @@ named workspace in `~/mrw-work/` or its recorded destination. If several qualify
 open the intended workspace and run setup again.
 
 Setup identifies a differently named file in `~/mrw-work/` by its
-`.code-workspace` extension, a workspace folder entry for `.`, and the
-`mrw.leanStudyParent` setting pointing to `~/mrw-work/`. If the file is already
-open, any saved `mrw.*` setting also identifies it. For a project workspace
-elsewhere, use VS Code's **File → Open Workspace from File…**.
+`.code-workspace` extension, a folder path resolving to `~/mrw-work/`, and a
+saved `mrw.*` setting. For a project workspace elsewhere, use VS Code's
+**File → Open Workspace from File…**.
 
 Setup creates `mrw-work`, a saved workspace file and a short README only if missing.
 Complete files are published without overwriting a competing or existing file,
