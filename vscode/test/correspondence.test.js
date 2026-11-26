@@ -224,13 +224,15 @@ test('rendering a missing review and second-reading status uses the report row e
     { title: 'Changed passage', source_revision: source.revision, lean_commit: facts.derived_from.commit, review: {
       ...review, declaration: facts.declaration, status: { manuscript: 'changed', lean: 'current' },
       second_readings: [{ stage: 'reconciled', saved_before_reveal: true, reconciled: true }],
-      discrepancies: [{ kind: 'signature_changed' }], axioms: ['sorryAx'],
+      discrepancies: [{ kind: 'signature_changed' }, {
+        kind: 'manuscript_vs_formalization', reason: 'Unfinished Lean proof depends on sorryAx <admitted>',
+      }], axioms: ['sorryAx'],
     } },
   ] } });
   assert.match(html, /Unreviewed passage[\s\S]+Awaiting review/);
   assert.match(html, /data-report-row="stale open"/);
   assert.match(html, /Reconstruction saved before reveal · reconciled/);
-  assert.match(html, /sorryAx/);
+  assert.match(html, /Unfinished Lean proof depends on sorryAx &lt;admitted&gt;/);
   const shell = correspondenceShell();
   assert.match(shell, /default-src 'none'/);
   assert.doesNotThrow(() => new Function(shell.match(/<script nonce="[^"]+">([\s\S]*?)<\/script>/)[1]));

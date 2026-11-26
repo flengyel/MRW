@@ -18,6 +18,7 @@ from .workspace import strict_json
 ASPECTS = ('objects', 'hypotheses', 'quantifiers', 'conclusion', 'assumptions')
 VERDICTS = {'matches', 'lean_assumes_more', 'lean_proves_less', 'lean_stronger', 'not_comparable'}
 RESOLUTIONS = {'first_revised', 'second_revised', 'open'}
+SORRY_REASON = 'Unfinished Lean proof depends on sorryAx'
 STAGES = ('blind', 'saved', 'facts', 'revealed', 'reconciled')
 EVENTS = {'review': 'reviews', 'reading': 'readings', 'observation': 'observations'}
 LIMIT = 3 * 1024 * 1024
@@ -179,7 +180,7 @@ def judgments(value):
     return value
 
 
-def decision(aspects, facts):
+def aspect_decision(aspects):
     verdicts = {item['verdict'] for item in aspects.values()}
     if 'not_comparable' in verdicts:
         return None, [{'kind': 'manuscript_vs_formalization', 'reason': 'Incomparable aspect'}]
@@ -187,9 +188,15 @@ def decision(aspects, facts):
         return 'weakens', [{'kind': 'manuscript_vs_formalization', 'reason': 'Lean assumes more or proves less'}]
     if 'lean_stronger' in verdicts:
         return 'strengthens', []
-    if 'sorryAx' in facts['axiom_dependencies']:
-        return None, [{'kind': 'manuscript_vs_formalization', 'reason': 'Unfinished Lean proof depends on sorryAx'}]
     return 'formalizes', []
+
+
+def decision(aspects, facts):
+    kind, found = aspect_decision(aspects)
+    if 'sorryAx' in facts['axiom_dependencies']:
+        found.append({'kind': 'manuscript_vs_formalization', 'reason': SORRY_REASON})
+        return None, found
+    return kind, found
 
 
 def subject(facts):
@@ -223,13 +230,16 @@ def comparison(prior, facts):
     return 'same_signature'
 
 
-def validate_review(record):
+def validate_review(record, *, allow_legacy=False):
     passage = source_snapshot(record['source'])
-    validate_facts(record['facts'])
-    judgments(record['aspects'])
+    facts, aspects = validate_facts(record['facts']), judgments(record['aspects'])
     string(record['reviewer'], 'reviewer', 512)
-    if record['kind'] != decision(record['aspects'], record['facts'])[0]:
-        raise ValueError('Saved correspondence verdict differs from the exact aspect judgments')
+    if record['kind'] != decision(aspects, facts)[0]:
+        # 0.23.63 applied these two aspect verdicts before the sorryAx check.
+        legacy_kind = aspect_decision(aspects)[0]
+        if not (allow_legacy and 'sorryAx' in facts['axiom_dependencies']
+                and legacy_kind in ('weakens', 'strengthens') and record['kind'] == legacy_kind):
+            raise ValueError('Saved correspondence verdict differs from the exact aspect judgments')
     if record['prior'] is not None:
         revision(record['prior'])
     if record['attribution'] is not None:
@@ -314,7 +324,7 @@ class Store:
         for key, record in self.events['review'].items():
             check_keys(record, {'schema', 'version', 'project_root', 'id', 'at', 'source', 'facts',
                                 'aspects', 'reviewer', 'kind', 'prior', 'attribution', 'verification'})
-            self.passages[key] = validate_review(record)
+            self.passages[key] = validate_review(record, allow_legacy=True)
             if record['prior']:
                 parent = self.event('review', record['prior'])
                 if record['id'] != parent['id'] or subject(record['facts']) != subject(parent['facts']):
@@ -447,7 +457,8 @@ def review_summary(key, item):
     facts = item['facts']
     return dict(id=item['id'], revision=key, source=source_locator(item['source']),
                 declaration=facts['declaration'], module=facts['module'], lean_project=facts['project'],
-                lean_commit=facts['derived_from']['commit'], kind=item['kind'], reviewer=item['reviewer'], at=item['at'])
+                lean_commit=facts['derived_from']['commit'], kind=decision(item['aspects'], facts)[0],
+                reviewer=item['reviewer'], at=item['at'])
 
 
 def reading_summaries(store, key):
@@ -461,8 +472,8 @@ def reading_summaries(store, key):
     return items
 
 
-def discrepancies(store, key, record, status):
-    result = list(decision(record['aspects'], record['facts'])[1])
+def discrepancies(store, key, status, aspect_discrepancies):
+    result = list(aspect_discrepancies)
     if 'changed' in status.values():
         result.append(dict(kind='stale_correspondence', reason='A captured source revision has changed'))
     for observation, item in store.events['observation'].items():
@@ -480,8 +491,9 @@ def review_view(store, key):
     record = store.event('review', key)
     status = dict(manuscript=manuscript_status(record['source']), lean=lean_status(record['facts']))
     source = dict(record['source'], passage=store.passages[key])
-    return dict(record, revision=key, source=source, status=status,
-                discrepancies=discrepancies(store, key, record, status), readings=reading_summaries(store, key),
+    kind, found = decision(record['aspects'], record['facts'])
+    return dict(record, revision=key, source=source, status=status, kind=kind,
+                discrepancies=discrepancies(store, key, status, found), readings=reading_summaries(store, key),
                 revisions=sorted((other for other, event in store.events['review'].items()
                                   if event['id'] == record['id']), key=lambda other: store.events['review'][other]['at']))
 
@@ -650,9 +662,11 @@ def report_snapshot(store, scope):
         if facts_key not in lean_states:
             lean_states[facts_key] = lean_status(facts)
         status = dict(manuscript=manuscript_state, lean=lean_states[facts_key])
+        kind, found = decision(item['aspects'], facts)
         by_span.setdefault(span, []).append(dict(
-            id=item['id'], revision=key, declaration=facts['declaration'], module=facts['module'], kind=item['kind'],
-            aspects=item['aspects'], axioms=facts['axiom_dependencies'], discrepancies=discrepancies(store, key, item, status),
+            id=item['id'], revision=key, declaration=facts['declaration'], module=facts['module'],
+            kind=kind, aspects=item['aspects'], axioms=facts['axiom_dependencies'],
+            discrepancies=discrepancies(store, key, status, found),
             status=status, second_readings=reading_summaries(store, key),
             passage=source_locator(source), source_location=facts['source_location'],
         ))
@@ -670,9 +684,27 @@ def report_snapshot(store, scope):
     return value
 
 
-def report_view(record, raw):
+def report_rows(rows):
+    # Render the proof status from retained axioms. Keep the snapshot and its
+    # digest intact, including when a report changes lifecycle state.
+    def effective_review(review):
+        if review is None or 'sorryAx' not in review['axioms']:
+            return review
+        unfinished = {'kind': 'manuscript_vs_formalization', 'reason': SORRY_REASON}
+        found = review['discrepancies']
+        return dict(review, kind=None, discrepancies=found if unfinished in found else [*found, unfinished])
+
+    return [dict(row, review=effective_review(row['review']),
+                 alternatives=[effective_review(review) for review in row.get('alternatives', [])])
+            for row in rows]
+
+
+def report_view(record, raw, *, include_rows=True):
     base = dict(id=record['id'], revision=digest(raw), state=record['state'], at=record['at'])
-    return dict(base, **record['snapshot']) if record['snapshot'] else base
+    snapshot = record['snapshot']
+    if snapshot is None:
+        return base
+    return dict(base, scope=snapshot['scope'], rows=report_rows(snapshot['rows']) if include_rows else [])
 
 
 def report_markdown(snapshot):
@@ -692,7 +724,7 @@ def report_markdown(snapshot):
              row('Result', 'Exact manuscript revision and range', 'Lean commit and declaration', 'Verdict',
                  'Aspects', 'Axioms', 'Discrepancies', 'Second reading'),
              row(*(['---'] * 8))]
-    for item in snapshot['rows']:
+    for item in report_rows(snapshot['rows']):
         cells = []
         candidates = [item['review'], *item.get('alternatives', [])]
         for review in candidates:
@@ -711,7 +743,10 @@ def report_markdown(snapshot):
                     lean += f" {start['line'] + 1}:{start['column']}–{end['line'] + 1}:{end['column']} (scalar columns)"
                 aspects = ', '.join(cell(aspect + '=' + review['aspects'][aspect]['verdict']) for aspect in ASPECTS)
                 facts = ', '.join(literal(axiom) for axiom in review['axioms'])
-                discrepancies = ', '.join(cell(entry['kind']) for entry in review['discrepancies'])
+                discrepancies = ', '.join(
+                    cell(entry['kind'] + (' · ' + entry['reason'] if entry.get('reason') else ''))
+                    for entry in review['discrepancies']
+                )
                 readings = ', '.join(
                     'reconstruction saved before reveal' + ('; reconciled' if entry['reconciled'] else '')
                     if entry['saved_before_reveal'] else cell(entry['stage'])
@@ -778,7 +813,7 @@ def _dispatch(store, method, request):
         return dict(
             reviews=sorted((review_summary(key, store.events['review'][key]) for key in store.heads('review').values()),
                            key=lambda item: item['at'], reverse=True),
-            reports=sorted((dict(report_view(record, raw), rows=[]) for record, raw in store.reports.values()
+            reports=sorted((report_view(record, raw, include_rows=False) for record, raw in store.reports.values()
                             if record['state'] != 'deleted'), key=lambda item: item['at'], reverse=True),
         )
     if method == 'correspondence_review':

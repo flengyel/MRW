@@ -1,10 +1,19 @@
 import copy
+import json
 import tempfile
 from pathlib import Path
 import unittest
 from unittest.mock import patch
 
 from mrw import correspondence_records as records
+
+
+def v02363_decision(aspects, facts):
+    # In the released validator, weakens and strengthens preceded sorryAx.
+    kind, discrepancies = records.aspect_decision(aspects)
+    if kind == 'formalizes' and 'sorryAx' in facts['axiom_dependencies']:
+        return None, [{'kind': 'manuscript_vs_formalization', 'reason': records.SORRY_REASON}]
+    return kind, discrepancies
 
 
 class CorrespondenceTests(unittest.TestCase):
@@ -124,6 +133,80 @@ class CorrespondenceTests(unittest.TestCase):
         sorry = self.save(facts=dict(self.facts, axiom_dependencies=['sorryAx']))
         self.assertIsNone(sorry['kind'])
         self.assertIn('sorryAx', sorry['discrepancies'][0]['reason'])
+        unfinished = dict(self.facts, axiom_dependencies=['propext', 'sorryAx'])
+        expected = {
+            'lean_stronger': [],
+            'lean_assumes_more': ['Lean assumes more or proves less'],
+            'lean_proves_less': ['Lean assumes more or proves less'],
+            'not_comparable': ['Incomparable aspect'],
+        }
+        for verdict, implied in expected.items():
+            with self.subTest(verdict=verdict):
+                record = self.save(facts=unfinished, aspects=self.aspects(hypotheses=verdict))
+                self.assertIsNone(record['kind'])
+                self.assertEqual(record['aspects']['hypotheses']['verdict'], verdict)
+                verdict_discrepancies = [item for item in record['discrepancies']
+                                         if item['kind'] == 'manuscript_vs_formalization']
+                self.assertEqual([item['reason'] for item in verdict_discrepancies],
+                                 implied + ['Unfinished Lean proof depends on sorryAx'])
+                self.assertIsNone(self.call('review', revision=record['revision'])['kind'])
+
+    def test_v02363_reviews_and_reports_reopen_with_effective_verdicts(self):
+        facts = dict(self.facts, axiom_dependencies=['sorryAx'])
+        with patch.object(records, 'decision', side_effect=v02363_decision):
+            weaker = self.save(facts=facts, aspects=self.aspects(hypotheses='lean_assumes_more'))
+            stronger = self.save(facts=facts, aspects=self.aspects(conclusion='lean_stronger'))
+            report = self.call('report_save', scope=self.scope)
+        self.assertEqual(weaker['kind'], 'weakens')
+        self.assertEqual(stronger['kind'], 'strengthens')
+
+        original = {path: path.read_bytes() for path in self.store.rglob('*.json')}
+        report_path = self.store / 'reports' / (report['id'] + '.json')
+        row = json.loads(original[report_path])['snapshot']['rows'][0]
+        self.assertEqual(row['review']['kind'], 'strengthens')
+        self.assertEqual(row['alternatives'][0]['kind'], 'weakens')
+
+        kind_by_revision = {review['revision']: review['kind'] for review in self.call('list')['reviews']}
+        self.assertEqual(kind_by_revision, {weaker['revision']: None, stronger['revision']: None})
+        for review in (weaker, stronger):
+            with self.subTest(kind=review['kind']):
+                reopened = self.call('review', revision=review['revision'])
+                self.assertIsNone(reopened['kind'])
+                self.assertEqual(reopened['aspects'], review['aspects'])
+                self.assertEqual(reopened['facts'], review['facts'])
+                self.assertIn(records.SORRY_REASON, [item['reason'] for item in reopened['discrepancies']])
+
+        reopened = self.call('report_read', id=report['id'])
+        self.assertEqual(reopened['revision'], records.digest(original[report_path]))
+        regenerated = self.call('report_build', scope=self.scope)
+        for view in (reopened, regenerated):
+            row = view['rows'][0]
+            for review in (row['review'], *row['alternatives']):
+                self.assertIsNone(review['kind'])
+                self.assertEqual([item['reason'] for item in review['discrepancies']].count(records.SORRY_REASON), 1)
+        destination = self.project / 'reopened.md'
+        self.call('report_export', id=report['id'], destination=str(destination))
+        exported = destination.read_text(encoding='utf-8')
+        self.assertIn(' | Open<br>Open | ', exported)
+        self.assertIn('manuscript&#95;vs&#95;formalization · ' + records.SORRY_REASON, exported)
+
+        successor = self.save(prior=weaker['revision'])
+        self.assertEqual(successor['kind'], 'formalizes')
+        self.assertIn(weaker['revision'], successor['revisions'])
+        self.assertIsNone(self.call('review', revision=weaker['revision'])['kind'])
+        self.assertEqual({path: path.read_bytes() for path in original}, original)
+
+    def test_legacy_review_kind_must_match_released_aspect_judgment(self):
+        review = dict(source=self.source, facts=dict(self.facts, axiom_dependencies=['sorryAx']),
+                      aspects=self.aspects(conclusion='lean_stronger'), kind='strengthens',
+                      reviewer='First', prior=None, attribution=None, verification=None)
+        records.validate_review(review, allow_legacy=True)
+        with self.assertRaisesRegex(ValueError, 'differs from the exact aspect judgments'):
+            records.validate_review(review)
+        for invalid in ('weakens', 'formalizes'):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(ValueError, 'differs from the exact aspect judgments'):
+                    records.validate_review(dict(review, kind=invalid), allow_legacy=True)
 
     def test_explicit_refresh_records_signature_change_without_rewriting(self):
         first = self.save()
@@ -248,20 +331,26 @@ class CorrespondenceTests(unittest.TestCase):
 
             review = managed('save', source=self.source, facts=self.facts,
                              aspects=self.aspects(), reviewer='First')
-            snapshot = managed('report_save', scope=self.scope)
-            export = fixture / 'report.md'
-            managed('report_export', id=snapshot['id'], destination=str(export))
-            expected = export.read_bytes()
-
-            plan = control('plan', destination=str(destination), roots=[str(self.project)])
-            result = control('move', destination=str(destination), roots=[str(self.project)],
-                             manifest=plan['source_manifest'])
+            # Create bound managed storage under the released decision rule,
+            # then restart and adopt it using the fixed validator.
+            with patch.object(records, 'decision', side_effect=v02363_decision):
+                legacy = managed('save', source=self.source, facts=dict(self.facts, axiom_dependencies=['sorryAx']),
+                                 aspects=self.aspects(conclusion='lean_stronger'), reviewer='Second')
+                snapshot = managed('report_save', scope=self.scope)
+                plan = control('plan', destination=str(destination), roots=[str(self.project)])
+                result = control('move', destination=str(destination), roots=[str(self.project)],
+                                 manifest=plan['source_manifest'])
+            self.assertEqual(legacy['kind'], 'strengthens')
             self.assertTrue(result['committed'])
             self.assertFalse(result['cleanup_pending'])
             self.assertFalse(inventory(host, legacy=True))
             self.assertTrue(any('/reports/' in name for name in inventory(destination)))
             epoch = ArtifactStorage(str(host)).status()['epoch']
             self.assertEqual(managed('report_read', id=snapshot['id']), snapshot)
+            self.assertIsNone(managed('review', revision=legacy['revision'])['kind'])
+            export = fixture / 'report.md'
+            managed('report_export', id=snapshot['id'], destination=str(export))
+            expected = export.read_bytes()
             with self.assertRaisesRegex(ValueError, 'stale client'):
                 managed('report_trash', id=snapshot['id'], revision=snapshot['revision'], active_epoch='legacy')
             with self.assertRaisesRegex(ValueError, 'stale client'):
@@ -283,6 +372,9 @@ class CorrespondenceTests(unittest.TestCase):
             current = managed('review', revision=review['revision'], **selection)
             self.assertEqual(current['facts'], self.facts)
             self.assertEqual(current['source']['revision'], self.source['revision'])
+            old = managed('review', revision=legacy['revision'], **selection)
+            self.assertIsNone(old['kind'])
+            self.assertIn(records.SORRY_REASON, [item['reason'] for item in old['discrepancies']])
             restored = managed('report_restore', id=snapshot['id'], revision=first_trash['revision'], **selection)
             self.assertEqual(restored['rows'], snapshot['rows'])
             self.assertEqual(export.read_bytes(), expected)
