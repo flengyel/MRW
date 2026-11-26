@@ -181,14 +181,19 @@ def judgments(value):
 
 def decision(aspects, facts):
     verdicts = {item['verdict'] for item in aspects.values()}
+    found = []
     if 'not_comparable' in verdicts:
-        return None, [{'kind': 'manuscript_vs_formalization', 'reason': 'Incomparable aspect'}]
-    if verdicts & {'lean_assumes_more', 'lean_proves_less'}:
-        return 'weakens', [{'kind': 'manuscript_vs_formalization', 'reason': 'Lean assumes more or proves less'}]
+        found.append({'kind': 'manuscript_vs_formalization', 'reason': 'Incomparable aspect'})
+    elif verdicts & {'lean_assumes_more', 'lean_proves_less'}:
+        found.append({'kind': 'manuscript_vs_formalization', 'reason': 'Lean assumes more or proves less'})
+    if 'sorryAx' in facts['axiom_dependencies']:
+        # An unfinished proof blocks every correspondence verdict, not only formalizes.
+        found.append({'kind': 'manuscript_vs_formalization', 'reason': 'Unfinished Lean proof depends on sorryAx'})
+        return None, found
+    if found:
+        return (None if 'not_comparable' in verdicts else 'weakens'), found
     if 'lean_stronger' in verdicts:
         return 'strengthens', []
-    if 'sorryAx' in facts['axiom_dependencies']:
-        return None, [{'kind': 'manuscript_vs_formalization', 'reason': 'Unfinished Lean proof depends on sorryAx'}]
     return 'formalizes', []
 
 

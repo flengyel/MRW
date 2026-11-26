@@ -124,6 +124,23 @@ class CorrespondenceTests(unittest.TestCase):
         sorry = self.save(facts=dict(self.facts, axiom_dependencies=['sorryAx']))
         self.assertIsNone(sorry['kind'])
         self.assertIn('sorryAx', sorry['discrepancies'][0]['reason'])
+        unfinished = dict(self.facts, axiom_dependencies=['propext', 'sorryAx'])
+        expected = {
+            'lean_stronger': [],
+            'lean_assumes_more': ['Lean assumes more or proves less'],
+            'lean_proves_less': ['Lean assumes more or proves less'],
+            'not_comparable': ['Incomparable aspect'],
+        }
+        for verdict, implied in expected.items():
+            with self.subTest(verdict=verdict):
+                record = self.save(facts=unfinished, aspects=self.aspects(hypotheses=verdict))
+                self.assertIsNone(record['kind'])
+                self.assertEqual(record['aspects']['hypotheses']['verdict'], verdict)
+                verdict_discrepancies = [item for item in record['discrepancies']
+                                         if item['kind'] == 'manuscript_vs_formalization']
+                self.assertEqual([item['reason'] for item in verdict_discrepancies],
+                                 implied + ['Unfinished Lean proof depends on sorryAx'])
+                self.assertIsNone(self.call('review', revision=record['revision'])['kind'])
 
     def test_explicit_refresh_records_signature_change_without_rewriting(self):
         first = self.save()
