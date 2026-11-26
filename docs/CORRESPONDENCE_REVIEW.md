@@ -129,12 +129,12 @@ happened in MRW. Readers may have consulted material elsewhere.
 
 ## Reports
 
-For a selected manuscript revision and Lean commit, show one row per printed
-result. Each row names both source revisions and the pinned passage and
-declaration. Include the overall kind, aspect verdicts, axioms, open
-discrepancies and whether the second reading was completed and reconciled.
-Provide filters for open discrepancies, stale reviews and missing second
-readings.
+For a selected manuscript revision and Lean commit, show each review on its
+own row. Each row names the pinned passage, the Lean module and qualified
+declaration, and both source revisions. A result awaiting review has one row.
+Each review shows its verdict, aspect judgments, axioms, open discrepancies
+and second-reading status. Filter for open discrepancies, stale reviews or
+missing second readings.
 
 **Save report** writes an immutable snapshot to the workspace's private MRW
 store. Keep exact references to the reviews and revisions for comparison or
@@ -171,6 +171,19 @@ and use a matching local build in an isolated copy.
 5. Save and export a report. Try exporting onto the existing path. Trash,
    restore and permanently delete the snapshot. Verify that the export and
    underlying records survive all three actions.
+
+Two v25 comparisons illustrate the **Strengthens** verdict on hypotheses.
+
+- For Theorem 2.1, review `DosenPetric.Presentation.maximality` in
+  `DosenPetric.PresentationMaximality`. It quantifies over arbitrary `P` and
+  retains substitution closure and the distinct-pair hypotheses. The
+  `DosenPetric.Palomar.maximality` declaration retains the nonemptiness
+  hypothesis. [Lean declaration](https://github.com/flengyel/Dosen-Petric-Maximality/blob/76a4ea71f257746bb6ea2cb2e686e85914c7347c/DosenPetric/PresentationMaximality.lean#L10-L16)
+- For Lemma 5.2, review `DosenPetric.Presentation.ShortProof.total` in
+  `DosenPetric.PresentationShortProjection`. It needs compatibility with
+  composition, pairing and copairing, and the contextual equation for each
+  formula. The printed lemma assumes a full proof congruence.
+  [Lean hypotheses](https://github.com/flengyel/Dosen-Petric-Maximality/blob/76a4ea71f257746bb6ea2cb2e686e85914c7347c/DosenPetric/PresentationShortProjection.lean#L33-L45)
 
 Automatic paper-to-Lean matching, Lean-to-English translation, proof-structure
 comparison, proof replay and new companion integrations are outside this design.

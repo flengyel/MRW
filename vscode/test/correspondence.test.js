@@ -238,6 +238,33 @@ test('rendering a missing review and second-reading status uses the report row e
   assert.doesNotThrow(() => new Function(shell.match(/<script nonce="[^"]+">([\s\S]*?)<\/script>/)[1]));
 });
 
+test('reviews of the same named declaration show separate modules, verdicts and filter states', () => {
+  const declaration = 'DosenPetric.Palomar.maximality';
+  const solved = { ...review, declaration, module: 'Solution', kind: 'formalizes', axioms: [], discrepancies: [] };
+  const challenge = { ...review, declaration, module: 'Challenge', kind: null, revision: 'challenge-review',
+    axioms: ['sorryAx'], discrepancies: [{ kind: 'manuscript_vs_formalization', reason: 'Unfinished Lean proof depends on sorryAx' }] };
+  const html = renderCorrespondence({ mode: 'report', report: { scope: reportScope(review), rows: [
+    { title: 'Maximality', source_revision: source.revision, lean_commit: facts.derived_from.commit,
+      review: challenge, alternatives: [solved] },
+  ] } });
+  const rows = [...html.matchAll(/<tr data-report-row="([^"]*)">([\s\S]*?)<\/tr>/g)];
+  assert.equal(rows.length, 2);
+  const [open, complete] = rows;
+  assert.match(open[1], /\bopen\b/);
+  assert.match(open[2], /Module <code>Challenge<\/code>/);
+  assert.match(open[2], /Unresolved/);
+  assert.match(open[2], /data-value="challenge-review"/);
+  assert.doesNotMatch(open[2], /Formalizes/);
+  assert.doesNotMatch(complete[1], /\bopen\b/);
+  assert.match(complete[2], /Module <code>Solution<\/code>/);
+  assert.match(complete[2], /Formalizes/);
+  assert.doesNotMatch(complete[2], /sorryAx/);
+  for (const entry of rows) {
+    assert.match(entry[2], /DosenPetric\.Palomar\.maximality/);
+    assert.match(entry[2], /data-action="report-passage" data-value="0"/);
+  }
+});
+
 test('closing a busy review cancels its read and retains the move guard until it settles', async () => {
   const h = harness();
   await h.controller.begin({ root: '/tmp/mrw-project', source });

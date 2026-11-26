@@ -155,7 +155,8 @@ class CorrespondenceTests(unittest.TestCase):
         facts = dict(self.facts, axiom_dependencies=['sorryAx'])
         with patch.object(records, 'decision', side_effect=v02363_decision):
             weaker = self.save(facts=facts, aspects=self.aspects(hypotheses='lean_assumes_more'))
-            stronger = self.save(facts=facts, aspects=self.aspects(conclusion='lean_stronger'))
+            stronger = self.save(facts=dict(facts, module='Formal.Expansion'),
+                                 aspects=self.aspects(conclusion='lean_stronger'))
             report = self.call('report_save', scope=self.scope)
         self.assertEqual(weaker['kind'], 'weakens')
         self.assertEqual(stronger['kind'], 'strengthens')
@@ -187,7 +188,10 @@ class CorrespondenceTests(unittest.TestCase):
         destination = self.project / 'reopened.md'
         self.call('report_export', id=report['id'], destination=str(destination))
         exported = destination.read_text(encoding='utf-8')
-        self.assertIn(' | Open<br>Open | ', exported)
+        self.assertEqual(exported.count(' | Open | '), 2)
+        entries = [line for line in exported.splitlines() if ' | Open | ' in line]
+        self.assertIn('<code>Formal.Expansion · Formal.triangle</code>', entries[0])
+        self.assertIn('<code>Formal · Formal.triangle</code>', entries[1])
         self.assertIn('manuscript&#95;vs&#95;formalization · ' + records.SORRY_REASON, exported)
 
         successor = self.save(prior=weaker['revision'])

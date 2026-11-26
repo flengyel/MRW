@@ -725,9 +725,7 @@ def report_markdown(snapshot):
                  'Aspects', 'Axioms', 'Discrepancies', 'Second reading'),
              row(*(['---'] * 8))]
     for item in report_rows(snapshot['rows']):
-        cells = []
-        candidates = [item['review'], *item.get('alternatives', [])]
-        for review in candidates:
+        for review in [item['review'], *item.get('alternatives', [])]:
             passage = review['passage'] if review else item
             source = literal(item['source_revision']) + f" {passage['start']}–{passage['end']} (UTF-16 offsets)"
             if review and passage.get('reference'):
@@ -754,9 +752,8 @@ def report_markdown(snapshot):
                 )
             else:
                 aspects = ''
-            cells.append((source, lean, cell(review['kind'] or 'Open') if review else 'Unreviewed',
-                          aspects, facts, discrepancies, readings))
-        lines.append(row(cell(item['title']), *('<br>'.join(column) for column in zip(*cells))))
+            verdict = cell(review['kind'] or 'Open') if review else 'Unreviewed'
+            lines.append(row(cell(item['title']), source, lean, verdict, aspects, facts, discrepancies, readings))
     lines.append('')
     return '\n'.join(lines).encode()
 

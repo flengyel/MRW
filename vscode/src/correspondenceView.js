@@ -190,8 +190,7 @@ function secondReading(state) {
       '</fieldset>').join('') + '<button type="submit">Save reconciliation</button></form>';
 }
 
-function reportRow(row, index) {
-  const review = row.review;
+function reportRow(row, index, review) {
   const discrepancies = review?.discrepancies || [];
   const readings = review?.second_readings || [];
   const saved = readings.some(reading => reading.stage !== 'blind');
@@ -204,13 +203,14 @@ function reportRow(row, index) {
   const journal = review?.aspects || {};
   const aspectVerdicts = Object.entries(aspects).filter(([key]) => journal[key]).map(([key, label]) =>
     '<li>' + escape(label) + ' · ' + escape(verdicts[journal[key].verdict] || journal[key].verdict) + '</li>').join('');
-  const alternatives = row.alternatives?.length ? disclosure('Other reviews',
-    '<ul>' + row.alternatives.map(item => '<li>' + button(item.declaration, 'report-review', item.revision) + '</li>').join('') + '</ul>') : '';
   const secondStatus = revealed ? 'Reconstruction saved before reveal' + (reconciled ? ' · reconciled' : '') :
     saved ? 'Reconstruction saved' : readings.length ? 'Reconstruction in progress' : 'Awaiting second reading';
   return '<tr data-report-row="' + attr(tags) + '"><th scope="row">' + escape(row.title) +
-    button('Open exact passage', 'report-passage', index) + (review ? button('Open review', 'report-review', review.revision) : '') + alternatives +
-    '<div class="hash">' + escape(row.source_revision) + '</div></th><td>' + escape(review?.declaration || '—') +
+    button('Open exact passage', 'report-passage', index) +
+    '<div class="hash">' + escape(row.source_revision) + '</div></th><td>' +
+    (review ? '<code>' + escape(review.declaration) + '</code>' +
+      (review.module ? '<div>Module <code>' + escape(review.module) + '</code></div>' : '') +
+      button('Open review', 'report-review', review.revision) : '—') +
     '<div class="hash">' + escape(row.lean_commit) + '</div></td><td>' +
     escape(review ? outcomes[review.kind] || 'Unresolved' : 'Awaiting review') +
     (aspectVerdicts ? disclosure('Aspect verdicts', '<ul>' + aspectVerdicts + '</ul>') : '') +
@@ -226,14 +226,16 @@ function reportView(state) {
   const controls = report.id ? trash ? button('Restore report', 'restore-report') +
     button('Permanently delete…', 'delete-report') : button('Export report…', 'export-report') +
       button('Delete report…', 'trash-report') : button('Save report', 'save-report');
+  const entries = rows.flatMap((row, index) =>
+    [row.review, ...(row.alternatives || [])].map(review => reportRow(row, index, review))).join('');
   return '<h1>Correspondence report</h1><p>' + escape(report.scope.source_uri) + '</p>' +
     '<p class="hash">Manuscript ' + escape(report.scope.source_revision) + ' · Lean ' + escape(report.scope.lean_commit) + '</p>' +
     (trash ? '<p>In Trash</p>' : '') + '<div class="toolbar">' + controls + '</div>' +
-    '<fieldset class="filters"><legend>Show reviews with</legend><label><input type="checkbox" data-filter="open">Open discrepancies</label>' +
+    '<fieldset class="filters"><legend>Show entries with</legend><label><input type="checkbox" data-filter="open">Open discrepancies</label>' +
     '<label><input type="checkbox" data-filter="stale">Stale revisions</label>' +
     '<label><input type="checkbox" data-filter="missing-second">Missing second reading</label></fieldset>' +
     (rows.length ? '<div class="report-table"><table><thead><tr><th>Printed result</th><th>Lean declaration</th><th>Judgment</th>' +
-      '<th>Discrepancies</th><th>Axioms</th><th>Second reading</th></tr></thead><tbody>' + rows.map(reportRow).join('') +
+      '<th>Discrepancies</th><th>Axioms</th><th>Second reading</th></tr></thead><tbody>' + entries +
       '</tbody></table></div><p class="muted" id="filter-summary" aria-live="polite"></p>' : '<p>No printed results in this report.</p>');
 }
 
@@ -286,7 +288,7 @@ const script = [
   '  const rows = Array.from(root.querySelectorAll("[data-report-row]"));',
   '  for (const row of rows) row.hidden = !filters.every(filter => row.dataset.reportRow.split(" ").includes(filter));',
   '  const summary = root.querySelector("#filter-summary");',
-  '  if (summary) summary.textContent = filters.length ? rows.filter(row => !row.hidden).length + " of " + rows.length + " results" : "";',
+  '  if (summary) summary.textContent = filters.length ? rows.filter(row => !row.hidden).length + " of " + rows.length + " entries" : "";',
   '}',
   'window.addEventListener("message", event => {',
   '  const message = event.data;',
