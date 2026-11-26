@@ -1,3 +1,3 @@
-"""GOLEM XIV."""
+"""Mathematical Research Workstation."""
 
-__version__ = "0.23.65"
+__version__ = "0.23.66"

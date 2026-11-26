@@ -289,7 +289,7 @@ function excerpt(fragment, language, limit, context) {
 
 const api = { escape, excerpt, preview, texPreviewContext };
 if (typeof module === 'object' && module?.exports) module.exports = api;
-else window.GolemXIVPassagePreview = api;
+else window.MRWPassagePreview = api;
 })(typeof module === 'object' && module?.exports ? require('../media/katex/katex.min.js') : window.katex,
    typeof module === 'object' && module?.exports ? require('../media/markdown-it/markdown-it.js') : window.markdownit,
-   typeof module === 'object' && module?.exports ? require('./mathNegation') : window.GolemXIVNormalizeNegatedRelations);
+   typeof module === 'object' && module?.exports ? require('./mathNegation') : window.MRWNormalizeNegatedRelations);

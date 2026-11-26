@@ -1,13 +1,13 @@
 # Documents, Contents and saved sources
 
-Open a note or paper with **Open Document…**. Markdown opens in
+Open a note or paper with **MRW: Open Document…**. Markdown opens in
 VS Code's preview, and **Contents** lists its headings and links. The original
 file stays in place. Reading, following links and returning require no import
 or problem record.
 
 ## Find an imported section and its reader notes
 
-Choose **Open Saved Source…** in GOLEM XIV's **Commands** view, next to Open Document.
+Choose **Open Saved Source…** in MRW's **Commands** view, next to Open Document.
 Search by source title, author or passage title/tag. For example, `Stacks` or
 `08ZH` finds a saved Hausdorff-spaces section containing that lemma. The result
 shows its reader-note count and retained revision. Open it, then expand
@@ -23,9 +23,9 @@ not import it again, replace its revision or move its annotations.
 
 ## Open a document and find Contents
 
-1. Choose **Open Document…** in GOLEM XIV's **Commands** section or the Command Palette.
+1. Choose **Open Document…** in MRW's **Commands** section or the Command Palette.
    Select an **Original file** to read its current contents, or a **Saved copy**
-   to open a retained revision with GOLEM XIV annotations.
+   to open a retained revision with MRW annotations.
 2. Use **Browse for another document…** to select a file directly. This action
    is available before folder listings or saved copies finish loading.
 3. For Markdown, choose **Show Contents** in the Commands section. The Contents
@@ -50,28 +50,28 @@ editor is active. While a different file is active, Contents hides the preceding
 tree and identifies the active file, with directions for selecting its Markdown
 or returning to the selected document.
 
-To start a note from GOLEM XIV, choose **New Note…** from **Reading and notes** or the
-document menu. For a configured Obsidian vault, GOLEM XIV brings Obsidian
+To start a note from MRW, choose **New Note…** from **Reading and notes** or the
+**MRW Document** menu. For a configured Obsidian vault, MRW brings Obsidian
 forward and runs your selected creation command; other notes folders use a blank
 VS Code Markdown editor. The current document stays open. See
 [note creation and setup](NOTE_COMPANIONS.md). Create other kinds of documents
 with their authoring application or VS Code extension, then use **Open Document**.
-Untitled Markdown works for the current session. GOLEM XIV keeps the chosen editor groups and sidebars; it does not
+Untitled Markdown works for the current session. MRW keeps the chosen editor groups and sidebars; it does not
 maximize reading or hide Codex and other editors automatically.
 
-Other formats use a registered host editor. If no PDF reader is available, GOLEM XIV
-offers **Open with system reader**. GOLEM XIV does not install a viewer or display PDF
+Other formats use a registered host editor. If no PDF reader is available, MRW
+offers **Open with system reader**. MRW does not install a viewer or display PDF
 bytes as text. PDF extraction, PDF Contents, page restoration and bookmarks are
 not implemented.
 
-Open the document menu from the editor toolbar’s book icon. **Return to
+Open **MRW Document** from the editor toolbar's list icon. **Return to
 Document** appears after following a link and returns to its recorded origin.
 Use **Reveal Contents Document** to reopen the selected Markdown document
 from Contents. **Show Backlinks…** searches the selected notes folder.
 
-Markdown offers **Show Contents** and **Edit Document Source**. The option to copy a
-note link is available for a note in the selected folder when the workspace has
-an address for the link. **Open Note in Obsidian** appears for notes in
+Markdown offers **Show Contents** and **Edit Document Source**. **Copy MRW
+Note Link** is available for a note in the selected folder when the workspace
+has an address for the link. **Open Note in Obsidian** appears for notes in
 the selected Obsidian vault. PDF Return reopens the file. The PDF reader
 controls its page position. Use the Command Palette in VS Code when the PDF
 opens in a system reader.
@@ -83,14 +83,14 @@ filename ID repeated at the start of the title is omitted from the display;
 the complete property remains in the tooltip. Metadata and filenames are not
 rewritten, and native editor tabs keep their filenames.
 
-**Open in Obsidian** in the preview, or **Open Note in Obsidian**, opens the
+**Open in Obsidian** in the preview, or **MRW: Open Note in Obsidian**, opens the
 same file through Obsidian's registered URI handler. Select the vault root with
-**Choose Notes Folder…**. **Obsidian Vault** accepts an optional vault name
+**Choose Notes Folder…**. **MRW: Obsidian Vault** accepts an optional vault name
 or ID; an empty value uses the selected folder's name. Under WSL, select a
 Windows vault through its `/mnt/c/…` path. Both applications must address the
 same files; the action does not synchronize a separate Linux or SSH copy.
 
-After explicit GOLEM XIV navigation, the displayed note is checked while VS Code is
+After explicit MRW navigation, the displayed note is checked while VS Code is
 focused. Saved external changes refresh a clean document, its preview, links
 and Contents, including Windows saves that produce no WSL file event. Dirty
 VS Code text remains a labelled draft and is not replaced or merged. Obsidian
@@ -99,7 +99,7 @@ receives the saved file, not unsent VS Code text. See the
 
 ## Follow notes and files
 
-Select **Choose Notes Folder…** to select the folder used for note-ID
+Choose **MRW: Choose Notes Folder…** to select the folder used for note-ID
 lookup and backlinks. It may be outside the workspace, including a Windows
 folder mounted in WSL. The selection sets `mrw.notesFolder` in workspace
 settings; it accepts an absolute extension-host path. Ordinary Markdown requires
@@ -108,11 +108,11 @@ neither Obsidian nor special note metadata.
 The chooser shows **Current** and **Recent** folders with their full paths.
 Select a recent entry to switch directly, or **Browse for notes folder…**.
 The ten most recent choices are remembered for this workspace after restart.
-Browse starts at the current folder; if it is unavailable, GOLEM XIV tries an available
+Browse starts at the current folder; if it is unavailable, MRW tries an available
 recent folder, then the workspace or home folder. It does not reuse an unrelated
 file dialog's last location. A successful choice reports the selected path.
 Cancellation and an unavailable or redirected recent folder leave the selection
-unchanged. If the setting is saved but history cannot be saved, GOLEM XIV reports both
+unchanged. If the setting is saved but history cannot be saved, MRW reports both
 facts; selecting that folder again retries the history save.
 
 1. Click a WikiLink in preview, or Ctrl+click it in the source editor, subject
@@ -144,7 +144,7 @@ are not evaluated. Directory symlinks do not extend the selected scope.
 
 ## Backlinks, edits and restart
 
-Lookup is limited to the chosen folder; GOLEM XIV does not discover a vault or scan
+Lookup is limited to the chosen folder; MRW does not discover a vault or scan
 ancestors. ID lookup searches filenames and reads matching notes. Backlinks
 read note text, including open unsaved buffers. The index is rebuilt on explicit
 operations, with these bounds:
@@ -178,16 +178,16 @@ range and records a fresh position. Dirty buffers remain unsaved. This covers
 source-editor selections and followed heading/block locations, not native
 preview scrolling. Exact-passage Return still requires its target to match.
 Activation does not open a document automatically. Missing or redirected files
-still require a new choice; GOLEM XIV does not guess a replacement by title or similar
+still require a new choice; MRW does not guess a replacement by title or similar
 text. VS Code separately owns unsaved-buffer and window recovery.
 
 ## Front matter and Contents
 
-Contents parses CommonMark ATX/Setext headings, Markdown links and exact GOLEM XIV
+Contents parses CommonMark ATX/Setext headings, Markdown links and exact MRW
 references. Code, images and comments are excluded. Leading YAML between `---`
 and a closing `---` or `...` is omitted without shifting original positions,
 including in BOM and CRLF files. An unclosed block is reported and the remainder
-is excluded until its delimiter is repaired. GOLEM XIV does not validate arbitrary
+is excluded until its delimiter is repaired. MRW does not validate arbitrary
 YAML or rewrite metadata.
 
 Unicode, escaped labels, repeated headings and duplicate references keep their
@@ -197,7 +197,7 @@ Markdown document per window.
 ## Retain text only when needed
 
 Under **Sources and references**, use **Retain Document as Source** to keep a
-saved UTF-8 text document at an exact revision. If you select text first, GOLEM XIV
+saved UTF-8 text document at an exact revision. If you select text first, MRW
 keeps that passage and names it from a heading, a result name such as
 “Lemma 1”, or its opening words. The status bar confirms the saved passage.
 Use **Open Saved Source…** or **Open Document… → Saved copy** to reopen the
@@ -261,7 +261,7 @@ the active extension build.
 
 Open the saved source. Choose **Move to Trash…** under **Source details and
 tools**. Save or cancel unsaved reader changes first.
-The confirmation moves only that GOLEM XIV saved copy to Trash. Its text, reader notes,
+The confirmation moves only that MRW saved copy to Trash. Its text, reader notes,
 diagrams and links are kept. Original files and vault notes are unchanged.
 
 **Undo** restores it immediately. **Restore saved source from Trash…** in Sources and

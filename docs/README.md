@@ -1,8 +1,8 @@
-# GOLEM XIV documentation
+# MRW documentation
 
 Start with the [project README](../README.md) for current capabilities and the
 [installation guide](INSTALLATION.md) for a Linux, WSL2 or Remote SSH workspace.
-The installed **Open Tutorial** command describes the active extension build.
+The installed **MRW: Open Tutorial** command describes the active extension build.
 
 ## User guides
 
@@ -22,7 +22,7 @@ The installed **Open Tutorial** command describes the active extension build.
 | Render TikZ in notes or reader annotations | [TikZ diagrams](TIKZ_WORKFLOW.md) |
 | Retain a Stacks Project or Kerodon section | [Published sources](STACKS_WORKFLOW.md) |
 | Distinguish a source item, its revision and a quoted passage | [Source identifiers](SOURCE_IDENTIFIERS.md) |
-| Ask about a passage using Codex or GOLEM XIV's separate API connector | [AI assistance](READER_AI_WORKFLOW.md) |
+| Ask about a passage using Codex or MRW's separate API connector | [AI assistance](READER_AI_WORKFLOW.md) |
 | Understand a claim's grounds, assumptions and checked inference steps | [Justification Logic: purpose, example and current tools](JUSTIFICATION_WORKFLOW.md) |
 | Select passages, review a companion proposal and admit grounds | [Grounds from existing notes](SOURCE_GROUNDS_WORKFLOW.md) |
 | Inspect and edit a proof outline | [Proof outlines](PROOF_GRAPH_WORKFLOW.md) |
@@ -32,7 +32,7 @@ The installed **Open Tutorial** command describes the active extension build.
 | Choose extensions, OCR and computation tools | [Companion software](RECOMMENDED_EXTENSIONS.md) |
 | Queue SageMath batch jobs using SagePod | [SageQueue and component roles](RECOMMENDED_EXTENSIONS.md#sagemath-sagepod-jupyter-and-sagequeue) |
 | Move or reconnect saved source records | [Saved-work storage](ARTIFACT_STORAGE.md) |
-| Prepare to rename a folder containing a GOLEM XIV workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
+| Prepare to rename a folder containing an MRW workspace | [Folder renaming](FOLDER_RENAME_WORKFLOW.md) |
 
 ## Design and development
 
@@ -87,6 +87,6 @@ The installed **Open Tutorial** command describes the active extension build.
 
 ## Releases
 
-[GitHub releases](https://github.com/flengyel/GOLEMXIV/releases) provide VSIX packages,
+[GitHub releases](https://github.com/flengyel/MRW/releases) provide VSIX packages,
 requirements and checksums. See [installation](INSTALLATION.md) and
 [release procedure](RELEASING.md).

@@ -2,7 +2,7 @@
 
 ## Mathematical purpose
 
-Use the [project purpose](README.md) when describing GOLEM XIV. Research may begin
+Use the [project purpose](README.md) when describing MRW. Research may begin
 with an open question before there is a passage to cite. Document optional
 study commands where readers use them. Opening a document starts no study.
 Preserve submitted work, retained feedback, corrections and unfinished attempts.
@@ -52,15 +52,15 @@ to simplify its presentation.
 
 ## Frontend and companion ownership
 
-Use one GOLEM XIV core VS Code extension in `vscode/` and the Python core in `src/mrw`.
-Use `mrw` for the Python package, distribution and CLI, and `flengyel.mrw`
-for the extension. Preserve the [Lean library name](lean/lakefile.toml). Do not add previous-name wrappers, compatibility
+Use one MRW core VS Code extension in `vscode/` and the Python core in `src/mrw`.
+Use `mrw` for the package, distribution and CLI, `MRW` for Lean, and
+`flengyel.mrw` for the extension. Do not add previous-name wrappers, compatibility
 readers, automatic old-state adoption or another frontend. Keep any explicitly
 authorized one-time data conversion outside maintained source and installation
 paths, preserve originals and never repeat a completed copy over later work.
 
 Follow [integration boundaries](docs/INTEGRATION_BOUNDARIES.md). VS Code owns
-ordinary documents, buffers, Save, Undo, recovery and layout. GOLEM XIV owns its
+ordinary documents, buffers, Save, Undo, recovery and layout. MRW owns its
 commands, record views and explicitly designed private state; the Python core
 owns record validation, exact request preparation and immutable publication.
 Do not port Qt widgets, buffer recovery or layout rules into VS Code, rewrite
@@ -69,7 +69,7 @@ persistence port without an authorized scope change.
 
 External systems own their editors, templates, evaluators, kernels, queues and
 managed databases. Delegate through supported interfaces and argument vectors,
-not a shell. Preserve their identities separately from GOLEM XIV captures. Missing
+not a shell. Preserve their identities separately from MRW captures. Missing
 companions must not block unrelated work. Use Linux, WSL2 or Linux Remote SSH
 workspace hosts; distinguish intended support from actual host observations.
 Native Windows/macOS backend support requires its own validation.
@@ -98,13 +98,13 @@ user-generated diagrams and unfinished work. Commit a Return pin only after
 navigation succeeds; a failed or stale follow must preserve the preceding pin.
 Changes to the selected notes folder must not redirect older references.
 Neither copying Markdown nor synchronizing ordinary files transfers private
-GOLEM XIV targets or restores kernel state.
+MRW targets or restores kernel state.
 
 [Source notes and linked notes](docs/NOTE_COMPANIONS.md#develop-and-link-notes)
 are independent works with potentially many-to-many associations. Preserve prior
 links, attribution and snapshots. Do not require exact-copy transfers, special
 markers, format validation or annotation retirement as proof of useful work.
-Machine-suggested prose and links remain proposals. Keep GOLEM XIV integration rules
+Machine-suggested prose and links remain proposals. Keep MRW integration rules
 out of an independent note-format specification.
 
 For an Obsidian vault, New Note and reader-note continuation use the configured

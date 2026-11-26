@@ -61,7 +61,7 @@ class ProfileAdapter:
 
 
 def old_reader(kind):
-    # Original GOLEM XIV records keep their schemas and exact citations. These
+    # Original MRW records keep their schemas and exact citations. These
     # immutable format readers belong to the built-in adapters, not the UI.
     modules={'stacks-section':'stacks_import','kerodon-section':'kerodon_import'}
     name=modules.get(kind)

@@ -48,7 +48,7 @@
         maxExpand: 1000, maxSize: 20, macros, globalGroup: false,
         preProcess: math => {
           for (const key of Object.keys(macros)) delete macros[key];
-          return window.GolemXIVNormalizeNegatedRelations(math);
+          return window.MRWNormalizeNegatedRelations(math);
         },
         errorCallback: () => { errors++; },
       });
@@ -102,5 +102,5 @@
     node('summary', exact, 'Exact annotation text');
     node('pre', exact, text);
   }
-  window.GolemXIVAnnotations = { render };
+  window.MRWAnnotations = { render };
 })();

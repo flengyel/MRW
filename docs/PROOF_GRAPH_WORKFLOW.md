@@ -35,15 +35,15 @@ selections are discarded. Proposed intermediate claims can cite the same tag;
 the displayed Stacks statement remains distinct from their AI summaries.
 
 The embedded page is restricted to the official Stacks origin, sandboxed and
-given no referrer. It has no GOLEM XIV API. Messages from child frames are ignored.
+given no referrer. It has no MRW API. Messages from child frames are ignored.
 No live page content is added to an AI request or written into the saved source store.
 
 The **Open Proof Outline** icon appears in the title bar of a
 `.mrw-proof.json` editor, alongside the Command Palette and Contents view menu.
 Selecting a JSON file in Explorer still opens its ordinary editor;
-the icon opens the interactive graph without another GOLEM XIV-sidebar step.
+the icon opens the interactive graph without another MRW-sidebar step.
 
-Run **Open Proof Outline…** and choose a `.mrw-proof.json` file in the
+Run **MRW: Open Proof Outline…** and choose a `.mrw-proof.json` file in the
 workspace. The command also uses an active file with that suffix. Opening an
 outline starts no network, model or Lean job.
 
@@ -67,7 +67,7 @@ claim specify premises needed **jointly**; different derivations are alternative
   request cannot be replaced by this action. Nothing is sent until **Send exact
   preview**. Responses remain separate; no response is installed as an inference.
 - **Conclusion** selects the first goal and opens its corresponding tag. **Sources** opens pinned quotations
-  offline, retained GOLEM XIV passages where linked, or the upstream URL by explicit
+  offline, retained MRW passages where linked, or the upstream URL by explicit
   browser action.
 
 The original graph file is unchanged by deletion, expansion or restoration.
@@ -92,7 +92,7 @@ original steps** restores the supporting argument. See the
 ## Lean and mathematical English
 
 Lean-to-English explanation and English-to-Lean formalization are
-[GOLEM XIV design goals](../VISION.md#mathematical-understanding). The current
+[MRW design goals](../VISION.md#mathematical-understanding). The current
 proof-outline viewer neither extracts an elaborated Lean proof graph nor
 translates arguments automatically. Generated Lean needs checking in the
 selected project, and its correspondence with the prose needs review.
@@ -117,10 +117,10 @@ Source entries pin local snapshot files by exact SHA-256, upstream revision,
 HTTPS URL and review tier. Local paths remain inside the outline directory;
 symlink escapes and changed bytes cannot supply the pinned quotation. Previously
 loaded exact bytes remain readable during that view's lifetime. Missing or changed
-snapshots after reopening are reported; no replacement is fetched. A retained GOLEM XIV
+snapshots after reopening are reported; no replacement is fetched. A retained MRW
 reference independently resolves its original revision under the existing store
 scope rules. Copy the snapshot directory with the outline for offline use;
-copying the JSON alone does not transfer private GOLEM XIV targets.
+copying the JSON alone does not transfer private MRW targets.
 
 Limits: 512 KiB graph document, 64 claims, 128 inferences, 16 sources, 16 scopes,
 16 premises per inference and 1,024 projected derivations. Each snapshot has the

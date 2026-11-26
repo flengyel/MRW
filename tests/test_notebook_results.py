@@ -66,7 +66,7 @@ class NotebookResultsTest(unittest.TestCase):
                 self.assertEqual(n.digest(z.read(item['file'])), item['sha256'])
             capture = z.read(a['id'] + '/capture.ttl').decode()
             execution = z.read(a['id'] + '/execution-reported.ttl').decode()
-            self.assertIn(f'<urn:mrw:result:{a["id"]}:mrw> a prov:SoftwareAgent; rdfs:label "GOLEM XIV"', capture)
+            self.assertIn(f'<urn:mrw:result:{a["id"]}:mrw> a prov:SoftwareAgent; rdfs:label "MRW"', capture)
             self.assertIn(':capture> prov:used <urn:mrw:result:', capture)
             self.assertIn('prov:wasGeneratedBy <urn:mrw:run:', execution)
             self.assertNotIn('wasDerivedFrom', execution)

@@ -1,6 +1,6 @@
 # Mathematical source outlines and proof-outline vertex elimination
 
-GOLEM XIV supports source-based inference graphs with attributed summaries, reversible
+MRW supports source-based inference graphs with attributed summaries, reversible
 vertex deletion, joint-premise alternatives, local scopes and expandable original
 steps. The graph file remains editable in VS Code. See the
 [current workflow](PROOF_GRAPH_WORKFLOW.md).
@@ -256,7 +256,7 @@ the exact retained revision and range. Open the saved source for its
 bibliographic details. To shorten an older caption, edit the text between
 the square brackets and keep the destination in parentheses.
 
-**Follow Source or Passage Link at Cursor** accepts this reference grammar.
+**MRW: Follow Source or Passage Link at Cursor** accepts this reference grammar.
 It opens the existing reader; a region reference also opens and selects its
 exact retained passage. Annotation edits do not change reference
 identity. If a region is removed or its range changes, navigation reports the

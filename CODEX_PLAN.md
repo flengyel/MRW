@@ -1,4 +1,4 @@
-# GOLEM XIV development plan
+# MRW development plan
 
 Follow [AGENTS.md](AGENTS.md) and the mandatory
 [documentation requirements](CONTRIBUTING.md#documentation). The

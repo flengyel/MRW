@@ -1,6 +1,6 @@
 'use strict';
 // One host-local authority record commits a verified workspace snapshot. The
-// source is retained; only the committed destination may resume GOLEM XIV writes.
+// source is retained; only the committed destination may resume MRW writes.
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
@@ -125,7 +125,7 @@ class WorkspaceMove {
     if(fs.existsSync(destination))throw Error('Destination already exists; no files were replaced.');
     if(lookup(this.registry,workspace)?.phase==='preparing')throw Error('Recover the earlier workspace move first.');
     if(fs.existsSync(privateHome))await canonical(privateHome);
-    if(inside(privateHome,destination))throw Error('Destination cannot be inside GOLEM XIV private storage.');
+    if(inside(privateHome,destination))throw Error('Destination cannot be inside MRW private storage.');
     const unlock=await lockRegistry(this.registry);
     try{
     const id=randomUUID(),file=path.join(this.registry,id+'.json');
@@ -144,7 +144,7 @@ class WorkspaceMove {
       if(fs.existsSync(sharedBinding)&&inside(source,JSON.parse(await fsp.readFile(sharedBinding,'utf8')).directory))throw Error('The shared history directory is inside this workspace. Choose a shared directory outside it before moving.');
       const original=await scan(source,{exclude:excludes});
       const privateRows=fs.existsSync(privateHome)?await scan(privateHome):{};
-      if(Object.values(privateRows).some(row=>row.kind==='symlink'))throw Error('GOLEM XIV private storage contains a symlink; its external target cannot be included in this transaction.');
+      if(Object.values(privateRows).some(row=>row.kind==='symlink'))throw Error('MRW private storage contains a symlink; its external target cannot be included in this transaction.');
       const workspaceData=jsonc(await fsp.readFile(workspace,'utf8'));
       if(!workspaceData.folders?.some(f=>path.resolve(source,f.path)===source))throw Error('Workspace file must be in its owned root folder. External folders stay in place.');
       if(!Array.isArray(workspaceData.folders))throw Error('Save this session as a .code-workspace file before moving it.');

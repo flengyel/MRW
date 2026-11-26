@@ -1,13 +1,13 @@
 # Subsystem ownership and integration boundaries
 
-GOLEM XIV delegates creation and execution to the application responsible for the
+MRW delegates creation and execution to the application responsible for the
 document or computation. The table below identifies the owner of each operation
 and distinguishes current integrations from proposals.
 
 ## Ownership and delegation
 
 The maintaining system owns its creation workflow, identities, format rules,
-execution state and lifecycle. A GOLEM XIV adapter may initiate an explicitly
+execution state and lifecycle. An MRW adapter may initiate an explicitly
 requested operation through that system's supported commands, APIs or file
 interfaces. It must not bypass the maintaining system or introduce a competing
 template engine, editor, kernel manager, evaluator, job queue or database writer.
@@ -20,13 +20,13 @@ system's supported creation or execution command is delegation. Independently
 creating an externally maintained note outside its configured creation workflow,
 rewriting a managed database or fabricating a job's state is a bypass.
 
-GOLEM XIV owns its source notes, retained snapshots, annotations, associations and
+MRW owns its source notes, retained snapshots, annotations, associations and
 provenance records. A retained copy has its own capture identity and does not
 replace the external original or acquire authority over its lifecycle. Deleting
-a GOLEM XIV copy or association must not delete the original. Each subsystem remains
+an MRW copy or association must not delete the original. Each subsystem remains
 optional outside operations that actually require it.
 
-| Subsystem | Responsibilities retained by the subsystem | GOLEM XIV's integration role |
+| Subsystem | Responsibilities retained by the subsystem | MRW's integration role |
 | --- | --- | --- |
 | Notes application | Create externally maintained notes using its configured workflow; assign identities, filenames and templates; maintain its indexes. | Open existing notes, support native editing, copy selected source material and maintain explicit source associations. Optional creation shortcuts delegate to that same workflow. |
 | Jupyter and the selected notebook editor | Create, edit, save and render native notebooks; select kernels and dispatch explicit cell execution. | Open notebooks through the host, retain selected saved results, associate notes and provide supported comparison/export. |
@@ -38,8 +38,8 @@ optional outside operations that actually require it.
 | Zotero | Maintain reference and attachment identities, bibliographic metadata and managed-library operations. | Use supported lookup, citation and attachment interfaces; retain separately identified copies. No direct writes to the live database or managed files. |
 | Lean and its host extension | Elaborate and check proofs, report diagnostics and maintain native proof interaction. | Navigate to exact files/declarations, open the native InfoView and retain scoped checking evidence. No competing language client or assertion that a successful check proves an unstated informal correspondence. |
 
-CoCalc, SageQueue and Wolfram adapters are not currently implemented in GOLEM XIV. SagePod
-connection uses the Jupyter extension; GOLEM XIV does not currently start its container
+CoCalc, SageQueue and Wolfram adapters are not currently implemented in MRW. SagePod
+connection uses the Jupyter extension; MRW does not currently start its container
 or submit queue jobs. These are current capability limits, not a permanent ban
 on explicit delegation through a future supported adapter.
 
@@ -52,8 +52,8 @@ note is intellectually complete. Preserve the source revision used and allow
 later work to develop independently. Human selection, formulation and links
 between ideas remain distinct from copying and format validation.
 
-For an Obsidian vault, GOLEM XIV invokes the configured creation command. Obsidian
-creates the note and applies its template. For an ordinary folder, GOLEM XIV opens
+For an Obsidian vault, MRW invokes the configured creation command. Obsidian
+creates the note and applies its template. For an ordinary folder, MRW opens
 an untitled Markdown file in VS Code. [Capture Passage in Emacs](NOTE_COMPANIONS.md#capture-a-passage-in-emacs)
 provides a retained passage and return link to the configured Denote or Org-roam
 template. Emacs owns the resulting draft and saved note.
@@ -68,10 +68,10 @@ and current [verification status](DESIGN_RECONCILIATION.md).
 Synchronization with the maintaining system is encouraged. Preserve usable
 references as existing material is edited, moved or renamed. Prefer shared files
 where both editors can safely use them; otherwise use the selected synchronization
-service or the subsystem's supported interface. GOLEM XIV should maintain its scoped
+service or the subsystem's supported interface. MRW should maintain its scoped
 associations, not introduce a second general synchronization service.
 
-Keep external logical identity, current location, content revision and GOLEM XIV
+Keep external logical identity, current location, content revision and MRW
 capture identity separate. A verified rename can update a current locator;
 an immutable citation still identifies the revision originally retained.
 Use explicit identity mappings, supported notifications or deliberate relinking.
@@ -89,10 +89,10 @@ separate works, not replicas whose text must be synchronized.
 ## Execution and evidence
 
 Ordinary opening, reading, synchronization, comparison and recovery do not make
-GOLEM XIV independently submit a computation, job, proof check, model request or
+MRW independently submit a computation, job, proof check, model request or
 Wolfram query. Native editors retain their normal behavior: opening a Lean file
 may trigger the Lean extension's elaboration and diagnostics. That is distinct
-from a GOLEM XIV-initiated Check or rerun. Scoped reads of metadata, external
+from an MRW-initiated Check or rerun. Scoped reads of metadata, external
 identities and status may support synchronization without submitting work. An explicit Run,
 Submit, Retry, Query or Check action may delegate the named operation. Make its
 destination and scope visible and preserve the subsystem's confirmation and
@@ -103,7 +103,7 @@ Distinguish request preparation, dispatch, acceptance, running, completion,
 failure and cancellation. Record only states the adapter can establish, with
 their origin. A submitted request is not a completed computation; a retained
 output is not an independently reproduced result. Keep external task/run IDs
-beside GOLEM XIV capture IDs when available. A hash verifies retained bytes, not
+beside MRW capture IDs when available. A hash verifies retained bytes, not
 mathematical truth or the authenticity of a producer's account.
 
 ## Integration review and testing
@@ -120,7 +120,7 @@ Python/JavaScript implementation; state its assumptions and demonstrate the
 correspondence. Formal verification remains separate from native integration
 tests and mathematical usefulness.
 
-GOLEM XIV is an integration workbench. Use ports and adapters: core expresses the
+MRW is an integration workbench. Use ports and adapters: core expresses the
 needed capability; each adapter translates it into its subsystem's supported
 operations. Keep the common model limited to references, captures, provenance
 and observable outcomes. A query service, notebook editor and job queue need
@@ -131,14 +131,14 @@ Each adapter supplies a compact, versioned contract:
 | Contract item | Required statement |
 | --- | --- |
 | Ownership and capabilities | Responsible system, supported operations, authorized write/execution route, host/API versions and prerequisites. |
-| Identity and scope | External logical ID, current locator, revision and GOLEM XIV capture ID; selected workspace, account, kernel or queue as applicable. |
+| Identity and scope | External logical ID, current locator, revision and MRW capture ID; selected workspace, account, kernel or queue as applicable. |
 | Outcomes and recovery | What dispatch, acceptance and completion establish; correlation, cancellation, uncertain outcomes, safe retry and reconciliation. |
 | Synchronization | Freshness, concurrent edits, conflict/rename/deletion handling, and limits when the owner is unavailable. |
 | Observation | User-facing feature ID, instrumentation owner, availability/coverage, observable outcomes and unobservable intervals. |
 | Inspection and repair | Bounded read-only checks, ownership of findings and supported recovery routes; inspection must not invoke a mutating sync operation. |
 | Tests | Isolated targets and evidence for success, failure, cancellation, interruption and missing optional software. |
 
-Missing optional software must not prevent unrelated GOLEM XIV work. Lightweight
+Missing optional software must not prevent unrelated MRW work. Lightweight
 [usage recording](OPERATIONAL_USAGE.md) remains in core; the optional
 [diagnostics plugin](DIAGNOSTICS_PLUGIN.md) owns periodic reports and their
 presentation. Core integrity checks remain necessary without that plugin.

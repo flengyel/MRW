@@ -1,6 +1,6 @@
 # Checking justification derivations
 
-GOLEM XIV checks how reasons for using a result compose under stated premises.
+MRW checks how reasons for using a result compose under stated premises.
 A source passage, computation or Lean check can supply grounds for admitting
 a premise. The admission records who accepted those grounds and in which
 context. [Euclid's lemma](JUSTIFICATION_EUCLID_EXAMPLE.md) illustrates two
@@ -86,12 +86,12 @@ truth.
 logic to scientific records. Its [evidence definitions](https://github.com/eigenius/eigenius/blob/1c0879c3acd1bb6d06f5c5dde97fc2e928f82efc/ontologies/justification/justification.esl)
 retain grounds for a claim and compose them through application and alternatives.
 Its tutorial distinguishes checking those grounds from proving the claim. This
-is a reference for GOLEM XIV's source and inference design; the logical specification
-above remains authoritative for GOLEM XIV.
+is a reference for MRW's source and inference design; the logical specification
+above remains authoritative for MRW.
 
 ## Grounds and admissions
 
-GOLEM XIV records six distinct kinds of information.
+MRW records six distinct kinds of information.
 
 1. a source, model response, proof term, computation, or other artifact;
 2. provenance identifying the artifact's origin and revision;
@@ -232,7 +232,7 @@ mrw admit-documentary NEW_PROJECTION_JSON \
   --derivation-id DERIVATION_ID --output NEW_ADMISSION_JSON
 
 mrw check-documentary NEW_PROJECTION_JSON NEW_ADMISSION_JSON \
-  NEW_PACKAGE_DIRECTORY --lean-root PATH_TO_LEAN_PROJECT
+  NEW_PACKAGE_DIRECTORY --lean-root PATH_TO_MRW_LEAN_PROJECT
 
 mrw show-documentary NEW_PACKAGE_DIRECTORY
 ```

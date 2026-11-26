@@ -24,14 +24,14 @@ function workspaceRoute(vscode, root) {
   const configured = vscode.workspace.getConfiguration('mrw').get('navigationWorkspaceUri', '');
   if (configured) {
     const value = route(configured);
-    if (decodeURIComponent(new URL(value).pathname) !== destination) throw new Error('GOLEM XIV navigation workspace URI must name this folder or saved workspace file.');
+    if (decodeURIComponent(new URL(value).pathname) !== destination) throw new Error('MRW navigation workspace URI must name this folder or saved workspace file.');
     return value;
   }
   const pathname = destination.split('/').map(encodeURIComponent).join('/');
   if (vscode.env.remoteName === 'wsl' && process.env.WSL_DISTRO_NAME) {
     return route(`vscode-remote://wsl+${process.env.WSL_DISTRO_NAME}${pathname}`);
   }
-  if (vscode.env.remoteName) throw new Error('Set GOLEM XIV: Navigation Workspace URI in Remote settings to this workspace’s vscode-remote://ssh-remote+HOST/… URI.');
+  if (vscode.env.remoteName) throw new Error('Set MRW: Navigation Workspace URI in Remote settings to this workspace’s vscode-remote://ssh-remote+HOST/… URI.');
   return route(`file://${pathname}`);
 }
 function makeExternal({ workspace, project, reference }, scheme = 'vscode') {
@@ -42,19 +42,19 @@ function makeExternal({ workspace, project, reference }, scheme = 'vscode') {
   return result;
 }
 function parseExternal(value, scheme = 'vscode') {
-  if (typeof value !== 'string' || value.length > 16384 || /[\s\x00-\x1f\x7f]/u.test(value)) throw new Error('Malformed GOLEM XIV navigation link. Copy the complete link again.');
+  if (typeof value !== 'string' || value.length > 16384 || /[\s\x00-\x1f\x7f]/u.test(value)) throw new Error('Malformed MRW navigation link. Copy the complete link again.');
   const uri = new URL(value), pairs = [...uri.searchParams], params = Object.fromEntries(pairs);
   if (uri.protocol !== `${scheme}:` || uri.host !== extensionId || uri.pathname !== '/outline' || uri.hash ||
       pairs.length !== 2 || Object.keys(params).length !== 2 || params.v !== '1' || !/^[\w-]+$/u.test(params.target || '') ||
-      uri.username || uri.password || uri.port) throw new Error('Unsupported GOLEM XIV URI action or parameters.');
+      uri.username || uri.password || uri.port) throw new Error('Unsupported MRW URI action or parameters.');
   const raw = Buffer.from(params.target, 'base64url');
-  if (raw.toString('base64url') !== params.target) throw new Error('Malformed GOLEM XIV target encoding.');
+  if (raw.toString('base64url') !== params.target) throw new Error('Malformed MRW target encoding.');
   const target = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(raw));
   if (!target || Object.keys(target).sort().join(',') !== 'project,reference,workspace' ||
       typeof target.project !== 'string' || !path.posix.isAbsolute(target.project) || path.posix.normalize(target.project) !== target.project ||
       /[\x00-\x1f\x7f\\]/u.test(target.project) || target.project.length > 4096 ||
       typeof target.reference !== 'string' || !/^mrw-outline:v[12]\//.test(target.reference) || target.reference.length > 4096) {
-    throw new Error('Malformed GOLEM XIV retained target.');
+    throw new Error('Malformed MRW retained target.');
   }
   target.workspace = route(target.workspace);
   return target;

@@ -1,4 +1,4 @@
-"""GOLEM XIV entry points and generated-core staging."""
+"""MRW entry points and generated-core staging."""
 from pathlib import Path
 import json
 import subprocess
@@ -13,7 +13,7 @@ class RenameTests(unittest.TestCase):
         run = subprocess.run([sys.executable, '-m', 'mrw', '--help'], capture_output=True, text=True)
         self.assertEqual(run.returncode, 0, run.stderr)
         self.assertIn('usage: mrw ', run.stdout)
-        self.assertIn('GOLEM XIV', run.stdout)
+        self.assertIn('Mathematical Research Workstation', run.stdout)
         import mrw
         import tomllib
         metadata = tomllib.loads((ROOT / 'pyproject.toml').read_text())['project']

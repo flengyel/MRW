@@ -4,7 +4,7 @@
 // use bundled, restricted MathML rendering; their exact text stays accessible.
 const api = acquireVsCodeApi();
 const root = document.getElementById('reader');
-const sourceReader = window.GolemXIVSourceReader?.create({root, onBrowser:()=>post({type:'stacks_citation', tag:model?.outline.published?.qualified_tag}), onReturn:()=>post({type:'reading_return'})});
+const sourceReader = window.MRWSourceReader?.create({root, onBrowser:()=>post({type:'stacks_citation', tag:model?.outline.published?.qualified_tag}), onReturn:()=>post({type:'reading_return'})});
 const levels = ['orientation', 'concepts_results', 'governing_idea', 'argument', 'technical_detail'];
 let model, selected, reference, filter = '', busy = false, blocked = false, error = '';
 let continuations = [], continuationErrors = {}, citationViews = {};
@@ -16,7 +16,7 @@ const helpText = {
   'study-current': 'Start or resume study of the selected retained passage. No questions or model requests are sent automatically.',
   'proof-study': 'Prepare an exact proof-passage handoff for study; this does not check a proof.',
   'add-reader-note': 'Write a note about this passage.',
-  'delete-reader-note': 'Choose an annotation stored in GOLEM XIV and confirm its deletion. Linked vault notes are not deleted.',
+  'delete-reader-note': 'Choose an annotation stored in MRW and confirm its deletion. Linked vault notes are not deleted.',
   'link-reader-note': 'Paste a note’s Obsidian URL to link it to this passage.',
   'ask-ai-passage': 'Prepare a question about this exact retained passage. Send is a separate action.',
   'ask-ai-pinned': 'Prepare a question about the earlier range pinned by the citation, even if the current passage changed.',
@@ -237,7 +237,7 @@ function renderNotes(parent, annotations, scope, title = 'Reader notes') {
     const action = button(notes,'Link another note…',
       {type:'continue_annotation',annotation:note.id,region:scope==='overview'?null:scope,action:'new'},'continue-annotation',true);
     action.title='Link this source annotation to an independently maintained note. Select, paraphrase or combine its material; exact copying is optional.';
-    if (window.GolemXIVAnnotations) window.GolemXIVAnnotations.render(content, note.text, {citationView:citationViews[note.id], fragments: note.fragments,
+    if (window.MRWAnnotations) window.MRWAnnotations.render(content, note.text, {citationView:citationViews[note.id], fragments: note.fragments,
       appearance: diagramAppearance,
       onRender: block => post({ type: 'render_diagram', annotation: note.id, code: block.key }),
       onAppearance: value => { diagramAppearance = ['paper', 'dark'].includes(value) ? value : 'theme';
@@ -269,14 +269,14 @@ function companionActions(parent, region = null, pinned = false) {
   else el('p', passage ? 'Links here apply to this passage’s current range.' : 'Links here apply to the whole source.', box, 'muted');
   const directions = el('div', undefined, box, 'companion-directions');
   const into = el('div', undefined, directions);
-  el('p', 'From your note to GOLEM XIV', into);
+  el('p', 'From your note to MRW', into);
   button(into, passage ? 'Copy link to this passage' : 'Copy link to this source', { type: 'copy_link', ...data }, 'copy-link').title =
-    'Copy a link that opens this retained source or passage in GOLEM XIV.';
+    'Copy a link that opens this retained source or passage in MRW.';
   const back = el('div', undefined, directions);
-  el('p', 'From GOLEM XIV to your note', back);
+  el('p', 'From MRW to your note', back);
   if (passage && orgCapture) {
     button(back, 'Capture passage in Emacs', { type: 'capture_emacs', ...data }, 'capture-emacs').title =
-      'Open an Emacs capture with this exact passage and its GOLEM XIV link.';
+      'Open an Emacs capture with this exact passage and its MRW link.';
   }
   const linked = targetNotes(region, pinned);
   if (noteError) el('p', 'Linked notes unavailable. Refresh the saved source to retry.', back, 'muted');
@@ -285,7 +285,7 @@ function companionActions(parent, region = null, pinned = false) {
   const open = button(back, 'Open linked note in Obsidian', { type: 'open_note', ...data }, 'open-note');
   open.dataset.empty = String(!linked.length || !!noteError);
   button(back, 'Link an Obsidian note…', { type: 'associate_note', ...data }, 'associate-note', true).title =
-    'Set the return destination from GOLEM XIV by pasting an existing note’s Obsidian URL. Copying a GOLEM XIV link does not set this destination.';
+    'Set the return destination from MRW by pasting an existing note’s Obsidian URL. Copying an MRW link does not set this destination.';
   const manage = button(back, 'Manage linked notes…', { type: 'manage_notes', ...data }, 'manage-notes', true);
   manage.dataset.empty = String(!linked.length || !!noteError);
 }
@@ -403,7 +403,7 @@ function render(destinationFocus) {
   sourceReader?.update(model.outline.published?.online);
   toolbarObserver?.disconnect();
   const o = model.outline;
-  const markdown = /\.(?:md|markdown)$/i.test(o.source.path) && window.GolemXIVPassagePreview;
+  const markdown = /\.(?:md|markdown)$/i.test(o.source.path) && window.MRWPassagePreview;
   const focused = document.activeElement;
   const focusKey = destinationFocus || focused?.dataset?.readerFocus;
   const focusedForm = focused?.name && [...root.querySelectorAll('form')].find(f => f.contains?.(focused));
@@ -470,14 +470,14 @@ function render(destinationFocus) {
   const toolbar = el('div', undefined, tools, 'toolbar');
   button(toolbar, 'Open retained source', { type: 'source' }, 'source');
   const refresh = button(toolbar, 'Refresh saved source', { type: 'refresh' }, 'refresh');
-  refresh.title = 'Reload saved reader state and annotations from GOLEM XIV storage.';
+  refresh.title = 'Reload saved reader state and annotations from MRW storage.';
   refresh.dataset.readerFocus = 'refresh';
   if (model.lifecycle?.state !== 'trash') {
     button(toolbar, 'Move to Trash…', {type:'trash_source'}, 'trash-source', true).title =
       'Move this saved copy to Trash. Restore keeps its passages, notes and links.';
   }
   if (o.published?.error) el('p', o.published.error, root, 'warning');
-  else if (o.published && window.GolemXIVStacks) window.GolemXIVStacks.header(tools, o.published, publishedAction);
+  else if (o.published && window.MRWStacks) window.MRWStacks.header(tools, o.published, publishedAction);
   if (o.published) {
     const links = el('details', undefined, tools); el('summary', 'Source links and Obsidian notes', links); companionActions(links);
   } else companionActions(tools);
@@ -494,7 +494,7 @@ function render(destinationFocus) {
       button(row, 'Manage linked notes…', { type: 'manage_notes', note: note.id }, 'manage-notes', true);
     }
   }
-  el('p', 'Select text in the saved original or retained source, then use GOLEM XIV: Add Selected Passage, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', tools, 'muted');
+  el('p', 'Select text in the saved original or retained source, then use MRW: Add Selected Passage, Use Selection as Exact Statement, or Keep Selected Hypothesis / Cited Result. Save annotations explicitly before closing or restarting.', tools, 'muted');
   const metadata = el('details', undefined, tools); el('summary', 'Bibliographic identity and source authorship', metadata);
   const f = form(metadata, 'metadata', { ...o.source.bibliography, authorship: o.source.authorship });
   f.node.className = 'metadata';
@@ -525,7 +525,7 @@ function render(destinationFocus) {
       button(cf.node, 'Save context description', () => ({ type: 'edit', draft: key, change: {
         kind: 'edit_context', context: c.id, context_kind: cf.read().context_kind, label: cf.read().label
       } }), 'save-context', true);
-      el('p', 'To replace its quoted range, select original or retained source text and run GOLEM XIV: Replace Shared Context with Selection…. Removing shared context changes only this reading association; the original statement and hypotheses remain in Open retained source.', contextTools, 'muted');
+      el('p', 'To replace its quoted range, select original or retained source text and run MRW: Replace Shared Context with Selection…. Removing shared context changes only this reading association; the original statement and hypotheses remain in Open retained source.', contextTools, 'muted');
       button(contextTools, 'Remove shared context', { type: 'edit', draft: key,
         change: { kind: 'remove_context', context: c.id } }, 'remove-context', true);
     }
@@ -552,7 +552,7 @@ function render(destinationFocus) {
     const box = el('section', undefined, root, `region${compactProof ? ' compact-proof' : ''}${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
     if (!compactProof) el('h2', r.title, box);
     if (originalPart && !publishedPart) el('p', 'This passage range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
-    if (publishedPart && expanded && window.GolemXIVStacks) window.GolemXIVStacks.part(box, publishedPart, publishedAction);
+    if (publishedPart && expanded && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
     if (r.statement && !publishedPart) {
       const statement = el('div', undefined, box, 'statement');
       el('p', r.statement.kind === 'declaration_statement' ? 'Exact declaration statement (reader-labeled source selection)' : 'Exact source statement (reader-selected)', statement);

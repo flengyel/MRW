@@ -1,27 +1,25 @@
-# The GOLEM XIV workspace
+# The MRW workspace
 
-<a id="the-mrw-workspace"></a>
-
-The default workspace is `~/mrw-work/GOLEM XIV.code-workspace` on the Linux host.
-Setup keeps the active default workspace, including a registered move. If neither
-default is open, it prefers the renamed workspace and falls back to the earlier
-`MRW.code-workspace` if that is the only one available.
-The workspace is independent of Stacks, Lean, a particular note, and the command
-used to begin reading. Do not use a temporary test directory as your workspace.
+On a fresh installation, setup creates `~/mrw-work/MRW.code-workspace` on the
+Linux host. The 0.23.65 build used `GOLEM XIV.code-workspace`. If either
+workspace is already open, 0.23.66 keeps it, including a registered move. From
+another window, setup prefers the MRW workspace or its registered move. If only
+the 0.23.65 workspace is available, setup reopens it at its existing or
+registered location. Use the path setup reports to return to the same records.
 
 A workspace is VS Code's session boundary: it selects folders, settings and
-workspace-scoped GOLEM XIV records. A **notes folder** supplies ordinary files and the
+workspace-scoped MRW records. A **notes folder** supplies ordinary files and the
 scope for note links and backlinks. These locations need not coincide.
 
 | Location | Purpose |
 | --- | --- |
-| `~/mrw-work/GOLEM XIV.code-workspace` | Default saved workspace for a new 0.23.65 installation |
+| `~/mrw-work/MRW.code-workspace` | Default saved workspace on a fresh installation |
 | `~/mrw-work/` | General Linux working directory; default parent for new Lean projects |
 | A separately selected notes folder | Notes, links and attachments; an Obsidian vault is optional |
 | VS Code's private storage on the Linux host | Retained sources, annotations, studies and history, according to their existing stores |
-| A GOLEM XIV source checkout | Extension development; unnecessary for using the VSIX |
+| An MRW source checkout | Extension development; unnecessary for using the VSIX |
 
-For example, `/home/alice/mrw-work/GOLEM XIV.code-workspace` can read notes at
+For example, `/home/alice/mrw-work/MRW.code-workspace` can read notes at
 `/mnt/c/Users/Alice/Notes`. The latter is a valid WSL path to Windows
 files. Linux builds work more efficiently on the Linux filesystem; Windows
 notes can stay where Obsidian uses them. See
@@ -35,16 +33,14 @@ notes can stay where Obsidian uses them. See
    [official WSL setup](https://code.visualstudio.com/docs/remote/wsl#_installation).
 2. Run **WSL: Connect to WSL using Distro…**, select Debian and check that the
    bottom-left indicator says **WSL: Debian**. This can be an empty window.
-3. In its terminal, run `python3 --version`. GOLEM XIV requires Python 3.11 or later
+3. In its terminal, run `python3 --version`. MRW requires Python 3.11 or later
    on this host. If absent, install Debian's `python3` package; if its version
    is too old, upgrade the distribution or configure an installed supported
    interpreter with `mrw.pythonExecutable` in Remote settings.
-4. [Install the current GOLEM XIV VSIX](INSTALLATION.md#2-install-both-vsix-packages-in-that-workspace-host)
+4. [Install the current MRW VSIX](INSTALLATION.md#2-install-both-vsix-packages-in-that-workspace-host)
    on **WSL: Debian**, rather than only the Windows interface.
-5. Press **F1** and search for `Set Up Workspace`. In 0.23.65 select
-   **GOLEM XIV: Set Up GOLEM XIV Workspace…**. The same search finds the
-   workspace setup command in 0.23.64. Setup reports the saved workspace
-   path and the Python check. Choose
+5. Press **F1** and run **MRW: Set Up MRW Workspace…**. Setup reports the
+   workspace path and the Python check. Choose
    **Open in this window** to switch after saving your work, or **Open in new
    window** to keep both sessions open. Repeating setup in the default workspace
    does not open another window.
@@ -72,13 +68,12 @@ reset either setting. The home and working directory are checked for known
 Windows/network filesystems and volatile memory-backed mounts; redirected target
 paths are rejected. Setup neither
 runs on activation nor moves data. It switches windows only after your explicit
-choice. Switching in this window checks unsaved documents and GOLEM XIV drafts first.
+choice. Switching in this window checks unsaved documents and MRW drafts first.
 
-To reopen a workspace created by a fresh 0.23.65 installation, run this in the
-Debian terminal:
+To reopen the default workspace from a Debian terminal:
 
 ```sh
-code "$HOME/mrw-work/GOLEM XIV.code-workspace"
+code "$HOME/mrw-work/MRW.code-workspace"
 ```
 
 If setup reports another workspace path, open that path instead.
@@ -102,7 +97,7 @@ history, editor recovery, Lean resumption state or all navigation state. The
 [folder preparation workflow](FOLDER_RENAME_WORKFLOW.md) has the same limits;
 it is not an atomic move of the whole workspace.
 
-**Move Workspace…** copies and verifies the workspace and its private GOLEM XIV work,
+**Move Workspace…** copies and verifies the workspace and its private MRW work,
 then commits one destination. **Recover Workspace Move** resolves interruptions.
 Originals remain available. Opening the destination is explicit and uses this
 window. Setup follows the committed destination on subsequent runs. Read the
@@ -114,14 +109,14 @@ and remaining limits. This relocates one workspace; it does not merge several.
 | Task | Additional setup |
 | --- | --- |
 | Lean study and proof development | Official Lean 4 extension and elan/Lean on the Linux workspace host. [Lean setup](LEAN_STUDY_WORKFLOW.md). New projects use `mrw.leanStudyParent`; existing copies stay in place. |
-| SageMath notebooks | Jupyter and SageMath support on the workspace host, with an explicitly connected SagePod kernel. [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md). Its notebook mount is separate from the GOLEM XIV workspace. |
+| SageMath notebooks | Jupyter and SageMath support on the workspace host, with an explicitly connected SagePod kernel. [SagePod setup](GETTING_STARTED_WSL_SAGEPOD.md). Its notebook mount is separate from the MRW workspace. |
 | Obsidian editing | Select the same notes folder both applications use. [Obsidian setup](OBSIDIAN_WORKFLOW.md). No Obsidian installation is required for plain Markdown. |
 | TikZ rendering | The tools and explicit render action in [TikZ setup](TIKZ_WORKFLOW.md). |
 | Zotero references | Zotero's enabled local API. [Zotero setup](ZOTERO_WORKFLOW.md). |
 
 ## Troubleshooting
 
-- **No GOLEM XIV command:** check GOLEM XIV under the connected host's installed extensions,
+- **No MRW command:** check MRW under the connected host's installed extensions,
   its active version, and Workspace Trust. Installing locally alone is insufficient.
 - **Records appear missing:** reopen their original `.code-workspace` file or
   folder. Do not create replacement records to compensate for a different session.
@@ -130,4 +125,4 @@ and remaining limits. This relocates one workspace; it does not merge several.
 - **WSL timed out:** reconnect to Debian, then open the same saved workspace.
   A timeout does not require creating another workspace.
 - **Python check failed:** verify the executable in the connected host's terminal
-  and its Remote setting. Python inside SagePod does not supply GOLEM XIV's interpreter.
+  and its Remote setting. Python inside SagePod does not supply MRW's interpreter.

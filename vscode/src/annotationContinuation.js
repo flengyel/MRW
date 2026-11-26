@@ -53,7 +53,7 @@ async function validateZettel(vscode, selected, execute = exec) {
     if (!picked?.length) throw Error('Zettel validation was cancelled. The annotation remains current.');
     tool = picked[0].fsPath;
   }
-  if (!path.isAbsolute(tool) || !tool.endsWith('.py')) throw Error('GOLEM XIV: Zettel Validator must name the existing validator Python file.');
+  if (!path.isAbsolute(tool) || !tool.endsWith('.py')) throw Error('MRW: Zettel Validator must name the existing validator Python file.');
   const bytes = await fs.readFile(tool), toolRevision = digest(bytes);
   let report;
   try {
@@ -117,7 +117,7 @@ function createContinuation({vscode, bridge, show, publish, refresh, createNote=
       await createNote({vscode,root,validate:async()=>{
         if (await fs.realpath(vscode.workspace.getConfiguration('mrw').get('notesFolder','')) !== root) throw Error('The notes folder changed.');
       }});
-      const choice = await vscode.window.showInformationMessage('Complete the configured template in Obsidian, including the title index link if using Zettel, and save. GOLEM XIV does not know the new filename.',{modal:true},'Select saved note…');
+      const choice = await vscode.window.showInformationMessage('Complete the configured template in Obsidian, including the title index link if using Zettel, and save. MRW does not know the new filename.',{modal:true},'Select saved note…');
       if (!choice) return;
     }
     const picked = await choose(root); if (!picked) return;

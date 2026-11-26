@@ -232,7 +232,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     const citationConfig=vscode.workspace.getConfiguration('mrw'),citationRoot=citationConfig.get('notesFolder','');
     if(citationRoot&&vscode.workspace.isTrusted!==false)for(const note of [...result.outline.annotations,...result.outline.regions.flatMap(r=>r.annotations)]){
       if(!require('./citations').candidates(note.text).length)continue;
-      try{citationViews[note.id]=await require('./citations').prepare({text:note.text,file:path.join(citationRoot,'source-annotation.md'),root:citationRoot,configuration:{executable:citationConfig.get('citationExecutable',''),bibliography:citationConfig.get('citationBibliography',''),style:citationConfig.get('citationStyle',''),source:citationConfig.get('citationSource','auto'),zoteroLibraries:citationConfig.get('citationZoteroLibraries',[]),zoteroConnection:context.workspaceState.get('mrw.zotero.v1',{})?.connection,host:vscode.env.remoteName}});}
+      try{citationViews[note.id]=await require('./citations').prepare({text:note.text,file:path.join(citationRoot,'MRW-source-annotation.md'),root:citationRoot,configuration:{executable:citationConfig.get('citationExecutable',''),bibliography:citationConfig.get('citationBibliography',''),style:citationConfig.get('citationStyle',''),source:citationConfig.get('citationSource','auto'),zoteroLibraries:citationConfig.get('citationZoteroLibraries',[]),zoteroConnection:context.workspaceState.get('mrw.zotero.v1',{})?.connection,host:vscode.env.remoteName}});}
       catch(e){citationViews[note.id]={citations:{},status:e.message};}
     }
     await c.panel.webview.postMessage({ type: 'outline', citationViews, model: result, selected: c.selected, clearDraft, annotationSaved, deletedAnnotation,
@@ -262,8 +262,8 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
     const deleted = change.kind === 'remove_annotation' ? { region: change.region, id: change.id } : undefined;
     const saved = await send(c, result, clearDraft, change.kind === 'annotation', deleted);
-    if (change.kind === 'annotation') vscode.window.setStatusBarMessage('GOLEM XIV: Submitted note saved.', 6000);
-    if (deleted) vscode.window.setStatusBarMessage('GOLEM XIV: Reader note deleted.', 6000);
+    if (change.kind === 'annotation') vscode.window.setStatusBarMessage('MRW: Submitted note saved.', 6000);
+    if (deleted) vscode.window.setStatusBarMessage('MRW: Reader note deleted.', 6000);
     return saved;
   }
   async function deleteAnnotation(c, value) {
@@ -337,14 +337,14 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (value.type === 'diagram_appearance') {
       if (!['theme', 'paper', 'dark'].includes(value.value)) return;
       try { await context.workspaceState.update('mrw.diagramAppearance.v2', value.value); }
-      catch (error) { void vscode.window.showErrorMessage(`GOLEM XIV: Could not save the diagram appearance: ${error.message}`); }
+      catch (error) { void vscode.window.showErrorMessage(`MRW: Could not save the diagram appearance: ${error.message}`); }
       return;
     }
     if (value.type === 'proofVisibility') {
       if (typeof value.hidden !== 'boolean') return;
       recorder?.record('source.visibility',{outline:c.result.outline.id,hidden:value.hidden,meaning:'Exposure opportunity only.'});
       try { await context.workspaceState.update('mrw.readerProofsHidden.v1', value.hidden); }
-      catch (error) { void vscode.window.showErrorMessage(`GOLEM XIV: Could not save the proof visibility preference: ${error.message}`); }
+      catch (error) { void vscode.window.showErrorMessage(`MRW: Could not save the proof visibility preference: ${error.message}`); }
       return;
     }
     if (value.type === 'select') {
@@ -388,7 +388,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
           try { result = await bridge(request(c, 'outline_render_diagram', { annotation: value.annotation, code: value.code })); }
           catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(c.store); throw error; }
           await send(c, result);
-          vscode.window.setStatusBarMessage('GOLEM XIV: Diagram rendered and retained.', 6000);
+          vscode.window.setStatusBarMessage('MRW: Diagram rendered and retained.', 6000);
         }
         else if (value.type === 'toggle') {
           const region = c.result.outline.regions.find(r => r.id === value.region);
@@ -472,7 +472,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       });
     } catch (error) {
       await c.panel.webview.postMessage({ type: 'error', message: error.message, draft: value.draft, writesBlocked: blockedStores.has(c.store) });
-      void vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`);
+      void vscode.window.showErrorMessage(`MRW: ${error.message}`);
     } finally {
       c.pending--;
       if (!c.pending) await c.panel.webview.postMessage({ type: 'idle' });
@@ -597,7 +597,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
       const uri = makeExternal({ workspace: workspaceRoute(vscode, c.root), project: c.root, reference: target.reference }, vscode.env.uriScheme);
       const markdown = `[${target.label}](${uri})`;
       await vscode.env.clipboard.writeText(markdown);
-      vscode.window.setStatusBarMessage('GOLEM XIV link copied. Paste it into the Obsidian note.', 6000);
+      vscode.window.setStatusBarMessage('MRW link copied. Paste it into the Obsidian note.', 6000);
       return markdown;
     }
     if (c.noteError) throw new Error(`Obsidian associations unavailable: ${c.noteError}. Refresh the reader; retained material remains accessible.`);
@@ -632,7 +632,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (!choice) return;
     let url = null, label = null;
     if (choice !== 'Remove note link') {
-      url = await vscode.window.showInputBox({ prompt: 'In Obsidian, open the note to link and run “Copy Obsidian URL for current file”. Paste that URL here to link this GOLEM XIV target.', value: existing?.url || '', ignoreFocusOut: true });
+      url = await vscode.window.showInputBox({ prompt: 'In Obsidian, open the note to link and run “Copy Obsidian URL for current file”. Paste that URL here to link this MRW target.', value: existing?.url || '', ignoreFocusOut: true });
       if (url === undefined) return;
       label = await vscode.window.showInputBox({ prompt: 'Short title or ID of that Obsidian note (navigation label)', value: existing?.label || '', ignoreFocusOut: true });
       if (label === undefined) return;
@@ -681,8 +681,8 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (result?.recovery) {
       // A notification can hide without resolving its promise. Release the
       // reader-action guard before waiting for the user's routing decision.
-      const choice = await vscode.window.showWarningMessage(`This GOLEM XIV link belongs to ${result.recovery}. This window has not resolved its private target. `
-        + 'Choose Copy Link and Open Workspace, then run GOLEM XIV: Open Link from Clipboard. Hidden warnings remain in Notifications.', 'Copy Link and Open Workspace');
+      const choice = await vscode.window.showWarningMessage(`This MRW link belongs to ${result.recovery}. This window has not resolved its private target. `
+        + 'Choose Copy Link and Open Workspace, then run MRW: Open Link from Clipboard. Hidden warnings remain in Notifications.', 'Copy Link and Open Workspace');
       if (choice === 'Copy Link and Open Workspace') {
         await vscode.env.clipboard.writeText(result.link);
         await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(result.recovery));
@@ -700,13 +700,13 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
   });
   context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: async uri => {
     try {
-      if (!vscode.workspace.isTrusted) throw new Error('Open and trust the intended workspace before following the GOLEM XIV link.');
+      if (!vscode.workspace.isTrusted) throw new Error('Open and trust the intended workspace before following the MRW link.');
       if (await handleDocumentUri?.(uri)) return;
       // VS Code's default serializer escapes the whole query, including its
       // '=' and '&' delimiters. Our payload is already restricted to base64url;
       // preserve those delimiters when passing it to the strict URL parser.
       await followExternalLink(uri.toString(true));
-    } catch (error) { void vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`); }
+    } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
   } }));
   async function markdown(editor = vscode.window.activeTextEditor) {
     const document = editor?.document;
@@ -905,7 +905,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
         path: note.path, source_revision: note.revision }); }
       catch (error) { if (error.code !== 'ACTION_REJECTED') blockedStores.add(destination.store); throw error; }
       await display(result, destination.store, destination.root);
-      vscode.window.setStatusBarMessage(result.reused ? 'GOLEM XIV: Opened the saved copy of this note.' : 'GOLEM XIV: Note imported as a saved source.', 6000);
+      vscode.window.setStatusBarMessage(result.reused ? 'MRW: Opened the saved copy of this note.' : 'MRW: Note imported as a saved source.', 6000);
       return result;
     }
     if (choice.kind === 'annotation') {
@@ -927,7 +927,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (Buffer.byteLength(document.getText(), 'utf8') + Buffer.byteLength(note.text, 'utf8') > 4 * 1024 * 1024) throw new Error('The combined Markdown document exceeds the 4 MiB navigation limit.');
     const applied = await editor.edit(edit => edit.insert(selection.active, note.text), { undoStopBefore: true, undoStopAfter: true });
     if (!applied) throw new Error('The editor declined the note insertion.');
-    vscode.window.setStatusBarMessage('GOLEM XIV: Note inserted into the document. Save with Ctrl+S.', 6000);
+    vscode.window.setStatusBarMessage('MRW: Note inserted into the document. Save with Ctrl+S.', 6000);
   }));
   async function addPassage(c, selected, announce) {
     const result = await mutate(c, { kind: 'add_region', ...selected });
@@ -937,7 +937,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (announce) {
       recentPassage = { store: c.store, root: c.root, id: result.outline.id, region: region.id, title: region.title, span: region.span };
       const filename = path.basename(result.outline.source.path);
-      vscode.window.setStatusBarMessage(`GOLEM XIV: Retained “${region.title}” from ${filename}.`, 6000);
+      vscode.window.setStatusBarMessage(`MRW: Retained “${region.title}” from ${filename}.`, 6000);
     }
     return result;
   }
@@ -957,7 +957,7 @@ function registerOutlines({ vscode, context, register, bridge, sourcePlugins, sh
     if (!range.isEmpty) {
       await addPassage(c, { start: point(range.start), end: point(range.end) }, announce);
     } else if (announce) {
-      vscode.window.setStatusBarMessage(`GOLEM XIV: Retained ${path.basename(result.outline.source.path)} as a source.`, 6000);
+      vscode.window.setStatusBarMessage(`MRW: Retained ${path.basename(result.outline.source.path)} as a source.`, 6000);
     }
     return c.result;
   }

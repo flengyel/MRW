@@ -12,7 +12,7 @@ function referenceAt(text, offset) {
     const end = match.index + match[0].length;
     if (match.index <= offset && offset <= end) return { reference: match[0], start: match.index, end };
   }
-  throw new Error('Place the cursor in a GOLEM XIV source or passage link in the Markdown editor.');
+  throw new Error('Place the cursor in an MRW source or passage link in the Markdown editor.');
 }
 
 module.exports = { referenceAt };

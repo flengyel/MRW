@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from hashlib import sha256
 import json
 from html import escape
+from importlib.resources import files
 import os
 from pathlib import Path
 import shlex
@@ -16,7 +17,7 @@ import sys
 from PySide6.QtCore import (QBuffer, QByteArray, QDir, QIODevice, QObject, QPoint, QPointF,
                             QRunnable, QSignalBlocker, QSortFilterProxyModel, Qt,
                             QThread, QThreadPool, QTimer, Signal, Slot)
-from PySide6.QtGui import (QAction, QColor, QFontDatabase, QKeySequence, QPainter,
+from PySide6.QtGui import (QAction, QColor, QFontDatabase, QIcon, QKeySequence, QPainter, QPixmap,
                            QTextCursor, QTextDocument, QTextOption)
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
     QDockWidget, QFileDialog, QFileSystemModel, QGridLayout, QHBoxLayout, QInputDialog, QLabel,
@@ -33,7 +34,7 @@ from .workstation import (ASSISTANCE_MODEL_ENV, MAX_ASSISTANCE_CONTEXTS,
                           record_kind)
 from .workspace import MAX_TEXT_BYTES, WorkspaceError
 
-TITLE = 'GOLEM XIV'
+TITLE = 'Mathematical Research Workstation'
 FILE_FILTER = 'Mathematical files (*.pdf *.tex *.lean *.sage *.py *.md *.txt *.ipynb *.json);;PDF documents (*.pdf);;All files (*)'
 
 
@@ -1884,6 +1885,9 @@ class WorkstationWindow(QMainWindow):
         self.editor_width_timer.setSingleShot(True)
         self.editor_width_timer.timeout.connect(self.normalize_editor_widths)
         self.setWindowTitle(TITLE)
+        icon = QPixmap()
+        icon.loadFromData(files('mrw.data').joinpath('mrw-icon.png').read_bytes(), 'PNG')
+        self.setWindowIcon(QIcon(icon))
         self.resize(1280, 820)
         self.setMinimumSize(760, 560)
         self.jobs = {}
@@ -3196,6 +3200,7 @@ def launch(directory: Path | None = None) -> int:
     app = QApplication.instance() or QApplication(sys.argv[:1])
     app.setApplicationName(TITLE)
     window = WorkstationWindow()
+    app.setWindowIcon(window.windowIcon())
     window.show()
     if directory is not None:
         window.perform(lambda: window.open_project(directory))

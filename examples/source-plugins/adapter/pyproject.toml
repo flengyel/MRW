@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "mrw-example-source"
 version = "1.0.0"
 requires-python = ">=3.11"
-description = "External GOLEM XIV source API 1 adapter example"
+description = "External MRW source API 1 adapter example"
 
 [project.entry-points."mrw.sources"]
 example = "mrw_example_source:Adapter"

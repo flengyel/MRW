@@ -6,37 +6,37 @@ configured template; existing notes may be edited in either application's
 native editor. Shared-file refresh is implemented; automatic cross-system
 rename/move reconciliation is not claimed.
 
-GOLEM XIV and Obsidian can open the same Markdown notes. The extension supplies Contents,
+MRW and Obsidian can open the same Markdown notes. The extension supplies Contents,
 links, backlinks and Return in VS Code; Obsidian retains its own editing and
 rendering. No conversion, import or special note metadata is required. Handwritten
 work can remain in scans, PDFs or other attachments linked from a note.
 
-GOLEM XIV also supports links between Obsidian notes and separately retained sources
+MRW also supports links between Obsidian notes and separately retained sources
 or passages. Those links are optional and are described below.
 
-To start a note from GOLEM XIV, choose **New Note…** in the **Commands** view
+To start a note from MRW, choose **New Note…** in the **Commands** view
 or document menu. The extension brings Obsidian forward and invokes your configured
 creation command; see [setup](#new-note). No format is imposed on existing notes.
 [Notes applications](NOTE_COMPANIONS.md) describes the supported routes and
 proposed adapters for other editors.
 
-## Configure Obsidian with GOLEM XIV
+## Configure Obsidian with MRW
 
-Use [the general GOLEM XIV workspace](WORKSPACE_SETUP.md). A fresh 0.23.65 installation
-creates `~/mrw-work/GOLEM XIV.code-workspace`. After upgrading from the published
-0.23.64 release, keep using the existing workspace. The vault is an external
+Use [the general MRW workspace](WORKSPACE_SETUP.md). A fresh installation
+creates `~/mrw-work/MRW.code-workspace`. After upgrading, keep using the
+existing workspace. The vault is an external
 notes folder; it need not be the VS Code workspace or move onto Linux. Existing
-links from Obsidian to GOLEM XIV still route to their recorded workspace. Keep that workspace
+links from Obsidian to MRW still route to their recorded workspace. Keep that workspace
 available until its retained references and saved work have been accounted for;
 setup does not rewrite notes or `.obsidian/mrw.json`.
 
-Open the vault in Obsidian. In GOLEM XIV, run **Choose Notes Folder…** and select the
+Open the vault in Obsidian. In MRW, run **Choose Notes Folder…** and select the
 same vault root: the folder containing `.obsidian` and the notes, rather than
 `.obsidian` itself. Both settings can also be changed in VS Code Settings.
 
 The chooser shows the current folder and recent choices with full paths. Select
 a recent vault to switch back, or **Browse for notes folder…** to choose another.
-Recent choices are remembered for this workspace after restart. GOLEM XIV reports the
+Recent choices are remembered for this workspace after restart. MRW reports the
 selected path; cancelling does not change it.
 
 | Setting | Value |
@@ -49,16 +49,16 @@ above its Markdown preview or run **Open Note in Obsidian**. This uses the
 desktop's registered Obsidian URI handler and requires no Obsidian CLI. If
 several vaults share a name, configure the intended vault's ID.
 
-Save edits in Obsidian and return to VS Code. While it is focused, GOLEM XIV checks
+Save edits in Obsidian and return to VS Code. While it is focused, MRW checks
 the displayed note about every two seconds and refreshes a clean document.
-Unsaved VS Code changes prevent replacement; GOLEM XIV does not save or merge them.
+Unsaved VS Code changes prevent replacement; MRW does not save or merge them.
 Both applications must address the same files. A link does not synchronize a
 separate Linux or SSH copy.
 
 The maintainer publishes an optional [note format and templates](https://github.com/flengyel/Zettel).
 **New Note…** uses the creation command configured for the selected vault.
 
-GOLEM XIV's native Markdown preview supports note-local mathematical macros and
+MRW's native Markdown preview supports note-local mathematical macros and
 explicit rendering of `tikz` fences. See [TikZ diagrams](TIKZ_WORKFLOW.md).
 Obsidian embeds and arbitrary LaTeX preambles remain unsupported; a note that
 uses them may render differently in the two applications.
@@ -66,9 +66,9 @@ uses them may render differently in the two applications.
 ## New Note
 
 Since version 0.23.24, **New Note** runs an Obsidian command when the selected
-notes folder is a vault. Obsidian creates the file and applies its template. GOLEM XIV does
+notes folder is a vault. Obsidian creates the file and applies its template. MRW does
 not ask for another title, prefill a file, insert a source link, or save other
-editor buffers. The current document stays open in GOLEM XIV.
+editor buffers. The current document stays open in MRW.
 
 1. Enable **Settings → General → Command line interface** in Obsidian. Use an
    installer that supports the CLI; see [Obsidian's CLI setup](https://help.obsidian.md/cli).
@@ -79,24 +79,24 @@ editor buffers. The current document stays open in GOLEM XIV.
    `templater-obsidian:create-Templates/NewFileTemplate.md`. Enable the template
    in Templater's template hotkeys so that this command is registered.
 3. Choose **New Note…** in the **Commands** view or Command Palette.
-   GOLEM XIV brings Obsidian forward and runs the chosen command. Complete its prompts
+   MRW brings Obsidian forward and runs the chosen command. Complete its prompts
    in Obsidian. Use the [return template](#open-the-current-note-from-obsidian) to bring the completed note back. Opening it
-   adds it to **Recent Documents** in GOLEM XIV; that list does not read Obsidian's
+   adds it to **Recent Documents** in MRW; that list does not read Obsidian's
    recent-file history.
 
 Use the creation command, not Templater's `insert-…` command, which edits the
-active note. GOLEM XIV rejects the plain `file-explorer:new-file` command and the
+active note. MRW rejects the plain `file-explorer:new-file` command and the
 known insert-template commands. Other explicitly configured plugin commands
-remain supported; configure one that runs your creation template. GOLEM XIV can check
+remain supported; configure one that runs your creation template. MRW can check
 that the command is registered, but cannot certify what an arbitrary plugin
 command does or that its interactive template has finished.
 To inspect the registered IDs, run
 `obsidian vault="Your vault" commands` in a terminal where the CLI is available.
 
-GOLEM XIV checks the vault's actual path and registered commands before dispatch.
+MRW checks the vault's actual path and registered commands before dispatch.
 An unavailable CLI or command produces an error, without a fallback file.
 After an uncertain command timeout, check Obsidian before retrying: the command
-may already have run. GOLEM XIV never retries it automatically.
+may already have run. MRW never retries it automatically.
 
 **Obsidian Executable** (`mrw.obsidianExecutable`) can name the CLI executable
 without arguments. Empty uses `obsidian` on PATH, `Obsidian.com` on Windows,
@@ -105,7 +105,7 @@ Windows filesystem in the WSL case. A custom installation needs this setting.
 The workspace must be trusted before its configured command can run.
 
 For a folder without `.obsidian`, New Note opens a blank Markdown editor in
-VS Code. Use Save to choose the filename and location. GOLEM XIV supplies no template
+VS Code. Use Save to choose the filename and location. MRW supplies no template
 or generated filename. Obsidian is optional.
 
 ## What the handoff does
@@ -115,18 +115,18 @@ Three routes are involved:
 | Action | Route | What success establishes |
 | --- | --- | --- |
 | New Note | CLI checks the vault and command, URI handler brings Obsidian forward, CLI invokes the chosen command. | Dispatch completed without a reported error; template prompts and saving still belong to Obsidian. |
-| Open in Obsidian | URI names the selected vault and relative note path. | The desktop accepted the address; GOLEM XIV receives no confirmation that Obsidian found the note. |
-| Return to GOLEM XIV from Obsidian | The optional Templater command opens a GOLEM XIV URI containing the workspace, notes root and relative Markdown filename. | GOLEM XIV validates scope and opens that file's current contents. This is not a retained citation. |
+| Open in Obsidian | URI names the selected vault and relative note path. | The desktop accepted the address; MRW receives no confirmation that Obsidian found the note. |
+| Return to MRW from Obsidian | The optional Templater command opens an MRW URI containing the workspace, notes root and relative Markdown filename. | MRW validates scope and opens that file's current contents. This is not a retained citation. |
 
 For **New Note**, the extension checks the configured vault and command before invoking it
 once. A timeout can leave dispatch uncertain; check Obsidian before retrying.
 Obsidian documents its [CLI](https://help.obsidian.md/cli) and
 [URI handler](https://help.obsidian.md/uri) separately.
 
-GOLEM XIV does not send the source passage to the template. It neither receives the
+MRW does not send the source passage to the template. It neither receives the
 new filename nor waits for the user to finish writing. Complete and save the
-note in Obsidian, then use the return template to open it in GOLEM XIV. For an
-already open Markdown note, external edits can refresh its clean preview in GOLEM XIV;
+note in Obsidian, then use the return template to open it in MRW. For an
+already open Markdown note, external edits can refresh its clean preview in MRW;
 unsaved VS Code text is preserved. This is shared-file access, not synchronization
 between separate copies.
 
@@ -163,10 +163,10 @@ associations on retained sources or passages.
 
 Install the optional [Obsidian return template](https://github.com/flengyel/Zettel/blob/main/doc/OpenInMRW.md).
 From the open note in Obsidian, run the Templater command it registers. This
-opens the file in GOLEM XIV's Markdown preview and selects it for Contents. No per-note link or clipboard transfer is needed.
+opens the file in MRW's Markdown preview and selects it for Contents. No per-note link or clipboard transfer is needed.
 
 The startup template registers the command; it does not automatically open
-GOLEM XIV or insert text. Vault-local `.obsidian/mrw.json` selects the GOLEM XIV workspace
+MRW or insert text. Vault-local `.obsidian/mrw.json` selects the MRW workspace
 and the same notes root used by **Choose Notes Folder…**. The action requires
 extension version 0.22.5 or later and uses neither the Obsidian CLI nor a note import.
 It reads the current filename in reading or editing view, without transferring
@@ -175,7 +175,7 @@ cursor positions, selections or YAML.
 ### Keep a note link
 
 1. Copy the note link from the preview, or search the Command Palette for
-   `Note Link`. In 0.23.65, select **GOLEM XIV: Copy GOLEM XIV Note Link**.
+   `Note Link` and select **MRW: Copy MRW Note Link**.
    The copied Markdown label contains the title and filename.
 2. Paste and save the link in an Obsidian note.
 3. Click it in Obsidian's reading view, or Ctrl+click while editing. Allow the
@@ -224,14 +224,14 @@ paths when working in WSL.
 1. In Obsidian, open the note and run **Copy Obsidian URL for current
    file**. The URL has the form
    `obsidian://open?vault=Notes&file=NOTE_ID` and contains no note prose.
-2. In GOLEM XIV's saved-source reader, expand **Source details and tools** and, for a
+2. In MRW's saved-source reader, expand **Source details and tools** and, for a
    published source, **Source links and Obsidian notes**. Choose **Link an
    Obsidian note…** under **Whole source**, or use a passage's **This passage**
    group. Paste the URL and enter a short label.
 3. Use **Open linked note in Obsidian** in that group to open it.
    **Manage linked notes…** offers **Replace linked note** and **Remove note link**.
 
-The stored association contains an address, a label and an exact GOLEM XIV reference,
+The stored association contains an address, a label and an exact MRW reference,
 not a copy of the note. Multiple notes produce a chooser. **All linked notes
 and earlier passage ranges** retains access to associations whose passage
 range has since changed.
@@ -264,7 +264,7 @@ retain their explicit recovery paths; no retry creates another note.
 
 ### Pending transfers and missing notes
 
-The pending record remains in the private source store when you restart GOLEM XIV.
+The pending record remains in the private source store when you restart MRW.
 Resume it beside the annotation. Repeated invocation neither creates another
 file nor inserts text. A duplicate optional copy is reported; linking does not require copying. If saving
 failed, the annotation remains current. If note text was saved but link
@@ -272,7 +272,7 @@ publication failed, keep that text and recover/reload the private store as
 instructed; verify the same pending destination without pasting again.
 
 Destination changes are rechecked by saved revision; the two works may develop
-independently. Cancellation never removes pasted text. GOLEM XIV never writes around
+independently. Cancellation never removes pasted text. MRW never writes around
 an application's unsaved buffer. The authoring application owns editing and Save;
 these stores are not a distributed transaction.
 
@@ -281,7 +281,7 @@ explicit relinking to a selected file. Removing a link preserves the external
 file and captured source snapshot. Deleting the source annotation leaves vault
 files alone. No background title search or recreation runs.
 
-## Put a GOLEM XIV link in the Obsidian note
+## Put an MRW link in the Obsidian note
 
 1. In the saved-source reader, choose **Copy link to this source** under
    **Whole source**, or **Copy link to this passage** under **This passage**.
@@ -290,8 +290,8 @@ files alone. No background title search or recreation runs.
 3. Click the link to open the saved reader. A passage link also selects its
    exact retained range in a read-only source view.
 
-**Copy link** supplies a destination from the note into GOLEM XIV. **Link an Obsidian
-note…** supplies a destination from GOLEM XIV back to the note. Creating one link
+**Copy link** supplies a destination from the note into MRW. **Link an Obsidian
+note…** supplies a destination from MRW back to the note. Creating one link
 does not create the other.
 
 Whole-source actions address the entire saved source. **This passage** addresses
@@ -300,7 +300,7 @@ link when that range differs from the current passage.
 
 ## Workspace routing and recovery
 
-GOLEM XIV links carry their target separately from the workspace address. Retained
+MRW links carry their target separately from the workspace address. Retained
 links use `mrw-outline:v1` or source-qualified `mrw-outline:v2` references;
 ordinary-note links identify current files. WSL routing uses the distribution
 name and saved folder/workspace path. For SSH, set **Navigation Workspace
@@ -314,7 +314,7 @@ The command accepts either the Markdown link or its complete URL. If no handler
 is available in the receiving window, open the intended WSL workspace and use
 the clipboard command there. A dismissed routing warning remains in VS Code's
 Notifications. Standard workspace-trust and remote-connection prompts apply;
-GOLEM XIV commands are unavailable in Restricted Mode.
+MRW commands are unavailable in Restricted Mode.
 
 For unavailable private storage, reopen the original workspace/profile or use
 the [storage guide](ARTIFACT_STORAGE.md) to open a complete saved-work copy.
@@ -340,15 +340,15 @@ retained material. Failed or uncertain publication blocks further private
 writes until host reload; keep unsaved text before reloading. Concurrent writing
 from multiple installations is unsupported.
 
-**Copying a Markdown note does not copy GOLEM XIV's retained sources, annotations or
+**Copying a Markdown note does not copy MRW's retained sources, annotations or
 associations.** **Move Saved Work Directory…** and **Open Saved Work Directory…**
 handle the supported saved-work store separately; see
 [storage scope and recovery](ARTIFACT_STORAGE.md). Current-study checkpoints
 and interaction history are outside that transfer.
 
 Opening ordinary Windows-vault notes through `/mnt/c` does not qualify that
-location for GOLEM XIV's private saved-work store. Windows-backed store placement
+location for MRW's private saved-work store. Windows-backed store placement
 remains unqualified. Ordinary reading does not require closing Obsidian.
 
-GOLEM XIV does not discover or rewrite a vault, synchronize its contents, or start a
+MRW does not discover or rewrite a vault, synchronize its contents, or start a
 background server. Navigation starts no compiler, model, notebook or container.

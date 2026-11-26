@@ -314,7 +314,7 @@ class ArtifactStorageTests(unittest.TestCase):
         store = str(uuid4())
         with first.store_exclusion(store), self.assertRaisesRegex(ValueError, 'Another process'):
             with second.store_exclusion(store):
-                self.fail('Two workspace homes acquired the same GOLEM XIV source store')
+                self.fail('Two workspace homes acquired the same MRW source store')
         with second.store_exclusion(store):
             pass
 

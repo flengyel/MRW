@@ -1,1 +1,1 @@
-"""Checked, generated GOLEM XIV package resources."""
+"""Checked, generated MRW package resources."""

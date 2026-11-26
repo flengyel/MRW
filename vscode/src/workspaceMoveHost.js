@@ -38,8 +38,8 @@ function session(vscode,nativeContext){
   function assertWritable(){
     if(frozen)throw Error('Workspace move in progress. Open the committed destination or recover the move before continuing.');
     const current=workspace&&registry?lookup(registry,workspace):undefined;
-    if(bindingFile&&registry&&fs.existsSync(bindingFile)){const b=JSON.parse(fs.readFileSync(bindingFile,'utf8'));if(records(registry).some(r=>r.phase==='committed'&&require('./workspaceMove').inside(r.source,b.location)))throw Error('This saved store moved with another workspace. Run GOLEM XIV: Recover Workspace Move.');}
-    if(current&&(current.phase==='preparing'||current.phase==='aborted'||current.phase==='committed'&&current.sourceWorkspace===workspace))throw Error('This workspace is moving or has moved. Run GOLEM XIV: Recover Workspace Move.');
+    if(bindingFile&&registry&&fs.existsSync(bindingFile)){const b=JSON.parse(fs.readFileSync(bindingFile,'utf8'));if(records(registry).some(r=>r.phase==='committed'&&require('./workspaceMove').inside(r.source,b.location)))throw Error('This saved store moved with another workspace. Run MRW: Recover Workspace Move.');}
+    if(current&&(current.phase==='preparing'||current.phase==='aborted'||current.phase==='committed'&&current.sourceWorkspace===workspace))throw Error('This workspace is moving or has moved. Run MRW: Recover Workspace Move.');
   }
   const state={keys:()=>values?Object.keys(values):nativeContext.workspaceState.keys(),get:(key,fallback)=>values?(values[key]??fallback):decode(nativeContext.workspaceState.get(key,fallback)),update:(key,value)=>{
     try{assertWritable();}catch(e){return Promise.reject(e);}
@@ -79,7 +79,7 @@ function session(vscode,nativeContext){
     })();
     nativeContext.subscriptions.push({dispose(){if(lease)void fsp.unlink(lease).catch(()=>{});}});
   }
-  ready.catch(e=>vscode.window?.showErrorMessage?.('GOLEM XIV: '+e.message));
+  ready.catch(e=>vscode.window?.showErrorMessage?.('MRW: '+e.message));
   async function others(){
     await ready;if(!registry)return;
     const dir=path.join(registry,'sessions');
@@ -87,12 +87,12 @@ function session(vscode,nativeContext){
       const file=path.join(dir,name);if(file===lease)continue;
       let other;try{other=JSON.parse(await fsp.readFile(file,'utf8'));}catch(e){if(e.code==='ENOENT')continue;throw e;}if(other.workspace!==workspace){const f=other.privateHome&&path.join(other.privateHome,'artifact-runtime/active-store.json');if(!f||!fs.existsSync(f)||!require('./workspaceMove').inside(path.dirname(workspace),JSON.parse(fs.readFileSync(f,'utf8')).location))continue;}
       try{process.kill(other.pid,0);}catch(e){if(e.code==='ESRCH')continue;throw e;}
-      throw Error('Another GOLEM XIV window is using this workspace. Close that window before moving it.');
+      throw Error('Another MRW window is using this workspace. Close that window before moving it.');
     }
   }
   const api={workspace,registry,context,get blocked(){return blocked;},get frozen(){return frozen;},get record(){return record;},ready,
     async run(action){await ready;assertWritable();inflight++;try{return await action();}finally{inflight--; }},
-    async freeze(){await ready;assertWritable();if(inflight)throw Error('Wait for current GOLEM XIV actions to finish before moving.');await others();frozen=true;for(const p of panels)await p.webview.postMessage({type:'workspace_freeze',frozen:true});},
+    async freeze(){await ready;assertWritable();if(inflight)throw Error('Wait for current MRW actions to finish before moving.');await others();frozen=true;for(const p of panels)await p.webview.postMessage({type:'workspace_freeze',frozen:true});},
     unfreeze(){frozen=false;for(const p of panels)void p.webview.postMessage({type:'workspace_freeze',frozen:false});},async flushState(){await mementoTail;},
     snapshot:()=>Object.fromEntries(state.keys().map(key=>[key,state.get(key)])),
     async recover(){const r=lookup(registry,workspace)||record||(bindingFile&&fs.existsSync(bindingFile)&&records(registry).find(r=>r.phase==='committed'&&require('./workspaceMove').inside(r.source,JSON.parse(fs.readFileSync(bindingFile,'utf8')).location)));if(!r)throw Error('No workspace move needs recovery.');return new WorkspaceMove(registry).recover(r.id);},
@@ -113,7 +113,7 @@ function session(vscode,nativeContext){
   return api;
 }
 function guardWindow(window,owner){return hostFacade(window,{get(target,key){
-  if(key==='registerUriHandler')return handler=>target.registerUriHandler({handleUri:uri=>owner.run(()=>handler.handleUri(uri)).catch(e=>target.showErrorMessage('GOLEM XIV: '+e.message))});
+  if(key==='registerUriHandler')return handler=>target.registerUriHandler({handleUri:uri=>owner.run(()=>handler.handleUri(uri)).catch(e=>target.showErrorMessage('MRW: '+e.message))});
   if(key==='createWebviewPanel')return (...args)=>{
     const panel=target.createWebviewPanel(...args);owner.panels.add(panel);panel.onDidDispose(()=>owner.panels.delete(panel));
     const webview=hostFacade(panel.webview,{get(w,k){if(k==='onDidReceiveMessage')return(fn,...rest)=>w.onDidReceiveMessage(m=>{
@@ -133,12 +133,12 @@ function hasDirty(vscode){return (vscode.workspace.textDocuments||[]).some(d=>d.
 function registerWorkspaceMove({vscode,context,register,session:owner,clients,study,recorder,bridge}){
   if(owner.blocked&&vscode.window.registerUriHandler)context.subscriptions.push(vscode.window.registerUriHandler({handleUri:async uri=>{try{
     const r=await owner.recover();if(r.phase!=='committed')throw Error('The move did not commit. Run Recover Workspace Move before following this link.');
-    const choice=await vscode.window.showWarningMessage('This workspace moved. Open its destination, then run GOLEM XIV: Open Link from Clipboard to follow this link.','Copy link and open moved workspace');
+    const choice=await vscode.window.showWarningMessage('This workspace moved. Open its destination, then run MRW: Open Link from Clipboard to follow this link.','Copy link and open moved workspace');
     if(choice==='Copy link and open moved workspace'){await vscode.env.clipboard.writeText(uri.toString(true));await hostOpen(r);}
-  }catch(e){void vscode.window.showErrorMessage('GOLEM XIV: '+e.message);}}}));
+  }catch(e){void vscode.window.showErrorMessage('MRW: '+e.message);}}}));
   const hostOpen=r=>{if(hasDirty(vscode))throw Error('Save or copy unsaved changes before opening the moved workspace. Edits made after the move remain at their original location.');return vscode.commands.executeCommand('vscode.openFolder',vscode.Uri.file(r.destinationWorkspace),{forceReuseWindow:true});};
   async function offer(r){
-    const choice=await vscode.window.showInformationMessage(`GOLEM XIV workspace moved to ${r.destination}. The original is retained.`, 'Open moved workspace');
+    const choice=await vscode.window.showInformationMessage(`MRW workspace moved to ${r.destination}. The original is retained.`, 'Open moved workspace');
     if(choice==='Open moved workspace')return hostOpen(r);
   }
   register('mrw.recoverWorkspaceMove',async()=>{
@@ -152,14 +152,14 @@ function registerWorkspaceMove({vscode,context,register,session:owner,clients,st
   register('mrw.moveWorkspace',async()=>{
     if(owner.blocked)throw Error('Recover the earlier workspace move before starting another.');
     if(!owner.workspace||!owner.registry)throw Error('Save this Linux session as a .code-workspace file before moving it.');
-    const destination=await vscode.window.showInputBox({title:'Move GOLEM XIV Workspace',prompt:'New absolute Linux directory. It must not already exist. External notes folders stay in place.',ignoreFocusOut:true});
+    const destination=await vscode.window.showInputBox({title:'Move MRW Workspace',prompt:'New absolute Linux directory. It must not already exist. External notes folders stay in place.',ignoreFocusOut:true});
     if(destination===undefined)return;
     if(process.platform!=='linux'||!path.isAbsolute(destination))throw Error('Choose an absolute Linux directory.');
     const type=Number((await fsp.statfs(path.dirname(destination))).type)>>>0;
     if([0x9fa0,0x5346544e,0xff534d42,0x517b,0x6969,0x01021994,0x858458f6].includes(type))throw Error('Choose a persistent Linux filesystem; Windows, network and temporary mounts are not supported for workspace moves.');
     const dirty=()=>hasDirty(vscode);
     if(dirty())throw Error('Save or close your unsaved documents before moving. Your drafts were left open.');
-    const answer=await vscode.window.showWarningMessage(`Move the workspace folder, GOLEM XIV studies, drafts, history and document locations to ${destination}? External notes folders and shared stores stay in place. The original is retained until you verify the destination. Close other GOLEM XIV windows using this workspace first.`,{modal:true},'Move workspace');
+    const answer=await vscode.window.showWarningMessage(`Move the workspace folder, MRW studies, drafts, history and document locations to ${destination}? External notes folders and shared stores stay in place. The original is retained until you verify the destination. Close other MRW windows using this workspace first.`,{modal:true},'Move workspace');
     if(answer!=='Move workspace')return;
     const frozen=[];let committed=false;
     try{

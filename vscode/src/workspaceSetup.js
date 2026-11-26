@@ -7,14 +7,14 @@ const {randomUUID} = require('node:crypto');
 const {execFile} = require('node:child_process');
 const {promisify} = require('node:util');
 const run = promisify(execFile);
-const GUIDE = 'https://github.com/flengyel/GOLEMXIV/blob/main/docs/WORKSPACE_SETUP.md';
+const GUIDE = 'https://github.com/flengyel/MRW/blob/main/docs/WORKSPACE_SETUP.md';
 
 function workspacePaths(home = os.homedir()) {
   const directory = path.join(home, 'mrw-work');
   return {
     directory,
-    workspace: path.join(directory, 'GOLEM XIV.code-workspace'),
-    previousWorkspace: path.join(directory, 'MRW.code-workspace'),
+    workspace: path.join(directory, 'MRW.code-workspace'),
+    previousWorkspace: path.join(directory, 'GOLEM XIV.code-workspace'),
   };
 }
 async function regular(io, file) {
@@ -25,11 +25,11 @@ async function regular(io, file) {
   } catch (error) { if (error.code === 'ENOENT') return false; throw error; }
 }
 async function registeredWorkspace(paths, active, resolveDefault) {
-  const renamed = resolveDefault(paths.workspace);
-  if (active && (active === paths.workspace || active === renamed?.workspace)) return renamed;
+  const preferred = resolveDefault(paths.workspace);
+  if (active && (active === paths.workspace || active === preferred?.workspace)) return preferred;
   const previous = resolveDefault(paths.previousWorkspace);
   if (active && (active === paths.previousWorkspace || active === previous?.workspace)) return previous;
-  if (renamed || !previous) return renamed;
+  if (preferred || !previous) return preferred;
   return await regular(fs, paths.workspace) ? undefined : previous;
 }
 async function syncDirectory(io, directory) {
@@ -56,19 +56,19 @@ async function createOnce(io, file, text) {
   }
 }
 async function prepareWorkspace({home = os.homedir(), activeWorkspace, notesFolder = '', platform = process.platform, io = fs} = {}) {
-  if (platform !== 'linux') throw Error('Connect VS Code to WSL: Debian or a Linux SSH host, then run Set Up GOLEM XIV Workspace again.');
+  if (platform !== 'linux') throw Error('Connect VS Code to WSL: Debian or a Linux SSH host, then run Set Up MRW Workspace again.');
   const canonicalHome = await io.realpath(home);
   const type = (Number((await io.statfs(canonicalHome)).type) >>> 0);
   if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b, 0x6969, 0x01021994, 0x858458f6].includes(type)) {
-    throw Error('Your home is on a Windows, network or volatile filesystem. Set up a persistent Linux home before creating the GOLEM XIV workspace.');
+    throw Error('Your home is on a Windows, network or volatile filesystem. Set up a persistent Linux home before creating the MRW workspace.');
   }
   const paths = workspacePaths(canonicalHome);
   const {directory} = paths;
   await io.mkdir(directory, {recursive: true, mode: 0o700});
   const stat = await io.lstat(directory);
-  if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('The default GOLEM XIV directory must be a Linux directory, not a redirected path.');
+  if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('The default MRW directory must be a Linux directory, not a redirected path.');
   if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b, 0x6969, 0x01021994, 0x858458f6].includes((Number((await io.statfs(directory)).type) >>> 0))) {
-    throw Error('The default GOLEM XIV directory must be on a persistent Linux filesystem.');
+    throw Error('The default MRW directory must be on a persistent Linux filesystem.');
   }
   await syncDirectory(io, canonicalHome);
   if (typeof notesFolder !== 'string' || (notesFolder && !path.isAbsolute(notesFolder))) throw Error('The notes folder must be an absolute path on the workspace host.');
@@ -81,8 +81,8 @@ async function prepareWorkspace({home = os.homedir(), activeWorkspace, notesFold
   for (const candidate of candidates) {
     if (await regular(io, candidate)) { workspace = candidate; break; }
   }
-  const created = await createOnce(io, workspace, JSON.stringify({folders: [{name: 'GOLEM XIV', path: '.'}], settings}, null, 2) + '\n');
-  await createOnce(io, path.join(directory, 'README.md'), `# GOLEM XIV workspace\n\nOpen this session with \`${path.basename(workspace)}\`. Use **Move Workspace…** to relocate this session.\n\nUse **Open Document…** to read a note or paper in place. **Choose Notes\nFolder…** selects a folder for links and backlinks; it may be outside this\nworkspace, including an Obsidian vault on Windows.\n\nNew Lean study projects go under this Linux folder. Existing studies keep their\nlocations. Saved GOLEM XIV sources, annotations and history are private to the workspace;\ncreating this workspace does not import records from another session.\n\n[Setup and optional companions](${GUIDE})\n`);
+  const created = await createOnce(io, workspace, JSON.stringify({folders: [{name: 'MRW', path: '.'}], settings}, null, 2) + '\n');
+  await createOnce(io, path.join(directory, 'README.md'), `# MRW workspace\n\nOpen this session with \`${path.basename(workspace)}\`. Use **Move Workspace…** to relocate this session.\n\nUse **Open Document…** to read a note or paper in place. **Choose Notes\nFolder…** selects a folder for links and backlinks; it may be outside this\nworkspace, including an Obsidian vault on Windows.\n\nNew Lean study projects go under this Linux folder. Existing studies keep their\nlocations. Saved MRW sources, annotations and history are private to the workspace;\ncreating this workspace does not import records from another session.\n\n[Setup and optional companions](${GUIDE})\n`);
   // Retry a preceding directory-sync failure even when both files now exist.
   await syncDirectory(io, directory);
   return {directory, workspace, created, notesFolder: created ? notesFolder : undefined};
@@ -110,7 +110,7 @@ function registerWorkspaceSetup({vscode, register, home = os.homedir(), prepare 
         || await prepare({home, activeWorkspace, notesFolder: config.get('notesFolder', '')});
       const python = await checkPython(config.get('pythonExecutable', 'python3'));
       const same = activeWorkspace === result.workspace;
-      const message = `${result.created ? 'Created' : 'Using'} GOLEM XIV workspace: ${result.workspace}. ${python.text} `
+      const message = `${result.created ? 'Created' : 'Using'} MRW workspace: ${result.workspace}. ${python.text} `
         + (result.created && result.notesFolder ? `Notes folder: ${result.notesFolder}. ` : '')
         + (same ? 'This is the current workspace.' : 'Earlier saved sources, studies and history remain in their original workspace. Choose whether to use this window or open another.');
       const buttons = same ? ['Setup guide'] : ['Open in this window', 'Open in new window', 'Setup guide'];

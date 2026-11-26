@@ -1,4 +1,4 @@
-# Continue GOLEM XIV development
+# Continue MRW development
 
 Read [AGENTS.md](../AGENTS.md), the mandatory
 [documentation requirements](../CONTRIBUTING.md#documentation), the

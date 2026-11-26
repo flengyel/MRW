@@ -1,18 +1,20 @@
-# GOLEM XIV — Mathematical Research Workstation
+# Mathematical Research Workstation
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/golem-xiv-dark.png">
-    <img src="docs/assets/golem-xiv-light.png" width="224" height="224" alt="GOLEM XIV. A Turing tape on the spear side, a library on the spindle side.">
-  </picture>
+  <a href="docs/assets/avatars/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/mrw-logo-dark.png">
+      <img src="docs/assets/mrw-logo-light.png" width="224" height="224" alt="MRW emblem. A spear and Turing tape on the left, books and a threaded spindle on the right.">
+    </picture>
+  </a>
 </p>
 
-GOLEM XIV supports mathematical understanding and research. Its aims are to study
+MRW supports mathematical understanding and research. Its aims are to study
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
 
-[Download the latest published VSIX (0.23.64)](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix)
-· [Release and checksums](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64)
+[Download the latest published VSIX (0.23.64)](https://github.com/flengyel/MRW/releases/download/v0.23.64/mrw-0.23.64.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.64)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md)
 
 Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
@@ -22,10 +24,9 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 
 ## Start
 
-1. Install the VSIX. Press **F1** and search for `Set Up Workspace`. In the 0.23.65
-   source build, run **GOLEM XIV: Set Up GOLEM XIV Workspace…**. It creates
-   `~/mrw-work/GOLEM XIV.code-workspace` on a fresh installation. The published
-   0.23.64 release uses the former workspace name. [Workspace setup](docs/WORKSPACE_SETUP.md)
+1. Install the VSIX and run **MRW: Set Up MRW Workspace…**. On a fresh installation,
+   it creates `~/mrw-work/MRW.code-workspace`. For an existing installation, reopen
+   the workspace reported by setup. [Workspace setup](docs/WORKSPACE_SETUP.md)
 2. For a new question, choose a notes folder with **Choose Notes Folder…**,
    then select **New Note…**. For an existing paper or note, use
    **Open Document…**. [Mathematics in ordinary notes](docs/MATHEMATICS_WITH_NOTES.md)
@@ -38,7 +39,7 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 ## Study and research
 
 VS Code can reopen the files used in an argument. Their locations alone do not
-say which passage was cited or which hypothesis justified a step. In GOLEM XIV, the
+say which passage was cited or which hypothesis justified a step. In MRW, the
 reader can retain the cited passage at a particular revision and record the
 grounds for using it.
 
@@ -75,7 +76,7 @@ translation remains a development goal.
 
 ## Architecture
 
-![GOLEM XIV architecture](docs/assets/mrw-architecture.png)
+![MRW architecture](docs/assets/mrw-architecture.png)
 
 [Architecture](docs/ARCHITECTURE.md) · [Data model](DOMAIN_MODEL.md)
 
@@ -92,13 +93,13 @@ host’s Python. **Open Tutorial** reports the active extension build.
 
 ## Data and transfers
 
-Ordinary files remain in their editors. GOLEM XIV stores retained sources and study
+Ordinary files remain in their editors. MRW stores retained sources and study
 records separately; copying notes does not transfer their saved targets.
 [Storage scope and moves](docs/ARTIFACT_STORAGE.md).
 
 ## Documentation and license
 
-[Guides](docs/README.md) · [Vision](VISION.md) · [Architecture](docs/ARCHITECTURE.md)
+[Guides](docs/README.md) · [Avatar images](docs/assets/avatars/) · [Vision](VISION.md) · [Architecture](docs/ARCHITECTURE.md)
 · [Current status](docs/DESIGN_RECONCILIATION.md) · [Contributing](CONTRIBUTING.md)
 
 Copyright 2026 F. Lengyel. [Apache-2.0](LICENSE). Third-party material retains

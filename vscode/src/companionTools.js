@@ -1,9 +1,9 @@
 'use strict';
 // Purpose menus over existing commands; configuration inspection never probes a service.
-const GUIDES='https://github.com/flengyel/GOLEMXIV/blob/main/docs/';
+const GUIDES='https://github.com/flengyel/MRW/blob/main/docs/';
 const SETUP = {
  workspace: {title: 'Workspace and storage', rows: [
-  ['Choose notes folder…','chooseNotesFolder'], ['Set up GOLEM XIV workspace…','setupWorkspace'],
+  ['Choose notes folder…','chooseNotesFolder'], ['Set up MRW workspace…','setupWorkspace'],
   ['Show saved-work location','artifactLocation'], ['Move workspace…','moveWorkspace'],
   ['Recover workspace move','recoverWorkspaceMove'],
  ]},
@@ -60,10 +60,10 @@ function companionStatus(vscode){
   {label:'Jupyter / SagePod',description:ext('ms-toolsai.jupyter')+'; SagePod server not checked',guide:'GETTING_STARTED_WSL_SAGEPOD.md'},
   {label:'Lean 4',description:ext('leanprover.lean4')+'; toolchain not checked',guide:'LEAN_STUDY_WORKFLOW.md'},
   {label:'LaTeX Workshop / PDFs',description:ext('James-Yu.latex-workshop'),guide:'RECOMMENDED_EXTENSIONS.md'},
-  {label:'GOLEM XIV Diagnostics',description:ext('flengyel.mrw-diagnostics')+'; weekly reporting opt-in is configured separately',guide:'DIAGNOSTICS_PLUGIN.md'},
+  {label:'MRW Diagnostics',description:ext('flengyel.mrw-diagnostics')+'; weekly reporting opt-in is configured separately',guide:'DIAGNOSTICS_PLUGIN.md'},
   {label:'Codex and companion plugins',description:'Separate application; manual reviewable handoff',guide:'READER_AI_WORKFLOW.md'},
   {label:'Emacs',description:c.get('orgCaptureTemplate','')?'capture template configured; server unchecked':'capture template not configured',guide:'NOTE_COMPANIONS.md#capture-a-passage-in-emacs'},
-  {label:'SageQueue / Wolfram / The Archive',description:'No GOLEM XIV adapter delivered',guide:'INTEGRATION_BOUNDARIES.md'}
+  {label:'SageQueue / Wolfram / The Archive',description:'No MRW adapter delivered',guide:'INTEGRATION_BOUNDARIES.md'}
  ];
 }
 function registerCompanionTools({vscode,register}){

@@ -17,14 +17,14 @@ installed Python adapter. No window reload or VSIX rebuild is required.
 
 A profile is data selecting an installed parser family. An adapter is trusted
 installed code running with your account's permissions. Its Python subprocess
-is not a sandbox. GOLEM XIV does not discover executable workspace files or execute
+is not a sandbox. MRW does not discover executable workspace files or execute
 code supplied by a website. Merely listing installed entry points reads package
 metadata; selecting and confirming **Enable adapter** loads the selected code.
 
 ## A working external profile
 
 Download [gerby-example.json](../examples/source-plugins/gerby-example.json) to
-any directory outside the GOLEM XIV installation. In **Add Source Plugin…**, choose
+any directory outside the MRW installation. In **Add Source Plugin…**, choose
 **Data-only source profile**, then that file. Use **Import Source… → External
 Gerby profile example** and enter `0004`. Review the revision/hash and destination,
 then import. This deliberately uses Kerodon's supported HTML with a separate
@@ -39,7 +39,7 @@ as a data-only profile. Clowder and PreTeXt are candidates, not supported import
 
 ## A working external Python adapter
 
-Copy [the adapter template](../examples/source-plugins/adapter) outside GOLEM XIV.
+Copy [the adapter template](../examples/source-plugins/adapter) outside MRW.
 Create a Python 3.11+ environment and install it there, for example:
 
 ```sh
@@ -47,11 +47,11 @@ python3 -m venv ~/venvs/mrw-sources
 ~/venvs/mrw-sources/bin/python -m pip install /path/to/copied/adapter
 ```
 
-Set **Python Executable** (`mrw.pythonExecutable`, User or Remote setting)
+Set **MRW: Python Executable** (`mrw.pythonExecutable`, User or Remote setting)
 to that environment's Python. Use **Add Source Plugin… → Installed Python
 adapter → example (mrw-example-source)** and confirm the trusted-code prompt.
 Then **Import Source… → External Python adapter example → 0004**. Ordinary
-reading needs no PySide6 or installation of GOLEM XIV into that environment: the bridge
+reading needs no PySide6 or installation of MRW into that environment: the bridge
 loads its bundled core, while Python finds the external entry point in the
 configured interpreter's installed packages. Other optional tools retain their
 own requirements.

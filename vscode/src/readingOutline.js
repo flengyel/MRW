@@ -54,7 +54,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   let collapsed = new Set(Array.isArray(saved.collapsed) ? saved.collapsed.filter(x => typeof x === 'string').slice(0, 1000) : []);
   const pendingOrigins = new Set();
   const changed = new vscode.EventEmitter();
-  const fail = error => vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`);
+  const fail = error => vscode.window.showErrorMessage(`MRW: ${error.message}`);
   const state = () => ({ uri: overviewUri, route,
     collapsed: [...collapsed].slice(-1000), selected: selected?.uri.startsWith('file:') ? selected : undefined,
     origin: origin?.uri.startsWith('file:') ? origin : undefined });
@@ -123,7 +123,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
       model = parseReadingMarkdown(document.getText());
       if (!differentDocument()) tree.description = `${noteIdentity(document).label}${document.isDirty ? ' •' : ''}`;
       for (const node of model.all) { node.revision = model.revision; node.uri = document.uri.toString(); }
-      const notice = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? '' : 'Add Markdown headings or file, note, or GOLEM XIV passage links.';
+      const notice = model.frontMatter?.malformed ? 'Malformed front matter: close the leading YAML block and correct its identity fields.' : model.roots.length ? '' : 'Add Markdown headings or file, note, or MRW passage links.';
       if (notice && !differentDocument()) tree.message += `\n${notice}`;
     } catch (error) {
       model = undefined;
@@ -365,7 +365,7 @@ function registerReadingOutline({ vscode, context, register, followReference, re
   register('mrw.selectReadingOutlineItem', async node => {
     const attempt = ++generation; documents.supersede();
     const source = document;
-    if (!source || source.isClosed) throw new Error('Reopen the Markdown document with GOLEM XIV: Show Contents.');
+    if (!source || source.isClosed) throw new Error('Reopen the Markdown document with MRW: Show Contents.');
     refresh();
     const current = model?.all.find(n => n.id === node?.id);
     if (!current || current.uri !== node.uri || current.revision !== node.revision || current.start !== node.start || current.end !== node.end) {

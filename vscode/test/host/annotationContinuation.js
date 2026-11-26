@@ -46,7 +46,7 @@ editor.replaceRange(${JSON.stringify(text)},editor.offsetToPos(offset));await vi
       const note=await fs.readFile(path.join(config.notesRoot,config.note),'utf8');assert.ok(note.includes('Later independent writing after continuation.'));
       await vscode.env.clipboard.writeText(notes.continuations[0].return_link);
       const returned=await vscode.commands.executeCommand('mrw.openLinkFromClipboard');assert.ok(returned,'Native retained-reference return did not complete');
-      report.checks.push('isolated GOLEM XIV host reloaded; completed continuation and original recovered; exact retained return link reopens its passage');
+      report.checks.push('isolated MRW host reloaded; completed continuation and original recovered; exact retained return link reopens its passage');
       report.complete=true;
     }else{
       const file=path.join(config.project,'source.txt'),source='Retained statement.\nRetained proof α.\n';await fs.writeFile(file,source);

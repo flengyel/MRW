@@ -15,6 +15,6 @@ The whole theorem receives both parameters. Its type can be read as
 proof of that same proposition. This construction gives no way to obtain a
 proof of an arbitrary proposition without the supplied argument.
 
-Hover over `h` in the native Lean editor to inspect its type. Use **Lean
+Hover over `h` in the native Lean editor to inspect its type. Use **MRW: Lean
 Study Actions…** to open the referenced book section or the associated note.
 This is a complete external content example for the installed Lean integration.

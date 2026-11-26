@@ -43,7 +43,7 @@ BUILTINS[2]['urlRules'] = dict(itemPath='/nlab/show/{id}', revisionPath='/nlab/r
 def manifest(value, *, profile=False):
     keys={'apiVersion','pluginId','pluginVersion','sourceId','name','parser','origins','urlRules','capabilities','attribution'}
     if not isinstance(value,dict) or set(value)!=keys or type(value['apiVersion']) is not int or value['apiVersion']!=API:
-        raise ValueError('Unsupported source manifest or apiVersion; GOLEM XIV supports source API 1')
+        raise ValueError('Unsupported source manifest or apiVersion; this MRW supports source API 1')
     if not isinstance(value['sourceId'],str) or not NAMESPACE.fullmatch(value['sourceId']) or value['sourceId'] in {'javascript','data','file','mailto','http','https','command','vscode','mrw-outline','obsidian'} or not isinstance(value['pluginId'],str) or not re.fullmatch(r'[a-zA-Z0-9_.-]{1,128}',value['pluginId']):raise ValueError('Invalid source namespace or pluginId')
     for k in ('name','pluginVersion','parser'):
         if not isinstance(value[k],str) or not 1<=len(value[k])<=200 or any(ord(c)<32 for c in value[k]):raise ValueError('Invalid source manifest '+k)
@@ -138,7 +138,7 @@ class Registry:
         if self.path.exists():
             try:
                 self.raw=read_bounded(self.path,256*1024,'source plugin registrations');data=strict_json(self.raw)
-                if not isinstance(data,dict) or set(data)!={'schema','version','entries'} or data['schema']!='mrw.source-plugins' or data['version']!=1 or not isinstance(data['entries'],list) or len(data['entries'])>64:raise ValueError('Invalid GOLEM XIV source plugin registry')
+                if not isinstance(data,dict) or set(data)!={'schema','version','entries'} or data['schema']!='mrw.source-plugins' or data['version']!=1 or not isinstance(data['entries'],list) or len(data['entries'])>64:raise ValueError('Invalid MRW source plugin registry')
                 self.entries=data['entries']
             except (OSError,ValueError) as exc:
                 self.invalid=True;self.diagnostics.append('Source registration file could not be read; built-ins remain available. Repair '+str(self.path)+': '+str(exc))
@@ -210,7 +210,7 @@ class Acquisition:
         if len(self.resources)>=8:raise ValueError('At most eight acquired resources per snapshot')
         if self.downloader:raw=self.downloader(url,limit)
         else:
-            with build_opener(ProxyHandler({}),NoRedirect()).open(Request(url,headers={'User-Agent':'GOLEMXIV-Source-Importer/1','Accept-Encoding':'identity'}),timeout=25) as r:
+            with build_opener(ProxyHandler({}),NoRedirect()).open(Request(url,headers={'User-Agent':'MRW-Source-Importer/1','Accept-Encoding':'identity'}),timeout=25) as r:
                 if r.status!=200 or r.headers.get('Content-Encoding','identity')!='identity':raise ValueError('Unsupported source response')
                 raw=r.read(limit+1)
         if not isinstance(raw,bytes) or len(raw)>limit or sum(len(r['bytes']) for r in self.resources.values())+len(raw)>LIMIT:raise ValueError('Source acquisition exceeds the combined 2 MiB limit')

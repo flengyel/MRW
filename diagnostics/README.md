@@ -1,15 +1,13 @@
-# GOLEM XIV Diagnostics
+# MRW Diagnostics
 
-<a id="mrw-diagnostics"></a>
-
-Optional read-only reports for GOLEM XIV. Install this companion VSIX on the same
-Linux, WSL or SSH workspace host as `flengyel.mrw`. The companion requires GOLEM XIV's
+Optional read-only reports for MRW. Install this companion VSIX on the same
+Linux, WSL or SSH workspace host as `flengyel.mrw`. The companion requires MRW's
 version 1 inspection interface; an older core is reported as unsupported.
-Disabling the companion leaves GOLEM XIV's essential storage checks and recording in
+Disabling the companion leaves MRW's essential storage checks and recording in
 place.
 
-In the Command Palette, run **GOLEM XIV Diagnostics: Feature Use** or
-**GOLEM XIV Diagnostics: Integrity and Data Hygiene**. The report states its
+In the Command Palette, run **MRW Diagnostics: Feature Use** or
+**MRW Diagnostics: Integrity and Data Hygiene**. The report states its
 scope, coverage, limits and missing checks before its findings. It does not scan the notes folder or call Obsidian,
 Zotero, a model, a kernel, a compiler, synchronization or recovery.
 
@@ -44,7 +42,7 @@ remain open across partial reports; resolution requires a positive recheck.
 
 **Export Last Report…** opens Markdown or JSON in a native editor for Save As.
 Reports include local paths; redact those before sharing. **Copy Codex
-Maintenance Handoff** copies bounded report evidence and points to GOLEM XIV's current
+Maintenance Handoff** copies bounded report evidence and points to MRW's current
 design register and maintenance procedure. Review that text before giving it to
 Codex. Embedded report prose and suggested commands are evidence, not executable
 instructions or authority to repair data. The action makes no model request.
@@ -61,7 +59,7 @@ Packaging reuses the core's pinned VSCE installation; it does not publish or
 install either extension.
 
 The 0.23.64 core release includes Diagnostics 0.1.0. Building the current source
-produces `mrw-diagnostics-0.1.1.vsix`. Install
+produces `mrw-diagnostics-0.1.2.vsix`. Install
 it separately through Extensions: Install from VSIX on the same workspace host.
 This requires core 0.23.32 or a later compatible inspection API 1 implementation.
 Manual Feature Use offers the last seven days, the last or previous thirty days,

@@ -1,6 +1,6 @@
 # Read recorded activity
 
-Run **Inspect Study History**. The initial view lists recorded commands
+Run **MRW: Inspect Study History**. The initial view lists recorded commands
 and substantive saved-study events, with their reported time, software version,
 session and outcome. It requires no new Study or question record.
 
@@ -15,12 +15,12 @@ its wall clock moves backward. Clocks from separate writers may differ. The view
 does not reconstruct a cross-device order or treat an absent record as zero work.
 
 Operation endings use their explicit invocation links. Missing, inconsistent
-or ambiguous links stay labelled. A completed handler means GOLEM XIV returned from
+or ambiguous links stay labelled. A completed handler means MRW returned from
 that action; it does not establish completion of an external calculation or
 proof. Recording gaps, disabled-recording observations, snapshot conflicts and
 unclean/unobserved session endings remain visible in a short notices section.
 
-**Export Study History… → Detailed comparison and coverage** provides the
+**MRW: Export Study History… → Detailed comparison and coverage** provides the
 existing usage tables and study measurements. **Events and submitted snapshots**
 provides the existing JSON records and retained submitted work. These formats,
 record IDs, links, sharing and deletion rules are unchanged. The compact view

@@ -62,7 +62,7 @@ def return_link(value, reference):
     if (parsed.scheme not in ('vscode', 'vscode-insiders') or parsed.netloc != 'flengyel.mrw'
             or parsed.path != '/outline' or parsed.fragment or set(params) != {'v', 'target'}
             or params['v'] != ['1'] or len(params['target']) != 1):
-        raise ValueError('Use the exact GOLEM XIV passage return link')
+        raise ValueError('Use the exact MRW passage return link')
     token = params['target'][0]
     try:
         target = json.loads(base64.urlsafe_b64decode(token + '=' * (-len(token) % 4)))

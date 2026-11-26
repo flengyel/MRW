@@ -1,8 +1,8 @@
-# Justification Logic in GOLEM XIV
+# Justification Logic in MRW
 
 <a id="justification-grounds-for-a-mathematical-claim"></a>
 
-GOLEM XIV uses Justification Logic to represent and check explicit reasons for a
+MRW uses Justification Logic to represent and check explicit reasons for a
 mathematical claim. A retained argument shows its supporting passages,
 calculations or proof artifacts, the assumptions admitted, and the steps
 connecting those grounds to the conclusion. It answers a practical question
@@ -13,7 +13,7 @@ The reference is Sergei Artemov and Melvin Fitting,
 216, Cambridge University Press, 2019
 ([publisher](https://www.cambridge.org/core/books/justification-logic/8E496BD49A8141542587B78EFBFCD5A9);
 [DOI](https://doi.org/10.1017/9781108348034)).
-GOLEM XIV implements a limited part of the formal framework developed in this book.
+MRW implements a limited part of the formal framework developed in this book.
 Its records, checker and bounded search have the specific scope described below.
 
 ## Justification assertions and reasons
@@ -21,7 +21,7 @@ Its records, checker and bounded search have the specific scope described below.
 Let `A` and `B` be formulas expressing claims, and let `s` and `t` be
 justification terms. The assertion `t:A` says that `t` is a reason for `A`.
 The term makes the reason available for inspection instead of suppressing it
-in a bare assertion of the claim. In GOLEM XIV, a claim's mathematical content remains
+in a bare assertion of the claim. In MRW, a claim's mathematical content remains
 in its versioned prose, LaTeX, Lean or other representation; an opaque atom
 identifies that exact claim version.
 
@@ -36,7 +36,7 @@ Sum does not measure confidence, independence or additional corroboration.
 Distinct arguments may share an admission; the retained dependencies show
 that overlap.
 
-GOLEM XIV records a context: the exact admissions permitted in the argument, together
+MRW records a context: the exact admissions permitted in the argument, together
 with their sources, scope and attribution. The Lean checker verifies a
 certificate of derivation in the selected context and logic profile. The
 current profiles, `J₀` and `J(CS)`, are non-factive: deriving `t:A` alone
@@ -46,7 +46,7 @@ decision to rely on a claim remain explicit.
 A `J(CS)` profile also identifies a constant specification: the permitted
 constant assertions about logical axioms. It is not a list of trusted authors,
 books, model providers or software. The book treats broader logics and semantic
-conditions; GOLEM XIV does not implement all of them. The present subsystem adds no
+conditions; MRW does not implement all of them. The present subsystem adds no
 factivity axiom, positive introspection or general semantic model checker.
 The [technical specification](JUSTIFICATION_LOGIC_EXPERIMENT.md#logical-basis)
 defines the implemented syntax and rules.
@@ -74,7 +74,7 @@ checker setup** and choose **Build local checker**. It runs Lake from the
 installed Lean 4.32.2 toolchain and downloads nothing. If Lean 4.32.2 is missing,
 install it in the workspace host’s terminal with
 `elan toolchain install leanprover/lean4:v4.32.2`, then retry the build.
-The checker requires the verified Linux x86-64/WSL build environment. GOLEM XIV
+The checker requires the verified Linux x86-64/WSL build environment. MRW
 rejects different compiler output. The official Lean editor extension is optional.
 
 Each route lists its admitted grounds. A source button opens the retained
@@ -85,10 +85,10 @@ states its scope: the earlier context, source notes and old certificates remain.
 **Return to document** returns to the originating document location and preserves
 its open buffer. An edited exact destination is reported rather than replaced.
 
-Close/reopen GOLEM XIV, choose **Justification…** and select the saved result. Reopening
+Close/reopen MRW, choose **Justification…** and select the saved result. Reopening
 reads the immutable result, exact sources and recorded checker identity; it
 requires no Lean build, process or network connection. Before a search starts,
-GOLEM XIV saves its exact request, source snapshots and originating document location.
+MRW saves its exact request, source snapshots and originating document location.
 If the search fails or the reader closes, choose **Unfinished: …** in the same
 picker. It reopens that saved context without building or checking; retry is
 explicit and keeps the request ID. A completed result replaces the unfinished
@@ -120,7 +120,7 @@ the conditional composition of those grounds, not the arithmetic proofs.
 
 A formal check concerns an exact declaration in a recorded environment. Using
 it to support a manuscript also requires an admitted proof policy and a reviewed
-correspondence between the formal proposition and the prose statement. GOLEM XIV
+correspondence between the formal proposition and the prose statement. MRW
 checks how those grounds compose under the selected admissions; it does not
 automatically establish the correspondence.
 
@@ -152,7 +152,7 @@ questions available for examination; mathematical judgment remains necessary.
 | Task | Existing route and limit |
 | --- | --- |
 | Search and compare admitted grounds | Choose **Proofs → Justification…**. The bounded reader retains checked routes and exact source snapshots, supports withdrawal and reopens completed or unfinished contexts. Selected Markdown text or saved passages can supply a companion proposal for review and explicit admission. |
-| Inspect retained evidence in VS Code | Run **Inspect Retained Record**. Choose **Documentary warrant package** and its directory, or **Verification and matching bundle** and select both files. Inspection validates and displays existing records; it creates no admission and does not rerun Lean. |
+| Inspect retained evidence in VS Code | Run **MRW: Inspect Retained Record**. Choose **Documentary warrant package** and its directory, or **Verification and matching bundle** and select both files. Inspection validates and displays existing records; it creates no admission and does not rerun Lean. |
 
 The documentary case records **that a model returned a particular passage**.
 Admitting that documentary fact does not admit the mathematical assertion

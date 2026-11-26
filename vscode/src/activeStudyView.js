@@ -7,7 +7,7 @@
   const el=(tag,text,parent=root)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;parent.append(n);return n;};
   const labels={definition:'Definition',hypotheses:'Hypotheses',missing_step:'Missing step',argument:'Argument reconstruction',application:'Application',unaided_success:'Unaided success',help_dependent:'Completed with help',unresolved:'Unresolved',unassessed:'Not assessed',human:'Reader',ai_proposal:'AI proposal'};
   const label=value=>labels[value]||value;
-  const math=(p,t)=>window.GolemXIVAnnotations.render(p,t,{exact:false,inlineDollars:true});
+  const math=(p,t)=>window.MRWAnnotations.render(p,t,{exact:false,inlineDollars:true});
   const copy=value=>value===undefined?undefined:structuredClone(value);
   function reportDraft(){return state?.current?local.reports?.[state.current.id]||state.current.reportDraft||null:null;}
   function identities(){
@@ -194,7 +194,7 @@
   }
   function renderSavedDocument(){
     if(state.current&&local.attempt!==state.current.id){local.attempt=state.current.id;local.answer=state.current.draft;local.paper=state.current.paper;}
-    el('p',state.lifecycleStatus&&state.lifecycleStatus!=='active'?'This study is '+state.lifecycleStatus+'. Reviews are suspended. Restore it through GOLEM XIV: Restore Study to continue.':'Document problem forms have been removed. Earlier saved work remains available here.');
+    el('p',state.lifecycleStatus&&state.lifecycleStatus!=='active'?'This study is '+state.lifecycleStatus+'. Reviews are suspended. Restore it through MRW: Restore Study to continue.':'Document problem forms have been removed. Earlier saved work remains available here.');
     const bar=el('div');bar.className='toolbar';
     const origin=state.returnOrigin||state.documentContext?.origin;
     if(origin){button(bar,'← Return to '+origin.filename+' › '+origin.section,'document_return');button(bar,'Open document without exact location','document_open');}

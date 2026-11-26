@@ -22,5 +22,5 @@
   }
   check(root,0);const copy=document.importNode(root,true);copy.classList.add(kind==='svg'?'published-svg':'published-mathml');parent.append(copy);
  }
- window.GolemXIVSourceRendering={render};
+ window.MRWSourceRendering={render};
 })();

@@ -1,6 +1,6 @@
 # User experience specification
 
-This specification defines GOLEM XIV's interaction requirements. The
+This specification defines MRW's interaction requirements. The
 [README](README.md) and [user guides](docs/README.md) describe current behavior;
 the [design register](docs/DESIGN_RECONCILIATION.md) identifies pending work.
 Proposed behavior is not a claim that an interface exists. VS Code owns ordinary
@@ -9,7 +9,7 @@ editing, saving, undo, layout and document recovery. The
 that application.
 
 [Integration boundaries](docs/INTEGRATION_BOUNDARIES.md) govern optional
-companions: the responsible system owns creation and execution; GOLEM XIV delegates
+companions: the responsible system owns creation and execution; MRW delegates
 explicitly and retains scoped references and results.
 
 <a id="evaluation-follow-up--interface-and-continuity"></a>
@@ -118,7 +118,7 @@ warrant question relevant.
 Begin with an existing project directory and an ordinary mathematical file.
 Open and edit files in place using native editors and the reader's chosen pane
 layout. Viewing or comparing documents requires no preliminary metadata. Keep
-GOLEM XIV commands available through visible menus, preserve native editing shortcuts
+MRW commands available through visible menus, preserve native editing shortcuts
 and keep the active Save and Find targets clear.
 
 Use an available PDF viewer beside the work note, or offer the system reader.
@@ -129,15 +129,15 @@ the transcription, and distinguish corrections from the source.
 
 Use [Reopen Document and Return to Document](docs/READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart)
 and [Recent Documents](docs/RECENT_DOCUMENTS.md) to recover files and supported
-locations. In Recent Documents, keep the title, filename and path. When GOLEM XIV
+locations. In Recent Documents, keep the title, filename and path. When MRW
 can match a previous Markdown selection to the current text, show a short
 excerpt and restore the selection on opening. Store the revision and range,
 and read the excerpt only from the authorized document when showing the list.
 Explain why a missing, changed or ambiguous exact link cannot be
 followed, and preserve the last usable Return destination. Offer the current
 document when it can be opened without claiming to restore an earlier passage.
-VS Code handles dirty buffers and pane layout. GOLEM XIV reopens PDFs at the file
-level; page and zoom belong to the viewer. GOLEM XIV does not restore preview scroll
+VS Code handles dirty buffers and pane layout. MRW reopens PDFs at the file
+level; page and zoom belong to the viewer. MRW does not restore preview scroll
 positions or live kernel state.
 
 A standard `.ipynb` can serve as a working document alongside or in place of a
@@ -146,10 +146,10 @@ saving and explicit kernel actions; SagePod supplies computation. File links
 join the notebook and notes. Use the Markdown editor to follow private
 retained-source references within their owning workspace. The
 [notebook workflow](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) does not pass cell
-selections to GOLEM XIV assistance or insert replies into cells. Keep the notebook's
+selections to MRW assistance or insert replies into cells. Keep the notebook's
 location available on return and distinguish saved outputs from live state.
 
-Opening, viewing and resuming do not make GOLEM XIV submit a model request, import a
+Opening, viewing and resuming do not make MRW submit a model request, import a
 remote source, build a document, compile a diagram, check a proof, start a
 container or kernel, or run a calculation. Each of those actions requires an
 explicit request. Native editor services such as Lean diagnostics run as usual.
@@ -543,7 +543,7 @@ not by itself establish that a human has understood the result.
 Task-mediated assistance begins when the mathematician requests help with active
 work: for example, asking for an explanation of a definition or result, a
 possible source, criticism of an attempted step, an intermediate lemma, a
-computation to perform, a proof outline, or a related problem. GOLEM XIV
+computation to perform, a proof outline, or a related problem. MRW
 constructs the request from the current problem or object, displayed source
 passages, and displayed `WorkArtifact`s. Before submission, the mathematician
 can inspect and reduce the exact outbound context. Nothing else is sent.
@@ -567,7 +567,7 @@ Source/citation retrieval in step 4 is not automatic:
 6. If useful, explicitly request a linked follow-up with the correction or
    alternative assumption, then continue the mathematical work.
 
-The reader enters a question in ordinary language. GOLEM XIV takes its references
+The reader enters a question in ordinary language. MRW takes its references
 from the selected work. Distinguish a suggested citation from a retrieved
 source and identify any missing context.
 
@@ -744,7 +744,7 @@ or abandonment of a proposal is recorded in `TaskEvidence`; none converts the
 proposal into a human judgment.
 
 **Non-goal.** Importing external AI content and making model requests from
-active mathematical work do not make GOLEM XIV a general chat client,
+active mathematical work do not make MRW a general chat client,
 prompt manager, conversation archive, provider-orchestration layer, or
 autonomous agent system.
 

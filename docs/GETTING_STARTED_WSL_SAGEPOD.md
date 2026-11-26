@@ -1,12 +1,10 @@
-# Install GOLEM XIV and use SagePod in WSL2
-
-<a id="install-mrw-and-use-sagepod-in-wsl2"></a>
+# Install Mathematical Research Workstation and use SagePod in WSL2
 
 Use Microsoft's Jupyter extension to connect a VS Code window in WSL2 to a
-SageMath notebook running in SagePod. GOLEM XIV can retain the saved notebook and link
+SageMath notebook running in SagePod. MRW can retain the saved notebook and link
 it to a working note. The SagePod helper commands below refer to revision
-`4bc1bc3`. For reading alone, follow [the GOLEM XIV installation guide](INSTALLATION.md#a-golem-xiv-for-reading).
-Download the [latest published GOLEM XIV VSIX](https://github.com/flengyel/GOLEMXIV/releases/latest).
+`4bc1bc3`. For reading alone, follow [the MRW installation guide](INSTALLATION.md#a-mrw-for-reading).
+Download the [latest published MRW VSIX](https://github.com/flengyel/MRW/releases/latest).
 
 For batch jobs, [SageQueue](https://github.com/flengyel/sagequeue) now uses the
 same SagePod runtime. It supplies queueing, workers and job logs; it is optional
@@ -16,11 +14,11 @@ and is not needed for the notebook setup below. See the
 | Component | Where it runs | What it supplies |
 | --- | --- | --- |
 | VS Code | Windows | Windows, tabs, editing, saving and undo |
-| GOLEM XIV and Python 3.11+ | Your WSL2 distribution | Retained sources, reader annotations and Markdown Contents |
+| MRW and Python 3.11+ | Your WSL2 distribution | Retained sources, reader annotations and Markdown Contents |
 | Jupyter extension | The same WSL workspace host | Notebook editing and connection to the SagePod server |
 | SagePod | A rootless Podman container in WSL2 | Jupyter server and the actual SageMath kernel |
 
-Ordinary GOLEM XIV reading works without SagePod, Lean or an AI account. Saved TikZ
+Ordinary MRW reading works without SagePod, Lean or an AI account. Saved TikZ
 diagrams have [separate optional rendering prerequisites](TIKZ_WORKFLOW.md).
 
 ## 1. Open the intended folder in WSL
@@ -30,19 +28,19 @@ Use a WSL2 Linux distribution; the recorded companion workflow used Debian.
 In Windows PowerShell, `wsl --list --verbose` shows each distribution's WSL
 version.
 
-Use the [saved GOLEM XIV workspace](WORKSPACE_SETUP.md). The default is
-`~/mrw-work/GOLEM XIV.code-workspace`.
+Use the [saved MRW workspace](WORKSPACE_SETUP.md). The default is
+`~/mrw-work/MRW.code-workspace`.
 SagePod's persistent notebook directory, normally `~/Jupyter`, is independent
-of this workspace. Open its notebooks in place from the GOLEM XIV window; do not
+of this workspace. Open its notebooks in place from the MRW window; do not
 change workspace merely to open a notebook. A separate notebook project is
 still possible when you deliberately want separate workspace state.
 
 All shell commands below run **in WSL**, except the PowerShell check above.
-After setup, reopen the workspace that matches the filename reported by GOLEM XIV.
-For a new 0.23.65 workspace, run:
+After setup, reopen the workspace that matches the filename reported by MRW.
+For a new workspace, run:
 
 ```bash
-code "$HOME/mrw-work/GOLEM XIV.code-workspace"
+code "$HOME/mrw-work/MRW.code-workspace"
 ```
 
 If setup reports another filename, use that path instead.
@@ -53,17 +51,15 @@ Use **Terminal → New Terminal** in that window and check:
 python3 --version
 ```
 
-GOLEM XIV needs Python **3.11 or later on WSL**, independently of the Python inside
+MRW needs Python **3.11 or later on WSL**, independently of the Python inside
 SagePod. A different installed interpreter can be selected using
 `mrw.pythonExecutable` in VS Code's **Remote** settings.
 
 If SagePod has not been installed yet, use [the setup branch in step 3](#3-obtain-sagepods-current-login-url)
-before opening its notebook directory. Keep notebooks and GOLEM XIV's default private
+before opening its notebook directory. Keep notebooks and MRW's default private
 storage on the Linux filesystem; Windows-backed artifact storage is not qualified.
 
-<a id="2-install-mrw-and-the-notebook-extensions"></a>
-
-## 2. Install GOLEM XIV and the notebook extensions
+## 2. Install MRW and the notebook extensions
 
 With the intended WSL folder open, press **Ctrl+Shift+X** for Extensions.
 Install these components in the locations shown:
@@ -71,11 +67,11 @@ Install these components in the locations shown:
 | Extension | Identifier | Installation location |
 | --- | --- | --- |
 | WSL | `ms-vscode-remote.remote-wsl` | Windows/local |
-| GOLEM XIV | `flengyel.mrw` | WSL, from the VSIX |
+| MRW | `flengyel.mrw` | WSL, from the VSIX |
 | Jupyter | `ms-toolsai.jupyter` | WSL |
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
-For GOLEM XIV, press **F1**, choose **Extensions: Install from VSIX…**, and select
+For MRW, press **F1**, choose **Extensions: Install from VSIX…**, and select
 `mrw-0.23.64.vsix` for the published release. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
@@ -91,15 +87,15 @@ only under **Local — Installed**, use its **Install in WSL** action. Microsoft
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.
 
-Save ordinary documents and any open GOLEM XIV annotation forms before a requested
+Save ordinary documents and any open MRW annotation forms before a requested
 window reload. Then reload after installing the Sage language extension. It
 registers the `sage` cell language; missing registration prevented execution
 with the Jupyter version used in the recorded workflow. Use Jupyter's notebook
 Run controls; **Run SageMath File** is a separate command requiring its own
 setup. Sage does not need to be installed directly on the WSL host.
 
-**You should now see the GOLEM XIV book icon in the left Activity Bar.** Click it to
-open **Contents** and **Commands**. GOLEM XIV's **…** menu and the **F1** Command Palette
+Click the MRW icon in the Activity Bar to
+open **Contents** and **Commands**. MRW's **…** menu and the **F1** Command Palette
 provide access to its commands. An installed VSIX needs no Node/npm, Qt, Lean or
 separate Python-package installation. Upgrading it does not require deleting
 workspace storage.
@@ -167,7 +163,7 @@ In the WSL VS Code window:
 
 **You should now see SageMath selected in the notebook's upper-right corner.**
 These are VS Code/Jupyter's [existing-server and kernel selection controls](https://code.visualstudio.com/docs/datascience/jupyter-kernel-management#_existing-jupyter-server).
-Jupyter owns the saved server connection; GOLEM XIV does not store its token.
+Jupyter owns the saved server connection; MRW does not store its token.
 
 ### Add a cell and run it
 
@@ -214,7 +210,7 @@ and prose useful for your work; there is no required template.
    Contents can also use an explicitly selected Markdown file outside the workspace.
 4. In a notebook Markdown cell, a relative link such as
    `[Working note](overview.md)` opens the companion file. Use an ordinary
-   file link in that note to return to the notebook. GOLEM XIV reference commands
+   file link in that note to return to the notebook. MRW reference commands
    operate in the Markdown editor; following a link in a notebook cell or Markdown
    preview does not supply that command bridge.
 
@@ -224,22 +220,22 @@ and saved annotations does not import or execute anything.
 See the [documents and Contents guide](READING_OUTLINE_WORKFLOW.md) for exact
 navigation and return behavior.
 
-GOLEM XIV's retained sources and annotations live in private storage scoped to the
+MRW's retained sources and annotations live in private storage scoped to the
 workspace. Opening a different folder does not expose another workspace's
 saved sources. Copying only the notebook and Markdown does not transfer private
-GOLEM XIV targets. Keep the same workspace for existing references; use the documented
+MRW targets. Keep the same workspace for existing references; use the documented
 [artifact workflow](ARTIFACT_STORAGE.md) for an explicitly intended transfer.
 
 ## 6. Save and return later
 
-Press **Ctrl+S** to save your notebook and Markdown. Save GOLEM XIV annotation forms
+Press **Ctrl+S** to save your notebook and Markdown. Save MRW annotation forms
 using their own **Save** button. On reopening the same workspace,
 open the notebook and working note normally. With the note's Markdown editor
 active, use **Show Contents**; **Open Saved Source…** reopens the reader.
 
 Saved notebook outputs remain in the file. Live Sage variables belong to the
 kernel and may be gone after it stops. Reconnect to the current server/kernel
-and rerun deliberately when needed; reopening GOLEM XIV runs no cells and starts no
+and rerun deliberately when needed; reopening MRW runs no cells and starts no
 container. With the default mount, host `~/Jupyter` appears inside SagePod as
 `/home/sage/notebooks`. Use container paths for code executing in Sage, and
 host paths for VS Code files.
@@ -248,21 +244,21 @@ host paths for VS Code files.
 
 | What you see | What to check |
 | --- | --- |
-| No GOLEM XIV commands or icon | Confirm the bottom-left WSL indicator, GOLEM XIV under WSL Installed, Python 3.11+, and a trusted workspace. Use F1 if the Activity Bar placement was customized. |
-| No SagePod container | Check the configured name and WSL user/distribution. Follow SagePod's own start/setup branch; GOLEM XIV does not start it. |
+| No MRW commands or icon | Confirm the bottom-left WSL indicator, MRW under WSL Installed, Python 3.11+, and a trusted workspace. Use F1 if the Activity Bar placement was customized. |
+| No SagePod container | Check the configured name and WSL user/distribution. Follow SagePod's own start/setup branch; MRW does not start it. |
 | Login rejected | Obtain a fresh URL with `bin/jupyter-url.sh`. Use its published host port and the credentials for that server. |
 | No Existing Jupyter Server option | Confirm Microsoft's Jupyter extension is installed in WSL, then choose Select Another Kernel. |
 | Notebook uses Python | Choose the SagePod server's actual `sagemath` kernel. Installing a local Python extension does not install Sage. |
 | Sage is selected but Run does nothing | Check SageMath Enhanced is installed in WSL to register `sage`; save work and reload after installing it. |
 | Sage cannot find a file VS Code can see | Compare the host and container mount paths. Inspect the kernel's working directory before using relative paths. |
-| GOLEM XIV reference reports a different workspace or missing target | Reopen the originating workspace and its valid retained storage. Do not create replacement records to make the link resolve. |
+| MRW reference reports a different workspace or missing target | Reopen the originating workspace and its valid retained storage. Do not create replacement records to make the link resolve. |
 
 ## Build the VSIX
 
 Use the current [installation and build instructions](INSTALLATION.md) and
 [VSIX packaging procedure](../vscode/README.md#package-and-install-a-vsix).
 Linux Node.js, npm and Git are build dependencies, not notebook-reading
-requirements. Keep the source checkout separate from your GOLEM XIV workspace and
+requirements. Keep the source checkout separate from your MRW workspace and
 SagePod's notebook directory.
 
 ## Further help

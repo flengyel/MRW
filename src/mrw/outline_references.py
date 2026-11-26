@@ -24,13 +24,13 @@ def parse_reference(value):
     legacy = 'mrw-outline:v1/' + qualified[2] if qualified else value
     match = REFERENCE.fullmatch(legacy) if isinstance(legacy, str) and len(legacy) <= 4096 else None
     if match is None:
-        raise ValueError('Malformed GOLEM XIV source or passage link; no target was opened')
+        raise ValueError('Malformed MRW source or passage link; no target was opened')
     scope, outline, source, region, *points = match.groups()
     span = None
     if region:
         sl, sc, el, ec = map(int, points)
         if (sl, sc) >= (el, ec):
-            raise ValueError('Malformed GOLEM XIV source or passage link range')
+            raise ValueError('Malformed MRW source or passage link range')
         span = dict(source_revision=source, start_line=sl, start_col=sc, end_line=el, end_col=ec)
     result = dict(scope=scope, outline=outline, source=source, region=region, span=span)
     if qualified:

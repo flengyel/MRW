@@ -1,14 +1,14 @@
 # Use grounds from existing notes
 
 A proof may use a theorem, an argument connecting that theorem to a conclusion,
-and alternative arguments for the same conclusion. GOLEM XIV can retain the selected
+and alternative arguments for the same conclusion. MRW can retain the selected
 passages, prepare a Codex handoff and display the proposed grounds for review.
 The note stays in its original file.
 
 ## Select, propose and review
 
 1. Select text in an ordinary Markdown editor. Choose **Proofs → Justification…
-   → Use selected Markdown text**. GOLEM XIV captures the buffer text, including unsaved
+   → Use selected Markdown text**. MRW captures the buffer text, including unsaved
    edits, without saving the note. Alternatively, choose **Choose saved passages…**
    and select the retained passages to include. This supports several sources.
 2. Choose **Copy passages for Codex**. Paste the handoff into your companion chat.
@@ -33,7 +33,7 @@ Importing either kind does not admit it. The checker verifies the composition
 under the selected admissions; the mathematical assertions and implications
 require review.
 
-Source selections and corrections are saved in GOLEM XIV's existing private artifact
+Source selections and corrections are saved in MRW's existing private artifact
 store. Reopen **Justification…** to continue **Selected sources: …**, **Review
 proposal: …** or **Unfinished: …** after closure or restart. A failed correction
 leaves the earlier view intact. An interrupted acceptance can be retried without
@@ -41,7 +41,7 @@ creating another context. Reopening never sends text or runs Lean.
 
 **Inspect supplied and reviewed proposal** preserves the response and corrections
 beside accepted grounds. Supplied attribution identifies the producer as reported
-in the response; GOLEM XIV has not authenticated that identity. A source hash binds
+in the response; MRW has not authenticated that identity. A source hash binds
 bytes, not authorship or mathematical truth.
 
 ## A second argument: composition of injections
@@ -61,7 +61,7 @@ the set-theoretic proof.
 
 ## Current limits
 
-The companion must return the bounded schema included in the handoff. GOLEM XIV does
+The companion must return the bounded schema included in the handoff. MRW does
 not parse an arbitrary prose response into implications. Changes to premises,
 conclusions, scope or the selected goal require a revised proposal; summary and
 title corrections are available directly in the reader. A text selection covers

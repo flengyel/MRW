@@ -13,7 +13,7 @@ async function fixture(t, version = '0.20.0', marker = { version, commit: 'a'.re
   await fs.mkdir(path.join(directory, 'media'));
   await fs.writeFile(path.join(directory, 'package.json'), JSON.stringify({ version: '9.9.9' }));
   await fs.writeFile(path.join(directory, 'media/build-info.json'), JSON.stringify(marker));
-  await fs.writeFile(path.join(directory, 'media/first-steps.md'), '# Using GOLEM XIV\n\nActive package instructions.\n');
+  await fs.writeFile(path.join(directory, 'media/first-steps.md'), '# Using MRW\n\nActive package instructions.\n');
   const commands = new Map(), changes = [], previews = [], providers = new Map();
   class EventEmitter {
     constructor() { this.event = listener => { this.listener = listener; return { dispose() {} }; }; }
@@ -35,11 +35,11 @@ test('tutorial reports activation metadata and keeps that build after an on-disk
   const active = registerTutorial(h);
   assert.equal(active.identity.version, '0.20.0');
   assert.equal(active.uri.scheme, 'mrw-help');
-  assert.equal(active.uri.path, '/Using GOLEM XIV.md');
-  assert.match(active.provider.provideTextDocumentContent(), /Active extension: \*\*GOLEM XIV 0\.20\.0\*\*/);
+  assert.equal(active.uri.path, '/Using MRW.md');
+  assert.match(active.provider.provideTextDocumentContent(), /Active extension: \*\*MRW 0\.20\.0\*\*/);
   assert.match(active.provider.provideTextDocumentContent(), new RegExp('a'.repeat(40)));
   assert.doesNotMatch(active.provider.provideTextDocumentContent(), /9\.9\.9/);
-  await fs.writeFile(path.join(h.directory, 'media/first-steps.md'), '# Using GOLEM XIV\n\nNewly installed instructions.\n');
+  await fs.writeFile(path.join(h.directory, 'media/first-steps.md'), '# Using MRW\n\nNewly installed instructions.\n');
   await fs.writeFile(path.join(h.directory, 'media/build-info.json'), JSON.stringify({ version: '0.20.1', commit: 'b'.repeat(40) }));
   await h.commands.get('mrw.openTutorial')();
   await h.commands.get('mrw.openTutorial')();
@@ -51,7 +51,7 @@ test('tutorial reports activation metadata and keeps that build after an on-disk
   h.context.extension.packageJSON.version = '0.20.1';
   const adopted = registerTutorial(h);
   assert.notEqual(adopted.uri.toString(), active.uri.toString(), 'a new activation cannot reuse the previous text model');
-  assert.match(adopted.provider.provideTextDocumentContent(), /GOLEM XIV 0\.20\.1/);
+  assert.match(adopted.provider.provideTextDocumentContent(), /MRW 0\.20\.1/);
   assert.match(adopted.provider.provideTextDocumentContent(), /Newly installed instructions/);
   assert.match(adopted.provider.provideTextDocumentContent(), new RegExp('b'.repeat(40)));
 });
@@ -61,7 +61,7 @@ test('a newer marker on disk is not called the active build and help still opens
   const active = registerTutorial(h);
   await h.commands.get('mrw.openTutorial')();
   const text = active.provider.provideTextDocumentContent();
-  assert.match(text, /GOLEM XIV 0\.19\.2/);
+  assert.match(text, /MRW 0\.19\.2/);
   assert.match(text, /build identity unavailable/);
   assert.doesNotMatch(text, /0\.20\.0|cccccccc/);
   assert.equal(h.previews.length, 1);
@@ -70,7 +70,7 @@ test('a newer marker on disk is not called the active build and help still opens
 test('the bundled task-first help resolves every advanced guide from its virtual URI', async () => {
   const text = await fs.readFile(path.join(__dirname, '../media/first-steps.md'), 'utf8');
   const rendered = renderTutorial(text, { version: '0.20.0' });
-  const openDocument = rendered.indexOf('**Open Document…**');
+  const openDocument = rendered.search(/\*\*(?:MRW: )?Open Document…\*\*/);
   assert.ok(openDocument >= 0 && openDocument < rendered.indexOf('## Work through a difficult step'));
   assert.match(rendered, /Choose Notes Folder/);
   assert.match(rendered, /Show Backlinks/);
@@ -83,7 +83,7 @@ test('the bundled task-first help resolves every advanced guide from its virtual
   assert.equal(targets.filter(target => target === zettelGuide).length, 1, 'the companion template guide keeps its explicit external repository address');
   for (const target of targets) {
     if (target === zettelGuide) continue;
-    assert.match(target, /^https:\/\/github\.com\/flengyel\/GOLEMXIV\/blob\/main\/docs\/[A-Z_]+\.md(?:#[a-z0-9-]+)?$/);
+    assert.match(target, /^https:\/\/github\.com\/flengyel\/MRW\/blob\/main\/docs\/[A-Z_]+\.md(?:#[a-z0-9-]+)?$/);
     const url = new URL(target);
     const guide = await fs.readFile(path.resolve(__dirname, '../../docs', url.pathname.split('/').at(-1)), 'utf8');
     if (url.hash) {

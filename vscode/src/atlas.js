@@ -111,7 +111,7 @@ function sourceGraph(atlas, component, page, include, includeProofs = []) {
   }
   for (const id of includeProofs) inputs.push(sourceExcerpt(atlas, allowed.get(id), allowed.get(id).proof));
   const study = { passages: studyPassages(inputs, true) };
-  const description = { author: 'GOLEM XIV source extraction', origin: 'human',
+  const description = { author: 'MRW source extraction', origin: 'human',
     text: 'Exact source entries. Follow references in the atlas. Add mathematical reasons after inspecting the passages.' };
   const nodes = [...all].map((entry, i) => {
     const passage = study.passages[i], chars = Array.from(passage.text);
@@ -245,7 +245,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
     const target = oldFile || Object.keys(c.atlas.graphs || {}).length ?
       vscode.Uri.file(path.join(folder, filename)) : await vscode.window.showSaveDialog({
         title: 'Save atlas and captured source text', defaultUri: vscode.Uri.file(path.join(folder, filename)),
-        filters: { 'GOLEM XIV atlas': ['mrw-atlas.json'] },
+        filters: { 'MRW atlas': ['mrw-atlas.json'] },
       });
     if (!target) return false;
     if (target.scheme !== 'file' || !target.fsPath.endsWith(SUFFIX)) throw new Error('Choose a local .mrw-atlas.json file.');
@@ -522,7 +522,7 @@ function registerAtlas({ vscode, context, register, bridge, projectRoot, chooseP
       } else if (m.type === 'openGraph' && component) {
         await graph(c, component);
       }
-    } catch (error) { void vscode.window.showErrorMessage('GOLEM XIV: ' + error.message); }
+    } catch (error) { void vscode.window.showErrorMessage('MRW: ' + error.message); }
     finally { c.busy = false; }
   }
 

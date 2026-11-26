@@ -10,7 +10,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
  let current,opening=0,frozen=false;const views=new Set();
  const cache=()=>{
   const home=hostStoragePath(vscode,context.globalStorageUri);
-  if(!home)throw Error('Use a host-local GOLEM XIV extension installation.');
+  if(!home)throw Error('Use a host-local MRW extension installation.');
   return path.join(home,'justification-checkers');
  };
  const project=async()=>{
@@ -19,7 +19,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
   const root=await projectRoot();return {root,store:path.join(home,'justification-'+digest(root))};
  };
  const call=(c,method,fields={},options)=>bridge({method:'route_'+method,store:c.store,project_root:c.root,...fields},options);
- const reportError=e=>void vscode.window.showErrorMessage('GOLEM XIV: '+e.message);
+ const reportError=e=>void vscode.window.showErrorMessage('MRW: '+e.message);
  const requestOf=c=>c.value?.effective||c.request;
  function send(c){if(c.disposed)return;void c.panel.webview.postMessage({type:'grounds',generation:++c.generation,
   material:c.material||null,materialRevision:c.materialRevision||null,request:requestOf(c),result:c.value?.record.response||null,revision:c.value?.revision||null,
@@ -32,7 +32,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
    try{return await action({signal:controller.signal,timeout:240000});}finally{subscription.dispose();}
   });
  }
- async function setup(){return progress('GOLEM XIV: building the local justification checker (no downloads)',options=>
+ async function setup(){return progress('MRW: building the local justification checker (no downloads)',options=>
   rawBridge({method:'route_setup',assets:path.join(context.extensionPath,'media/route-engine'),cache:cache()},options));}
  async function run(c){
   if(!c.request)throw Error('Choose an explicit context before searching.');
@@ -41,7 +41,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
   const notes=vscode.workspace.getConfiguration?.('mrw').get('notesFolder','')||'';
   const staged=await call(c,'stage',{request,origin:locations.encode(c.origin||null,c.root,notes)});
   c.intent=staged.intent;c.origin=locations.decode(staged.origin,c.root);send(c);
-  const result=await progress('GOLEM XIV: checking routes under the displayed admissions',options=>call(c,'run',{request,cache:checkerCache},options));
+  const result=await progress('MRW: checking routes under the displayed admissions',options=>call(c,'run',{request,cache:checkerCache},options));
   if(!c.disposed){c.value=result;c.request=null;c.error='';c.panel.title='Grounds: '+goalLabel(result.effective);}
  }
  async function message(c,value){
@@ -59,7 +59,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
     if(value.type==='copy_material'){
      const schema=JSON.parse(await fs.readFile(path.join(context.extensionPath,'media/grounds-proposal.schema.json'),'utf8'));
      await vscode.env.clipboard.writeText(materialTools.handoff(c.material,schema));
-     void vscode.window.setStatusBarMessage?.('GOLEM XIV: exact selected passages and proposal schema copied for Codex.',5000);return;
+     void vscode.window.setStatusBarMessage?.('MRW: exact selected passages and proposal schema copied for Codex.',5000);return;
     }
     let saved;
     if(value.type==='import_material'){
@@ -162,7 +162,7 @@ function registerJustification({vscode,context,register,bridge,rawBridge,project
   let prepared;
   if(choice.kind==='example')prepared=await bridge({method:'route_example',path:path.join(context.extensionPath,'media/euclid-grounds.md')});
   else{
-    const picked=await vscode.window.showOpenDialog({title:'Open an explicit justification context',canSelectMany:false,filters:{'GOLEM XIV route context':['json']}});
+    const picked=await vscode.window.showOpenDialog({title:'Open an explicit justification context',canSelectMany:false,filters:{'MRW route context':['json']}});
     if(!picked?.length||generation!==opening)return;
     if(picked[0].scheme!=='file')throw Error('Choose a local context file.');
     const open=vscode.workspace.textDocuments?.find(d=>d.uri.toString()===picked[0].toString());

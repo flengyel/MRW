@@ -25,5 +25,5 @@ function normalizeNegatedRelations(math) {
 }
 
 if (typeof module === 'object' && module?.exports) module.exports = normalizeNegatedRelations;
-else window.GolemXIVNormalizeNegatedRelations = normalizeNegatedRelations;
+else window.MRWNormalizeNegatedRelations = normalizeNegatedRelations;
 })();

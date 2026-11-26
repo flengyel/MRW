@@ -14,7 +14,7 @@ sys.modules[spec.name] = module
 try:
     spec.loader.exec_module(module)
 except ModuleNotFoundError as error:
-    print(json.dumps(dict(valid=False, issues=[f"The selected validator requires {error.name}. Install its dependencies in the interpreter configured by mrw.pythonExecutable, then retry."], index_suggestions=[], section=None)))
+    print(json.dumps(dict(valid=False, issues=[f"The selected validator requires {error.name}. Install its dependencies in MRW: Python Executable, then retry."], index_suggestions=[], section=None)))
     sys.exit(1)
 validator = module.ZettelValidator()
 note = Path(sys.argv[2])

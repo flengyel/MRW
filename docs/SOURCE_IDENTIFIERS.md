@@ -8,7 +8,7 @@ revision of that item's contents. Retained references distinguish four fields:
 | Qualified item ID | `stacks-project:08ZH`, `kerodon:0004`, `nlab:adjoint%20functor` | Source namespace and source-local item |
 | Content revision | Retained SHA-256; Stacks Project also retains a Git commit | The exact acquired bytes |
 | Passage | Outline/region identity and scalar start/end range | The exact quotation within those bytes |
-| Private scope | Workspace/store identity | Where GOLEM XIV resolves the retained reference |
+| Private scope | Workspace/store identity | Where MRW resolves the retained reference |
 
 Keep the qualified identifier intact in document links, backlinks, study/research
 records, handoffs and resumption. Never collapse `kerodon:0004` and

@@ -1,4 +1,4 @@
-# Reading Stacks Project and Kerodon sections in GOLEM XIV
+# Reading Stacks Project and Kerodon sections in MRW
 
 Use **Import Stacks Project Section…** or **Import Kerodon Section…** to retain
 a published section for reading and annotation. Once imported, the section and
@@ -13,9 +13,9 @@ and exact passage. See [source identifiers](SOURCE_IDENTIFIERS.md).
 
 For example, import [Topology, Hausdorff spaces (08ZD)](https://stacks.math.columbia.edu/tag/08ZD):
 
-1. Open the intended GOLEM XIV workspace and run **Import Stacks Project Section…**.
+1. Open the intended MRW workspace and run **MRW: Import Stacks Project Section…**.
    Enter `stacks-project:08ZD`, `08ZD` or the canonical URL above.
-2. GOLEM XIV downloads the source at a pinned official Git revision. Review the
+2. MRW downloads the source at a pinned official Git revision. Review the
    section, revision, saved-work destination and project, then choose **Import
    section**. Cancelling leaves saved work unchanged.
 3. Read **Hausdorff spaces** in the source reader. Use the statement/proof
@@ -29,7 +29,7 @@ For example, import [Topology, Hausdorff spaces (08ZD)](https://stacks.math.colu
    **Save**. Supply origin and author under **Attribution** when known.
    Annotations remain separate from the authors' text. Save before closing:
    unsaved reader drafts are not ordinary VS Code text documents.
-6. Reopen with **Open Document… → Saved copy** or **Open Saved Source…**.
+6. Reopen with **Open Document… → Saved copy** or **MRW: Open Saved Source…**.
    Reading, annotations and citations within the saved section require no
    further download.
 
@@ -41,7 +41,7 @@ references and annotations retain their original revision and range.
 To connect a source to an Obsidian note, expand **Source details and tools →
 Source links and Obsidian notes** and use **Whole source**. A passage's
 **This passage** group provides the corresponding passage actions. See the
-[Obsidian guide](OBSIDIAN_WORKFLOW.md) for copying GOLEM XIV links and setting return
+[Obsidian guide](OBSIDIAN_WORKFLOW.md) for copying MRW links and setting return
 notes. Copying a Markdown link alone does not transfer its retained target.
 
 ## Reopen saved material
@@ -58,7 +58,7 @@ only changes note-link and backlink lookup; it does not move retained sources.
 
 ## Kerodon
 
-Run **Import Kerodon Section…** with `kerodon:0004` or
+Run **MRW: Import Kerodon Section…** with `kerodon:0004` or
 `https://kerodon.net/tag/0004` for Section 1.1, Simplicial Sets. Review the page
 SHA-256 and saved-work destination, then choose **Import section**.
 
@@ -86,11 +86,11 @@ they do not establish that the quotations are identical.
 
 ## Stacks Project acquisition, fidelity and limits
 
-GOLEM XIV uses the official [Stacks Project Git repository](https://github.com/stacks/stacks-project).
+MRW uses the official [Stacks Project Git repository](https://github.com/stacks/stacks-project).
 It resolves `master` once and retrieves the chapter TeX, `tags/tags`, `COPYING`
 and `preamble.tex` at that same commit. Each file is hashed and retained. The
 source contains the whole chapter, while generated passages cover the selected
-section. The website may show a different revision or numbering; GOLEM XIV does not
+section. The website may show a different revision or numbering; MRW does not
 combine its HTML with the retained Git source.
 
 The combined download is limited to 2 MiB and the outline to 64 passages.
@@ -122,7 +122,7 @@ importing does not move the store or change mount or synchronization settings.
 ## Shared reader and source plugins
 
 Both direct import buttons remain in Commands with documents open. **Original
-page** explicitly opens the current official section in GOLEM XIV; **Saved text**
+page** explicitly opens the current official section in MRW; **Saved text**
 restores the retained revision and annotations. **Open in browser** is separate.
 Switching preserves reader drafts, selection and Return, and leaves the frame
 mounted across local updates. Websites may have changed since import.

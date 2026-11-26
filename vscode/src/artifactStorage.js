@@ -13,7 +13,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
   let epoch, initialization, moving = false;
   const home = () => {
     const location = hostStoragePath(vscode, context.storageUri);
-    if (!location) throw new Error('Open a Linux/WSL/SSH workspace for saved GOLEM XIV artifacts.');
+    if (!location) throw new Error('Open a Linux/WSL/SSH workspace for saved MRW artifacts.');
     return location;
   };
   const control = (method, extra = {}, options) => rawBridge({ method, artifact_home: home(), ...extra }, options);
@@ -57,7 +57,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
     async function progress(action) {
       const controller = new AbortController();
       return vscode.window.withProgress({ location: vscode.ProgressLocation.Notification,
-        title: 'GOLEM XIV: moving saved sources and annotations', cancellable: true }, async (_progress, token) => {
+        title: 'MRW: moving saved sources and annotations', cancellable: true }, async (_progress, token) => {
         const disposable = token.onCancellationRequested(() => controller.abort());
         try { return await action({ timeout: 300000, signal: controller.signal }); }
         finally { disposable.dispose(); }
@@ -65,8 +65,8 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
     }
     register('mrw.artifactLocation', async () => {
       const s = await refresh();
-      void vscode.window.showInformationMessage(`GOLEM XIV saved sources and annotations: ${s.location}. ${s.scope}.`
-        + (s.recovery_required ? ' A storage operation needs recovery: run GOLEM XIV: Recover Artifact Move.' : ''));
+      void vscode.window.showInformationMessage(`MRW saved sources and annotations: ${s.location}. ${s.scope}.`
+        + (s.recovery_required ? ' A storage operation needs recovery: run MRW: Recover Artifact Move.' : ''));
       return s;
     });
     register('mrw.refreshArtifactLocation', () => transaction(async () => refresh(), true));
@@ -74,17 +74,17 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const folders = await roots();
       if (folders.length !== 1) throw new Error('Prepare a folder rename in its own single-folder workspace.');
       const current = await refresh();
-      if (current.recovery_required) throw new Error('Run GOLEM XIV: Recover Artifact Move before preparing a folder rename.');
+      if (current.recovery_required) throw new Error('Run MRW: Recover Artifact Move before preparing a folder rename.');
       const parent = hostStoragePath(vscode, context.globalStorageUri);
       if (!parent) throw new Error('Folder rename preparation needs host-local extension storage.');
       if (folders.some(root => within(parent, root))) throw new Error('Saved work must be outside the project folder being renamed.');
       const destination = path.join(parent, 'saved-work-' + randomUUID());
       const choice = await vscode.window.showWarningMessage(
-        `Prepare saved GOLEM XIV work before renaming this folder or a parent directory?\nProject: ${folders[0]}\n`
+        `Prepare saved MRW work before renaming this folder or a parent directory?\nProject: ${folders[0]}\n`
         + `Saved work will move from ${current.location} to ${destination}.\n`
-        + 'Save ordinary documents and reader forms, finish unsent requests, and close other GOLEM XIV windows using this store first. '
+        + 'Save ordinary documents and reader forms, finish unsent requests, and close other MRW windows using this store first. '
         + 'This does not rename directories or move ordinary documents. After preparation, close this workspace, rename with your file tools, '
-        + 'open the new folder and run GOLEM XIV: Reconnect Saved Work After Folder Rename…. '
+        + 'open the new folder and run MRW: Reconnect Saved Work After Folder Rename…. '
         + 'Prepare other study workspaces inside a renamed parent separately; this does not discover nested workspaces.',
         { modal: true }, 'Prepare saved work');
       if (choice !== 'Prepare saved work') return;
@@ -97,11 +97,11 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       try { await enclosing.sync(); } finally { await enclosing.close(); }
       const plan = await control('artifact_plan', { destination, roots: folders });
       if (plan.projects.length !== 1) throw new Error('This saved store contains several projects. Use the existing artifact move/open commands with explicit mappings.');
-      if (!plan.files) throw new Error('No saved GOLEM XIV work exists in this workspace. Open the study workspace that owns the records before preparing it.');
+      if (!plan.files) throw new Error('No saved MRW work exists in this workspace. Open the study workspace that owns the records before preparing it.');
       const result = await progress(options => control('artifact_move', {
         destination, roots: folders, manifest: plan.source_manifest }, options));
       if (!result.committed || result.cleanup_pending || result.recovery_required) {
-        throw new Error(`Preparation is unfinished. Keep the current folder in place and run GOLEM XIV: Recover Artifact Move. Saved-work location: ${result.location}`);
+        throw new Error(`Preparation is unfinished. Keep the current folder in place and run MRW: Recover Artifact Move. Saved-work location: ${result.location}`);
       }
       const hint = { location: result.location, store_id: result.store_id, project: folders[0] };
       try {
@@ -111,22 +111,22 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
         await context.globalState.update(renameKey, { ...hints, [result.store_id]: hint });
       } catch (error) {
         throw new Error(`Saved work moved to ${result.location}, but its reconnect shortcut could not be saved. `
-          + 'Keep this path and use GOLEM XIV: Open Saved Work Directory… after reopening the renamed folder. ' + error.message);
+          + 'Keep this path and use MRW: Open Saved Work Directory… after reopening the renamed folder. ' + error.message);
       }
       return result;
-    }, result => 'Saved GOLEM XIV work prepared. Close this workspace, rename the folder with your file tools, '
-      + 'open its new location, then run GOLEM XIV: Reconnect Saved Work After Folder Rename…. '
+    }, result => 'Saved MRW work prepared. Close this workspace, rename the folder with your file tools, '
+      + 'open its new location, then run MRW: Reconnect Saved Work After Folder Rename…. '
       + `Keep this saved-work location: ${result.location}`));
     register('mrw.reconnectRenamedFolder', () => withCompletionNotice(async () => {
       const folders = await roots();
       if (folders.length !== 1) throw new Error('Reconnect a renamed folder in its own single-folder workspace.');
       const current = await refresh();
-      if (current.recovery_required) throw new Error('Run GOLEM XIV: Recover Artifact Move before reconnecting saved work.');
+      if (current.recovery_required) throw new Error('Run MRW: Recover Artifact Move before reconnecting saved work.');
       if (current.store_id) throw new Error('This workspace already has a saved-work binding. Stores are never replaced or merged.');
       const hints = Object.values(context.globalState.get(renameKey, {})).filter(hint => hint && typeof hint.project === 'string'
         && typeof hint.location === 'string' && typeof hint.store_id === 'string');
       if (!hints.length) throw new Error('No prepared folder renames are recorded in this host/profile. Prepare the original workspace first, '
-        + 'or use GOLEM XIV: Open Saved Work Directory… with a verified artifact store.');
+        + 'or use MRW: Open Saved Work Directory… with a verified artifact store.');
       const picked = await vscode.window.showQuickPick(hints.map(hint => ({ label: path.basename(hint.project),
         description: hint.project, detail: hint.location, hint })), { placeHolder: 'Choose the saved study prepared before this folder rename' });
       if (!picked) return;
@@ -136,7 +136,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
         throw new Error('The prepared saved-work identity differs or contains several projects. No workspace binding was changed.');
       }
       const original = inspected.projects[0];
-      const choice = await vscode.window.showWarningMessage(`Reconnect this saved GOLEM XIV study?\n`
+      const choice = await vscode.window.showWarningMessage(`Reconnect this saved MRW study?\n`
         + `Previous local folder: ${hint.project}\nCurrent folder: ${folders[0]}\nSaved-work directory: ${hint.location}\n`
         + `Recorded project: ${original}\n`
         + 'Close the previous workspace and use one writing installation. This verifies the complete saved store; '
@@ -147,11 +147,11 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const result = await control('artifact_adopt', { destination: hint.location, mapping: { [folders[0]]: original },
         store_id: inspected.store_id, head_hash: inspected.head_hash });
       return result;
-    }, () => 'Saved GOLEM XIV study reconnected. Use GOLEM XIV: Open Saved Source… '
-      + 'or GOLEM XIV: Open Link from Clipboard for an earlier external passage link.'));
+    }, () => 'Saved MRW study reconnected. Use MRW: Open Saved Source… '
+      + 'or MRW: Open Link from Clipboard for an earlier external passage link.'));
     register('mrw.moveArtifactDirectory', () => withCompletionNotice(async () => {
       const current = await refresh();
-      if (current.recovery_required) throw new Error('Run GOLEM XIV: Recover Artifact Move before another move.');
+      if (current.recovery_required) throw new Error('Run MRW: Recover Artifact Move before another move.');
       const destination = await vscode.window.showInputBox({
         title: 'Move Saved Work Directory',
         prompt: `Current location: ${current.location}. Enter a new directory on the workspace host. Ordinary notes, source documents and notebooks stay in place.`,
@@ -161,7 +161,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const folders = await roots();
       const plan = await control('artifact_plan', { destination, roots: folders });
       const choice = await vscode.window.showWarningMessage(
-        `Move saved GOLEM XIV work?\nFrom: ${plan.location}\nTo: ${plan.destination}\nScope: ${plan.scope}\nProjects: ${plan.projects.join(', ')}\n`
+        `Move saved MRW work?\nFrom: ${plan.location}\nTo: ${plan.destination}\nScope: ${plan.scope}\nProjects: ${plan.projects.join(', ')}\n`
         + `${plan.files} files (${plan.bytes} bytes), plus any required retained record dependencies. `
         + 'The complete destination is verified before switching the active location; old artifact copies are then removed. Stores are never merged.',
         { modal: true }, 'Move saved work');
@@ -169,7 +169,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
       const result = await progress(options => control('artifact_move', { destination: plan.destination, roots: folders, manifest: plan.source_manifest }, options));
       return result;
     }, result => `${result.message}. Effective location: ${result.location}.`
-      + (result.cleanup_pending ? ' Run GOLEM XIV: Recover Artifact Move to retry cleanup.' : '')));
+      + (result.cleanup_pending ? ' Run MRW: Recover Artifact Move to retry cleanup.' : '')));
     register('mrw.openArtifactDirectory', () => withCompletionNotice(async () => {
       const destination = await vscode.window.showInputBox({ title: 'Open Saved Work Directory',
         prompt: 'Enter the directory containing your saved sources and annotations. This connects the workspace without moving files.', ignoreFocusOut: true });
@@ -182,7 +182,7 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
         if (!selected) return;
         mapping[selected] = original; available.splice(available.indexOf(selected), 1);
       }
-      const choice = await vscode.window.showWarningMessage(`Open saved GOLEM XIV work?\nDirectory: ${destination}\n`
+      const choice = await vscode.window.showWarningMessage(`Open saved MRW work?\nDirectory: ${destination}\n`
         + Object.entries(mapping).map(([local, original]) => `${original} → ${local}`).join('\n')
         + '\nConfirm that other computers have stopped writing and synchronization has completed. Local locks do not coordinate other computers.',
         { modal: true }, 'Open saved work');
@@ -198,12 +198,12 @@ function createArtifactStorage({ vscode, context, rawBridge }) {
   async function inspectionRoots(){
     const original=home(),binding=path.join(original,'artifact-runtime','active-store.json');
     async function bounded(file){const h=await fs.open(file,require('node:fs').constants.O_RDONLY|require('node:fs').constants.O_NOFOLLOW);try{const before=await h.stat();if(!before.isFile()||before.size>1024*1024)throw Error('Artifact inspection metadata exceeds its budget');const buffer=Buffer.alloc(before.size+1);let offset=0;while(offset<buffer.length){const {bytesRead}=await h.read(buffer,offset,buffer.length-offset,null);if(!bytesRead)break;offset+=bytesRead;}const after=await h.stat();if(offset!==before.size||before.size!==after.size||before.mtimeMs!==after.mtimeMs)throw Error('Artifact inspection metadata changed');return buffer.subarray(0,offset);}finally{await h.close();}}
-    let raw;try{raw=await bounded(binding);}catch(e){if(e.code==='ENOENT')return [{path:original,label:'Workspace GOLEM XIV storage'}];throw e;}
+    let raw;try{raw=await bounded(binding);}catch(e){if(e.code==='ENOENT')return [{path:original,label:'Workspace MRW storage'}];throw e;}
     const value=JSON.parse(raw);if(value.version!==1||typeof value.location!=='string'||!path.isAbsolute(value.location)||typeof value.store_id!=='string'||!/^[a-f0-9]{64}$/.test(value.identity_hash))throw Error('Artifact binding cannot be inspected safely');
     if(await fs.realpath(value.location)!==value.location)throw Error('Bound artifact location was redirected');
     const identityRaw=await bounded(path.join(value.location,'store.json')),identity=JSON.parse(identityRaw);
     if(identity.id!==value.store_id||require('node:crypto').createHash('sha256').update(identityRaw).digest('hex')!==value.identity_hash)throw Error('Bound artifact identity differs');
-    return [{path:original,label:'Workspace GOLEM XIV storage'},{path:value.location,label:'Verified bound saved-work store'}];
+    return [{path:original,label:'Workspace MRW storage'},{path:value.location,label:'Verified bound saved-work store'}];
   }
   return { bridge, registerCommands, inspectionRoots };
 }

@@ -20,7 +20,7 @@ The preparer creates a new private directory under `~/.cache/mrw-native-tests/`;
 a vault or working notes folder is not an output destination. It never
 reuses that parent as the fixture or accepts a working project as its destination.
 The receipt binds the new directory's device/inode, UUID, staged extension,
-project and uniquely named `GOLEM-XIV-Fixture-<UUID>` profile. Its `launch.json` contains
+project and uniquely named `MRW-Fixture-<UUID>` profile. Its `launch.json` contains
 the explicit Windows/WSL arguments. Preparation launches or installs nothing.
 
 Use those arguments with the Windows VS Code CLI. Enable the WSL connector in
@@ -51,7 +51,7 @@ Every host module's exported activation/run/check is guarded before its body:
 - The test context uses dedicated workspace/global store directories under the
   owned root. Raw native contexts are not passed to production activation.
   Native Mementos are wrapped with a UUID key prefix, using their existing
-  `get`, `keys` and `update` methods. Genuine GOLEM XIV keys are neither exposed nor
+  `get`, `keys` and `update` methods. Genuine MRW keys are neither exposed nor
   overwritten, and test keys cannot enter Settings Sync. This is a scoped native
   adapter, not another persistence engine or a direct state-database writer.
 - A first launch must have no orphaned state in that fixture namespace. Only
@@ -151,7 +151,7 @@ requesting Contents.
 
 On the tested Windows CLI, installing a connector into a new named profile
 requires that profile to exist first. If a bootstrap window is needed, give it
-the same unique fixture title through a disposable local folder, disable GOLEM XIV
+the same unique fixture title through a disposable local folder, disable MRW
 there, and close that exact window after enabling the pinned WSL connector.
 Verify its closure before launching the remote fixture. Do not leave an
 unidentified blank window behind. Keep inherited CLI IPC/Electron settings out

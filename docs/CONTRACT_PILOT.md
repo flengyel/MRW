@@ -85,7 +85,7 @@ changed-source, abrupt termination, Unicode/range and recovery cases.
 
 The conformance test is optional in ordinary extension testing: without the
 explicit executable path it reports a skip. It never builds or invokes Lean
-when GOLEM XIV opens. Run from the repository root after bundling the Python core:
+when MRW opens. Run from the repository root after bundling the Python core:
 
 ```sh
 npm run bundle-core --prefix vscode

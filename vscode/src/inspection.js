@@ -25,7 +25,7 @@ function createInspection({storageRoots=[],usage,version='unknown',scope='worksp
         }finally{await handle.close();}
       }
       async function inspectRoot(spec){
-        const root=typeof spec==='string'?spec:spec.path,label=typeof spec==='string'?'GOLEM XIV storage':spec.label||'GOLEM XIV storage';
+        const root=typeof spec==='string'?spec:spec.path,label=typeof spec==='string'?'MRW storage':spec.label||'MRW storage';
         const row={label,path:root,status:'complete',files:0,bytes:0,checks:['streamed byte hashes','content-addressed object digests','bounded metadata','active generation manifests'],unchecked:['external note/proof targets','remote replicas','semantic correctness','full schema/dependency validation']};roots.push(row);
         const authorityPins=[];
         try{check();if(typeof root!=='string'||!path.isAbsolute(root)||await io.realpath(root)!==root)throw Error('Unsupported storage root');

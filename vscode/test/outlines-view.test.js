@@ -125,10 +125,10 @@ test('copy and return-note actions explain opposite directions and preserve expl
   assert.equal(h.button(whole,'copy-link').textContent, 'Copy link to this source');
   assert.equal(h.button(current,'copy-link').textContent, 'Copy link to this passage');
   assert.match(current.text(), /2 linked notes — choose when opening/);
-  assert.match(whole.text(), /From your note to GOLEM XIV/);
-  assert.match(h.button(whole,'copy-link').title, /opens this retained source or passage in GOLEM XIV/);
-  assert.match(whole.text(), /From GOLEM XIV to your note/);
-  assert.match(h.button(whole,'associate-note').title, /return destination from GOLEM XIV/);
+  assert.match(whole.text(), /From your note to MRW/);
+  assert.match(h.button(whole,'copy-link').title, /opens this retained source or passage in MRW/);
+  assert.match(whole.text(), /From MRW to your note/);
+  assert.match(h.button(whole,'associate-note').title, /return destination from MRW/);
   h.button(whole,'copy-link').listeners.click();
   assert.equal(h.messages.filter(m => m.type === 'associate_note').length, 0);
   assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({type:'copy_link',region:null,pinned:false}));
@@ -271,7 +271,7 @@ test('hover and keyboard focus explain controls without an action; destination u
   refresh.listeners.mouseenter(); refresh.listeners.mouseleave(); assert.match(help.text(), /Send is a separate action/);
   assert.equal(ask['aria-description'], ask.title); assert.equal(ask['aria-describedby'], help.id);
   ask.listeners.keydown({ key: 'Escape' }); assert.equal(help.hidden, true);
-  ask.listeners.blur(); refresh.listeners.focus(); assert.match(help.text(), /from GOLEM XIV storage/);
+  ask.listeners.blur(); refresh.listeners.focus(); assert.match(help.text(), /from MRW storage/);
   refresh.listeners.blur(); assert.equal(help.hidden, true);
   assert.equal(h.messages.length, before);
   h.send({ type: 'return_destination', destination: { kind: 'selected', label: '← Open reading-overview.md',

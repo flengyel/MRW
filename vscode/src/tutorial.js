@@ -7,7 +7,7 @@ const { randomUUID } = require('node:crypto');
 // an installation replaces the package on disk while the old host stays open.
 const descriptor = require('../package.json');
 
-const GUIDE_ROOT = 'https://github.com/flengyel/GOLEMXIV/blob/main/';
+const GUIDE_ROOT = 'https://github.com/flengyel/MRW/blob/main/';
 const GUIDES = new Set([
   'PROOF_STUDY_WORKFLOW.md', 'ACTIVE_STUDY_WORKFLOW.md', 'DOCUMENT_LEARNING_WORKFLOW.md',
   'GETTING_STARTED_WSL_SAGEPOD.md', 'READING_OUTLINE_WORKFLOW.md',
@@ -23,7 +23,7 @@ function renderTutorial(text, identity) {
   const version = identity.version || 'unknown';
   const build = identity.commit ? ` · build \`${identity.commit}\`${identity.localChanges ? ' with local changes' : ''}` : ' · build identity unavailable';
   const heading = /^# [^\r\n]+(?:\r?\n|$)/;
-  const banner = `\nActive extension: **GOLEM XIV ${version}**${build}.\n`;
+  const banner = `\nActive extension: **MRW ${version}**${build}.\n`;
   const source = rewriteGuideLinks(text);
   return heading.test(source) ? source.replace(heading, first => first + banner) : banner + '\n' + source;
 }
@@ -45,7 +45,7 @@ function registerTutorial({ vscode, context, register }) {
   // this activation's help or claim that the new extension has been adopted.
   const content = renderTutorial(fs.readFileSync(path.join(context.extensionPath, 'media', 'first-steps.md'), 'utf8'), identity);
   const changed = new vscode.EventEmitter();
-  const uri = vscode.Uri.from({ scheme: 'mrw-help', path: '/Using GOLEM XIV.md', query: `activation=${randomUUID()}` });
+  const uri = vscode.Uri.from({ scheme: 'mrw-help', path: '/Using MRW.md', query: `activation=${randomUUID()}` });
   const provider = { onDidChange: changed.event, provideTextDocumentContent: () => content };
   context.subscriptions.push(changed, vscode.workspace.registerTextDocumentContentProvider('mrw-help', provider));
   register('mrw.openTutorial', async () => {

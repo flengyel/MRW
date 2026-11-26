@@ -1,19 +1,19 @@
 # Publish a GitHub release
 
-GOLEM XIV is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
-The current release is [0.23.64](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64).
+MRW is distributed as a workspace-extension VSIX, with identity `flengyel.mrw`.
+The current release is [0.23.64](https://github.com/flengyel/MRW/releases/tag/v0.23.64).
 GitHub-distributed updates require downloading and installing a newer VSIX;
 there is no automatic update channel or Marketplace publication in this procedure.
 
 Publish normal releases by default (`prerelease: false`) and mark the newest
 release as **Latest**. Reserve the prerelease flag for an explicitly designated
-test candidate. GOLEM XIV remains experimental; that description does not require the
+test candidate. MRW remains experimental; that description does not require the
 GitHub prerelease flag.
 
 To promote an existing prerelease, clear **Set as a pre-release**, select
 **Set as the latest release**, and save. Keep its tag, version, assets and
 checksums unchanged; changing release metadata requires no rebuild. Verify the
-release page and the [latest-release link](https://github.com/flengyel/GOLEMXIV/releases/latest).
+release page and the [latest-release link](https://github.com/flengyel/MRW/releases/latest).
 The steps below apply when building a new version.
 
 1. Fetch origin and reconcile main without discarding local work. Inspect remote
@@ -22,8 +22,8 @@ The steps below apply when building a new version.
    worktree when needed and keep the working VS Code window and private data intact.
 2. Update `vscode/package.json`, matching root metadata in
    `vscode/package-lock.json`, `pyproject.toml` and `src/mrw/__init__.py` to the
-   same version. Preserve dependency pins. Update the version in the manifest’s `mrw` Activity
-   Bar container title; VS Code uses it for
+   same version. Preserve dependency pins. Set the `mrw` Activity
+   Bar container title to `MRW <version>` in the manifest; VS Code uses it for
    the icon hover and sidebar heading. Package verification rejects a stale title.
    Update versioned release and VSIX links in both READMEs and the installation
    guide. Keep release facts and check results in release notes or the pull
@@ -41,10 +41,11 @@ The steps below apply when building a new version.
    TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
    core_version=$(node -p "require('./vscode/package.json').version")
    diagnostics_version=$(node -p "require('./diagnostics/package.json').version")
-   npm run verify-vsix --prefix vscode -- "mrw-$core_version.vsix"
    npm run check --prefix diagnostics
    npm test --prefix diagnostics
    TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix diagnostics
+   python3 vscode/scripts/verify-vsix.py "vscode/mrw-$core_version.vsix" \
+     --diagnostics "diagnostics/mrw-diagnostics-$diagnostics_version.vsix"
    ```
 
    Check changed documents and their links.
@@ -53,11 +54,11 @@ The steps below apply when building a new version.
    regressions for uncovered runtime changes. Changes to shared reader/plugin code require
    the full Python and extension suites, syntax checks, a clean wheel install,
    an extracted-VSIX bridge check and isolated interface checks. Verify no stale
-   generated package is present. Search every tracked path and text file, then
-   the extracted VSIX, for superseded identities: zero occurrences are required.
-   Keep one-time data conversion and original evidence outside maintained source
-   and installation directories. No compatibility-reader or evidence exception
-   substitutes for completion. Documentation-only shortcuts do not apply.
+   generated package is present. Check product names, icons and command labels in
+   tracked files and both extracted VSIX packages. Verify that workspace setup still
+   recognizes the earlier 0.23.65 workspace filename as described in the
+   [workspace guide](WORKSPACE_SETUP.md). Keep one-time data conversion and original
+   evidence outside maintained source and installation directories. Documentation-only shortcuts do not apply.
 5. Inspect the final manifest, build marker, revised tutorial, guide links and
    packaged README. The verifier checks the exact inventory, runtime bytes and
    bundled licenses/notices; do not include vault files, private settings, logs

@@ -1,11 +1,11 @@
-# Selective formalization of GOLEM XIV contracts
+# Selective formalization of MRW contracts
 
-GOLEM XIV has a first [executable contract pilot](CONTRACT_PILOT.md) for identity
+MRW has a first [executable contract pilot](CONTRACT_PILOT.md) for identity
 preservation during relocation and immutable citation targets. Operation-state
 and report-classification invariants remain subsequent targets.
 Formalizing the complete interface, external applications or mathematical
 usefulness is outside this proposal. This document authorizes no toolchain
-upgrade or claim that GOLEM XIV's runtime is verified.
+upgrade or claim that MRW's runtime is verified.
 
 ## Candidate obligations
 
@@ -59,7 +59,7 @@ Start with Lean core and Std. Add dependencies only for an identified missing
 capability, pinned compatibly with the selected toolchain:
 
 - [Batteries](https://github.com/leanprover-community/batteries) supplies additional
-  data structures and tactics; it is not a ready-made GOLEM XIV contract verifier.
+  data structures and tactics; it is not a ready-made MRW contract verifier.
 - [Veil](https://github.com/verse-lab/veil) is a Lean framework for transition
   systems. Evaluate it if the protocol model needs that machinery; a small
   state machine may need only ordinary inductive definitions and proofs.
@@ -72,7 +72,7 @@ capability, pinned compatibly with the selected toolchain:
 
 No `sorry` or new axioms may discharge the contract obligations. List environment
 assumptions explicitly and inspect theorem dependencies. Use bounded build/test
-jobs with measured memory/time; ordinary GOLEM XIV reading must not require Lean.
+jobs with measured memory/time; ordinary MRW reading must not require Lean.
 Formalization must not block concrete usability repairs, including bibliography
 rendering and the remaining [evaluation items](DESIGN_RECONCILIATION.md).
 

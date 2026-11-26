@@ -1,9 +1,10 @@
 {
   "name": "mrw-diagnostics",
-  "displayName": "GOLEM XIV Diagnostics",
-  "description": "Optional read-only feature-use and integrity reports for GOLEM XIV.",
+  "displayName": "MRW Diagnostics",
+  "description": "Optional read-only feature-use and integrity reports for MRW.",
   "publisher": "flengyel",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "icon": "media/mrw-icon.png",
   "license": "Apache-2.0",
   "engines": {
     "vscode": "^1.96.0"
@@ -22,27 +23,27 @@
     "commands": [
       {
         "command": "mrwDiagnostics.featureUse",
-        "category": "GOLEM XIV Diagnostics",
+        "category": "MRW Diagnostics",
         "title": "Feature Use"
       },
       {
         "command": "mrwDiagnostics.integrity",
-        "category": "GOLEM XIV Diagnostics",
+        "category": "MRW Diagnostics",
         "title": "Integrity and Data Hygiene"
       },
       {
         "command": "mrwDiagnostics.export",
-        "category": "GOLEM XIV Diagnostics",
+        "category": "MRW Diagnostics",
         "title": "Export Last Report\u2026"
       },
       {
         "command": "mrwDiagnostics.maintenance",
-        "category": "GOLEM XIV Diagnostics",
+        "category": "MRW Diagnostics",
         "title": "Copy Codex Maintenance Handoff"
       }
     ],
     "configuration": {
-      "title": "GOLEM XIV Diagnostics",
+      "title": "MRW Diagnostics",
       "properties": {
         "mrwDiagnostics.weeklyEnabled": {
           "type": "boolean",
@@ -68,7 +69,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/flengyel/GOLEMXIV.git",
+    "url": "https://github.com/flengyel/MRW.git",
     "directory": "diagnostics"
   }
 }

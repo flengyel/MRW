@@ -1,5 +1,5 @@
 'use strict';
-// Obsidian owns creation and template execution. GOLEM XIV never supplies note bytes.
+// Obsidian owns creation and template execution. MRW never supplies note bytes.
 const path = require('node:path');
 const {execFile} = require('node:child_process');
 const {promisify} = require('node:util');
@@ -25,7 +25,7 @@ async function executable(configuration, remote, execute) {
     const value = await execute('/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
       ['-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')]);
     const match = /^([A-Za-z]):\\([^\r\n]+)$/.exec(value);
-    if (!match) throw Error('Set Obsidian Executable (mrw.obsidianExecutable) to the Obsidian CLI on this host.');
+    if (!match) throw Error('Set MRW: Obsidian Executable to the Obsidian CLI on this host.');
     return `/mnt/${match[1].toLowerCase()}/${match[2].replaceAll('\\','/')}`;
   }
   return process.platform === 'win32' ? 'Obsidian.com' : 'obsidian';
@@ -37,22 +37,22 @@ async function createObsidianNote({vscode, root, validate = async () => {}, exec
   const configuredCommand = config.get('obsidianNewNoteCommand', '');
   const command = typeof configuredCommand === 'string' ? configuredCommand.trim() : '';
   // No implicit plain-file creation. The chosen companion command must run the
-  // vault's creation template; GOLEM XIV cannot inspect arbitrary plugin execution.
+  // vault's creation template; MRW cannot inspect arbitrary plugin execution.
   if (!command || command === 'file-explorer:new-file' ||
       command.startsWith('templater-obsidian:insert-') || command === 'templates:insert-template') {
-    throw Error('Set Obsidian New Note Command (mrw.obsidianNewNoteCommand) to your template’s creation command, for example templater-obsidian:create-Templates/NewFileTemplate.md. Plain new-file and insert-template commands cannot be used here. No command was sent.');
+    throw Error('Set MRW: Obsidian New Note Command to your template’s creation command, for example templater-obsidian:create-Templates/NewFileTemplate.md. Plain new-file and insert-template commands cannot be used here. No command was sent.');
   }
-  if (!vault || /[\r\n\x00]/.test(vault + command)) throw Error('Set Obsidian New Note Command (mrw.obsidianNewNoteCommand) and a valid Obsidian vault.');
+  if (!vault || /[\r\n\x00]/.test(vault + command)) throw Error('Set MRW: Obsidian New Note Command and a valid Obsidian vault.');
   let cli;
   try {
     cli = await executable(config, vscode.env.remoteName, execute);
     const actual = await execute(cli, [`vault=${vault}`, 'vault', 'info=path']);
     const expected = vscode.env.remoteName === 'wsl' ? windowsPath(root) : root;
-    if (!samePath(actual, expected)) throw Error('Obsidian selected a different vault. Set Obsidian Vault (mrw.obsidianVault) to the intended vault ID.');
+    if (!samePath(actual, expected)) throw Error('Obsidian selected a different vault. Set MRW: Obsidian Vault to the intended vault ID.');
     const commands = await execute(cli, [`vault=${vault}`, 'commands']);
-    if (!commands.split(/\r?\n/).includes(command)) throw Error(`Obsidian command is unavailable: ${command}. Set Obsidian New Note Command (mrw.obsidianNewNoteCommand) to your template's creation command.`);
+    if (!commands.split(/\r?\n/).includes(command)) throw Error(`Obsidian command is unavailable: ${command}. Set MRW: Obsidian New Note Command to your template's creation command.`);
   } catch (error) {
-    throw Error(`New Note could not reach the selected Obsidian command: ${error.message}. Enable Obsidian Settings → General → Command line interface, and check GOLEM XIV's Obsidian settings. No note was created by GOLEM XIV.`);
+    throw Error(`New Note could not reach the selected Obsidian command: ${error.message}. Enable Obsidian Settings → General → Command line interface, and check MRW's Obsidian settings. No note was created by MRW.`);
   }
   await validate();
   const focused = await vscode.env.openExternal(vscode.Uri.parse(`obsidian://open?vault=${encodeURIComponent(vault)}`));
@@ -63,7 +63,7 @@ async function createObsidianNote({vscode, root, validate = async () => {}, exec
     if (/^Error\b/im.test(response)) throw Error(response);
   } catch (error) {
     // Commands may have run before transport failure. Never retry or create a fallback file.
-    throw Error(`Obsidian did not confirm the new-note command: ${error.message}. Check Obsidian before retrying; GOLEM XIV will not create a second note.`);
+    throw Error(`Obsidian did not confirm the new-note command: ${error.message}. Check Obsidian before retrying; MRW will not create a second note.`);
   }
 }
 module.exports = {createObsidianNote, samePath, windowsPath};

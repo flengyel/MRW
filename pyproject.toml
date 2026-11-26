@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mrw"
-version = "0.23.65"
-description = "GOLEM XIV — Mathematical Research Workstation"
+version = "0.23.66"
+description = "Mathematical Research Workstation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
@@ -20,4 +20,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "mrw" = ["quiver.json"]
-"mrw.data" = ["*.json"]
+"mrw.data" = ["*.json", "mrw-icon.png"]

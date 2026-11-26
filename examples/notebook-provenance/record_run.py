@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Explicitly execute a trusted notebook in a fresh kernel and save its receipt.
 
-Requires nbclient/nbformat in the producer environment. GOLEM XIV never imports
-or invokes this script. Refuses to overwrite either input or output files.
+Requires nbclient/nbformat in the producer environment, not in MRW. Never imported
+or invoked by the extension. Refuses to overwrite either input or output files.
 """
 import argparse
 from datetime import datetime, timezone
@@ -64,7 +64,7 @@ def main():
     cells = [c for c in saved['cells'] if c['cell_type'] == 'code']
     saved['metadata']['mrw_execution'] = {
         'schema': 'mrw-notebook-run:1', 'id': str(uuid4()),
-        'producer': 'GOLEM XIV example runner using nbclient', 'started': started, 'ended': now(),
+        'producer': 'MRW example runner using nbclient', 'started': started, 'ended': now(),
         'outcome': outcome,
         'code_sha256': sha256(canonical([''.join(c['source']) if isinstance(c['source'], list) else c['source'] for c in cells])).hexdigest(),
         'outputs_sha256': sha256(canonical([c['outputs'] for c in cells])).hexdigest(),

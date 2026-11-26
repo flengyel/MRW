@@ -11,7 +11,7 @@
   if(source){
    const back=el('button',current.material?(current.material.review?'← Back to proposal':'← Back to selected passages'):'← Back to routes',nav);back.onclick=()=>{source=null;render();};
    const s=(current.material?.sources||current.request.sources).find(s=>s.id===source);
-   if(s){el('h2',s.title);window.GolemXIVAnnotations.render(root,s.text,{inlineDollars:true,exact:false});
+   if(s){el('h2',s.title);window.MRWAnnotations.render(root,s.text,{inlineDollars:true,exact:false});
     const details=el('details');el('summary','Exact source and reference',details);el('p',s.reference,details);
     el('p','Reported source revision: '+s.source_revision,details);el('p','Retained passage SHA-256: '+s.sha256,details);el('pre',s.text,details);}
    return;
@@ -27,7 +27,7 @@
     const names=Object.fromEntries(review.claims.map(c=>[c.id,c.title]));
     review.claims.forEach(c=>{
      const row=el('section');row.className='region';el('h3',(c.id===review.goal?'Goal: ':'')+c.title,row);
-     window.GolemXIVAnnotations.render(row,c.text,{inlineDollars:true,exact:false});
+     window.MRWAnnotations.render(row,c.text,{inlineDollars:true,exact:false});
      button('Edit summary','edit_material',row,{claim:c.id,field:'text'});
      button('Edit title','edit_material',row,{claim:c.id,field:'title'});
      c.sources.forEach(id=>{const source=m.sources.find(s=>s.id===id);if(source){const n=el('button',source.title,row);n.onclick=()=>{sourceId(id);};}});
@@ -54,7 +54,7 @@
   }
   el('p',current.revision?'Retained Lean run: checked relative to these admissions. Reopened views perform no new check.':'Review the supplied context before searching. Opening it admits nothing.');
   const goal=current.request.goal,claim=goal[0]==='atom'?current.request.claims.find(c=>c.id===goal[1].id):null;
-  if(claim)window.GolemXIVAnnotations.render(root,claim.assertion,{inlineDollars:true,exact:false});
+  if(claim)window.MRWAnnotations.render(root,claim.assertion,{inlineDollars:true,exact:false});
   el('p','This engine checks the stated composition of grounds; it does not check the arithmetic proofs or a paper–Lean correspondence.').className='muted';
   if(current.proposalRevision)button('Inspect supplied and reviewed proposal','proposal_record');
   if(current.pending){
@@ -86,7 +86,7 @@
   current.request.admissions.filter(a=>active.has(a.id)).forEach(a=>{const row=el('section',undefined,assumptions);row.className='region';
    el('h3',a.id.replaceAll('-',' '),row);el('p',a.rationale,row);el('p','Scope: '+a.scope,row);el('p','Supplied by '+a.admitted_by.id+' · '+a.at,row);a.basis_refs.forEach(ref=>showSource(ref.id,row));});
   if(current.pending)assumptions.open=true;
-  const setup=el('details');el('summary','Local checker setup',setup);el('p','Build GOLEM XIV’s checker using an already installed Lean 4.32.2 toolchain on Linux/WSL. No download or build occurs when opening this view.',setup);button('Build local checker','build',setup);
+  const setup=el('details');el('summary','Local checker setup',setup);el('p','Build MRW’s checker using an already installed Lean 4.32.2 toolchain on Linux/WSL. No download or build occurs when opening this view.',setup);button('Build local checker','build',setup);
   if(current.busy)el('p',current.pendingSaved?'Working… The exact unfinished context is saved.':'Saving the exact context before checking… Keep this view open until confirmed.').setAttribute('role','status');
   if(current.error)el('p',current.error).className='warning';
  }

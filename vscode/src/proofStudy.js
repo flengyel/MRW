@@ -41,7 +41,7 @@ function handoff(study, schema, atlas = false) {
     'joint premises, alternative inferences and local scope. Identify unsupported steps in their explanations.',
     'Structural validation is separate from mathematical checking.',
     'Use only these selected sources. Copy their source entries exactly.',
-    'Cite line numbers within each exact passage snapshot. Include its GOLEM XIV reference if supplied.',
+    'Cite line numbers within each exact passage snapshot. Include its MRW reference if supplied.',
     ...(atlas ? ['Cite the reason for each inference. Describe unresolved steps in an explanation without adding an inference for them.'] : []),
     'Do not request or infer access to other private files, reader notes or evidence.', '',
     'Source entries:', fence + 'json', encoded(sources(study)).trimEnd(), fence, ''];
@@ -60,7 +60,7 @@ function bindProposal(graph, study, atlas = false) {
   const byId = new Map(study.passages.map(p => [p.id, p]));
   for (const item of [...graph.nodes, ...graph.inferences]) for (const c of item.citations || []) {
     const p = byId.get(c.source);
-    if (!p || c.reference !== p.reference || c.end_line > p.text.split(/\r\n|\r|\n/u).length) throw new Error('A citation leaves its selected passage or changes its GOLEM XIV reference.');
+    if (!p || c.reference !== p.reference || c.end_line > p.text.split(/\r\n|\r|\n/u).length) throw new Error('A citation leaves its selected passage or changes its MRW reference.');
   }
   if (atlas && graph.inferences.some(inference => !inference.citations?.length)) {
     throw new Error('Cite the approved reason for each inference. Keep unsupported steps as gaps in an explanation.');
@@ -123,7 +123,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
     const graph = await readProposal(vscode.env.clipboard, bridge, c.study);
     const uri = await vscode.window.showSaveDialog({ title: 'Save proposed outline',
       defaultUri: vscode.Uri.file(c.file.replace(/\.mrw-study\.json$/, '-' + crypto.randomUUID().slice(0, 8) + '.mrw-proof.json')),
-      filters: { 'GOLEM XIV proof outline': ['mrw-proof.json'] } });
+      filters: { 'MRW proof outline': ['mrw-proof.json'] } });
     if (!uri) return;
     if (uri.scheme !== 'file') throw new Error('Choose a local outline file.');
     const file = await scoped(uri.fsPath, c.root, '.mrw-proof.json');
@@ -183,7 +183,7 @@ function registerProofStudy({ vscode, context, register, bridge, projectRoot, ch
     const passages = studyPassages(selected), question = await vscode.window.showInputBox({ prompt: 'Question to investigate' });
     if (question === undefined) return;
     const study = validateStudy({ version: 1, title: passages[0].label.slice(0, 240), question, passages, outline: null });
-    const uri = await vscode.window.showSaveDialog({ title: 'Save proof work', defaultUri: vscode.Uri.file(path.join(root, 'proof-study.mrw-study.json')), filters: { 'GOLEM XIV proof work': ['mrw-study.json'] } });
+    const uri = await vscode.window.showSaveDialog({ title: 'Save proof work', defaultUri: vscode.Uri.file(path.join(root, 'proof-study.mrw-study.json')), filters: { 'MRW proof work': ['mrw-study.json'] } });
     if (!uri) return;
     if (uri.scheme !== 'file') throw new Error('Choose a local study file.');
     const file = await scoped(uri.fsPath, root, '.mrw-study.json'); await create(file, encoded(study)); await open(file, root);

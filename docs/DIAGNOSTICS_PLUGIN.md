@@ -1,7 +1,7 @@
 # Optional diagnostics and maintenance plugin
 
 An optional plugin provides feature-use analysis and periodic integrity and
-data-hygiene reports. GOLEM XIV core retains lightweight usage recording and the
+data-hygiene reports. MRW core retains lightweight usage recording and the
 integrity checks required to read, write, move and recover its own data safely.
 Disabling the plugin must not disable those checks or block mathematical work.
 
@@ -10,7 +10,7 @@ VSIX and supported checks are described in [its guide](../diagnostics/README.md)
 The requirements below include checks beyond that bounded implementation. Existing
 source-plugin API 1 and Lean lesson-pack interfaces do not supply a general
 maintenance API. Start with a companion VS Code extension and the minimum
-versioned, read-only GOLEM XIV inspection interface needed for these reports. Do not
+versioned, read-only MRW inspection interface needed for these reports. Do not
 expand source import into unrestricted maintenance or build a general plugin
 framework as a prerequisite.
 
@@ -18,14 +18,14 @@ framework as a prerequisite.
 
 | Component | Responsibility |
 | --- | --- |
-| GOLEM XIV core | Own storage invariants, operation identities, lightweight usage events, bounded inspection interfaces and existing authorized recovery commands. |
+| MRW core | Own storage invariants, operation identities, lightweight usage events, bounded inspection interfaces and existing authorized recovery commands. |
 | Diagnostics plugin | Own report configuration, scheduling, aggregation, findings, presentation and its bounded report history. |
 | External subsystem | Own its formats, creation/execution workflows, managed indexes and repair operations. |
 
 The plugin follows [the integration contract](INTEGRATION_BOUNDARIES.md) and
 [feature-use measurement contract](OPERATIONAL_USAGE.md). Core supplies storage
 knowledge through versioned inspectors; the plugin must not copy private schema
-logic or write GOLEM XIV stores directly. Unsupported core versions or checks are
+logic or write MRW stores directly. Unsupported core versions or checks are
 reported as unavailable. Read-only inspection preserves source objects and
 owner-managed data. New reports, schedule state and invocation records may be
 written to their separate output/control stores; exclude the in-progress report
@@ -50,7 +50,7 @@ or all retained artifacts into memory. Show the age of full verification and
 which unchanged objects were reused from earlier checks. Incremental reuse
 must not be labeled a fresh byte-integrity check.
 
-Limit scope to configured GOLEM XIV data, plugin-owned reports/caches and explicit
+Limit scope to configured MRW data, plugin-owned reports/caches and explicit
 external references. Use supported read/status interfaces for external targets;
 remote checks are separately configurable. A routine report must work offline,
 make no model request, execute no notebook/proof/computation and submit no job.
@@ -70,7 +70,7 @@ markers and removes staging files, so it is not a read-only inspector.
 | Links and associations | Missing or ambiguous identities, changed locations, unresolved passage anchors and references to unavailable external material. Keep current locations separate from immutable citations. |
 | History and synchronization | Conflicting event IDs or snapshots, missing dependencies, gaps, pending publication, deletion markers and incomplete or unavailable replicas. |
 | Interrupted work | Pending or uncertain transfers, moves, captures and external operations; use recorded identities and observed status without retrying them. |
-| Data hygiene | Storage growth by class, old plugin reports, rebuildable caches, known GOLEM XIV temporary/staging remnants and possible duplicate content with distinct identities. |
+| Data hygiene | Storage growth by class, old plugin reports, rebuildable caches, known MRW temporary/staging remnants and possible duplicate content with distinct identities. |
 
 An absent external target is not automatically corruption: it may be offline,
 moved or outside authorized scope. Distinguish a verified failure from
@@ -81,7 +81,7 @@ inconclusive. Collect independent findings even when one check fails; later
 checks not run remain unperformed. A partial report cannot claim that the
 store is healthy.
 
-Each report records run identity, scope, observation times, GOLEM XIV/plugin/check
+Each report records run identity, scope, observation times, MRW/plugin/check
 versions, completed/skipped checks, resource limits and coverage. Findings have
 stable identities, severity, supporting observations, first/last seen times and
 new/persistent/resolved status. Severity describes data or recovery consequences,

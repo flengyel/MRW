@@ -479,7 +479,7 @@ test('WikiLinks are clickable without an active source editor and preserve exact
   const previous = structuredClone(h.state.get('mrw.documents.v1').origin);
   await assert.rejects(h.commands.get('mrw.followWikiLink')(value), /note link changed/);
   assert.deepEqual(h.state.get('mrw.documents.v1').origin, previous, 'stale click preserves preceding origin');
-  await assert.rejects(wiki.handleUri(h.api.Uri.parse(hrefs[0] + '&extra=x')), /Invalid GOLEM XIV/);
+  await assert.rejects(wiki.handleUri(h.api.Uri.parse(hrefs[0] + '&extra=x')), /Invalid MRW/);
   h.api.workspace.isTrusted = false;
   assert.deepEqual(h.linkProvider.provideDocumentLinks(a), []);
   await assert.rejects(h.commands.get('mrw.followWikiLink')(value), /trust the intended workspace/);
@@ -548,7 +548,7 @@ test('copied note link opens from the external URI after restart without importi
   const a = await h.doc('1a.md'); await h.focus(a);
   const link = await h.commands.get('mrw.copyDocumentLink')();
   assert.equal(parseNoteLink(link).file, '1a.md');
-  assert.match(h.clipboard, /^\[A changed title · 1a\.md — GOLEM XIV\]\(vscode:/);
+  assert.match(h.clipboard, /^\[A changed title · 1a\.md — MRW\]\(vscode:/);
   const state = h.state, restarted = harness(f, state, { notesFolder: f.notes, preview: true });
   const draft = await restarted.doc('1a.md'); restarted.change(draft, draft.getText().length, 0, 'Unsent draft α😀');
   const wiki = registerWikiLinks({ vscode: restarted.api, context: restarted.context, register: (k,v) => restarted.commands.set(k,v), documents: restarted.documents });

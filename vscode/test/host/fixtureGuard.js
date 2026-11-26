@@ -6,7 +6,7 @@ const UUID=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 let verified;
 const contexts=new WeakMap();
 const inside=(root,file)=>{const rel=path.relative(root,file);return rel==='' || (!path.isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+path.sep));};
-function fail(message){throw Error('GOLEM XIV native fixture refused: '+message);}
+function fail(message){throw Error('MRW native fixture refused: '+message);}
 async function canonical(value){
  if(typeof value!=='string'||!path.isAbsolute(value)||value.includes('\0')||path.normalize(value)!==value)fail('a canonical absolute fixture path is required');
  let p=value;
@@ -25,7 +25,7 @@ async function receipt(extension){
  const root=await canonical(pointer.root),marker=await json(path.join(root,'.mrw-native-fixture.json'));
  const stat=await fs.stat(root);
  if(marker.schema!=='mrw.native-fixture'||marker.version!==1||marker.id!==pointer.id||marker.root!==root
-  ||marker.device!==String(stat.dev)||marker.inode!==String(stat.ino)||marker.profile!=='GOLEM-XIV-Fixture-'+pointer.id
+  ||marker.device!==String(stat.dev)||marker.inode!==String(stat.ino)||marker.profile!=='MRW-Fixture-'+pointer.id
   ||marker.extension!==extension||!inside(root,extension)||extension===root)fail('fixture ownership differs');
  if(typeof process.getuid==='function'&&(stat.uid!==process.getuid()||(stat.mode&0o077)!==0))fail('fixture root must be private and owned by this user');
  if(!['isolation','sourceTrash','activation','sourceReturn','warrantInspection','justification','leanLesson','atlas'].includes(marker.case))fail('this older native case needs explicit fixture/UI migration');
@@ -164,7 +164,7 @@ async function assertFixture(vscode,context,extension){
  const pinPath=path.join(marker.root,'native-scope.json');
  let pin;try{pin=await json(pinPath);}catch(e){if(e.code!=='ENOENT')throw e;}
  if(pin&&(pin.id!==marker.id||pin.storage!==storage||pin.global!==global||pin.project!==project||pin.nativeStorage!==info.nativeStorage||pin.nativeGlobal!==info.nativeGlobal))fail('native stores differ from the fixture first launch');
- if(!pin&&(context.workspaceState.keys().length||context.globalState.keys().length))fail('first fixture launch already contains GOLEM XIV state');
+ if(!pin&&(context.workspaceState.keys().length||context.globalState.keys().length))fail('first fixture launch already contains MRW state');
  const owned=[marker.root,storage,global];configPaths(config,owned,marker);
  const configuration=vscode.workspace.getConfiguration('mrw');
  for(const key of ['notesFolder','dataDirectory','leanStudyParent']){

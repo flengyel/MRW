@@ -4,7 +4,25 @@ from hashlib import sha256
 import json
 from pathlib import Path, PurePosixPath
 import tomllib
+from xml.etree import ElementTree
 from zipfile import ZipFile
+
+
+def verify_icon(package, extension):
+    manifest = json.loads(package.read('extension/package.json'))
+    filename = 'media/mrw-icon.png'
+    asset_path = 'extension/' + filename
+    if manifest.get('icon') != filename:
+        raise ValueError('Extension manifest must name the MRW icon')
+    metadata = ElementTree.fromstring(package.read('extension.vsixmanifest'))
+    assets = metadata.findall('.//{*}Asset[@Type="Microsoft.VisualStudio.Services.Icons.Default"]')
+    if (metadata.findtext('.//{*}Metadata/{*}Icon') != asset_path
+            or [a.get('Path') for a in assets] != [asset_path]):
+        raise ValueError('VSIX metadata must expose the MRW icon')
+    if package.read(asset_path) != (extension / filename).read_bytes():
+        raise ValueError('Packaged MRW icon differs from the source image')
+    if package.read(asset_path) != (extension.parent / 'src/mrw/data/mrw-icon.png').read_bytes():
+        raise ValueError('The VS Code and Qt icons differ')
 
 
 def verify(archive):
@@ -13,15 +31,16 @@ def verify(archive):
     manifest = json.loads((extension / 'package.json').read_text())
     metadata = tomllib.loads((repository / 'pyproject.toml').read_text())
     if metadata['project']['version'] != manifest['version']:
-        raise ValueError('The Python distribution and the GOLEM XIV extension must have the same version')
+        raise ValueError('The Python distribution and the MRW extension must have the same version')
     containers = manifest.get('contributes', {}).get('viewsContainers', {}).get('activitybar', [])
     mrw_container = next((item for item in containers if item.get('id') == 'mrw'), {})
-    if mrw_container.get('title') != f'GOLEM XIV {manifest["version"]}':
-        raise ValueError('GOLEM XIV Activity Bar title must match the package version')
+    if mrw_container.get('title') != f'MRW {manifest["version"]}':
+        raise ValueError('MRW Activity Bar title must match the package version')
     expected = {'extension/package.json', 'extension/readme.md', 'extension/LICENSE.txt',
                 'extension.vsixmanifest', '[Content_Types].xml'}
     exact = {'extension/LICENSE.txt': repository / 'LICENSE',
-             'extension/python/bridge.py': extension / 'python/bridge.py'}
+             'extension/python/bridge.py': extension / 'python/bridge.py',
+             'extension/python/mrw/data/mrw-icon.png': repository / 'src/mrw/data/mrw-icon.png'}
     for path in (extension / 'src').glob('*.js'):
         exact['extension/' + str(path.relative_to(extension))] = path
     for path in (extension / 'media').rglob('*'):
@@ -71,6 +90,7 @@ def verify(archive):
         packed = json.loads(package.read('extension/package.json'))
         if packed != manifest or packed['main'] != './src/extension.js' or packed['extensionKind'] != ['workspace']:
             raise ValueError('Packaged manifest differs from production')
+        verify_icon(package, extension)
         for name, source in exact.items():
             if package.read(name) != source.read_bytes():
                 raise ValueError(f'Packaged runtime bytes differ: {name}')
@@ -83,5 +103,11 @@ def verify(archive):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('vsix', type=Path)
+    parser.add_argument('--diagnostics', type=Path, help='also check the diagnostics VSIX icon')
     args = parser.parse_args()
-    print(json.dumps(verify(args.vsix), indent=2, sort_keys=True))
+    result = verify(args.vsix)
+    if args.diagnostics:
+        with ZipFile(args.diagnostics) as companion:
+            verify_icon(companion, Path(__file__).resolve().parents[2] / 'diagnostics')
+        result['diagnostics_icon_verified'] = True
+    print(json.dumps(result, indent=2, sort_keys=True))

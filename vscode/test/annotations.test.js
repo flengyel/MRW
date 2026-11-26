@@ -41,7 +41,7 @@ function view() {
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', name), 'utf8'), globals);
   }
   const root = new Node('section');
-  return { root, calls, globals, render: (text, options) => globals.GolemXIVAnnotations.render(root, text, options),
+  return { root, calls, globals, render: (text, options) => globals.MRWAnnotations.render(root, text, options),
     math: () => root.all().filter(n => n.mathml), raw: () => root.all().find(n => n.nodeName === 'pre') };
 }
 

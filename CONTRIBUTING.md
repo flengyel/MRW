@@ -1,6 +1,6 @@
-# Contributing to GOLEM XIV
+# Contributing to MRW
 
-GOLEM XIV is an experimental VS Code extension for mathematical study and research.
+MRW is an experimental VS Code extension for mathematical study and research.
 Contributions are welcome, especially changes that make mathematical work
 easier to read, navigate, check and resume.
 
@@ -22,7 +22,7 @@ possibility, not an established extension API.
 
 ## Reporting a problem
 
-Include the GOLEM XIV version, VS Code version and host arrangement, such as Windows
+Include the MRW version, VS Code version and host arrangement, such as Windows
 with WSL2. Describe what was expected, what happened and the shortest known
 reproduction. Attach only relevant logs or screenshots and use minimal example
 documents that can be shared publicly. Keep credentials and private research
@@ -134,7 +134,7 @@ material added by a contribution.
 ## Native tests
 
 Use the [owned-fixture procedure](docs/NATIVE_TEST_ISOLATION.md). The shared
-guard must pass before a native test activates GOLEM XIV, patches a host API or writes
+guard must pass before a native test activates MRW, patches a host API or writes
 test data. A new window, a familiar fixture filename or a supplied directory
 does not prove isolation. Never use genuine notes, saved stores or working
 profiles as mutation-test fixtures.

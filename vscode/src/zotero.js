@@ -18,7 +18,7 @@ function registerZotero({ vscode, context, register, reading, show, onCancel=()=
     if (busy) throw Error('A Zotero action is in progress. Finish or cancel it first.');
     busy=true;
     try { return await action(); }
-    catch(error){if(error.code==='GOLEM_XIV_ZOTERO_CANCELLED'){onCancel();return;}throw error;}
+    catch(error){if(error.code==='MRW_ZOTERO_CANCELLED'){onCancel();return;}throw error;}
     finally { busy=false; }
   }
   function route() {

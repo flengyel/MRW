@@ -127,8 +127,8 @@ async function renderer({ initial = true } = {}) {
     acquireVsCodeApi:()=>({postMessage:m=>messages.push(m)}),addEventListener:(_,f)=>{receive=f;}};
   global.URL=URL;global.window=global;global.parent=global;global.origin=origin;
   global.setTimeout=f=>{timers.set(1,f);return 1;};global.clearTimeout=id=>timers.delete(id);
-  global.GolemXIVAnnotations={render:(p,s)=>{const n=new Node('p');n.textContent=s;p.append(n);}};
-  global.GolemXIVStacks={part:(p,part)=>{const n=new Node('p');n.textContent=part.exact_text;p.append(n);}};
+  global.MRWAnnotations={render:(p,s)=>{const n=new Node('p');n.textContent=s;p.append(n);}};
+  global.MRWStacks={part:(p,part)=>{const n=new Node('p');n.textContent=part.exact_text;p.append(n);}};
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/proofGraphMap.js'),'utf8'),global);
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/sourceReader.js'),'utf8'),global);
   vm.runInNewContext(await fs.readFile(path.join(extension,'src/proofGraphView.js'),'utf8'),global);

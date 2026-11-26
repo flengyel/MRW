@@ -47,7 +47,7 @@ function createRecentNotes({vscode, context, folderRoot, authorize, open, eligib
     else if (!within(await folderRoot(), actual)) throw Error('The notes folder changed or this document is outside the selected scope.');
     return actual;
   }
-  const report = error => void vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`);
+  const report = error => void vscode.window.showErrorMessage(`MRW: ${error.message}`);
   async function identity(uri, actual, position) {
     if (!markdown(uri.fsPath)) return {label: path.basename(uri.fsPath)};
     const info = (text, cue) => ({
@@ -131,7 +131,7 @@ function createRecentNotes({vscode, context, folderRoot, authorize, open, eligib
           detail: info.cue ? `${info.cue} · ${uri.fsPath}` : uri.fsPath, entry};
       } catch (_) { return {label: entry.label, description: 'Unavailable — moved, missing or outside the selected scope', detail: entry.canonical, entry}; }
     }));
-    choices.push({label:'VS Code file history…', description:'Includes files opened before GOLEM XIV recorded them', action:'native'});
+    choices.push({label:'VS Code file history…', description:'Includes files opened before MRW recorded them', action:'native'});
     const selected = await vscode.window.showQuickPick(choices, {title: 'Recent Documents', placeHolder: 'Notes, PDFs and other documents in this workspace', matchOnDescription: true, matchOnDetail: true});
     if (!selected || disposed) return;
     validate();

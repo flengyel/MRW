@@ -1,4 +1,4 @@
-"""Explicit local build/run of GOLEM XIV's pinned route engine. No downloads."""
+"""Explicit local build/run of MRW's pinned route engine. No downloads."""
 from __future__ import annotations
 from datetime import datetime, timezone
 from hashlib import sha256
@@ -178,7 +178,7 @@ def verify_record_identity(verification, request, response):
     from .route_records import encode,digest,exact_keys,text
     exact_keys(verification,{'method','engine','engine_fingerprint','input_sha256','output_sha256','checked_at','outcome','stderr'},'route verification')
     engine=registry()['engines'].get(verification['engine'])
-    if engine is None or verification['engine_fingerprint']!=fingerprint(engine): raise ValueError('Unknown retained checker identity; keep this record and use a version of GOLEM XIV that supports this checker')
+    if engine is None or verification['engine_fingerprint']!=fingerprint(engine): raise ValueError('Unknown retained checker identity; keep this record and use a version of MRW that supports this checker')
     if verification['method']!='Lean bounded route search / checkCertificate' or verification['outcome']!='checked_relative_to_admissions': raise ValueError('Unsupported recorded verification')
     if verification['input_sha256']!=digest(encode(request)) or verification['output_sha256']!=digest(encode(response)):
         raise ValueError('Retained input/output differs from its verification')

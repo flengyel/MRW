@@ -14,7 +14,7 @@ function view(stored={studies:{}}){
   const root=new Node('main'),document={getElementById:()=>root,createElement:t=>new Node(t)};
   const globals={document,structuredClone,crypto:require('node:crypto'),setTimeout:fn=>{const id=nextTimer++;timers.set(id,fn);return id;},clearTimeout:id=>timers.delete(id),
     acquireVsCodeApi:()=>({getState:()=>stored,setState:s=>{stored=structuredClone(s);},postMessage:m=>messages.push(structuredClone(m))}),
-    addEventListener:(_,fn)=>receive=fn,GolemXIVAnnotations:{render:(p,t)=>{const n=new Node('div');n.textContent=t;p.append(n);}}};
+    addEventListener:(_,fn)=>receive=fn,MRWAnnotations:{render:(p,t)=>{const n=new Node('div');n.textContent=t;p.append(n);}}};
   globals.window=globals;globals.origin='vscode-webview://fixture';
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/activeStudyView.js'),'utf8'),globals);
   return{root,messages,deliver:data=>receive({origin:globals.origin,data}),send:(study,notice='',gap='')=>receive({origin:globals.origin,data:{type:'active_study',study:structuredClone(study),notice,gap}}),

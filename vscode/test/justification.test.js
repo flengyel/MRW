@@ -61,7 +61,7 @@ test('the checker reader shows the actionable missing toolchain message', async 
   return h.defaultService(request);
  });
  await h.send('build');
- assert.deepEqual(h.errors, ['GOLEM XIV: ' + message]);
+ assert.deepEqual(h.errors, ['MRW: ' + message]);
  assert.equal(h.panels[0].messages.at(-1).error, message);
 });
 test('remote userdata storage cannot stage or run a justification search',async()=>{

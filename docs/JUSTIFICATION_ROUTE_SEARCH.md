@@ -81,7 +81,7 @@ lake -f lakefile-routes.toml env lean RouteAudit.lean
 ```
 
 Lean/elan must provide the repository's pinned Lean 4.32.2. This profile has no
-new dependency. It does not run when opening a document or activating GOLEM XIV.
+new dependency. It does not run when opening a document or activating MRW.
 The ordinary documentary checker continues to use `lakefile.toml` and
 `.lake/build`; search uses `.lake/routes-build`.
 

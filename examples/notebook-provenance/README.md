@@ -38,9 +38,9 @@ $1$ and $\sqrt5$.
 ## Run and retain
 
 These are ordinary notebooks. Open `trace.ipynb` or `resultant.ipynb` with the
-Sage kernel, run and save it, then use **Retain Notebook Result…**. Include
+Sage kernel, run and save it, then use **MRW: Retain Notebook Result…**. Include
 this note as a companion if useful. Saved outputs alone leave execution context
-unknown. GOLEM XIV does not start a kernel or assert that saved outputs match current
+unknown. MRW does not start a kernel or assert that saved outputs match current
 code.
 
 For a producer-reported execution account, explicitly run the supplied helper
@@ -55,7 +55,7 @@ sage -python record_run.py failed.ipynb failed-run.ipynb
 The last command returns 1 and still saves the cell error. Each invocation uses
 a fresh kernel and writes a new file. Retain those `*-run.ipynb` files. The
 receipt records code, outputs, times, outcome and available versions. It is a
-producer's report; GOLEM XIV checks its consistency but does not authenticate it.
+producer's report; MRW checks its consistency but does not authenticate it.
 The code records Sage's version in its output. These examples use no random seed
 or external dataset.
 
@@ -73,4 +73,4 @@ after restart to continue; opening a saved calculation runs no cells.
 
 The runner preserves actual kernel error replies even when traceback formatting
 fails. It returns 1 for a failed cell and saves both the available output and
-the error. GOLEM XIV still rejects contradictory or stale execution receipts.
+the error. MRW still rejects contradictory or stale execution receipts.

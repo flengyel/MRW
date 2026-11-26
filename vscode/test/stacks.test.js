@@ -52,7 +52,7 @@ test('published prose remains inert and retained/external references have distin
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/mathNegation.js'), 'utf8'), globals);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/stacksView.js'), 'utf8'), globals);
   const parent = new Node('section');
-  globals.GolemXIVStacks.part(parent, { region: 'fixture', exact_text: 'Exact retained source',
+  globals.MRWStacks.part(parent, { region: 'fixture', exact_text: 'Exact retained source',
     tokens: [{ kind: 'text', text: '<img src=x onerror=bad>' }, { kind: 'math', text: 'X \\times_Z Y', display: false },
       { kind: 'math', text: String.raw`g\not\approx_T z`, display: false },
       { kind: 'reference', tag: '08ZE', label: 'lemma', retained: true },

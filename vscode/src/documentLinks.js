@@ -184,7 +184,7 @@ async function resolveNoteLink(index, from, target, syntax = 'markdown') {
     destination = note.path;
     }
   } else if (syntax === 'markdown') {
-    if (/^[a-z][a-z0-9+.-]*:/i.test(target) || /^[/\\]/u.test(target)) return failure('unsupported_scheme', 'GOLEM XIV note navigation supports relative local file links; this link needs the host or an explicit file choice.');
+    if (/^[a-z][a-z0-9+.-]*:/i.test(target) || /^[/\\]/u.test(target)) return failure('unsupported_scheme', 'MRW note navigation supports relative local file links; this link needs the host or an explicit file choice.');
     const marker = target.indexOf('#'), filePart = marker < 0 ? target : target.slice(0, marker);
     if (filePart.includes('?')) return failure('unsupported_selector', 'File query selectors are not supported in note navigation.');
     let decoded;

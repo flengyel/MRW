@@ -43,7 +43,7 @@ def digest(raw):
 
 
 def read_json(path):
-    return strict_json(read_bounded(path, JSON_LIMIT, 'GOLEM XIV storage metadata'))
+    return strict_json(read_bounded(path, JSON_LIMIT, 'MRW storage metadata'))
 
 
 def regular(path):
@@ -154,9 +154,9 @@ def probe(parent):
         if stat.S_IMODE(p.stat().st_mode) != 0o700:
             raise ValueError('Unsupported destination filesystem: private directories requested as 0700 are reported as '
                              + oct(stat.S_IMODE(p.stat().st_mode)) + '. On WSL/DrvFS without working Unix permission metadata, '
-                             'GOLEM XIV cannot preserve its private-record permission requirements. No move committed.')
+                             'MRW cannot preserve its private-record permission requirements. No move committed.')
         f = p / 'record'
-        persist_private_new(f, b'exact filesystem probe\r\n\xce\xb1')
+        persist_private_new(f, b'exact MRW filesystem probe\r\n\xce\xb1')
         if stat.S_IMODE(f.stat().st_mode) != 0o600:
             raise ValueError('Unsupported destination filesystem: mode 0600 is not preserved')
         save_mutable(f, b'replaced', previous=f.read_bytes(), lock_root=p/'locks')
@@ -274,7 +274,7 @@ class ArtifactStorage:
         b, raw = self.binding()
         return dict(location=b['location'] if b else str(self.home), epoch=digest(raw) if raw else 'legacy',
                     store_id=b['store_id'] if b else None, recovery_required=self.journal.exists(),
-                    scope='All GOLEM XIV saved artifacts in this VS Code workspace; other workspaces are unchanged',
+                    scope='All MRW saved artifacts in this VS Code workspace; other workspaces are unchanged',
                     projects=b['projects'] if b else {})
 
     def load(self, location, *, expected=None):
@@ -308,7 +308,7 @@ class ArtifactStorage:
                             and all(isinstance(x, str) and HEX.fullmatch(x) for x in scopes)
                             and len(scopes) == len(set(scopes)))
             if project['root'] in roots or project['id'] in ids or not valid_scopes:
-                raise ValueError('Invalid GOLEM XIV citation scope mapping')
+                raise ValueError('Invalid MRW citation scope mapping')
             roots.add(project['root']); ids.add(project['id'])
         if expected and (ident['id'] != expected['store_id'] or digest(raw) != expected['identity_hash']):
             raise ValueError('Artifact store identity differs from the locally bound store; path spelling is not identity')
@@ -764,7 +764,7 @@ class ArtifactStorage:
 
     def run(self, request, dispatch):
         """Every updated extension writer enters this exclusion and reads binding."""
-        if self.journal.exists(): raise ValueError('Artifact operation needs recovery; run GOLEM XIV: Recover Artifact Move. Writes remain blocked')
+        if self.journal.exists(): raise ValueError('Artifact operation needs recovery; run MRW: Recover Artifact Move. Writes remain blocked')
         status=self.status(); b,_=self.binding();method=request['method']
         mutating=method in WRITE or method in ('project','correspondence_report_export')
         if mutating and request.pop('artifact_epoch',None) != status['epoch']:
