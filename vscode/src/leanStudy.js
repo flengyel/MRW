@@ -100,7 +100,7 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
  }));
  register('mrw.resumeLeanStudy',()=>locked(openLesson));
  register('mrw.leanStudyInfo',resource=>locked(async()=>{const selected=await selectedLesson(resource);if(selected)return info(selected);}));
- register('mrw.returnFromLeanStudy',async()=>{if(!state?.origin)throw Error('No prior MRW document location was captured. Your lesson remains open.');await returnToDocument(state.origin);});
+ register('mrw.returnFromLeanStudy',async()=>{if(!state?.origin)throw Error('No prior GOLEM XIV document location was captured. Your lesson remains open.');await returnToDocument(state.origin);});
  register('mrw.leanStudyActions',resource=>locked(async()=>{
   const selected = await selectedLesson(resource);
   if (!selected) return;
@@ -111,7 +111,7 @@ function registerLeanStudy({vscode,context,register,trackLocation,returnToDocume
    {label:'Show native Lean InfoView', kind:'info'},
   ];
   if (file !== pack.manifest.notesTemplate) actions.push({label:'Open associated note', kind:'notes'});
-  if (state.origin) actions.push({label:'Return to prior MRW document', kind:'return'});
+  if (state.origin) actions.push({label:'Return to prior GOLEM XIV document', kind:'return'});
   actions.push(
    ...lesson.bookSections.map(section => ({label:'Book: '+section.title, kind:'book', section})),
    ...['exercises','solutions','mistakes'].flatMap(kind=>lesson[kind].map(item=>({label:(kind==='exercises'?'Try: ':kind==='solutions'?'Solution: ':'Deliberate error: ')+item.title,kind:'file',file:item.file}))),

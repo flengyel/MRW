@@ -1,9 +1,9 @@
 {
   "name": "mrw-diagnostics",
-  "displayName": "MRW Diagnostics",
+  "displayName": "GOLEM XIV Diagnostics",
   "description": "Optional read-only feature-use and integrity reports for GOLEM XIV.",
   "publisher": "flengyel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "Apache-2.0",
   "engines": {
     "vscode": "^1.96.0"
@@ -22,23 +22,27 @@
     "commands": [
       {
         "command": "mrwDiagnostics.featureUse",
-        "title": "MRW Diagnostics: Feature Use"
+        "category": "GOLEM XIV Diagnostics",
+        "title": "Feature Use"
       },
       {
         "command": "mrwDiagnostics.integrity",
-        "title": "MRW Diagnostics: Integrity and Data Hygiene"
+        "category": "GOLEM XIV Diagnostics",
+        "title": "Integrity and Data Hygiene"
       },
       {
         "command": "mrwDiagnostics.export",
-        "title": "MRW Diagnostics: Export Last Report\u2026"
+        "category": "GOLEM XIV Diagnostics",
+        "title": "Export Last Report\u2026"
       },
       {
         "command": "mrwDiagnostics.maintenance",
-        "title": "MRW Diagnostics: Copy Codex Maintenance Handoff"
+        "category": "GOLEM XIV Diagnostics",
+        "title": "Copy Codex Maintenance Handoff"
       }
     ],
     "configuration": {
-      "title": "MRW Diagnostics",
+      "title": "GOLEM XIV Diagnostics",
       "properties": {
         "mrwDiagnostics.weeklyEnabled": {
           "type": "boolean",

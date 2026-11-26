@@ -3,9 +3,9 @@ const { spawn } = require('node:child_process');
 
 function captureUrl({ backend, template, link, title, text }) {
   if (typeof template !== 'string' || !template.trim() || /[\u0000-\u001f\u007f]/u.test(template)) {
-    throw new Error('Set MRW: Org Capture Template to your Emacs template key.');
+    throw new Error('Set Org Capture Template (mrw.orgCaptureTemplate) to your Emacs template key.');
   }
-  if (backend !== 'denote' && backend !== 'org-roam') throw new Error('Choose Denote or Org-roam in MRW: Org Capture Backend.');
+  if (backend !== 'denote' && backend !== 'org-roam') throw new Error('Choose Denote or Org-roam in Org Capture Backend (mrw.orgCaptureBackend).');
   const roam = backend === 'org-roam';
   const fields = { template: template.trim(), [roam ? 'ref' : 'url']: link, title, body: text };
   const parameters = Object.entries(fields).map(([key, value]) => {

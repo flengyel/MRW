@@ -74,14 +74,14 @@ for(const tag of ['08ZH','08ZG'])test(tag+' retained proof → handoff → attri
   assert.equal(await fs.readFile(data.source,'utf8'),data.text);
   assert.equal(h.calls.some(r=>r.method==='send_assistance'),false);
 });
-test('import rejects changed source pins, wrong MRW references, duplicate JSON keys and overwrites; cancellation writes nothing',async t=>{
+test('import rejects changed source pins, wrong GOLEM XIV references, duplicate JSON keys and overwrites; cancellation writes nothing',async t=>{
   const data=await retained(t,'08ZG'),h=await host(data);h.setSelection(undefined);
   await h.commands.get('mrw.prepareProofStudy')();assert.equal(h.edits.length,0);
   h.setSelection(data.selected);const p=await h.prepare(),study=JSON.parse(await fs.readFile(path.join(data.root,'study.mrw-study.json'),'utf8'));
   const graph=proposal(study,'08ZG');graph.sources[0].sha256='0'.repeat(64);h.setClipboard(JSON.stringify(graph));
   await p.receive({type:'import'});assert.match(p.messages.at(-2).message,/sources differ/);
   const clean=proposal(study,'08ZG');clean.nodes[0].citations[0].reference=data.selected[0].reference;h.setClipboard(JSON.stringify(clean));
-  await p.receive({type:'import'});assert.match(p.messages.at(-2).message,/MRW reference/);
+  await p.receive({type:'import'});assert.match(p.messages.at(-2).message,/GOLEM XIV reference/);
   h.setClipboard('{"version":1,"version":1}');await p.receive({type:'import'});assert.equal(p.messages.at(-2).type,'error');
   const target=path.join(data.root,'occupied.mrw-proof.json');await fs.writeFile(target,'preserve');
   h.setClipboard(JSON.stringify(proposal(study,'08ZG')));h.destinations.push(h.uri(target));await p.receive({type:'import'});

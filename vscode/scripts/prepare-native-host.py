@@ -22,7 +22,7 @@ def prepare(case, parent=None, seed=None, config=None, route_cache=None):
     parent.mkdir(parents=True,exist_ok=True)
     root=Path(tempfile.mkdtemp(prefix='mrw-fixture-',dir=parent));os.chmod(root,0o700)
     (root/'workspace-storage').mkdir();(root/'global-storage').mkdir()
-    identifier=str(uuid4());profile='MRW-Fixture-'+identifier
+    identifier=str(uuid4());profile='GOLEM-XIV-Fixture-'+identifier
     names={'sourceTrash':'mrw-source-trash-fixture','activation':'mrw-activation-fixture','isolation':'mrw-isolation-fixture','sourceReturn':'mrw-source-return-fixture','warrantInspection':'mrw-warrant-inspection-fixture','justification':'mrw-justification-fixture','leanLesson':'mrw-lean-lesson-fixture','atlas':'mrw-atlas-fixture'}
     project=root/names.get(case,'project');project.mkdir()
     extension=root/'extension';extension.mkdir()

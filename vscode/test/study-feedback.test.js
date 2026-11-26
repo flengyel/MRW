@@ -39,7 +39,7 @@ test('retained prose, linked requests, immutable submissions and assisted contin
  const next=registerActiveStudy(h.options);await h.commands.get('mrw.resumeStudy')({study:id});assert.equal(next.active.help[0].original.text,pasted);assert.equal(next.active.current.continues,first);
  const rows=await h.recorder.events();assert.ok(rows.some(e=>e.action==='help.request'));assert.ok(rows.some(e=>e.action==='help.retained'));assert.ok(rows.some(e=>e.action==='help.display'));
  const submissions=rows.filter(e=>e.action==='attempt.submit');assert.equal(submissions[0].data.help_visible,false);assert.equal(submissions[1].data.help_visible,true);
- await next.receive({type:'history'});assert.match(h.shown.at(-1),/# Recorded MRW activity/);
+ await next.receive({type:'history'});assert.match(h.shown.at(-1),/# Recorded GOLEM XIV activity/);
  assert.doesNotMatch(h.shown.at(-1),/help.retained/,'test records stay out of production activity');
  assert.match(h.recorder.report(rows),/companion requests copied/);assert.ok(rows.some(e=>e.action==='help.retained'));
  // A deliberately fresh attempt conceals prior help; it does not inherit lifetime assistance.

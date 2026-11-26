@@ -208,7 +208,7 @@ def export_records(records):
     for record in records:
         key = record['id']; base = f'urn:mrw:result:{key}:'
         uri = lambda suffix: '<' + base + suffix + '>'
-        rows = [prefixes, f'{uri("mrw")} a prov:SoftwareAgent; rdfs:label "MRW"; mrw:version {lit(record["software"]["version"])}; mrw:commit {lit(record["software"]["commit"])} .',
+        rows = [prefixes, f'{uri("mrw")} a prov:SoftwareAgent; rdfs:label "GOLEM XIV"; mrw:version {lit(record["software"]["version"])}; mrw:commit {lit(record["software"]["commit"])} .',
                 f'{uri("capture")} a prov:Activity; prov:wasAssociatedWith {uri("mrw")}; prov:endedAtTime {lit(record["captured"])}^^xsd:dateTime .']
         for i, item in enumerate(record['artifacts']):
             target = f'{key}/artifacts/{i}-{item["name"]}'
@@ -220,7 +220,7 @@ def export_records(records):
         capture_file = f'{key}/capture.ttl'
         content[capture_file] = '\n'.join(rows).encode('utf-8')
         bundles.append({'id': base + 'capture-bundle', 'type': 'http://www.w3.org/ns/prov#Bundle', 'file': capture_file,
-                        'attributedTo': base + 'mrw', 'evidence': 'MRW-observed capture', 'software': record['software']})
+                        'attributedTo': base + 'mrw', 'evidence': 'GOLEM XIV-observed capture', 'software': record['software']})
         nb = notebook(unpack(record['artifacts'][0])); report = receipt(nb)
         if report:
             code, outputs = execution_parts(nb)

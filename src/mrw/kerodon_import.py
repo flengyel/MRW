@@ -44,7 +44,7 @@ class _NoRedirect(HTTPRedirectHandler):
 def fetch(url, limit):
     if not re.fullmatch(r'https://kerodon\.net/tag/[A-Z0-9]{4}', url):
         raise ValueError('Unsupported Kerodon acquisition endpoint')
-    request = Request(url, headers={'User-Agent': 'MRW-Kerodon-Importer/1', 'Accept-Encoding': 'identity'})
+    request = Request(url, headers={'User-Agent': 'GOLEMXIV-Kerodon-Importer/1', 'Accept-Encoding': 'identity'})
     try:
         with build_opener(ProxyHandler({}), _NoRedirect()).open(request, timeout=20) as response:
             if response.status != 200 or response.headers.get('Content-Encoding', 'identity') != 'identity':

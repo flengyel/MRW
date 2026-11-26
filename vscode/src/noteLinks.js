@@ -15,7 +15,7 @@ function validateTarget(target) {
       path.posix.isAbsolute(target.file) || path.posix.normalize(target.file) !== target.file ||
       /[\x00-\x1f\x7f\\]/u.test(target.file) || !/\.(md|markdown)$/iu.test(target.file) ||
       target.file.split('/').some(p => p === '.' || p === '..' || excluded.has(p))) {
-    throw new Error('Malformed MRW note target. Copy its link again.');
+    throw new Error('Malformed GOLEM XIV note target. Copy its link again.');
   }
   return { workspace: validateWorkspaceRoute(target.workspace), notes: target.notes, file: target.file };
 }
@@ -25,15 +25,15 @@ function makeNoteLink(target, scheme = 'vscode') {
 }
 function parseNoteLink(value, scheme = 'vscode') {
   if (!['vscode', 'vscode-insiders'].includes(scheme) || typeof value !== 'string' ||
-      value.length > 20000 || /[\s\x00-\x1f\x7f]/u.test(value)) throw new Error('Malformed MRW note link. Copy the complete link again.');
+      value.length > 20000 || /[\s\x00-\x1f\x7f]/u.test(value)) throw new Error('Malformed GOLEM XIV note link. Copy the complete link again.');
   const uri = new URL(value), pairs = [...uri.searchParams], params = Object.fromEntries(pairs);
   if (uri.protocol !== `${scheme}:` || uri.host !== 'flengyel.mrw' || uri.pathname !== '/note' ||
       uri.hash || uri.username || uri.password || uri.port || pairs.length !== 2 ||
       Object.keys(params).length !== 2 || params.v !== '1' || !/^[\w-]+$/u.test(params.target || '')) {
-    throw new Error('Unsupported MRW note action or parameters.');
+    throw new Error('Unsupported GOLEM XIV note action or parameters.');
   }
   const bytes = Buffer.from(params.target, 'base64url');
-  if (bytes.toString('base64url') !== params.target) throw new Error('Malformed MRW note encoding.');
+  if (bytes.toString('base64url') !== params.target) throw new Error('Malformed GOLEM XIV note encoding.');
   return validateTarget(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
 }
 module.exports = { makeNoteLink, parseNoteLink, validateTarget };

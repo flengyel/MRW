@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),vm=require('node:vm'),{createRequire}=require('node:module');
 async function fixture(t){
- const root=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-diagnostics-menu-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'golemxiv-diagnostics-menu-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
  const commands=new Map(),choices=[],calls=[],docs=[],subscriptions=[];
  const api={version:1,scope:'isolated-menu-fixture',featureUse:async options=>{calls.push(options);return {markdown:'Recorded observations only',features:[],versions:['test']};}};
  const vscode={extensions:{getExtension:()=>({activate:async()=>({mrwInspection:api})})},workspace:{getConfiguration:()=>({get:(_key,fallback)=>fallback}),onDidChangeConfiguration:()=>({dispose(){}}),openTextDocument:async data=>{docs.push(data);return data;}},
@@ -11,6 +11,17 @@ async function fixture(t){
  loaded.exports.activate({globalStorageUri:{fsPath:root},subscriptions});t.after(()=>subscriptions.forEach(s=>s.dispose?.()));
  return {root,commands,choices,calls,docs};
 }
+test('the diagnostics command category uses the product name while preserving its extension and command IDs', () => {
+ const manifest = require('../package.json');
+ assert.equal(manifest.displayName, 'GOLEM XIV Diagnostics');
+ assert.equal(manifest.contributes.configuration.title, manifest.displayName);
+ assert.equal(manifest.publisher + '.' + manifest.name, 'flengyel.mrw-diagnostics');
+ const commands = manifest.contributes.commands;
+ assert.deepEqual(new Set(commands.map(command => command.command)), new Set([
+  'mrwDiagnostics.featureUse', 'mrwDiagnostics.integrity', 'mrwDiagnostics.export', 'mrwDiagnostics.maintenance'
+ ]));
+ assert.ok(commands.every(command => command.category === manifest.displayName));
+});
 test('manual Feature Use cancellation asks only for a period and creates no report',async t=>{
  const f=await fixture(t);f.choices.push(rows=>{assert.deepEqual(Array.from(rows,row=>row.period),['last7','last30','previous30','compare30']);return undefined;});
  await f.commands.get('mrwDiagnostics.featureUse')();assert.equal(f.calls.length,0);assert.equal(f.docs.length,0);assert.deepEqual(await fs.readdir(f.root),[]);

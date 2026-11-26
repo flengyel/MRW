@@ -15,7 +15,7 @@ function registerSourcePlugins({vscode,register,rawBridge}) {
    const allow=await vscode.window.showWarningMessage('Enable '+picked.distribution+' / '+picked.entryPoint+'? This executes trusted installed Python code with your account’s permissions. A subprocess is not a security sandbox.',{modal:true},'Enable adapter');if(allow!=='Enable adapter')return;
    await rawBridge({method:'source_plugins_add_adapter',entry_point:picked.entryPoint,distribution:picked.distribution});
   }
-  await load();void vscode.window.showInformationMessage('Source plugin registered. Use MRW: Import Source…; no VSIX rebuild or window reload is needed.');
+  await load();void vscode.window.showInformationMessage('Source plugin registered. Use GOLEM XIV: Import Source…; no VSIX rebuild or window reload is needed.');
  });
  register('mrw.manageSourcePlugins',async()=>{
   const state=await load();

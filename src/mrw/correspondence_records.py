@@ -788,7 +788,7 @@ def reports_action(store, method, request):
             if access.payload is not None:
                 private_roots.append(access.payload.parents[2])
         if any(destination.is_relative_to(root) for root in private_roots):
-            raise ValueError('Export to an ordinary file outside private MRW storage')
+            raise ValueError('Export to an ordinary file outside private GOLEM XIV storage')
         persist_private_new(destination, report_markdown(record['snapshot']))
         return dict(path=str(destination))
     if revision(request['revision']) != digest(raw):

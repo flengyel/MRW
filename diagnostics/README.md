@@ -8,9 +8,9 @@ version 1 inspection interface; an older core is reported as unsupported.
 Disabling the companion leaves GOLEM XIV's essential storage checks and recording in
 place.
 
-Run **Feature Use** or **Integrity and Data Hygiene** from the
-Command Palette. The report states its scope, coverage, limits and missing
-checks before its findings. It does not scan the notes folder or call Obsidian,
+In the Command Palette, run **GOLEM XIV Diagnostics: Feature Use** or
+**GOLEM XIV Diagnostics: Integrity and Data Hygiene**. The report states its
+scope, coverage, limits and missing checks before its findings. It does not scan the notes folder or call Obsidian,
 Zotero, a model, a kernel, a compiler, synchronization or recovery.
 
 Integrity inspection streams bytes from explicitly supplied core-owned roots.
@@ -27,8 +27,8 @@ fresh verification. Full schemas, internal passage anchors, notebook embedded
 artifacts and external/remote references remain unchecked by this first
 inspector. No report establishes complete store health or mathematical truth.
 
-Enable `mrwDiagnostics.weeklyEnabled` to run one report while the workspace
-is active. Missed weeks coalesce into one run at the next active session. No
+In Settings, enable `mrwDiagnostics.weeklyEnabled` to run one report while the
+workspace is active. Missed weeks coalesce into one run at the next active session. No
 service runs while VS Code is closed. Notification progress offers cancellation.
 A Python 3 / Linux kernel file lock coordinates windows on the host. Its inode
 is retained and its kernel ownership releases automatically on process exit.
@@ -60,8 +60,10 @@ npm run package --prefix diagnostics
 Packaging reuses the core's pinned VSCE installation; it does not publish or
 install either extension.
 
-The core release includes the optional mrw-diagnostics-0.1.0.vsix asset. Install
+The 0.23.64 core release includes Diagnostics 0.1.0. Building the current source
+produces `mrw-diagnostics-0.1.1.vsix`. Install
 it separately through Extensions: Install from VSIX on the same workspace host.
 This requires core 0.23.32 or a later compatible inspection API 1 implementation.
-Manual Feature Use offers two periods and a comparison; scheduled reports retain
+Manual Feature Use offers the last seven days, the last or previous thirty days,
+and a comparison of the two thirty-day periods; scheduled reports retain
 their separate weekly cadence. The companion does not install or launch Codex.

@@ -25,7 +25,7 @@ test('wheel scrolls the page unless Ctrl or Meta requests pointer-centered zoom'
   const window = {};
   const document = {createElementNS: () => svg};
   vm.runInNewContext(fs.readFileSync(require.resolve('../src/proofGraphMap'), 'utf8'), {window, document});
-  const map = window.MRWProofMap.create({append() {}}, () => {});
+  const map = window.GolemXIVProofMap.create({append() {}}, () => {});
   map.update({graph: {nodes: []}, projection: {order: [], edges: []}});
 
   const viewBox = () => attributes.get('viewBox').split(' ').map(Number);

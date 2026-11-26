@@ -21,7 +21,7 @@
     const b = el('button', parent, title); b.type = 'button'; b.dataset.local = 'true'; b.title = tooltip;
     b.addEventListener('click', action); return b;
   }
-  function math(parent, text) { window.MRWAnnotations.render(parent, text, { exact: false }); }
+  function math(parent, text) { window.GolemXIVAnnotations.render(parent, text, { exact: false }); }
   function attributed(parent, value) {
     el('p', parent, `${value.origin === 'ai_proposal' ? 'AI proposal' : 'Reader explanation'} · ${value.author}`, 'muted'); math(parent, value.text);
   }
@@ -98,7 +98,7 @@
     if (!passage) { sourceArea.replaceChildren();sourceReader=undefined;el('p',sourceArea,'Opening saved source association…','muted');return; }
     if (!sourceReader) {
       sourceArea.replaceChildren();const host=el('section',sourceArea);savedSource=el('div',sourceArea);
-      sourceReader=window.MRWSourceReader.create({root:savedSource,host,initialMode:sourceMode,originalLabel:'Stacks page',
+      sourceReader=window.GolemXIVSourceReader.create({root:savedSource,host,initialMode:sourceMode,originalLabel:'Stacks page',
         onBrowser:()=>send('stacks_page',{node:selected}),
         onMode:mode=>{sourceMode=mode;api.postMessage({type:'view_event',event:'source_mode',revision:state.documentRevision,node:selected,mode});}});
     }
@@ -110,7 +110,7 @@
     sourceReader.update({sourceId:'stacks-project',name:'Stacks Project · Tag '+passage.tag,
       url:'https://stacks.math.columbia.edu/tag/'+passage.tag,origins:['https://stacks.math.columbia.edu'],supported:true,revision:passage.commit});
     el('p',savedSource,`${passage.authors} · Git ${passage.commit}`,'source-caption');
-    for(const part of passage.parts){el('h3',savedSource,part.role==='statement'?'Statement':'Proof');window.MRWStacks.part(savedSource,part,(action,tag)=>send('stacks_citation',{node:selected,tag}));}
+    for(const part of passage.parts){el('h3',savedSource,part.role==='statement'?'Statement':'Proof');window.GolemXIVStacks.part(savedSource,part,(action,tag)=>send('stacks_citation',{node:selected,tag}));}
     controls();
   }
   function clearSelection() {
@@ -137,7 +137,7 @@
     local(controls, '−', () => map.zoom(1.25), 'Zoom out'); local(controls, 'Fit', () => map.fit(), 'Fit the displayed graph'); local(controls, '+', () => map.zoom(.8), 'Zoom in');
     const search = el('input', controls); search.type = 'search'; search.placeholder = 'Find a claim'; search.setAttribute('aria-label', 'Find a claim');
     search.addEventListener('keydown', e => { if (e.key === 'Enter' && search.value.trim()) { const id = map.find(search.value.trim()); if (id) selectNode(id, true); } });
-    mapHost = el('div', stage); map = window.MRWProofMap.create(mapHost, selectNode);
+    mapHost = el('div', stage); map = window.GolemXIVProofMap.create(mapHost, selectNode);
     el('p', stage, 'Select to read · drag to pan · Ctrl+wheel to zoom · dashed arrows cross deleted steps', 'proof-legend');
     inspector = el('aside', shell, undefined, 'proof-inspector'); inspector.setAttribute('aria-label', 'Selected claim and Stacks passage');
     readingList = el('details', root, undefined, 'proof-reading-list');
@@ -158,7 +158,7 @@
     button(bar, 'Ask OpenAI API…', 'ask', {}, 'Prepare an exact request; Send remains separate.'); button(bar, 'Refresh', 'refresh');
     local(bar, 'Conclusion', () => selectNode(graph.goals[0], true), 'Read the conclusion and its corresponding Stacks tag.');
     count.textContent = `${projection.order.length} visible claims · ${projection.hidden.length} deleted from display`;
-    if (changed) { mapHost.replaceChildren(); map = window.MRWProofMap.create(mapHost, selectNode); }
+    if (changed) { mapHost.replaceChildren(); map = window.GolemXIVProofMap.create(mapHost, selectNode); }
     map.update(state);
     if (changed || (selected && !projection.order.includes(selected))) clearSelection();
     else if (selected) map.select(selected);

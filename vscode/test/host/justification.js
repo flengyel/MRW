@@ -13,7 +13,7 @@ async function run(context){
  const save=async()=>{const sync=require('node:fs'),temp=reportPath+'.next';sync.writeFileSync(temp,JSON.stringify(report,null,2));sync.renameSync(temp,reportPath);};
  try{
   bridgeModule=require('../../src/bridge');realBridge=bridgeModule.runBridge;bridgeModule.runBridge=async(...args)=>{report.requests.push(args[2].method);if(!config.phase&&args[2].method==='route_run')throw Error('Synthetic search interruption after durable staging');return realBridge(...args);};
-  vscode.window.showErrorMessage=async message=>{if(message==='MRW: Synthetic search interruption after durable staging')report.expectedFailureDisplayed=true;else report.errors.push(message);await save();};
+  vscode.window.showErrorMessage=async message=>{if(message==='GOLEM XIV: Synthetic search interruption after durable staging')report.expectedFailureDisplayed=true;else report.errors.push(message);await save();};
   vscode.window.showWarningMessage=async(_message,_options,...choices)=>choices.includes('Search successor')?'Search successor':undefined;
   vscode.window.showQuickPick=async items=>{
    if(items.some(i=>i.kind==='example'))return config.phase==='restart'?items.find(i=>i.revision===config.successor):config.phase==='resume_pending'?items.find(i=>i.requestId===config.pendingId):items.find(i=>i.kind==='example');

@@ -35,10 +35,9 @@ not import it again, replace its revision or move its annotations.
 
 ## First-time workspace setup
 
-Press **F1**, search for `Set Up Workspace`, and select the workspace setup
-command to create or reuse
-`~/mrw-work/MRW.code-workspace` on the Linux host. This workspace is independent
-of the subject or command. **Choose Notes Folder…** connects notes stored
+Press **F1**, search for `Set Up Workspace`, and select **GOLEM XIV: Set Up GOLEM XIV Workspace…**.
+On a fresh 0.23.65 installation, setup creates `~/mrw-work/GOLEM XIV.code-workspace`
+on the Linux host. If the default workspace is already open, setup keeps it. This workspace is independent of the subject or command. **Choose Notes Folder…** connects notes stored
 elsewhere, including a Windows Obsidian vault reached through `/mnt/c/…`.
 
 Setup preserves existing settings. Choose **Open in this window** after saving
@@ -175,7 +174,7 @@ Unsaved VS Code text stays intact and is labelled **Unsaved VS Code changes**;
 GOLEM XIV does not save, discard or merge that draft.
 
 To copy a link to the current file, use the link action in the note preview, or
-press **F1** and search for `Copy Note Link`. The pasted link opens the file's current
+press **F1** and select **GOLEM XIV: Copy GOLEM XIV Note Link**. The pasted link opens the file's current
 contents, including after restart. It does not pin a retained revision. If the
 link reaches another workspace, use **Copy Link and Open Workspace**, then run
 **Open Link from Clipboard** in the intended workspace. The original window

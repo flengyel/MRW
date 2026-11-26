@@ -50,7 +50,7 @@ function registerWikiLinks({ vscode, context, register, documents, compile, note
             const range = new vscode.Range(doc.positionAt(node.start), doc.positionAt(node.end));
             const target = vscode.Uri.parse('command:mrw.followWikiLink?' + encodeURIComponent(JSON.stringify([payload(doc, node)])));
             const link = new vscode.DocumentLink(range, target);
-            link.tooltip = node.syntax === 'zettel' ? `Follow ${zettelLinkParts(node.target).target} in MRW’s notes folder` : 'Open the retained calculation and keep Return to this link';
+            link.tooltip = node.syntax === 'zettel' ? `Follow ${zettelLinkParts(node.target).target} in GOLEM XIV’s notes folder` : 'Open the retained calculation and keep Return to this link';
             return link;
           });
         } catch (_) { return []; } // Bounded-parser failures remain available via Show Contents.
@@ -99,7 +99,7 @@ function registerWikiLinks({ vscode, context, register, documents, compile, note
         ['contents', 'Show Contents'],
         ...(bundled && !doc.isDirty ? [['annotate-bundled', 'Annotate saved copy…']] : []),
         ...(actions.obsidian ? [['obsidian', 'Open in Obsidian']] : []),
-        ...(actions.link ? [['copy', 'Copy MRW link']] : []),
+        ...(actions.link ? [['copy', 'Copy GOLEM XIV link']] : []),
       ].map(([kind, label]) => `<a href="${escape(action(kind))}">${label}</a>`).join(' · ');
       if (bundled) return `<aside class="mrw-note-heading" aria-label="Bundled note actions"><p>${links}</p></aside>
 `;
@@ -137,10 +137,10 @@ function registerWikiLinks({ vscode, context, register, documents, compile, note
     const value = uri.toString(true);
     if (!['/document-link', '/document-action', '/document-diagram'].includes(uri.path)) return false;
     if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following a note action.');
-    if (value.length > 40000) throw new Error('Invalid MRW note link.');
+    if (value.length > 40000) throw new Error('Invalid GOLEM XIV note link.');
     const parsed = new URL(value), pairs = [...parsed.searchParams];
     if (parsed.protocol !== `${scheme}:` || parsed.host !== 'flengyel.mrw' || parsed.hash ||
-        pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid MRW note link.');
+        pairs.length !== 1 || pairs[0][0] !== 'target' || !/^[\w-]+$/.test(pairs[0][1])) throw new Error('Invalid GOLEM XIV note link.');
     const data = JSON.parse(Buffer.from(pairs[0][1], 'base64url').toString('utf8'));
     if (uri.path === '/document-diagram') { await math.handle(data); return true; }
     if (uri.path === '/document-action') {

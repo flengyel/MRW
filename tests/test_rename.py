@@ -1,4 +1,4 @@
-"""MRW entry points, generated-core staging and preserved MRW citations."""
+"""GOLEM XIV entry points and generated-core staging."""
 from pathlib import Path
 import json
 import subprocess
@@ -13,6 +13,7 @@ class RenameTests(unittest.TestCase):
         run = subprocess.run([sys.executable, '-m', 'mrw', '--help'], capture_output=True, text=True)
         self.assertEqual(run.returncode, 0, run.stderr)
         self.assertIn('usage: mrw ', run.stdout)
+        self.assertIn('GOLEM XIV', run.stdout)
         import mrw
         import tomllib
         metadata = tomllib.loads((ROOT / 'pyproject.toml').read_text())['project']
@@ -29,7 +30,7 @@ class RenameTests(unittest.TestCase):
             script = root / 'vscode/scripts/bundle-core.py'; script.parent.mkdir(parents=True)
             script.write_bytes((ROOT / 'vscode/scripts/bundle-core.py').read_bytes())
             core = root / 'src/mrw'; core.mkdir(parents=True)
-            (core / '__init__.py').write_text('"""MRW fixture."""\n')
+            (core / '__init__.py').write_text('"""Fixture package."""\n')
             (root / 'LICENSE').write_text('Fixture license\n')
             registry=json.loads((ROOT/'src/mrw/data/route_runtime.json').read_text())
             (core/'data').mkdir();(core/'data/route_runtime.json').write_text(json.dumps(registry))

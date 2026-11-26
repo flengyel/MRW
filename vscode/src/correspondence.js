@@ -301,7 +301,7 @@ function registerCorrespondence({ vscode, context, register, bridge, rawBridge, 
     }
     const choices = writtenLeanDeclarations(source).slice(0, 500)
       .map(value => ({ label: value.name, description: 'Name as written in the module' }));
-    if (!choices.length) throw Error('This module contains no theorem or lemma names that MRW can suggest.');
+    if (!choices.length) throw Error('This module contains no theorem or lemma names that GOLEM XIV can suggest.');
     const choice = await vscode.window.showQuickPick(choices, { title: 'Suggested names',
       placeHolder: 'Confirm and qualify the name before reading it in Lean' });
     if (choice) {
@@ -321,7 +321,7 @@ function registerCorrespondence({ vscode, context, register, bridge, rawBridge, 
     c.readController = controller;
     let facts;
     try {
-      facts = await vscode.window.withProgress({ title: 'MRW: Reading Lean declaration',
+      facts = await vscode.window.withProgress({ title: 'GOLEM XIV: Reading Lean declaration',
         location: vscode.ProgressLocation.Notification, cancellable: true }, async (_progress, token) => {
         const subscription = token.onCancellationRequested(() => controller.abort());
         if (token.isCancellationRequested) controller.abort();

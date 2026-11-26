@@ -14,7 +14,7 @@ function view(){
  class Node{constructor(tag){this.tag=tag;this.children=[];this.listeners={};this.textContent='';}append(n){this.children.push(n);}replaceChildren(){this.children=[];}addEventListener(t,f){this.listeners[t]=f;}setAttribute(k,v){this[k]=v;}all(){return this.children.flatMap(n=>[n,...n.all()]);}text(){return this.textContent+this.children.map(n=>n.text()).join(' ');}click(){if(!this.disabled)(this.listeners.click||this.onclick)?.();}}
  const root=new Node('main'),messages=[];let receive;
  const globals={document:{getElementById:()=>root,createElement:t=>new Node(t)},acquireVsCodeApi:()=>({postMessage:v=>messages.push(v)}),addEventListener:(_type,f)=>receive=f};
- globals.window=globals;globals.MRWAnnotations={render(parent,text){const n=new Node('p');n.textContent=text;parent.append(n);}};
+ globals.window=globals;globals.GolemXIVAnnotations={render(parent,text){const n=new Node('p');n.textContent=text;parent.append(n);}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/justificationView.js'),'utf8'),globals);
  return {root,messages,send:value=>receive({data:value}),button:text=>root.all().find(n=>n.tag==='button'&&n.textContent===text)};
 }

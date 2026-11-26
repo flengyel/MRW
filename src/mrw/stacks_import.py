@@ -61,7 +61,7 @@ def fetch(url, limit):
             re.escape(RAW) + r'[a-f0-9]{40}/(?:[a-z][a-z0-9-]{0,79}\.tex|tags/tags|COPYING)', url):
         raise ValueError('Unsupported Stacks acquisition endpoint')
     opener = build_opener(ProxyHandler({}), _NoRedirect())
-    request = Request(url, headers={'User-Agent': 'MRW-Stacks-Importer/1', 'Accept-Encoding': 'identity'})
+    request = Request(url, headers={'User-Agent': 'GOLEMXIV-Stacks-Importer/1', 'Accept-Encoding': 'identity'})
     try:
         with opener.open(request, timeout=15) as response:
             if response.status != 200 or response.headers.get('Content-Encoding', 'identity') != 'identity':

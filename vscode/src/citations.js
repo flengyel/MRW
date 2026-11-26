@@ -86,7 +86,7 @@ async function prepare({text,file,root,configuration={},execute=run,resolveZoter
  const ids=new Map();for(const ref of references){const key=String(ref.id);ids.set(key,(ids.get(key)||0)+1);}
  const args=['--sandbox','--from=json','--to=plain','--wrap=none','--citeproc'];
  if(style){const target=await scoped(style),xml=await bounded(target);if(!/\.csl$/i.test(target)||!/<style\b/.test(xml)||/rel=["']independent-parent["']/.test(xml))throw Error('Select a local independent CSL style; remote/dependent styles are not fetched');args.push('--csl='+(/\.exe$/i.test(executable)?require('./obsidianNotes').windowsPath(target):target));}
- const separator='MRWCITATION'+crypto.randomBytes(12).toString('hex');
+ const separator='GOLEMXIVCITATION'+crypto.randomBytes(12).toString('hex');
  const blocks=[],valid=[];const citations={};
  ast.blocks.forEach((block,i)=>{if(i>=raw.length)return;const keys=[];function walk(v){if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object'){if(v.t==='Cite')for(const c of v.c[0])keys.push(c.citationId);Object.values(v).forEach(walk);}}walk(block);
   const missing=keys.filter(k=>!ids.has(k)),ambiguous=keys.filter(k=>ids.get(k)>1||sourceErrors[k]>1);

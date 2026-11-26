@@ -1,8 +1,8 @@
 {
   "name": "mrw",
-  "displayName": "Mathematical Research Workstation",
+  "displayName": "GOLEM XIV",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.64",
+  "version": "0.23.65",
   "publisher": "flengyel",
   "license": "Apache-2.0",
   "repository": {
@@ -49,726 +49,726 @@
     "commands": [
       {
         "command": "mrw.copyDocumentLink",
-        "title": "Copy MRW Note Link",
-        "category": "MRW",
+        "title": "Copy GOLEM XIV Note Link",
+        "category": "GOLEM XIV",
         "icon": "$(link)"
       },
       {
         "command": "mrw.openDocumentInObsidian",
         "title": "Open Note in Obsidian",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(link-external)"
       },
       {
         "command": "mrw.editDocumentSource",
         "title": "Edit Document Source",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(edit)"
       },
       {
         "command": "mrw.followWikiLink",
         "title": "Follow WikiLink",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.askReader",
         "title": "Ask OpenAI API About Reader Passage…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.mark",
         "title": "Mark Return Location",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(bookmark)"
       },
       {
         "command": "mrw.return",
         "title": "Return to Marked Location",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(go-to-file)"
       },
       {
         "command": "mrw.clearMark",
         "title": "Clear Return Location",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openProof",
         "title": "Open Lean Proof and Keep Return Location",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openViewer",
         "title": "Open External Proof Viewer",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.inspect",
         "title": "Inspect Retained Record",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.review",
         "title": "Review Model Response",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.passage",
         "title": "Show Response Passage",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.index",
         "title": "Show Response Index Page",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.fullResponse",
         "title": "Show Full Response",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.retain",
         "title": "Retain Response Passage",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.insert",
         "title": "Insert Attributed Passage into Active Note",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.ask",
         "title": "Ask OpenAI API about Selection…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.addContext",
         "title": "Add Selection to Request",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.removeContext",
         "title": "Remove Request Context",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.editQuestion",
         "title": "Edit Mathematical Question",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.previewRequest",
         "title": "Show Exact Request Preview",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.discardRequest",
         "title": "Discard Unsent Request",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.sendRequest",
         "title": "Send Exact Preview",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.continueAnswer",
         "title": "Continue an Initial Answer Once",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.selectPriorPassages",
         "title": "Select Prior Response Passages",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.editCorrection",
         "title": "Edit Human Correction",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.editConclusion",
         "title": "Edit Last Useful Conclusion",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.editIssue",
         "title": "Edit Unresolved Issue",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.resumeInvestigation",
         "title": "Resume Saved Investigation",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.saveInvestigationSummary",
         "title": "Save Human Task Summary",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.insertInvestigationHandoff",
         "title": "Insert Investigation Handoff into Active Note",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.reviewInvestigationParent",
         "title": "Review Investigation Parent",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.reviewInvestigationChild",
         "title": "Review Investigation Completed Child",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.endInvestigation",
         "title": "End Investigation…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.editInvestigationQuestion",
         "title": "Edit Investigation Current Question",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.assistanceBusy"
       },
       {
         "command": "mrw.importObsidianNote",
         "title": "Import Markdown Text…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.importStacksSection",
         "title": "Import Stacks Project Section…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.createOutline",
         "title": "Retain Document as Source",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.openOutline",
         "title": "Open Saved Source…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(book)",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.refreshSourceOutline",
         "title": "Refresh Saved Source",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.addOutlineRegion",
         "title": "Add Selected Passage",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.replaceOutlineRegion",
         "title": "Replace Selected Passage Range",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.setOutlineStatement",
         "title": "Use Selection as Exact Statement",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.addOutlineContext",
         "title": "Keep Selected Hypothesis / Cited Result",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.replaceOutlineContext",
         "title": "Replace Shared Context with Selection…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.attachOutlineEvidence",
         "title": "Attach Recorded Evidence…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.insertOutlineReference",
         "title": "Insert Source or Passage Link…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.followOutlineReference",
         "title": "Follow Source or Passage Link at Cursor",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.copyOutlineLink",
         "title": "Copy Source or Passage Link…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.capturePassageInEmacs",
         "title": "Capture Passage in Emacs…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.openLinkFromClipboard",
         "title": "Open Link from Clipboard",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.associateObsidianNote",
         "title": "Link an Obsidian Note…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.openObsidianNote",
         "title": "Open Linked Note in Obsidian…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.manageObsidianNotes",
         "title": "Manage Linked Notes…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.artifactLocation",
         "title": "Show Artifact Location",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.moveArtifactDirectory",
         "title": "Move Saved Work Directory…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openArtifactDirectory",
         "title": "Open Saved Work Directory…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.prepareFolderRename",
         "title": "Prepare Folder Rename…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.reconnectRenamedFolder",
         "title": "Reconnect Saved Work After Folder Rename…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.recoverArtifactMove",
         "title": "Recover Artifact Move",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.refreshArtifactLocation",
         "title": "Refresh Artifact Location",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openTutorial",
         "title": "Open Tutorial",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(question)"
       },
       {
         "command": "mrw.openLearningMaterials",
         "title": "Examples…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.annotateBundledNote",
         "title": "Annotate Bundled Note",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openOperadsNotes",
         "title": "Open Operads Notes",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openReadingOutline",
         "title": "Show Contents",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(list-tree)"
       },
       {
         "command": "mrw.chooseReadingOverview",
         "title": "Choose Document…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.revealReadingDocument",
         "title": "Reveal Contents Document",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(go-to-file)"
       },
       {
         "command": "mrw.refreshReadingOutline",
         "title": "Refresh Contents",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(refresh)"
       },
       {
         "command": "mrw.returnToReadingOutline",
         "title": "Return to Document",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(arrow-left)"
       },
       {
         "command": "mrw.selectReadingOutlineItem",
         "title": "Go to Document Location",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.generateAtlas",
         "title": "Generate Mathematical Atlas…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(list-tree)"
       },
       {
         "command": "mrw.openAtlas",
         "title": "Open Mathematical Atlas…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(graph)"
       },
       {
         "command": "mrw.returnToAtlas",
         "title": "Return to Atlas",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openProofOutline",
         "title": "Open Proof Outline…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(type-hierarchy)"
       },
       {
         "command": "mrw.prepareProofStudy",
         "title": "Work through a proof…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.resumeProofStudy",
         "title": "Continue proof work",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(book)"
       },
       {
         "command": "mrw.studyCurrent",
         "title": "Study Current Material",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(book)"
       },
       {
         "command": "mrw.resumeStudy",
         "title": "Resume Study",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(history)"
       },
       {
         "command": "mrw.inspectStudyHistory",
         "title": "Inspect Study History",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.exportStudyHistory",
         "title": "Export Study History…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openStudyExample",
         "title": "Open Study Example",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openDocument",
         "title": "Open Document…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(go-to-file)"
       },
       {
         "command": "mrw.newZettel",
         "title": "New Note…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(new-file)"
       },
       {
         "command": "mrw.recentNotes",
         "title": "Recent Documents…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(history)"
       },
       {
         "command": "mrw.chooseNotesFolder",
         "title": "Choose Notes Folder…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(folder)"
       },
       {
         "command": "mrw.followDocumentLink",
         "title": "Follow Document Link",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(link)"
       },
       {
         "command": "mrw.showBacklinks",
         "title": "Show Backlinks…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(references)"
       },
       {
         "command": "mrw.reopenDocument",
         "title": "Reopen Document",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(history)"
       },
       {
         "command": "mrw.importKerodonSection",
         "title": "Import Kerodon Section…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "enablement": "!mrw.outlineBusy"
       },
       {
         "command": "mrw.importSource",
         "title": "Import Source…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.addSourcePlugin",
         "title": "Add Source Plugin…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.manageSourcePlugins",
         "title": "Manage Source Plugins…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.reparseSource",
         "title": "Reparse Saved Source…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.studyLean4",
         "title": "Study Lean 4…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.resumeLeanStudy",
         "title": "Resume Lean Study",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.leanStudyActions",
         "title": "Lean Study Actions…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.leanStudyInfo",
         "title": "Show Lean Study InfoView",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.returnFromLeanStudy",
         "title": "Return from Lean Study",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.addLeanLessonPack",
         "title": "Add Lean Lesson Pack…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.manageLeanLessonPacks",
         "title": "Manage Lean Lesson Packs…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.archiveStudy",
         "title": "Archive Study",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(archive)"
       },
       {
         "command": "mrw.restoreStudy",
         "title": "Restore Study",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(discard)"
       },
       {
         "command": "mrw.deleteStudy",
         "title": "Delete Study…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(trash)"
       },
       {
         "command": "mrw.permanentlyDeleteStudy",
         "title": "Permanently Delete Study…",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(trash)"
       },
       {
         "command": "mrw.showArchivedStudies",
         "title": "Show Archived Studies",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(archive)"
       },
       {
         "command": "mrw.showDeletedStudies",
         "title": "Show Deleted Studies",
-        "category": "MRW",
+        "category": "GOLEM XIV",
         "icon": "$(trash)"
       },
       {
         "command": "mrw.configureHistory",
         "title": "Configure History…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.connectZotero",
         "title": "Connect Zotero…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.findZoteroReference",
         "title": "Find Zotero Reference…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.resumeZoteroReference",
         "title": "Resume Zotero Reference…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.setupWorkspace",
-        "title": "Set Up MRW Workspace…",
-        "category": "MRW",
+        "title": "Set Up GOLEM XIV Workspace…",
+        "category": "GOLEM XIV",
         "icon": "$(home)"
       },
       {
         "command": "mrw.moveWorkspace",
         "title": "Move Workspace…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.recoverWorkspaceMove",
         "title": "Recover Workspace Move",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.retainNotebookResult",
         "title": "Retain Notebook Result…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openNotebookResult",
         "title": "Open Retained Notebook Result…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.exportNotebookProvenance",
         "title": "Export Notebook Provenance…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.readingTools",
         "title": "Reading and Notes…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.sourceTools",
         "title": "Sources and References…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.calculationTools",
         "title": "Calculation…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.proofTools",
         "title": "Proofs…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.companionTools",
         "title": "Tools and Setup…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.earlierWork",
         "title": "Earlier Saved Work…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openNotebook",
         "title": "Open Notebook…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.refreshCitations",
         "title": "Refresh Citation Preview",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.deleteSavedSource",
         "title": "Delete Saved Source…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.restoreSavedSource",
         "title": "Restore Saved Source…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.openJustification",
         "title": "Justification…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.correspondenceReview",
         "title": "Correspondence Review…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.correspondenceReports",
         "title": "Correspondence Reports…",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       },
       {
         "command": "mrw.setupJustificationChecker",
         "title": "Build Local Justification Checker",
-        "category": "MRW"
+        "category": "GOLEM XIV"
       }
     ],
     "views": {
@@ -1066,7 +1066,7 @@
       ]
     },
     "configuration": {
-      "title": "Mathematical Research Workstation",
+      "title": "GOLEM XIV",
       "properties": {
         "mrw.obsidianVault": {
           "type": "string",
@@ -1230,7 +1230,7 @@
     "viewsWelcome": [
       {
         "view": "mrw.commands",
-        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Examples…](command:mrw.openLearningMaterials \"Browse operads notes, an induction example, and Lean 4 lessons.\")\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active MRW version.\")"
+        "contents": "[Open Document…](command:mrw.openDocument \"Open a note, paper or ordinary file in place.\")\n[Open Saved Source…](command:mrw.openOutline \"Open retained source passages and their reader notes.\")\n[Recent Documents…](command:mrw.recentNotes \"Reopen recent notes, PDFs and other files.\")\n\n[Reading and notes](command:mrw.readingTools) · [Sources and references](command:mrw.sourceTools)\n[Calculation](command:mrw.calculationTools) · [Proofs](command:mrw.proofTools)\n[Tools and setup](command:mrw.companionTools) · [Earlier saved work](command:mrw.earlierWork)\n\n[Examples…](command:mrw.openLearningMaterials \"Browse operads notes, an induction example, and Lean 4 lessons.\")\n[Tutorial](command:mrw.openTutorial \"Read instructions for the active GOLEM XIV version.\")"
       },
       {
         "view": "mrw.readingOutline",
@@ -1241,7 +1241,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.64",
+          "title": "GOLEM XIV 0.23.65",
           "icon": "media/mrw.svg"
         }
       ]
@@ -1249,7 +1249,7 @@
     "submenus": [
       {
         "id": "mrw.documentNavigation",
-        "label": "MRW Document",
+        "label": "GOLEM XIV Document",
         "icon": "$(list-selection)"
       }
     ]

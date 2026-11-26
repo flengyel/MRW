@@ -39,7 +39,7 @@ function usageReport(events,status={}){
     if(e.action==='operation.complete')g.complete++;if(e.action==='operation.cancel')g.cancel++;if(e.action==='operation.error')g.error++;
     if(Number.isFinite(e.data.duration_ms)&&e.data.duration_ms>=0)g.durations.push(e.data.duration_ms);
   }
-  const lines=['# Usage and interaction history','','Only available batches are represented; MRW cannot know whether every device has synchronized. Dates below are writer-reported UTC calendar periods, not a cross-device ordering. Last use is the greatest reported timestamp, not a synchronized-clock assertion.',
+  const lines=['# Usage and interaction history','','Only available batches are represented; GOLEM XIV cannot know whether every device has synchronized. Dates below are writer-reported UTC calendar periods, not a cross-device ordering. Last use is the greatest reported timestamp, not a synchronized-clock assertion.',
     'Counts describe invocations and observed software outcomes, not usefulness, reading, comprehension or mathematical correctness. Old unlinked outcomes are shown separately; they are not silently matched by timestamp.','',
     `Shared history: ${status.enabled?'enabled':'not enabled'}. Available publishing writers: ${(status.writers||[]).join(', ')||'none observed'}.`,
     ...events.filter(e=>e.action==='usage.recording').map(e=>`Usage recording ${e.data.enabled?'enabled':'disabled'}: ${safe(e.writer||'unknown writer')}, ${safe(e.at)}. Study evidence remains separate.`),

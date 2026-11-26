@@ -58,15 +58,15 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   async function folderRoot() {
     const configured = configuredFolder();
     if (configured) {
-      if (typeof configured !== 'string' || !path.isAbsolute(configured)) throw new Error('MRW: Notes Folder must be an absolute path on this extension host. In WSL use /mnt/c/… for a Windows folder.');
+      if (typeof configured !== 'string' || !path.isAbsolute(configured)) throw new Error('GOLEM XIV: Notes Folder must be an absolute path on this extension host. In WSL use /mnt/c/… for a Windows folder.');
       const uri = vscode.Uri.file(configured);
       if (folder?.uri !== uri.toString()) {
         const actual = await fs.realpath(configured);
-        if (!(await fs.stat(actual)).isDirectory()) throw new Error('MRW: Notes Folder must name a folder.');
+        if (!(await fs.stat(actual)).isDirectory()) throw new Error('GOLEM XIV: Notes Folder must name a folder.');
         folder = { uri: uri.toString(), canonical: actual }; await persist();
       }
     }
-    if (!folder?.uri || !folder?.canonical) throw new Error('Choose a notes folder with MRW: Choose Notes Folder. No parent folder is indexed automatically.');
+    if (!folder?.uri || !folder?.canonical) throw new Error('Choose a notes folder with GOLEM XIV: Choose Notes Folder. No parent folder is indexed automatically.');
     const uri = vscode.Uri.parse(folder.uri);
     if (uri.scheme !== 'file') throw new Error('Choose the notes folder on this extension host again.');
     const actual = await fs.realpath(uri.fsPath);
@@ -185,7 +185,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       if (attempt !== generation) return false;
       if (!reader) {
         if (readers.length) return false;
-        const action = await vscode.window.showInformationMessage('No installed PDF custom reader is available. MRW can ask the system reader to open this file; it cannot restore a PDF page.', 'Open with system reader');
+        const action = await vscode.window.showInformationMessage('No installed PDF custom reader is available. GOLEM XIV can ask the system reader to open this file; it cannot restore a PDF page.', 'Open with system reader');
         if (attempt !== generation || action !== 'Open with system reader') return false;
         if (!await vscode.env.openExternal(uri)) throw new Error('The system reader could not open this PDF. Choose an available host reader.');
       } else await vscode.commands.executeCommand('vscode.openWith', uri, reader.viewType, { preview: false });
@@ -198,8 +198,8 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     latestDisplay = { uri, location: shownLocation };
     lastLocation = shownLocation;
     onDisplayed(uri);
-    await notes.remember(uri, {opened: true, location: shownLocation}).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
-    if (positionUnavailable) vscode.window.setStatusBarMessage?.('MRW: Opened the current document; the previous position no longer matches.', 8000);
+    await notes.remember(uri, {opened: true, location: shownLocation}).catch(error => vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`));
+    if (positionUnavailable) vscode.window.setStatusBarMessage?.('GOLEM XIV: Opened the current document; the previous position no longer matches.', 8000);
     return true;
   }
   function validFolder(value) {
@@ -341,7 +341,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   }
   async function resolve(doc, node) {
     await check(doc.uri);
-    if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || /^[/\\]/u.test(node.target))) throw new Error('MRW follows relative local file links here. Open other targets explicitly through the host.');
+    if (node.syntax === 'markdown' && (/^[a-z][a-z0-9+.-]*:/i.test(node.target) || /^[/\\]/u.test(node.target))) throw new Error('GOLEM XIV follows relative local file links here. Open other targets explicitly through the host.');
     if (node.syntax === 'zettel') {
       const wiki = wikiTarget(node.target);
       if (wiki.lookupId) return resolveNoteLink(await index(false, wiki.lookupId), doc.uri.fsPath, node.target, node.syntax);
@@ -478,7 +478,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     }
     if (origin?.uri === uri && !origin.fileOnly) origin = trackLocation(origin, e.contentChanges, revision);
     for (const pending of candidates) if (pending.location.uri === uri && !pending.location.fileOnly) pending.location = trackLocation(pending.location, e.contentChanges, revision);
-    void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+    void persist().catch(error => vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`));
   }
   function isNote(uri) {
     const root = configuredFolder() || folder?.canonical;
@@ -507,7 +507,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     if (!(await fs.stat(path.join(root, '.obsidian')).catch(() => undefined))?.isDirectory()) throw new Error('The selected notes folder is not an Obsidian vault. Choose its root folder.');
     const configured = vscode.workspace.getConfiguration?.('mrw').get('obsidianVault', '') || '';
     const vault = configured || path.basename(root);
-    if (typeof vault !== 'string' || vault.includes('/') || vault.includes('\\') || [...vault].some(c => c.charCodeAt(0) < 32)) throw new Error('MRW: Obsidian Vault must be its name or vault ID.');
+    if (typeof vault !== 'string' || vault.includes('/') || vault.includes('\\') || [...vault].some(c => c.charCodeAt(0) < 32)) throw new Error('GOLEM XIV: Obsidian Vault must be its name or vault ID.');
     const relative = path.relative(root, actual).split(path.sep).join('/');
     const target = vscode.Uri.from({ scheme: 'obsidian', authority: 'vault', path: `/${vault}/${relative}` });
     const doc = vscode.workspace.textDocuments?.find(d => d.uri.toString() === uri.toString());
@@ -526,25 +526,25 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   async function copyLink(value) {
     const selected = vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri || vscode.window.activeTextEditor?.document?.uri;
     const uri = value?.scheme ? value : selected || (last && vscode.Uri.parse(last));
-    if (!uri || !isNote(uri)) throw new Error('Open a Markdown note in the selected notes folder before copying its MRW link.');
+    if (!uri || !isNote(uri)) throw new Error('Open a Markdown note in the selected notes folder before copying its GOLEM XIV link.');
     await check(uri);
     const notes = await folderRoot(), actual = await canonical(uri);
     if (!within(notes, actual)) throw new Error('This note is outside the selected notes folder.');
     const link = makeNoteLink({ workspace: await noteWorkspace(), notes, file: path.relative(notes, actual).split(path.sep).join('/') }, vscode.env.uriScheme || 'vscode');
     const doc = await vscode.workspace.openTextDocument(uri);
-    const label = `${noteIdentity(doc).label} — MRW`.replace(/\s+/gu, ' ').replace(/[\\[\]]/gu, '\\$&');
+    const label = `${noteIdentity(doc).label} — GOLEM XIV`.replace(/\s+/gu, ' ').replace(/[\\[\]]/gu, '\\$&');
     await vscode.env.clipboard.writeText(`[${label}](${link})`);
-    void vscode.window.showInformationMessage('Copied the link to this note in MRW.');
+    void vscode.window.showInformationMessage('Copied the link to this note in GOLEM XIV.');
     return link;
   }
   async function handleUri(uri) {
     if (uri.path !== '/note') return false;
-    if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following the MRW note link.');
+    if (vscode.workspace.isTrusted === false) throw new Error('Open and trust the intended workspace before following the GOLEM XIV note link.');
     const value = uri.toString(true), target = await (context.mrwRoute|| (async x=>x))(parseNoteLink(value, vscode.env.uriScheme || 'vscode'));
     const attempt = supersede();
     const here = await noteWorkspace().catch(() => undefined);
     if (here !== target.workspace) {
-      const choice = await vscode.window.showWarningMessage(`This note link belongs to ${target.workspace}. Open that workspace in a separate window, then run MRW: Open Link from Clipboard.`, 'Copy Link and Open Workspace');
+      const choice = await vscode.window.showWarningMessage(`This note link belongs to ${target.workspace}. Open that workspace in a separate window, then run GOLEM XIV: Open Link from Clipboard.`, 'Copy Link and Open Workspace');
       if (choice === 'Copy Link and Open Workspace' && attempt === generation) {
         await vscode.env.clipboard.writeText(value);
         await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(target.workspace), { forceNewWindow: true });
@@ -552,7 +552,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
       return true;
     }
     const notes = await folderRoot();
-    if (notes !== target.notes) throw new Error('This note link belongs to a different notes folder. Select its vault root with MRW: Choose Notes Folder, then open the link again.');
+    if (notes !== target.notes) throw new Error('This note link belongs to a different notes folder. Select its vault root with GOLEM XIV: Choose Notes Folder, then open the link again.');
     const destination = vscode.Uri.file(path.join(notes, target.file));
     await check(destination);
     if (!within(notes, await canonical(destination))) throw new Error('This note resolves outside its linked notes folder.');
@@ -620,7 +620,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
   register('mrw.followDocumentLink', followAtCursor);
   register('mrw.showBacklinks', showBacklinks);
   function rememberRecentPosition() {
-    void notes.rememberPosition(lastLocation).catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+    void notes.rememberPosition(lastLocation).catch(error => vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`));
   }
   const selectionChanged = vscode.window.onDidChangeTextEditorSelection?.(event => {
     const doc = event.textEditor?.document, range = event.selections?.[0];
@@ -628,7 +628,7 @@ function createDocuments({ vscode, context, register, trackLocation, onMarkdown 
     lastLocation = snapshot(doc, doc.offsetAt(range.start), doc.offsetAt(range.end));
     if (latestDisplay?.uri.toString() === last) latestDisplay.location = lastLocation;
     rememberRecentPosition();
-    void persist().catch(error => vscode.window.showErrorMessage(`MRW: ${error.message}`));
+    void persist().catch(error => vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`));
   });
   if (selectionChanged) context.subscriptions.push(selectionChanged);
   register('mrw.reopenDocument', async () => {

@@ -2,8 +2,11 @@
 
 <a id="the-mrw-workspace"></a>
 
-Use `~/mrw-work/MRW.code-workspace` on the Linux host as the general
-GOLEM XIV workspace. It is independent of Stacks, Lean, a particular note, and the command
+The default workspace is `~/mrw-work/GOLEM XIV.code-workspace` on the Linux host.
+Setup keeps the active default workspace, including a registered move. If neither
+default is open, it prefers the renamed workspace and falls back to the earlier
+`MRW.code-workspace` if that is the only one available.
+The workspace is independent of Stacks, Lean, a particular note, and the command
 used to begin reading. Do not use a temporary test directory as your workspace.
 
 A workspace is VS Code's session boundary: it selects folders, settings and
@@ -12,13 +15,13 @@ scope for note links and backlinks. These locations need not coincide.
 
 | Location | Purpose |
 | --- | --- |
-| `~/mrw-work/MRW.code-workspace` | The saved workspace to reopen |
+| `~/mrw-work/GOLEM XIV.code-workspace` | Default saved workspace for a new 0.23.65 installation |
 | `~/mrw-work/` | General Linux working directory; default parent for new Lean projects |
 | A separately selected notes folder | Notes, links and attachments; an Obsidian vault is optional |
 | VS Code's private storage on the Linux host | Retained sources, annotations, studies and history, according to their existing stores |
 | A GOLEM XIV source checkout | Extension development; unnecessary for using the VSIX |
 
-For example, `/home/alice/mrw-work/MRW.code-workspace` can read notes at
+For example, `/home/alice/mrw-work/GOLEM XIV.code-workspace` can read notes at
 `/mnt/c/Users/Alice/Notes`. The latter is a valid WSL path to Windows
 files. Linux builds work more efficiently on the Linux filesystem; Windows
 notes can stay where Obsidian uses them. See
@@ -38,9 +41,10 @@ notes can stay where Obsidian uses them. See
    interpreter with `mrw.pythonExecutable` in Remote settings.
 4. [Install the current GOLEM XIV VSIX](INSTALLATION.md#2-install-both-vsix-packages-in-that-workspace-host)
    on **WSL: Debian**, rather than only the Windows interface.
-5. Press **F1**, search for `Set Up Workspace`, and select the workspace setup
-   command. It prepares
-   `~/mrw-work/MRW.code-workspace` and reports the path and Python check. Choose
+5. Press **F1** and search for `Set Up Workspace`. In 0.23.65 select
+   **GOLEM XIV: Set Up GOLEM XIV Workspace…**. The same search finds the
+   workspace setup command in 0.23.64. Setup reports the saved workspace
+   path and the Python check. Choose
    **Open in this window** to switch after saving your work, or **Open in new
    window** to keep both sessions open. Repeating setup in the default workspace
    does not open another window.
@@ -55,7 +59,7 @@ No setup can promise to suppress every VS Code warning or remote timeout.
 
 ## What repeating setup does
 
-Setup creates `mrw-work`, `MRW.code-workspace` and a short README only if missing.
+Setup creates `mrw-work`, a saved workspace file and a short README only if missing.
 Complete files are published without overwriting a competing or existing file,
 then synchronized to disk. If interrupted, rerunning completes missing files.
 A reported write/synchronization failure is not reported as successful setup.
@@ -70,12 +74,14 @@ paths are rejected. Setup neither
 runs on activation nor moves data. It switches windows only after your explicit
 choice. Switching in this window checks unsaved documents and GOLEM XIV drafts first.
 
-Reopen the same file from a Debian terminal:
+To reopen a workspace created by a fresh 0.23.65 installation, run this in the
+Debian terminal:
 
 ```sh
-code "$HOME/mrw-work/MRW.code-workspace"
+code "$HOME/mrw-work/GOLEM XIV.code-workspace"
 ```
 
+If setup reports another workspace path, open that path instead.
 Opening `~/mrw-work` as a folder instead selects a different workspace identity.
 Use **Move Workspace…** to change its location. Different dedicated
 project workspaces remain possible, but a new topic or document does not require

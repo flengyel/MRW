@@ -164,6 +164,6 @@
     return { update, select, fit, zoom, svg,
       find(query) { return model?.projection.order.find(id => { const n = model.graph.nodes.find(n => n.id === id); return (n.title + ' ' + n.claim).toLowerCase().includes(query.toLowerCase()); }); } };
   }
-  if (typeof window !== 'undefined') window.MRWProofMap = { layout, create };
+  if (typeof window !== 'undefined') window.GolemXIVProofMap = { layout, create };
   if (typeof module !== 'undefined') module.exports = { layout };
 })();

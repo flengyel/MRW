@@ -12,7 +12,7 @@ function freshGuard(){
 }
 async function fixture(t){
  const base=await fs.mkdtemp(path.join(os.tmpdir(),'mrw-guard-'));t.after(()=>fs.rm(base,{recursive:true,force:true}));
- const root=path.join(base,'owned'),project=path.join(root,'project'),extension=path.join(root,'extension'),id=crypto.randomUUID(),profile='MRW-Fixture-'+id;
+ const root=path.join(base,'owned'),project=path.join(root,'project'),extension=path.join(root,'extension'),id=crypto.randomUUID(),profile='GOLEM-XIV-Fixture-'+id;
  await fs.mkdir(project,{recursive:true,mode:0o700});await fs.chmod(root,0o700);await fs.mkdir(extension);await fs.mkdir(path.join(root,'workspace-storage'));await fs.mkdir(path.join(root,'global-storage'));
  const user=path.join(base,'User'),global=path.join(user,'profiles','profile-id','globalStorage','flengyel.mrw'),storage=path.join(user,'workspaceStorage','workspace-id','flengyel.mrw');
  await fs.mkdir(global,{recursive:true});await fs.mkdir(storage,{recursive:true});await fs.mkdir(path.join(user,'globalStorage'));
@@ -96,7 +96,7 @@ test('fixture host identity is checked before native storage URIs are interprete
  }
 });
 test('large packaged manifest does not mask the guarded bootstrap activation refusal',async t=>{
- const f=await fixture(t),local=freshGuard(),refusal=Error('MRW native fixture refused: original native storage refusal');
+ const f=await fixture(t),local=freshGuard(),refusal=Error('GOLEM XIV native fixture refused: original native storage refusal');
  f.marker.case='activation';await f.put(path.join(f.root,'.mrw-native-fixture.json'),f.marker);
  await f.put(path.join(f.extension,'package.json'),{main:'./test/host/bootstrap.js',description:'x'.repeat(40000)});
  let activated=0,bodies=0;
@@ -150,7 +150,7 @@ test('native user keys stay separate and only the owned prefix is updated',async
  assert.deepEqual(f.nativeGlobal.get('existing-research'),{text:'Keep this mathematical note.'});
 });
 test('orphaned fixture-owned native state is not silently adopted',async t=>{
- const f=await fixture(t);f.nativeGlobal.set('mrw.fixture.'+f.id+'.old-result',1);await assert.rejects(f.check(),/already contains MRW state/);
+ const f=await fixture(t);f.nativeGlobal.set('mrw.fixture.'+f.id+'.old-result',1);await assert.rejects(f.check(),/already contains GOLEM XIV state/);
 });
 test('symlinks, hardlinks and a redirected notes folder refuse without changing targets',async t=>{
  for(const kind of ['symlink','hardlink','notes']){const f=await fixture(t),outside=path.join(f.base,'real-note.md');await fs.writeFile(outside,'Keep this exact note.');

@@ -79,7 +79,7 @@ def publication_guard(path):
             try: value=json.loads(read_bounded(marker,32*1024*1024,'artifact store marker'))
             except (OSError, ValueError): continue
             if isinstance(value,dict) and value.get('schema')=='mrw-artifact-store':
-                raise ValueError('Open this artifact directory through MRW before modifying its saved records')
+                raise ValueError('Open this artifact directory through GOLEM XIV before modifying its saved records')
     home = legacy_home(path)
     if home is not None:
         key=str(home.resolve())
@@ -90,7 +90,7 @@ def publication_guard(path):
         runtime = home/'artifact-runtime'
         with file_lock(runtime/'workspace-store', runtime/'coordination'):
             if (runtime/'active-store.json').exists() or (runtime/'transaction.json').exists():
-                raise ValueError('Saved artifact location moved or is moving; use the current MRW artifact binding, not this retired locator')
+                raise ValueError('Saved artifact location moved or is moving; use the current GOLEM XIV artifact binding, not this retired locator')
             token=PUBLICATION_HOMES.set(PUBLICATION_HOMES.get() | {key})
             try:yield
             finally:PUBLICATION_HOMES.reset(token)

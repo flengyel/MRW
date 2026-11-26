@@ -206,7 +206,7 @@ test('actual generated qualified 08ZH v2 references survive the existing handoff
   const generatedV1 = await bridge({ method: 'outline_reference', ...base, id: legacy.outline.id, revision: legacy.revision, region: null });
   assert.match(generatedV1.reference, /^mrw-outline:v1\//); assert.ok(pattern.test(generatedV1.reference));
   const tampered = proposal(study); tampered.inferences[0].citations[0].reference = generatedV1.reference;
-  await assert.rejects(() => readProposal({ readText: async () => encode(tampered) }, bridge, study, true), /MRW reference/);
+  await assert.rejects(() => readProposal({ readText: async () => encode(tampered) }, bridge, study, true), /GOLEM XIV reference/);
 });
 
 test('pre-publication review corrects the reason and joint premises while retaining the attributed original', async t => {

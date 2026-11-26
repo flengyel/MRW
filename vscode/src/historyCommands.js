@@ -21,13 +21,13 @@ function registerHistory({vscode,context,register,recorder}){
     let directory=recorder.shared?.binding?.directory;
     if(choice.action==='choose'){
       const suggested=configuration().get('dataDirectory','')||configuration().get('notesFolder','');
-      const picked=await vscode.window.showOpenDialog({title:'Choose MRW data directory',canSelectFiles:false,canSelectFolders:true,canSelectMany:false,
+      const picked=await vscode.window.showOpenDialog({title:'Choose GOLEM XIV data directory',canSelectFiles:false,canSelectFolders:true,canSelectMany:false,
         defaultUri:suggested&&path.isAbsolute(suggested)?vscode.Uri.file(suggested):undefined,openLabel:'Use History subfolder'});
       if(!picked?.length)return;if(picked[0].scheme!=='file')throw Error('Choose a directory on this extension host.');directory=picked[0].fsPath;
     }
     if(!directory)throw Error('Choose a shared history directory first.');
     const accepted=await vscode.window.showWarningMessage('Import recorded history into '+path.join(directory,'History')+'?',{modal:true,
-      detail:'Shares recorded interactions and their submitted snapshots with anyone who can read this folder. It does not copy active drafts, study checkpoints, scheduling or the source store. Host file locations become opaque references. Original private files remain. The connection changes only after verification. A vault/MRW folder is recommended; a separate folder or vault root also works.'},'Import and Connect');
+      detail:'Shares recorded interactions and their submitted snapshots with anyone who can read this folder. It does not copy active drafts, study checkpoints, scheduling or the source store. Host file locations become opaque references. Original private files remain. The connection changes only after verification. Choose a dedicated folder inside or outside the vault, or use the vault root.'},'Import and Connect');
     if(accepted!=='Import and Connect')return;
     const status=await recorder.importHistory(directory);
     await configuration().update('dataDirectory',directory,vscode.ConfigurationTarget.Global);

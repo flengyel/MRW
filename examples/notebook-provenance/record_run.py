@@ -64,7 +64,7 @@ def main():
     cells = [c for c in saved['cells'] if c['cell_type'] == 'code']
     saved['metadata']['mrw_execution'] = {
         'schema': 'mrw-notebook-run:1', 'id': str(uuid4()),
-        'producer': 'MRW example runner using nbclient', 'started': started, 'ended': now(),
+        'producer': 'GOLEM XIV example runner using nbclient', 'started': started, 'ended': now(),
         'outcome': outcome,
         'code_sha256': sha256(canonical([''.join(c['source']) if isinstance(c['source'], list) else c['source'] for c in cells])).hexdigest(),
         'outputs_sha256': sha256(canonical([c['outputs'] for c in cells])).hexdigest(),

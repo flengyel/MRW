@@ -11,7 +11,7 @@ GOLEM XIV supports mathematical understanding and research. Its aims are to stud
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
 
-[Download GOLEM XIV 0.23.64](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix)
+[Download the latest published VSIX (0.23.64)](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix)
 · [Release and checksums](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md)
 
@@ -22,8 +22,10 @@ Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
 
 ## Start
 
-1. Install the VSIX. In the Command Palette, search for `Set Up Workspace`
-   and run the extension’s workspace setup command.
+1. Install the VSIX. Press **F1** and search for `Set Up Workspace`. In the 0.23.65
+   source build, run **GOLEM XIV: Set Up GOLEM XIV Workspace…**. It creates
+   `~/mrw-work/GOLEM XIV.code-workspace` on a fresh installation. The published
+   0.23.64 release uses the former workspace name. [Workspace setup](docs/WORKSPACE_SETUP.md)
 2. For a new question, choose a notes folder with **Choose Notes Folder…**,
    then select **New Note…**. For an existing paper or note, use
    **Open Document…**. [Mathematics in ordinary notes](docs/MATHEMATICS_WITH_NOTES.md)

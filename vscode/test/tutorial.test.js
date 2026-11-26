@@ -34,6 +34,8 @@ test('tutorial reports activation metadata and keeps that build after an on-disk
   const h = await fixture(t);
   const active = registerTutorial(h);
   assert.equal(active.identity.version, '0.20.0');
+  assert.equal(active.uri.scheme, 'mrw-help');
+  assert.equal(active.uri.path, '/Using GOLEM XIV.md');
   assert.match(active.provider.provideTextDocumentContent(), /Active extension: \*\*GOLEM XIV 0\.20\.0\*\*/);
   assert.match(active.provider.provideTextDocumentContent(), new RegExp('a'.repeat(40)));
   assert.doesNotMatch(active.provider.provideTextDocumentContent(), /9\.9\.9/);

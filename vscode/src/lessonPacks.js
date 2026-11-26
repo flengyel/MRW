@@ -53,7 +53,7 @@ async function workingCopy(pack,parent){
  if(await fs.realpath(folder)!==folder)throw Error('Study directory is redirected; choose another destination.');
  const root=path.join(folder,pack.manifest.packId);
  try{if((await fs.lstat(root)).isSymbolicLink())throw Error('Study working-copy path is redirected.');const old=await loadPack(root);if(old.manifest.packId!==pack.manifest.packId)throw Error('The study destination belongs to another pack.');
-  const meta=JSON.parse(await read(root,'.study-copy.json',64*1024));if(meta.apiVersion!==1||meta.packId!==pack.manifest.packId)throw Error('The occupied folder is not an MRW-created working copy.');return {root,manifest:old.manifest,reused:true};
+  const meta=JSON.parse(await read(root,'.study-copy.json',64*1024));if(meta.apiVersion!==1||meta.packId!==pack.manifest.packId)throw Error('The occupied folder is not a GOLEM XIV working copy.');return {root,manifest:old.manifest,reused:true};
  }catch(error){if(error.code!=='ENOENT')throw error;}
  // Publish a complete fresh directory once. Never merge into an occupied folder.
  const stage=await fs.mkdtemp(path.join(folder,'.creating-'));let published=false;

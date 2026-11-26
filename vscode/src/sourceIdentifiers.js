@@ -44,7 +44,7 @@ function qualifiedIdentifier(value){
 function canonicalCitation(value){
  const online=urlIdentity(value);if(online)return online.uri.href;
  const ref=qualifiedIdentifier(value),item=ref&&split(ref),spec=item&&sources.get(item.source);
- if(!spec)throw new Error('The source namespace is unavailable. Enable its source profile, or follow the retained MRW citation.');
+ if(!spec)throw new Error('The source namespace is unavailable. Enable its source profile, or follow the retained GOLEM XIV citation.');
  let local=encode(item.item);if(spec.urlRules.identifier==='page')local=local.replaceAll('%20','+');
  const marker=value.indexOf('#'),fragment=marker<0?'':'#'+encode(decodeURIComponent(value.slice(marker+1)));
  return spec.origins[0]+spec.urlRules.itemPath.replace('{id}',local)+fragment;

@@ -6,7 +6,7 @@ Use Microsoft's Jupyter extension to connect a VS Code window in WSL2 to a
 SageMath notebook running in SagePod. GOLEM XIV can retain the saved notebook and link
 it to a working note. The SagePod helper commands below refer to revision
 `4bc1bc3`. For reading alone, follow [the GOLEM XIV installation guide](INSTALLATION.md#a-golem-xiv-for-reading).
-Download the GOLEM XIV VSIX from the [current release](https://github.com/flengyel/GOLEMXIV/releases/latest).
+Download the [latest published GOLEM XIV VSIX](https://github.com/flengyel/GOLEMXIV/releases/latest).
 
 For batch jobs, [SageQueue](https://github.com/flengyel/sagequeue) now uses the
 same SagePod runtime. It supplies queueing, workers and job logs; it is optional
@@ -30,20 +30,22 @@ Use a WSL2 Linux distribution; the recorded companion workflow used Debian.
 In Windows PowerShell, `wsl --list --verbose` shows each distribution's WSL
 version.
 
-For new GOLEM XIV sessions, use [the default workspace](WORKSPACE_SETUP.md) at
-`~/mrw-work/MRW.code-workspace`. Existing sessions keep their own saved records.
+Use the [saved GOLEM XIV workspace](WORKSPACE_SETUP.md). The default is
+`~/mrw-work/GOLEM XIV.code-workspace`.
 SagePod's persistent notebook directory, normally `~/Jupyter`, is independent
 of this workspace. Open its notebooks in place from the GOLEM XIV window; do not
 change workspace merely to open a notebook. A separate notebook project is
 still possible when you deliberately want separate workspace state.
 
 All shell commands below run **in WSL**, except the PowerShell check above.
-Reopen the default saved workspace with:
+After setup, reopen the workspace that matches the filename reported by GOLEM XIV.
+For a new 0.23.65 workspace, run:
 
 ```bash
-code "$HOME/mrw-work/MRW.code-workspace"
+code "$HOME/mrw-work/GOLEM XIV.code-workspace"
 ```
 
+If setup reports another filename, use that path instead.
 The bottom-left corner must show **WSL: Debian**, or your chosen distribution.
 Use **Terminal → New Terminal** in that window and check:
 
@@ -74,17 +76,17 @@ Install these components in the locations shown:
 | SageMath Enhanced | `Lov3.sagemath-enhanced` | WSL |
 
 For GOLEM XIV, press **F1**, choose **Extensions: Install from VSIX…**, and select
-`mrw-0.23.54.vsix`. Alternatively, in that window's WSL integrated
+`mrw-0.23.64.vsix` for the published release. Alternatively, in that window's WSL integrated
 terminal, replace the example path with your package's actual Linux path:
 
 ```bash
-code --install-extension /absolute/path/to/mrw-0.23.54.vsix
+code --install-extension /absolute/path/to/mrw-0.23.64.vsix
 code --list-extensions --show-versions
 ```
 
 Check that the extension appears under
 **WSL: your-distribution — Installed**, along with Jupyter and SageMath Enhanced.
-The CLI identity is `flengyel.mrw@0.23.54`. If an extension appears
+The CLI lists the published release as `flengyel.mrw@0.23.64`. If an extension appears
 only under **Local — Installed**, use its **Install in WSL** action. Microsoft's
 [WSL extension guide](https://code.visualstudio.com/docs/remote/wsl#_managing-extensions)
 explains these two installation locations.

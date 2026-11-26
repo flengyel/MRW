@@ -223,7 +223,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     let text=model.questionHandoff(scope,purpose,submitted);
     if(purpose!=='questions'){
       const requestId=require('node:crypto').randomUUID();
-      text+='\n\nRequest association: '+requestId+'\nAttempt: '+(scope.current?.id||'none')+'\nLatest submission: '+(scope.current?.submissions.at(-1)?.event||'none')+'\nReturn ordinary prose for explicit review and retention in MRW.';
+      text+='\n\nRequest association: '+requestId+'\nAttempt: '+(scope.current?.id||'none')+'\nLatest submission: '+(scope.current?.submissions.at(-1)?.event||'none')+'\nReturn ordinary prose for explicit review and retention in GOLEM XIV.';
       await vscode.env.clipboard.writeText(text);
       const r=help.request(scope,purpose,text,recorder,adaptation,requestId);
       await persist(s);
@@ -444,7 +444,7 @@ function registerActiveStudy({vscode,context,register,recorder,projectRoot,show,
     if(!picked?.length){recorder.record('operation.cancel',{operation:'history.export'});return;}
     const selection=selectHistoryContext(all,picked.map(p=>p.id)),selected=selection.events;
     const kind=await vscode.window.showQuickPick([{label:'Detailed comparison and coverage',kind:'md'},{label:'Events and submitted snapshots',kind:'json'}],{placeHolder:'Export format'});if(!kind)return;
-    const uri=await vscode.window.showSaveDialog({title:'Export selected study history',defaultUri:vscode.Uri.file(path.join(recorder.shared?.binding?.directory||recorder.directory,'MRW-history-'+new Date().toISOString().replace(/[:.]/g,'-')+'-'+require('node:crypto').randomUUID().slice(0,8)+'.'+kind.kind)),filters:{'Study history':[kind.kind]}});if(!uri)return;
+    const uri=await vscode.window.showSaveDialog({title:'Export selected study history',defaultUri:vscode.Uri.file(path.join(recorder.shared?.binding?.directory||recorder.directory,'GOLEM-XIV-history-'+new Date().toISOString().replace(/[:.]/g,'-')+'-'+require('node:crypto').randomUUID().slice(0,8)+'.'+kind.kind)),filters:{'Study history':[kind.kind]}});if(!uri)return;
     let text=recorder.report(selected);if(selection.missing.length)text+='\n\nMissing linked context (unsupported derived values excluded):\n'+selection.missing.map(x=>JSON.stringify(x)).join('\n');
     if(kind.kind==='json'){
       const snapshots=await recorder.exportSnapshots(selected);

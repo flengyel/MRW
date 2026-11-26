@@ -202,7 +202,7 @@ function registerProofGraph({ vscode, context, register, bridge, projectRoot, ch
     } catch (error) {
       recorder?.record('operation.error',{operation:'graph.'+m.type,message:error.message,revision:c.revision});
       await c.panel.webview.postMessage({ type: 'error', message: error.message });
-      void vscode.window.showErrorMessage(`MRW: ${error.message}`);
+      void vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`);
     } finally {
       c.busy = false;
       await c.panel.webview.postMessage({ type: 'idle' });

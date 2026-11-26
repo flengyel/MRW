@@ -33,7 +33,7 @@ from .workstation import (ASSISTANCE_MODEL_ENV, MAX_ASSISTANCE_CONTEXTS,
                           record_kind)
 from .workspace import MAX_TEXT_BYTES, WorkspaceError
 
-TITLE = 'Mathematical Research Workstation'
+TITLE = 'GOLEM XIV'
 FILE_FILTER = 'Mathematical files (*.pdf *.tex *.lean *.sage *.py *.md *.txt *.ipynb *.json);;PDF documents (*.pdf);;All files (*)'
 
 

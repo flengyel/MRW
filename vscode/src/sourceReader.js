@@ -1,5 +1,5 @@
 'use strict';
-// The remote frame is a separate browsing context with no MRW command channel.
+// The remote frame is a separate browsing context with no GOLEM XIV command channel.
 (() => {
   function validated(value) {
     if (!value || typeof value.name !== 'string' || !value.name || value.name.length > 200 ||
@@ -60,5 +60,5 @@
       frame:()=>frame
     };
   }
-  window.MRWSourceReader={create,validated};
+  window.GolemXIVSourceReader={create,validated};
 })();

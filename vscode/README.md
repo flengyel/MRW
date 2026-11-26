@@ -7,7 +7,7 @@ GOLEM XIV keeps the exact passages and saved results used in an argument. Its
 justification engine shows which conclusions depend on premises the reader
 has admitted. [Mathematics in ordinary notes](../docs/MATHEMATICS_WITH_NOTES.md)
 
-**GOLEM XIV 0.23.64**
+**Latest published release — GOLEM XIV 0.23.64**
 [Download the VSIX](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix)
 · [Release and checksums](https://github.com/flengyel/GOLEMXIV/releases/tag/v0.23.64)
 · [Installation](../docs/INSTALLATION.md).
@@ -18,8 +18,9 @@ VSIX; there is no Marketplace listing. GOLEM XIV remains experimental.
 
 ## Open a document
 
-[Set up the workspace](../docs/WORKSPACE_SETUP.md) at
-`~/mrw-work/MRW.code-workspace` on the Linux host. Your notes folder can remain
+[Set up the workspace](../docs/WORKSPACE_SETUP.md) on the Linux host. A fresh
+0.23.65 installation creates `~/mrw-work/GOLEM XIV.code-workspace`. After an upgrade, reopen
+the workspace reported by setup. Your notes folder can remain
 elsewhere, including in a Windows Obsidian vault accessed from WSL.
 
 1. Choose **Open Document… → Original file**. Markdown opens in preview; other
@@ -126,13 +127,15 @@ workspace host. The recommended optional companion is
 Its weekly reports are opt-in. Save work before a requested reload and retain
 workspace storage when upgrading.
 
-To build from the repository root, use Python 3.11+, Linux Node.js 22+ and npm:
+To build GOLEM XIV 0.23.65 and Diagnostics 0.1.1 from the repository root, use
+Python 3.11+, Linux Node.js 22+ and npm:
 
 ```sh
 npm ci --prefix vscode --ignore-scripts
 TZ=UTC SOURCE_DATE_EPOCH=1792094267 npm run package --prefix vscode
-npm run verify-vsix --prefix vscode -- mrw-0.23.64.vsix
-sha256sum vscode/mrw-0.23.64.vsix
+npm run verify-vsix --prefix vscode -- mrw-0.23.65.vsix
+npm run package --prefix diagnostics
+sha256sum vscode/mrw-0.23.65.vsix diagnostics/mrw-diagnostics-0.1.1.vsix
 ```
 
 Packaging bundles the Python core and pinned Lean source assets, not a compiled

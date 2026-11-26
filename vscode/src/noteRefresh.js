@@ -3,7 +3,7 @@ const fs = require('node:fs/promises');
 const { documentColumn, showMarkdownPreview } = require('./documentPresentation');
 
 // WSL does not always receive Windows file events. Poll only the displayed
-// note after explicit MRW navigation. Ask VS Code to resolve a clean file;
+// note after explicit GOLEM XIV navigation. Ask VS Code to resolve a clean file;
 // never revert, provide replacement contents, apply edits or save a document.
 function createNoteRefresh({ vscode, context, check, isNote }) {
   let timer, running = false, disposed = false;

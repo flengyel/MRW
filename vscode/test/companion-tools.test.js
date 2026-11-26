@@ -22,7 +22,7 @@ test('group selection delegates one existing action and native notebook opening 
 
 
 test('optional diagnostics status and supported actions are discoverable without a plugin registry',async()=>{
- const h=harness();assert.ok(companionStatus(h.vscode).find(x=>x.label==='MRW Diagnostics').description.includes('not installed'));
+ const h=harness();assert.ok(companionStatus(h.vscode).find(x=>x.label==='GOLEM XIV Diagnostics').description.includes('not installed'));
  const history = rows=>rows.find(x=>x.label==='History and diagnostics…');
  h.picks.push(history,rows=>{assert.ok(!rows.some(x=>x.command==='mrwDiagnostics.featureUse'));return undefined;});await h.handlers.get('mrw.companionTools')();
  h.vscode.extensions.getExtension=id=>id==='flengyel.mrw-diagnostics'?{}:undefined;

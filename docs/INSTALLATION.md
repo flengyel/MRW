@@ -3,7 +3,7 @@
 <a id="install-mathematical-research-workstation"></a>
 
 The recommended installation is **GOLEM XIV plus GOLEM XIV Diagnostics** on the same
-workspace host. Download both packages from the current release:
+workspace host. These packages are available in the latest published release:
 
 - [GOLEM XIV 0.23.64](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-0.23.64.vsix): reading, notes, sources and research tools.
 - [GOLEM XIV Diagnostics 0.1.0](https://github.com/flengyel/GOLEMXIV/releases/download/v0.23.64/mrw-diagnostics-0.1.0.vsix): feature-use and integrity reports.
@@ -13,8 +13,8 @@ cover both downloads. Diagnostics can be omitted; GOLEM XIV's essential storage 
 and recording stay in core. Weekly reports are opt-in even when both are installed.
 
 There is no Marketplace listing. The extension identifiers are `flengyel.mrw`
-and `flengyel.mrw-diagnostics`. You can also
-[build from source](../vscode/README.md#package-and-install-a-vsix).
+and `flengyel.mrw-diagnostics`. To install GOLEM XIV 0.23.65 and Diagnostics 0.1.1,
+[build the VSIX packages from source](../vscode/README.md#package-and-install-a-vsix).
 
 <a id="a-mrw-for-reading"></a>
 
@@ -40,8 +40,7 @@ For a fresh installation, use **WSL: Connect to WSL using Distro…** and choose
 Debian. An empty connected window is sufficient for installing GOLEM XIV. For ongoing
 work, keep the current window open; install no update until its drafts are safe.
 Do not use a Stacks study, a temporary test folder or the GOLEM XIV source checkout as
-the general default. After installation, setup creates the saved workspace
-`~/mrw-work/MRW.code-workspace` as described below.
+the general default. After installation, run the workspace setup command described below.
 
 In that window's integrated terminal, check:
 
@@ -90,13 +89,13 @@ Reporting does not repair data or invoke Codex. See [the companion guide](../dia
 
 ### 3. Set up GOLEM XIV and open a document
 
-Press **F1**, search for `Set Up Workspace`, and select the workspace setup
-command. It creates or reuses
-`~/mrw-work/MRW.code-workspace`, checks Python and offers to open that exact
-workspace in a new window. It does not close the current window or transfer its
-saved records. Subsequent runs preserve your settings and files. Reopen this
-saved workspace for later sessions; opening `~/mrw-work` as a folder selects a
-different VS Code workspace identity. See [workspace setup](WORKSPACE_SETUP.md)
+Press **F1** and search for `Set Up Workspace`. In the 0.23.65 source build, select
+**GOLEM XIV: Set Up GOLEM XIV Workspace…**. On a fresh installation it creates
+`~/mrw-work/GOLEM XIV.code-workspace`. For an existing installation, reopen the
+workspace reported by setup.
+Setup checks Python and offers to open the file in the current window or a new
+one. Reopen the same saved workspace for later sessions. Opening `~/mrw-work`
+as a folder selects a different VS Code workspace identity. See [workspace setup](WORKSPACE_SETUP.md)
 for the layout, optional tools and existing-work recovery.
 
 1. Open the GOLEM XIV Activity Bar view and choose **Open Document…**, or run

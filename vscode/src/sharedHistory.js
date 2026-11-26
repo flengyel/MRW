@@ -77,7 +77,7 @@ class SharedHistory{
     const marker=path.join(root,'format.json');let format;
     try{format=await read(this.io,marker);}catch(e){
       if(e.code!=='ENOENT'||!create)throw e;
-      if((await this.io.readdir(root)).length)throw Error('History is occupied but has no MRW format marker; choose another directory.');
+      if((await this.io.readdir(root)).length)throw Error('History is occupied but has no GOLEM XIV format marker; choose another directory.');
       await immutable(this.io,marker,{format:FORMAT,schema:1,collection:randomUUID()});format=await read(this.io,marker);
     }
     if(format.format!==FORMAT||format.schema!==1||!UUID.test(format.collection)||binding.collection&&format.collection!==binding.collection)throw Error('History collection differs from the verified binding.');
@@ -145,7 +145,7 @@ class SharedHistory{
     for(const study of this.deleted)await immutable(this.io,path.join(root,'Deleted',study+'.json'),this.deletion(study));
   }
   async purgeStaging(dir){
-    // Publication staging is MRW-owned and names its opaque study before any
+    // Publication staging is GOLEM XIV-owned and names its opaque study before any
     // payload is written. A crash can leave incomplete JSON; the reserved name
     // lets deletion remove those bytes without guessing from note contents.
     for(const name of await this.io.readdir(dir)){

@@ -132,7 +132,7 @@ function registerAssistance({ vscode, context, register, bridge, show, projectRo
     const sending = prepared;
     busy = true; draft = undefined; invalidate();
     vscode.commands.executeCommand?.('setContext', 'mrw.assistanceBusy', true);
-    const status = vscode.window.setStatusBarMessage('MRW: sending one request…');
+    const status = vscode.window.setStatusBarMessage('GOLEM XIV: sending one request…');
     try {
       let result;
       try {

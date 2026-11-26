@@ -129,6 +129,9 @@ class GraphicalEditorTests(unittest.TestCase):
         cursor.setPosition(document_position(document, entry.end), QTextCursor.MoveMode.KeepAnchor)
         return cursor.selectedText()
 
+    def test_editor_displays_product_name(self):
+        self.assertEqual(self.window.windowTitle(), 'GOLEM XIV')
+
     def test_live_marker_translates_before_edits_and_ignores_after_edits(self):
         path, left, right = self.shared_editors()
         self.window.select(left.shown, 0)

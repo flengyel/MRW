@@ -22,8 +22,9 @@ proposed adapters for other editors.
 
 ## Configure Obsidian with GOLEM XIV
 
-Use [the general GOLEM XIV workspace](WORKSPACE_SETUP.md),
-`~/mrw-work/MRW.code-workspace`, for a new installation. The vault is an external
+Use [the general GOLEM XIV workspace](WORKSPACE_SETUP.md). A fresh 0.23.65 installation
+creates `~/mrw-work/GOLEM XIV.code-workspace`. After upgrading from the published
+0.23.64 release, keep using the existing workspace. The vault is an external
 notes folder; it need not be the VS Code workspace or move onto Linux. Existing
 links from Obsidian to GOLEM XIV still route to their recorded workspace. Keep that workspace
 available until its retained references and saved work have been accounted for;
@@ -174,7 +175,8 @@ cursor positions, selections or YAML.
 ### Keep a note link
 
 1. Copy the note link from the preview, or search the Command Palette for
-   **Note Link** (`mrw.copyDocumentLink`). The copied Markdown label contains the title and filename.
+   `Note Link`. In 0.23.65, select **GOLEM XIV: Copy GOLEM XIV Note Link**.
+   The copied Markdown label contains the title and filename.
 2. Paste and save the link in an Obsidian note.
 3. Click it in Obsidian's reading view, or Ctrl+click while editing. Allow the
    desktop to open VS Code if prompted.

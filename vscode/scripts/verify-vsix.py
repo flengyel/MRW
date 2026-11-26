@@ -13,11 +13,11 @@ def verify(archive):
     manifest = json.loads((extension / 'package.json').read_text())
     metadata = tomllib.loads((repository / 'pyproject.toml').read_text())
     if metadata['project']['version'] != manifest['version']:
-        raise ValueError('The Python distribution and the MRW extension must have the same version')
+        raise ValueError('The Python distribution and the GOLEM XIV extension must have the same version')
     containers = manifest.get('contributes', {}).get('viewsContainers', {}).get('activitybar', [])
     mrw_container = next((item for item in containers if item.get('id') == 'mrw'), {})
-    if mrw_container.get('title') != f'MRW {manifest["version"]}':
-        raise ValueError('MRW Activity Bar title must match the package version')
+    if mrw_container.get('title') != f'GOLEM XIV {manifest["version"]}':
+        raise ValueError('GOLEM XIV Activity Bar title must match the package version')
     expected = {'extension/package.json', 'extension/readme.md', 'extension/LICENSE.txt',
                 'extension.vsixmanifest', '[Content_Types].xml'}
     exact = {'extension/LICENSE.txt': repository / 'LICENSE',

@@ -6,7 +6,7 @@ const { execFile } = require('node:child_process');
 const { fileURLToPath } = require('node:url');
 const MAX_RESPONSE = 4 * 1024 * 1024;
 const KEY = /^[A-Z0-9]{8}$/;
-function cancelled() { return Object.assign(Error('Zotero request cancelled.'), {code:'MRW_ZOTERO_CANCELLED'}); }
+function cancelled() { return Object.assign(Error('Zotero request cancelled.'), {code:'GOLEM_XIV_ZOTERO_CANCELLED'}); }
 function libraryPath(library) {
   if (!library || !['user', 'group'].includes(library.type) || !/^\d+$/.test(String(library.id))) throw Error('Invalid Zotero library.');
   return `/${library.type === 'group' ? 'groups' : 'users'}/${library.id}`;

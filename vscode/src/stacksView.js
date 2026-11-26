@@ -12,7 +12,7 @@
     for (const value of values) {
       if (value.kind === 'mathml' || value.kind === 'svg') {
         const target=node('span',parent,undefined,value.kind==='svg'?'published-diagram':'published-math');
-        try{window.MRWSourceRendering.render(target,value.text,value.kind);}
+        try{window.GolemXIVSourceRendering.render(target,value.text,value.kind);}
         catch(error){node('pre',target,'[Display unavailable at this location: '+error.message+'. Read exact HTML or open the original page.]','warning');}
       } else if (value.kind === 'anchor') {node('span',parent).dataset.sourceAnchor=value.name;
       } else if (value.kind === 'link') {
@@ -22,7 +22,7 @@
       } else if (value.kind === 'math') {
         const target = node(value.display ? 'div' : 'span', parent, undefined, 'published-math');
         try {
-          window.katex.render(window.MRWNormalizeNegatedRelations(value.text), target, { output: 'mathml', displayMode: value.display,
+          window.katex.render(window.GolemXIVNormalizeNegatedRelations(value.text), target, { output: 'mathml', displayMode: value.display,
             trust: false, strict: 'error', throwOnError: true, maxExpand: 1000,
             maxSize: 20, macros: {}, globalGroup: false });
         } catch (error) {
@@ -99,5 +99,5 @@
       jump.addEventListener('click', () => action('stacks_jump', item.region));
     }
   }
-  window.MRWStacks = { header, part };
+  window.GolemXIVStacks = { header, part };
 })();

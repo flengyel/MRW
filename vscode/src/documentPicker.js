@@ -12,7 +12,7 @@ function createDocumentPicker(vscode,{initialFolder,dirtyText=()=>undefined,list
  let savedSource,savedEpoch=0,savedDone=false;
  let resolveChoice;const result=new Promise(resolve=>{resolveChoice=resolve;});
  const browse={key:'browse',action:'browse',label:'Browse for another document…',description:'Original file',detail:'Open current contents in place, including PDFs. No import.',alwaysShow:true};
- const savedAction={key:'saved',action:'saved',label:'Saved copy…',description:'Retained revision and MRW annotations',alwaysShow:true};
+ const savedAction={key:'saved',action:'saved',label:'Saved copy…',description:'Retained revision and GOLEM XIV annotations',alwaysShow:true};
  const sep=label=>({label,kind:vscode.QuickPickItemKind?.Separator??-1});
  function publish(){
   if(finished)return;const active=picker.activeItems?.map(i=>i.key)||[],selected=picker.selectedItems?.map(i=>i.key)||[];

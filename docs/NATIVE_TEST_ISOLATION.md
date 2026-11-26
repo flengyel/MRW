@@ -20,7 +20,7 @@ The preparer creates a new private directory under `~/.cache/mrw-native-tests/`;
 a vault or working notes folder is not an output destination. It never
 reuses that parent as the fixture or accepts a working project as its destination.
 The receipt binds the new directory's device/inode, UUID, staged extension,
-project and uniquely named `MRW-Fixture-<UUID>` profile. Its `launch.json` contains
+project and uniquely named `GOLEM-XIV-Fixture-<UUID>` profile. Its `launch.json` contains
 the explicit Windows/WSL arguments. Preparation launches or installs nothing.
 
 Use those arguments with the Windows VS Code CLI. Enable the WSL connector in

@@ -881,7 +881,7 @@ test('Markdown insertion offers the recently retained passage in one choice and 
   h.api.window.setStatusBarMessage = message => notices.push(message);
   const saved = await h.commands.get('mrw.createOutline')();
   const passage = saved.outline.regions[0];
-  assert.deepEqual(notices, [`MRW: Retained “${passage.title}” from paper.md.`]);
+  assert.deepEqual(notices, [`GOLEM XIV: Retained “${passage.title}” from paper.md.`]);
 
   const file = path.join(root, 'note.md');
   await fs.writeFile(file, '');
@@ -1509,7 +1509,7 @@ test('Obsidian overview import refuses a changed cursor or document without over
   }
 });
 
-test('the MRW starting view offers note handoff, Open, saved sources and tutorial without a document creator', async t => {
+test('the GOLEM XIV starting view offers note handoff, Open, saved sources and tutorial without a document creator', async t => {
   const root = await temporary(t), h = await harness(root);
   const manifest = JSON.parse(await fs.readFile(path.resolve(__dirname, '../package.json'), 'utf8'));
   const welcome = manifest.contributes.viewsWelcome.find(view => view.view === 'mrw.commands').contents;
@@ -1920,7 +1920,7 @@ test('annotation success feedback follows core publication and is absent after r
   const root=await temporary(t), file=path.join(root,'source.txt');await fs.writeFile(file,'Source.');
   const h=await harness(root);h.focus(h.editor(h.document(file,'Source.')));
   const created=await h.commands.get('mrw.createOutline')();assert.ok(created);
-  assert.match(h.panels[0].webview.html, /MRWAnnotations/);
+  assert.match(h.panels[0].webview.html, /GolemXIVAnnotations/);
   assert.match(h.panels[0].webview.html, /renderMathInElement/);
   const notices=[];h.api.window.setStatusBarMessage=text=>notices.push(text);
   const panel=h.panels[0], draft='note:overview:new';
@@ -1929,7 +1929,7 @@ test('annotation success feedback follows core publication and is absent after r
   const saved=panel.webview.messages.findLast(m=>m.type==='outline');
   assert.equal(saved.annotationSaved,true);assert.equal(saved.clearDraft,draft);
   assert.equal(saved.model.outline.annotations[0].text,'Saved reader explanation');
-  assert.deepEqual(notices,['MRW: Submitted note saved.']);
+  assert.deepEqual(notices,['GOLEM XIV: Submitted note saved.']);
   const before=panel.webview.messages.length;
   h.setService(async()=>{const e=new Error('Revision conflict');e.code='ACTION_REJECTED';throw e});
   await panel.receive(value);
@@ -1938,16 +1938,24 @@ test('annotation success feedback follows core publication and is absent after r
   assert.equal(notices.length,1);
 });
 
-test('MRW Activity Bar entry exposes existing views and a registered reading menu without starting a bridge', async t => {
+test('GOLEM XIV Activity Bar entry exposes existing views and a registered reading menu without starting a bridge', async t => {
   const root=await temporary(t),h=await harness(root);
   const manifest=JSON.parse(await fs.readFile(path.resolve(__dirname,'../package.json'),'utf8'));
   const c=manifest.contributes,container=c.viewsContainers.activitybar.find(v=>v.id==='mrw');
-  assert.ok(container);assert.equal(container.title,`MRW ${manifest.version}`);
+  assert.equal(manifest.displayName,'GOLEM XIV');
+  assert.equal(manifest.publisher+'.'+manifest.name,'flengyel.mrw');
+  assert.equal(c.configuration.title,'GOLEM XIV');
+  for(const command of c.commands){
+    assert.equal(command.category,'GOLEM XIV',command.command);
+    assert.ok(command.command.startsWith('mrw.'),command.command);
+    assert.doesNotMatch(command.title,/\bMRW\b/);
+  }
+  assert.ok(container);assert.equal(container.title,`GOLEM XIV ${manifest.version}`);
   const svg=await fs.readFile(path.resolve(__dirname,'..',container.icon),'utf8');
   assert.match(svg,/<svg[^>]*viewBox="0 0 24 24"/);
   assert.doesNotMatch(svg,/<script|<image|href=/i);
   assert.deepEqual(c.views.mrw.map(v=>v.id),['mrw.readingOutline','mrw.commands']);
-  assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'MRW views have one default container');
+  assert.ok(!c.views.explorer?.some(v=>v.id.startsWith('mrw.')),'GOLEM XIV views have one default container');
   const overflow=c.menus['view/title'].filter(v=>v.when==='view == mrw.readingOutline'&&!v.group?.startsWith('navigation'));
   assert.ok(overflow.some(v=>v.command==='mrw.refreshReadingOutline'));
   for(const command of ['mrw.readingTools','mrw.sourceTools','mrw.calculationTools','mrw.proofTools','mrw.companionTools','mrw.earlierWork']){
@@ -2196,7 +2204,7 @@ test('reader note deletion is confirmed, scoped, and announced only after core p
   assert.equal(latest().model.outline.regions[0].annotations.length,0);
   assert.equal(latest().model.outline.annotations[0].text,'Keep source note');
   assert.deepEqual(latest().deletedAnnotation,{region,id:note.id});
-  assert.deepEqual(notices,['MRW: Reader note deleted.']);
+  assert.deepEqual(notices,['GOLEM XIV: Reader note deleted.']);
   const before=h.requests.length;await panel.receive(deletion);
   assert.equal(h.requests.length,before);assert.equal(notices.length,1);
   assert.match(h.errors.at(-1),/Reader note changed/);
@@ -2491,7 +2499,7 @@ test('Kerodon import confirms a source-qualified page snapshot and reopens its e
   h.inputs.push('kerodon:0004');h.endings.push('Import section');
   const result=await h.commands.get('mrw.importKerodonSection')();assert.ok(result,h.errors.join('\n'));
   const pub=result.outline.published;assert.equal(pub.qualified_tag,'kerodon:0004');assert.equal(pub.authors,'Jacob Lurie');assert.equal(pub.commit,null);
-  assert.ok(h.panels[0].webview.html.includes('MRWStacks'));assert.equal(h.requests.filter(r=>r.method==='outline_source_prepare'&&r.source_id==='kerodon').length,1);
+  assert.ok(h.panels[0].webview.html.includes('GolemXIVStacks'));assert.equal(h.requests.filter(r=>r.method==='outline_source_prepare'&&r.source_id==='kerodon').length,1);
   const statement=Object.values(pub.parts).find(p=>p.tag==='000A'&&p.role==='statement');
   await h.panels[0].receive({type:'stacks_reference',tag:'kerodon:000A'});
   assert.ok(h.panels[0].webview.messages.findLast(m=>m.type==='outline').reference.uri.startsWith('mrw-outline:v2/kerodon:000A/'));

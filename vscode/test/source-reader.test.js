@@ -4,9 +4,9 @@ function fixture(){
  class N{constructor(tag){this.tag=tag;this.children=[];this.dataset={};this.events={};this.style={};if(tag==='iframe')this.contentWindow={};}append(n){this.children.push(n);n.parent=this;}before(n){const a=this.parent.children;a.splice(a.indexOf(this),0,n);n.parent=this.parent;}remove(){this.parent.children=this.parent.children.filter(n=>n!==this);}setAttribute(k,v){this[k]=v;}addEventListener(k,f){this.events[k]=f;}}
  const globals={URL,document:{createElement:t=>new N(t)},window:{}};vm.runInNewContext(fs.readFileSync(require.resolve('../src/sourceReader'),'utf8'),globals);
  const outer=new N('main'),root=new N('article');outer.append(root);const draft=new N('textarea');draft.value='Unsent annotation λ';root.append(draft);
- let browser,returns=0;const reader=globals.window.MRWSourceReader.create({root,onBrowser:u=>browser=u,onReturn:()=>returns++});
+ let browser,returns=0;const reader=globals.window.GolemXIVSourceReader.create({root,onBrowser:u=>browser=u,onReturn:()=>returns++});
  const all=n=>n.children.flatMap(x=>[x,...all(x)]),click=a=>all(outer).find(n=>n.dataset.action===a).events.click();
- return{outer,root,draft,reader,all,click,browser:()=>browser,returns:()=>returns,validate:globals.window.MRWSourceReader.validated};
+ return{outer,root,draft,reader,all,click,browser:()=>browser,returns:()=>returns,validate:globals.window.GolemXIVSourceReader.validated};
 }
 for(const [id,name,base,tag] of [['stacks-project','Stacks Project','https://stacks.math.columbia.edu','08ZD'],['kerodon','Kerodon','https://kerodon.net','0004']])test(name+' original/saved switching is explicit and keeps its frame, draft and Return',()=>{
  const h=fixture(),config={sourceId:id,name,url:base+'/tag/'+tag,origins:[base],supported:true,revision:'retained-hash'};

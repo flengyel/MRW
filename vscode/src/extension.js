@@ -26,10 +26,10 @@ function activate(nativeContext) {
   let recorder;
   if(moveSession.blocked){
     moveHost.registerWorkspaceMove({vscode:hostVscode,context,session:moveSession,register:(id,fn)=>context.subscriptions.push(hostVscode.commands.registerCommand(id,async()=>{try{return await fn();}catch(e){void hostVscode.window.showErrorMessage(e.message);}}))});
-    void hostVscode.window.showWarningMessage("MRW workspace relocation needs attention. Run MRW: Recover Workspace Move.");
+    void hostVscode.window.showWarningMessage("GOLEM XIV workspace relocation needs attention. Run GOLEM XIV: Recover Workspace Move.");
     return {extendMarkdownIt:md=>md};
   }
-  // Only MRW sees this facade; no instrumentation of other extensions' dialogs.
+  // Only GOLEM XIV sees this facade; no instrumentation of other extensions' dialogs.
   const dialogs=new Set(['showInputBox','showQuickPick','showOpenDialog','showSaveDialog','showWarningMessage']);
   const nativeWindow=moveHost.guardWindow(hostVscode.window,moveSession);
   const windowFacade=new Proxy({},{get(_target,key){
@@ -53,8 +53,8 @@ function activate(nativeContext) {
   const session = randomUUID();
   let serial = 0, reviewGeneration = 0, currentReview;
   const software=JSON.parse(require('node:fs').readFileSync(path.join(context.extensionPath,'media/build-info.json'),'utf8'));
-  recorder=new StudyHistory(path.join(context.storageUri?.fsPath||context.globalStorageUri?.fsPath||'/tmp/mrw-unavailable-storage','study-history-v1'),software,{origin:context.extensionMode!==undefined&&context.extensionMode===vscode.ExtensionMode?.Test?'automated_test':context.extensionMode!==undefined&&context.extensionMode===vscode.ExtensionMode?.Development?'developer_fixture':'production',onGap:message=>vscode.window.setStatusBarMessage?.('MRW: '+message)});
-  if(context.globalStorageUri?.fsPath)recorder.shared=new (require('./sharedHistory').SharedHistory)(path.join(recorder.directory,'sharing-v1'),path.join(context.globalStorageUri.fsPath,'history-host-v1'),{onStatus:message=>{if(message)vscode.window.setStatusBarMessage?.('MRW: '+message);}});
+  recorder=new StudyHistory(path.join(context.storageUri?.fsPath||context.globalStorageUri?.fsPath||'/tmp/mrw-unavailable-storage','study-history-v1'),software,{origin:context.extensionMode!==undefined&&context.extensionMode===vscode.ExtensionMode?.Test?'automated_test':context.extensionMode!==undefined&&context.extensionMode===vscode.ExtensionMode?.Development?'developer_fixture':'production',onGap:message=>vscode.window.setStatusBarMessage?.('GOLEM XIV: '+message)});
+  if(context.globalStorageUri?.fsPath)recorder.shared=new (require('./sharedHistory').SharedHistory)(path.join(recorder.directory,'sharing-v1'),path.join(context.globalStorageUri.fsPath,'history-host-v1'),{onStatus:message=>{if(message)vscode.window.setStatusBarMessage?.('GOLEM XIV: '+message);}});
   context.subscriptions.push({dispose(){void recorder.close();}});
   let currentMaterial;
   const onMaterial=value=>{currentMaterial=value;};
@@ -65,7 +65,7 @@ function activate(nativeContext) {
         if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
         if(['mrw.moveWorkspace','mrw.recoverWorkspaceMove'].includes(name)){void recorder.init();return await recorder.operations.run(name,()=>action(...args));}
         return await moveSession.run(async()=>{void recorder.init();return await recorder.operations.run(name,()=>action(...args));});
-      } catch (error) { void vscode.window.showErrorMessage(`MRW: ${error.message}`); }
+      } catch (error) { void vscode.window.showErrorMessage(`GOLEM XIV: ${error.message}`); }
     }));};
   const rawBridge = async (request, options) => {
     if (!vscode.workspace.isTrusted) throw new Error('This action requires a trusted workspace.');
@@ -176,7 +176,7 @@ function activate(nativeContext) {
       preview: Array.from(document.getText(selection).replace(/\s+/gu, ' ').trim()).slice(0, 120).join('') };
     await context.workspaceState.update(markerKey(root), marker);
     changed.fire();
-    vscode.window.setStatusBarMessage(`MRW return: ${path.basename(marker.path)}:${marker.start[0] + 1}`, 5000);
+    vscode.window.setStatusBarMessage(`GOLEM XIV return: ${path.basename(marker.path)}:${marker.start[0] + 1}`, 5000);
     return marker;
   }
   async function returnToMarker() {
@@ -352,7 +352,7 @@ function activate(nativeContext) {
   for(const hook of [vscode.workspace.onDidChangeConfiguration,vscode.workspace.onDidGrantWorkspaceTrust])if(hook)context.subscriptions.push(hook.call(vscode.workspace,refreshCoverage));
   deactivateAction=async()=>{if(!moveSession.frozen){await studyController.flush();await recorder.close();}};
   context.subscriptions.push(changed);
-  void moveSession.restoreTabs().catch(e=>vscode.window.showErrorMessage('MRW: '+e.message));
+  void moveSession.restoreTabs().catch(e=>vscode.window.showErrorMessage('GOLEM XIV: '+e.message));
   // Activation registers UI and checks local relocation authority. No source acquisition or network access.
   const inspection=require('./inspection').createInspection({version:software.version,scope:vscode.workspace.workspaceFile?.toString()||vscode.workspace.workspaceFolders?.map(f=>f.uri.toString()).join('|')||'no-workspace',storageRoots:artifactStorage.inspectionRoots,usage:options=>require('./featureInspection').featureUse(recorder,options)});
   return { extendMarkdownIt: readingController.extendMarkdownIt, mrwInspection:inspection };

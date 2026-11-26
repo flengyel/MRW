@@ -37,9 +37,9 @@ function activityReport(events,status={}){
  const sessions=new Map();
  for(const entry of entries){const e=entry.event;let group=sessions.get(e.session);if(!group){group={id:e.session,at:'',time:-Infinity,entries:[]};sessions.set(e.session,group);}const time=Date.parse(e.at);if(Number.isFinite(time)&&time>group.time){group.at=e.at;group.time=time;}group.entries.push(entry);}
  const ordered=[...sessions.values()].sort((a,b)=>b.time-a.time||a.id.localeCompare(b.id));
- const lines=['# Recorded MRW activity','',
+ const lines=['# Recorded GOLEM XIV activity','',
   'Available production records only; unrecorded work and offline replicas are not represented.',
-  'Sessions follow reported timestamps, which may differ between writers; entries within each session follow sequence order, newest first. Handler completion describes the MRW action, not an external result.',''];
+  'Sessions follow reported timestamps, which may differ between writers; entries within each session follow sequence order, newest first. Handler completion describes the GOLEM XIV action, not an external result.',''];
  if(typeof status.recording==='boolean')lines.push('Usage recording now: '+(status.recording?'enabled':'disabled')+'.');
  lines.push('Shared history: '+(status.enabled?'connected; available records included':'not connected')+'.');
  const notices=[];
@@ -74,7 +74,7 @@ function activityReport(events,status={}){
  const collapsed=chosen.filter(e=>e.origin==='production'&&routine.has(e.action)).length;
  if(collapsed)lines.push(collapsed+' startup/availability observation(s) collapsed in this view.');
  const nonProduction=chosen.filter(e=>e.origin!=='production').length;if(nonProduction)lines.push(nonProduction+' test, development, demo or other non-production record(s) omitted.');
- lines.push('','Full coverage, study measurements and event data remain available through MRW: Export Study History… (Detailed comparison or Events and submitted snapshots). No journal records are removed by this view.');
+ lines.push('','Full coverage, study measurements and event data remain available through GOLEM XIV: Export Study History… (Detailed comparison or Events and submitted snapshots). No journal records are removed by this view.');
  return lines.join('\n');
 }
 module.exports={activityReport,LIMIT};
