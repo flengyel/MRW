@@ -101,7 +101,8 @@ function leanEvidence(facts) {
 }
 function discrepancyList(values = []) {
   return values.length ? '<ul class="warnings">' + values.map(value => '<li>' +
-    escape(discrepancyLabels[value.kind] || value.kind || value) + '</li>').join('') + '</ul>' : '';
+    escape(discrepancyLabels[value.kind] || value.kind || value) +
+    (typeof value.reason === 'string' ? ' · ' + escape(value.reason) : '') + '</li>').join('') + '</ul>' : '';
 }
 function savedJudgment(review, title = 'Saved review') {
   const verdict = review.kind ? outcomes[review.kind] || review.kind : 'Open discrepancy';

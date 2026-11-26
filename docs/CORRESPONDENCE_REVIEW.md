@@ -88,15 +88,17 @@ generated facts, reviewer, time and any supplied attribution.
 
 The aspect verdicts are `matches`, `lean_assumes_more`,
 `lean_proves_less`, `lean_stronger` and `not_comparable`. Each reason
-identifies the relevant evidence. Record the overall result as follows.
+identifies the relevant evidence. A declaration that depends on `sorryAx`
+has an unfinished proof. MRW keeps the aspect judgments and opens a
+discrepancy. The overall verdict stays unresolved. For declarations without
+that dependency, MRW applies these rules.
 
 | Aspect judgments or proof status | Overall result |
 | --- | --- |
-| All aspects match and the declaration has no `sorryAx` dependency | `formalizes` |
+| All aspects match | `formalizes` |
 | Lean assumes more or proves less, with comparable objects | `weakens` plus a `manuscript_vs_formalization` discrepancy |
 | Lean strengthens at least one aspect and weakens none, with comparable objects | `strengthens` |
 | An aspect is incomparable | Open discrepancy without a correspondence verdict |
-| The type matches but the declaration depends on `sorryAx` | Retain the aspect judgments and show the unresolved proof obligation. Block `formalizes`. |
 
 The first version accepts reviewer judgments and supplies no model proposals.
 
@@ -105,7 +107,10 @@ changed manuscript passage stale. If the Lean file or commit changes, offer
 **Read Lean declaration** again. A new type or changed axiom dependencies
 creates a `signature_changed` discrepancy. An absent declaration creates
 `declaration_missing`. Keep the earlier review and its exact evidence
-available. A missing current file leaves its comparison unresolved.
+available. A missing current file leaves its comparison unresolved. Older
+reviews and saved reports keep their stored revisions. When they depend on
+`sorryAx`, MRW displays the unresolved proof obligation in the review and
+report and includes it in exports made after the update.
 
 ## Second reading
 
@@ -154,11 +159,12 @@ and use a matching local build in an isolated copy.
    Compare the report with the claim map and Palomar statements. Explain each
    difference as a review finding or an MRW defect.
 2. Read a declaration with an unfinished proof from the challenge module in
-   its own Lean environment. Check that `sorryAx` is visible and blocks
-   `formalizes`. The solution and challenge can use the same qualified names.
+   its own Lean environment. Check that `sorryAx` is visible and blocks the
+   overall verdict for matching and differing aspect judgments. The solution
+   and challenge can use the same qualified names.
 3. Change a hypothesis and rebuild the scratch project. Reopen the review.
-   Check that the old revision stays available, reopening runs nothing, and
-   an explicit read records `signature_changed`.
+   Check that the old revision stays available, reopening runs neither Lean nor
+   Lake, and an explicit read records `signature_changed`.
 4. Have a second reader complete a reconstruction and reconciliation.
    Verify that the report records the save before reveal and carries the
    resulting discrepancies.
