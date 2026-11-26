@@ -58,9 +58,9 @@ npm run package --prefix diagnostics
 Packaging reuses the core's pinned VSCE installation; it does not publish or
 install either extension.
 
-The 0.23.64 core release includes Diagnostics 0.1.0. Building the current source
-produces `mrw-diagnostics-0.1.2.vsix`. Install
-it separately through Extensions: Install from VSIX on the same workspace host.
+The [MRW 0.23.66 release](https://github.com/flengyel/MRW/releases/tag/v0.23.66) includes
+`mrw-diagnostics-0.1.2.vsix`. Install it through **Extensions: Install from VSIX…**
+on the same workspace host as MRW.
 This requires core 0.23.32 or a later compatible inspection API 1 implementation.
 Manual Feature Use offers the last seven days, the last or previous thirty days,
 and a comparison of the two thirty-day periods; scheduled reports retain

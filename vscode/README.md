@@ -5,9 +5,9 @@ MRW keeps the exact passages and saved results used in an argument. Its
 justification engine shows which conclusions depend on premises the reader
 has admitted. [Mathematics in ordinary notes](../docs/MATHEMATICS_WITH_NOTES.md)
 
-**Latest published release — MRW 0.23.64**
-[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.64/mrw-0.23.64.vsix)
-· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.64)
+**Latest published release — MRW 0.23.66**
+[Download the VSIX](https://github.com/flengyel/MRW/releases/download/v0.23.66/mrw-0.23.66.vsix)
+· [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.66)
 · [Installation](../docs/INSTALLATION.md).
 The extension ID is `flengyel.mrw`. GitHub updates require installing a newer
 VSIX; there is no Marketplace listing. MRW remains experimental.
@@ -119,9 +119,9 @@ store and a trusted file workspace.
 
 ## Package and install a VSIX
 
-Install `mrw-0.23.64.vsix` with **Extensions: Install from VSIX…** in the intended
+Install `mrw-0.23.66.vsix` with **Extensions: Install from VSIX…** in the intended
 workspace host. The recommended optional companion is
-[MRW Diagnostics 0.1.0](https://github.com/flengyel/MRW/releases/download/v0.23.64/mrw-diagnostics-0.1.0.vsix).
+[MRW Diagnostics 0.1.2](https://github.com/flengyel/MRW/releases/download/v0.23.66/mrw-diagnostics-0.1.2.vsix).
 Its weekly reports are opt-in. Save work before a requested reload and retain
 workspace storage when upgrading.
 
