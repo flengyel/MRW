@@ -97,6 +97,12 @@ Ordinary files remain in their editors. MRW stores retained sources and study
 records separately; copying notes does not transfer their saved targets.
 [Storage scope and moves](docs/ARTIFACT_STORAGE.md).
 
+## Contributors
+
+- [Florian Lengyel](https://github.com/flengyel) maintains MRW.
+- [Codex](https://github.com/codex) contributed to implementation, regression
+  testing and release verification.
+
 ## Documentation and license
 
 [Guides](docs/README.md) · [Avatar images](docs/assets/avatars/) · [Vision](VISION.md) · [Architecture](docs/ARCHITECTURE.md)
