@@ -75,7 +75,7 @@ function activate(nativeContext) {
     return recorder.operations.run(operation,()=>runBridge(context.extensionPath,
       vscode.workspace.getConfiguration('mrw').get('pythonExecutable', 'python3'), request, options),identity);
   };
-  require('./workspaceSetup').registerWorkspaceSetup({vscode, register,resolveDefault:moveSession.defaultWorkspace,beforeSwitch:async()=>{
+  require('./workspaceSetup').registerWorkspaceSetup({vscode, register,registeredSources:moveSession.registeredSources,resolveDefault:moveSession.defaultWorkspace,beforeSwitch:async()=>{
     if(moveHost.hasDirty(vscode))throw Error('Save your unsaved documents before switching workspaces.');
     const settled=[];try{for(const client of artifactClients){try{await client.freeze(false);settled.push(client);}catch(e){await client.cancelFreeze?.();throw e;}}
       await studyController.prepareMove();await recorder.flush();if(recorder.gap)throw Error(recorder.gap);

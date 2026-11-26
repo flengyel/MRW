@@ -1,11 +1,8 @@
 # The MRW workspace
 
 On a fresh installation, setup creates `~/mrw-work/MRW.code-workspace` on the
-Linux host. The 0.23.65 build used `GOLEM XIV.code-workspace`. If either
-workspace is already open, 0.23.66 keeps it, including a registered move. From
-another window, setup prefers the MRW workspace or its registered move. If only
-the 0.23.65 workspace is available, setup reopens it at its existing or
-registered location. Use the path setup reports to return to the same records.
+Linux host. To resume existing work, open the same saved workspace. Its filename,
+directory, settings and workspace-scoped records can stay in place.
 
 A workspace is VS Code's session boundary: it selects folders, settings and
 workspace-scoped MRW records. A **notes folder** supplies ordinary files and the
@@ -54,6 +51,18 @@ Workspace Trust remains VS Code's decision; trust only folders you control.
 No setup can promise to suppress every VS Code warning or remote timeout.
 
 ## What repeating setup does
+
+If an MRW workspace prepared by setup is already open, setup keeps that workspace.
+From another window, it prefers `MRW.code-workspace` or the destination recorded
+by **Move Workspace…**. If the default is absent, setup can reuse a differently
+named workspace in `~/mrw-work/` or its recorded destination. If several qualify,
+open the intended workspace and run setup again.
+
+Setup identifies a differently named file in `~/mrw-work/` by its
+`.code-workspace` extension, a workspace folder entry for `.`, and the
+`mrw.leanStudyParent` setting pointing to `~/mrw-work/`. If the file is already
+open, any saved `mrw.*` setting also identifies it. For a project workspace
+elsewhere, use VS Code's **File → Open Workspace from File…**.
 
 Setup creates `mrw-work`, a saved workspace file and a short README only if missing.
 Complete files are published without overwriting a competing or existing file,

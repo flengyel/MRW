@@ -97,6 +97,8 @@ function session(vscode,nativeContext){
     snapshot:()=>Object.fromEntries(state.keys().map(key=>[key,state.get(key)])),
     async recover(){const r=lookup(registry,workspace)||record||(bindingFile&&fs.existsSync(bindingFile)&&records(registry).find(r=>r.phase==='committed'&&require('./workspaceMove').inside(r.source,JSON.parse(fs.readFileSync(bindingFile,'utf8')).location)));if(!r)throw Error('No workspace move needs recovery.');return new WorkspaceMove(registry).recover(r.id);},
     rebaseRoute:route,
+    registeredSources(directory){return records(registry||'')
+      .filter(r=>r.phase==='committed'&&r.source===directory).map(r=>r.sourceWorkspace);},
     defaultWorkspace(original){let next=original;for(let i=0;i<32;i++){const r=lookup(registry||'',next);if(!r||r.phase!=='committed'||r.destinationWorkspace===next)return next===original?undefined:{directory:path.dirname(next),workspace:next,created:false};next=r.destinationWorkspace;}throw Error('Workspace routing cycle.');},
     panels,checkOtherWindows:others,
     assertWritable,guardEvent:fn=>(...args)=>{try{assertWritable();}catch{return;}return fn(...args);},

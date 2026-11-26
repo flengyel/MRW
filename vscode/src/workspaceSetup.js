@@ -1,7 +1,9 @@
 'use strict';
 
 const fs = require('node:fs/promises');
+const {constants} = require('node:fs');
 const path = require('node:path');
+const {jsonc} = require('./workspaceMove');
 const os = require('node:os');
 const {randomUUID} = require('node:crypto');
 const {execFile} = require('node:child_process');
@@ -14,7 +16,6 @@ function workspacePaths(home = os.homedir()) {
   return {
     directory,
     workspace: path.join(directory, 'MRW.code-workspace'),
-    previousWorkspace: path.join(directory, 'GOLEM XIV.code-workspace'),
   };
 }
 async function regular(io, file) {
@@ -24,13 +25,63 @@ async function regular(io, file) {
     return true;
   } catch (error) { if (error.code === 'ENOENT') return false; throw error; }
 }
-async function registeredWorkspace(paths, active, resolveDefault) {
-  const preferred = resolveDefault(paths.workspace);
-  if (active && (active === paths.workspace || active === preferred?.workspace)) return preferred;
-  const previous = resolveDefault(paths.previousWorkspace);
-  if (active && (active === paths.previousWorkspace || active === previous?.workspace)) return previous;
-  if (preferred || !previous) return preferred;
-  return await regular(fs, paths.workspace) ? undefined : previous;
+async function isSetupWorkspace(io, file, directory, active) {
+  // Workspace files contain configuration, never executable content. Read one
+  // bounded regular file without following a replacement symlink or FIFO.
+  let handle;
+  try {
+    handle = await io.open(file, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+    const stat = await handle.stat();
+    if (!stat.isFile() || stat.size > 1024 * 1024) return false;
+    const buffer = Buffer.alloc(stat.size + 1);
+    let offset = 0;
+    while (offset < buffer.length) {
+      const {bytesRead} = await handle.read(buffer, offset, buffer.length - offset, offset);
+      if (!bytesRead) break;
+      offset += bytesRead;
+    }
+    if (offset !== stat.size) return false;
+    const config = jsonc(buffer.toString('utf8', 0, offset).replace(/^\uFEFF/, ''));
+    if (!Array.isArray(config?.folders) || !config.folders.some(folder => folder?.path === '.')) return false;
+    const settings = config.settings || {};
+    return settings['mrw.leanStudyParent'] === directory
+      || (file === active && Object.keys(settings).some(key => key.startsWith('mrw.')));
+  } catch (error) {
+    if (error instanceof SyntaxError || ['ELOOP', 'ENOENT'].includes(error.code)) return false;
+    throw error;
+  } finally { await handle?.close(); }
+}
+
+async function selectWorkspace(paths, active, io, registeredSources, resolveDefault) {
+  const {workspace, directory} = paths;
+  const options = new Map();
+  // A move retains authority even if the source copy has since been removed.
+  for (const source of new Set([workspace, ...registeredSources(directory)])) {
+    if (path.dirname(source) !== directory || !source.endsWith('.code-workspace')) continue;
+    const moved = resolveDefault(source);
+    if (moved) options.set(source, moved);
+  }
+  if (await regular(io, workspace) && !options.has(workspace)) options.set(workspace, undefined);
+  const choose = source => ({workspace:source, moved:options.get(source)});
+  const activeDestination = active && resolveDefault(active)?.workspace;
+  for (const [source, moved] of options) {
+    if (source === active || (moved && (moved.workspace === active || moved.workspace === activeDestination))) {
+      return choose(source);
+    }
+  }
+  if (active && path.dirname(active) === directory && active.endsWith('.code-workspace')
+      && await isSetupWorkspace(io, active, directory, active)) return choose(active);
+  if (options.has(workspace)) return choose(workspace);
+  let entries;
+  try { entries = await io.readdir(directory, {withFileTypes:true}); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; entries = []; }
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.code-workspace')) continue;
+    const file = path.join(directory, entry.name);
+    if (!options.has(file) && await isSetupWorkspace(io, file, directory, active)) options.set(file, undefined);
+  }
+  if (options.size > 1) throw Error('Several MRW workspaces are available. Open the intended workspace in VS Code and run setup again.');
+  return choose(options.size ? options.keys().next().value : workspace);
 }
 async function syncDirectory(io, directory) {
   const handle = await io.open(directory, 'r');
@@ -55,7 +106,7 @@ async function createOnce(io, file, text) {
     await io.unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error; });
   }
 }
-async function prepareWorkspace({home = os.homedir(), activeWorkspace, notesFolder = '', platform = process.platform, io = fs} = {}) {
+async function prepareWorkspace({home = os.homedir(), activeWorkspace, notesFolder = '', platform = process.platform, io = fs, registeredSources = () => [], resolveDefault = () => undefined} = {}) {
   if (platform !== 'linux') throw Error('Connect VS Code to WSL: Debian or a Linux SSH host, then run Set Up MRW Workspace again.');
   const canonicalHome = await io.realpath(home);
   const type = (Number((await io.statfs(canonicalHome)).type) >>> 0);
@@ -64,24 +115,29 @@ async function prepareWorkspace({home = os.homedir(), activeWorkspace, notesFold
   }
   const paths = workspacePaths(canonicalHome);
   const {directory} = paths;
-  await io.mkdir(directory, {recursive: true, mode: 0o700});
-  const stat = await io.lstat(directory);
-  if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('The default MRW directory must be a Linux directory, not a redirected path.');
-  if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b, 0x6969, 0x01021994, 0x858458f6].includes((Number((await io.statfs(directory)).type) >>> 0))) {
-    throw Error('The default MRW directory must be on a persistent Linux filesystem.');
+  async function inspectDirectory() {
+    try {
+      const stat = await io.lstat(directory);
+      if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('The default MRW directory must be a Linux directory, not a redirected path.');
+      if ([0x9fa0, 0x5346544e, 0xff534d42, 0x517b, 0x6969, 0x01021994, 0x858458f6].includes((Number((await io.statfs(directory)).type) >>> 0))) {
+        throw Error('The default MRW directory must be on a persistent Linux filesystem.');
+      }
+      return true;
+    } catch (error) { if (error.code === 'ENOENT') return false; throw error; }
+  }
+  const exists = await inspectDirectory();
+  const {workspace, moved} = await selectWorkspace(paths, activeWorkspace, io, registeredSources, resolveDefault);
+  if (moved) return moved;
+  if (!exists) {
+    await io.mkdir(directory, {recursive: true, mode: 0o700});
+    if (!await inspectDirectory()) throw Error('The workspace directory disappeared during setup.');
   }
   await syncDirectory(io, canonicalHome);
   if (typeof notesFolder !== 'string' || (notesFolder && !path.isAbsolute(notesFolder))) throw Error('The notes folder must be an absolute path on the workspace host.');
   const settings = {'mrw.leanStudyParent': directory};
   if (notesFolder) settings['mrw.notesFolder'] = notesFolder;
-  // The saved workspace filename determines its VS Code identity and private storage.
-  const candidates = [paths.workspace, paths.previousWorkspace];
-  if (activeWorkspace === paths.previousWorkspace) candidates.reverse();
-  let workspace = paths.workspace;
-  for (const candidate of candidates) {
-    if (await regular(io, candidate)) { workspace = candidate; break; }
-  }
-  const created = await createOnce(io, workspace, JSON.stringify({folders: [{name: 'MRW', path: '.'}], settings}, null, 2) + '\n');
+  if (workspace !== paths.workspace && !await regular(io, workspace)) throw Error('The selected workspace disappeared during setup.');
+  const created = workspace === paths.workspace && await createOnce(io, workspace, JSON.stringify({folders: [{name: 'MRW', path: '.'}], settings}, null, 2) + '\n');
   await createOnce(io, path.join(directory, 'README.md'), `# MRW workspace\n\nOpen this session with \`${path.basename(workspace)}\`. Use **Move Workspace…** to relocate this session.\n\nUse **Open Document…** to read a note or paper in place. **Choose Notes\nFolder…** selects a folder for links and backlinks; it may be outside this\nworkspace, including an Obsidian vault on Windows.\n\nNew Lean study projects go under this Linux folder. Existing studies keep their\nlocations. Saved MRW sources, annotations and history are private to the workspace;\ncreating this workspace does not import records from another session.\n\n[Setup and optional companions](${GUIDE})\n`);
   // Retry a preceding directory-sync failure even when both files now exist.
   await syncDirectory(io, directory);
@@ -96,7 +152,7 @@ async function pythonStatus(executable = 'python3', execute = run) {
     return {ok, text: ok ? version : 'Python 3.11+ is required on this host.'};
   } catch (_) { return {ok: false, text: 'Python 3.11+ was not found on this host. See the setup guide.'}; }
 }
-function registerWorkspaceSetup({vscode, register, home = os.homedir(), prepare = prepareWorkspace, checkPython = pythonStatus, resolveDefault = ()=>undefined, beforeSwitch = async()=>{}}) {
+function registerWorkspaceSetup({vscode, register, home = os.homedir(), prepare = prepareWorkspace, checkPython = pythonStatus, registeredSources = () => [], resolveDefault = ()=>undefined, beforeSwitch = async()=>{}}) {
   let pending;
   register('mrw.setupWorkspace', () => {
     if (pending) return pending;
@@ -105,9 +161,7 @@ function registerWorkspaceSetup({vscode, register, home = os.homedir(), prepare 
       const current = vscode.workspace.workspaceFile;
       const activeWorkspace = current && ['file', 'vscode-remote'].includes(current.scheme)
         ? await fs.realpath(current.fsPath).catch(() => current.fsPath) : undefined;
-      const paths = workspacePaths(await fs.realpath(home));
-      const result = await registeredWorkspace(paths, activeWorkspace, resolveDefault)
-        || await prepare({home, activeWorkspace, notesFolder: config.get('notesFolder', '')});
+      const result = await prepare({home, activeWorkspace, registeredSources, resolveDefault, notesFolder: config.get('notesFolder', '')});
       const python = await checkPython(config.get('pythonExecutable', 'python3'));
       const same = activeWorkspace === result.workspace;
       const message = `${result.created ? 'Created' : 'Using'} MRW workspace: ${result.workspace}. ${python.text} `

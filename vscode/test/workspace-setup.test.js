@@ -16,12 +16,12 @@ test('repeat setup preserves settings, README, notes and unrelated files byte-fo
  assert.equal(await fs.readFile(first.workspace,'utf8'),customized);assert.equal(await fs.readFile(readme,'utf8'),'My workspace instructions');assert.equal(await fs.readFile(path.join(notesFolder,'note.md'),'utf8'),'# My work\n');
  assert.deepEqual((await fs.readdir(first.directory)).sort(),['MRW.code-workspace','README.md']);
 });
-test('setup reopens a GOLEM XIV workspace without forking its settings or replacing its README', async t => {
+test('setup reopens a Research workspace without forking its settings or replacing its README', async t => {
  const home = await fixture(t);
  const directory = path.join(home, 'mrw-work');
- const workspace = path.join(directory, 'GOLEM XIV.code-workspace');
+ const workspace = path.join(directory, 'Research.code-workspace');
  await fs.mkdir(directory);
- const previousSettings = '// Existing workspace settings\n{"folders":[{"name":"GOLEM XIV","path":"."}],"settings":{"mrw.notesFolder":"/vault"}}';
+ const previousSettings = '// Existing workspace settings\n'+JSON.stringify({folders:[{name:'Research',path:'.'}],settings:{'mrw.leanStudyParent':directory,'mrw.notesFolder':'/vault'}}).replace(/}}$/, ',},}');
  await fs.writeFile(workspace, previousSettings);
  await fs.writeFile(path.join(directory, 'README.md'), 'Reader instructions.');
  const result = await prepareWorkspace({home, notesFolder: '/another-vault'});
@@ -29,14 +29,14 @@ test('setup reopens a GOLEM XIV workspace without forking its settings or replac
  assert.equal(result.created, false);
  assert.equal(await fs.readFile(workspace, 'utf8'), previousSettings);
  assert.equal(await fs.readFile(path.join(directory, 'README.md'), 'utf8'), 'Reader instructions.');
- assert.deepEqual((await fs.readdir(directory)).sort(), ['GOLEM XIV.code-workspace', 'README.md']);
+ assert.deepEqual((await fs.readdir(directory)).sort(), ['README.md', 'Research.code-workspace']);
  await fs.unlink(path.join(directory, 'README.md'));
  await prepareWorkspace({home});
  const restoredInstructions = await fs.readFile(path.join(directory, 'README.md'), 'utf8');
- assert.ok(restoredInstructions.includes('`GOLEM XIV.code-workspace`'));
+ assert.ok(restoredInstructions.includes('`Research.code-workspace`'));
  assert.ok(!restoredInstructions.includes('`MRW.code-workspace`'));
 });
-for (const filename of ['GOLEM XIV.code-workspace', 'MRW.code-workspace']) {
+for (const filename of ['Research.code-workspace', 'MRW.code-workspace']) {
  test('setup honors a registered move from '+filename, async t => {
   const home = await fixture(t);
   const commands = new Map();
@@ -48,25 +48,26 @@ for (const filename of ['GOLEM XIV.code-workspace', 'MRW.code-workspace']) {
   registerWorkspaceSetup({
    home, vscode, register: (id, handler) => commands.set(id, handler),
    resolveDefault: original => path.basename(original) === filename ? {workspace:moved} : undefined,
-   prepare: () => assert.fail('Setup must follow the registered move before creating a workspace.'),
+   registeredSources: directory => [path.join(directory, filename)],
    checkPython: async () => ({text: 'Python 3.12'}),
   });
   const result = await commands.get('mrw.setupWorkspace')();
   assert.equal(result.workspace, moved);
+  assert.deepEqual(await fs.readdir(home), []);
  });
 }
 test('coexisting workspace identities preserve the active workspace and otherwise prefer MRW', async t => {
  const home = await fixture(t);
  const directory = path.join(home, 'mrw-work');
  const current = path.join(directory, 'MRW.code-workspace');
- const earlier = path.join(directory, 'GOLEM XIV.code-workspace');
+ const earlier = path.join(directory, 'Research.code-workspace');
  const movedCurrent = path.join(home, 'moved-current.code-workspace');
  const movedEarlier = path.join(home, 'moved-earlier.code-workspace');
- const unrelated = path.join(home, 'unrelated', 'GOLEM XIV.code-workspace');
+ const unrelated = path.join(home, 'unrelated', 'Research.code-workspace');
  await fs.mkdir(directory);
  await fs.mkdir(path.dirname(unrelated));
  for (const file of [current, earlier, movedCurrent, movedEarlier, unrelated]) {
-  await fs.writeFile(file, JSON.stringify({folders:[{path:'.'}], name:file}));
+  await fs.writeFile(file, JSON.stringify({folders:[{path:'.'}],settings:{'mrw.leanStudyParent':directory}}));
  }
  const prepared = await prepareWorkspace({home});
  assert.equal(prepared.workspace, current);
@@ -89,12 +90,37 @@ test('coexisting workspace identities preserve the active workspace and otherwis
    home, register: (id, handler) => commands.set(id, handler),
    vscode: {workspace:{workspaceFile,getConfiguration:()=>({get:(_k,f)=>f})},
     window:{showInformationMessage:async()=>undefined}},
+   registeredSources: () => [...moves.keys()],
    resolveDefault: original => moves.has(original) ? {directory:home,workspace:moves.get(original),created:false} : undefined,
    checkPython: async () => ({text:'Python'}),
   });
   const result = await commands.get('mrw.setupWorkspace')();
   assert.equal(result.workspace, scenario.expected, scenario.label);
  }
+});
+test('multiple identified workspaces require a choice and unrelated files are skipped', async t => {
+ const home = await fixture(t), directory = path.join(home, 'mrw-work');
+ const first = path.join(directory,'Analysis.code-workspace'), second = path.join(directory,'Algebra.code-workspace');
+ const other = path.join(directory,'Other.code-workspace');
+ const data = {folders:[{path:'.'}],settings:{'mrw.leanStudyParent':directory}};
+ await fs.mkdir(directory);
+ for (const file of [first,second]) await fs.writeFile(file,JSON.stringify(data));
+ await fs.writeFile(other,JSON.stringify({folders:[{path:'..'}],settings:data.settings}));
+ const before = (await fs.readdir(directory)).sort();
+ await assert.rejects(prepareWorkspace({home}),/Open the intended workspace/);
+ assert.deepEqual((await fs.readdir(directory)).sort(),before);
+ assert.equal((await prepareWorkspace({home,activeWorkspace:second})).workspace,second);
+ await fs.rm(first); await fs.rm(second);
+ assert.equal(path.basename((await prepareWorkspace({home,activeWorkspace:other})).workspace),'MRW.code-workspace');
+ assert.deepEqual(JSON.parse(await fs.readFile(other)),{folders:[{path:'..'}],settings:data.settings});
+});
+test('an active customized workspace with MRW settings wins over the default', async t => {
+ const home = await fixture(t), {directory} = await prepareWorkspace({home});
+ const activeWorkspace = path.join(directory,'Custom.code-workspace');
+ const data = {folders:[{path:'.'}],settings:{'mrw.leanStudyParent':path.join(home,'studies')}};
+ await fs.writeFile(activeWorkspace,JSON.stringify(data));
+ assert.equal((await prepareWorkspace({home,activeWorkspace})).workspace,activeWorkspace);
+ assert.deepEqual(JSON.parse(await fs.readFile(activeWorkspace)),data);
 });
 test('simultaneous setup publishes one complete workspace without replacing the winner',async t=>{
  const home=await fixture(t);const both=await Promise.all([prepareWorkspace({home,notesFolder:'/vault/a'}),prepareWorkspace({home,notesFolder:'/vault/b'})]);

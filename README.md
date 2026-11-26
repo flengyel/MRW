@@ -4,7 +4,7 @@
   <a href="docs/assets/avatars/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="docs/assets/mrw-logo-dark.png">
-      <img src="docs/assets/mrw-logo-light.png" width="224" height="224" alt="MRW emblem. A spear and Turing tape on the left, books and a threaded spindle on the right.">
+      <img src="docs/assets/mrw-logo-light.png" width="224" alt="MRW emblem. A spear and Turing tape on the left, books and a threaded spindle on the right.">
     </picture>
   </a>
 </p>

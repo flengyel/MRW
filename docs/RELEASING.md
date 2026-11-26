@@ -55,9 +55,9 @@ The steps below apply when building a new version.
    the full Python and extension suites, syntax checks, a clean wheel install,
    an extracted-VSIX bridge check and isolated interface checks. Verify no stale
    generated package is present. Check product names, icons and command labels in
-   tracked files and both extracted VSIX packages. Verify that workspace setup still
-   recognizes the earlier 0.23.65 workspace filename as described in the
-   [workspace guide](WORKSPACE_SETUP.md). Keep one-time data conversion and original
+   tracked files and both extracted VSIX packages. Check fresh workspace setup,
+   reopening a differently named workspace, and following a registered move as
+   described in the [workspace guide](WORKSPACE_SETUP.md). Keep one-time data conversion and original
    evidence outside maintained source and installation directories. Documentation-only shortcuts do not apply.
 5. Inspect the final manifest, build marker, revised tutorial, guide links and
    packaged README. The verifier checks the exact inventory, runtime bytes and
