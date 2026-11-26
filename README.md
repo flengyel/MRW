@@ -1,5 +1,12 @@
 # Mathematical Research Workstation
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/golem-xiv-dark.png">
+    <img src="docs/assets/golem-xiv-light.png" width="224" height="224" alt="GOLEM XIV. A Turing tape on the spear side, a library on the spindle side.">
+  </picture>
+</p>
+
 MRW supports mathematical understanding and research. Its aims are to study
 literature and AI-generated mathematics, inspect grounds for using results,
 and continue unfinished work.
