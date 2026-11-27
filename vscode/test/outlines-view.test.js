@@ -685,3 +685,39 @@ test('active reader exposes Delete inside source details and keeps notes editabl
  const h=reader();h.send(readingModel());const control=h.root.all().find(n=>n.dataset.action==='trash-source');
  assert.ok(control);assert.equal(control.disabled,false);assert.match(control.title,/Restore keeps its passages, notes and links/);
 });
+
+test('retained LaTeX typesets a selected result with its own macros and keeps exact text', () => {
+  const h = reader(), value = readingModel(), { outline } = value.model;
+  outline.source.path = '/fixture.TEX';
+  outline.tex_preview_source = String.raw`\newcommand{\B}{\mathsf B}
+\newtheorem{result}{Result}
+\begin{document}`;
+  const exact = String.raw`\begin{result}\label{lem:collapse}
+Let $\theta$ be a proof congruence on $\B$. Then $\B/\theta$ is a preorder.
+\end{result}`;
+  const [region, unsupported] = outline.regions;
+  Object.assign(region, { collapsed: false, argument_text: exact,
+    statement: { kind: 'statement' }, statement_text: exact });
+  Object.assign(unsupported, { collapsed: false, argument_text: String.raw`\input{outside.tex}` });
+  outline.contexts = [{ id: 'context1', kind: 'hypothesis', span: region.span,
+    label: 'Assumption', text: String.raw`A congruence on $\B$.` }];
+  h.send(value);
+
+  const passage = h.root.children.find(n => n.dataset.region === region.id);
+  for (const block of [...passage.all(), ...h.root.children.find(n => n.dataset.contextItem === 'context1').all()]
+    .filter(n => n.className === 'retained-prose')) {
+    assert.match(block.innerHTML, /<math/);
+    assert.doesNotMatch(block.innerHTML, /atlas-raw-math|Preview unavailable|\\begin\{result\}/);
+  }
+  assert.equal(passage.all().find(n => n.dataset.statement === region.id).textContent, exact);
+  const retained = passage.children.find(n => n.className === 'source-exact');
+  assert.equal(retained.open, false);
+  assert.equal(retained.children[1].textContent, exact);
+  const failed = h.root.children.find(n => n.dataset.region === unsupported.id);
+  assert.match(failed.children.find(n => n.className === 'retained-prose').innerHTML, /Preview unavailable/);
+  assert.equal(failed.all().find(n => n.dataset.argument === unsupported.id).textContent, unsupported.argument_text);
+
+  const actions = passage.children.find(n => n.className?.includes('passage-actions'));
+  h.button(actions, 'compare-lean').listeners.click();
+  assert.equal(JSON.stringify(h.messages.at(-1)), JSON.stringify({ type: 'compare_lean', region: region.id }));
+});

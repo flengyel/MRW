@@ -70,7 +70,10 @@ running Lean.
 ## Review a correspondence
 
 Open **Compare with Lean declaration…** from an atlas component or saved
-passage. **Proofs… → Correspondence review…** lists reviews for the manuscript.
+passage. For a local LaTeX source, the action sits below the rendered passage.
+In other saved sources, expand **Source details and tools**, then **Notes and
+tools** for the passage. **Proofs… → Correspondence review…** lists reviews
+for the manuscript.
 
 Place the typeset printed statement and **Exact text** beside the Lean type.
 Offer the explicit type rendering, binder table, axiom list and links to the

@@ -67,12 +67,12 @@ function el(tag, text, parent = root, className) {
   if (className) node.className = className;
   parent.append(node); return node;
 }
-function retainedText(parent, text, markdown, kind, id) {
+function retainedText(parent, text, format, context, kind, id) {
   if (typeof text !== 'string') return;
   let exact = parent;
-  if (markdown) {
+  if (format && window.MRWPassagePreview) {
     const prose = el('div', undefined, parent, 'retained-prose');
-    prose.innerHTML = markdown.preview(text, 'markdown', 16 * 1024);
+    prose.innerHTML = window.MRWPassagePreview.preview(text, format, 16 * 1024, context);
     exact = el('details', undefined, parent, 'source-exact');
     const key = `exact:${kind}:${id}`;
     keepOpen(exact, key);
@@ -403,7 +403,11 @@ function render(destinationFocus) {
   sourceReader?.update(model.outline.published?.online);
   toolbarObserver?.disconnect();
   const o = model.outline;
-  const markdown = /\.(?:md|markdown)$/i.test(o.source.path) && window.MRWPassagePreview;
+  const sourcePath = o.source.path;
+  const format = /\.tex$/i.test(sourcePath) ? 'latex' : /\.(?:md|markdown)$/i.test(sourcePath) ? 'markdown' : undefined;
+  const context = format === 'latex' && o.tex_preview_source
+    ? window.MRWPassagePreview?.texPreviewContext(o.tex_preview_source) : undefined;
+  const compareInPassage = format === 'latex' && !o.published;
   const focused = document.activeElement;
   const focusKey = destinationFocus || focused?.dataset?.readerFocus;
   const focusedForm = focused?.name && [...root.querySelectorAll('form')].find(f => f.contains?.(focused));
@@ -516,7 +520,7 @@ function render(destinationFocus) {
       const box = el('details', undefined, root, 'context'); box.open = true;
       box.dataset.contextItem = c.id;
       el('summary', `${label(c.kind)}: ${c.label}`, box); el('p', spanLocation(c.span), box, 'muted');
-      retainedText(box, c.text, markdown, 'context', c.id);
+      retainedText(box, c.text, format, context, 'context', c.id);
       button(box, 'Go to source context', { type: 'navigate_context', context: c.id }, 'navigate-context');
       const contextTools = el('details', undefined, tools); el('summary', `Edit context: ${c.label}`, contextTools);
       const key = `context:${c.id}`, cf = form(contextTools, key, { context_kind: c.kind, label: c.label });
@@ -556,11 +560,11 @@ function render(destinationFocus) {
     if (r.statement && !publishedPart) {
       const statement = el('div', undefined, box, 'statement');
       el('p', r.statement.kind === 'declaration_statement' ? 'Exact declaration statement (reader-labeled source selection)' : 'Exact source statement (reader-selected)', statement);
-      retainedText(statement, r.statement_text, markdown, 'statement', r.id);
+      retainedText(statement, r.statement_text, format, context, 'statement', r.id);
       button(statement, 'Go to statement', { type: 'navigate', region: r.id, statement: true }, 'navigate-statement');
     } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
     if (!expanded && !compactProof) el('p', 'Argument detail hidden.', box, 'muted');
-    else if (!publishedPart) retainedText(box, r.argument_text, markdown, 'argument', r.id);
+    else if (!publishedPart) retainedText(box, r.argument_text, format, context, 'argument', r.id);
     if (!publishedPart || publishedPart.role === 'proof') {
       const proof = publishedPart?.role === 'proof';
       const control = el('button', compactProof ? `▸ ${r.title}` : (expanded ? 'Hide ' : 'Show ') + (proof ? 'proof' : 'details'), box,
@@ -603,7 +607,7 @@ function render(destinationFocus) {
       revealed.delete(r.id); hiddenDetails.delete(r.id); return { type: 'toggle', region: r.id };
     }, 'toggle', true);
     button(actions, o.published ? 'Open exact retained passage' : 'Go to original source', { type: 'navigate', region: r.id }, 'navigate');
-    if (!/\.lean$/i.test(o.source.path)) button(actions, 'Compare with Lean declaration…',
+    if (!compareInPassage && !/\.lean$/i.test(sourcePath)) button(actions, 'Compare with Lean declaration…',
       { type: 'compare_lean', region: r.id }, 'compare-lean');
     if (o.published) {
       const links = el('details', undefined, passageTools); el('summary', 'Passage links and Obsidian note', links); companionActions(links, r.id);
@@ -629,6 +633,8 @@ function render(destinationFocus) {
         button(assistance, 'Delete reader note…', { type: 'delete_annotation', region: r.id }, 'delete-reader-note', true);
       }
       button(assistance, 'Link Obsidian note…', { type: 'associate_note', region: r.id, pinned: false }, 'link-reader-note', true);
+      if (compareInPassage) button(assistance, 'Compare with Lean declaration…',
+        { type: 'compare_lean', region: r.id }, 'compare-lean');
       const more = passageAssistance(assistance, r.id);
       button(more, 'Ask OpenAI API about this passage…', { type: 'ask_ai', region: r.id }, 'ask-ai-passage');
       button(more, 'Copy passage for Codex…', { type: 'copy_companion', region: r.id }, 'copy-companion');

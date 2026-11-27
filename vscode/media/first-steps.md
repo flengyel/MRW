@@ -229,8 +229,9 @@ Ordinary note opening does not require this step.
 its **Open <document>** control opens the selected Contents document. Following
 a citation from Contents gives **Return to <document>** for that exact occurrence.
 
-Markdown passages show formatted text and mathematics. Open **Exact text**
-to see the stored quotation.
+Markdown and supported LaTeX passages show formatted prose and mathematics.
+Open **Exact text** to see the stored quotation. For a local LaTeX statement,
+choose **Compare with Lean declaration…** at the passage.
 
 Choose **Add a note** to open the passage’s annotation editor. Enter your text
 and attribution, then **Save**. **More…** holds **Ask OpenAI API about this

@@ -438,6 +438,9 @@ class OutlineStore:
             value['source_status'] = 'missing'
         except (OSError, ValueError):
             value['source_status'] = 'changed or unavailable'
+        if source is not None and source.path.suffix.lower() == '.tex':
+            # The offline preview reads macro definitions from this retained revision.
+            value['tex_preview_source'] = logical_text(source)[:65536]
         for r in value['regions']:
             r['argument_text'] = span_text(source, r['span']) if source and not r['collapsed'] else None
             r['statement_text'] = span_text(source, r['statement']['span'], 65536) if source and r['statement'] else None

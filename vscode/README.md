@@ -227,6 +227,10 @@ editable file. A stable source identifier does not freeze its contents.
 
 **Retain Document as Source** keeps the selected UTF-8 text and exact ranges.
 Original-file edits do not replace that revision or its reader notes.
+Markdown and supported LaTeX passages render offline. LaTeX uses supported
+macro definitions from the retained source. **Exact text** shows the quotation
+as saved. Commands that need a LaTeX compiler, imported files or the document’s
+compiled numbering may appear as source text or reference labels.
 
 <a id="outline-persistence-boundary"></a>
 

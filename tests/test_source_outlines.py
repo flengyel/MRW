@@ -43,6 +43,24 @@ class SourceOutlineTests(unittest.TestCase):
         self.edit(kind='add_region', start=start or [0, 1], end=end or [1, 5])
         return self.saved['outline']['regions'][-1]
 
+    def test_tex_preview_uses_bounded_retained_source_after_original_changes(self):
+        macro = r'\newcommand{\B}{\mathsf B}'
+        statement = r'Let $\theta$ be a congruence on $\B$.'
+        tex = self.project / 'article.TEX'
+        text = '\r\n'.join((macro, r'\begin{document}', statement, '% ' + 'x' * 65536))
+        raw = text.encode()
+        tex.write_bytes(raw)
+        self.saved = self.call('outline_create', path=str(tex), source_revision=sha256(raw).hexdigest())
+        passage = self.add([2, 0], [2, len(statement)])
+        revision = self.saved['revision']
+
+        tex.write_text(text.replace(r'\mathsf B', r'\mathsf C'))
+        reopened = self.call('outline_load', id=self.saved['outline']['id'])
+        self.assertEqual(reopened['revision'], revision)
+        self.assertEqual(reopened['outline']['tex_preview_source'], text[:65536])
+        self.assertEqual(reopened['outline']['regions'][0]['id'], passage['id'])
+        self.assertEqual(reopened['outline']['regions'][0]['argument_text'], statement)
+
     def test_passage_title_reads_proof_and_result_markup(self):
         examples = (
             ('*Proof.* An argument.', 'Proof'),
