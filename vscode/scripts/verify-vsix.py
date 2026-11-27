@@ -8,21 +8,23 @@ from xml.etree import ElementTree
 from zipfile import ZipFile
 
 
+ICON_FILENAME = 'media/mrw-icon.png'
+ICON_ASSET = 'extension/' + ICON_FILENAME
+
+
 def verify_icon(package, extension):
     manifest = json.loads(package.read('extension/package.json'))
-    filename = 'media/mrw-icon.png'
-    asset_path = 'extension/' + filename
-    if manifest.get('icon') != filename:
+    if manifest.get('icon') != ICON_FILENAME:
         raise ValueError('Extension manifest must name the MRW icon')
     metadata = ElementTree.fromstring(package.read('extension.vsixmanifest'))
     assets = metadata.findall('.//{*}Asset[@Type="Microsoft.VisualStudio.Services.Icons.Default"]')
-    if (metadata.findtext('.//{*}Metadata/{*}Icon') != asset_path
-            or [a.get('Path') for a in assets] != [asset_path]):
+    if (metadata.findtext('.//{*}Metadata/{*}Icon') != ICON_ASSET
+            or [a.get('Path') for a in assets] != [ICON_ASSET]):
         raise ValueError('VSIX metadata must expose the MRW icon')
-    if package.read(asset_path) != (extension / filename).read_bytes():
+    icon = package.read(ICON_ASSET)
+    if icon != (extension / ICON_FILENAME).read_bytes():
         raise ValueError('Packaged MRW icon differs from the source image')
-    if package.read(asset_path) != (extension.parent / 'src/mrw/data/mrw-icon.png').read_bytes():
-        raise ValueError('The VS Code and Qt icons differ')
+    return icon
 
 
 def verify(archive):
@@ -39,8 +41,7 @@ def verify(archive):
     expected = {'extension/package.json', 'extension/readme.md', 'extension/LICENSE.txt',
                 'extension.vsixmanifest', '[Content_Types].xml'}
     exact = {'extension/LICENSE.txt': repository / 'LICENSE',
-             'extension/python/bridge.py': extension / 'python/bridge.py',
-             'extension/python/mrw/data/mrw-icon.png': repository / 'src/mrw/data/mrw-icon.png'}
+             'extension/python/bridge.py': extension / 'python/bridge.py'}
     for path in (extension / 'src').glob('*.js'):
         exact['extension/' + str(path.relative_to(extension))] = path
     for path in (extension / 'media').rglob('*'):
@@ -90,7 +91,8 @@ def verify(archive):
         packed = json.loads(package.read('extension/package.json'))
         if packed != manifest or packed['main'] != './src/extension.js' or packed['extensionKind'] != ['workspace']:
             raise ValueError('Packaged manifest differs from production')
-        verify_icon(package, extension)
+        if verify_icon(package, extension) != (repository / 'diagnostics' / ICON_FILENAME).read_bytes():
+            raise ValueError('The MRW extension and Diagnostics icons differ')
         for name, source in exact.items():
             if package.read(name) != source.read_bytes():
                 raise ValueError(f'Packaged runtime bytes differ: {name}')

@@ -109,7 +109,7 @@ nLab; snapshots remain readable without their plugin.
 MRW and Python run on a Linux workspace host, including WSL2 or Remote SSH.
 Windows VS Code may provide the interface. Ordinary reading requires VS Code
 1.95+ and Python 3.11+, normally `python3`; set `mrw.pythonExecutable` in
-User/Remote settings when needed. It requires no Qt, Lean, SageMath or AI account.
+User/Remote settings when needed. It requires no Lean, SageMath or AI account.
 
 Windows VS Code with Debian WSL is the current checked arrangement. Earlier
 reader checks cover Debian ARM64 over SSH; that does not qualify the separate
@@ -253,7 +253,7 @@ neither private outlines nor their retained sources.
 An API investigation holds one initial completed response, one bounded child
 request and separate human task text. Its private state pins exact record
 identities, response digests and selected spans; the child reservation is saved
-before Send. It imports no Qt workspace, editor buffer or recovery state.
+before Send.
 
 **Resume Saved Investigation** validates those bindings and restores the saved
 comparison without transmitting or retrying. An interrupted request is matched
@@ -294,7 +294,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 Lean checks use the repository's pinned toolchain and separate build profiles;
 see [route search](../docs/JUSTIFICATION_ROUTE_SEARCH.md). Tests that require a
-compiled checker, Qt, TikZ or native host report those prerequisites separately.
+compiled checker, TikZ or native host report those prerequisites separately.
 The guarded native preparer is `vscode/scripts/prepare-native-host.py`.
 [Native isolation](../docs/NATIVE_TEST_ISOLATION.md).
 

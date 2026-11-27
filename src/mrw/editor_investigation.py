@@ -1,4 +1,4 @@
-"""Private editor investigation pointer, independent of Qt buffers and recovery."""
+"""Private editor investigation pointer, independent of editor buffers and recovery."""
 from hashlib import sha256
 from pathlib import Path
 import re

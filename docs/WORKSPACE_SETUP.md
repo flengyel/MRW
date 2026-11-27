@@ -46,7 +46,7 @@ notes can stay where Obsidian uses them. See
 
 Setup is available on Linux, including Linux SSH hosts. On Windows or macOS
 it asks you to connect to a Linux host. It does not install WSL, Python or other
-software. Ordinary reading needs no Node/npm, Qt, Lean, SageMath or AI account.
+software. Ordinary reading needs no Node/npm, Lean, SageMath or AI account.
 Workspace Trust remains VS Code's decision; trust only folders you control.
 No setup can promise to suppress every VS Code warning or remote timeout.
 

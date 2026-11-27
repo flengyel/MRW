@@ -51,8 +51,7 @@ Set **MRW: Python Executable** (`mrw.pythonExecutable`, User or Remote setting)
 to that environment's Python. Use **Add Source Plugin… → Installed Python
 adapter → example (mrw-example-source)** and confirm the trusted-code prompt.
 Then **Import Source… → External Python adapter example → 0004**. Ordinary
-reading needs no PySide6 or installation of MRW into that environment: the bridge
-loads its bundled core, while Python finds the external entry point in the
+reading uses the bundled MRW core. Python finds the external entry point in the
 configured interpreter's installed packages. Other optional tools retain their
 own requirements.
 

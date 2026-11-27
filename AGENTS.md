@@ -63,9 +63,8 @@ Follow [integration boundaries](docs/INTEGRATION_BOUNDARIES.md). VS Code owns
 ordinary documents, buffers, Save, Undo, recovery and layout. MRW owns its
 commands, record views and explicitly designed private state; the Python core
 owns record validation, exact request preparation and immutable publication.
-Do not port Qt widgets, buffer recovery or layout rules into VS Code, rewrite
-the frontend in TypeScript, add a remote-access service or introduce a Windows
-persistence port without an authorized scope change.
+Do not rewrite the frontend in TypeScript, add a remote-access service or
+introduce a Windows persistence port without an authorized scope change.
 
 External systems own their editors, templates, evaluators, kernels, queues and
 managed databases. Delegate through supported interfaces and argument vectors,
@@ -144,6 +143,8 @@ escape, unrestricted fallback, workspace/home/network access or automatic retry.
 Preserve resource limits, trusted-tool checks, restricted SVGs, UUID/code-digest
 bindings, diagram indexes, prior output after failure and publication epochs.
 Save, open, refresh, migration and theme changes must not compile diagrams.
+Treat project TeX as executable input and delegate builds to the authoring
+tools. Preserve the distinction between typesetting and proof verification.
 
 ## Storage, lifecycle and relocation
 
@@ -248,37 +249,6 @@ Keep `ModelCall` and proposal records operational and provenance-only. Add no
 epistemic, adoption or weight fields, generic support edges or provider-wide
 production-to-truth bridges.
 
-## Standalone application maintenance
-
-When working on the Qt application, keep widgets separate from controllers and
-services; apply worker results only through queued main-thread QObject slots.
-Keep one shared text document/undo history and equal viewport widths for wrapped
-views of that document. Preserve existing local-PDF page/zoom state separately
-from text buffers and generated-build provenance. PDF opening never builds TeX
-or fabricates a Verification.
-
-Opening a project writes nothing inside it and reads no executable configuration.
-Use canonical user-local state, coalesced recovery outside the keystroke path and
-a test-only state-root override. Save/Save As perform conflict-checked atomic
-replacement. Flush at durability boundaries; failed checkpoints block close/quit
-unless the user explicitly discards work. Recovery deletion compares exact bytes
-under lock and syncs the parent; failure blocks writes until reopen, without a
-compensating rewrite. Native Windows directory-fsync and same-project concurrent
-processes remain unsupported. Navigation anchors track loaded editable text and
-undo only; keep path/revision/scalar bounds and a whitespace-normalized preview
-of at most 120 characters. Publish recovery before pins and never guess changed
-locations or use these anchors as model input.
-
-Build only trusted project TeX through the accepted pdfTeX/latexmk boundary.
-Out-of-tree staging is not a sandbox; preserve `openin_any=p`, `openout_any=p`, no
-shell escape, quotas, process-tree termination and input-coverage provenance.
-LuaLaTeX requires a separately authorized and verified sandbox. Keep generated
-files outside the project and preserve the last successful PDF after failures,
-marking stale inputs accurately. Typesetting success is not proof verification.
-Do not introduce corpus-specific GUI behavior or change the existing bounded
-manuscript CLI into a general importer. Follow [UX](UX_SPEC.md) and the
-[development guide](vscode/README.md).
-
 ## Verification and delivery
 
 Use [native-test isolation](docs/NATIVE_TEST_ISOLATION.md) before activation,
@@ -288,19 +258,17 @@ open drafts, research stores and working windows are never test fixtures.
 Model read-only host properties faithfully; writable doubles do not establish
 native compatibility.
 
-Run focused Node/bridge and Python tests for affected behavior. Shared-service
-changes retain coverage for both callers; report unavailable checks. For Qt,
-use actual widgets with `MRW_GUI_TESTS=1`; relevant visible changes require
-1280×820 and 960×680 observations, not only offscreen tests. Preserve PDF,
-Unicode/unsaved-selection, exact preview/Send, terminal statuses, inert-response,
-projection, concurrent-edit and recovery regressions when their paths change.
+Run focused Node/bridge and Python tests for affected behavior. Cover each
+affected entry point for shared services and report unavailable checks. Preserve
+PDF navigation, Unicode and unsaved selections, exact preview and Send, terminal
+statuses, inert responses, projection, concurrent edits and recovery when their
+paths change.
 A live integration corpus requires task authorization and remains read-only.
 
-Documentation-only changes require link, example and consistency checks, not
-GUI/compiler/full-suite runs. Do not claim mocks, offscreen checks, fixture
-counts or synthetic receipts establish native use, independent reproduction or
-learning benefit. Run one appropriate broader regression pass for code changes;
-repeat only after relevant changes or a concrete failure.
+For documentation-only changes, check links, examples and consistency. Report
+native use, independent reproduction and learning benefit only when supported by
+corresponding evidence. Run one appropriate broader regression pass for code
+changes. Repeat only after relevant changes or a concrete failure.
 
 Keep feature instrumentation lightweight and reports bounded through
 [operational usage](docs/OPERATIONAL_USAGE.md) and the optional

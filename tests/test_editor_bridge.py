@@ -11,8 +11,6 @@ from unittest.mock import patch
 
 from mrw.documentary_warrant import parse_documentary_projection
 from mrw.editor_bridge import dispatch
-from mrw.record_actions import call_passage, attributed_contribution
-from mrw.workstation import Workstation
 
 FIXTURE = Path(__file__).parent / 'fixtures' / 'mechanical_model_call.json'
 
@@ -111,13 +109,23 @@ class EditorBridgeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.request('inspect', format='terminal_call')
 
-    def test_qt_and_extension_share_the_same_contribution(self):
+    def test_contribution_preserves_exact_text_and_attribution(self):
+        original = self.path.read_bytes()
         result = self.request('contribution', number=1, revision=self.revision)
-        self.assertEqual(result['body'], Workstation.attributed_assistance_contribution(self.path, 1))
-        _, call, selected, exact = call_passage(self.path, 1)
-        self.assertEqual(result['body'], attributed_contribution(call, selected, exact))
-        self.assertIn('unverified editable copy', result['body'])
-        self.assertIn(call.raw_response_digest, result['body'])
+        self.assertEqual(result['revision'], self.revision)
+        self.assertEqual(result['body'], (
+            '\n[Model contribution — unverified editable copy]\n'
+            'Provider: synthetic-fixture-provider\n'
+            'Model: synthetic-fixture-model-v1\n'
+            'ModelCall: model-call-mechanical-fixture-v1\n'
+            'Exact source span: response SHA-256 3edc5ac184de675fa0407c410569597f8a1bf4073d46fc3e65348c2c5dab2bd8, '
+            'UTF-8 bytes [0, 28)\n'
+            'Returned citations, links, code, and mathematical claims are unverified.\n'
+            '[Begin copied response passage]\n'
+            'Fixture only — α → β.\n'
+            '[End copied response passage]\n'
+        ))
+        self.assertEqual(self.path.read_bytes(), original)
 
     def test_protocol_rejects_ambiguous_unbounded_or_unknown_inputs(self):
         valid = dict(protocol=1, method='review', path=str(self.path), mode='index', number=1)

@@ -4,9 +4,7 @@ This specification defines MRW's interaction requirements. The
 [README](README.md) and [user guides](docs/README.md) describe current behavior;
 the [design register](docs/DESIGN_RECONCILIATION.md) identifies pending work.
 Proposed behavior is not a claim that an interface exists. VS Code owns ordinary
-editing, saving, undo, layout and document recovery. The
-[standalone Qt maintenance rules](#standalone-qt-maintenance) apply only to
-that application.
+editing, saving, undo, layout and document recovery.
 
 [Integration boundaries](docs/INTEGRATION_BOUNDARIES.md) govern optional
 companions: the responsible system owns creation and execution; MRW delegates
@@ -125,7 +123,10 @@ Use an available PDF viewer beside the work note, or offer the system reader.
 Opening a PDF requires neither TeX source nor a build and does not extract a
 passage. For assistance on a PDF excerpt, use the reader's transcription and
 show the exact text before sending. Keep any supplied revision and page with
-the transcription, and distinguish corrections from the source.
+the transcription, and distinguish corrections from the source. Build trusted
+project TeX through the authoring tools on request. Distinguish typesetting
+from mathematical verification. MRW’s explicit diagram rendering follows the
+[TikZ workflow](docs/TIKZ_WORKFLOW.md).
 
 Use [Reopen Document and Return to Document](docs/READING_OUTLINE_WORKFLOW.md#backlinks-edits-and-restart)
 and [Recent Documents](docs/RECENT_DOCUMENTS.md) to recover files and supported
@@ -166,103 +167,6 @@ the work. Show attribution and response identity before returned mathematical
 text. Retain exact passages on request. Inspection creates no new response,
 premise admission or verification. Keep provenance, verification, premise
 admission, contextual derivability and human judgment distinct.
-
-### Standalone Qt maintenance
-
-The older standalone Qt application opens a local PDF and a work note in
-independent panes. Keep PDF bytes outside text buffers, recovery and anchors.
-Preserve the document identity, page and zoom separately from generated-output
-provenance. Restore the page and zoom only for the matching document. Report
-missing, invalid or changed PDFs without discarding the note or overwriting the
-last valid reading state. Migration validates stored state without reading
-sources; loading validates the selected document.
-
-Retain platform-standard Open, Save, Find and Find-next shortcuts, explicit
-PDF-versus-editor focus status and visible marker feedback. Save names the
-editable text target even when a PDF has focus. Find and Find-next are text
-operations and are visibly unavailable while the PDF has focus. Qt does not
-provide PDF search, outline, SyncTeX or text extraction. Keep the note and
-return location available during a lookup; following an internal link must
-not silently launch an external action.
-
-Qt assistance begins from a nonempty visible selection in an ordinary text
-buffer. Its non-modal dock freezes the selected text, current in-memory
-revision and scalar location, accepts one question, permits context
-removal, shows the exact request body and requires a separate Send. It includes
-no PDF bytes or implicit extraction. A PDF-motivated question therefore uses an
-explicit ordinary-text transcription or corresponding source selection. The
-answer remains inert attributed plain text with exact raw-record access. Exact
-passage retention and separately attributed editable note insertion are
-explicit; neither creates a premise, Verification, warrant or disposition.
-
-Different projects may be open in different Qt processes. Use one active process
-per project; there is no lifetime lock.
-
-For LaTeX, select an existing file as the root, save the intended source revisions
-and explicitly request a build. TeX source is trusted executable input;
-out-of-tree staging is not a sandbox. openin_any=p is defense in depth for
-conventional input operations, not a complete read boundary: pdfTeX can embed
-an absolute external file through `\immediate\pdfobj stream file`. Arbitrary
-external reads are not confined; build only trusted project TeX. Keep the rendered
-PDF beside its source. A reported file-and-line error should return directly to
-the relevant text. Preserve
-the last successful output after a failed build and make changed-input staleness
-visible. Distinguish complete, partial and unknown dependency coverage. With
-untracked external dependencies, describe only the recorded project inputs as
-unchanged. Derivation/build provenance comes from the action; successful typesetting
-is separate from mathematical Verification and from justification or judgment.
-
-A deliberate external-editor action opens the saved file at the current passage.
-On return, compare changed disk content with any unsaved work before refreshing.
-
-On re-entry, Qt restores the open work, selected passage and rendering position.
-Two panes comparing the same file retain independent cursor, selection and scroll
-positions while sharing one editable document, modified state, undo/redo history
-and buffer/recovery identity. Insertions and deletions adjust both views' text
-positions. Wrapping survives restart. Layout changes retain a visible cursor
-with minimal scrolling, or retain the visible passage when the cursor was
-deliberately offscreen. Recovery restores positions even with an unavailable
-saved base; placeholders and diagnostics never replace document positions. An
-optional unresolved-work marker anchors a file selection without demanding a
-written description. The implemented **Working context** shelf independently
-retains up to 32 ordered, exact revision-pinned selections across ordinary text
-files, including explicitly opened external read-only references. Its menu and
-dock actions open a passage in either of the two editors or remove an anchor.
-Restoring or displaying the shelf reads no source content; opening is explicit
-and fails without moving the editors if a path is missing or redirected or its
-current/recovered content or saved base does not match. Entries contain only the
-path, content revision, selection endpoints and a plain preview of at most 120
-Unicode characters with display whitespace normalized. Displayed lines and
-columns are one-based; canonical stored columns remain zero-based. Previews
-survive restart without source reads; they are display excerpts, not immutable
-source-quotation or provenance records.
-In loaded editable ordinary text, the marker and shelf follow internal edits and
-undo/redo through their shared document, independently of both pane selections.
-Nonempty ranges exclude insertions at their outside boundaries; a point marker
-advances at its continuation point. A deleted passage retains its last completed
-pin, visibly changed, rather than relocating. Recovery becomes durable before
-updated pins are published. Known external changes do not re-pin anchors, and
-Return validates completely before navigation, just like shelf opening.
-They are private local navigation anchors,
-not provenance, citations, warrant records, mathematical-object identities or
-material automatically sent to a model. **Mark unfinished work here**, **Return
-to unfinished work** and **Clear unfinished marker** retain their independent
-single-location purpose. Private recovery retains the exact latest successfully
-completed checkpoint across an interrupted process, not uncheckpointed characters; it is mutable application state, never mathematical provenance. A failed
-final checkpoint must leave the work available until the user explicitly decides
-whether to discard it.
-
-Save, Discard, Refresh and return to clean text report successful recovery cleanup
-only after exact-byte validation, unlink and recovery-directory synchronization.
-An uncertain deletion blocks further workspace writes until close/reopen without
-a compensating rewrite. Native Windows currently lacks the directory-sync
-implementation required for crash-durable mutable publication and reports that
-limitation as a failure.
-
-Wrapped views of one shared document keep equal viewport widths because the
-document has one layout width. Splitter movement and resizing preserve this
-constraint and both pane positions. Different buffers or unwrapped views may
-have unequal widths; no earlier unequal ratio is restored automatically.
 
 ---
 
@@ -548,9 +452,8 @@ constructs the request from the current problem or object, displayed source
 passages, and displayed `WorkArtifact`s. Before submission, the mathematician
 can inspect and reduce the exact outbound context. Nothing else is sent.
 
-R2 delivers one initial exchange in steps 1–3 and the exact-retain/edit/dismiss
-part of step 5. R3 delivers one bounded explicit linked follow-up in step 6.
-Source/citation retrieval in step 4 is not automatic:
+The API workflow offers one initial exchange and one explicit linked follow-up.
+Source and citation navigation are reader actions.
 
 1. Select source or work passages and write the mathematical question.
 2. Inspect the provider/model and exact outbound content; remove unwanted
@@ -571,25 +474,20 @@ The reader enters a question in ordinary language. MRW takes its references
 from the selected work. Distinguish a suggested citation from a retrieved
 source and identify any missing context.
 
-The standalone Qt assistance dock is non-modal so the selected source and ordinary note stay
-reachable. It shows OpenAI and the requested model, every exact selected context
-with source identity/current revision/scalar range, the question, complete
-instructions/input, configured limits, destination, retention disclosure and
-the exact UTF-8 body with its byte count and digest. Context removal or any draft
-edit invalidates the preview. The requested model is a non-secret per-request
-field optionally initialized by `MRW_OPENAI_MODEL`; the credential
-is read only from `OPENAI_API_KEY` at the separate Send action. No credential is
-stored or displayed.
+Keep the selected source and ordinary note reachable during assistance. The
+preview identifies the provider, requested model, question, selected context
+with exact identities and ranges, limits, retention disclosure, and complete
+outbound UTF-8 body. Removing context or editing the request requires a new
+preview. Send reads the credential from `OPENAI_API_KEY` on the extension host.
+[Reader AI workflow](docs/READER_AI_WORKFLOW.md#ask-preview-and-send)
 
-Transport runs off the Qt thread and keeps ordinary note editing available. One
-in-flight slot prevents duplicate sends. Closing or switching a source view does
-not change the frozen request, and a completion never replaces concurrent note
-edits. Cancellation before Send makes no request or artifact. After Send, the
-existing adapter retains completed, refused, incomplete or failed terminal
-records when possible; only a completed record enables passage projection or
-note contribution. Dismissal records no mandatory disposition.
+Use one in-flight slot and preserve the frozen request when the reader switches
+views. Completion preserves concurrent note edits. Cancellation before Send
+leaves ordinary documents and retained records untouched. Retain completed,
+refused, incomplete and failed terminal records when possible. Only a completed
+record enables passage projection or note contribution.
 
-R3 starts only from an initial completed retained call. The mathematician
+A linked follow-up starts from an initial completed retained call. The mathematician
 selects one to eight deterministic exact response passages, may add current
 visible ordinary-text selections, and enters one new question. A correction,
 changed assumption or alternative remains a separately labeled human-authored
@@ -607,42 +505,26 @@ editable insertion. Refused, incomplete and failed children remain retained
 terminal outcomes without retry. After a terminal child, private workspace state
 stores only bounded human task text plus exact record paths/revisions,
 parent/child identities and selected response spans. Reopening validates those
-immutable records off the GUI thread and restores the comparison without a
-provider call. A missing, redirected or changed record is reported while the
+immutable records and restores the comparison without a provider call. A missing, redirected or changed record is reported while the
 human task summary remains available; no replacement span or revision is
 guessed. An explicit ordinary-note handoff records the human task summary and
 immutable identities without copying or verifying model prose.
 
-The R3 cut line is one initial parent and one child. The child cannot become a
+The current workflow keeps one initial parent and one child. The child cannot become a
 new parent in this workflow, and an existing saved investigation cannot be
 silently overwritten to create a branch. General conversation history,
 automatic summaries, branching, retry, source retrieval and provider tools stay
 outside this interaction. This is the current implementation boundary, not a
 permanent product requirement; deeper follow-up needs evidence from real use.
 
-R3.1 supplies the missing terminal lifecycle for that single slot. **End
-investigation…** is available in the Work menu and the assistance dock. Because
-an inserted handoff is an ordinary editable note rather than workspace metadata,
-the application does not read or search note content to infer whether insertion
-already occurred. Ending therefore requires one explicit choice: insert the
-human task handoff and end, end without insertion, or cancel. If the dock shows
-the active investigation, insertion captures and validates its latest visible
-question, correction, conclusion and unresolved issue rather than an older
-checkpoint, including for the standalone insertion action. It does not use an
-unrelated draft or empty widgets when that investigation is not displayed. The
-first choice makes an ordinary unsaved-note edit before clearing; the second
-explicitly discards the private human task text and changes no note text; cancel
-changes nothing. Validation failure preserves the visible fields, note and
-active pointer.
-
-Ending durably replaces only the private active-investigation pointer with no
-pointer. It deletes or rewrites no `ModelCall`, projection, selected passage,
-anchor, recovery entry, ordinary file or unrelated workspace field. Recovery and
-workspace publication must complete before the UI reports success. Both menu and
-dock End actions are disabled during foreground work, and the handler rechecks
-busy state, active identity and any editable target after the modal confirmation
-returns. Restore workers validate a captured pointer; an obsolete completion is
-ignored rather than reinstalling an ended or replaced panel.
+**End Investigation…** offers insertion of the human task handoff and ending,
+ending without insertion, or cancellation. Insertion uses the current task
+summary and creates an ordinary unsaved note edit with Undo. Successful ending
+clears the active pointer and preserves immutable responses and projections.
+Validate the active investigation and the editable target before insertion.
+Validation failure preserves the live state and note. An obsolete restoration
+must not reinstall an ended investigation.
+[Investigation persistence](vscode/README.md#investigation-persistence-boundary)
 
 On an initial checkpoint or pre-publication failure, the live pointer and visible
 human edits remain and the error stays visible under the existing blocked-write
@@ -660,9 +542,8 @@ tree or child-of-child chat.
 
 Each explicit user action creates at most one provider request. The request
 obeys configured input, output, and timeout limits, invokes no provider tools,
-and performs no automatic retry or recursive request. R2 supplies no retry or
-follow-up action. R3's one user-requested follow-up creates another `ModelCall`
-linked to the preceding call and no further live child.
+and performs no automatic retry or recursive request. The single requested
+follow-up creates a `ModelCall` linked to the preceding call.
 
 Each request produces a local `ModelCall`. The record contains every
 application-supplied instruction and message, the source and artifact versions

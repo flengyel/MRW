@@ -21,7 +21,7 @@ The Windows setup uses **VS Code connected to WSL2**, with MRW and
 The [host table](../vscode/README.md#workspace-hosts-and-dependencies) distinguishes
 observed configurations from other intended Linux arrangements.
 
-Ordinary reading needs no Qt, npm, separate MRW Python installation, Lean,
+Ordinary reading needs no npm, separate MRW Python installation, Lean,
 SageMath or AI account. Additional tools are needed only for the corresponding
 optional features.
 

@@ -57,8 +57,6 @@ Reuse the existing [domain model](DOMAIN_MODEL.md),
 [workspace relocation contract](docs/WORKSPACE_RELOCATION_DESIGN.md),
 [AI workflow](docs/READER_AI_WORKFLOW.md) and
 [investigation persistence boundary](vscode/README.md#investigation-persistence-boundary).
-The standalone Qt behavior remains specified in [UX_SPEC.md](UX_SPEC.md);
-it does not prescribe extension-owned editors, buffers or recovery machinery.
 
 Opening and restoring work run no provider, compiler, kernel or container.
 Provider requests require the exact preview and separate Send. Keep original

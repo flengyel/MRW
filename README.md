@@ -80,14 +80,6 @@ translation remains a development goal.
 
 [Architecture](docs/ARCHITECTURE.md) · [Data model](DOMAIN_MODEL.md)
 
-## Qt editor (source installation)
-
-The source tree also includes an older [Qt desktop editor](src/mrw/gui.py).
-To run it, install the Python package in a Python 3.11+ virtual environment
-with `python -m pip install .`, then run `mrw gui`. It requires a graphical
-session, PySide6 with QtPdf, and the [Qt platform libraries](https://doc.qt.io/qt-6/linux-requirements.html).
-[Desktop editor behavior](UX_SPEC.md#standalone-qt-maintenance)
-
 The VS Code extension bundles its Python service and runs it with the workspace
 host’s Python. **Open Tutorial** reports the active extension build.
 
@@ -96,6 +88,10 @@ host’s Python. **Open Tutorial** reports the active extension build.
 Ordinary files remain in their editors. MRW stores retained sources and study
 records separately; copying notes does not transfer their saved targets.
 [Storage scope and moves](docs/ARTIFACT_STORAGE.md).
+
+Files and local state from the retired desktop editor stay in their saved
+locations. Its source and instructions are available in the
+[0.23.66 archive](https://github.com/flengyel/MRW/blob/v0.23.66/README.md#qt-editor-source-installation).
 
 ## Contributors
 

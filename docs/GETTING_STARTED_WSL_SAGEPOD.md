@@ -96,7 +96,7 @@ setup. Sage does not need to be installed directly on the WSL host.
 
 Click the MRW icon in the Activity Bar to
 open **Contents** and **Commands**. MRW's **…** menu and the **F1** Command Palette
-provide access to its commands. An installed VSIX needs no Node/npm, Qt, Lean or
+provide access to its commands. An installed VSIX needs no Node/npm, Lean or
 separate Python-package installation. Upgrading it does not require deleting
 workspace storage.
 

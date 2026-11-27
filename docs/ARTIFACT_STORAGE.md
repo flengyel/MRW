@@ -80,7 +80,6 @@ These are **host-local**, outside the chosen directory: the active-location
 binding, transaction/recovery journals, writer and publication locks, output
 reservations, credentials, caches, UI/session state, VS Code return markers,
 ordinary document recovery, trusted tool settings and build/runtime outputs.
-The standalone Qt application's project storage is unchanged.
 
 Study checkpoints, study/interaction history and retained notebook results are
 outside this operation. The separate [Move Workspace workflow](WORKSPACE_RELOCATION_DESIGN.md)

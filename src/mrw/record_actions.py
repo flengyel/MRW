@@ -1,4 +1,4 @@
-"""Shared record actions for the Qt and editor-extension frontends.
+"""Read-only and publication actions for retained records.
 
 These functions do not own editor buffers, invoke a model, or run a checker.
 """
@@ -11,27 +11,7 @@ from .model_projection import extract_lossless_representation, make_model_produc
 from .private_persistence import persist_private_new
 from .record_views import read_call_snapshot
 from .response_review import purpose_kind, select_passage
-from .workspace import WorkspaceError, strict_json
-
-
-def record_kind(text: str) -> str | None:
-    """Structural dispatch only; each supported record uses its existing parser."""
-    if not text.lstrip().startswith('{'):
-        return None
-    try:
-        value = strict_json(text.encode('utf-8'))
-    except WorkspaceError:
-        return None
-    if not isinstance(value, dict):
-        return None
-    schema = value.get('schema')
-    if schema == 'mrw.model-call':
-        return 'model_call'
-    if schema == 'mrw.documentary-projection':
-        return 'projection'
-    if (isinstance(schema, str) and schema.startswith('mrw.')) or {'artifact_identity', 'artifact_digest', 'method', 'subject'} <= value.keys():
-        return 'protected'
-    return None
+from .workspace import WorkspaceError
 
 
 def call_passage(path, number, *, expected_revision=None):

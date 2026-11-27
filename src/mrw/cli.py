@@ -19,9 +19,6 @@ def _parser() -> argparse.ArgumentParser:
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
-    gui = commands.add_parser("gui", help="open the MRW Qt editor")
-    gui.add_argument("project", type=Path, nargs="?", help="project directory to open or resume")
-
     orient = commands.add_parser(
         "orient",
         help="show purpose, organization, and central mathematics before detail",
@@ -151,12 +148,6 @@ def _cli_error(command: str, exc: BaseException) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
-        if args.command == "gui":
-            try:
-                from mrw.gui import launch
-            except ImportError as exc:
-                raise ValueError("The GUI requires PySide6 with QtPdf and the platform desktop libraries. Install the package and see README desktop prerequisites.") from exc
-            return launch(args.project)
         if args.command in ("orient", "study", "why"):
             from mrw.appendix_a import StudyLevel, render_orientation, render_study
 

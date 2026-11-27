@@ -1,6 +1,6 @@
 """Shared explicit request preparation and single-attempt transmission.
 
-No editor buffers, recovery, Qt imports, or automatic provider activity.
+No editor buffers, recovery, or automatic provider activity.
 """
 from __future__ import annotations
 from dataclasses import dataclass
