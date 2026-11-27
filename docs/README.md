@@ -8,7 +8,7 @@ The installed **MRW: Open Tutorial** command describes the active extension buil
 
 | Task | Guide |
 | --- | --- |
-| Start with an open question, keep a failed approach and resume the argument | [Mathematics in ordinary notes](MATHEMATICS_WITH_NOTES.md) |
+| Link notes to source passages and saved notebook results | [Mathematics in ordinary notes](MATHEMATICS_WITH_NOTES.md) |
 | Revisit a proof step or example | [Questions, attempts and spaced review](ACTIVE_STUDY_WORKFLOW.md) |
 | Work through a proof with its cited passages and questions | [Proof work](PROOF_STUDY_WORKFLOW.md) |
 | Choose a workspace, check prerequisites and repeat setup | [Workspace setup](WORKSPACE_SETUP.md) |

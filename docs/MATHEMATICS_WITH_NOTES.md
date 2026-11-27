@@ -1,26 +1,21 @@
 # Mathematics in ordinary notes
 
-Start with the question in a working note. To begin a new one, set the notes
-folder with **Choose Notes Folder…** if needed, then choose **New Note…**.
-In an ordinary folder this opens an untitled Markdown file. In an Obsidian
-vault it runs the configured creation command.
-[Notes applications](NOTE_COMPANIONS.md)
+**Open Document…** opens an existing note in place. **Choose Notes Folder…**
+sets the folder for WikiLinks and backlinks. In an Obsidian vault, **New Note…**
+runs the [configured note-creation command](NOTE_COMPANIONS.md#start-a-note-from-mrw).
+In other folders it opens an untitled Markdown note in VS Code.
 
-When the use of a theorem is in doubt, link to its statement and write down
-why its hypotheses hold or what is missing. Use **Insert Source or Passage
-Link…** to cite a [retained passage](READING_OUTLINE_WORKFLOW.md#retain-text-only-when-needed).
-Select the citation in **Contents**, or place the cursor on it in the Markdown
-editor and run **Follow Source or Passage Link at Cursor**. **Return to Document**
-selects the originating citation again. For ordinary file links and WikiLinks
-in the Markdown editor, use **Follow Document Link**.
+**Follow Document Link** opens the file link or WikiLink at the cursor.
+Select a passage in a saved text file and run **Retain Document as Source**.
+In the note, use **Insert Source or Passage Link…** to cite that revision.
+Select the citation in **Contents** or use **Follow Source or Passage Link at Cursor**.
+**Return to Document** selects that occurrence of the citation.
+[Passage links](READING_OUTLINE_WORKFLOW.md#retain-text-only-when-needed)
 
-Run calculations in Jupyter. Link a [retained notebook result](NOTEBOOK_RESULTS.md)
-from the note to keep the saved inputs and outputs used in the argument.
-Reopening that result does not execute it.
+**Retain Notebook Result…** copies a saved Jupyter notebook with its code and
+outputs. Choose **Copy link to this result** and paste the address into a
+Markdown link in the note. [Notebook results](NOTEBOOK_RESULTS.md)
 
-Before stopping, leave the unfinished step in the note and save it. Use
-**Reopen Document** for the last file or **Recent Documents…** for another.
-An exact saved selection is restored while it still matches. PDF return is
-file-level.
-
-No study record, question form or justification context is required.
+**Reopen Document** opens the last file. **Recent Documents…** lists earlier
+files. Both restore the saved selection in a Markdown note if its text matches
+the recorded revision. For PDFs, MRW saves only the file path.
