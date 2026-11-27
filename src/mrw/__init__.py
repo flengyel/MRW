@@ -1,3 +1,3 @@
 """Mathematical Research Workstation."""
 
-__version__ = "0.23.68"
+__version__ = "0.23.69"

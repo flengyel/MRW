@@ -58,7 +58,7 @@ npm run package --prefix diagnostics
 Packaging reuses the core's pinned VSCE installation; it does not publish or
 install either extension.
 
-The [MRW 0.23.68 release](https://github.com/flengyel/MRW/releases/tag/v0.23.68) includes
+The [MRW 0.23.69 release](https://github.com/flengyel/MRW/releases/tag/v0.23.69) includes
 `mrw-diagnostics-0.1.2.vsix`. Install it through **Extensions: Install from VSIX…**
 on the same workspace host as MRW.
 This requires core 0.23.32 or a later compatible inspection API 1 implementation.

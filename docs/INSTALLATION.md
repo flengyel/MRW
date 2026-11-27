@@ -3,10 +3,10 @@
 The recommended installation is **MRW plus MRW Diagnostics** on the same
 workspace host. These packages are available in the latest published release:
 
-- [MRW 0.23.68](https://github.com/flengyel/MRW/releases/download/v0.23.68/mrw-0.23.68.vsix): reading, notes, sources and research tools.
-- [MRW Diagnostics 0.1.2](https://github.com/flengyel/MRW/releases/download/v0.23.68/mrw-diagnostics-0.1.2.vsix): feature-use and integrity reports.
+- [MRW 0.23.69](https://github.com/flengyel/MRW/releases/download/v0.23.69/mrw-0.23.69.vsix): reading, notes, sources and research tools.
+- [MRW Diagnostics 0.1.2](https://github.com/flengyel/MRW/releases/download/v0.23.69/mrw-diagnostics-0.1.2.vsix): feature-use and integrity reports.
 
-[Release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.68)
+[Release notes and SHA256SUMS](https://github.com/flengyel/MRW/releases/tag/v0.23.69)
 cover both downloads. Diagnostics can be omitted; MRW's essential storage checks
 and recording stay in core. Weekly reports are opt-in even when both are installed.
 
@@ -55,17 +55,17 @@ workspace there and perform the same Python and extension-host checks.
 
 ### 2. Install both VSIX packages in that workspace host
 
-Run **Extensions: Install from VSIX…** and install `mrw-0.23.68.vsix` first,
+Run **Extensions: Install from VSIX…** and install `mrw-0.23.69.vsix` first,
 then `mrw-diagnostics-0.1.2.vsix`. Install both in the same WSL/SSH workspace host.
 Alternatively, use that window's Linux terminal and substitute the package paths:
 
 ```sh
-code --install-extension /absolute/path/to/mrw-0.23.68.vsix
+code --install-extension /absolute/path/to/mrw-0.23.69.vsix
 code --install-extension /absolute/path/to/mrw-diagnostics-0.1.2.vsix
 code --list-extensions --show-versions
 ```
 
-Confirm `flengyel.mrw@0.23.68` and `flengyel.mrw-diagnostics@0.1.2` under the
+Confirm `flengyel.mrw@0.23.69` and `flengyel.mrw-diagnostics@0.1.2` under the
 WSL/SSH host's installed extensions. After installing both, save unfinished work
 and reload once if VS Code requests it. Keep workspace storage when upgrading.
 After activation, hover over the extension’s Activity Bar icon to check the
