@@ -11,54 +11,47 @@
 
 MRW is an experimental VS Code extension for mathematical study and research. 
 
-[Download the latest published VSIX (0.23.70)](https://github.com/flengyel/MRW/releases/download/v0.23.70/mrw-0.23.70.vsix)
+[Download MRW 0.23.70 (VSIX)](https://github.com/flengyel/MRW/releases/download/v0.23.70/mrw-0.23.70.vsix)
 · [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.70)
 · [Installation](docs/INSTALLATION.md) · [Guides](docs/README.md)
 
-Experimental VS Code extension: `flengyel.mrw`. Requires a Linux workspace host
-(including WSL2 or Remote SSH), Python 3.11+ and VS Code 1.95+.
+The extension `flengyel.mrw` runs on Linux (locally, in WSL2, or over SSH).
+It requires VS Code 1.95 or later and Python 3.11 or later.
 
 <a id="open-existing-work"></a>
 
 ## Start
 
-1. Install the VSIX and run **MRW: Set Up MRW Workspace…**. On a fresh installation,
-   it creates `~/mrw-work/MRW.code-workspace`. For an existing installation, reopen
-   the workspace reported by setup. [Workspace setup](docs/WORKSPACE_SETUP.md)
-2. For a new question, choose a notes folder with **Choose Notes Folder…**,
-   then select **New Note…**. For an existing paper or note, use
-   **Open Document…**. [Mathematics in ordinary notes](docs/MATHEMATICS_WITH_NOTES.md)
-3. Follow references through **Contents** and use **Return to Document** to
-   return to the argument. **Recent Documents…** reopens earlier work.
+1. Install the VSIX and run **MRW: Set Up MRW Workspace…**. Open the workspace
+   named by setup. On a first installation this is `~/mrw-work/MRW.code-workspace`.
+   **Open Tutorial** shows which version of MRW is running. [Workspace setup](docs/WORKSPACE_SETUP.md)
+2. Use **Open Document…** to open a paper or note. To start a note, select
+   **Choose Notes Folder…**, then **New Note…**. [Writing mathematics in notes](docs/MATHEMATICS_WITH_NOTES.md)
+3. Follow a link from **Contents** in a Markdown document. **Return to Document**
+   takes you back to that occurrence of the link. **Recent Documents…** lists
+   files opened in MRW.
 
 <a id="optional-source-study"></a>
 <a id="justification"></a>
 
 ## Study and research
 
-VS Code can reopen the files used in an argument. Their locations alone do not
-say which passage was cited or which hypothesis justified a step. In MRW, the
-reader can retain the cited passage at a particular revision and record the
-grounds for using it.
-
-| Task | Tools |
+| Task | How to do it |
 | --- | --- |
-| Understand an argument | [Generate a mathematical atlas](docs/PROOF_STUDY_WORKFLOW.md#start-an-atlas-from-a-passage). Follow cited results in the **Proof map**, inspect exact passages in the **Blueprint**, or edit components through the **Reading list**. |
-| Revisit a proof step | In **Study Current Material**, enter a question and choose **Keep for spaced review**. Return through **Resume Study**. [Attempts, feedback and scheduling](docs/ACTIVE_STUDY_WORKFLOW.md#review-and-effort). |
-| Calculate | Jupyter and SagePod; [retained notebook results](docs/NOTEBOOK_RESULTS.md) preserve saved calculations for comparison. |
-| Examine grounds | [Source-linked reasons and admitted premises](docs/JUSTIFICATION_WORKFLOW.md), using Artemov's Justification Logic. |
-
-Ordinary reading requires no study record. General automatic Lean–English
-translation remains a development goal.
+| Cite a passage | Use [**Import Source…**](docs/SOURCE_PLUGINS.md) for the Stacks Project, Kerodon, or the nLab. A link to a saved passage opens the cited revision. |
+| Trace a proof | Select a Markdown or LaTeX passage and run [**Generate Mathematical Atlas…**](docs/PROOF_STUDY_WORKFLOW.md#start-an-atlas-from-a-passage). Follow citations between results in **Proof map**, read statements and proofs in **Blueprint**, and edit hypotheses and conclusions in **Reading list**. |
+| Review a question | Select a saved passage and run **Study Current Material**. Write a recall question and choose **Keep for spaced review**. **Resume Study** reopens the question and draft. [Spaced review](docs/ACTIVE_STUDY_WORKFLOW.md#review-and-effort) |
+| Examine a justification | In [**Justification…**](docs/JUSTIFICATION_WORKFLOW.md), **Explore Euclid’s lemma** compares a proof using Bézout’s identity with one using unique factorization. MRW’s Lean checker verifies derivations from admitted premises in a fragment of Artemov’s Justification Logic. |
+| Compare calculations | [**Retain Notebook Result…**](docs/NOTEBOOK_RESULTS.md) copies a saved `.ipynb` file, including its code and outputs. Open a copy and choose **Compare with another retained result**. |
 
 ## Related research
 
-| System | Emphasis |
+| System | What it does |
 | --- | --- |
-| [Eigenius](https://eigenius.io/docs/platform/justification-logic/) | Typed evidence and checkable grounds for research claims. |
-| [Axiom Math](https://axiommath.ai/mission/) | Pursues mathematical discovery through conjecturing, proof search and translation between informal mathematics and Lean. |
-| [Google AI co-scientist](https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/) | Generates, evaluates and refines scientific hypotheses and research proposals. |
-| [Kosmos](https://advances.edisonscientific.com/research/announcing-kosmos/) | Combines literature reading and computational analysis, tracing report conclusions to sources and code. |
+| [Eigenius](https://eigenius.io/docs/platform/justification-logic/) | Records evidence for research claims using Justification Logic. |
+| [Axiom Math](https://axiommath.ai/mission/) | Develops AI systems to propose conjectures, find proofs, and translate between Lean and informal proofs. |
+| [Google AI co-scientist](https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/) | Proposes, compares and revises scientific hypotheses. |
+| [Kosmos](https://advances.edisonscientific.com/research/announcing-kosmos/) | Analyzes data and links its conclusions to code and to passages in the literature. |
 
 [Further comparisons](docs/RESEARCH_WORKSTATION_DESIGN.md#related-systems-and-reuse).
 
@@ -66,30 +59,30 @@ translation remains a development goal.
 
 | Integration | Use |
 | --- | --- |
-| [Obsidian](docs/OBSIDIAN_WORKFLOW.md) | Linked notes and the configured note-creation workflow. |
-| [Emacs](docs/NOTE_COMPANIONS.md#capture-a-passage-in-emacs) | Send a retained passage and its link to your Denote or Org-roam template. |
-| [Zotero](docs/ZOTERO_WORKFLOW.md) | References, attachments and citations. |
-| [Lean](docs/LEAN_STUDY_WORKFLOW.md) | Native goals, diagnostics and proof checking. |
-| [Jupyter and SagePod](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) | Notebook editing and computation. |
+| [Obsidian](docs/OBSIDIAN_WORKFLOW.md) | Create a note with the vault’s configured template and link notes to saved passages. |
+| [Emacs](docs/NOTE_COMPANIONS.md#capture-a-passage-in-emacs) | Send a passage and its source link to a Denote or Org-roam capture template. |
+| [Zotero](docs/ZOTERO_WORKFLOW.md) | Look up a reference, open an attachment, or insert a citation in a note. |
+| [Lean 4](docs/LEAN_STUDY_WORKFLOW.md) | Work through Lean exercises and inspect proof goals in the Lean extension’s InfoView. |
+| [Jupyter and SagePod](docs/SAGEPOD_NOTEBOOK_WORKFLOW.md) | Run SageMath cells in a Jupyter notebook using SagePod’s kernel. |
+| [Codex and the OpenAI API](docs/READER_AI_WORKFLOW.md) | Copy a question and selected passages to Codex. For an API request, preview the text and send it from MRW. |
+| [MRW Diagnostics](diagnostics/README.md) | In VS Code 1.96 or later, check saved records for errors and see which MRW features were used. |
 
 ## Architecture
 
 ![MRW architecture](docs/assets/mrw-architecture.png)
 
+The extension uses its bundled Python package to import sources and save records.
 [Architecture](docs/ARCHITECTURE.md) · [Data model](DOMAIN_MODEL.md)
-
-The VS Code extension bundles its Python service and runs it with the workspace
-host’s Python. **Open Tutorial** reports the active extension build.
 
 ## Data and transfers
 
-Ordinary files remain in their editors. MRW stores retained sources and study
-records separately; copying notes does not transfer their saved targets.
-[Storage scope and moves](docs/ARTIFACT_STORAGE.md).
+MRW keeps saved passages, annotations and study records separately from notes.
+Use [**Move Saved Work Directory…**](docs/ARTIFACT_STORAGE.md#what-moves) to
+move saved sources and annotations. Use [**Move Workspace…**](docs/WORKSPACE_RELOCATION_DESIGN.md#using-the-commands)
+to move a workspace with its study history and saved notebook results.
 
-Files and local state from the retired desktop editor stay in their saved
-locations. Its source and instructions are available in the
-[0.23.66 archive](https://github.com/flengyel/MRW/blob/v0.23.66/README.md#qt-editor-source-installation).
+The [0.23.66 archive](https://github.com/flengyel/MRW/blob/v0.23.66/README.md#qt-editor-source-installation)
+contains the source and installation instructions for the former desktop editor.
 
 ## Contributors
 
@@ -99,7 +92,7 @@ locations. Its source and instructions are available in the
 
 ## Documentation and license
 
-[Guides](docs/README.md) · [Avatar images](docs/assets/avatars/) · [Vision](VISION.md) · [Architecture](docs/ARCHITECTURE.md)
+[Guides](docs/README.md) · [Avatar images](docs/assets/avatars/) · [Vision](VISION.md)
 · [Current status](docs/DESIGN_RECONCILIATION.md) · [Contributing](CONTRIBUTING.md)
 
 Copyright 2026 F. Lengyel. [Apache-2.0](LICENSE). Third-party material retains
