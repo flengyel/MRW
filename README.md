@@ -9,9 +9,7 @@
   </a>
 </p>
 
-MRW supports mathematical understanding and research. Its aims are to study
-literature and AI-generated mathematics, inspect grounds for using results,
-and continue unfinished work.
+MRW is an experimental VS Code extension for mathematical study and research. 
 
 [Download the latest published VSIX (0.23.70)](https://github.com/flengyel/MRW/releases/download/v0.23.70/mrw-0.23.70.vsix)
 · [Release and checksums](https://github.com/flengyel/MRW/releases/tag/v0.23.70)
