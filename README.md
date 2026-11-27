@@ -3,8 +3,8 @@
 <p align="center">
   <a href="docs/assets/avatars/">
     <picture>
-      <source media="(prefers-color-scheme: light)" srcset="docs/assets/mrw-logo-light.png">
-      <img src="docs/assets/mrw-logo-light.png" width="224" alt="MRW emblem. A spear and Turing tape on the left, books and a threaded spindle on the right.">
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/mrw-logo-dark.png">
+      <img src="docs/assets/mrw-logo-dark.png" width="224" alt="MRW emblem. A spear and Turing tape on the left, books and a threaded spindle on the right.">
     </picture>
   </a>
 </p>
