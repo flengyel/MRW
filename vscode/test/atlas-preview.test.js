@@ -179,3 +179,38 @@ test('the v38 manuscript opens on numbered results and a readable one-page map w
     new RegExp('data-entry="' + quotient.id + '" data-part="statement">\\(3\\)</a>'));
   assert.deepEqual(saved61, opening);
 });
+
+test('literal equation tags resolve in retained TeX without guessing missing or ambiguous targets', () => {
+  const source = String.raw`\begin{document}
+\begin{equation}
+ x=y \tag{$K_A$}\label{eq:context}
+\end{equation}
+% \begin{equation}\tag{comment}\label{eq:context}\end{equation}
+\verb|\begin{equation}\tag{verbatim}\label{eq:context}\end{equation}|
+\begin{verbatim}
+ \begin{equation}\tag{literal}\label{eq:context}\end{equation}
+\end{verbatim}
+\newcommand{\sample}{\begin{equation}\tag{macro}\label{eq:context}\end{equation}}
+\begin{equation}x=z\tag{A}\label{eq:duplicate}\end{equation}
+\begin{equation}x=w\tag{B}\label{eq:duplicate}\end{equation}
+\label{eq:outside}
+\begin{equation}x=w\tag{C}\end{equation}
+\begin{equation}x=w\tag{D}\label{eq:truncated}`;
+  const quote = String.raw`Use \eqref{eq:context}. See \eqref{eq:outside},
+\eqref{eq:duplicate} and \eqref{eq:truncated}.`;
+  const context = texPreviewContext(source);
+  const rendered = preview(quote, 'latex', 4096, context);
+  assert.match(rendered, /atlas-inline-reference">\(<span class="katex"><math\b/);
+  assert.match(rendered, /<msub><mi>K<\/mi><mi>A<\/mi><\/msub>/);
+  assert.match(rendered, /<\/math><\/span>\)<\/span>/);
+  assert.doesNotMatch(rendered, /\[eq:context\]/);
+  for (const label of ['eq:outside', 'eq:duplicate', 'eq:truncated']) {
+    assert.ok(rendered.includes('[' + label + ']'));
+  }
+
+  const numbered = { ...context, references: new Map([
+    ['eq:context', { number: '3.4', kind: 'equation', entry: 'target' }],
+  ]) };
+  assert.match(preview(quote, 'latex', 4096, numbered),
+    /data-entry="target" data-part="statement">\(3\.4\)<\/a>/);
+});

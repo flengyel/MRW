@@ -230,6 +230,7 @@ its **Open <document>** control opens the selected Contents document. Following
 a citation from Contents gives **Return to <document>** for that exact occurrence.
 
 Markdown and supported LaTeX passages show formatted prose and mathematics.
+In LaTeX, references can show a literal equation tag from the saved revision.
 Open **Exact text** to see the stored quotation. For a local LaTeX statement,
 choose **Compare with Lean declaration…** at the passage.
 

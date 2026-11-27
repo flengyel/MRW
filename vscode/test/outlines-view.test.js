@@ -691,12 +691,14 @@ test('retained LaTeX typesets a selected result with its own macros and keeps ex
   outline.source.path = '/fixture.TEX';
   outline.tex_preview_source = String.raw`\newcommand{\B}{\mathsf B}
 \newtheorem{result}{Result}
-\begin{document}`;
+\begin{document}
+\begin{equation} x=y \tag{$K_A$}\label{eq:context} \end{equation}`;
   const exact = String.raw`\begin{result}\label{lem:collapse}
-Let $\theta$ be a proof congruence on $\B$. Then $\B/\theta$ is a preorder.
+Let $\theta$ be a proof congruence on $\B$ satisfying \eqref{eq:context}. Then $\B/\theta$ is a preorder.
 \end{result}`;
   const [region, unsupported] = outline.regions;
-  Object.assign(region, { collapsed: false, argument_text: exact,
+  Object.assign(region, { title: String.raw`\begin{result}\label{lem:collapse}`,
+    collapsed: false, argument_text: exact,
     statement: { kind: 'statement' }, statement_text: exact });
   Object.assign(unsupported, { collapsed: false, argument_text: String.raw`\input{outside.tex}` });
   outline.contexts = [{ id: 'context1', kind: 'hypothesis', span: region.span,
@@ -710,6 +712,11 @@ Let $\theta$ be a proof congruence on $\B$. Then $\B/\theta$ is a preorder.
     assert.doesNotMatch(block.innerHTML, /atlas-raw-math|Preview unavailable|\\begin\{result\}/);
   }
   assert.equal(passage.all().find(n => n.dataset.statement === region.id).textContent, exact);
+  assert.equal(passage.children.find(n => n.tag === 'h2').textContent, 'Result · lem:collapse');
+  const rendered = passage.children.find(n => n.className === 'retained-prose');
+  assert.equal(rendered.dataset.format, 'latex');
+  assert.match(rendered.innerHTML, /<msub><mi>K<\/mi><mi>A<\/mi><\/msub>/);
+  assert.doesNotMatch(rendered.innerHTML, /\[eq:context\]/);
   const retained = passage.children.find(n => n.className === 'source-exact');
   assert.equal(retained.open, false);
   assert.equal(retained.children[1].textContent, exact);

@@ -1,7 +1,7 @@
 'use strict';
 
 const { randomBytes } = require('node:crypto');
-const { escape, preview, texPreviewContext } = require('./atlasPreview');
+const { escape, preview, texPreviewContext, texPassageTitle } = require('./atlasPreview');
 
 const aspects = {
   objects: 'Objects and definitions',
@@ -65,8 +65,11 @@ function statusText(result) {
 
 function printed(source, previewContext) {
   const text = source.passage ?? source.text.slice(source.start, source.end);
-  const tex = previewContext || (['latex', 'tex'].includes(source.language) && source.text ? texPreviewContext(source.text) : undefined);
-  return '<section class="evidence"><h2>Printed statement</h2><p class="source-title">' + escape(source.label || source.title) +
+  const latex = ['latex', 'tex'].includes(source.language);
+  const tex = previewContext || (latex && source.text ? texPreviewContext(source.text) : undefined);
+  const title = source.label || source.title;
+  return '<section class="evidence"><h2>Printed statement</h2><p class="source-title">' +
+    escape(latex ? texPassageTitle(title) : title) +
     '</p>' + preview(text, source.language, 64 * 1024, tex) + disclosure('Exact text', pre(text)) +
     disclosure('Source revision', '<p>' + escape(source.uri) + '</p><p class="hash">' + escape(source.revision) + '</p>') + '</section>';
 }
@@ -254,7 +257,7 @@ const styles = [
   '@media(max-width:720px){.two-columns{grid-template-columns:minmax(0,1fr)}}',
   '.evidence{border:1px solid var(--vscode-panel-border);padding:10px 16px;min-width:0}',
   '.source-title{font-weight:600;overflow-wrap:anywhere}.path,.hash{overflow-wrap:anywhere}.hash{font-family:var(--vscode-editor-font-family);font-size:.88em}',
-  '.atlas-reading{overflow-wrap:anywhere}.atlas-math-display{display:block;max-width:100%;overflow:auto}',
+  '.atlas-reading{overflow-wrap:anywhere;font-size:1.2em;line-height:1.7}.atlas-reading math{font-size:1.08em}.atlas-math-display{display:block;max-width:100%;overflow:auto}',
   'pre{white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4;margin:.5em 0;font-family:var(--vscode-editor-font-family);background:var(--vscode-textCodeBlock-background);padding:.5rem}',
   'details{margin:.65em 0}summary{cursor:pointer;font-weight:500}dl{display:grid;grid-template-columns:minmax(6em,auto) minmax(0,1fr);gap:.4em 1em;margin:.6em 0}dt{font-weight:600}dd{margin:0;overflow-wrap:anywhere}.reason{white-space:pre-wrap;overflow-wrap:anywhere}',
   'form{max-width:60em}label{display:grid;gap:.25em;margin:.4em 0}input,select,textarea,button{font:inherit;color:inherit}input,select,textarea{background:var(--vscode-input-background);border:1px solid var(--vscode-input-border,var(--vscode-panel-border));padding:.35em .5em;min-width:0;max-width:100%}textarea{resize:vertical}',

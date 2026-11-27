@@ -72,6 +72,7 @@ function retainedText(parent, text, format, context, kind, id) {
   let exact = parent;
   if (format && window.MRWPassagePreview) {
     const prose = el('div', undefined, parent, 'retained-prose');
+    prose.dataset.format = format;
     prose.innerHTML = window.MRWPassagePreview.preview(text, format, 16 * 1024, context);
     exact = el('details', undefined, parent, 'source-exact');
     const key = `exact:${kind}:${id}`;
@@ -554,7 +555,8 @@ function render(destinationFocus) {
     const expanded = regionExpanded(r, publishedPart);
     const compactProof = publishedPart?.role === 'proof' && !expanded;
     const box = el('section', undefined, root, `region${compactProof ? ' compact-proof' : ''}${selected === r.id ? ' selected' : ''}`); box.dataset.region = r.id;
-    if (!compactProof) el('h2', r.title, box);
+    const title = compareInPassage ? window.MRWPassagePreview?.texPassageTitle(r.title) ?? r.title : r.title;
+    if (!compactProof) el('h2', title, box);
     if (originalPart && !publishedPart) el('p', 'This passage range was edited. The original published reference still pins its retained range; current text is shown below.', box, 'warning');
     if (publishedPart && expanded && window.MRWStacks) window.MRWStacks.part(box, publishedPart, publishedAction);
     if (r.statement && !publishedPart) {
@@ -562,7 +564,7 @@ function render(destinationFocus) {
       el('p', r.statement.kind === 'declaration_statement' ? 'Exact declaration statement (reader-labeled source selection)' : 'Exact source statement (reader-selected)', statement);
       retainedText(statement, r.statement_text, format, context, 'statement', r.id);
       button(statement, 'Go to statement', { type: 'navigate', region: r.id, statement: true }, 'navigate-statement');
-    } else if (!publishedPart) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
+    } else if (!publishedPart && !compareInPassage) el('p', 'No separate exact statement selected. Reader explanations below do not supply a checked claim.', box, 'muted');
     if (!expanded && !compactProof) el('p', 'Argument detail hidden.', box, 'muted');
     else if (!publishedPart) retainedText(box, r.argument_text, format, context, 'argument', r.id);
     if (!publishedPart || publishedPart.role === 'proof') {
@@ -596,7 +598,7 @@ function render(destinationFocus) {
     }
     // Editing forms live outside the statement/proof reading sequence. Opening
     // an annotation editor must not insert a panel between them.
-    const passageTools = el('details', undefined, tools, 'passage-tools'); el('summary', `Notes and tools: ${r.title}`, passageTools);
+    const passageTools = el('details', undefined, tools, 'passage-tools'); el('summary', `Notes and tools: ${title}`, passageTools);
     keepOpen(passageTools, `passage:${r.id}`);
     el('p', spanLocation(r.span), passageTools, 'muted');
     const actions = el('div', undefined, passageTools, 'toolbar');

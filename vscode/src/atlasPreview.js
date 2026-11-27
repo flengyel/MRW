@@ -95,9 +95,63 @@ function textAccent(text, start, combining) {
   return { value: ((base[2] || base[3]) + combining).normalize('NFC'), end: start + base[0].length };
 }
 
+function literalEquationTags(text) {
+  const tags = new Map(), seen = new Set(), ambiguous = new Set();
+  let equation, braceDepth = 0;
+  // Consume comments, literal examples and escaped control symbols before
+  // looking for the label and tag of a single, complete equation.
+  const commands = /(?<brace>[{}])|%[^\r\n]*|\\(?:verb\*?(?<delimiter>[^A-Za-z\s])[^\r\n]*?\k<delimiter>|(?<boundary>begin|end)\s*\{(?<environment>[A-Za-z]+\*?)\}|(?<command>label|tag)(?![A-Za-z*])|[A-Za-z]+\*?|[^\r\n])/gu;
+  for (let match; (match = commands.exec(text));) {
+    const { brace, boundary, environment, command } = match.groups;
+    if (brace) braceDepth = Math.max(0, braceDepth + (brace === '{' ? 1 : -1));
+    if (boundary === 'begin' && /^(?:verbatim\*?|lstlisting|minted|comment)$/u.test(environment)) {
+      const close = '\\end{' + environment + '}';
+      const stop = text.indexOf(close, commands.lastIndex);
+      if (stop < 0) break;
+      commands.lastIndex = stop + close.length;
+    } else if (braceDepth) {
+      continue;
+    } else if (environment === 'equation' || environment === 'equation*') {
+      if (boundary === 'begin') equation = { environment, labels: [], tags: [] };
+      else {
+        if (equation?.environment === environment && equation.labels.length === 1 && equation.tags.length === 1) {
+          tags.set(equation.labels[0], equation.tags[0]);
+        }
+        equation = undefined;
+      }
+    } else if (command) {
+      let argument;
+      try { argument = braced(text, commands.lastIndex); } catch { break; }
+      const value = argument.body.trim();
+      commands.lastIndex = argument.end;
+      if (command === 'label') {
+        if (seen.has(value)) ambiguous.add(value);
+        seen.add(value);
+        equation?.labels.push(value);
+      } else if (equation) {
+        equation.tags.push(value);
+      }
+    }
+  }
+  for (const label of ambiguous) tags.delete(label);
+  return tags;
+}
+
 function renderedReference(label, name, context) {
   const target = context.references?.get(label);
-  if (!target?.number) return '<span class="atlas-inline-reference">[' + escape(label) + ']</span>';
+  if (!target?.number) {
+    const tag = context.equationTags?.get(label);
+    if (tag && tag.length <= 128 && ['ref', 'eqref'].includes(name)) {
+      try {
+        const rendered = renderTex(tag, true, 0, { macros: context.macros });
+        if (rendered && !rendered.includes('atlas-raw-math')) {
+          const value = name === 'eqref' ? '(' + rendered + ')' : rendered;
+          return '<span class="atlas-inline-reference">' + value + '</span>';
+        }
+      } catch { /* Leave the source label visible for unsupported tags. */ }
+    }
+    return '<span class="atlas-inline-reference">[' + escape(label) + ']</span>';
+  }
   const value = name === 'eqref' ? '(' + target.number + ')' : target.number;
   if (target.kind !== 'equation') return '<span class="atlas-inline-reference">' + escape(value) + '</span>';
   const entry = escape(target.entry);
@@ -107,8 +161,9 @@ function renderedReference(label, name, context) {
 
 function texPreviewContext(text) {
   const macros = {}, environments = new Set();
-  const preamble = text.slice(0, 65536).split(/\\begin\s*\{document\}/u, 1)[0]
-    .replace(/(?<!\\)%[^\r\n]*/gu, '');
+  const prefix = text.slice(0, 65536);
+  const documentStart = /\\begin\s*\{document\}/u.exec(prefix);
+  const preamble = prefix.slice(0, documentStart?.index).replace(/(?<!\\)%[^\r\n]*/gu, '');
   for (const match of preamble.matchAll(/(?<!\\)\\(newcommand|newtheorem)\*?(?![a-zA-Z])/gu)) {
     if (Object.keys(macros).length + environments.size >= 64) break;
     try {
@@ -125,7 +180,8 @@ function texPreviewContext(text) {
       // Only complete literal declarations can affect the preview.
     }
   }
-  return { macros, environments };
+  const body = documentStart ? prefix.slice(documentStart.index + documentStart[0].length) : prefix;
+  return { macros, environments, equationTags: literalEquationTags(body) };
 }
 
 function renderTex(text, inlineOnly = false, depth = 0, context = {}) {
@@ -287,7 +343,16 @@ function excerpt(fragment, language, limit, context) {
   return '';
 }
 
-const api = { escape, excerpt, preview, texPreviewContext };
+function texPassageTitle(title) {
+  // Source captures can use the first line as their automatic name.
+  const match = /^\\begin\{([A-Za-z]+)\*?\}\s*(?:\\label\{([^{}\r\n]+)\})?$/u.exec(title);
+  if (!match) return title;
+  const [, kind, label] = match;
+  const heading = kind[0].toUpperCase() + kind.slice(1);
+  return label ? heading + ' · ' + label : heading;
+}
+
+const api = { escape, excerpt, preview, texPreviewContext, texPassageTitle };
 if (typeof module === 'object' && module?.exports) module.exports = api;
 else window.MRWPassagePreview = api;
 })(typeof module === 'object' && module?.exports ? require('../media/katex/katex.min.js') : window.katex,

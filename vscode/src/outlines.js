@@ -153,7 +153,9 @@ textarea{display:block;width:100%;min-height:90px;resize:vertical}input{width:10
 .proof-map{overflow:auto;max-width:100%;margin:12px 0}.proof-map svg{display:block}.proof-map text{cursor:pointer}
 .region,.region>h2,.retained-prose,.source-exact{min-width:0;max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
 .region>h2,.passage-tools>summary{white-space:normal}
-.retained-prose{line-height:1.6;overflow-x:auto}.retained-prose .atlas-math-display{display:block}.retained-prose .atlas-math-display,.retained-prose table{max-width:100%;overflow-x:auto}.retained-prose table{display:block}
+.retained-prose{line-height:1.6;overflow-x:auto}
+.retained-prose[data-format="latex"]{font-size:1.2em;line-height:1.7}
+.retained-prose[data-format="latex"] math{font-size:1.08em}.retained-prose .atlas-math-display{display:block}.retained-prose .atlas-math-display,.retained-prose table{max-width:100%;overflow-x:auto}.retained-prose table{display:block}
 .source-exact>summary,.passage-more>summary{cursor:pointer}.passage-more>summary{padding:6px 9px;margin:3px}.passage-actions>.passage-more[open]{flex-basis:100%}
 ${diagramStyle}
 .published-svg{max-width:100%;height:auto;color:var(--vscode-editor-foreground)}
