@@ -2,7 +2,7 @@
   "name": "mrw",
   "displayName": "Mathematical Research Workstation",
   "description": "Investigate mathematical questions, reconstruct arguments, and develop proofs with your sources and notes.",
-  "version": "0.23.67",
+  "version": "0.23.68",
   "publisher": "flengyel",
   "icon": "media/mrw-icon.png",
   "license": "Apache-2.0",
@@ -1242,7 +1242,7 @@
       "activitybar": [
         {
           "id": "mrw",
-          "title": "MRW 0.23.67",
+          "title": "MRW 0.23.68",
           "icon": "media/mrw.svg"
         }
       ]
